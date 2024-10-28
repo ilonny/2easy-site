@@ -11,3 +11,9 @@
   color: black;
   text-decoration: underline;
 }
+.fullWidth {
+  width: 100%;
+}
+.mediumHeight {
+  height: 48px;
+}

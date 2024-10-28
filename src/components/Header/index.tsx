@@ -16,11 +16,11 @@ export const Header = () => {
   }
 
   return (
-    <div className="flex flex-row justify-between border-b-[1px] border-[#D9D9D9] pb-8">
+    <div className="flex flex-row justify-between border-b-[1px] border-[#D9D9D9] mx-8 py-8">
       <div className="left"></div>
       <a href="/">
         <div className="center absolute top-30 left-1/2 -ml-[53px]">
-          <Image src={Logo} alt="logo" />
+          <Image priority={false} src={Logo} alt="logo" />
         </div>
       </a>
       <div className="right">

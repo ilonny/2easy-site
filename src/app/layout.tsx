@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Header } from "@/components";
 import { AuthContextProvider } from "@/auth";
-import { usePathname } from "next/navigation";
+import { NextUIProvider } from "@nextui-org/react";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,12 +29,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased px-8 py-8`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthContextProvider>
-          <Header />
-          {children}
-        </AuthContextProvider>
+        <NextUIProvider>
+          <AuthContextProvider>
+            <Header />
+            {children}
+          </AuthContextProvider>
+        </NextUIProvider>
       </body>
     </html>
   );

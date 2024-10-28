@@ -1,11 +1,15 @@
 import { forwardRef } from "react";
 
 type Ref = HTMLInputElement;
-type TInputProps = React.HTMLProps<HTMLInputElement>;
+import { Input as NextInput, InputProps } from "@nextui-org/react";
 
-export const Input = forwardRef<Ref, TInputProps>(function InputComponent(
-  props,
-  ref
-) {
-  return <input {...props} ref={ref} />;
-});
+export const Input = (props: InputProps) => {
+  return <NextInput {...props} />;
+};
+
+// export const Input = forwardRef<Ref, InputProps>(function InputComponent(
+//   props,
+//   ref
+// ) {
+//   return <NextInput {...props} ref={ref} />;
+// });
