@@ -1,7 +1,14 @@
+"use client";
+import { API_URL, fetchPostJson, getFormData } from "@/api";
+import { AuthContext } from "@/auth";
+import { setTokenToLocalStorage, writeToLocalStorage } from "@/auth/utils";
 import { Button } from "@/ui";
 import { Input } from "@nextui-org/react";
+import { useMutation } from "@tanstack/react-query";
 
 import Link from "next/link";
+import { redirect, useRouter } from "next/navigation";
+import { useContext, useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 
 type TLoginInputs = {
@@ -16,11 +23,35 @@ export const LoginForm = () => {
     formState: { errors },
   } = useForm<TLoginInputs>();
 
+  const [responseError, setResponseError] = useState("");
+  const { setProfile } = useContext(AuthContext);
+  const router = useRouter();
+
   const onSubmit: SubmitHandler<TLoginInputs> = (data) => {
     console.log(data);
+    mutation.mutate(data);
   };
 
-  console.log("errors", errors);
+  const mutation = useMutation({
+    mutationFn: (data) => {
+      return fetchPostJson("/login", data);
+    },
+    onMutate: () => setResponseError(""),
+    onSettled: (data) => {
+      data?.json().then((res) => {
+        console.log("res?", res);
+        if (res.message) {
+          setResponseError(res.message);
+        }
+        if (res.token) {
+          writeToLocalStorage("token", res.token);
+          writeToLocalStorage("profile", JSON.stringify(res));
+          setProfile(res);
+          router.replace("/");
+        }
+      });
+    },
+  });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -56,7 +87,16 @@ export const LoginForm = () => {
         )}
       />
       <div className="mb-10">
-        <Button type="submit" text="Войти" fullWidth mediumHeight />
+        <Button
+          isLoading={mutation.isPending}
+          type="submit"
+          text="Войти"
+          fullWidth
+          mediumHeight
+        />
+        {!!responseError && (
+          <p className="text-tiny text-danger">{responseError}</p>
+        )}
       </div>
       <div className="flex justify-center items-center gap-2">
         <p>Нет аккаунта?</p>

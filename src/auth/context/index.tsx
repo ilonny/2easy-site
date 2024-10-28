@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useEffect, useState } from "react";
-import { getTokenFromLocalStorage } from "../utils";
+import { readFromLocalStorage } from "../utils";
 
 export const AuthContext = createContext({});
 
@@ -11,9 +11,9 @@ export const AuthContextProvider = ({
 }) => {
   const [profile, setProfile] = useState({});
   useEffect(() => {
-    const localToken = getTokenFromLocalStorage();
-    if (!localToken) {
-      setProfile({});
+    const profile = readFromLocalStorage("profile");
+    if (profile) {
+      setProfile(JSON.parse(profile));
     }
   }, []);
   return (

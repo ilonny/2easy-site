@@ -10,7 +10,6 @@ import { usePathname } from "next/navigation";
 export const Header = () => {
   const pathname = usePathname();
   const { profile } = useContext(AuthContext);
-
   if (pathname === "/login") {
     return null;
   }
