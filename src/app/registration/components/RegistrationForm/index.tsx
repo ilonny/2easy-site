@@ -3,7 +3,7 @@ import { fetchPostJson } from "@/api";
 import { AuthContext } from "@/auth";
 import { writeToLocalStorage } from "@/auth/utils";
 import { Button } from "@/ui";
-import { Checkbox, Input } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 
 import Link from "next/link";
@@ -12,11 +12,11 @@ import { useContext, useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 
 type TLoginInputs = {
+  name: string;
   login: string;
-  password: string;
 };
 
-export const LoginForm = () => {
+export const RegistrationForm = () => {
   const {
     control,
     handleSubmit,
@@ -33,7 +33,7 @@ export const LoginForm = () => {
 
   const mutation = useMutation({
     mutationFn: (data) => {
-      return fetchPostJson("/login", data);
+      return fetchPostJson("/register", data);
     },
     onMutate: () => setResponseError(""),
     onSettled: (data) => {
@@ -54,11 +54,36 @@ export const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <h3 className="text-center font-bold text-2xl mb-8">Вход</h3>
+      <h3 className="text-center font-extrabold text-2xl mb-2">Регистрация</h3>
+      <p className="text-center mb-7 font-medium">
+        После создания личного кабинета начнется бесплатный пробный период (3
+        дня)
+      </p>
+      <Controller
+        name="name"
+        control={control}
+        rules={{ required: "Имя обязательное поле" }}
+        render={({ field }) => (
+          <Input
+            {...field}
+            label="Имя"
+            className="mb-5"
+            radius="sm"
+            errorMessage={errors?.name?.message}
+            isInvalid={!!errors.name?.message}
+          />
+        )}
+      />
       <Controller
         name="login"
         control={control}
-        rules={{ required: "E-mail обязательное поле" }}
+        rules={{
+          required: "E-mail обязательное поле",
+          pattern: {
+            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+            message: "Некорректный e-mail",
+          },
+        }}
         render={({ field }) => (
           <Input
             {...field}
@@ -70,37 +95,11 @@ export const LoginForm = () => {
           />
         )}
       />
-      <Controller
-        name="password"
-        control={control}
-        rules={{
-          required: "Пароль обязательное поле",
-        }}
-        render={({ field }) => (
-          <Input
-            {...field}
-            label="Пароль"
-            type="password"
-            className="mb-8"
-            radius="sm"
-            errorMessage={errors?.password?.message}
-            isInvalid={!!errors.password?.message}
-          />
-        )}
-      />
-      <div className="flex items-center justify-between mb-8">
-        <Checkbox size="sm" defaultSelected>
-          Запомнить
-        </Checkbox>
-        <Link href="/" className="text-[#3F28C6] underline text-sm">
-          Забыли пароль?
-        </Link>
-      </div>
       <div className="mb-10">
         <Button
           isLoading={mutation.isPending}
           type="submit"
-          text="Войти"
+          text="Получить пароль"
           fullWidth
           mediumHeight
         />
@@ -108,10 +107,10 @@ export const LoginForm = () => {
           <p className="text-tiny text-danger">{responseError}</p>
         )}
       </div>
-      <div className="flex justify-center items-center gap-2  font-medium text-small">
-        <p>Нет аккаунта?</p>
-        <Link href="/registration" className="text-[#3F28C6] underline">
-          Зарегистрироваться
+      <div className="flex justify-center items-center gap-2 font-medium text-small">
+        <p>Уже есть подписка?</p>
+        <Link href="/login" className="text-[#3F28C6] underline">
+          Войти
         </Link>
       </div>
     </form>

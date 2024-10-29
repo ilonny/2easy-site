@@ -1,26 +1,17 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import { Header } from "@/components";
 import { AuthContextProvider } from "@/auth";
 import { NextUIProvider } from "@nextui-org/react";
 import { ApiProvider } from "@/api";
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+import { Manrope } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
   description: "",
 };
+
+const manrope = Manrope({ subsets: ["cyrillic"] });
 
 export default function RootLayout({
   children,
@@ -29,9 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${manrope.className} antialiased`}>
         <ApiProvider>
           <NextUIProvider>
             <AuthContextProvider>

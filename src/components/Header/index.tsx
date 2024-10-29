@@ -10,11 +10,10 @@ import { usePathname } from "next/navigation";
 import { ContentWrapper } from "../ContentWrapper";
 export const Header = () => {
   const pathname = usePathname();
-  const { profile, profileIsLoading } = useContext(AuthContext);
-  if (pathname === "/login") {
+  const { profile } = useContext(AuthContext);
+  if (["/login", "/registration"].includes(pathname)) {
     return null;
   }
-  console.log("profileIsLoading", profileIsLoading, profile)
   return (
     <ContentWrapper>
       <div className="flex flex-row justify-between border-b-[1px] border-[#D9D9D9] mx-8 py-8">
@@ -24,21 +23,15 @@ export const Header = () => {
             <Image priority={false} src={Logo} alt="logo" />
           </div>
         </a>
-        {profileIsLoading ? (
-          <div>
-            <>loading</>
-          </div>
-        ) : (
-          <div className="right">
-            {profile?.name ? (
-              <HeaderProfile />
-            ) : (
-              <Link href="/login">
-                <Button text="Войти" kind="secondary" />
-              </Link>
-            )}
-          </div>
-        )}
+        <div className="right">
+          {profile?.name ? (
+            <HeaderProfile />
+          ) : (
+            <Link href="/login">
+              <Button text="Войти" kind="secondary" />
+            </Link>
+          )}
+        </div>
       </div>
     </ContentWrapper>
   );
