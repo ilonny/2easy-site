@@ -16,14 +16,26 @@ type TLoginInputs = {
   login: string;
 };
 
+type TConfirmInputs = {
+  password: string;
+};
+
 export const RegistrationForm = () => {
   const {
     control,
     handleSubmit,
     formState: { errors },
+    getValues,
   } = useForm<TLoginInputs>();
 
+  const {
+    control: confirmControl,
+    handleSubmit: confirmSubmit,
+    formState: { errors: confirmErrors },
+  } = useForm<TConfirmInputs>();
+
   const [responseError, setResponseError] = useState("");
+  const [step, setStep] = useState(0);
   const { setProfile } = useContext(AuthContext);
   const router = useRouter();
 
@@ -31,9 +43,32 @@ export const RegistrationForm = () => {
     mutation.mutate(data);
   };
 
+  const onSubmitConfirm: SubmitHandler<TConfirmInputs> = (data) => {
+    loginMutation.mutate({ ...data, login: getValues().login });
+  };
+
   const mutation = useMutation({
     mutationFn: (data) => {
       return fetchPostJson("/register", data);
+    },
+    onMutate: () => setResponseError(""),
+    onSettled: (data) => {
+      data?.json().then((res) => {
+        console.log("res?", res);
+        if (res.message) {
+          setResponseError(res.message);
+        }
+        if (res.ok) {
+          setStep(1);
+          return;
+        }
+      });
+    },
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: (data) => {
+      return fetchPostJson("/login", data);
     },
     onMutate: () => setResponseError(""),
     onSettled: (data) => {
@@ -52,8 +87,66 @@ export const RegistrationForm = () => {
     },
   });
 
+  if (step === 1) {
+    return (
+      <form key={2} onSubmit={confirmSubmit(onSubmitConfirm)}>
+        <div className="relative mb-16">
+          <h3 className="text-center font-extrabold text-2xl mb-2">
+            Регистрация
+          </h3>
+          <button
+            type="button"
+            onClick={() => setStep(0)}
+            className="text-[#787878] absolute left-0 top-1"
+          >
+            {"<-"} Назад
+          </button>
+        </div>
+        <p className="text-center mb-7 font-medium">
+          Введите пароль, отправленный на почту {getValues()?.login}
+        </p>
+        <Controller
+          name="password"
+          control={confirmControl}
+          rules={{
+            required: "Пароль обязательное поле",
+          }}
+          render={({ field }) => (
+            <Input
+              {...field}
+              label="Пароль"
+              type="password"
+              className="mb-8"
+              radius="sm"
+              errorMessage={confirmErrors?.password?.message}
+              isInvalid={!!confirmErrors.password?.message}
+            />
+          )}
+        />
+        <div className="mb-10">
+          <Button
+            isLoading={loginMutation.isPending}
+            type="submit"
+            text="Получить пароль"
+            fullWidth
+            mediumHeight
+          />
+          {!!responseError && (
+            <p className="text-tiny text-danger">{responseError}</p>
+          )}
+        </div>
+        <div className="flex justify-center items-center gap-2 font-medium text-small">
+          <p>Уже есть подписка?</p>
+          <Link href="/login" className="text-[#3F28C6] underline">
+            Войти
+          </Link>
+        </div>
+      </form>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form key={1} onSubmit={handleSubmit(onSubmit)}>
       <h3 className="text-center font-extrabold text-2xl mb-2">Регистрация</h3>
       <p className="text-center mb-7 font-medium">
         После создания личного кабинета начнется бесплатный пробный период (3
