@@ -16,7 +16,7 @@ type TLoginInputs = {
   password: string;
 };
 
-export const LoginForm = () => {
+export const RestoreForm = () => {
   const {
     control,
     handleSubmit,
@@ -33,7 +33,7 @@ export const LoginForm = () => {
 
   const mutation = useMutation({
     mutationFn: (data) => {
-      return fetchPostJson("/login", data);
+      return fetchPostJson("/reset-password", data);
     },
     onMutate: () => setResponseError(""),
     onSettled: (data) => {
@@ -42,11 +42,8 @@ export const LoginForm = () => {
         if (res.message) {
           setResponseError(res.message);
         }
-        if (res.token) {
-          writeToLocalStorage("token", res.token);
-          writeToLocalStorage("profile", JSON.stringify(res));
-          setProfile(res);
-          router.replace("/");
+        if (res.success) {
+          router.replace("/login");
         }
       });
     },
@@ -54,11 +51,24 @@ export const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <h3 className="text-center font-bold text-2xl mb-8">Вход</h3>
+      <h3 className="text-center font-bold text-2xl mb-2">
+        Восстановление пароля
+      </h3>
+      <p className="text-center mb-7 font-medium">
+        Введите E-mail при регистрации,
+        <br />
+        пришлем на него пароль
+      </p>
       <Controller
         name="login"
         control={control}
-        rules={{ required: "E-mail обязательное поле" }}
+        rules={{
+          required: "E-mail обязательное поле",
+          pattern: {
+            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+            message: "Некорректный e-mail",
+          },
+        }}
         render={({ field }) => (
           <Input
             {...field}
@@ -70,37 +80,11 @@ export const LoginForm = () => {
           />
         )}
       />
-      <Controller
-        name="password"
-        control={control}
-        rules={{
-          required: "Пароль обязательное поле",
-        }}
-        render={({ field }) => (
-          <Input
-            {...field}
-            label="Пароль"
-            type="password"
-            className="mb-8"
-            radius="sm"
-            errorMessage={errors?.password?.message}
-            isInvalid={!!errors.password?.message}
-          />
-        )}
-      />
-      <div className="flex items-center justify-between mb-8">
-        <Checkbox size="sm" defaultSelected>
-          Запомнить
-        </Checkbox>
-        <Link href="/restore-password" className="text-[#3F28C6] underline text-sm">
-          Забыли пароль?
-        </Link>
-      </div>
       <div className="mb-10">
         <Button
           isLoading={mutation.isPending}
           type="submit"
-          text="Войти"
+          text="Восстановить пароль"
           fullWidth
           mediumHeight
         />
@@ -109,9 +93,9 @@ export const LoginForm = () => {
         )}
       </div>
       <div className="flex justify-center items-center gap-2  font-medium text-small">
-        <p>Нет аккаунта?</p>
-        <Link href="/registration" className="text-[#3F28C6] underline">
-          Зарегистрироваться
+        <p>Вспомнили пароль?</p>
+        <Link href="/login" className="text-[#3F28C6] underline">
+          Войти
         </Link>
       </div>
     </form>

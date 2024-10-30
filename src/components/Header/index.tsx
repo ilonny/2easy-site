@@ -11,7 +11,7 @@ import { ContentWrapper } from "../ContentWrapper";
 export const Header = () => {
   const pathname = usePathname();
   const { profile } = useContext(AuthContext);
-  if (["/login", "/registration"].includes(pathname)) {
+  if (["/login", "/registration", "/restore-password"].includes(pathname)) {
     return null;
   }
   return (
