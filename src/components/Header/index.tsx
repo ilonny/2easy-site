@@ -8,6 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ContentWrapper } from "../ContentWrapper";
 import { Button } from "@nextui-org/react";
+import { HeaderMenuList } from "../HeaderMenuList";
 export const Header = () => {
   const pathname = usePathname();
   const { profile } = useContext(AuthContext);
@@ -47,6 +48,7 @@ export const Header = () => {
           )}
         </div>
       </div>
+      <HeaderMenuList />
     </ContentWrapper>
   );
 };
