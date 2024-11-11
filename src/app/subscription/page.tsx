@@ -7,6 +7,10 @@ import {
   BreadcrumbItem,
   Breadcrumbs,
   Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
   Tab,
   Tabs,
 } from "@nextui-org/react";
@@ -16,9 +20,11 @@ import { useState } from "react";
 import SaleIcon from "@/assets/icons/sale.svg";
 import TariffCheckedIcon from "@/assets/icons/tariff_checked.svg";
 import TariffCheckedGrayIcon from "@/assets/icons/tariff_checked_gray.svg";
+import { RegistrationForm } from "../registration";
 
 export default function StartRegistrationPage() {
   const [tabIndex, setTabIndex] = useState(0);
+  const [modalIsOpened, setModalIsOpened] = useState(false);
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
@@ -63,14 +69,17 @@ export default function StartRegistrationPage() {
                 Еще не пользовались 2easy?
               </h1>
               <div className="h-4" />
-              <Link href="/registration">
-                <h2 className="font-medium text-lg">
-                  Начните с{" "}
-                  <span className="border-primary border-b-2">
-                    бесплатного пробного периода
-                  </span>
-                </h2>
-              </Link>
+
+              <h2
+                className="font-medium text-lg cursor-pointer"
+                onClick={() => setModalIsOpened(true)}
+              >
+                Начните с{" "}
+                <span className="border-primary border-b-2">
+                  бесплатного пробного периода
+                </span>
+              </h2>
+
               <div className="h-4" />
               <div className="max-w-[420px]">
                 У вас будет 3 дня полного доступа ко всему, что есть на сайте.
@@ -87,16 +96,15 @@ export default function StartRegistrationPage() {
               </div>
               <div className="h-9" />
               <div className="max-w-[320px]">
-                <Link href="/registration">
-                  <Button
-                    fullWidth
-                    size="lg"
-                    color="warning"
-                    style={{ backgroundColor: "#FF7EB3", color: "#fff" }}
-                  >
-                    Начать бесплатно
-                  </Button>
-                </Link>
+                <Button
+                  fullWidth
+                  size="lg"
+                  color="warning"
+                  style={{ backgroundColor: "#FF7EB3", color: "#fff" }}
+                  onClick={() => setModalIsOpened(true)}
+                >
+                  Начать бесплатно
+                </Button>
               </div>
             </Panel>
           </div>
@@ -125,7 +133,7 @@ export default function StartRegistrationPage() {
               selectedKey={tabIndex}
               color="primary"
               size="lg"
-              radius="none"
+              radius="sm"
               onSelectionChange={setTabIndex}
             >
               <Tab key={0} title="Месяц" style={{ minWidth: "100px" }} />
@@ -241,7 +249,12 @@ export default function StartRegistrationPage() {
                 width: 376,
               }}
             >
-              <Button fullWidth color="primary" size="lg">
+              <Button
+                fullWidth
+                color="primary"
+                size="lg"
+                onClick={() => setModalIsOpened(true)}
+              >
                 Подписаться за 790₽
               </Button>
             </div>
@@ -250,8 +263,13 @@ export default function StartRegistrationPage() {
                 width: 376,
               }}
             >
-              <Button fullWidth color="primary" size="lg">
-                Подписаться за 790₽
+              <Button
+                fullWidth
+                color="primary"
+                size="lg"
+                onClick={() => setModalIsOpened(true)}
+              >
+                Подписаться за 590₽
               </Button>
             </div>
           </div>
@@ -262,6 +280,19 @@ export default function StartRegistrationPage() {
           <div className="h-10" />
         </div>
       </ContentWrapper>
+      <Modal
+        size="lg"
+        isOpen={modalIsOpened}
+        onClose={() => setModalIsOpened(false)}
+      >
+        <ModalContent>
+          <ModalHeader></ModalHeader>
+          <ModalBody>
+            <RegistrationForm />
+            <div className="h-10" />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </main>
   );
 }
