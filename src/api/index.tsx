@@ -20,7 +20,7 @@ export const getFormData = (object) =>
 
 type TParams = {
   path: string;
-  data: never;
+  data: any;
   isSecure?: boolean;
 };
 

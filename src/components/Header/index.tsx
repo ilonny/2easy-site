@@ -4,10 +4,10 @@ import Image from "next/image";
 import { HeaderProfile } from "../HeaderProfile";
 import { useContext } from "react";
 import { AuthContext } from "@/auth";
-import { Button } from "@/ui/Button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ContentWrapper } from "../ContentWrapper";
+import { Button } from "@nextui-org/react";
 export const Header = () => {
   const pathname = usePathname();
   const { profile } = useContext(AuthContext);
@@ -34,9 +34,16 @@ export const Header = () => {
           {profile?.name ? (
             <HeaderProfile />
           ) : (
-            <Link href="/login">
-              <Button text="Войти" kind="secondary" />
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/start-registration">
+                <Button variant="light">
+                  <span className="underline">Зарегистрироваться</span>
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button color="primary">Войти</Button>
+              </Link>
+            </div>
           )}
         </div>
       </div>
