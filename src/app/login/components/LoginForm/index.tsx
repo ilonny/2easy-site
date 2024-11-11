@@ -119,7 +119,7 @@ export const LoginForm = () => {
       </div>
       <div className="flex justify-center items-center gap-2  font-medium text-small">
         <p>Нет аккаунта?</p>
-        <Link href="/registration" className="text-[#3F28C6] underline">
+        <Link href="/start-registration" className="text-[#3F28C6] underline">
           Зарегистрироваться
         </Link>
       </div>

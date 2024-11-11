@@ -14,9 +14,11 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         primary: "#3F28C6",
+        pinkSecondary: "#FF7EB3",
       },
       borderColor: {
         primary: "#3F28C6",
+        pinkSecondary: "#FF7EB3",
       },
     },
   },
