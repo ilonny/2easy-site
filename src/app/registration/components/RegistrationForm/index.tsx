@@ -49,7 +49,10 @@ export const RegistrationForm = () => {
 
   const mutation = useMutation({
     mutationFn: (data) => {
-      return fetchPostJson("/register", data);
+      return fetchPostJson({
+        path: "/register",
+        data,
+      });
     },
     onMutate: () => setResponseError(""),
     onSettled: (data) => {
@@ -68,7 +71,10 @@ export const RegistrationForm = () => {
 
   const loginMutation = useMutation({
     mutationFn: (data) => {
-      return fetchPostJson("/login", data);
+      return fetchPostJson({
+        path: "/login",
+        data,
+      });
     },
     onMutate: () => setResponseError(""),
     onSettled: (data) => {
@@ -127,7 +133,7 @@ export const RegistrationForm = () => {
           <Button
             isLoading={loginMutation.isPending}
             type="submit"
-            text="Получить пароль"
+            text="Войти"
             fullWidth
             mediumHeight
           />

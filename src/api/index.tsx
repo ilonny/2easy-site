@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { getTokenFromLocalStorage } from "@/auth/utils";
 
 export const ApiProvider = ({ children }) => {
   const [client] = useState(new QueryClient());
@@ -17,12 +18,29 @@ export const getFormData = (object) =>
     return formData;
   }, new FormData());
 
-export const fetchPostJson = (path: string, data: any) => {
+type TParams = {
+  path: string;
+  data: never;
+  isSecure?: boolean;
+};
+
+const mapHeaders = (params: TParams) => {
+  const headers: Headers = new Headers();
+  const { isSecure } = params;
+  headers.append("Content-Type", "application/json");
+  if (isSecure) {
+    const token = getTokenFromLocalStorage();
+    headers.append("Authorization", `Bearer ${token}`);
+  }
+  return headers;
+};
+
+export const fetchPostJson = (params: TParams) => {
+  const { path, data } = params;
+  const headers = mapHeaders(params);
   return fetch(API_URL + path, {
     method: "POST",
     body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 };

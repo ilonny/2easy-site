@@ -1,7 +1,9 @@
 "use client";
-import { FC } from "react";
+import { forwardRef } from "react";
 import styles from "./styles.module.css";
 import { Spinner } from "@nextui-org/react";
+
+type Ref = HTMLButtonElement;
 
 type TButtonProps = {
   text?: string;
@@ -13,15 +15,20 @@ type TButtonProps = {
   isLoading?: boolean;
 };
 
-export const Button: FC<TButtonProps> = ({
-  text,
-  onClick = () => {},
-  kind = "primary",
-  fullWidth,
-  mediumHeight,
-  type,
-  isLoading,
-}) => {
+export const Button = forwardRef<Ref, TButtonProps>(function ButtonComponent(
+  props,
+  ref
+) {
+  const {
+    text,
+    onClick = () => {},
+    kind = "primary",
+    fullWidth,
+    mediumHeight,
+    type,
+    isLoading,
+  } = props;
+
   const className = `${styles.mainButton} ${
     kind === "secondary" && styles.secondary
   } ${fullWidth && styles.fullWidth} ${mediumHeight && styles.mediumHeight}`;
@@ -33,13 +40,16 @@ export const Button: FC<TButtonProps> = ({
       </div>
     );
   }
+
   return (
     <button
+      {...props}
       type={type}
       onClick={isLoading ? undefined : onClick}
       className={className}
+      ref={ref}
     >
       {text}
     </button>
   );
-};
+});

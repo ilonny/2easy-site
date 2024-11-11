@@ -1,14 +1,12 @@
 "use client";
 import { fetchPostJson } from "@/api";
-import { AuthContext } from "@/auth";
-import { writeToLocalStorage } from "@/auth/utils";
 import { Button } from "@/ui";
-import { Checkbox, Input } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 
 type TLoginInputs = {
@@ -24,7 +22,6 @@ export const RestoreForm = () => {
   } = useForm<TLoginInputs>();
 
   const [responseError, setResponseError] = useState("");
-  const { setProfile } = useContext(AuthContext);
   const router = useRouter();
 
   const onSubmit: SubmitHandler<TLoginInputs> = (data) => {
@@ -33,7 +30,10 @@ export const RestoreForm = () => {
 
   const mutation = useMutation({
     mutationFn: (data) => {
-      return fetchPostJson("/reset-password", data);
+      return fetchPostJson({
+        path: "/reset-password",
+        data,
+      });
     },
     onMutate: () => setResponseError(""),
     onSettled: (data) => {

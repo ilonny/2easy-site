@@ -2,8 +2,8 @@
 import { fetchPostJson } from "@/api";
 import { AuthContext } from "@/auth";
 import { writeToLocalStorage } from "@/auth/utils";
-import { Button } from "@/ui";
-import { Checkbox, Input } from "@nextui-org/react";
+
+import { Button, Checkbox, Input } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 
 import Link from "next/link";
@@ -33,7 +33,10 @@ export const LoginForm = () => {
 
   const mutation = useMutation({
     mutationFn: (data) => {
-      return fetchPostJson("/login", data);
+      return fetchPostJson({
+        path: "/login",
+        data,
+      });
     },
     onMutate: () => setResponseError(""),
     onSettled: (data) => {
@@ -89,10 +92,13 @@ export const LoginForm = () => {
         )}
       />
       <div className="flex items-center justify-between mb-8">
-        <Checkbox size="sm" defaultSelected>
+        {/* <Checkbox size="sm" defaultSelected>
           Запомнить
-        </Checkbox>
-        <Link href="/restore-password" className="text-[#3F28C6] underline text-sm">
+        </Checkbox> */}
+        <Link
+          href="/restore-password"
+          className="text-[#3F28C6] underline text-sm"
+        >
           Забыли пароль?
         </Link>
       </div>
@@ -100,10 +106,13 @@ export const LoginForm = () => {
         <Button
           isLoading={mutation.isPending}
           type="submit"
-          text="Войти"
           fullWidth
-          mediumHeight
-        />
+          color="primary"
+          size="lg"
+          radius="sm"
+        >
+          Войти
+        </Button>
         {!!responseError && (
           <p className="text-tiny text-danger">{responseError}</p>
         )}
