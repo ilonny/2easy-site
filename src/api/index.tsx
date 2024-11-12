@@ -20,7 +20,7 @@ export const getFormData = (object) =>
 
 type TParams = {
   path: string;
-  data: any;
+  data?: any;
   isSecure?: boolean;
 };
 
@@ -41,6 +41,18 @@ export const fetchPostJson = (params: TParams) => {
   return fetch(API_URL + path, {
     method: "POST",
     body: JSON.stringify(data),
+    headers,
+  });
+};
+
+export const fetchGet = (params: TParams) => {
+  const { path } = params;
+  if (params.isSecure && !getTokenFromLocalStorage()) {
+    return;
+  }
+  const headers = mapHeaders(params);
+  return fetch(API_URL + path, {
+    method: "GET",
     headers,
   });
 };

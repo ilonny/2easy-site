@@ -1,4 +1,5 @@
 "use client";
+import { SibscribeContext } from "@/subscribe/context";
 // import { Button } from "@/ui/Button";
 import {
   Button,
@@ -7,10 +8,66 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@nextui-org/react";
-import { useState } from "react";
+import dayjs from "dayjs";
+import { useContext, useMemo, useState } from "react";
 
 export const SubscribeCounter = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { subscription } = useContext(SibscribeContext);
+  console.log("subscription", subscription);
+
+  const diffDate = useMemo(() => {
+    if (!subscription) {
+      return 0;
+    }
+    return dayjs(subscription?.dateEnd).diff(dayjs(), "days");
+  }, [subscription]);
+
+  const diffText = useMemo(() => {
+    if (subscription?.subscribe_type_id === 1) {
+      return (
+        <>
+          <p className="mb-1">
+            Пробный период до{" "}
+            {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
+          </p>
+          <Link href="/subscription" color="primary" className="underline" size="sm">
+            Выбрать тариф
+          </Link>
+        </>
+      );
+    }
+    if (subscription?.subscribe_type_id === 2) {
+      return (
+        <>
+          <p className="mb-1">
+            2easy PRO до {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
+          </p>
+        </>
+      );
+    }
+    if (subscription?.subscribe_type_id === 3) {
+      return (
+        <>
+          <p className="mb-1">
+            2easy PRO до {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
+          </p>
+        </>
+      );
+    }
+    return (
+      <>
+        Подписка закончилась
+        <br />
+        <Link href="/subscription" color="primary" className="underline" size="sm">
+          Выбрать тариф
+        </Link>
+      </>
+    );
+  }, [subscription]);
+
+  console.log("diffDate", diffDate);
+
   return (
     <div className="flex flex-row">
       <Popover
@@ -23,15 +80,10 @@ export const SubscribeCounter = () => {
       >
         <PopoverTrigger>
           <Button radius="sm" color="primary">
-            3 days
+            {diffDate} дней
           </Button>
         </PopoverTrigger>
-        <PopoverContent>
-          <p className="mb-1">Пробный период до 18.10.2024</p>
-          <Link href="/" color="primary" className="underline" size="sm">
-            Выбрать тариф
-          </Link>
-        </PopoverContent>
+        <PopoverContent>{diffText}</PopoverContent>
       </Popover>
     </div>
   );

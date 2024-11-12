@@ -5,6 +5,7 @@ import { AuthContextProvider } from "@/auth";
 import { NextUIProvider } from "@nextui-org/react";
 import { ApiProvider } from "@/api";
 import { Manrope } from "next/font/google";
+import { SibscribeContextProvider } from "@/subscribe/context";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
@@ -24,8 +25,10 @@ export default function RootLayout({
         <ApiProvider>
           <NextUIProvider>
             <AuthContextProvider>
-              <Header />
-              {children}
+              <SibscribeContextProvider>
+                <Header />
+                {children}
+              </SibscribeContextProvider>
             </AuthContextProvider>
           </NextUIProvider>
         </ApiProvider>
