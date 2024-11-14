@@ -138,7 +138,7 @@ export const RegistrationForm = () => {
             mediumHeight
           />
           {!!responseError && (
-            <p className="text-tiny text-danger">{responseError}</p>
+            <p className="text-tiny text-danger mt-2">{responseError}</p>
           )}
         </div>
         <div className="flex justify-center items-center gap-2 font-medium text-small">
@@ -203,7 +203,7 @@ export const RegistrationForm = () => {
           mediumHeight
         />
         {!!responseError && (
-          <p className="text-tiny text-danger">{responseError}</p>
+          <p className="text-tiny text-danger mt-2">{responseError}</p>
         )}
       </div>
       <div className="flex justify-center items-center gap-2 font-medium text-small">

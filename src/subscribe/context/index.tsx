@@ -17,7 +17,7 @@ export const SibscribeContextProvider = ({
       path: "/subscription",
       isSecure: true,
     });
-    const data = await res.json();
+    const data = await res?.json();
     if (data) {
       setSubscription(data);
     }
