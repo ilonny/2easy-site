@@ -1,8 +1,10 @@
 "use client";
 import { AuthContext } from "@/auth";
+import { usePayment } from "@/payment/hooks/usePayment";
 import { usePromocode } from "@/payment/hooks/usePromocode";
 import { TSubscribePeriod } from "@/subscribe/types";
 import { Button, Input } from "@nextui-org/react";
+import { redirect } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
@@ -37,16 +39,25 @@ export const PaymentForm = (props: TProps) => {
   });
 
   const { checkPromo, promocodeValue, promocodeStatus } = usePromocode();
+  const { paymentIsLoading, paymentStatus, createPayment } = usePayment();
 
-  const onSubmit = useCallback((data) => {
-    console.log("onSubmit data: ", data);
-  }, []);
+  const onSubmit = useCallback(
+    async (_data) => {
+      // console.log("onSubmit data: ", data);
+      const response = await createPayment(type);
+      console.log("onSubmit res: ", response);
+    },
+    [createPayment, type]
+  );
 
   useEffect(() => {
     if (!!promocodeValue) {
       setPrice((price) => price - promocodeValue);
     }
-  }, [promocodeValue]);
+    if (paymentStatus === "success") {
+      redirect("/");
+    }
+  }, [promocodeValue, paymentStatus]);
 
   return (
     <>
@@ -167,9 +178,22 @@ export const PaymentForm = (props: TProps) => {
           <p className="font-bold">{price}₽</p>
         </div>
         <div className="h-5" />
-        <Button size="lg" fullWidth radius="sm" type="submit" color="primary">
+        <Button
+          size="lg"
+          fullWidth
+          radius="sm"
+          type="submit"
+          color="primary"
+          isLoading={paymentIsLoading}
+        >
           К оплате →
         </Button>
+        {paymentStatus === "error" && (
+          <p className="text-sm text-red-400">
+            Внутренняя ошибка сервера. Попробуйте позже, или свяжитесь с
+            техподдержкой
+          </p>
+        )}
       </form>
     </>
   );

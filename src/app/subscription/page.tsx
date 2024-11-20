@@ -6,9 +6,15 @@ import { SubscribeTariffs } from "@/subscribe/components/SubscribeTariffs";
 import { SubscribeFreeBlock } from "@/subscribe";
 import { AuthContext } from "@/auth";
 import { useContext } from "react";
+import { SibscribeContext } from "@/subscribe/context";
 
 export default function StartRegistrationPage() {
   const { isAuthorized, authIsLoading } = useContext(AuthContext);
+  const { subscription } = useContext(SibscribeContext);
+
+  const hasTariff =
+    subscription?.subscribe_type_id && subscription?.subscribe_type_id !== 1;
+
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
@@ -50,21 +56,25 @@ export default function StartRegistrationPage() {
             </>
           )}
           <h1 className={"text-primary font-bold text-3xl uppercase"}>
-            тарифы 2easy
+            {hasTariff ? "ВАШ ТАРИФ" : "тарифы 2easy"}
           </h1>
-          <div className="h-3" />
-          <h2 className="font-medium text-lg text-center">
-            Выберите тариф, чтобы оформить подписку на сайт,
-            <br />
-            или{" "}
-            <Link href="/login">
-              <span className="text-primary underline">
-                войдите в личный кабинет
-              </span>
-            </Link>
-            , если у вас уже есть подписка
-          </h2>
-          <div className="h-10" />
+          {!hasTariff && (
+            <>
+              <div className="h-3" />
+              <h2 className="font-medium text-lg text-center">
+                Выберите тариф, чтобы оформить подписку на сайт,
+                <br />
+                или{" "}
+                <Link href="/login">
+                  <span className="text-primary underline">
+                    войдите в личный кабинет
+                  </span>
+                </Link>
+                , если у вас уже есть подписка
+              </h2>
+              <div className="h-10" />
+            </>
+          )}
           <div className="h-10" />
           <SubscribeTariffs />
           <div className="h-10" />
