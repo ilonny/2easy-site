@@ -5,7 +5,7 @@ import { usePromocode } from "@/payment/hooks/usePromocode";
 import { TSubscribePeriod } from "@/subscribe/types";
 import { Button, Input } from "@nextui-org/react";
 import { redirect } from "next/navigation";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 
@@ -44,16 +44,24 @@ export const PaymentForm = (props: TProps) => {
   const onSubmit = useCallback(
     async (_data) => {
       // console.log("onSubmit data: ", data);
-      const response = await createPayment(type);
-      console.log("onSubmit res: ", response);
+      const response = await createPayment(
+        type,
+        getValues().phone,
+        getValues().promocode
+      );
+      // console.log("onSubmit res: ", response);
     },
-    [createPayment, type]
+    [createPayment, getValues, type]
   );
 
-  useEffect(() => {
+  const priceWithPromo = useMemo(() => {
     if (!!promocodeValue) {
-      setPrice((price) => price - promocodeValue);
+      return price * (promocodeValue / 100);
     }
+    return price;
+  }, [price, promocodeValue]);
+
+  useEffect(() => {
     if (paymentStatus === "success") {
       redirect("/");
     }
@@ -136,16 +144,6 @@ export const PaymentForm = (props: TProps) => {
           control={control}
           render={({ field }) => (
             <div>
-              <div>
-                {promocodeStatus === "error" && (
-                  <p className="text-danger-400 text-sm">
-                    Промокод не действителен или не существует
-                  </p>
-                )}
-                {promocodeStatus === "success" && (
-                  <p className="text-success-400 text-sm">Промокод применен</p>
-                )}
-              </div>
               <div className="flex items-center justify-between">
                 <Input {...field} label="Промокод" radius="sm" />
                 {!!getValues().promocode?.length && (
@@ -156,11 +154,21 @@ export const PaymentForm = (props: TProps) => {
                       variant="faded"
                       color="primary"
                       isLoading={promocodeStatus === "loading"}
-                      onClick={() => checkPromo(getValues().promocode)}
+                      onClick={() => checkPromo(getValues().promocode, type)}
                     >
                       Применить
                     </Button>
                   </div>
+                )}
+              </div>
+              <div>
+                {promocodeStatus === "error" && (
+                  <p className="text-small text-red-500">
+                    Промокод не действителен или не существует
+                  </p>
+                )}
+                {promocodeStatus === "success" && (
+                  <p className="text-green-500 text-small">Промокод применен</p>
                 )}
               </div>
             </div>
@@ -170,12 +178,14 @@ export const PaymentForm = (props: TProps) => {
         {!!promocodeValue && (
           <div className="flex items-center justify-between">
             <p>Скидка</p>
-            <p className="text-success-600 font-bold">-{promocodeValue}₽</p>
+            <p className="text-success-600 font-bold">
+              -{price - (price - priceWithPromo)}₽
+            </p>
           </div>
         )}
         <div className="flex items-center justify-between">
           <p>Итого</p>
-          <p className="font-bold">{price}₽</p>
+          <p className="font-bold">{price - priceWithPromo}₽</p>
         </div>
         <div className="h-5" />
         <Button

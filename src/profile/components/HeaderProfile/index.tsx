@@ -11,7 +11,8 @@ import {
 
 import { fetchPostJson } from "@/api";
 import { writeToLocalStorage } from "@/auth/utils";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import Link from "next/link";
 export const HeaderProfile = () => {
   const { profile, setProfile } = useContext(AuthContext);
   const router = useRouter();
@@ -36,6 +37,9 @@ export const HeaderProfile = () => {
         </button>
       </DropdownTrigger>
       <DropdownMenu aria-label="Profile Actions">
+        <DropdownItem key="profile">
+          <Link href="/profile">Профиль</Link>
+        </DropdownItem>
         <DropdownItem onClick={logout} key="logout">
           Выйти
         </DropdownItem>

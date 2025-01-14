@@ -3,5 +3,9 @@
 @tailwind utilities;
 
 :root {
-    --primary: #3F28C6;
+  --primary: #3f28c6;
+}
+
+* {
+  box-sizing: border-box;
 }
