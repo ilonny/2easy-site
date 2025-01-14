@@ -61,13 +61,12 @@ export default function StartRegistrationPage() {
           </Tabs>
           <div className="h-10" />
           <div className="h-10" />
-          <div className="mx-8">
-          </div>
-            {tabIndex === "profile" && (
-              <div className="flex items-start justify-between w-full">
-                <ProfileInfoForm />
-              </div>
-            )}
+          <div className="mx-8"></div>
+          {tabIndex === "profile" && !authIsLoading && (
+            <div className="flex items-start justify-between w-full">
+              <ProfileInfoForm />
+            </div>
+          )}
         </div>
       </ContentWrapper>
     </main>

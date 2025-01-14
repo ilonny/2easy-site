@@ -1,0 +1,18 @@
+.header-profile-short-wrapper {
+    width: 140px;
+    height: 140px;
+    border-radius: 140px;
+    background-color: #EBE8FF;
+    @apply
+    flex
+    items-center
+    justify-center
+}
+
+.title {
+    color: #3F28C699;
+    font-weight: 800;
+    font-size: 100px;
+    position: relative;
+    top: -8px;
+}
