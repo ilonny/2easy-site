@@ -1,8 +1,16 @@
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useState } from "react";
 import { ProfileImagePicker } from "./ProfileImagePicker";
 import { AuthContext } from "@/auth";
 import { Controller, useForm } from "react-hook-form";
-import { Button, Input } from "@nextui-org/react";
+import {
+  Button,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
+} from "@nextui-org/react";
+import { ChangePasswordForm } from "@/app/login/components/ChangePasswordForm";
 
 type TFieldList = {
   name: string;
@@ -13,8 +21,8 @@ type TFieldList = {
 };
 
 export const ProfileInfoForm = () => {
-  const { profile, authIsLoading } = useContext(AuthContext);
-
+  const { profile } = useContext(AuthContext);
+  const [changePasswordIsVisible, setChangePasswordIsVisible] = useState(false);
   const {
     control,
     handleSubmit,
@@ -95,7 +103,27 @@ export const ProfileInfoForm = () => {
               />
             )}
           />
-          <Button size="lg" type="button" className="text-small bg-black text-white">Изменить</Button>
+          <Button
+            size="lg"
+            type="button"
+            className="text-small bg-black text-white"
+            onClick={() => setChangePasswordIsVisible(true)}
+          >
+            Изменить
+          </Button>
+          <Modal
+            size="lg"
+            isOpen={changePasswordIsVisible}
+            onClose={() => setChangePasswordIsVisible(false)}
+          >
+            <ModalContent>
+              <ModalHeader></ModalHeader>
+              <ModalBody>
+                <ChangePasswordForm />
+                <div className="h-10" />
+              </ModalBody>
+            </ModalContent>
+          </Modal>
         </div>
       </form>
     </div>

@@ -189,7 +189,7 @@ export const SubscribeTariffs = () => {
               Подписаться за 6990₽
             </Button>
           )}
-          {isMonthTariff && (
+          {/* {isMonthTariff && (
             <Button
               style={{ textDecoration: "underline" }}
               variant="light"
@@ -200,7 +200,7 @@ export const SubscribeTariffs = () => {
             >
               Продлить на год со скидкой 30%
             </Button>
-          )}
+          )} */}
         </div>
       </div>
       <Modal

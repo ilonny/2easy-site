@@ -102,14 +102,6 @@ export const ProfileSubscribeInformer = () => {
           )}
         </CardBody>
       </Card>
-      {subscription?.subscribe_type_id === 2 && (
-        <>
-          <div className="h-3" />
-          <Button color="primary" className="w-full">
-            Продлить на год со скидкой 30%
-          </Button>
-        </>
-      )}
     </div>
   );
 };
