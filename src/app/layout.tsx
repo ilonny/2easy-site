@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Header } from "@/components";
 import { AuthContextProvider } from "@/auth";
@@ -10,6 +10,13 @@ import { SibscribeContextProvider } from "@/subscribe/context";
 export const metadata: Metadata = {
   title: "2EASY Interactive",
   description: "",
+};
+
+export const viewport: Viewport = {
+  width: "1200px",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 const manrope = Manrope({ subsets: ["cyrillic"] });

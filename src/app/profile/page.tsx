@@ -8,6 +8,7 @@ import { AuthContext } from "@/auth";
 import { useContext, useState } from "react";
 import { SibscribeContext } from "@/subscribe/context";
 import { ProfileInfoForm } from "./components/ProfileInfoForm";
+import { ProfileSubscribeInformer } from "../subscription/components/ProfileSubscribeInformer";
 
 export default function StartRegistrationPage() {
   const { isAuthorized, authIsLoading } = useContext(AuthContext);
@@ -63,8 +64,9 @@ export default function StartRegistrationPage() {
           <div className="h-10" />
           <div className="mx-8"></div>
           {tabIndex === "profile" && !authIsLoading && (
-            <div className="flex items-start justify-between w-full">
+            <div className="flex items-start justify-center w-full gap-40">
               <ProfileInfoForm />
+              <ProfileSubscribeInformer />
             </div>
           )}
         </div>
