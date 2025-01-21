@@ -1,0 +1,35 @@
+import Bg from "@/assets/images/wide_bg_empty.png";
+import { Button } from "@nextui-org/react";
+import { FC } from "react";
+
+type TProps = {
+  title: string;
+  buttonTitle: string;
+  onButtonPress: () => void;
+};
+
+export const ProfileEmptyLessons: FC<TProps> = ({
+  title,
+  buttonTitle,
+  onButtonPress,
+}) => {
+  return (
+    <div
+      className="w-full h-[225px] flex justify-center items-center flex-col gap-7"
+      style={{
+        background: `url(${Bg.src}) center center no-repeat #fff`,
+        backgroundSize: "contain",
+      }}
+    >
+      <p className="text-center">{title}</p>
+      <Button
+        size="lg"
+        color="primary"
+        style={{ minWidth: 310 }}
+        onClick={onButtonPress}
+      >
+        {buttonTitle}
+      </Button>
+    </div>
+  );
+};

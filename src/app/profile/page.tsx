@@ -9,6 +9,7 @@ import { useContext, useState } from "react";
 import { SibscribeContext } from "@/subscribe/context";
 import { ProfileInfoForm } from "./components/ProfileInfoForm";
 import { ProfileSubscribeInformer } from "../subscription/components/ProfileSubscribeInformer";
+import { ProfileLessons } from "../lessons/components/ProfileLessons";
 
 export default function StartRegistrationPage() {
   const { isAuthorized, authIsLoading } = useContext(AuthContext);
@@ -18,7 +19,7 @@ export default function StartRegistrationPage() {
     subscription?.subscribe_type_id && subscription?.subscribe_type_id !== 1;
 
   const [tabIndex, setTabIndex] = useState<"profile" | "lessons" | "students">(
-    "profile"
+    "lessons"
   );
 
   return (
@@ -69,6 +70,8 @@ export default function StartRegistrationPage() {
               <ProfileSubscribeInformer />
             </div>
           )}
+          {tabIndex === "lessons" && !authIsLoading && <ProfileLessons />}
+          <div className="h-20" />
         </div>
       </ContentWrapper>
     </main>

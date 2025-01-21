@@ -41,7 +41,7 @@ export const ProfileInfoForm = () => {
   }, []);
 
   return (
-    <div className="flex gap-16 mb-20">
+    <div className="flex gap-16">
       <ProfileImagePicker />
       <form onSubmit={handleSubmit(onSubmit)} className="min-w-[450px]">
         <Controller
