@@ -45,6 +45,18 @@ export const fetchPostJson = (params: TParams) => {
   });
 };
 
+export const fetchPostMultipart = (params: TParams) => {
+  const { path, data } = params;
+  const headers = mapHeaders(params);
+  headers.set("Content-Type", "multipart/form-data");
+  headers.delete('Content-Type')
+  return fetch(API_URL + path, {
+    method: "POST",
+    body: data,
+    headers,
+  });
+};
+
 export const fetchGet = (params: TParams) => {
   const { path } = params;
   if (params.isSecure && !getTokenFromLocalStorage()) {

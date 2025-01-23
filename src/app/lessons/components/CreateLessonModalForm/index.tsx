@@ -1,4 +1,5 @@
 import { ImageUpload } from "@/components/ImageUpload";
+import { useUploadImage } from "@/hooks/useUploadImage";
 import {
   Button,
   Input,
@@ -43,13 +44,15 @@ export const CreateLessonModalForm: FC<TProps> = ({
   });
 
   const [images, setImages] = useState([]);
+  const { uploadImages } = useUploadImage();
 
   const onSubmit = useCallback(
-    (_data) => {
+    async (_data) => {
       console.log("onSubmit", _data);
       console.log("images", images);
+      const attachments = await uploadImages(images);
     },
-    [images]
+    [images, uploadImages]
   );
 
   const title = watch("title");
@@ -153,7 +156,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
               />
             </div>
             <div className="h-5" />
-            <Button color="primary" type="submit" className="min-w-[350px]">
+            <Button color="primary" type="submit" className="w-full">
               Создать урок
             </Button>
             <div className="h-10" />

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { FC, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 import ReactImageUploading, { ImageListType } from "react-images-uploading";
 import Bg from "@/assets/images/image_upload_placeholder.png";
 import { Button } from "@nextui-org/react";
