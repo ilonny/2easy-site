@@ -1,3 +1,4 @@
+import { fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import {
@@ -17,6 +18,7 @@ import { Controller, useForm } from "react-hook-form";
 type TProps = {
   isVisible: boolean;
   setIsVisible: (val: boolean) => void;
+  onSuccess: () => void;
 };
 
 type TFieldList = {
@@ -29,12 +31,12 @@ type TFieldList = {
 export const CreateLessonModalForm: FC<TProps> = ({
   isVisible,
   setIsVisible,
+  onSuccess,
 }) => {
   const {
     control,
     handleSubmit,
     formState: { errors },
-    getValues,
     setValue,
     watch,
   } = useForm<TFieldList>({
@@ -51,8 +53,21 @@ export const CreateLessonModalForm: FC<TProps> = ({
       console.log("onSubmit", _data);
       console.log("images", images);
       const attachments = await uploadImages(images);
+      const lessonRes = await fetchPostJson({
+        path: "/lesson/create-lesson",
+        isSecure: true,
+        data: {
+          ..._data,
+          tags: _data.tags?.join(","),
+          image_id: attachments?.attachments?.[0]?.id,
+        },
+      });
+      const lesson = await lessonRes.json();
+      if (lesson.success) {
+        onSuccess();
+      }
     },
-    [images, uploadImages]
+    [images, uploadImages, onSuccess]
   );
 
   const title = watch("title");
@@ -122,7 +137,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
               render={({ field }) => (
                 <TagInput
                   {...field}
-                  placeholder="Теги (видны только вам)"
+                  placeholder="Теги (видны только вам, вводить через enter)"
                   styleClasses={{
                     inlineTagsContainer: "p-0 h-15",
                     input: "h-16 bg-default-100",
@@ -156,7 +171,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
               />
             </div>
             <div className="h-5" />
-            <Button color="primary" type="submit" className="w-full">
+            <Button color="primary" type="submit" className="w-full" size="lg">
               Создать урок
             </Button>
             <div className="h-10" />

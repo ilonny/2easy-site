@@ -15,6 +15,7 @@ export const useUploadImage = () => {
       data: fd,
       isSecure: true,
     });
+    return await res.json()
   }, []);
 
   return { isLoading, uploadImages };

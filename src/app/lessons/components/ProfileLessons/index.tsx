@@ -1,18 +1,19 @@
 import { Button } from "@nextui-org/react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLessons } from "../../hooks/useLessons";
 import { ProfileEmptyLessons } from "../ProfileEmptyLessons";
 import { CreateLessonModalForm } from "../CreateLessonModalForm";
+import { LessonsList } from "../LessonsList";
 
 export const ProfileLessons = () => {
-  const [tabIndex, setTabIndex] = useState<"userLessons" | "2easyLessons">(
+  const [tabIndex, setTabIndex] = useState<"userLessons" | "savedLessons">(
     "userLessons"
   );
 
   const [createLessonModalIsVisible, setCreateLessonModalIsVisible] =
     useState(false);
 
-  const { lessons } = useLessons();
+  const { lessons, getLessons } = useLessons();
 
   const data = useMemo(() => {
     const title =
@@ -32,13 +33,32 @@ export const ProfileLessons = () => {
     return { title, buttonTitle, onButtonPress };
   }, [tabIndex]);
 
+  useEffect(() => {
+    getLessons();
+  }, [getLessons]);
+
+  const onCreateLesson = useCallback(() => {
+    setCreateLessonModalIsVisible(false);
+    getLessons();
+  }, [getLessons]);
+  console.log('lessons', lessons)
   return (
     <>
       <div className="flex gap-5">
-        <Button radius="full" color="primary">
+        <Button
+          radius="full"
+          color="primary"
+          variant={tabIndex === "userLessons" ? "solid" : "faded"}
+          onClick={() => setTabIndex("userLessons")}
+        >
           Созданные уроки
         </Button>
-        <Button radius="full" color="primary" variant="faded">
+        <Button
+          radius="full"
+          color="primary"
+          variant={tabIndex === "savedLessons" ? "solid" : "faded"}
+          onClick={() => setTabIndex("savedLessons")}
+        >
           Сохранённые уроки
         </Button>
       </div>
@@ -50,9 +70,11 @@ export const ProfileLessons = () => {
           onButtonPress={data.onButtonPress}
         />
       )}
+      {lessons?.length && <LessonsList lessons={lessons} />}
       <CreateLessonModalForm
         isVisible={createLessonModalIsVisible}
         setIsVisible={setCreateLessonModalIsVisible}
+        onSuccess={onCreateLesson}
       />
     </>
   );
