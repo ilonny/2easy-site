@@ -10,7 +10,8 @@ export const ApiProvider = ({ children }) => {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
 
-export const API_URL = "http://localhost:8888/api";
+export const BASE_URL = "http://localhost:8888";
+export const API_URL = BASE_URL + "/api";
 
 export const getFormData = (object) =>
   Object.keys(object).reduce((formData, key) => {
@@ -49,7 +50,7 @@ export const fetchPostMultipart = (params: TParams) => {
   const { path, data } = params;
   const headers = mapHeaders(params);
   headers.set("Content-Type", "multipart/form-data");
-  headers.delete('Content-Type')
+  headers.delete("Content-Type");
   return fetch(API_URL + path, {
     method: "POST",
     body: data,

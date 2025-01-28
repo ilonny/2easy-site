@@ -1,0 +1,33 @@
+.lesson-card {
+  cursor: pointer;
+}
+.lesson-card:hover .image-bg {
+  transform: scale(1.1);
+}
+.lesson-card:hover .shadow {
+  opacity: 1;
+}
+
+.lesson-card:hover .btn-wrapper {
+  transform: translateY(0);
+}
+
+.shadow {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-color: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 500ms ease;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.btn-wrapper {
+  transform: translateY(-100%);
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: all 100ms ease;
+}
