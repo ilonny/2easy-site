@@ -1,4 +1,4 @@
-import { fetchPostJson } from "@/api";
+import { BASE_URL, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import {
@@ -14,11 +14,13 @@ import {
 import { Tag, TagInput } from "emblor";
 import { FC, useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { TLesson } from "../../types";
 
 type TProps = {
   isVisible: boolean;
   setIsVisible: (val: boolean) => void;
   onSuccess: () => void;
+  lesson: TLesson;
 };
 
 type TFieldList = {
@@ -28,10 +30,11 @@ type TFieldList = {
   tags: Tag[];
 };
 
-export const CreateLessonModalForm: FC<TProps> = ({
+export const EditLessonModalForm: FC<TProps> = ({
   isVisible,
   setIsVisible,
   onSuccess,
+  lesson,
 }) => {
   const {
     control,
@@ -41,23 +44,32 @@ export const CreateLessonModalForm: FC<TProps> = ({
     watch,
   } = useForm<TFieldList>({
     defaultValues: {
-      title: "",
+      ...lesson,
     },
   });
 
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState(
+    lesson?.image_path
+      ? [
+          {
+            dataURL: BASE_URL + "/" + lesson?.image_path,
+          },
+        ]
+      : []
+  );
   const { uploadImages } = useUploadImage();
 
   const onSubmit = useCallback(
     async (_data) => {
+      const imagesToUpload = images.filter((image) => !!image?.file);
       let attachments;
-      if (images?.length) {
-        attachments = await uploadImages(images);
+      if (imagesToUpload?.length) {
+        attachments = await uploadImages(imagesToUpload);
       }
-      console.log("_data.tags", _data.tags);
+      console.log("_data", _data?.tags);
       const tagsArr = (_data?.tags || [])?.map((t) => (t.text ? t.text : ""));
       const lessonRes = await fetchPostJson({
-        path: "/lesson/create-lesson",
+        path: "/lesson/edit-lesson",
         isSecure: true,
         data: {
           ..._data,
@@ -75,7 +87,14 @@ export const CreateLessonModalForm: FC<TProps> = ({
 
   const title = watch("title");
 
-  const [tags, setTags] = useState<Tag[]>([]);
+  const [tags, setTags] = useState<Tag[]>(
+    lesson?.tags
+      ?.replaceAll("[", "")
+      ?.replaceAll("]", "")
+      ?.split(",")
+      ?.map((tag) => ({ text: tag, id: tag }))
+      ?.filter((tag) => !!tag.text) || []
+  );
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   return (
@@ -168,6 +187,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
             <div className="h-5" />
             <div className="flex gap-5 items-end">
               <ImageUpload
+                // initialImages=[]
                 label="Обложка урока"
                 images={images}
                 setImages={setImages}
@@ -175,7 +195,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
             </div>
             <div className="h-5" />
             <Button color="primary" type="submit" className="w-full" size="lg">
-              Создать урок
+              Подтвердить
             </Button>
             <div className="h-10" />
           </form>

@@ -36,9 +36,7 @@ export const ProfileInfoForm = () => {
     },
   });
 
-  const onSubmit = useCallback((_data) => {
-    console.log("onSubmit", _data);
-  }, []);
+  const onSubmit = useCallback((_data) => {}, []);
 
   return (
     <div className="flex gap-16">

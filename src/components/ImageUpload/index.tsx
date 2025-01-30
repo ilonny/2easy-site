@@ -10,6 +10,7 @@ type TProps = {
   isMultiple?: boolean;
   images: ImageListType;
   setImages: any;
+  initialImages?: string[];
 };
 
 export const ImageUpload: FC<TProps> = ({
@@ -38,7 +39,7 @@ export const ImageUpload: FC<TProps> = ({
     }
     return true;
   }, [isMultiple, images]);
-
+  console.log('images?', images)
   return (
     <div className="App">
       <ReactImageUploading
@@ -66,13 +67,13 @@ export const ImageUpload: FC<TProps> = ({
                 {...dragProps}
                 type="button"
               >
-                <Image src={Bg} alt="placeholder" height={170} />
+                <Image src={Bg} alt="placeholder" width={170} height={170} />
               </button>
             )}
             <div className="flex gap-10">
               {imageList.map((image, index) => (
                 <div key={index} className="image-item relative">
-                  <img src={image.dataURL} alt="" height="170" />
+                  <img src={image.dataURL} alt="" width={170} height={170} />
                   <div className="image-item__btn-wrapper top-0 right-0 absolute">
                     <Button
                       isIconOnly

@@ -41,7 +41,6 @@ export const LoginForm = () => {
     onMutate: () => setResponseError(""),
     onSettled: (data) => {
       data?.json().then((res) => {
-        console.log("res?", res);
         if (res.message) {
           setResponseError(res.message);
         }

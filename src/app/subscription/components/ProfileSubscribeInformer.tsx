@@ -16,7 +16,6 @@ import { useContext, useMemo, useState } from "react";
 export const ProfileSubscribeInformer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { subscription } = useContext(SibscribeContext);
-  console.log("subscription", subscription);
 
   const diffDate = useMemo(() => {
     if (!subscription) {
@@ -83,8 +82,6 @@ export const ProfileSubscribeInformer = () => {
       </div>
     );
   }, [subscription]);
-
-  console.log("diffDate", diffDate);
 
   return (
     <div>

@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import { FC, useMemo, useState } from "react";
 import { TLesson } from "../../types";
 import { BASE_URL } from "@/api";
 import styles from "./styles.module.css";
@@ -14,9 +14,17 @@ import Image from "next/image";
 
 type TProps = {
   lesson: TLesson;
+  onPressEdit?: (lesson: TLesson) => void;
+  onPressDelete?: (lesson: TLesson) => void;
 };
 
-export const LessonCard: FC<TProps> = ({ lesson }) => {
+export const LessonCard: FC<TProps> = ({
+  lesson,
+  onPressEdit,
+  onPressDelete,
+}) => {
+  const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+
   const tags = useMemo(() => {
     if (lesson?.tags) {
       return (
@@ -48,6 +56,8 @@ export const LessonCard: FC<TProps> = ({ lesson }) => {
           height: 317,
           position: "relative",
           overflow: "hidden",
+          borderTopLeftRadius: 4,
+          borderTopRightRadius: 4,
         }}
       >
         <div
@@ -64,34 +74,51 @@ export const LessonCard: FC<TProps> = ({ lesson }) => {
         />
         <div className={styles["shadow"]} />
         <div className={styles["btn-wrapper"]}>
-          <Popover color="foreground" placement="bottom-end">
+          <Popover
+            color="foreground"
+            placement="bottom-end"
+            isOpen={popoverIsOpen}
+            onOpenChange={(open) => setPopoverIsOpen(open)}
+          >
             <PopoverTrigger>
               <Button isIconOnly variant="flat">
                 <Image src={Ellipse} alt="icon" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="bg-white p-2">
-              <Button
-                variant="light"
-                className="w-full text-default-foreground py-1 p-x-4 text-left"
-                style={{ fontSize: 16 }}
-              >
-                Редактировать
-              </Button>
-              <Button
-                variant="light"
-                className="w-full text-default-foreground py-1 p-x-4"
-                style={{ fontSize: 16 }}
-                endContent={<Image src={DeleteIcon} alt="icon" />}
-              >
-                Удалить
-              </Button>
+              {!!onPressEdit && (
+                <Button
+                  variant="light"
+                  className="w-full text-default-foreground py-1 p-x-4 text-left"
+                  style={{ fontSize: 16 }}
+                  onClick={() => {
+                    setPopoverIsOpen(false);
+                    onPressEdit(lesson);
+                  }}
+                >
+                  Редактировать
+                </Button>
+              )}
+              {!!onPressDelete && (
+                <Button
+                  variant="light"
+                  className="w-full text-default-foreground py-1 p-x-4"
+                  style={{ fontSize: 16 }}
+                  endContent={<Image src={DeleteIcon} alt="icon" />}
+                  onClick={() => {
+                    setPopoverIsOpen(false);
+                    onPressDelete(lesson);
+                  }}
+                >
+                  Удалить
+                </Button>
+              )}
             </PopoverContent>
           </Popover>
         </div>
       </div>
       <div className="p-4 bg-white ">
-        <p className="text-black font-bold">LESSON PLAN {lesson.title}</p>
+        <p className="text-black font-bold">{lesson.title}</p>
         <div className="h-2" />
         {!!tags && tags}
         <div className="h-2" />

@@ -43,13 +43,11 @@ export const PaymentForm = (props: TProps) => {
 
   const onSubmit = useCallback(
     async (_data) => {
-      // console.log("onSubmit data: ", data);
       const response = await createPayment(
         type,
         getValues().phone,
         getValues().promocode
       );
-      // console.log("onSubmit res: ", response);
     },
     [createPayment, getValues, type]
   );

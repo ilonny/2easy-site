@@ -41,7 +41,7 @@ export const ProfileLessons = () => {
     setCreateLessonModalIsVisible(false);
     getLessons();
   }, [getLessons]);
-  console.log('lessons', lessons)
+
   return (
     <>
       <div className="flex gap-5">
@@ -70,7 +70,14 @@ export const ProfileLessons = () => {
           onButtonPress={data.onButtonPress}
         />
       )}
-      {lessons?.length && <LessonsList lessons={lessons} />}
+      {!!lessons?.length && (
+        <LessonsList
+          onPressCreate={() => setCreateLessonModalIsVisible(true)}
+          canCreateLesson
+          lessons={lessons}
+          getLessons={getLessons}
+        />
+      )}
       <CreateLessonModalForm
         isVisible={createLessonModalIsVisible}
         setIsVisible={setCreateLessonModalIsVisible}

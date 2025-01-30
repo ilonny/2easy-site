@@ -5,7 +5,6 @@ import { useContext, useMemo } from "react";
 
 export const SubscribeCounter = () => {
   const { subscription } = useContext(SibscribeContext);
-  console.log("subscription", subscription);
 
   const diffText = useMemo(() => {
     if (subscription?.subscribe_type_id === 1) {

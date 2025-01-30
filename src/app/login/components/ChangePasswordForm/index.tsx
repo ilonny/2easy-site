@@ -58,7 +58,7 @@ export const ChangePasswordForm = () => {
     },
     [mutation]
   );
-  console.log("responseError", responseError);
+
   return (
     <>
       <h3 className="text-center font-extrabold text-2xl mb-2">
