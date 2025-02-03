@@ -117,7 +117,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
                 />
               )}
             />
-            <Controller
+            {/* <Controller
               name="student_id"
               control={control}
               render={({ field }) => (
@@ -133,7 +133,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
                   <SelectItem key={"qq"} value={"qqqq"} title="Qq" />
                 </Select>
               )}
-            />
+            /> */}
             <Controller
               name="tags"
               control={control}

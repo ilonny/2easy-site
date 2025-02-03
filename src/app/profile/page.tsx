@@ -1,15 +1,13 @@
 "use client";
-import Link from "next/link";
 import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
-import { SubscribeTariffs } from "@/subscribe/components/SubscribeTariffs";
-import { SubscribeFreeBlock } from "@/subscribe";
 import { AuthContext } from "@/auth";
 import { useContext, useState } from "react";
 import { SibscribeContext } from "@/subscribe/context";
 import { ProfileInfoForm } from "./components/ProfileInfoForm";
 import { ProfileSubscribeInformer } from "../subscription/components/ProfileSubscribeInformer";
 import { ProfileLessons } from "../lessons/components/ProfileLessons";
+import { ProfileStudents } from "../student/components/ProfileStudents";
 
 export default function StartRegistrationPage() {
   const { isAuthorized, authIsLoading } = useContext(AuthContext);
@@ -57,7 +55,7 @@ export default function StartRegistrationPage() {
             />
             <Tab
               key="students"
-              title="Ученики и группы"
+              title="Мои ученики"
               className="uppercase font-bold"
             />
           </Tabs>
@@ -71,6 +69,7 @@ export default function StartRegistrationPage() {
             </div>
           )}
           {tabIndex === "lessons" && !authIsLoading && <ProfileLessons />}
+          {tabIndex === "students" && !authIsLoading && <ProfileStudents />}
           <div className="h-20" />
         </div>
       </ContentWrapper>
