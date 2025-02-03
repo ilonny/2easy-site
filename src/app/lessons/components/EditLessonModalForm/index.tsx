@@ -67,7 +67,10 @@ export const EditLessonModalForm: FC<TProps> = ({
         attachments = await uploadImages(imagesToUpload);
       }
       console.log("_data", _data?.tags);
-      const tagsArr = (_data?.tags || [])?.map((t) => (t.text ? t.text : ""));
+      const tagsArr =
+        typeof _data.tags === "string"
+          ? _data?.tags?.split(",")
+          : (_data?.tags || [])?.map((t) => (t.text ? t.text : ""));
       const lessonRes = await fetchPostJson({
         path: "/lesson/edit-lesson",
         isSecure: true,
