@@ -11,6 +11,7 @@ import {
 import Ellipse from "@/assets/icons/ellipse.svg";
 import DeleteIcon from "@/assets/icons/delete.svg";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 type TProps = {
   lesson: TLesson;
@@ -24,7 +25,7 @@ export const LessonCard: FC<TProps> = ({
   onPressDelete,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
-
+  const router = useRouter();
   const tags = useMemo(() => {
     if (lesson?.tags) {
       return (
@@ -50,6 +51,9 @@ export const LessonCard: FC<TProps> = ({
   return (
     <div style={{ width: "25%" }} className={`p-2 ${styles["lesson-card"]}`}>
       <div
+        onClick={() => {
+          router.push("/editor/" + lesson?.id);
+        }}
         className="image-wrapper"
         style={{
           width: "100%",

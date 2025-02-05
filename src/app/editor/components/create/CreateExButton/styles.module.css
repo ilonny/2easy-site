@@ -1,0 +1,8 @@
+.wrapper {
+  border: 1px dashed #d3d3d3;
+  transition: all 250ms ease;
+}
+
+.wrapper:hover {
+  border: 1px dashed #3f28c6;
+}
