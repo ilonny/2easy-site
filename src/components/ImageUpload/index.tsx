@@ -11,6 +11,9 @@ type TProps = {
   images: ImageListType;
   setImages: any;
   initialImages?: string[];
+  customPlaceHolder?: JSX.Element;
+  onlyPlaceholder?: boolean;
+  maxNumber?: number;
 };
 
 export const ImageUpload: FC<TProps> = ({
@@ -18,9 +21,10 @@ export const ImageUpload: FC<TProps> = ({
   isMultiple = false,
   images,
   setImages,
+  customPlaceHolder,
+  onlyPlaceholder,
+  maxNumber = 12,
 }) => {
-  const maxNumber = 69;
-
   const onChange = (
     imageList: ImageListType,
     addUpdateIndex: number[] | undefined
@@ -31,15 +35,15 @@ export const ImageUpload: FC<TProps> = ({
   };
 
   const showPlaceholder = useMemo(() => {
-    if (isMultiple) {
+    if (isMultiple || onlyPlaceholder) {
       return true;
     }
     if (!isMultiple && images.length) {
       return false;
     }
     return true;
-  }, [isMultiple, images]);
-  console.log('images?', images)
+  }, [isMultiple, images, onlyPlaceholder]);
+
   return (
     <div className="App">
       <ReactImageUploading
@@ -66,26 +70,33 @@ export const ImageUpload: FC<TProps> = ({
                 onClick={onImageUpload}
                 {...dragProps}
                 type="button"
+                className="w-full"
               >
-                <Image src={Bg} alt="placeholder" width={170} height={170} />
+                {customPlaceHolder ? (
+                  customPlaceHolder
+                ) : (
+                  <Image src={Bg} alt="placeholder" width={170} height={170} />
+                )}
               </button>
             )}
-            <div className="flex gap-10">
-              {imageList.map((image, index) => (
-                <div key={index} className="image-item relative">
-                  <img src={image.dataURL} alt="" width={170} height={170} />
-                  <div className="image-item__btn-wrapper top-0 right-0 absolute">
-                    <Button
-                      isIconOnly
-                      onClick={() => onImageRemove(index)}
-                      variant="flat"
-                    >
-                      <Image priority={false} src={Close} alt="close" />
-                    </Button>
+            {!onlyPlaceholder && (
+              <div className="flex gap-10">
+                {imageList.map((image, index) => (
+                  <div key={index} className="image-item relative">
+                    <img src={image.dataURL} alt="" width={170} height={170} />
+                    <div className="image-item__btn-wrapper top-0 right-0 absolute">
+                      <Button
+                        isIconOnly
+                        onClick={() => onImageRemove(index)}
+                        variant="flat"
+                      >
+                        <Image priority={false} src={Close} alt="close" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </ReactImageUploading>
