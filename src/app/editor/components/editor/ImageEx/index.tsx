@@ -3,11 +3,12 @@ import { ImageExView } from "../../view/ImageExView";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
 import { TImageExData } from "./types";
-import { useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button, Radio, RadioGroup } from "@nextui-org/react";
+import { Button, Input, Radio, RadioGroup } from "@nextui-org/react";
 import Close from "@/assets/icons/close.svg";
+import { useUploadImageEx } from "../hooks/useUploadImageEx";
 
 const defaultValues: TImageExData = {
   title: "let’s speak!",
@@ -18,13 +19,31 @@ const defaultValues: TImageExData = {
   viewType: "carousel",
 };
 
-export const ImageEx = () => {
+type TProps = {
+  onSuccess: () => void;
+};
+
+export const ImageEx: FC<TProps> = ({ onSuccess }) => {
+  const { isLoading, saveImageEx, success } = useUploadImageEx();
   const { data, changeData } = useExData<TImageExData>(defaultValues);
   const [images, setImages] = useState<TImageExData["images"]>([]);
 
   useEffect(() => {
     changeData("images", images);
   }, [images, changeData]);
+
+  const changeImageDescription = useCallback((text: string, index: number) => {
+    setImages((i) => {
+      i[index].text = text;
+      return [...i];
+    });
+  }, []);
+
+  useEffect(() => {
+    if (success) {
+      onSuccess?.();
+    }
+  }, [success]);
 
   console.log("data", data);
 
@@ -107,31 +126,53 @@ export const ImageEx = () => {
         <div className="flex flex-wrap">
           {images?.map((image, index) => {
             return (
-              <div
-                key={index}
-                className="image-item relative w-[25%] p-2 flex items-center justify-center"
-              >
-                <img src={image.dataURL} style={{ width: "100%" }} />
-                <div className="image-item__btn-wrapper top-0 right-0 absolute">
-                  <Button
-                    isIconOnly
-                    onClick={() =>
-                      setImages((imgs) => imgs.filter((_img, i) => i !== index))
-                    }
-                    variant="flat"
-                  >
-                    <Image priority={false} src={Close} alt="close" />
-                  </Button>
+              <div key={index} className="w-[25%] p-2">
+                <div className="image-item relative w-full h-full flex items-center justify-center">
+                  <img src={image.dataURL} style={{ width: "100%" }} />
+                  <div className="image-item__btn-wrapper top-0 right-0 absolute">
+                    <Button
+                      isIconOnly
+                      onClick={() =>
+                        setImages((imgs) =>
+                          imgs.filter((_img, i) => i !== index)
+                        )
+                      }
+                      variant="flat"
+                    >
+                      <Image priority={false} src={Close} alt="close" />
+                    </Button>
+                  </div>
                 </div>
+                <Input
+                  onChange={(e) =>
+                    changeImageDescription(e.target.value, index)
+                  }
+                  placeholder="Подпись к изображению"
+                  size="sm"
+                  variant="flat"
+                  style={{ zIndex: 2, position: "relative" }}
+                />
               </div>
             );
           })}
         </div>
       )}
-      <div className="h-5" />
+      <div className="h-10" />
       <div>
         <p className="font-light mb-2">Превью</p>
         <ImageExView data={data} isPreview />
+        <div className="h-5" />
+        <div className="flex justify-center">
+          <Button
+            color="primary"
+            className="min-w-[310px]"
+            size="lg"
+            onClick={() => saveImageEx(data)}
+            isLoading={isLoading}
+          >
+            Сохранить
+          </Button>
+        </div>
       </div>
       <div className="h-10" />
     </div>

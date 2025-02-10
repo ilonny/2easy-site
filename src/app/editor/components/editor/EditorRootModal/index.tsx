@@ -10,6 +10,7 @@ type TProps = {
   type?: TTemplate["type"];
   onBack?: () => void;
   id?: number;
+  onSuccess: () => void;
 };
 
 export const EditorRootModal: FC<TProps> = ({
@@ -18,6 +19,7 @@ export const EditorRootModal: FC<TProps> = ({
   type,
   id,
   onBack,
+  onSuccess,
 }) => {
   const EditorComponent = useMemo(() => {
     switch (type) {
@@ -33,6 +35,7 @@ export const EditorRootModal: FC<TProps> = ({
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
       style={{ background: "#F9F9F9" }}
+      scrollBehavior="outside"
     >
       <ModalContent>
         <ModalHeader className="justify-center">
@@ -47,7 +50,9 @@ export const EditorRootModal: FC<TProps> = ({
             </div>
           )}
         </ModalHeader>
-        <ModalBody>{!!EditorComponent && <EditorComponent />}</ModalBody>
+        <ModalBody>
+          {!!EditorComponent && <EditorComponent onSuccess={onSuccess} />}
+        </ModalBody>
       </ModalContent>
     </Modal>
   );

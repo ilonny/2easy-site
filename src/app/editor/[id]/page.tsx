@@ -33,6 +33,12 @@ export default function EditorPage() {
     setExCreateTemplateModal(true);
   }, []);
 
+  const onSuccessCreate = useCallback(() => {
+    setChosenTemplate(null);
+    setExCreateTemplateModal(false);
+    setEditorModal(false);
+  }, []);
+
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
@@ -60,6 +66,7 @@ export default function EditorPage() {
         isVisible={editorModal}
         setIsVisible={setEditorModal}
         type={chosenTemplate?.type}
+        onSuccess={onSuccessCreate}
         onBack={() => {
           setChosenTemplate(null);
           setEditorModal(false);
