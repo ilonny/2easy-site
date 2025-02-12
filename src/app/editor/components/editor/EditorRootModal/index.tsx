@@ -11,6 +11,8 @@ type TProps = {
   onBack?: () => void;
   id?: number;
   onSuccess: () => void;
+  chosenExToEdit?: any;
+  lastSortIndex: number;
 };
 
 export const EditorRootModal: FC<TProps> = ({
@@ -20,14 +22,17 @@ export const EditorRootModal: FC<TProps> = ({
   id,
   onBack,
   onSuccess,
+  chosenExToEdit,
+  lastSortIndex,
 }) => {
   const EditorComponent = useMemo(() => {
-    switch (type) {
+    const exType = type || chosenExToEdit?.type;
+    switch (exType) {
       case "image":
         return ImageEx;
       default:
     }
-  }, [type]);
+  }, [type, chosenExToEdit]);
 
   return (
     <Modal
@@ -40,7 +45,7 @@ export const EditorRootModal: FC<TProps> = ({
       <ModalContent>
         <ModalHeader className="justify-center">
           <div>{mapTypeToTitle(type)}</div>
-          {!id && (
+          {!chosenExToEdit?.id && (
             <div
               onClick={() => onBack && onBack()}
               className="font-light absolute left-4 text-small top-5"
@@ -51,7 +56,13 @@ export const EditorRootModal: FC<TProps> = ({
           )}
         </ModalHeader>
         <ModalBody>
-          {!!EditorComponent && <EditorComponent onSuccess={onSuccess} />}
+          {!!EditorComponent && (
+            <EditorComponent
+              onSuccess={onSuccess}
+              defaultValues={chosenExToEdit ? chosenExToEdit : undefined}
+              lastSortIndex={lastSortIndex}
+            />
+          )}
         </ModalBody>
       </ModalContent>
     </Modal>

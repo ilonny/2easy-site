@@ -29,19 +29,36 @@ export const TitleExInput: FC<TProps> = ({
             classNames={{ inputWrapper: "bg-white", input: "min-h-[118px]" }}
           />
         ) : (
-          <div className="flex gap-2">
+          <div className="relative">
             <Input
               value={value}
               onChange={(e) => setValue(e.target.value)}
               classNames={{ inputWrapper: "bg-white" }}
             />
             {!!onColorChange && (
-              <input
-                value={selectedColor}
-                type="color"
-                onChange={(e) => onColorChange(e.target.value)}
-                style={{ height: 40 }}
-              />
+              <div
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: 30,
+                  overflow: "hidden",
+                  position: "absolute",
+                  top: 5,
+                  right: 10,
+                }}
+              >
+                <input
+                  value={selectedColor}
+                  type="color"
+                  onChange={(e) => onColorChange(e.target.value)}
+                  style={{
+                    height: 70,
+                    width: 70,
+                    marginTop: -15,
+                    marginLeft: -15,
+                  }}
+                />
+              </div>
             )}
           </div>
         )}

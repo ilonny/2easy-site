@@ -3,23 +3,28 @@ import { useUploadImage } from "@/hooks/useUploadImage";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 
-export const useUploadImageEx = () => {
+export const useUploadImageEx = (lastSortIndex: number) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { uploadImages } = useUploadImage();
   const saveImageEx = useCallback(async (data: any) => {
     setIsLoading(true);
-    const exAttachments: any[] = [];
-    if (!!data?.images?.length) {
-    }
-    const savedAttachments = await uploadImages(
-      data?.images?.map((i) => {
-        return {
-          ...i,
-        };
-      })
-    );
+    const exAttachments: any[] =
+      (!!data?.images?.length && data?.images?.filter((i) => !i.file)) || [];
+
+    const imagesToUpload =
+      (!!data?.images?.length && data?.images?.filter((i) => !!i.file)) || [];
+
+    const savedAttachments = imagesToUpload?.length
+      ? await uploadImages(
+          data?.images?.map((i) => {
+            return {
+              ...i,
+            };
+          })
+        )
+      : [];
     if (savedAttachments?.attachments?.length) {
       savedAttachments?.attachments?.forEach((att, attIndex) => {
         console.log("att?", att, attIndex, data?.images?.[attIndex]);
@@ -30,11 +35,12 @@ export const useUploadImageEx = () => {
         });
       });
     }
+
     const exData = {
       ...data,
       attachments: exAttachments,
     };
-    console.log("exAttachments", exAttachments);
+    console.log("lastSortIndex????", lastSortIndex, data.sortIndex);
     try {
       delete exData.images;
       const createdExRes = await fetchPostJson({
@@ -42,8 +48,11 @@ export const useUploadImageEx = () => {
         isSecure: true,
         data: {
           lesson_id: params.id,
+          id: data.id,
           type: "image",
           data: JSON.stringify(exData),
+          sortIndex:
+            data.sortIndex === 0 ? 0 : data.sortIndex || lastSortIndex || 0,
         },
       });
       const createdEx = await createdExRes.json();

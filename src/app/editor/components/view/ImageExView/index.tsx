@@ -4,6 +4,8 @@ import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 import { FC } from "react";
 import { TImageExData } from "../../editor/ImageEx/types";
+import ArrowIcon from "@/assets/icons/slick_arrow.svg";
+import Image from "next/image";
 
 type TProps = {
   data: TImageExData;
@@ -18,19 +20,28 @@ const settings = {
   slidesToScroll: 1,
   adaptiveHeight: true,
   arrows: true,
+  nextArrow: (
+    <div>
+      <Image src={ArrowIcon} alt="ArrowIcon" style={{ transform: "rotate(180deg)" }} />
+    </div>
+  ),
+  prevArrow: (
+    <div>
+      <Image
+        src={ArrowIcon}
+        alt="ArrowIcon"
+      />
+    </div>
+  ),
 };
 
 export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
-  console.log("Preview data", data);
   return (
-    <div
-      style={{ border: "1px solid #3F28C6", borderRadius: 4 }}
-      className="p-8"
-    >
+    <div className="p-16 px-24">
       <p
         style={{
           color: data.titleColor,
-          fontSize: 22,
+          fontSize: 38,
           textAlign: "center",
           fontWeight: 700,
           textTransform: "uppercase",
@@ -40,7 +51,7 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
       </p>
       <p
         style={{
-          fontSize: 14,
+          fontSize: 24,
           textAlign: "center",
           fontWeight: 700,
           textTransform: "uppercase",
@@ -51,7 +62,7 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
       {!!data.description && (
         <p
           style={{
-            fontSize: 14,
+            fontSize: 20,
             textAlign: "center",
             whiteSpace: "pre-line",
           }}
@@ -61,7 +72,7 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
       )}
       <div className="h-10" />
       <div
-        className={isPreview ? "w-[430px]" : ""}
+        className={isPreview ? "w-[633px]" : ""}
         style={{ margin: "0 auto" }}
       >
         {!Boolean(data?.images?.length) && (

@@ -10,7 +10,7 @@ import { Button, Input, Radio, RadioGroup } from "@nextui-org/react";
 import Close from "@/assets/icons/close.svg";
 import { useUploadImageEx } from "../hooks/useUploadImageEx";
 
-const defaultValues: TImageExData = {
+const defaultValuesStub: TImageExData = {
   title: "let’s speak!",
   titleColor: "#3F28C6",
   subtitle: "look at the pictures",
@@ -21,12 +21,22 @@ const defaultValues: TImageExData = {
 
 type TProps = {
   onSuccess: () => void;
+  defaultValues?: any;
+  lastSortIndex: number;
 };
 
-export const ImageEx: FC<TProps> = ({ onSuccess }) => {
-  const { isLoading, saveImageEx, success } = useUploadImageEx();
-  const { data, changeData } = useExData<TImageExData>(defaultValues);
-  const [images, setImages] = useState<TImageExData["images"]>([]);
+export const ImageEx: FC<TProps> = ({
+  onSuccess,
+  defaultValues,
+  lastSortIndex,
+}) => {
+  const { isLoading, saveImageEx, success } = useUploadImageEx(lastSortIndex);
+  const { data, changeData } = useExData<TImageExData>(
+    defaultValues || defaultValuesStub
+  );
+  const [images, setImages] = useState<TImageExData["images"]>(
+    defaultValues?.images || []
+  );
 
   useEffect(() => {
     changeData("images", images);
@@ -45,7 +55,7 @@ export const ImageEx: FC<TProps> = ({ onSuccess }) => {
     }
   }, [success]);
 
-  console.log("data", data);
+  console.log('lastSortIndex??', lastSortIndex)
 
   return (
     <div>
@@ -147,6 +157,7 @@ export const ImageEx: FC<TProps> = ({ onSuccess }) => {
                   onChange={(e) =>
                     changeImageDescription(e.target.value, index)
                   }
+                  value={images[index]?.text || ""}
                   placeholder="Подпись к изображению"
                   size="sm"
                   variant="flat"
@@ -160,7 +171,9 @@ export const ImageEx: FC<TProps> = ({ onSuccess }) => {
       <div className="h-10" />
       <div>
         <p className="font-light mb-2">Превью</p>
-        <ImageExView data={data} isPreview />
+        <div style={{ border: "1px solid #3F28C6", borderRadius: 4 }}>
+          <ImageExView data={data} isPreview />
+        </div>
         <div className="h-5" />
         <div className="flex justify-center">
           <Button

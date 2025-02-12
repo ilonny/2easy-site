@@ -1,0 +1,24 @@
+.wrapper {
+  border: 1px dashed transparent;
+  border-radius: 10px;
+  transition: all 250ms ease;
+  position: relative;
+}
+
+.edit-wrapper {
+  position: absolute;
+  right: 0;
+  top: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 250ms ease;
+}
+
+.wrapper:hover {
+  border: 1px dashed #3f28c6;
+}
+
+.wrapper:hover .edit-wrapper {
+  opacity: 1;
+  pointer-events: all;
+}

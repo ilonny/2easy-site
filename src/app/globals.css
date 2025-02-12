@@ -14,4 +14,19 @@
 .slick-next:before {
   color: black !important;
   font-size: 28px !important;
+  content: "" !important;
+}
+
+.slick-prev,
+.slick-next {
+  width: 50px !important;
+  height: 50px !important;
+}
+
+.slick-next {
+  right: -63px !important;
+}
+
+.slick-prev {
+  left: -63px !important;
 }
