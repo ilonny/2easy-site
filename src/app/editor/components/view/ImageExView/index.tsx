@@ -106,7 +106,7 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
           </>
         )}
         {!!data?.images?.length && data?.viewType === "2-col" && (
-          <div className="flex flex-wrap">
+          <div className="flex flex-wrap justify-center">
             {data?.images?.map((image) => {
               return (
                 <div key={image.dataURL} className="w-[50%] p-4">
@@ -125,7 +125,7 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
           </div>
         )}
         {!!data?.images?.length && data?.viewType === "3-col" && (
-          <div className="flex flex-wrap">
+          <div className="flex flex-wrap justify-center">
             {data?.images?.map((image) => {
               return (
                 <div key={image.dataURL} className="w-[33.3333333%] p-4">

@@ -5,7 +5,7 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { templates, TTemplate } from "./templates";
 
 type TProps = {
@@ -19,15 +19,50 @@ export const ChooseTemplateModal: FC<TProps> = ({
   setIsVisible,
   onChooseTemplate,
 }) => {
+  const [isSubViews, setIsSubViews] = useState(false);
+
+  const [templatesToShow, setTemplatesToShow] = useState(templates);
+
+  const onClickTemplate = useCallback(
+    (t: TTemplate) => {
+      if (t.subItems?.length) {
+        setTemplatesToShow(t.subItems);
+        setIsSubViews(true);
+        return;
+      }
+      onChooseTemplate(t);
+    },
+    [onChooseTemplate]
+  );
+
+  const onBack = useCallback(() => {
+    setTemplatesToShow(templates);
+    setIsSubViews(false);
+  }, []);
+
   return (
-    <Modal size="4xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
+    <Modal
+      size="4xl"
+      isOpen={isVisible}
+      onClose={() => setIsVisible(false)}
+      scrollBehavior="outside"
+    >
       <ModalContent>
-        <ModalHeader>
-          <>Выберите шаблон задания</>
+        <ModalHeader className="justify-center">
+          <p className="text-center">Выберите шаблон задания</p>
+          {isSubViews && (
+            <div
+              onClick={onBack}
+              className="font-light absolute left-4 text-small top-5"
+              style={{ cursor: "pointer" }}
+            >
+              {"<- все шаблоны"}
+            </div>
+          )}
         </ModalHeader>
         <ModalBody>
           <div className="flex flex-wrap">
-            {templates?.map((template) => {
+            {templatesToShow?.map((template) => {
               return (
                 <Card
                   className="w-[50%] p-2"
@@ -37,7 +72,7 @@ export const ChooseTemplateModal: FC<TProps> = ({
                 >
                   <div
                     onClick={() => {
-                      onChooseTemplate(template);
+                      onClickTemplate(template);
                     }}
                   >
                     <Card

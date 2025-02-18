@@ -1,8 +1,10 @@
 export type TTemplate = {
   type: string;
   title: string;
+  bgImage?: string;
   description?: string;
   subTemplates?: TTemplate[];
+  subItems?: TTemplate[];
 };
 
 export const templates: TTemplate[] = [
@@ -10,6 +12,24 @@ export const templates: TTemplate[] = [
     type: "text",
     title: "Текст",
     description: "Статьи, вопросы и другие текстовые блоки",
+    subItems: [
+      {
+        type: "text-default",
+        title: "Текст",
+      },
+      {
+        type: "text-2-col",
+        title: "Текст в 2 колонки",
+      },
+      {
+        type: "text-sticker",
+        title: "Текст на стикерах",
+      },
+      {
+        type: "text-checklist",
+        title: "Чек-лист",
+      },
+    ],
   },
   {
     type: "image",
