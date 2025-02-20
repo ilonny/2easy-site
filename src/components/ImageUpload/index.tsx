@@ -4,6 +4,7 @@ import ReactImageUploading, { ImageListType } from "react-images-uploading";
 import Bg from "@/assets/images/image_upload_placeholder.png";
 import { Button } from "@nextui-org/react";
 import Close from "@/assets/icons/close.svg";
+import { getImageNameFromPath } from "@/app/editor/components/editor/mappers";
 
 type TProps = {
   label?: string;
@@ -14,6 +15,7 @@ type TProps = {
   customPlaceHolder?: JSX.Element;
   onlyPlaceholder?: boolean;
   maxNumber?: number;
+  isButton?: boolean;
 };
 
 export const ImageUpload: FC<TProps> = ({
@@ -24,13 +26,13 @@ export const ImageUpload: FC<TProps> = ({
   customPlaceHolder,
   onlyPlaceholder,
   maxNumber = 12,
+  isButton,
 }) => {
   const onChange = (
     imageList: ImageListType,
     addUpdateIndex: number[] | undefined
   ) => {
     // data for submit
-    console.log(imageList, addUpdateIndex);
     setImages(imageList as never[]);
   };
 
@@ -43,6 +45,8 @@ export const ImageUpload: FC<TProps> = ({
     }
     return true;
   }, [isMultiple, images, onlyPlaceholder]);
+
+  const firstImage = images?.[0];
 
   return (
     <div className="App">
@@ -75,7 +79,51 @@ export const ImageUpload: FC<TProps> = ({
                 {customPlaceHolder ? (
                   customPlaceHolder
                 ) : (
-                  <Image src={Bg} alt="placeholder" width={170} height={170} />
+                  <>
+                    {isButton ? (
+                      <>
+                        <Button
+                          onClick={onImageUpload}
+                          {...dragProps}
+                          variant="faded"
+                          className="w-[375px]"
+                          size="lg"
+                          color="primary"
+                        >
+                          <div className="flex justify-between items-center w-[100%]">
+                            <div></div>
+                            <p className="text-center">
+                              {firstImage
+                                ? firstImage.file?.name ||
+                                  getImageNameFromPath(firstImage?.path)
+                                : "Добавить картинку"}
+                            </p>
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onImageRemove(0);
+                              }}
+                            >
+                              {!!firstImage && (
+                                <Image
+                                  priority={false}
+                                  src={Close}
+                                  alt="close"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        </Button>
+                      </>
+                    ) : (
+                      <Image
+                        src={Bg}
+                        alt="placeholder"
+                        width={170}
+                        height={170}
+                      />
+                    )}
+                  </>
                 )}
               </button>
             )}

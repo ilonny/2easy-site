@@ -80,9 +80,13 @@ export const ChooseTemplateModal: FC<TProps> = ({
                       radius="sm"
                       className="p-5 flex items-center justify-center"
                       style={{
-                        background: "#D9D9D9",
+                        backgroundColor: "#D9D9D9",
                         cursor: "pointer",
                         height: "220px",
+                        backgroundImage: template.bgImage
+                          ? `url(${template.bgImage?.src})`
+                          : "none",
+                        backgroundSize: "cover",
                       }}
                     >
                       <p

@@ -56,8 +56,6 @@ export const StudentList = () => {
       ?.filter(Boolean);
   };
 
-  console.log("chosenStudent", chosenStudent);
-
   return (
     <>
       {!students.length && (
@@ -111,7 +109,7 @@ export const StudentList = () => {
                         >
                           Редактировать
                         </Button>
-                        <div className="h-2"/>
+                        <div className="h-2" />
                         <Button
                           fullWidth
                           color="danger"

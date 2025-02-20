@@ -7,7 +7,13 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
   switch (type) {
     case "image":
       return "Изображение";
+    case "text-default":
+      return "Текст";
     default:
       return type;
   }
+};
+
+export const getImageNameFromPath = (p: string) => {
+  return p.split("/").reverse()?.[0] || "";
 };

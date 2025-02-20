@@ -37,7 +37,7 @@ export default function EditorPage() {
     //@ts-ignore
     getLesson(params.id);
     getExList();
-  }, [getLesson, params.id]);
+  }, [getExList, getLesson, params.id]);
 
   const onChooseTemplate = useCallback((template: TTemplate) => {
     setExCreateTemplateModal(false);
@@ -68,10 +68,13 @@ export default function EditorPage() {
     setEditorModal(true);
   }, []);
 
-  const onChangeSort = useCallback(async (exId: number, newIndex: number) => {
-    await changeSortIndex(exId, newIndex);
-    getExList();
-  }, []);
+  const onChangeSort = useCallback(
+    async (exId: number, newIndex: number) => {
+      await changeSortIndex(exId, newIndex);
+      getExList();
+    },
+    [changeSortIndex, getExList]
+  );
 
   const onPressDelete = useCallback((exId: number) => {
     setDeleteId(exId);

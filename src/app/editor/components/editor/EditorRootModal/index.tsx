@@ -3,6 +3,7 @@ import { TTemplate } from "../../create/ChooseTemplateModal/templates";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@nextui-org/react";
 import { mapTypeToTitle } from "../mappers";
 import { ImageEx } from "../ImageEx";
+import { TextDefaultEx } from "../TextDefault";
 
 type TProps = {
   isVisible: boolean;
@@ -30,6 +31,8 @@ export const EditorRootModal: FC<TProps> = ({
     switch (exType) {
       case "image":
         return ImageEx;
+      case "text-default":
+        return TextDefaultEx;
       default:
     }
   }, [type, chosenExToEdit]);

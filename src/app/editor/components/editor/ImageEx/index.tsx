@@ -55,8 +55,6 @@ export const ImageEx: FC<TProps> = ({
     }
   }, [success]);
 
-  console.log('lastSortIndex??', lastSortIndex)
-
   return (
     <div>
       <div className="flex flex-wrap">
@@ -171,7 +169,13 @@ export const ImageEx: FC<TProps> = ({
       <div className="h-10" />
       <div>
         <p className="font-light mb-2">Превью</p>
-        <div style={{ border: "1px solid #3F28C6", borderRadius: 4 }}>
+        <div
+          style={{
+            border: "1px solid #3F28C6",
+            borderRadius: 4,
+            background: "#fff",
+          }}
+        >
           <ImageExView data={data} isPreview />
         </div>
         <div className="h-5" />

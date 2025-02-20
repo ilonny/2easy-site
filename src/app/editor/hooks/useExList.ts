@@ -14,10 +14,34 @@ const mapImageExData = (data: string) => {
   return parsedData;
 };
 
+const mapTextDefaultExData = (data: string) => {
+  const parsedData = data ? JSON.parse(data) : {};
+
+  if (parsedData?.bgAttachments) {
+    parsedData.images = parsedData.bgAttachments?.map((a) => {
+      return {
+        ...a,
+        dataURL: BASE_URL + "/" + a?.path,
+      };
+    });
+  }
+  if (parsedData?.editorAttachments) {
+    parsedData.editorImages = parsedData.editorAttachments?.map((a) => {
+      return {
+        ...a,
+        dataURL: BASE_URL + "/" + a?.path,
+      };
+    });
+  }
+  return parsedData;
+};
+
 const getDataMapper = (type: string) => {
   switch (type) {
     case "image":
       return mapImageExData;
+    case "text-default":
+      return mapTextDefaultExData;
     default:
       return (_data?: string) => (_data ? JSON.parse(_data) : {});
   }

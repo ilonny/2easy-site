@@ -56,7 +56,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
   );
 
   const title = watch("name");
-  console.log("error", errors);
+
   return (
     <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
       <ModalContent>

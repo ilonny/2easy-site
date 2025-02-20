@@ -54,7 +54,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
       if (images?.length) {
         attachments = await uploadImages(images);
       }
-      console.log("_data.tags", _data.tags);
+
       const tagsArr = (_data?.tags || [])?.map((t) => (t.text ? t.text : ""));
       const lessonRes = await fetchPostJson({
         path: "/lesson/create-lesson",

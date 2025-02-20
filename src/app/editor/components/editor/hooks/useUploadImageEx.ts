@@ -18,7 +18,7 @@ export const useUploadImageEx = (lastSortIndex: number) => {
 
     const savedAttachments = imagesToUpload?.length
       ? await uploadImages(
-          data?.images?.map((i) => {
+          imagesToUpload?.map((i) => {
             return {
               ...i,
             };
@@ -27,7 +27,6 @@ export const useUploadImageEx = (lastSortIndex: number) => {
       : [];
     if (savedAttachments?.attachments?.length) {
       savedAttachments?.attachments?.forEach((att, attIndex) => {
-        console.log("att?", att, attIndex, data?.images?.[attIndex]);
         exAttachments.push({
           id: att?.id,
           path: att?.path,
@@ -40,7 +39,6 @@ export const useUploadImageEx = (lastSortIndex: number) => {
       ...data,
       attachments: exAttachments,
     };
-    console.log("lastSortIndex????", lastSortIndex, data.sortIndex);
     try {
       delete exData.images;
       const createdExRes = await fetchPostJson({

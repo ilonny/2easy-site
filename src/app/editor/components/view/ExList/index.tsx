@@ -6,6 +6,7 @@ import EditIcon from "@/assets/icons/edit.svg";
 import DeleteIcon from "@/assets/icons/delete.svg";
 import Image from "next/image";
 import { Divider } from "@nextui-org/react";
+import { TextDefaultExView } from "../TextDefaultExView";
 
 type TProps = {
   list: Array<any>;
@@ -18,7 +19,10 @@ const mapComponent = (type: string) => {
   switch (type) {
     case "image":
       return (props) => <ImageExView {...props} />;
+    case "text-default":
+      return (props) => <TextDefaultExView {...props} />;
     default:
+      return () => <></>;
       break;
   }
 };
@@ -42,7 +46,7 @@ export const ExList: FC<TProps> = ({
                   <div
                     onClick={() => {
                       //up
-                      console.log("list", exIndex);
+
                       if (list[exIndex - 1]) {
                         const prevEx = list[exIndex - 1];
                         changeSortIndex(prevEx.id, prevEx.sortIndex + 1);
@@ -62,10 +66,10 @@ export const ExList: FC<TProps> = ({
                   <div
                     onClick={() => {
                       //down
-                      console.log("list 2", exIndex);
+
                       if (list[exIndex + 1]) {
                         const next = list[exIndex + 1];
-                        console.log("next???", next);
+
                         changeSortIndex(next.id, next.sortIndex - 1);
                       }
                       changeSortIndex(ex.id, ex.sortIndex + 1);

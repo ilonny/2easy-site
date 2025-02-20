@@ -1,7 +1,13 @@
+import TextDefaultBg from "@/assets/images/text_default_bg.png";
+import Text2ColBg from "@/assets/images/text_2_col_bg.png";
+import TextStickerBg from "@/assets/images/text_sticker_bg.png";
+import TextChecklistBg from "@/assets/images/text_checklist_bg.png";
+import { StaticImageData } from "next/image";
+
 export type TTemplate = {
   type: string;
   title: string;
-  bgImage?: string;
+  bgImage?: StaticImageData;
   description?: string;
   subTemplates?: TTemplate[];
   subItems?: TTemplate[];
@@ -16,18 +22,22 @@ export const templates: TTemplate[] = [
       {
         type: "text-default",
         title: "Текст",
+        bgImage: TextDefaultBg,
       },
       {
         type: "text-2-col",
         title: "Текст в 2 колонки",
+        bgImage: Text2ColBg,
       },
       {
         type: "text-sticker",
         title: "Текст на стикерах",
+        bgImage: TextStickerBg,
       },
       {
         type: "text-checklist",
         title: "Чек-лист",
+        bgImage: TextChecklistBg,
       },
     ],
   },

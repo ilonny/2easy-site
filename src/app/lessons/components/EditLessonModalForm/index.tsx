@@ -66,7 +66,6 @@ export const EditLessonModalForm: FC<TProps> = ({
       if (imagesToUpload?.length) {
         attachments = await uploadImages(imagesToUpload);
       }
-      console.log("_data", _data?.tags);
       const tagsArr =
         typeof _data.tags === "string"
           ? _data?.tags?.split(",")

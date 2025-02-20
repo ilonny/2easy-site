@@ -34,3 +34,21 @@
 .slick-slide img {
   margin: 0 auto;
 }
+
+ol,
+ul {
+  list-style: auto !important;
+}
+
+ul {
+  list-style: disc !important;
+}
+
+blockquote {
+  border-left: 5px solid #f1f1f1 !important;
+  padding-left: 5px !important;
+}
+
+.editorClassName {
+  min-height: 300px;
+}
