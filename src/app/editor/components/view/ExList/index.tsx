@@ -7,6 +7,7 @@ import DeleteIcon from "@/assets/icons/delete.svg";
 import Image from "next/image";
 import { Divider } from "@nextui-org/react";
 import { TextDefaultExView } from "../TextDefaultExView";
+import { Text2ColExView } from "../Text2ColExView";
 
 type TProps = {
   list: Array<any>;
@@ -21,6 +22,8 @@ const mapComponent = (type: string) => {
       return (props) => <ImageExView {...props} />;
     case "text-default":
       return (props) => <TextDefaultExView {...props} />;
+    case "text-2-col":
+      return (props) => <Text2ColExView {...props} />;
     default:
       return () => <></>;
       break;

@@ -1,9 +1,10 @@
-import { FC, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 import { TTemplate } from "../../create/ChooseTemplateModal/templates";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@nextui-org/react";
 import { mapTypeToTitle } from "../mappers";
 import { ImageEx } from "../ImageEx";
 import { TextDefaultEx } from "../TextDefault";
+import { Text2ColEx } from "../Text2Col";
 
 type TProps = {
   isVisible: boolean;
@@ -33,6 +34,8 @@ export const EditorRootModal: FC<TProps> = ({
         return ImageEx;
       case "text-default":
         return TextDefaultEx;
+      case "text-2-col":
+        return Text2ColEx;
       default:
     }
   }, [type, chosenExToEdit]);

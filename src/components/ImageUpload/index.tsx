@@ -92,13 +92,21 @@ export const ImageUpload: FC<TProps> = ({
                         >
                           <div className="flex justify-between items-center w-[100%]">
                             <div></div>
-                            <p className="text-center">
+                            <p
+                              className="text-center"
+                              style={{
+                                maxWidth: "100%",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
                               {firstImage
                                 ? firstImage.file?.name ||
                                   getImageNameFromPath(firstImage?.path)
                                 : "Добавить картинку"}
                             </p>
                             <div
+                              className="shrink-0"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onImageRemove(0);

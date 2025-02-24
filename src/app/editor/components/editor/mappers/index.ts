@@ -9,6 +9,8 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return "Изображение";
     case "text-default":
       return "Текст";
+    case "text-2-col":
+      return "Текст в две колонки";
     default:
       return type;
   }

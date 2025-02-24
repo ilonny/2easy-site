@@ -36,12 +36,46 @@ const mapTextDefaultExData = (data: string) => {
   return parsedData;
 };
 
+const mapText2ColExData = (data: string) => {
+  const parsedData = data ? JSON.parse(data) : {};
+
+  if (parsedData?.bgAttachments) {
+    parsedData.images = parsedData.bgAttachments?.map((a) => {
+      return {
+        ...a,
+        dataURL: BASE_URL + "/" + a?.path,
+      };
+    });
+  }
+  if (parsedData?.editorAttachments) {
+    parsedData.editorImages = parsedData.editorAttachments?.map((a) => {
+      return {
+        ...a,
+        dataURL: BASE_URL + "/" + a?.path,
+      };
+    });
+  }
+
+  if (parsedData?.secondEditorAttachments) {
+    parsedData.secondEditorImages = parsedData.secondEditorAttachments?.map(
+      (a) => {
+        return {
+          ...a,
+          dataURL: BASE_URL + "/" + a?.path,
+        };
+      }
+    );
+  }
+  return parsedData;
+};
 const getDataMapper = (type: string) => {
   switch (type) {
     case "image":
       return mapImageExData;
     case "text-default":
       return mapTextDefaultExData;
+    case "text-2-col":
+      return mapText2ColExData;
     default:
       return (_data?: string) => (_data ? JSON.parse(_data) : {});
   }
