@@ -6,6 +6,7 @@ import { ImageEx } from "../ImageEx";
 import { TextDefaultEx } from "../TextDefault";
 import { Text2ColEx } from "../Text2Col";
 import { TextSticker } from "../TextSticker";
+import { TextChecklist } from "../TextChecklist";
 
 type TProps = {
   isVisible: boolean;
@@ -39,6 +40,8 @@ export const EditorRootModal: FC<TProps> = ({
         return Text2ColEx;
       case "text-sticker":
         return TextSticker;
+      case "text-checklist":
+        return TextChecklist;
       default:
     }
   }, [type, chosenExToEdit]);

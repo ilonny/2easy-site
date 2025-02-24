@@ -94,6 +94,8 @@ const getDataMapper = (type: string) => {
       return mapText2ColExData;
     case "text-sticker":
       return mapTextStickerExData;
+    case "text-checklist":
+      return mapTextDefaultExData;
     default:
       return (_data?: string) => (_data ? JSON.parse(_data) : {});
   }

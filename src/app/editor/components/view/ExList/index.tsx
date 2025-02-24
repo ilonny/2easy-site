@@ -9,6 +9,7 @@ import { Divider } from "@nextui-org/react";
 import { TextDefaultExView } from "../TextDefaultExView";
 import { Text2ColExView } from "../Text2ColExView";
 import { TextStickerExView } from "../TextStickerExView";
+import { TextChecklistExView } from "../TextChecklistExView";
 
 type TProps = {
   list: Array<any>;
@@ -27,6 +28,8 @@ const mapComponent = (type: string) => {
       return (props) => <Text2ColExView {...props} />;
     case "text-sticker":
       return (props) => <TextStickerExView {...props} />;
+    case "text-checklist":
+      return (props) => <TextChecklistExView {...props} />;
     default:
       return () => <></>;
       break;

@@ -1,6 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import { FC } from "react";
 import { TTextDefaultData } from "../../editor/TextDefault/types";
 import { Card } from "@nextui-org/react";

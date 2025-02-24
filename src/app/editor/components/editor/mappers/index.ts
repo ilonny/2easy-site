@@ -13,7 +13,8 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return "Текст в две колонки";
     case "text-sticker":
       return "Текст на стикерах";
-
+    case "text-checklist":
+      return "Чек лист";
     default:
       return type;
   }

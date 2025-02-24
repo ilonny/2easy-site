@@ -58,9 +58,6 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
           }
         }
       >
-        {/* ${
-            !isPreview && "w-[740px]"
-          } */}
         <div
           className={` flex items-center justify-center flex-wrap`}
           style={{ margin: "0 auto" }}
@@ -68,15 +65,16 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
           {data.stickers?.map((sticker, index) => {
             return (
               <div
-                className={`w-[50%] shrink-0 p-4 ${styles["card-rotate"]}`}
+                className={`w-[50%] shrink-0 p-4 ${styles["card-rotate"]} `}
                 key={index}
               >
                 <Card
-                  className={`p-4 flex justify-center items-center text-center min-h-[200px] relative `}
+                  className={`p-4 flex justify-center items-center text-center  relative`}
                   radius="none"
                   style={{
                     overflow: "inherit",
                     backgroundColor: data.stickerBgColor || "#fff",
+                    minHeight: isPreview ? 160 : 200,
                   }}
                 >
                   <p
