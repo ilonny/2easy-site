@@ -130,7 +130,7 @@ export const Text2ColEx: FC<TProps> = ({
       <div className="flex flex-wrap">
         <div className="w-[50%] pr-2">
           <TitleExInput
-            label="Заголовок задания text default"
+            label="Заголовок задания"
             value={data.title}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}
@@ -182,7 +182,11 @@ export const Text2ColEx: FC<TProps> = ({
       <div className="flex items-start justify-between gap-4">
         <div>
           <div
-            style={{ background: "#fff", border: "1px solid #3f28c6", padding: 10 }}
+            style={{
+              background: "#fff",
+              border: "1px solid #3f28c6",
+              padding: 10,
+            }}
           >
             <Editor
               editorState={editorState}
@@ -223,7 +227,11 @@ export const Text2ColEx: FC<TProps> = ({
         </div>
         <div>
           <div
-            style={{ background: "#fff", border: "1px solid #3f28c6", padding: 10 }}
+            style={{
+              background: "#fff",
+              border: "1px solid #3f28c6",
+              padding: 10,
+            }}
           >
             <Editor
               editorState={secondEditorState}

@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Divider } from "@nextui-org/react";
 import { TextDefaultExView } from "../TextDefaultExView";
 import { Text2ColExView } from "../Text2ColExView";
+import { TextStickerExView } from "../TextStickerExView";
 
 type TProps = {
   list: Array<any>;
@@ -24,6 +25,8 @@ const mapComponent = (type: string) => {
       return (props) => <TextDefaultExView {...props} />;
     case "text-2-col":
       return (props) => <Text2ColExView {...props} />;
+    case "text-sticker":
+      return (props) => <TextStickerExView {...props} />;
     default:
       return () => <></>;
       break;

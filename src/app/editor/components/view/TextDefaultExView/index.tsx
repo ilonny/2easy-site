@@ -59,7 +59,7 @@ export const TextDefaultExView: FC<TProps> = ({ data, isPreview = false }) => {
         }
       >
         <Card
-          className={`${isPreview ? "w-[633px]" : ""} p-10`}
+          className={`${isPreview ? "w-[633px]" : ""} p-10 editor-view`}
           style={{
             margin: "0 auto",
             backgroundColor: "#fff",

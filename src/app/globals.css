@@ -52,3 +52,7 @@ blockquote {
 .editorClassName {
   min-height: 300px;
 }
+
+.editor-view p {
+  min-height: 20px !important;
+}

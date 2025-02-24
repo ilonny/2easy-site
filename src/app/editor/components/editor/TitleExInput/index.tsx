@@ -40,7 +40,7 @@ export const TitleExInput: FC<TProps> = ({
                 style={{
                   width: 30,
                   height: 30,
-                  borderRadius: 30,
+                  borderRadius: 5,
                   overflow: "hidden",
                   position: "absolute",
                   top: 5,

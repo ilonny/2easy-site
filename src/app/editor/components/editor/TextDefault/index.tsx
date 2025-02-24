@@ -104,7 +104,7 @@ export const TextDefaultEx: FC<TProps> = ({
       <div className="flex flex-wrap">
         <div className="w-[50%] pr-2">
           <TitleExInput
-            label="Заголовок задания text default"
+            label="Заголовок задания"
             value={data.title}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}

@@ -5,6 +5,7 @@ import { mapTypeToTitle } from "../mappers";
 import { ImageEx } from "../ImageEx";
 import { TextDefaultEx } from "../TextDefault";
 import { Text2ColEx } from "../Text2Col";
+import { TextSticker } from "../TextSticker";
 
 type TProps = {
   isVisible: boolean;
@@ -36,6 +37,8 @@ export const EditorRootModal: FC<TProps> = ({
         return TextDefaultEx;
       case "text-2-col":
         return Text2ColEx;
+      case "text-sticker":
+        return TextSticker;
       default:
     }
   }, [type, chosenExToEdit]);

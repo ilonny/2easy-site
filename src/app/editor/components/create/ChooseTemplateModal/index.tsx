@@ -5,7 +5,7 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useState } from "react";
 import { templates, TTemplate } from "./templates";
 
 type TProps = {
