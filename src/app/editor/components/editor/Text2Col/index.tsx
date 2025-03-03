@@ -69,20 +69,10 @@ export const Text2ColEx: FC<TProps> = ({
     TText2ColData["secondEditorImages"]
   >(defaultValues?.secondEditorImages || []);
 
-  const [editorState, setEditorState] = useState(
-    data.content
-      ? EditorState.createWithContent(
-          ContentState.createFromBlockArray(htmlToDraft(data?.content))
-        )
-      : EditorState.createEmpty()
-  );
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const [secondEditorState, setSecondEditorState] = useState(
-    data.content
-      ? EditorState.createWithContent(
-          ContentState.createFromBlockArray(htmlToDraft(data?.secondContent))
-        )
-      : EditorState.createEmpty()
+    EditorState.createEmpty()
   );
 
   useEffect(() => {
@@ -105,6 +95,22 @@ export const Text2ColEx: FC<TProps> = ({
   useEffect(() => {
     setTimeout(() => {
       setIsLoaded(true);
+      setEditorState(
+        data.content
+          ? EditorState.createWithContent(
+              ContentState.createFromBlockArray(htmlToDraft(data?.content))
+            )
+          : EditorState.createEmpty()
+      );
+      setSecondEditorState(
+        data.content
+          ? EditorState.createWithContent(
+              ContentState.createFromBlockArray(
+                htmlToDraft(data?.secondContent)
+              )
+            )
+          : EditorState.createEmpty()
+      );
     }, 200);
   }, []);
 

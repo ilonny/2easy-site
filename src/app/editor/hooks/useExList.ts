@@ -96,6 +96,8 @@ const getDataMapper = (type: string) => {
       return mapTextStickerExData;
     case "text-checklist":
       return mapTextDefaultExData;
+    case "video":
+      return mapTextDefaultExData;
     default:
       return (_data?: string) => (_data ? JSON.parse(_data) : {});
   }

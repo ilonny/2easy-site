@@ -62,13 +62,7 @@ export const TextDefaultEx: FC<TProps> = ({
     defaultValues?.editorImages || []
   );
 
-  const [editorState, setEditorState] = useState(
-    data.content
-      ? EditorState.createWithContent(
-          ContentState.createFromBlockArray(htmlToDraft(data?.content))
-        )
-      : EditorState.createEmpty()
-  );
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   useEffect(() => {
     changeData("images", images);
@@ -86,6 +80,13 @@ export const TextDefaultEx: FC<TProps> = ({
   useEffect(() => {
     setTimeout(() => {
       setIsLoaded(true);
+      setEditorState(
+        data.content
+          ? EditorState.createWithContent(
+              ContentState.createFromBlockArray(htmlToDraft(data?.content))
+            )
+          : EditorState.createEmpty()
+      );
     }, 300);
   }, []);
 

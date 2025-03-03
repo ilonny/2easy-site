@@ -15,6 +15,8 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return "Текст на стикерах";
     case "text-checklist":
       return "Чек лист";
+    case "video":
+      return "Видео";
     default:
       return type;
   }
