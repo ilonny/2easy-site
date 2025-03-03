@@ -8,6 +8,7 @@ import { Text2ColEx } from "../Text2Col";
 import { TextSticker } from "../TextSticker";
 import { TextChecklist } from "../TextChecklist";
 import { Video } from "../Video";
+import { Audio } from "../Audio";
 
 type TProps = {
   isVisible: boolean;
@@ -45,6 +46,8 @@ export const EditorRootModal: FC<TProps> = ({
         return TextChecklist;
       case "video":
         return Video;
+      case "audio":
+        return Audio;
       default:
     }
   }, [type, chosenExToEdit]);

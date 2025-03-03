@@ -11,9 +11,13 @@ import { Text2ColExView } from "../../view/Text2ColExView";
 import { EditorState, convertToRaw, ContentState } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import dynamic from "next/dynamic";
-import htmlToDraft from "html-to-draftjs";
 import draftToHtml from "draftjs-to-html";
 import { useUploadText2ColEx } from "../hooks/useUploadText2ColEx";
+
+let htmlToDraft = null;
+if (typeof window === "object") {
+  htmlToDraft = require("html-to-draftjs").default;
+}
 
 const Editor = dynamic(
   () =>
@@ -24,8 +28,6 @@ const Editor = dynamic(
     ssr: false,
   }
 );
-
-// const htmlToDraft = dynamic(() => import("html-to-draftjs"), { ssr: false });
 
 const defaultValuesStub: TText2ColData = {
   title: "Let’s read!",
@@ -131,6 +133,8 @@ export const Text2ColEx: FC<TProps> = ({
   if (!isLoaded) {
     return null;
   }
+  console.log("htmlToDraft", htmlToDraft);
+
   return (
     <div>
       <div className="flex flex-wrap">

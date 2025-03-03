@@ -12,8 +12,12 @@ import { TextDefaultExView } from "../../view/TextDefaultExView";
 import { EditorState, convertToRaw, ContentState } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import dynamic from "next/dynamic";
-import htmlToDraft from "html-to-draftjs";
 import draftToHtml from "draftjs-to-html";
+
+let htmlToDraft = null;
+if (typeof window === "object") {
+  htmlToDraft = require("html-to-draftjs").default;
+}
 
 const Editor = dynamic(
   () =>

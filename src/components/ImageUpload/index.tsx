@@ -16,6 +16,8 @@ type TProps = {
   onlyPlaceholder?: boolean;
   maxNumber?: number;
   isButton?: boolean;
+  title?: string;
+  acceptType?: string[];
 };
 
 export const ImageUpload: FC<TProps> = ({
@@ -27,11 +29,14 @@ export const ImageUpload: FC<TProps> = ({
   onlyPlaceholder,
   maxNumber = 12,
   isButton,
+  title,
+  acceptType,
 }) => {
   const onChange = (
     imageList: ImageListType,
     addUpdateIndex: number[] | undefined
   ) => {
+    console.log("onchange", imageList);
     // data for submit
     setImages(imageList as never[]);
   };
@@ -47,7 +52,7 @@ export const ImageUpload: FC<TProps> = ({
   }, [isMultiple, images, onlyPlaceholder]);
 
   const firstImage = images?.[0];
-
+  console.log("images", images);
   return (
     <div className="App">
       <ReactImageUploading
@@ -55,6 +60,7 @@ export const ImageUpload: FC<TProps> = ({
         value={images}
         onChange={onChange}
         maxNumber={maxNumber}
+        acceptType={acceptType}
       >
         {({
           imageList,
@@ -103,7 +109,7 @@ export const ImageUpload: FC<TProps> = ({
                               {firstImage
                                 ? firstImage.file?.name ||
                                   getImageNameFromPath(firstImage?.path)
-                                : "Добавить картинку"}
+                                : title || "Добавить картинку"}
                             </p>
                             <div
                               className="shrink-0"

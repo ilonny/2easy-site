@@ -36,7 +36,8 @@
     "react-input-mask": "^2.0.4",
     "react-responsive-carousel": "^3.2.23",
     "react-slick": "^0.30.3",
-    "slick-carousel": "^1.8.1"
+    "slick-carousel": "^1.8.1",
+    "use-file-picker": "^2.1.2"
   },
   "devDependencies": {
     "@types/node": "^20",
