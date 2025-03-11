@@ -9,9 +9,9 @@ import Image from "next/image";
 import { Button, Input, Tooltip } from "@nextui-org/react";
 import Close from "@/assets/icons/close.svg";
 import { useUploadAudioEx } from "../hooks/useUploadAudioEx";
-import InfoIcon from "@/assets/icons/info.svg";
-import { VideoExView } from "../../view/VideoExView";
 import { useFilePicker } from "use-file-picker";
+import { getImageNameFromPath } from "../mappers";
+import { AudioExView } from "../../view/AudioExView";
 
 const defaultValuesStub: TAudioData = {
   title: "Let’s read!",
@@ -41,18 +41,21 @@ export const Audio: FC<TProps> = ({
     defaultValues?.images || []
   );
 
-  const [editorImages, setEditorImages] = useState<TAudioData["editorImages"]>(
-    defaultValues?.editorImages || []
-  );
-
-  const { openFilePicker, filesContent, loading } = useFilePicker({
+  const { openFilePicker, filesContent, clear, plainFiles } = useFilePicker({
     accept: ".mp3",
   });
 
   useEffect(() => {
     changeData("images", images);
-    changeData("editorImages", editorImages);
-  }, [images, changeData, editorImages]);
+    if (plainFiles?.[0]?.lastModified) {
+      changeData(
+        "editorImages",
+        plainFiles.map((file) => {
+          return { file };
+        })
+      );
+    }
+  }, [images, changeData, plainFiles]);
 
   useEffect(() => {
     if (success) {
@@ -60,31 +63,9 @@ export const Audio: FC<TProps> = ({
     }
   }, [onSuccess, success]);
 
-  const onDeleteVideo = useCallback(
-    (index: number) => {
-      const videos = data.videos.filter((_s, i) => i !== index);
-      if (!videos.length) {
-        changeData("videos", [{ content: "", title: "" }]);
-        return;
-      }
-      changeData("videos", videos);
-    },
-    [changeData, data.videos]
-  );
-
-  const createSticker = useCallback(() => {
-    const videos = data.videos.concat({ content: "", title: "" });
-    changeData("videos", videos);
-  }, [changeData, data.videos]);
-
-  const onChangeSticker = useCallback(
-    (text: string, index: number, key: "content" | "title") => {
-      data.videos[index][key] = text;
-      changeData("videos", [...data.videos]);
-    },
-    [data?.videos, changeData]
-  );
-  console.log("filesContent", filesContent);
+  const audioFile = data.editorImages?.[0]?.file || data.editorImages?.[0];
+  const audioFileName =
+    audioFile?.name || getImageNameFromPath(audioFile?.path) || "";
 
   return (
     <div>
@@ -139,91 +120,50 @@ export const Audio: FC<TProps> = ({
         </div>
       </div>
       <div className="h-5" />
-      <div className="flex flex-wrap items-start justify-between">
-        <div className="flex justify-center">
-          <Button
-            onClick={() => openFilePicker()}
-            variant="faded"
-            size="lg"
-            color="primary"
-          >
-            Загрузить аудиофа22йл
-          </Button>
-        </div>
-        {data.videos?.map((video, index) => {
-          return (
-            <div key={index} className="w-[100%] mb-4">
-              <div className="">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <p>Ссылка на видео</p>
-                    <Tooltip
-                      content="Вставьте ссылку на видео из Youtube, Vk Видео, Vimeo, Rutube, Google Drive или TED."
-                      classNames={{
-                        base: [
-                          // arrow color
-                          "before:bg-neutral-400 dark:before:bg-white",
-                        ],
-                        content: [
-                          "py-2 px-4 shadow-xl",
-                          "text-black bg-white max-w-[255px]",
-                        ],
-                      }}
-                      placement="right-end"
-                      color="foreground"
-                    >
-                      <Image src={InfoIcon} alt="InfoIcon" />
-                    </Tooltip>
-                  </div>
-                </div>
-                <div className="flex my-2 gap-4">
-                  <Input
-                    value={video.content}
-                    onChange={(e) =>
-                      onChangeSticker(e.target.value, index, "content")
-                    }
-                    classNames={{ inputWrapper: "bg-white" }}
-                  />
-
-                  <Button
-                    isIconOnly
-                    onClick={() => onDeleteVideo(index)}
-                    variant="flat"
-                    size="md"
-                  >
-                    <Image priority={false} src={Close} alt="close" />
-                  </Button>
-                </div>
-                <p>Название видео</p>
-                <div className="flex mt-2 gap-4">
-                  <Input
-                    value={video.title}
-                    onChange={(e) =>
-                      onChangeSticker(e.target.value, index, "title")
-                    }
-                    classNames={{ inputWrapper: "bg-white" }}
-                  />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="flex items-center justify-center gap-4">
-        {data.videos?.length < 6 && (
-          <div className="flex justify-center">
-            <Button
-              variant="light"
-              onClick={() => createSticker()}
-              color="primary"
-              className="w-[300px]"
-              size="lg"
-            >
-              + Добавить еще видео
-            </Button>
-          </div>
+      <p>Аудиофайл (не более 10 мб)</p>
+      <Button
+        onClick={openFilePicker}
+        variant="faded"
+        size="lg"
+        color="primary"
+        fullWidth
+        className="bg-white my-2"
+      >
+        <p
+          style={{
+            maxWidth: "100%",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {audioFileName ? audioFileName : "Загрузить аудиофайл"}
+        </p>
+        {!!audioFileName && (
+          <Image
+            onClick={(e) => {
+              e.stopPropagation();
+              changeData("editorImages", []);
+            }}
+            priority={false}
+            src={Close}
+            alt="close"
+            style={{ flexShrink: 0 }}
+          />
         )}
+      </Button>
+      <div className="w-[100%] mb-4">
+        <TitleExInput
+          label="Название"
+          value={data.audioTitle || ""}
+          setValue={(val) => changeData("audioTitle", val)}
+        />
       </div>
+      <TitleExInput
+        isTextarea
+        label="Скрипт"
+        value={data.audioDescription || ""}
+        setValue={(val) => changeData("audioDescription", val)}
+      />
       <div className="h-10" />
       <div>
         <p className="font-light mb-2">Превью</p>
@@ -234,7 +174,7 @@ export const Audio: FC<TProps> = ({
             background: "#fff",
           }}
         >
-          <VideoExView data={data} isPreview />
+          <AudioExView data={data} isPreview />
         </div>
         <div className="h-5" />
         <div className="flex justify-center">

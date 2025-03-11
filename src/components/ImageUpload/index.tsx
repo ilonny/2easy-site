@@ -52,7 +52,6 @@ export const ImageUpload: FC<TProps> = ({
   }, [isMultiple, images, onlyPlaceholder]);
 
   const firstImage = images?.[0];
-  console.log("images", images);
   return (
     <div className="App">
       <ReactImageUploading

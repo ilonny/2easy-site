@@ -11,6 +11,7 @@ import { Text2ColExView } from "../Text2ColExView";
 import { TextStickerExView } from "../TextStickerExView";
 import { TextChecklistExView } from "../TextChecklistExView";
 import { VideoExView } from "../VideoExView";
+import { AudioExView } from "../AudioExView";
 
 type TProps = {
   list: Array<any>;
@@ -33,6 +34,8 @@ const mapComponent = (type: string) => {
       return (props) => <TextChecklistExView {...props} />;
     case "video":
       return (props) => <VideoExView {...props} />;
+    case "audio":
+      return (props) => <AudioExView {...props} />;
     default:
       return () => <></>;
       break;

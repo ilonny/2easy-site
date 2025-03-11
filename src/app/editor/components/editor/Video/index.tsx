@@ -69,6 +69,19 @@ export const Video: FC<TProps> = ({
 
   const onChangeSticker = useCallback(
     (text: string, index: number, key: "content" | "title") => {
+      if (key === "content" && text.includes("youtube.com")) {
+        const regExp =
+          /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = text.match(regExp);
+        const id = match && match[2].length === 11 ? match[2] : null;
+        if (!id) {
+          return text;
+        }
+        text =
+          '<iframe width="560" height="315" src="//www.youtube.com/embed/' +
+          id +
+          '" frameborder="0" allowfullscreen></iframe>';
+      }
       data.videos[index][key] = text;
       changeData("videos", [...data.videos]);
     },
@@ -137,7 +150,7 @@ export const Video: FC<TProps> = ({
                   <div className="flex items-center gap-2">
                     <p>Ссылка на видео</p>
                     <Tooltip
-                      content="Вставьте ссылку на видео из Youtube, Vk Видео, Vimeo, Rutube, Google Drive или TED."
+                      content="Вставьте ссылку на видео из Youtube, Vk Видео, Vimeo, Rutube, Google Drive или TED через кнопку “поделиться”."
                       classNames={{
                         base: [
                           // arrow color

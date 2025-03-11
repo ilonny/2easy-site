@@ -1,0 +1,24 @@
+.rhap_container {
+  box-shadow: none !important;
+  .rhap_progress-indicator,
+  .rhap_progress-filled,
+  svg path,
+  .rhap_volume-indicator{
+    background: #3F28C6;
+    fill: #3F28C6 !important;
+  }
+  .rhap_progress-bar {
+    height: 10px;
+  }
+  .rhap_progress-indicator {
+    top: -5px;
+  }
+  .rhap_rewind-button, .rhap_forward-button {
+    display: none;
+  }
+  .rhap_controls-section {
+    justify-content: center;
+  }
+}
+
+$rhap_theme-color: #3F28C6 !default;   // Color of all buttons and volume/progress indicators

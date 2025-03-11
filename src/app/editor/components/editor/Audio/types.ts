@@ -5,9 +5,7 @@ export type TAudioData = {
   description: string;
   images: Array<Record<string, string>>;
   editorImages: Array<Record<string, string>>;
-  videos: Array<{
-    content: string;
-    title?: string;
-  }>;
+  audioTitle?: string;
+  audioDescription?: string;
   sortIndex?: number;
 };

@@ -1,8 +1,8 @@
-import { TVideoData } from "./../Video/types";
 import { fetchPostJson } from "@/api";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
+import { TAudioData } from "../Audio/types";
 
 export const useUploadAudioEx = (lastSortIndex: number) => {
   const params = useParams();
@@ -10,13 +10,22 @@ export const useUploadAudioEx = (lastSortIndex: number) => {
   const [success, setSuccess] = useState(false);
   const { uploadImages } = useUploadImage();
   const saveAudioEx = useCallback(
-    async (data: TVideoData) => {
+    async (data: TAudioData) => {
       setIsLoading(true);
-
+      console.log('data??', data)
       const exBgAttachments: any[] =
         (!!data?.images?.length && data?.images?.filter((i) => !i.file)) || [];
       const bgImagesToUpload =
         (!!data?.images?.length && data?.images?.filter((i) => !!i.file)) || [];
+
+      const exEditorAttachments: any[] =
+        (!!data?.editorImages?.length &&
+          data?.editorImages?.filter((i) => !i.file)) ||
+        [];
+      const editorImagesToUpload =
+        (!!data?.editorImages?.length &&
+          data?.editorImages?.filter((i) => !!i.file)) ||
+        [];
 
       const savedBgAttachments = bgImagesToUpload?.length
         ? await uploadImages(
@@ -38,13 +47,35 @@ export const useUploadAudioEx = (lastSortIndex: number) => {
         });
       }
 
+      const savedEditorAttachments = editorImagesToUpload?.length
+        ? await uploadImages(
+            editorImagesToUpload?.map((i) => {
+              return {
+                ...i,
+              };
+            })
+          )
+        : [];
+
+      if (savedEditorAttachments?.attachments?.length) {
+        savedEditorAttachments?.attachments?.forEach((att, attIndex) => {
+          exEditorAttachments.push({
+            id: att?.id,
+            path: att?.path,
+            text: data?.editorImages?.[attIndex]?.text || "",
+          });
+        });
+      }
+
       const exData = {
         ...data,
         bgAttachments: exBgAttachments,
+        editorAttachments: exEditorAttachments,
       };
 
       try {
         delete exData.images;
+        delete exData.editorImages;
 
         const createdExRes = await fetchPostJson({
           path: "/ex/create",

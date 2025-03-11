@@ -31,11 +31,13 @@
     "react": "^18",
     "react-dom": "^18",
     "react-draft-wysiwyg": "^1.15.0",
+    "react-h5-audio-player": "^3.10.0-rc.1",
     "react-hook-form": "^7.53.0",
     "react-images-uploading": "^3.1.7",
     "react-input-mask": "^2.0.4",
     "react-responsive-carousel": "^3.2.23",
     "react-slick": "^0.30.3",
+    "sass": "^1.85.1",
     "slick-carousel": "^1.8.1",
     "use-file-picker": "^2.1.2"
   },

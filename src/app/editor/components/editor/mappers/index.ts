@@ -25,5 +25,8 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
 };
 
 export const getImageNameFromPath = (p: string) => {
-  return p.split("/").reverse()?.[0] || "";
+  if (!p) {
+    return "";
+  }
+  return p?.split("/")?.reverse()?.[0] || "";
 };
