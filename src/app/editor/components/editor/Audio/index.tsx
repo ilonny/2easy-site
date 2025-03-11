@@ -63,7 +63,7 @@ export const Audio: FC<TProps> = ({
     }
   }, [onSuccess, success]);
 
-  const audioFile = data.editorImages?.[0]?.file || data.editorImages?.[0];
+  const audioFile = data?.editorImages?.[0]?.file || data?.editorImages?.[0];
   const audioFileName =
     audioFile?.name || getImageNameFromPath(audioFile?.path) || "";
 

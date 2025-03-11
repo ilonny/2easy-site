@@ -19,6 +19,8 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return "Видео";
     case "audio":
       return "Аудио";
+    case "note":
+      return "Заметка";
     default:
       return type;
   }

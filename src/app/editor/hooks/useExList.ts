@@ -106,6 +106,12 @@ const mapAudioExData = (data: string) => {
   return parsedData;
 };
 
+const mapNoteExData = (data: string) => {
+  const parsedData = data ? JSON.parse(data) : {};
+
+  return parsedData;
+};
+
 const getDataMapper = (type: string) => {
   switch (type) {
     case "image":
@@ -122,6 +128,8 @@ const getDataMapper = (type: string) => {
       return mapTextDefaultExData;
     case "audio":
       return mapAudioExData;
+    case "note":
+      return mapNoteExData;
     default:
       return (_data?: string) => (_data ? JSON.parse(_data) : {});
   }

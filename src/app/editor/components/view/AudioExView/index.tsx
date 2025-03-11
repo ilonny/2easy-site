@@ -17,7 +17,7 @@ type TProps = {
 export const AudioExView: FC<TProps> = ({ data, isPreview = false }) => {
   const image = data?.images?.[0];
 
-  const audioFile = data.editorImages?.[0]?.file || data.editorImages?.[0];
+  const audioFile = data?.editorImages?.[0]?.file || data.editorImages?.[0];
   const audioFileName =
     audioFile?.name || getImageNameFromPath(audioFile?.path) || "";
   const [scriptIsVisible, setScriptIsVisible] = useState(false);

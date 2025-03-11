@@ -78,7 +78,7 @@ export const Video: FC<TProps> = ({
           return text;
         }
         text =
-          '<iframe width="560" height="315" src="//www.youtube.com/embed/' +
+          '<iframe width="100%" height="400" src="//www.youtube.com/embed/' +
           id +
           '" frameborder="0" allowfullscreen></iframe>';
       }

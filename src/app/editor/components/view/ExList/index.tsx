@@ -12,15 +12,17 @@ import { TextStickerExView } from "../TextStickerExView";
 import { TextChecklistExView } from "../TextChecklistExView";
 import { VideoExView } from "../VideoExView";
 import { AudioExView } from "../AudioExView";
+import { NoteExView } from "../NoteExView";
 
 type TProps = {
   list: Array<any>;
   onPressEdit: (ex: any) => void;
   changeSortIndex: (exId: number, newIndex: number) => void;
   onPressDelete: (exId: number) => void;
+  onChangeIsVisible: () => void;
 };
 
-const mapComponent = (type: string) => {
+const mapComponent = (type: string, outerProps: never) => {
   switch (type) {
     case "image":
       return (props) => <ImageExView {...props} />;
@@ -36,22 +38,25 @@ const mapComponent = (type: string) => {
       return (props) => <VideoExView {...props} />;
     case "audio":
       return (props) => <AudioExView {...props} />;
+    case "note":
+      return (props) => (
+        <NoteExView
+          {...props}
+          onChangeIsVisible={outerProps.onChangeIsVisible}
+        />
+      );
     default:
       return () => <></>;
       break;
   }
 };
 
-export const ExList: FC<TProps> = ({
-  list,
-  onPressEdit,
-  changeSortIndex,
-  onPressDelete,
-}) => {
+export const ExList: FC<TProps> = (props) => {
+  const { list, onPressEdit, changeSortIndex, onPressDelete } = props;
   return (
     <div className="flex flex-col gap-10">
       {list.map((ex, exIndex) => {
-        const Viewer = mapComponent(ex.type);
+        const Viewer = mapComponent(ex.type, props);
         return (
           <div className={`${styles["wrapper"]}`} key={ex.id}>
             <Viewer data={ex.data} />

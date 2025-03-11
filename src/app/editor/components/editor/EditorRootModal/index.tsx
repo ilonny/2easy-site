@@ -9,6 +9,7 @@ import { TextSticker } from "../TextSticker";
 import { TextChecklist } from "../TextChecklist";
 import { Video } from "../Video";
 import { Audio } from "../Audio";
+import { Note } from "../Note";
 
 type TProps = {
   isVisible: boolean;
@@ -48,6 +49,8 @@ export const EditorRootModal: FC<TProps> = ({
         return Video;
       case "audio":
         return Audio;
+      case "note":
+        return Note;
       default:
     }
   }, [type, chosenExToEdit]);

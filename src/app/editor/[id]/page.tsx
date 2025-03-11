@@ -81,6 +81,10 @@ export default function EditorPage() {
     setDeleteModal(true);
   }, []);
 
+  const onChangeIsVisible = useCallback(() => {
+    getExList();
+  }, [getExList]);
+
   const lastSortIndex = useMemo(() => {
     return exList.length;
   }, [exList.length]);
@@ -111,6 +115,7 @@ export default function EditorPage() {
             onPressEdit={onPressEditEx}
             changeSortIndex={onChangeSort}
             onPressDelete={onPressDelete}
+            onChangeIsVisible={onChangeIsVisible}
           />
           <div className="h-10" />
           <div className="h-10" />
