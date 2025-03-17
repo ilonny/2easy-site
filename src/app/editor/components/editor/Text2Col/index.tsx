@@ -133,7 +133,6 @@ export const Text2ColEx: FC<TProps> = ({
   if (!isLoaded) {
     return null;
   }
-  console.log("htmlToDraft", htmlToDraft);
 
   return (
     <div>

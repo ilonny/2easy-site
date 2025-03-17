@@ -21,7 +21,6 @@ export const AudioExView: FC<TProps> = ({ data, isPreview = false }) => {
   const audioFileName =
     audioFile?.name || getImageNameFromPath(audioFile?.path) || "";
   const [scriptIsVisible, setScriptIsVisible] = useState(false);
-  console.log("audioFile?", audioFile);
   return (
     <>
       <div className="p-8 px-24">

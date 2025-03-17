@@ -12,7 +12,6 @@ export const useUploadAudioEx = (lastSortIndex: number) => {
   const saveAudioEx = useCallback(
     async (data: TAudioData) => {
       setIsLoading(true);
-      console.log('data??', data)
       const exBgAttachments: any[] =
         (!!data?.images?.length && data?.images?.filter((i) => !i.file)) || [];
       const bgImagesToUpload =

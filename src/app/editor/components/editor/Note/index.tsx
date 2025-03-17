@@ -18,12 +18,14 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  onChangeIsVisible: () => void;
 };
 
 export const Note: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  onChangeIsVisible,
 }) => {
   const { isLoading, saveNoteEx, success } = useUploadNoteEx(lastSortIndex);
   const { data, changeData } = useExData<TNoteData>(
@@ -56,7 +58,7 @@ export const Note: FC<TProps> = ({
       </div>
       <div className="h-10" />
       <p className="font-light mb-2">Превью</p>
-      <NoteExView data={data} isPreview />
+      <NoteExView data={data} isPreview changeData={changeData} />
 
       <div className="h-10" />
       <div className="flex justify-center">

@@ -36,7 +36,6 @@ export const ImageUpload: FC<TProps> = ({
     imageList: ImageListType,
     addUpdateIndex: number[] | undefined
   ) => {
-    console.log("onchange", imageList);
     // data for submit
     setImages(imageList as never[]);
   };

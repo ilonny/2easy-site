@@ -55,8 +55,6 @@ export const useUploadText2ColEx = (lastSortIndex: number) => {
           });
         });
       }
-      console.log('editorImagesToUpload?', editorImagesToUpload)
-      console.log('secondEditorImagesToUpload?', secondEditorImagesToUpload)
       const savedEditorAttachments = editorImagesToUpload?.length
         ? await uploadImages(
             editorImagesToUpload?.map((i) => {
