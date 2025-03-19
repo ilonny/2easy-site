@@ -10,6 +10,7 @@ import { TextChecklist } from "../TextChecklist";
 import { Video } from "../Video";
 import { Audio } from "../Audio";
 import { Note } from "../Note";
+import { FillGapsSelect } from "../FillGapsSelect";
 
 type TProps = {
   isVisible: boolean;
@@ -51,6 +52,8 @@ export const EditorRootModal: FC<TProps> = ({
         return Audio;
       case "note":
         return Note;
+      case "fill-gaps-select":
+        return FillGapsSelect;
       default:
     }
   }, [type, chosenExToEdit]);

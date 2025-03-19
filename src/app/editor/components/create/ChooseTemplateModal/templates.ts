@@ -65,6 +65,20 @@ export const templates: TTemplate[] = [
     type: "fill_gaps",
     title: "Заполнить пропуски",
     description: "Перетащить, вписать или выбрать правильное слово",
+    subItems: [
+      {
+        type: "fill-gaps-drag",
+        title: "Перетащить слово из списка",
+      },
+      {
+        type: "fill-gaps-select",
+        title: "Выбрать вариант из списка",
+      },
+      {
+        type: "fill-gaps-input",
+        title: "Вписать слово в пропуск",
+      },
+    ],
   },
   {
     type: "test",

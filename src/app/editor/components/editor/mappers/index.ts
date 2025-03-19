@@ -21,6 +21,8 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return "Аудио";
     case "note":
       return "Заметка";
+    case "fill-gaps-select":
+      return "Вариант из списка";
     default:
       return type;
   }

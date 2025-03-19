@@ -61,7 +61,7 @@ export const ChooseTemplateModal: FC<TProps> = ({
           )}
         </ModalHeader>
         <ModalBody>
-          <div className="flex flex-wrap">
+          <div className="flex flex-wrap justify-center">
             {templatesToShow?.map((template) => {
               return (
                 <Card
