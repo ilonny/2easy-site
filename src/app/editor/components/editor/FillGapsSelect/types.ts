@@ -1,3 +1,14 @@
+export type TField = {
+  startPosition: number;
+  id: string;
+  options: [
+    {
+      value: string;
+      isCorrect: boolean;
+    }
+  ];
+};
+
 export type TFillGapsSelectData = {
   title: string;
   titleColor: "#3F28C6";
@@ -5,4 +16,6 @@ export type TFillGapsSelectData = {
   description: string;
   images: Array<Record<string, string>>;
   sortIndex?: number;
+  dataText: string;
+  fields: Array<TField>;
 };

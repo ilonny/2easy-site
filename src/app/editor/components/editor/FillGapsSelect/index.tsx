@@ -2,12 +2,23 @@
 import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
-import { TFillGapsSelectData } from "./types";
-import { FC, useEffect, useState } from "react";
+import { TField, TFillGapsSelectData } from "./types";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button } from "@nextui-org/react";
+import {
+  Button,
+  Checkbox,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@nextui-org/react";
 import { useUploadFillGapsSelectEx } from "../hooks/useUploadFillGapsSelectEx";
+import ContentEditable from "react-contenteditable";
+import { AddItemCard } from "../AddItemCard";
+import ReactDOM from "react-dom/client";
+import ChevronIconDown from "@/assets/icons/chevron_down.svg";
+import { PopoverFields } from "./PopoverFields";
 
 const defaultValuesStub: TFillGapsSelectData = {
   title: "Let’s read!",
@@ -15,6 +26,8 @@ const defaultValuesStub: TFillGapsSelectData = {
   subtitle: "Read the part of the article",
   description: "Answer the questions below",
   images: [],
+  dataText: "",
+  fields: [],
 };
 
 type TProps = {
@@ -47,6 +60,81 @@ export const FillGapsSelect: FC<TProps> = ({
     }
   }, [onSuccess, success]);
 
+  const renderContent = useCallback(() => {
+    document.querySelectorAll(".answerWrapper").forEach((el, index) => {
+      el.setAttribute("index", index.toString());
+      const id = el.id;
+      const field = data.fields.find((f) => f.id == id);
+      const root = ReactDOM.createRoot(el);
+      root.render(
+        <div className="popover-wrapper" id={"popover-wrapper-" + index}>
+          <PopoverFields
+            id={id}
+            field={field}
+            onChangeFieldOption={onChangeFieldOption}
+          />
+        </div>
+      );
+    });
+  }, [data]);
+
+  const onClickAddSelection = useCallback(
+    (addItemState: any) => {
+      const id = new Date().getTime();
+      pasteHtmlAtCaret(
+        `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
+      );
+      const contentEditableWrapper = document.getElementById(
+        "contentEditableWrapper"
+      );
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+      }
+
+      const field = {
+        id,
+        options: [
+          {
+            isCorrect: true,
+            value: addItemState.selection,
+          },
+        ],
+      } as unknown as TField;
+
+      const dataFields = [...data.fields];
+      dataFields.push(field);
+
+      changeData("fields", [...dataFields]);
+      contentEditableWrapper?.blur();
+      // setTimeout(() => {
+      //   renderContent();
+      // }, 100);
+    },
+    [data.fields, renderContent, changeData, data]
+  );
+
+  const onChangeText = useCallback(
+    (text: string) => {
+      changeData("dataText", text);
+    },
+    [changeData]
+  );
+
+  const onChangeFieldOption = useCallback(
+    (fieldId: number, optionIndex: number) => {
+      const dataFields = [...data.fields];
+      const field = dataFields.find((f) => f.id == fieldId);
+      field.options[optionIndex].isCorrect =
+        !field.options[optionIndex].isCorrect;
+      changeData("fields", dataFields);
+    },
+    [data.fields, changeData, renderContent]
+  );
+
+  useEffect(() => {
+    renderContent();
+  }, [data.fields]);
   return (
     <div>
       <div className="flex flex-wrap">
@@ -100,6 +188,19 @@ export const FillGapsSelect: FC<TProps> = ({
         </div>
       </div>
       <div className="h-10" />
+      <div className="relative">
+        <div
+          suppressContentEditableWarning
+          contentEditable
+          id="contentEditableWrapper"
+          className="p-4"
+          style={{ borderRadius: 20, background: "#fff" }}
+          onBlur={(e) => onChangeText(e.currentTarget.innerHTML || "")}
+          // dangerouslySetInnerHTML={{ __html: content }}
+        ></div>
+        <AddItemCard onClickAddSelection={onClickAddSelection} />
+      </div>
+      <div className="h-10" />
       <div>
         <p className="font-light mb-2">Превью</p>
         <div
@@ -126,3 +227,30 @@ export const FillGapsSelect: FC<TProps> = ({
     </div>
   );
 };
+
+function pasteHtmlAtCaret(html: string) {
+  let sel, range;
+  if (window.getSelection) {
+    // IE9 and non-IE
+    sel = window.getSelection();
+    if (!sel) {
+      return;
+    }
+    if (sel.getRangeAt && sel.rangeCount) {
+      range = sel.getRangeAt(0);
+      range.deleteContents();
+
+      // Range.createContextualFragment() would be useful here but is
+      // non-standard and not supported in all browsers (IE9, for one)
+      const el = document.createElement("div");
+      el.innerHTML = html;
+      let frag = document.createDocumentFragment(),
+        node,
+        lastNode;
+      while ((node = el.firstChild)) {
+        lastNode = frag.appendChild(node);
+      }
+      range.insertNode(frag);
+    }
+  }
+}
