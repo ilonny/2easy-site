@@ -19,6 +19,7 @@ import { AddItemCard } from "../AddItemCard";
 import ReactDOM from "react-dom/client";
 import ChevronIconDown from "@/assets/icons/chevron_down.svg";
 import { PopoverFields } from "./PopoverFields";
+import styles from "./styles.module.css";
 
 const defaultValuesStub: TFillGapsSelectData = {
   title: "Let’s read!",
@@ -62,16 +63,18 @@ export const FillGapsSelect: FC<TProps> = ({
 
   const renderContent = useCallback(() => {
     document.querySelectorAll(".answerWrapper").forEach((el, index) => {
-      el.setAttribute("index", index.toString());
       const id = el.id;
       const field = data.fields.find((f) => f.id == id);
+      el.setAttribute("index", field.id.toString());
       const root = ReactDOM.createRoot(el);
       root.render(
-        <div className="popover-wrapper" id={"popover-wrapper-" + index}>
+        <div className="popover-wrapper" id={"popover-wrapper-" + field.id}>
           <PopoverFields
             id={id}
             field={field}
             onChangeFieldOption={onChangeFieldOption}
+            onChangeFieldValue={onChangeFieldValue}
+            onAddFieldOption={onAddFieldOption}
           />
         </div>
       );
@@ -127,6 +130,26 @@ export const FillGapsSelect: FC<TProps> = ({
       const field = dataFields.find((f) => f.id == fieldId);
       field.options[optionIndex].isCorrect =
         !field.options[optionIndex].isCorrect;
+      changeData("fields", dataFields);
+    },
+    [data.fields, changeData, renderContent]
+  );
+
+  const onChangeFieldValue = useCallback(
+    (fieldId: number, optionIndex: number, value: string) => {
+      const dataFields = [...data.fields];
+      const field = dataFields.find((f) => f.id == fieldId);
+      field.options[optionIndex].value = value;
+      changeData("fields", dataFields);
+    },
+    [data.fields, changeData, renderContent]
+  );
+
+  const onAddFieldOption = useCallback(
+    (fieldId: number) => {
+      const dataFields = [...data.fields];
+      const field = dataFields.find((f) => f.id == fieldId);
+      field.options.push({ value: "", isCorrect: false });
       changeData("fields", dataFields);
     },
     [data.fields, changeData, renderContent]
@@ -188,12 +211,13 @@ export const FillGapsSelect: FC<TProps> = ({
         </div>
       </div>
       <div className="h-10" />
+      <p className="font-light mb-2">Введите текст задания</p>
       <div className="relative">
         <div
           suppressContentEditableWarning
           contentEditable
           id="contentEditableWrapper"
-          className="p-4"
+          className={`p-4 contentEditable ${styles["contentEditable"]}`}
           style={{ borderRadius: 20, background: "#fff" }}
           onBlur={(e) => onChangeText(e.currentTarget.innerHTML || "")}
           // dangerouslySetInnerHTML={{ __html: content }}

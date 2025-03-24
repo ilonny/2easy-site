@@ -1,0 +1,14 @@
+.contentEditable div:not(.popover-wrapper) *, .contentEditable div:not(.popover-wrapper) span {
+    color: black !important;
+    white-space: inherit !important;
+    background-color: inherit !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+}
+.contentEditable > div > span {
+    color: black !important;
+}
+.popover-wrapper button span {
+    color: rgb(63, 40, 198) !important;
+}

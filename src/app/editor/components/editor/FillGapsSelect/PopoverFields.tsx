@@ -1,6 +1,7 @@
 import {
   Button,
   Checkbox,
+  Input,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -14,22 +15,59 @@ type TProps = {
   id: number;
   field: TField;
   onChangeFieldOption: (id: number, optionIndex: number) => void;
+  onChangeFieldValue: (id: number, optionIndex: number, value: string) => void;
+  onAddFieldOption: (id: number) => void;
+};
+
+const PopoverInput = ({
+  onBlur,
+  initialValue,
+}: {
+  onBlur: (val: string) => void;
+  initialValue: string;
+}) => {
+  const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    setInputValue(initialValue);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      console.log("effect??", inputValue);
+      if (!inputValue) {
+        return
+      }
+      onBlur(inputValue);
+    };
+  }, [inputValue]);
+  return (
+    <Input
+      value={inputValue}
+      onChange={(e) => setInputValue(e.target.value)}
+      onBlur={(e) => onBlur(inputValue)}
+      // onChange={(e) => onBlur(inputValue)}
+      size="sm"
+      variant="underlined"
+      color="primary"
+      onKeyDown={(e) => {
+        if (e.key.toLowerCase() === "enter") {
+          onBlur(inputValue);
+        }
+      }}
+    />
+  );
 };
 
 export const PopoverFields: FC<TProps> = ({
   id,
   field,
   onChangeFieldOption,
+  onChangeFieldValue,
+  onAddFieldOption,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
-  // useEffect(() => {
-  //   setIsOpen(false);
-  //   setTimeout(() => {
-  //     setIsOpen(true);
-  //   }, 300);
-  // }, [field.options]);
-  console.log('field?', field)
+  console.log("field?", field);
   return (
     <Popover
       placement="bottom"
@@ -70,7 +108,7 @@ export const PopoverFields: FC<TProps> = ({
           color="default"
           endContent={<Image src={ChevronIconDown} alt="down" />}
         >
-          <span style={{ color: "#3F28C6" }}>______</span>
+          <span style={{ color: "#3F28C6 important!" }}>______</span>
         </Button>
         {/* <Select variant="bordered" size="sm" fullWidth={false} className="min-w-[100px]" /> */}
       </PopoverTrigger>
@@ -84,28 +122,63 @@ export const PopoverFields: FC<TProps> = ({
               optionIndex.toString() + option.isCorrect
             );
             return (
-              <Checkbox
-                key={optionIndex.toString() + option.isCorrect}
-                isSelected={option.isCorrect}
-                onValueChange={() => {
-                  setIsOpen(false);
-                  onChangeFieldOption(id, optionIndex);
-                  setTimeout(() => {
-                    const wrapper = document.getElementById(
-                      "popover-wrapper-" + index
-                    )?.firstChild;
-                    console.log("wrapper?", wrapper);
-                    document
-                      .getElementById("popover-wrapper-" + index)
-                      ?.firstChild?.click();
-                  }, 50);
-                }}
-              >
-                {option.value}
-              </Checkbox>
+              <div className="flex items-center gap-1">
+                <Checkbox
+                  key={optionIndex.toString() + option.isCorrect}
+                  isSelected={option.isCorrect}
+                  onValueChange={() => {
+                    setIsOpen(false);
+                    onChangeFieldOption(id, optionIndex);
+                    setTimeout(() => {
+                      const wrapper = document.getElementById(
+                        "popover-wrapper-" + id
+                      )?.firstChild;
+                      console.log("wrapper?", wrapper);
+                      document
+                        .getElementById("popover-wrapper-" + id)
+                        ?.firstChild?.click();
+                    }, 50);
+                  }}
+                >
+                  {/* {option.value} */}
+                </Checkbox>
+                <PopoverInput
+                  initialValue={option.value}
+                  onBlur={(val) => {
+                    onChangeFieldValue(id, optionIndex, val);
+                  }}
+                />
+                {/* <Input
+                  value={option.value}
+                  onChange={(e) =>
+                    onChangeFieldValue(id, optionIndex, e.target.value)
+                  }
+                /> */}
+              </div>
             );
           })}
-          <div className="text-tiny">This is the popover content</div>
+          <Button
+            style={{
+              padding: 10,
+              background: "#fff",
+              cursor: "pointer",
+            }}
+            onClick={(e) => {
+              setIsOpen(false);
+              onAddFieldOption(id);
+              setTimeout(() => {
+                const wrapper = document.getElementById(
+                  "popover-wrapper-" + id
+                )?.firstChild;
+                console.log("wrapper?", wrapper);
+                document
+                  .getElementById("popover-wrapper-" + id)
+                  ?.firstChild?.click();
+              }, 50);
+            }}
+          >
+            <p style={{ color: "#3F28C6" }}>+ добавить вариант</p>
+          </Button>
         </div>
       </PopoverContent>
     </Popover>
