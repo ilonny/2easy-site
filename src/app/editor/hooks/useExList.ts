@@ -112,6 +112,21 @@ const mapNoteExData = (data: string) => {
   return parsedData;
 };
 
+const mapFillGapsSelectEx = (data: string) => {
+  const parsedData = data ? JSON.parse(data) : {};
+
+  if (parsedData?.bgAttachments) {
+    parsedData.images = parsedData.bgAttachments?.map((a) => {
+      return {
+        ...a,
+        dataURL: BASE_URL + "/" + a?.path,
+      };
+    });
+  }
+
+  return parsedData;
+};
+
 const getDataMapper = (type: string) => {
   switch (type) {
     case "image":
@@ -130,6 +145,8 @@ const getDataMapper = (type: string) => {
       return mapAudioExData;
     case "note":
       return mapNoteExData;
+    case "fill-gaps-select":
+      return mapFillGapsSelectEx;
     default:
       return (_data?: string) => (_data ? JSON.parse(_data) : {});
   }

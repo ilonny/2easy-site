@@ -33,13 +33,25 @@ export const AddItemCard: FC<TProps> = ({ onClickAddSelection }) => {
   // }, [addItemIsVisible]);
 
   useEffect(() => {
-    const handleSelectionChange = () => {
+    const handleSelectionChange = (e) => {
+      const parent = window?.getSelection()?.anchorNode?.parentNode;
+      const parentParent = parent?.parentNode;
+      const parentParentParent = parentParent?.parentNode;
+      const parentParentParentParent = parentParentParent?.parentNode;
+      if (
+        parent?.id !== "contentEditableWrapper" &&
+        parentParent?.id !== "contentEditableWrapper" &&
+        parentParentParent?.id !== "contentEditableWrapper" &&
+        parentParentParentParent?.id !== "contentEditableWrapper"
+      ) {
+        setAddItemIsVisible(false);
+        return;
+      }
       // Действия, которые нужно выполнить при изменении выделения
       const selection = window?.getSelection();
       const bounds = document
         ?.getElementById("contentEditableWrapper")
         ?.getBoundingClientRect();
-
       if (!selection?.toString() || !bounds) {
         setAddItemIsVisible(false);
         return;

@@ -3,23 +3,16 @@ import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
 import { TField, TFillGapsSelectData } from "./types";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import {
-  Button,
-  Checkbox,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
 import { useUploadFillGapsSelectEx } from "../hooks/useUploadFillGapsSelectEx";
-import ContentEditable from "react-contenteditable";
 import { AddItemCard } from "../AddItemCard";
 import ReactDOM from "react-dom/client";
-import ChevronIconDown from "@/assets/icons/chevron_down.svg";
 import { PopoverFields } from "./PopoverFields";
 import styles from "./styles.module.css";
+import { FillGapsSelectExView } from "../../view/FillGapsSelectExView";
 
 const defaultValuesStub: TFillGapsSelectData = {
   title: "Let’s read!",
@@ -62,23 +55,26 @@ export const FillGapsSelect: FC<TProps> = ({
   }, [onSuccess, success]);
 
   const renderContent = useCallback(() => {
-    document.querySelectorAll(".answerWrapper").forEach((el, index) => {
-      const id = el.id;
-      const field = data.fields.find((f) => f.id == id);
-      el.setAttribute("index", field.id.toString());
-      const root = ReactDOM.createRoot(el);
-      root.render(
-        <div className="popover-wrapper" id={"popover-wrapper-" + field.id}>
-          <PopoverFields
-            id={id}
-            field={field}
-            onChangeFieldOption={onChangeFieldOption}
-            onChangeFieldValue={onChangeFieldValue}
-            onAddFieldOption={onAddFieldOption}
-          />
-        </div>
-      );
-    });
+    document
+      .querySelectorAll(".contentEditable .answerWrapper")
+      .forEach((el, index) => {
+        const id = el.id;
+        const field = data.fields.find((f) => f.id == id);
+        el.setAttribute("index", field?.id?.toString());
+        const root = ReactDOM.createRoot(el);
+        root.render(
+          <div className="popover-wrapper" id={"popover-wrapper-" + field?.id}>
+            <PopoverFields
+              id={id}
+              field={field}
+              onChangeFieldOption={onChangeFieldOption}
+              onChangeFieldValue={onChangeFieldValue}
+              onAddFieldOption={onAddFieldOption}
+              deleteOption={deleteOption}
+            />
+          </div>
+        );
+      });
   }, [data]);
 
   const onClickAddSelection = useCallback(
@@ -109,12 +105,13 @@ export const FillGapsSelect: FC<TProps> = ({
       dataFields.push(field);
 
       changeData("fields", [...dataFields]);
+      changeData("dataText", contentEditableWrapper?.innerHTML);
       contentEditableWrapper?.blur();
       // setTimeout(() => {
       //   renderContent();
       // }, 100);
     },
-    [data.fields, renderContent, changeData, data]
+    [changeData, data]
   );
 
   const onChangeText = useCallback(
@@ -132,7 +129,7 @@ export const FillGapsSelect: FC<TProps> = ({
         !field.options[optionIndex].isCorrect;
       changeData("fields", dataFields);
     },
-    [data.fields, changeData, renderContent]
+    [data.fields, changeData]
   );
 
   const onChangeFieldValue = useCallback(
@@ -142,7 +139,7 @@ export const FillGapsSelect: FC<TProps> = ({
       field.options[optionIndex].value = value;
       changeData("fields", dataFields);
     },
-    [data.fields, changeData, renderContent]
+    [data.fields, changeData]
   );
 
   const onAddFieldOption = useCallback(
@@ -152,12 +149,31 @@ export const FillGapsSelect: FC<TProps> = ({
       field.options.push({ value: "", isCorrect: false });
       changeData("fields", dataFields);
     },
-    [data.fields, changeData, renderContent]
+    [data.fields, changeData]
+  );
+
+  const deleteOption = useCallback(
+    (fieldId: number, optionIndex: number) => {
+      const dataFields = [...data.fields];
+      const field = dataFields.find((f) => f.id == fieldId);
+      field.options = field.options.filter((_o, i) => i !== optionIndex);
+      changeData("fields", dataFields);
+    },
+    [changeData, data.fields]
   );
 
   useEffect(() => {
     renderContent();
   }, [data.fields]);
+
+  useEffect(() => {
+    if (data.dataText) {
+      document.getElementById("contentEditableWrapper").innerHTML =
+        data.dataText;
+    }
+    renderContent()
+  }, []);
+
   return (
     <div>
       <div className="flex flex-wrap">
@@ -233,7 +249,9 @@ export const FillGapsSelect: FC<TProps> = ({
             borderRadius: 4,
             background: "#fff",
           }}
-        ></div>
+        >
+          <FillGapsSelectExView isPreview={true} data={data} />
+        </div>
         <div className="h-5" />
         <div className="flex justify-center">
           <Button

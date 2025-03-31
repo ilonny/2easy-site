@@ -10,6 +10,7 @@ import { FC, useEffect, useState } from "react";
 import ChevronIconDown from "@/assets/icons/chevron_down.svg";
 import Image from "next/image";
 import { TField } from "./types";
+import Close from "@/assets/icons/close.svg";
 
 type TProps = {
   id: number;
@@ -17,6 +18,7 @@ type TProps = {
   onChangeFieldOption: (id: number, optionIndex: number) => void;
   onChangeFieldValue: (id: number, optionIndex: number, value: string) => void;
   onAddFieldOption: (id: number) => void;
+  deleteOption: (id: number, optionIndex: number) => void;
 };
 
 const PopoverInput = ({
@@ -36,7 +38,7 @@ const PopoverInput = ({
     return () => {
       console.log("effect??", inputValue);
       if (!inputValue) {
-        return
+        return;
       }
       onBlur(inputValue);
     };
@@ -65,9 +67,9 @@ export const PopoverFields: FC<TProps> = ({
   onChangeFieldOption,
   onChangeFieldValue,
   onAddFieldOption,
+  deleteOption,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  console.log("field?", field);
   return (
     <Popover
       placement="bottom"
@@ -116,24 +118,17 @@ export const PopoverFields: FC<TProps> = ({
         <div className="px-1 py-2">
           <div className="text-small font-bold">Варианты для пропуска:</div>
           {field?.options?.map((option, optionIndex) => {
-            console.log(
-              "option???",
-              option,
-              optionIndex.toString() + option.isCorrect
-            );
             return (
-              <div className="flex items-center gap-1">
+              <div
+                className="flex items-center gap-1"
+                key={optionIndex.toString() + option.isCorrect}
+              >
                 <Checkbox
-                  key={optionIndex.toString() + option.isCorrect}
                   isSelected={option.isCorrect}
                   onValueChange={() => {
                     setIsOpen(false);
                     onChangeFieldOption(id, optionIndex);
                     setTimeout(() => {
-                      const wrapper = document.getElementById(
-                        "popover-wrapper-" + id
-                      )?.firstChild;
-                      console.log("wrapper?", wrapper);
                       document
                         .getElementById("popover-wrapper-" + id)
                         ?.firstChild?.click();
@@ -148,6 +143,23 @@ export const PopoverFields: FC<TProps> = ({
                     onChangeFieldValue(id, optionIndex, val);
                   }}
                 />
+                <Button
+                  onClick={() => {
+                    setIsOpen(false);
+                    deleteOption(id, optionIndex);
+                    setTimeout(() => {
+                      document
+                        .getElementById("popover-wrapper-" + id)
+                        ?.firstChild?.click();
+                    }, 100);
+                  }}
+                  isIconOnly
+                  variant="flat"
+                  size="sm"
+                >
+                  <Image src={Close} alt="delete option" />
+                </Button>
+
                 {/* <Input
                   value={option.value}
                   onChange={(e) =>

@@ -52,7 +52,7 @@ export const useUploadFillGapsSelectEx = (lastSortIndex: number) => {
           data: {
             lesson_id: params.id,
             id: data.id,
-            type: "video",
+            type: "fill-gaps-select",
             data: JSON.stringify(exData),
             sortIndex:
               data.sortIndex === 0 ? 0 : data.sortIndex || lastSortIndex || 0,

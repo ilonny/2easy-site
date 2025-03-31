@@ -56,3 +56,15 @@ blockquote {
 .editor-view p {
   min-height: 20px !important;
 }
+
+.contentEditable *:not(.popover-wrapper),
+.contentEditable div:not(.popover-wrapper) *,
+.contentEditable div:not(.popover-wrapper) span,
+.answerWrapperArea *:not(.answer-wrapper):not([data-slot]) {
+    color: black !important;
+    white-space: inherit !important;
+    background-color: inherit !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+}

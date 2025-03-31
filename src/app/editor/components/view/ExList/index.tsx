@@ -13,6 +13,7 @@ import { TextChecklistExView } from "../TextChecklistExView";
 import { VideoExView } from "../VideoExView";
 import { AudioExView } from "../AudioExView";
 import { NoteExView } from "../NoteExView";
+import { FillGapsSelectExView } from "../FillGapsSelectExView";
 
 type TProps = {
   list: Array<any>;
@@ -45,6 +46,8 @@ const mapComponent = (type: string, outerProps: never) => {
           onChangeIsVisible={outerProps.onChangeIsVisible}
         />
       );
+    case "fill-gaps-select":
+      return (props) => <FillGapsSelectExView {...props} />;
     default:
       return () => <></>;
       break;
