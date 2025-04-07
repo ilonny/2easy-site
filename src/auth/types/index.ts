@@ -3,4 +3,5 @@ export type TProfile = {
   login?: string;
   phone?: string;
   surname?: string;
+  role_id?: number;
 };

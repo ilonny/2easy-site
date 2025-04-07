@@ -1,16 +1,27 @@
 /* eslint-disable @next/next/no-img-element */
 
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { TField, TFillGapsSelectData } from "../../editor/FillGapsSelect/types";
-import { Card, Select, SelectItem } from "@nextui-org/react";
+import { Card, Checkbox, Select, SelectItem } from "@nextui-org/react";
 import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
+import { AuthContext } from "@/auth";
 type TProps = {
   data: TFillGapsSelectData;
   isPreview?: boolean;
 };
 
-const AnswerField: FC<{ field: TField }> = ({ field }) => {
+const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
+  field,
+  isTeacher,
+}) => {
   const [selectedValue, setSelectedValue] = useState("");
   const [count, setCount] = useState(0);
   const [isDisabled, setIsDisabled] = useState(false);
@@ -50,13 +61,15 @@ const AnswerField: FC<{ field: TField }> = ({ field }) => {
       >
         {(field?.options || [])?.map((o) => {
           return (
-            <SelectItem
-              color="default"
-              key={o.value}
-              value={o.value}
-              title={o.value}
-            >
-              {o.value}
+            <SelectItem color="default" key={o.value} textValue={o.value}>
+              <div className="flex gap-1 items-center">
+                {isTeacher && o.isCorrect && (
+                  <div>
+                    <Checkbox isSelected isDisabled />
+                  </div>
+                )}
+                {o.value}
+              </div>
             </SelectItem>
           );
         })}
@@ -70,6 +83,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
   isPreview = false,
 }) => {
   const image = data?.images?.[0];
+  const { profile } = useContext(AuthContext);
 
   const renderContent = useCallback(() => {
     document
@@ -77,19 +91,29 @@ export const FillGapsSelectExView: FC<TProps> = ({
       .forEach((el, index) => {
         const id = el.id;
         const field = data.fields.find((f) => f.id == id);
+        const maxOptionLength = Math?.max(
+          ...(field?.options?.map((o) => o.value.length) || [])
+        );
         el.setAttribute("index", field?.id?.toString());
         const root = ReactDOM.createRoot(el);
         root.render(
           <div
             className="answer-wrapper mx-2"
             id={"answer-wrapper-" + field?.id}
-            style={{ display: "inline-block", minWidth: 120 }}
+            style={{
+              display: "inline-block",
+              minWidth: maxOptionLength * (maxOptionLength < 5 ? 20 : 17),
+            }}
           >
-            <AnswerField field={field} key={field?.id} />
+            <AnswerField
+              field={field}
+              key={field?.id}
+              isTeacher={profile?.role_id === 2}
+            />
           </div>
         );
       });
-  }, [data]);
+  }, [data.fields, profile?.role_id]);
 
   useEffect(() => {
     renderContent();

@@ -12,6 +12,7 @@ import { HeaderMenuList } from "../HeaderMenuList";
 export const Header = () => {
   const pathname = usePathname();
   const { profile, authIsLoading } = useContext(AuthContext);
+  console.log('header profile', profile)
   if (
     [
       "/login",
