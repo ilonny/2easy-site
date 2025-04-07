@@ -33,6 +33,7 @@
 
 .slick-slide img {
   margin: 0 auto;
+  max-height: 600px !important;
 }
 
 ol,
@@ -67,4 +68,5 @@ blockquote {
     font-family: inherit !important;
     font-size: inherit !important;
     line-height: inherit !important;
+    display: inline !important;
 }

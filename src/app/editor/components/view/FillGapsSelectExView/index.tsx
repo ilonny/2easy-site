@@ -2,7 +2,7 @@
 
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { TField, TFillGapsSelectData } from "../../editor/FillGapsSelect/types";
-import { Select, SelectItem } from "@nextui-org/react";
+import { Card, Select, SelectItem } from "@nextui-org/react";
 import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
 type TProps = {
@@ -70,13 +70,11 @@ export const FillGapsSelectExView: FC<TProps> = ({
   isPreview = false,
 }) => {
   const image = data?.images?.[0];
-  console.log("view data:", data);
 
   const renderContent = useCallback(() => {
     document
       .querySelectorAll(".answerWrapperArea .answerWrapper")
       .forEach((el, index) => {
-        console.log("el?", el);
         const id = el.id;
         const field = data.fields.find((f) => f.id == id);
         el.setAttribute("index", field?.id?.toString());
@@ -133,21 +131,23 @@ export const FillGapsSelectExView: FC<TProps> = ({
           </p>
         )}
       </div>
-      <div
-        className={`p-8 ${isPreview ? "pt-4" : "p-18"} px-24 `}
-        style={
-          image && {
-            backgroundImage: `url(${image.dataURL})`,
-            backgroundSize: "cover",
+      <div className={`p-8 ${isPreview ? "pt-4" : "p-18"} px-24 `}>
+        <Card
+          className={`p-10 px-10 `}
+          style={
+            image && {
+              backgroundImage: `url(${image.dataURL})`,
+              backgroundSize: "cover",
+            }
           }
-        }
-      >
-        <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
-          <div
-            className="answerWrapperArea"
-            dangerouslySetInnerHTML={{ __html: data.dataText }}
-          ></div>
-        </div>
+        >
+          <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
+            <div
+              className="answerWrapperArea"
+              dangerouslySetInnerHTML={{ __html: data.dataText }}
+            ></div>
+          </div>
+        </Card>
       </div>
     </>
   );

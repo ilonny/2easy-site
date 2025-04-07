@@ -36,7 +36,6 @@ const PopoverInput = ({
 
   useEffect(() => {
     return () => {
-      console.log("effect??", inputValue);
       if (!inputValue) {
         return;
       }
@@ -182,7 +181,6 @@ export const PopoverFields: FC<TProps> = ({
                 const wrapper = document.getElementById(
                   "popover-wrapper-" + id
                 )?.firstChild;
-                console.log("wrapper?", wrapper);
                 document
                   .getElementById("popover-wrapper-" + id)
                   ?.firstChild?.click();

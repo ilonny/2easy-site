@@ -10,6 +10,7 @@ import { Button, Input, Tooltip } from "@nextui-org/react";
 import Close from "@/assets/icons/close.svg";
 import { useUploadAudioEx } from "../hooks/useUploadAudioEx";
 import { useFilePicker } from "use-file-picker";
+import { FileSizeValidator } from "use-file-picker/validators";
 import { getImageNameFromPath } from "../mappers";
 import { AudioExView } from "../../view/AudioExView";
 
@@ -33,6 +34,7 @@ export const Audio: FC<TProps> = ({
   defaultValues,
   lastSortIndex,
 }) => {
+  const [filePickerError, setFilePickerError] = useState("");
   const { isLoading, saveAudioEx, success } = useUploadAudioEx(lastSortIndex);
   const { data, changeData } = useExData<TAudioData>(
     defaultValues || defaultValuesStub
@@ -41,9 +43,11 @@ export const Audio: FC<TProps> = ({
     defaultValues?.images || []
   );
 
-  const { openFilePicker, filesContent, clear, plainFiles } = useFilePicker({
-    accept: ".mp3",
-  });
+  const { openFilePicker, filesContent, clear, plainFiles, errors } =
+    useFilePicker({
+      accept: [".mp3", ".wav"],
+      validators: [new FileSizeValidator({ maxFileSize: 10 * 1024 * 1024 })],
+    });
 
   useEffect(() => {
     changeData("images", images);
@@ -66,7 +70,6 @@ export const Audio: FC<TProps> = ({
   const audioFile = data?.editorImages?.[0]?.file || data?.editorImages?.[0];
   const audioFileName =
     audioFile?.name || getImageNameFromPath(audioFile?.path) || "";
-
   return (
     <div>
       <div className="flex flex-wrap">
@@ -151,6 +154,15 @@ export const Audio: FC<TProps> = ({
           />
         )}
       </Button>
+      {errors?.map((err) => {
+        if (err.reason === "FILE_SIZE_TOO_LARGE") {
+          return (
+            <p key={err.reason} className="text-danger">
+              Файл слишком большой
+            </p>
+          );
+        }
+      })}
       <div className="w-[100%] mb-4">
         <TitleExInput
           label="Название"

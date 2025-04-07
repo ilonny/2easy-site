@@ -71,15 +71,12 @@ export const AddItemCard: FC<TProps> = ({ onClickAddSelection }) => {
       setAddItemIsVisible(true);
     };
 
-    // Подписываемся на событие selectionchange
     document.addEventListener("selectionchange", handleSelectionChange);
 
-    // Функция для отписки от события при размонтировании компонента
     return () => {
       document.removeEventListener("selectionchange", handleSelectionChange);
-      console.log("Selectionchange listener removed"); //Optional, but good for debugging
     };
-  }, []); // Пустой массив зависимостей означает, что эффект запускается только один раз (при монтировании компонента)
+  }, []);
 
   return (
     <Card

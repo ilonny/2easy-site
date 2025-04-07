@@ -40,12 +40,18 @@ const mapComponent = (type: string, outerProps: never) => {
     case "audio":
       return (props) => <AudioExView {...props} />;
     case "note":
-      return (props) => (
-        <NoteExView
-          {...props}
-          onChangeIsVisible={outerProps.onChangeIsVisible}
-        />
-      );
+      return (props) => {
+        return (
+          <NoteExView
+            {...props}
+            data={{
+              ...props.data,
+              id: outerProps.id,
+            }}
+            onChangeIsVisible={outerProps.onChangeIsVisible}
+          />
+        );
+      };
     case "fill-gaps-select":
       return (props) => <FillGapsSelectExView {...props} />;
     default:
@@ -59,7 +65,7 @@ export const ExList: FC<TProps> = (props) => {
   return (
     <div className="flex flex-col gap-10">
       {list.map((ex, exIndex) => {
-        const Viewer = mapComponent(ex.type, props);
+        const Viewer = mapComponent(ex.type, { ...props, id: ex.id });
         return (
           <div className={`${styles["wrapper"]}`} key={ex.id}>
             <Viewer data={ex.data} />
