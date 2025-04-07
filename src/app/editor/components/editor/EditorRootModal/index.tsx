@@ -12,6 +12,7 @@ import { Audio } from "../Audio";
 import { Note } from "../Note";
 import { FillGapsSelect } from "../FillGapsSelect";
 import { FillGapsInput } from "../FillGapsInput";
+import { FillGapsDrag } from "../FillGapsDrag";
 
 type TProps = {
   isVisible: boolean;
@@ -57,6 +58,8 @@ export const EditorRootModal: FC<TProps> = ({
         return FillGapsSelect;
       case "fill-gaps-input":
         return FillGapsInput;
+      case "fill-gaps-drag":
+        return FillGapsDrag;
       default:
     }
   }, [type, chosenExToEdit]);

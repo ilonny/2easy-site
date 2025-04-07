@@ -30,7 +30,6 @@ export const AuthContextProvider = ({
   useEffect(() => {
     const profile = readFromLocalStorage("profile");
     if (profile) {
-      console.log('set profile', profile)
       setProfile(JSON.parse(profile));
     }
     setAuthIsLoading(false);

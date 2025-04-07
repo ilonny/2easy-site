@@ -25,6 +25,8 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return "Вариант из списка";
     case "fill-gaps-input":
       return "Вписать слово в пропуск";
+    case "fill-gaps-drag":
+      return "Перетащить слово из списка";
     default:
       return type;
   }

@@ -71,6 +71,20 @@ blockquote {
     display: inline !important;
 }
 
+.contentEditableDrag .popover-wrapper .drag-word{
+  background-color: #EEEBFF !important;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.answerWrapperArea .answer-wrapper{
+  background-color: #EEEBFF !important;
+  padding: 4px 10px;
+  border-radius: 4px;
+  min-height: 25px;
+  vertical-align: middle;
+}
+
 .answer-wrapper .inputcustom.isCorrect [data-slot="input-wrapper"]::after {
   background-color: rgb(23, 201, 100) !important;
   width: 100% !important;
