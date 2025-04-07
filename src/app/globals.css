@@ -70,3 +70,12 @@ blockquote {
     line-height: inherit !important;
     display: inline !important;
 }
+
+.answer-wrapper .inputcustom.isCorrect [data-slot="input-wrapper"]::after {
+  background-color: rgb(23, 201, 100) !important;
+  width: 100% !important;
+}
+.answer-wrapper .inputcustom.isIncorrect [data-slot="input-wrapper"]::after {
+  background-color: rgb(243, 18, 96) !important;
+  width: 100% !important;
+}

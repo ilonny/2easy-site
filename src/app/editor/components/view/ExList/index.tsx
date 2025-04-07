@@ -14,6 +14,7 @@ import { VideoExView } from "../VideoExView";
 import { AudioExView } from "../AudioExView";
 import { NoteExView } from "../NoteExView";
 import { FillGapsSelectExView } from "../FillGapsSelectExView";
+import { FillGapsInputExView } from "../FillGapsInputExView";
 
 type TProps = {
   list: Array<any>;
@@ -54,6 +55,8 @@ const mapComponent = (type: string, outerProps: never) => {
       };
     case "fill-gaps-select":
       return (props) => <FillGapsSelectExView {...props} />;
+    case "fill-gaps-input":
+      return (props) => <FillGapsInputExView {...props} />;
     default:
       return () => <></>;
       break;

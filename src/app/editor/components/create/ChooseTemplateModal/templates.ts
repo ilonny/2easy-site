@@ -2,6 +2,9 @@ import TextDefaultBg from "@/assets/images/text_default_bg.png";
 import Text2ColBg from "@/assets/images/text_2_col_bg.png";
 import TextStickerBg from "@/assets/images/text_sticker_bg.png";
 import TextChecklistBg from "@/assets/images/text_checklist_bg.png";
+import FillGapsDragBg from "@/assets/images/fill_gaps_drag_bg.png";
+import FillGapsSelectBg from "@/assets/images/fill_gaps_select_bg.png";
+import FillGapsInputBg from "@/assets/images/fill_gaps_input_bg.png";
 import { StaticImageData } from "next/image";
 
 export type TTemplate = {
@@ -69,14 +72,17 @@ export const templates: TTemplate[] = [
       {
         type: "fill-gaps-drag",
         title: "Перетащить слово из списка",
+        bgImage: FillGapsDragBg,
       },
       {
         type: "fill-gaps-select",
         title: "Выбрать вариант из списка",
+        bgImage: FillGapsSelectBg,
       },
       {
         type: "fill-gaps-input",
         title: "Вписать слово в пропуск",
+        bgImage: FillGapsInputBg,
       },
     ],
   },

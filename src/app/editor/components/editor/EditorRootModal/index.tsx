@@ -11,6 +11,7 @@ import { Video } from "../Video";
 import { Audio } from "../Audio";
 import { Note } from "../Note";
 import { FillGapsSelect } from "../FillGapsSelect";
+import { FillGapsInput } from "../FillGapsInput";
 
 type TProps = {
   isVisible: boolean;
@@ -54,6 +55,8 @@ export const EditorRootModal: FC<TProps> = ({
         return Note;
       case "fill-gaps-select":
         return FillGapsSelect;
+      case "fill-gaps-input":
+        return FillGapsInput;
       default:
     }
   }, [type, chosenExToEdit]);
@@ -63,7 +66,7 @@ export const EditorRootModal: FC<TProps> = ({
       size="4xl"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
-      style={{ background: "#F9F9F9", overflow: 'hidden' }}
+      style={{ background: "#F9F9F9", overflow: "hidden" }}
       scrollBehavior="outside"
     >
       <ModalContent>
