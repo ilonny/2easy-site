@@ -16,6 +16,7 @@ import { NoteExView } from "../NoteExView";
 import { FillGapsSelectExView } from "../FillGapsSelectExView";
 import { FillGapsInputExView } from "../FillGapsInputExView";
 import { FillGapsDragExView } from "../FillGapsDragExView";
+import { MatchWordWordExView } from "../MatchWordWordExView";
 
 type TProps = {
   list: Array<any>;
@@ -77,6 +78,16 @@ const mapComponent = (type: string, outerProps: never) => {
     case "fill-gaps-drag":
       return (props) => (
         <FillGapsDragExView
+          {...props}
+          data={{
+            ...props.data,
+            id: outerProps.id,
+          }}
+        />
+      );
+    case "match-word-word":
+      return (props) => (
+        <MatchWordWordExView
           {...props}
           data={{
             ...props.data,

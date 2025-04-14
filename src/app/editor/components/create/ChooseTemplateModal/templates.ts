@@ -95,5 +95,19 @@ export const templates: TTemplate[] = [
     type: "match_words",
     title: "Смэтчить слова",
     description: "Сопоставить слово с картинкой или определением",
+    subItems: [
+      {
+        type: "match-word-word",
+        title: "Match слова с определением",
+      },
+      {
+        type: "match-word-image",
+        title: "Match слова с изображением",
+      },
+      {
+        type: "match-word-column",
+        title: "Расставить слова по колонкам",
+      },
+    ],
   },
 ];

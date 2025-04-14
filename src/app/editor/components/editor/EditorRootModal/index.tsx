@@ -13,6 +13,7 @@ import { Note } from "../Note";
 import { FillGapsSelect } from "../FillGapsSelect";
 import { FillGapsInput } from "../FillGapsInput";
 import { FillGapsDrag } from "../FillGapsDrag";
+import { MatchWordWord } from "../MatchWordWord";
 
 type TProps = {
   isVisible: boolean;
@@ -60,6 +61,8 @@ export const EditorRootModal: FC<TProps> = ({
         return FillGapsInput;
       case "fill-gaps-drag":
         return FillGapsDrag;
+      case "match-word-word":
+        return MatchWordWord;
       default:
     }
   }, [type, chosenExToEdit]);
