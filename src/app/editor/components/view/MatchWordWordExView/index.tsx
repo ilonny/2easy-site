@@ -1,7 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useContext, useMemo, useState } from "react";
 import { Card } from "@nextui-org/react";
 import { TMatch, TMatchWordWordData } from "../../editor/MatchWordWord/types";
+import { AuthContext } from "@/auth";
 type TProps = {
   data: TMatchWordWordData;
   isPreview?: boolean;
@@ -11,6 +12,7 @@ export const MatchWordWordExView: FC<TProps> = ({
   data,
   isPreview = false,
 }) => {
+  const { profile } = useContext(AuthContext);
   const image = data?.images?.[0];
 
   const [selectedMatchId, setSelectedMatchId] = useState<number | undefined>(0);
@@ -143,7 +145,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                           : "2px solid transparent",
                     }}
                   >
-                    {m.value} {m.id}
+                    {m.value}
                   </Card>
                 </div>
                 <div
@@ -155,10 +157,15 @@ export const MatchWordWordExView: FC<TProps> = ({
                     shadow="sm"
                     radius="sm"
                     style={{
-                      background: bgColor,
+                      background:
+                        profile?.role_id === 2 &&
+                        selectedMatchId &&
+                        m.correctId === selectedMatchId
+                          ? "#E9FEE8"
+                          : bgColor,
                     }}
                   >
-                    {m.correctValue} {m.correctId}
+                    {m.correctValue}
                   </Card>
                 </div>
               </div>
@@ -193,7 +200,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                       background: "#E9FEE8",
                     }}
                   >
-                    {m.value} {m.id}
+                    {m.value}
                   </Card>
                 </div>
                 <div className=" w-[50%] radius-10">
@@ -206,7 +213,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                       border: "2px solid #219F59",
                     }}
                   >
-                    {m.correctValue} {m.id}
+                    {m.correctValue}
                   </Card>
                 </div>
               </div>

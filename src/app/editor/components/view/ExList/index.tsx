@@ -17,6 +17,7 @@ import { FillGapsSelectExView } from "../FillGapsSelectExView";
 import { FillGapsInputExView } from "../FillGapsInputExView";
 import { FillGapsDragExView } from "../FillGapsDragExView";
 import { MatchWordWordExView } from "../MatchWordWordExView";
+import { MatchWordImageExView } from "../MatchWordImageExView";
 
 type TProps = {
   list: Array<any>;
@@ -88,6 +89,16 @@ const mapComponent = (type: string, outerProps: never) => {
     case "match-word-word":
       return (props) => (
         <MatchWordWordExView
+          {...props}
+          data={{
+            ...props.data,
+            id: outerProps.id,
+          }}
+        />
+      );
+    case "match-word-image":
+      return (props) => (
+        <MatchWordImageExView
           {...props}
           data={{
             ...props.data,

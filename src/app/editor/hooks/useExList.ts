@@ -147,6 +147,8 @@ const getDataMapper = (type: string) => {
       return mapNoteExData;
     case "fill-gaps-select":
       return mapFillGapsSelectEx;
+    case "match-word-image":
+      return mapImageExData;
     default:
       return (_data?: string) => (_data ? JSON.parse(_data) : {});
   }
