@@ -32,7 +32,7 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
       return false;
     }
     return !!field.options?.find((o) => o.value === selectedValue)?.isCorrect;
-  }, [selectedValue, field.options, isDisabled]);
+  }, [selectedValue, field?.options, isDisabled]);
 
   const onChangeSelection = useCallback((val: string) => {
     setSelectedValue(val);
@@ -84,7 +84,9 @@ export const FillGapsInputExView: FC<TProps> = ({
   const { profile } = useContext(AuthContext);
   const renderContent = useCallback(() => {
     document
-      .querySelectorAll(".answerWrapperArea .answerWrapper")
+      .querySelectorAll(
+        `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`
+      )
       .forEach((el, index) => {
         const id = el.id;
         const field = data.fields.find((f) => f.id == id);
@@ -99,7 +101,7 @@ export const FillGapsInputExView: FC<TProps> = ({
             id={"answer-wrapper-" + field?.id}
             style={{
               display: "inline-block",
-              maxWidth: maxOptionLength * 10,
+              maxWidth: maxOptionLength * 15,
             }}
           >
             <AnswerField
@@ -110,7 +112,7 @@ export const FillGapsInputExView: FC<TProps> = ({
           </div>
         );
       });
-  }, [data]);
+  }, [data.fields, data?.id, profile?.role_id]);
 
   useEffect(() => {
     renderContent();
@@ -164,7 +166,10 @@ export const FillGapsInputExView: FC<TProps> = ({
         >
           <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
             <div
-              className="answerWrapperArea"
+              className={
+                "answerWrapperArea answerWrapperArea-" +
+                (data?.id || 0).toString()
+              }
               dangerouslySetInnerHTML={{ __html: data.dataText }}
             ></div>
           </div>

@@ -144,11 +144,9 @@ export const FillGapsDrag: FC<TProps> = ({
   }, []);
 
   useEffect(() => {
-    console.log("data.fields", data.fields);
     setTimeout(() => {
       const res = data.fields.filter((field) => {
         const el = document.getElementById("popover-wrapper-" + field.id);
-        console.log("el??", el);
         return !!el;
       });
       if (res.length !== data.fields.length) {

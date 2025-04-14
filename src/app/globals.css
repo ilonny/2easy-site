@@ -85,6 +85,10 @@ blockquote {
   vertical-align: middle;
 }
 
+.answerWrapperArea .answer-wrapper.select-answer-wrapper {
+  background-color: transparent !important;
+}
+
 .answer-wrapper .inputcustom.isCorrect [data-slot="input-wrapper"]::after {
   background-color: rgb(23, 201, 100) !important;
   width: 100% !important;
@@ -93,3 +97,15 @@ blockquote {
   background-color: rgb(243, 18, 96) !important;
   width: 100% !important;
 }
+
+.answerWrapperArea *:not(.answer-wrapper):not([data-slot]) .teacher-placeholer {
+  color: gray !important;
+}
+
+.answerWrapperArea .answer-wrapper.mx-2.bg-success {
+  background-color: #17c964 !important;
+}
+
+/* .answerWrapperArea .answer-wrapper.mx-2.bg-success .success-placeholder {
+  color: rgb(23, 201, 100) !important;
+} */

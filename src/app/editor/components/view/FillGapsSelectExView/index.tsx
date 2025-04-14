@@ -31,7 +31,7 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
       return false;
     }
     return !!field.options?.find((o) => o.value === selectedValue)?.isCorrect;
-  }, [selectedValue, field.options, isDisabled]);
+  }, [selectedValue, field?.options, isDisabled]);
 
   const onChangeSelection = useCallback((val: string) => {
     setSelectedValue(val);
@@ -87,7 +87,9 @@ export const FillGapsSelectExView: FC<TProps> = ({
 
   const renderContent = useCallback(() => {
     document
-      .querySelectorAll(".answerWrapperArea .answerWrapper")
+      .querySelectorAll(
+        `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`
+      )
       .forEach((el, index) => {
         const id = el.id;
         const field = data.fields.find((f) => f.id == id);
@@ -98,7 +100,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
         const root = ReactDOM.createRoot(el);
         root.render(
           <div
-            className="answer-wrapper mx-2"
+            className="answer-wrapper mx-2 select-answer-wrapper"
             id={"answer-wrapper-" + field?.id}
             style={{
               display: "inline-block",
@@ -113,12 +115,12 @@ export const FillGapsSelectExView: FC<TProps> = ({
           </div>
         );
       });
-  }, [data.fields, profile?.role_id]);
+  }, [data.fields, data?.id, profile?.role_id]);
 
   useEffect(() => {
     renderContent();
   }, [renderContent]);
-
+  console.log('data???', data)
   return (
     <>
       <div className="p-8 px-24">
@@ -167,7 +169,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
         >
           <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
             <div
-              className="answerWrapperArea"
+              className={"answerWrapperArea answerWrapperArea-" + (data?.id || 0).toString()}
               dangerouslySetInnerHTML={{ __html: data.dataText }}
             ></div>
           </div>

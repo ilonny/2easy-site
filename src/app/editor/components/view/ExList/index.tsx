@@ -15,6 +15,7 @@ import { AudioExView } from "../AudioExView";
 import { NoteExView } from "../NoteExView";
 import { FillGapsSelectExView } from "../FillGapsSelectExView";
 import { FillGapsInputExView } from "../FillGapsInputExView";
+import { FillGapsDragExView } from "../FillGapsDragExView";
 
 type TProps = {
   list: Array<any>;
@@ -54,9 +55,35 @@ const mapComponent = (type: string, outerProps: never) => {
         );
       };
     case "fill-gaps-select":
-      return (props) => <FillGapsSelectExView {...props} />;
+      return (props) => (
+        <FillGapsSelectExView
+          {...props}
+          data={{
+            ...props.data,
+            id: outerProps.id,
+          }}
+        />
+      );
     case "fill-gaps-input":
-      return (props) => <FillGapsInputExView {...props} />;
+      return (props) => (
+        <FillGapsInputExView
+          {...props}
+          data={{
+            ...props.data,
+            id: outerProps.id,
+          }}
+        />
+      );
+    case "fill-gaps-drag":
+      return (props) => (
+        <FillGapsDragExView
+          {...props}
+          data={{
+            ...props.data,
+            id: outerProps.id,
+          }}
+        />
+      );
     default:
       return () => <></>;
       break;
