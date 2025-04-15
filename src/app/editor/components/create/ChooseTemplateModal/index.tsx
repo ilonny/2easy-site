@@ -61,7 +61,7 @@ export const ChooseTemplateModal: FC<TProps> = ({
           )}
         </ModalHeader>
         <ModalBody>
-          <div className="flex flex-wrap justify-center">
+          <div className="flex flex-wrap justify-start">
             {templatesToShow?.map((template) => {
               return (
                 <Card
@@ -80,7 +80,7 @@ export const ChooseTemplateModal: FC<TProps> = ({
                       radius="sm"
                       className="p-5 flex items-center justify-center"
                       style={{
-                        backgroundColor: "#D9D9D9",
+                        backgroundColor: "#2A2374",
                         cursor: "pointer",
                         height: "220px",
                         backgroundImage: template.bgImage

@@ -59,6 +59,7 @@ export default function EditorPage() {
   }, [getExList]);
 
   const onPressEditEx = useCallback((ex) => {
+    setChosenTemplate(null);
     setChosenExToEdit({
       ...ex.data,
       id: ex.id,

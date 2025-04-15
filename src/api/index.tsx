@@ -10,8 +10,8 @@ export const ApiProvider = ({ children }) => {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
 
-// export const BASE_URL = "http://localhost:8888";
-export const BASE_URL = "https://d2b9lzt8-8888.euw.devtunnels.ms";
+export const BASE_URL = "http://localhost:8888";
+// export const BASE_URL = "https://d2b9lzt8-8888.euw.devtunnels.ms";
 
 export const API_URL = BASE_URL + "/api";
 

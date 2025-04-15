@@ -15,6 +15,7 @@ import { FillGapsInput } from "../FillGapsInput";
 import { FillGapsDrag } from "../FillGapsDrag";
 import { MatchWordWord } from "../MatchWordWord";
 import { MatchWordImage } from "../MatchWordImage";
+import { MatchWordColumn } from "../MatchWordColumn";
 
 type TProps = {
   isVisible: boolean;
@@ -66,6 +67,8 @@ export const EditorRootModal: FC<TProps> = ({
         return MatchWordWord;
       case "match-word-image":
         return MatchWordImage;
+      case "match-word-column":
+        return MatchWordColumn;
       default:
     }
   }, [type, chosenExToEdit]);

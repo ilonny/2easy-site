@@ -100,11 +100,6 @@ const DraggableItem = (props: {
         draggableRect.left > droppableRect.right
       );
       isIntersected.current = intersects;
-      if (!intersects) {
-        setX(0);
-        setY(0);
-        return;
-      }
     } catch (err) {}
   }, []);
 
@@ -127,6 +122,8 @@ const DraggableItem = (props: {
         onDrop();
         setActiveDragId(null);
         if (!isIntersected.current) {
+          setX(0);
+          setY(0);
           setIsError(true);
           setTimeout(() => {
             setIsError(false);
