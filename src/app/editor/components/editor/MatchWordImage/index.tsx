@@ -1,5 +1,4 @@
 import { ImageUpload } from "@/components/ImageUpload";
-// import { MatchWordImageView } from "../../view/MatchWordImageView";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
 import { TMatchWordImageData } from "./types";
@@ -9,6 +8,7 @@ import Image from "next/image";
 import { Button, Input, Radio, RadioGroup } from "@nextui-org/react";
 import Close from "@/assets/icons/close.svg";
 import { useUploadMatchWordImage } from "../hooks/useUploadMatchWordImage";
+import { MatchWordImageExView } from "../../view/MatchWordImageExView";
 
 const defaultValuesStub: TMatchWordImageData = {
   title: "let’s speak!",
@@ -55,7 +55,7 @@ export const MatchWordImage: FC<TProps> = ({
       onSuccess?.();
     }
   }, [success]);
-  console.log("images?", images);
+
   return (
     <div>
       <div className="flex flex-wrap">
@@ -173,7 +173,7 @@ export const MatchWordImage: FC<TProps> = ({
             background: "#fff",
           }}
         >
-          {/* <MatchWordImageView data={data} isPreview /> */}
+          <MatchWordImageExView data={data} isPreview />
         </div>
         <div className="h-5" />
         <div className="flex justify-center">
