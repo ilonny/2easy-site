@@ -14,7 +14,7 @@ const defaultValuesStub: TImageExData = {
   title: "let’s speak!",
   titleColor: "#3F28C6",
   subtitle: "look at the pictures",
-  description: "Describe each image and answer the questions below",
+  description: "Describe each picture and answer the questions below",
   images: [],
   viewType: "carousel",
 };

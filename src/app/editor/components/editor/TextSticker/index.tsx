@@ -12,9 +12,9 @@ import Close from "@/assets/icons/close.svg";
 import { TextStickerExView } from "../../view/TextStickerExView";
 
 const defaultValuesStub: TTextStickerData = {
-  title: "Let’s read!",
+  title: "Warm up",
   titleColor: "#3F28C6",
-  subtitle: "Read the part of the article",
+  subtitle: "Let's discuss the following questions ",
   description: "Answer the questions below",
   images: [],
   editorImages: [],

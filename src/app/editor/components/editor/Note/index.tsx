@@ -8,9 +8,8 @@ import { useUploadNoteEx } from "../hooks/useUploadNoteEx";
 import { NoteExView } from "../../view/NoteExView";
 
 const defaultValuesStub: TNoteData = {
-  title: "For example: key",
-  description:
-    "When you go on a SetJetting vacation you visit famous film sets around the world. For example, Maya Beach where The Beach was filmed and Harry Potter sets in London. ",
+  title: "teacher's notes",
+  description: "",
   isVisible: false,
 };
 

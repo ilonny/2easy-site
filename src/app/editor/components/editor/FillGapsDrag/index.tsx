@@ -15,9 +15,9 @@ import styles from "./styles.module.css";
 import { FillGapsDragExView } from "../../view/FillGapsDragExView";
 
 const defaultValuesStub: TFillGapsDragData = {
-  title: "Let’s read!",
+  title: "Let's practice!",
   titleColor: "#3F28C6",
-  subtitle: "Read the part of the article",
+  subtitle: "Fill in the gaps with the correct words",
   description: "Answer the questions below",
   images: [],
   dataText: "",

@@ -15,9 +15,9 @@ import styles from "./styles.module.css";
 import { FillGapsSelectExView } from "../../view/FillGapsSelectExView";
 
 const defaultValuesStub: TFillGapsSelectData = {
-  title: "Let’s read!",
+  title: "Let's practice!",
   titleColor: "#3F28C6",
-  subtitle: "Read the part of the article",
+  subtitle: "Choose the correct option to complete the sentences",
   description: "Answer the questions below",
   images: [],
   dataText: "",

@@ -12,10 +12,10 @@ import { useUploadTextChecklistEx } from "../hooks/useUploadTextChecklistEx";
 import { TextChecklistExView } from "../../view/TextChecklistExView";
 
 const defaultValuesStub: TTextStickerData = {
-  title: "Let’s read!",
+  title: "Let's speak!",
   titleColor: "#3F28C6",
-  subtitle: "Read the part of the article",
-  description: "Answer the questions below",
+  subtitle: "Look at the list below",
+  description: "Tick the things you would like to try and explain your choices",
   images: [],
   editorImages: [],
   stickers: ["", ""],

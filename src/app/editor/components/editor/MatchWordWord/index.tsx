@@ -12,10 +12,10 @@ import Close from "@/assets/icons/close.svg";
 import { MatchWordWordExView } from "../../view/MatchWordWordExView";
 
 const defaultValuesStub: TMatchWordWordData = {
-  title: "Let’s read!",
+  title: "New vocab!",
   titleColor: "#3F28C6",
-  subtitle: "Read the part of the article",
-  description: "Answer the questions below",
+  subtitle: "Look at the words below and try to guess their meanings",
+  description: "Match the words with their definitions ",
   images: [],
   matches: [
     {

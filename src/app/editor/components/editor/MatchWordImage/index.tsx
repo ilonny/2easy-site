@@ -11,10 +11,10 @@ import { useUploadMatchWordImage } from "../hooks/useUploadMatchWordImage";
 import { MatchWordImageExView } from "../../view/MatchWordImageExView";
 
 const defaultValuesStub: TMatchWordImageData = {
-  title: "let’s speak!",
+  title: "Warm up",
   titleColor: "#3F28C6",
-  subtitle: "look at the pictures",
-  description: "Describe each image and answer the questions below",
+  subtitle: "Look at the pictures below",
+  description: "Match the pictures with their definitions",
   images: [],
   viewType: "drag",
 };

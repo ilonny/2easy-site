@@ -13,10 +13,10 @@ import InfoIcon from "@/assets/icons/info.svg";
 import { VideoExView } from "../../view/VideoExView";
 
 const defaultValuesStub: TVideoData = {
-  title: "Let’s read!",
+  title: "Let's watch!",
   titleColor: "#3F28C6",
-  subtitle: "Read the part of the article",
-  description: "Answer the questions below",
+  subtitle: "Watch the video and answer the questions below",
+  description: "",
   images: [],
   videos: [{ content: "", title: "" }],
 };

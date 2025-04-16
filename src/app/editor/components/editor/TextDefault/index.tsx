@@ -32,9 +32,9 @@ const Editor = dynamic(
 // const htmlToDraft = dynamic(() => import("html-to-draftjs"), { ssr: false });
 
 const defaultValuesStub: TTextDefaultData = {
-  title: "Let’s read!",
+  title: "Let's read!",
   titleColor: "#3F28C6",
-  subtitle: "Read the part of the article",
+  subtitle: "Read the article",
   description: "Answer the questions below",
   images: [],
   editorImages: [],

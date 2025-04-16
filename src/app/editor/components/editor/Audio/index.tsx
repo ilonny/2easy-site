@@ -15,10 +15,10 @@ import { getImageNameFromPath } from "../mappers";
 import { AudioExView } from "../../view/AudioExView";
 
 const defaultValuesStub: TAudioData = {
-  title: "Let’s read!",
+  title: "Let's listen!",
   titleColor: "#3F28C6",
-  subtitle: "Read the part of the article",
-  description: "Answer the questions below",
+  subtitle: "Listen to the audio and do the tasks below",
+  description: "",
   images: [],
   videos: [{ content: "", title: "" }],
 };

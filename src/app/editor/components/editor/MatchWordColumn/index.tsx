@@ -13,10 +13,10 @@ import DeleteIcon from "@/assets/icons/delete_black.svg";
 import { MatchWordColumnExView } from "../../view/MatchWordColumnExView";
 
 const defaultValuesStub: TMatchWordColumnData = {
-  title: "Let’s read!",
+  title: "New vocab!",
   titleColor: "#3F28C6",
-  subtitle: "Read the part of the article",
-  description: "Answer the questions below",
+  subtitle: "Here's some more vocabulary on the topic",
+  description: "Sort these words into positive and negative columns",
   images: [],
   sortIndex: undefined,
   columns: [
