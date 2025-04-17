@@ -19,6 +19,7 @@ import { FillGapsDragExView } from "../FillGapsDragExView";
 import { MatchWordWordExView } from "../MatchWordWordExView";
 import { MatchWordImageExView } from "../MatchWordImageExView";
 import { MatchWordColumnExView } from "../MatchWordColumnExView";
+import { TestExView } from "../TestExView";
 
 type TProps = {
   list: Array<any>;
@@ -110,6 +111,16 @@ const mapComponent = (type: string, outerProps: never) => {
     case "match-word-column":
       return (props) => (
         <MatchWordColumnExView
+          {...props}
+          data={{
+            ...props.data,
+            id: outerProps.id,
+          }}
+        />
+      );
+    case "test":
+      return (props) => (
+        <TestExView
           {...props}
           data={{
             ...props.data,

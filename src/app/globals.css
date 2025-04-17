@@ -109,3 +109,8 @@ blockquote {
 /* .answerWrapperArea .answer-wrapper.mx-2.bg-success .success-placeholder {
   color: rgb(23, 201, 100) !important;
 } */
+
+
+.checkbox-test-option-success svg polyline {
+  stroke: #fff;
+}

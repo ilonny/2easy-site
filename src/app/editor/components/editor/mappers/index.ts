@@ -33,6 +33,8 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return "Match слова с изображением";
     case "match-word-column":
       return "Расставить слова по колонкам";
+    case "test":
+      return "Тест";
     default:
       return type;
   }
