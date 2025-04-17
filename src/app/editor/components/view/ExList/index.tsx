@@ -20,6 +20,7 @@ import { MatchWordWordExView } from "../MatchWordWordExView";
 import { MatchWordImageExView } from "../MatchWordImageExView";
 import { MatchWordColumnExView } from "../MatchWordColumnExView";
 import { TestExView } from "../TestExView";
+import { FreeInputFormExView } from "../FreeInputFormExView";
 
 type TProps = {
   list: Array<any>;
@@ -121,6 +122,16 @@ const mapComponent = (type: string, outerProps: never) => {
     case "test":
       return (props) => (
         <TestExView
+          {...props}
+          data={{
+            ...props.data,
+            id: outerProps.id,
+          }}
+        />
+      );
+    case "free-input-form":
+      return (props) => (
+        <FreeInputFormExView
           {...props}
           data={{
             ...props.data,

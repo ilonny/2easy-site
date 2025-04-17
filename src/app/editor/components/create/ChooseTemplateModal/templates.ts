@@ -132,7 +132,7 @@ export const templates: TTemplate[] = [
   },
   {
     type: "free-input-form",
-    title: "пустое поле для текста",
-    description: "Поле ввода для ответов ученика",
+    title: "Поле для ввода текста",
+    description: "Пустое поле для ответов ученика",
   },
 ];
