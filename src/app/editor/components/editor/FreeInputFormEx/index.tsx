@@ -145,7 +145,7 @@ export const FreeInputFormEx: FC<TProps> = ({
         return (
           <div className="question-wrapper items-start mb-4" key={q.id}>
             <div className="w-[100%]">
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center min-h-[40px]">
                 <p className="font-light mb-2">Текст задания</p>
                 {data.questions.length > 1 && (
                   <div className="flex justify-end">
