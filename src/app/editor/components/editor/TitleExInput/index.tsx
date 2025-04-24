@@ -27,10 +27,12 @@ export const TitleExInput: FC<TProps> = ({
             value={value}
             onChange={(e) => setValue(e.target.value)}
             classNames={{ inputWrapper: "bg-white", input: "min-h-[118px]" }}
+            size="lg"
           />
         ) : (
           <div className="relative">
             <Input
+              size="lg"
               value={value}
               onChange={(e) => setValue(e.target.value)}
               classNames={{ inputWrapper: "bg-white" }}

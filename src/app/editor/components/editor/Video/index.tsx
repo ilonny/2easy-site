@@ -180,7 +180,8 @@ export const Video: FC<TProps> = ({
                   <Button
                     isIconOnly
                     onClick={() => onDeleteVideo(index)}
-                    variant="flat"
+                    variant="light"
+                    className="hover:!bg-transparent"
                     size="md"
                   >
                     <Image priority={false} src={Close} alt="close" />

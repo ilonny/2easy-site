@@ -215,8 +215,9 @@ export const MatchWordColumn: FC<TProps> = ({
                             onDeleteWord(columnIndex, wordIndex);
                           }}
                           isIconOnly
-                          variant="flat"
                           size="sm"
+                          variant="light"
+                          className="hover:!bg-transparent"
                         >
                           <Image src={Close} alt="delete option" />
                         </Button>

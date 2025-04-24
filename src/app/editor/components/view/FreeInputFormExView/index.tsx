@@ -34,7 +34,7 @@ export const FreeInputFormExView: FC<TProps> = ({
 
   return (
     <>
-      <div className="p-8 px-24">
+      <div className={`py-8 w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -69,7 +69,7 @@ export const FreeInputFormExView: FC<TProps> = ({
         )}
       </div>
       <div
-        className={`${isPreview ? "pt-4" : "p-18"} px-24 pb-10 `}
+        className={`py-8 w-[886px] m-auto`}
         style={
           image && {
             backgroundImage: `url(${image.dataURL})`,

@@ -189,7 +189,7 @@ export const TestStep = (props: TTestStepProps) => {
           size="lg"
           onClick={() => onPressNext()}
         >
-          Next
+          Next →
         </Button>
       )}
     </>
@@ -222,7 +222,7 @@ export const TestExView: FC<TProps> = ({ data, isPreview = false }) => {
 
   return (
     <>
-      <div className="p-8 px-24">
+      <div className={`py-8 w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -257,7 +257,7 @@ export const TestExView: FC<TProps> = ({ data, isPreview = false }) => {
         )}
       </div>
       <div
-        className={`${isPreview ? "pt-4" : "p-18"} px-24 pb-10 `}
+        className={`py-8 w-[886px] m-auto`}
         style={
           image && {
             backgroundImage: `url(${image.dataURL})`,

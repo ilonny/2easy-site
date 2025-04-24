@@ -13,7 +13,7 @@ export const TextDefaultExView: FC<TProps> = ({ data, isPreview = false }) => {
   const editorImage = data?.editorImages?.[0];
   return (
     <>
-      <div className="p-8 px-24">
+      <div className={`py-8 w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -48,7 +48,7 @@ export const TextDefaultExView: FC<TProps> = ({ data, isPreview = false }) => {
         )}
       </div>
       <div
-        className={`p-8 ${isPreview ? "pt-4" : "p-18"} px-24`}
+        className={`py-8 w-[886px] m-auto`}
         style={
           image && {
             backgroundImage: `url(${image.dataURL})`,
@@ -57,7 +57,7 @@ export const TextDefaultExView: FC<TProps> = ({ data, isPreview = false }) => {
         }
       >
         <Card
-          className={`${isPreview ? "w-[633px]" : ""} p-10 editor-view`}
+          className={`p-10 editor-view`}
           style={{
             margin: "0 auto",
             backgroundColor: "#fff",
@@ -65,8 +65,13 @@ export const TextDefaultExView: FC<TProps> = ({ data, isPreview = false }) => {
           }}
         >
           {/* eslint-disable-next-line jsx-a11y/alt-text */}
-          {!!editorImage && <img src={editorImage.dataURL} />}
-          <div dangerouslySetInnerHTML={{ __html: data?.content }} />
+          {!!editorImage && (
+            <img src={editorImage.dataURL} style={{ marginBottom: 25 }} />
+          )}
+          <div
+            dangerouslySetInnerHTML={{ __html: data?.content }}
+            className="editorClassName"
+          />
           {/* {!Boolean(data?.images?.length) && (
           <div
             className="w-full h-[250px]"

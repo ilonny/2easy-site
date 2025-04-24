@@ -81,7 +81,7 @@ export const EditorRootModal: FC<TProps> = ({
 
   return (
     <Modal
-      size="4xl"
+      size="5xl"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
       style={{ background: "#F9F9F9", overflow: "hidden" }}

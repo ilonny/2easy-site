@@ -203,7 +203,7 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
 
   return (
     <>
-      <div className="p-8 px-24">
+      <div className={`py-8 w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -237,7 +237,7 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
           </p>
         )}
       </div>
-      <div className={`p-8 ${isPreview ? "pt-4" : "p-18"} px-24`}>
+      <div className={`py-8 w-[886px] m-auto`}>
         <div className="flex justify-center items-center mb-4 gap-2 ">
           {sortedFields.map((field) => {
             return (

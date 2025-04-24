@@ -18,6 +18,8 @@ type TProps = {
   isButton?: boolean;
   title?: string;
   acceptType?: string[];
+  fullWidth?: boolean;
+  whiteBg?: boolean;
 };
 
 export const ImageUpload: FC<TProps> = ({
@@ -31,6 +33,8 @@ export const ImageUpload: FC<TProps> = ({
   isButton,
   title,
   acceptType,
+  fullWidth,
+  whiteBg,
 }) => {
   const onChange = (
     imageList: ImageListType,
@@ -52,7 +56,7 @@ export const ImageUpload: FC<TProps> = ({
 
   const firstImage = images?.[0];
   return (
-    <div className="App">
+    <div className="App" style={{ width: fullWidth ? "100%" : "initial" }}>
       <ReactImageUploading
         multiple={isMultiple}
         value={images}
@@ -70,7 +74,10 @@ export const ImageUpload: FC<TProps> = ({
           dragProps,
         }) => (
           // write your building UI
-          <div className="upload__image-wrapper relative">
+          <div
+            className="upload__image-wrapper relative"
+            style={{ width: fullWidth ? "100%" : "initial" }}
+          >
             {!!label && <p className="mb-3">{label}</p>}
             {showPlaceholder && (
               <button
@@ -89,10 +96,11 @@ export const ImageUpload: FC<TProps> = ({
                         <Button
                           onClick={onImageUpload}
                           {...dragProps}
-                          variant="faded"
-                          className="w-[375px]"
+                          variant="light"
+                          className={`${!fullWidth && "w-[375px]"} bg-white`}
                           size="lg"
                           color="primary"
+                          fullWidth={fullWidth}
                         >
                           <div className="flex justify-between items-center w-[100%]">
                             <div></div>
@@ -148,7 +156,8 @@ export const ImageUpload: FC<TProps> = ({
                       <Button
                         isIconOnly
                         onClick={() => onImageRemove(index)}
-                        variant="flat"
+                        variant="light"
+                        className="hover:!bg-transparent"
                       >
                         <Image priority={false} src={Close} alt="close" />
                       </Button>

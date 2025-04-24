@@ -17,7 +17,7 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
   const secondEditorImage = data?.secondEditorImages?.[0];
   return (
     <>
-      <div className="p-8 px-24">
+      <div className={`py-8 w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -52,7 +52,7 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
         )}
       </div>
       <div
-        className={`p-8 ${isPreview ? "pt-4" : "p-18"} px-16`}
+        className={`py-8 w-[886px] m-auto`}
         style={
           image && {
             backgroundImage: `url(${image.dataURL})`,
@@ -62,7 +62,7 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
       >
         <div className="flex items-start justify-between gap-4">
           <Card
-            className={`${isPreview ? "w-[50%]" : ""} p-5 editor-view`}
+            className={`w-[50%] p-5 editor-view`}
             style={{
               margin: "0 auto",
               backgroundColor: "#fff",
@@ -74,10 +74,13 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
             {!!editorImage && (
               <img src={editorImage.dataURL} className="mb-4" />
             )}
-            <div dangerouslySetInnerHTML={{ __html: data?.content }} />
+            <div
+              dangerouslySetInnerHTML={{ __html: data?.content }}
+              className="editorClassName"
+            />
           </Card>
           <Card
-            className={`${isPreview ? "w-[50%]" : ""} p-5 editor-view`}
+            className={`w-[50%] p-5 editor-view`}
             style={{
               margin: "0 auto",
               backgroundColor: "#fff",
@@ -89,7 +92,10 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
             {!!secondEditorImage && (
               <img src={secondEditorImage.dataURL} className="mb-4" />
             )}
-            <div dangerouslySetInnerHTML={{ __html: data?.secondContent }} />
+            <div
+              dangerouslySetInnerHTML={{ __html: data?.secondContent }}
+              className="editorClassName"
+            />
           </Card>
         </div>
       </div>

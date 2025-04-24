@@ -159,7 +159,8 @@ export const MatchWordWord: FC<TProps> = ({
                     <Button
                       isIconOnly
                       onClick={() => onDeleteSticker(index)}
-                      variant="flat"
+                      variant="light"
+                      className="hover:!bg-transparent"
                       size="sm"
                     >
                       <Image priority={false} src={Close} alt="close" />

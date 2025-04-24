@@ -140,7 +140,8 @@ export const PopoverFields: FC<TProps> = ({
                       }, 100);
                     }}
                     isIconOnly
-                    variant="flat"
+                    variant="light"
+                    className="hover:!bg-transparent"
                     size="sm"
                   >
                     <Image src={Close} alt="delete option" />

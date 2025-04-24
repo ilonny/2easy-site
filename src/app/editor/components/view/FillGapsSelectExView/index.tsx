@@ -120,10 +120,10 @@ export const FillGapsSelectExView: FC<TProps> = ({
   useEffect(() => {
     renderContent();
   }, [renderContent]);
-  console.log('data???', data)
+  console.log("data???", data);
   return (
     <>
-      <div className="p-8 px-24">
+      <div className={`py-8 w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -157,7 +157,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
           </p>
         )}
       </div>
-      <div className={`p-8 ${isPreview ? "pt-4" : "p-18"} px-24 `}>
+      <div className={`py-8 w-[886px] m-auto`}>
         <Card
           className={`p-10 px-10 `}
           style={
@@ -169,7 +169,10 @@ export const FillGapsSelectExView: FC<TProps> = ({
         >
           <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
             <div
-              className={"answerWrapperArea answerWrapperArea-" + (data?.id || 0).toString()}
+              className={
+                "answerWrapperArea answerWrapperArea-" +
+                (data?.id || 0).toString()
+              }
               dangerouslySetInnerHTML={{ __html: data.dataText }}
             ></div>
           </div>

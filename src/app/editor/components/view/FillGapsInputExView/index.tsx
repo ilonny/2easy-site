@@ -120,7 +120,7 @@ export const FillGapsInputExView: FC<TProps> = ({
 
   return (
     <>
-      <div className="p-8 px-24">
+      <div className={`py-8 w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -154,7 +154,7 @@ export const FillGapsInputExView: FC<TProps> = ({
           </p>
         )}
       </div>
-      <div className={`p-8 ${isPreview ? "pt-4" : "p-18"} px-24 `}>
+      <div className={`py-8 w-[886px] m-auto`}>
         <Card
           className={`p-10 px-10 `}
           style={

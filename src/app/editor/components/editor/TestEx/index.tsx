@@ -247,6 +247,7 @@ export const TestEx: FC<TProps> = ({
                     <Button
                       isIconOnly
                       variant="light"
+                      className="hover:!bg-transparent"
                       onClick={() => onDeleteQuestion(qIndex)}
                     >
                       <Image src={Close} alt="close icon" />
@@ -287,6 +288,7 @@ export const TestEx: FC<TProps> = ({
                           <Button
                             isIconOnly
                             variant="light"
+                            className="hover:!bg-transparent"
                             onClick={() => onDeleteOption(qIndex, optionIndex)}
                           >
                             <Image src={Close} alt="close icon" />

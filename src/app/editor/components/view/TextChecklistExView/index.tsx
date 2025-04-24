@@ -18,7 +18,7 @@ export const TextChecklistExView: FC<TProps> = ({
 
   return (
     <>
-      <div className="p-8 px-24">
+      <div className={`py-8 w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -53,7 +53,7 @@ export const TextChecklistExView: FC<TProps> = ({
         )}
       </div>
       <div
-        className={`p-8 ${isPreview ? "pt-4" : "p-18"} px-24 `}
+        className={`py-8 w-[886px] m-auto`}
         style={
           image && {
             backgroundImage: `url(${image.dataURL})`,
@@ -77,7 +77,7 @@ export const TextChecklistExView: FC<TProps> = ({
                     key={index}
                     style={{ cursor: "pointer" }}
                   >
-                    <Checkbox size="lg" color="success" />
+                    <Checkbox size="lg" color="primary" />
                     <p style={{ fontSize: 18 }}>{sticker}</p>
                   </label>
                 );

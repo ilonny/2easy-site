@@ -189,16 +189,17 @@ export const Text2ColEx: FC<TProps> = ({
       </div>
       <div className="h-5" />
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div style={{ width: "50%" }}>
           <div
             style={{
               background: "#fff",
-              border: "1px solid #3f28c6",
-              padding: 10,
+              // border: "1px solid #3f28c6",
+              // padding: 10,
             }}
           >
             <Editor
               editorState={editorState}
+              stripPastedStyles={true}
               toolbar={{
                 options: [
                   "inline",
@@ -224,25 +225,28 @@ export const Text2ColEx: FC<TProps> = ({
               onEditorStateChange={setEditorState}
             />
           </div>
-          <div className="h-8" />
+          <div className="h-4" />
           <div className="flex justify-center">
             <ImageUpload
               images={editorImages}
               setImages={setEditorImages}
               isButton
               onlyPlaceholder
+              whiteBg
+              fullWidth
             />
           </div>
         </div>
-        <div>
+        <div style={{ width: "50%" }}>
           <div
             style={{
               background: "#fff",
-              border: "1px solid #3f28c6",
-              padding: 10,
+              // border: "1px solid #3f28c6",
+              // padding: 10,
             }}
           >
             <Editor
+              stripPastedStyles={true}
               editorState={secondEditorState}
               toolbar={{
                 options: [
@@ -270,9 +274,11 @@ export const Text2ColEx: FC<TProps> = ({
               onEditorStateChange={setSecondEditorState}
             />
           </div>
-          <div className="h-8" />
+          <div className="h-4" />
           <div className="flex justify-center">
             <ImageUpload
+              fullWidth
+              whiteBg
               images={secondEditorImages}
               setImages={setSecondEditorImages}
               isButton

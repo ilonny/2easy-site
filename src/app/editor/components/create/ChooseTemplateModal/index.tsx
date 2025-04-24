@@ -5,7 +5,7 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { templates, TTemplate } from "./templates";
 
 type TProps = {
@@ -39,6 +39,12 @@ export const ChooseTemplateModal: FC<TProps> = ({
     setTemplatesToShow(templates);
     setIsSubViews(false);
   }, []);
+
+  useEffect(() => {
+    if (isVisible) {
+      setTemplatesToShow(templates);
+    }
+  }, [isVisible]);
 
   return (
     <Modal
@@ -80,7 +86,7 @@ export const ChooseTemplateModal: FC<TProps> = ({
                       radius="sm"
                       className="p-5 flex items-center justify-center"
                       style={{
-                        backgroundColor: "#2A2374",
+                        backgroundColor: "#e3e3e3",
                         cursor: "pointer",
                         height: "220px",
                         backgroundImage: template.bgImage

@@ -22,22 +22,23 @@ const settings = {
   arrows: true,
   nextArrow: (
     <div>
-      <Image src={ArrowIcon} alt="ArrowIcon" style={{ transform: "rotate(180deg)" }} />
+      <Image
+        src={ArrowIcon}
+        alt="ArrowIcon"
+        style={{ transform: "rotate(180deg)" }}
+      />
     </div>
   ),
   prevArrow: (
     <div>
-      <Image
-        src={ArrowIcon}
-        alt="ArrowIcon"
-      />
+      <Image src={ArrowIcon} alt="ArrowIcon" />
     </div>
   ),
 };
 
 export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
   return (
-    <div className="p-16 px-24">
+    <div className={`py-8 w-[886px] m-auto`}>
       <p
         style={{
           color: data.titleColor,
@@ -71,10 +72,7 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
         </p>
       )}
       <div className="h-10" />
-      <div
-        className={isPreview ? "w-[633px]" : ""}
-        style={{ margin: "0 auto" }}
-      >
+      <div className={`py-8 w-[886px] m-auto`} style={{ margin: "0 auto" }}>
         {!Boolean(data?.images?.length) && (
           <div
             className="w-full h-[250px]"

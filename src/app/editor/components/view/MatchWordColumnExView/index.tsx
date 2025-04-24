@@ -122,18 +122,17 @@ export const MatchWordColumnExView: FC<TProps> = ({
     }, []);
     return allWords
       .filter((wChip) => {
-        return !correctChips.find(
-          (correctChip) => correctChip.word === wChip.word
-        ) && !!wChip.word;
+        return (
+          !correctChips.find(
+            (correctChip) => correctChip.word === wChip.word
+          ) && !!wChip.word
+        );
       })
       .sort(() => 0.5 - Math.random());
   }, [correctChips, data.columns]);
 
-  console.log("sortedChips", sortedChips);
-  console.log("data.columns", data.columns);
-
   return (
-    <div className="p-16 px-24">
+    <div className={`py-8 w-[886px] m-auto`}>
       <p
         style={{
           color: data.titleColor,
@@ -168,7 +167,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
       )}
       <div className="h-10" />
       <div
-        className={`p-8 ${isPreview ? "pt-4 px-0" : "p-18"}  `}
+        className={`py-8 w-[886px] m-auto`}
         style={
           image && {
             backgroundImage: `url(${image.dataURL})`,
@@ -177,7 +176,6 @@ export const MatchWordColumnExView: FC<TProps> = ({
         }
       >
         <div
-          className={isPreview ? "w-[633px]" : ""}
           style={{
             margin: "0 auto",
           }}

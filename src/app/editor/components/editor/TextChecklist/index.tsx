@@ -6,7 +6,7 @@ import { TTextStickerData } from "./types";
 import { FC, useCallback, useEffect, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button, Textarea } from "@nextui-org/react";
+import { Button, Input, Textarea } from "@nextui-org/react";
 import Close from "@/assets/icons/close.svg";
 import { useUploadTextChecklistEx } from "../hooks/useUploadTextChecklistEx";
 import { TextChecklistExView } from "../../view/TextChecklistExView";
@@ -103,6 +103,15 @@ export const TextChecklist: FC<TProps> = ({
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
+          <div className="h-4" />
+          <ImageUpload
+            images={editorImages}
+            setImages={setEditorImages}
+            isButton
+            onlyPlaceholder
+            fullWidth
+            whiteBg
+          />
         </div>
         <div className="w-[50%] pl-2">
           <p className="font-light mb-2">Фоновое изображение блока</p>
@@ -143,7 +152,8 @@ export const TextChecklist: FC<TProps> = ({
                     <Button
                       isIconOnly
                       onClick={() => onDeleteSticker(index)}
-                      variant="flat"
+                      variant="light"
+                      className="hover:!bg-transparent"
                       size="sm"
                     >
                       <Image priority={false} src={Close} alt="close" />
@@ -151,8 +161,12 @@ export const TextChecklist: FC<TProps> = ({
                   )}
                 </div>
                 <div className="mt-2">
-                  <Textarea
-                    variant="bordered"
+                  <Input
+                    size="lg"
+                    classNames={{
+                      inputWrapper:
+                        "bg-white focus-within:bg-white active:bg-white",
+                    }}
                     value={sticker}
                     onChange={(e) => onChangeSticker(e.target.value, index)}
                   />
@@ -176,14 +190,6 @@ export const TextChecklist: FC<TProps> = ({
             </Button>
           </div>
         )}
-        <div className="flex justify-center">
-          <ImageUpload
-            images={editorImages}
-            setImages={setEditorImages}
-            isButton
-            onlyPlaceholder
-          />
-        </div>
       </div>
       <div className="h-10" />
       <div>

@@ -15,7 +15,7 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
 
   return (
     <>
-      <div className="p-8 px-24">
+      <div className={`py-8 w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -50,7 +50,7 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
         )}
       </div>
       <div
-        className={`p-8 ${isPreview ? "pt-4" : "p-18"} px-24 `}
+        className={`py-8 w-[886px] m-auto`}
         style={
           image && {
             backgroundImage: `url(${image.dataURL})`,
@@ -69,20 +69,20 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
                 key={index}
               >
                 <Card
-                  className={`p-4 flex justify-center items-center text-center  relative`}
+                  className={`p-10 flex justify-center items-center text-center  relative`}
                   radius="none"
                   style={{
                     overflow: "inherit",
                     backgroundColor: data.stickerBgColor || "#fff",
-                    minHeight: isPreview ? 160 : 200,
+                    minHeight: 260,
                   }}
                 >
                   <p
                     style={{
-                      fontSize: 24,
+                      fontSize: 30,
                       position: "absolute",
-                      left: 13,
-                      top: -17,
+                      left: 6,
+                      top: -23,
                     }}
                   >
                     📌
@@ -90,8 +90,9 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
                   <p
                     className="uppercase"
                     style={{
-                      fontWeight: 600,
+                      fontWeight: 500,
                       color: data.stickerTextColor || "#000",
+                      lineHeight: "130%",
                     }}
                   >
                     {sticker}

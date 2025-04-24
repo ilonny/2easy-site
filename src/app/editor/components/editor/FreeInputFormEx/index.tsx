@@ -6,18 +6,17 @@ import { TFreeInputFormData } from "./types";
 import { FC, useCallback, useEffect, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button, Card, Checkbox, Input, Textarea } from "@nextui-org/react";
+import { Button, Textarea } from "@nextui-org/react";
 import { useUploadFreeInputFormEx } from "../hooks/useUploadFreeInputFormEx";
 import Close from "@/assets/icons/close.svg";
-import { ImageListType } from "react-images-uploading";
 import { uuidv4 } from "@/app/editor/helpers";
-// import { FreeInputFormExView } from "../../view/FreeInputFormExView";
+import { FreeInputFormExView } from "../../view/FreeInputFormExView";
 
 const defaultValuesStub: TFreeInputFormData = {
-  title: "Let's test yourself!",
+  title: "Let's practice!",
   titleColor: "#3F28C6",
-  subtitle: "Choose the correct option for each question",
-  description: "",
+  subtitle: "Look at the questions below",
+  description: "Write down your answers for each of them",
   images: [],
   questions: [
     {
@@ -152,6 +151,7 @@ export const FreeInputFormEx: FC<TProps> = ({
                     <Button
                       isIconOnly
                       variant="light"
+                      className="hover:!bg-transparent"
                       onClick={() => onDeleteQuestion(qIndex)}
                     >
                       <Image src={Close} alt="close icon" />
@@ -194,7 +194,7 @@ export const FreeInputFormEx: FC<TProps> = ({
             background: "#fff",
           }}
         >
-          {/* <FreeInputFormExView data={data} isPreview /> */}
+          <FreeInputFormExView data={data} isPreview />
         </div>
         <div className="h-5" />
         <div className="flex justify-center">

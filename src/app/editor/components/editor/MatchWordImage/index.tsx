@@ -142,7 +142,8 @@ export const MatchWordImage: FC<TProps> = ({
                           imgs.filter((_img, i) => i !== index)
                         )
                       }
-                      variant="flat"
+                      variant="light"
+                      className="hover:!bg-transparent"
                     >
                       <Image priority={false} src={Close} alt="close" />
                     </Button>

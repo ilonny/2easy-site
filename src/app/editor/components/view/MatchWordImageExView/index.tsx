@@ -139,13 +139,13 @@ export const MatchWordImageExView: FC<TProps> = ({
   const isTeacher = profile?.role_id === 2;
   const sortedChips = useMemo(() => {
     return [...data.images]
-      .filter((i) => !correctChips.includes(i.text))
+      .filter((i) => !!i.text && !correctChips.includes(i.text))
       .map((img) => img.text)
       .sort(() => 0.5 - Math.random());
   }, [correctChips, data.images]);
 
   return (
-    <div className="p-16 px-24">
+    <div className={`py-8 w-[886px] m-auto`}>
       <p
         style={{
           color: data.titleColor,
@@ -179,10 +179,7 @@ export const MatchWordImageExView: FC<TProps> = ({
         </p>
       )}
       <div className="h-10" />
-      <div
-        className={isPreview ? "w-[633px]" : ""}
-        style={{ margin: "0 auto" }}
-      >
+      <div style={{ margin: "0 auto" }}>
         {!Boolean(data?.images?.length) && (
           <div
             className="w-full h-[250px]"
@@ -191,11 +188,11 @@ export const MatchWordImageExView: FC<TProps> = ({
         )}
         {data.viewType === "drag" && (
           <div className="flex items-center wrap gap-4 justify-center mb-4">
-            {sortedChips.map((chip) => {
+            {sortedChips.map((chip, chipIndex) => {
               return (
                 <DraggableItem
                   chip={chip}
-                  key={chip}
+                  key={chip + chipIndex}
                   isIntersected={isIntersected}
                   setCorrectChips={setCorrectChips}
                   setActiveChip={setActiveChip}

@@ -161,6 +161,7 @@ export const TextDefaultEx: FC<TProps> = ({
       <div style={{ background: "#fff" }}>
         <Editor
           editorState={editorState}
+          stripPastedStyles={true}
           toolbar={{
             options: [
               "inline",
@@ -170,7 +171,8 @@ export const TextDefaultEx: FC<TProps> = ({
               "list",
               "textAlign",
               "colorPicker",
-              "link",
+              // "link",
+              "remove",
             ],
             fontSize: {
               options: [
