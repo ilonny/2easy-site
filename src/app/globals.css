@@ -25,11 +25,11 @@
 }
 
 .slick-next {
-  right: -63px !important;
+  /* right: -63px !important; */
 }
 
 .slick-prev {
-  left: -63px !important;
+  /* left: -63px !important; */
 }
 
 .slick-slide img {
@@ -37,6 +37,21 @@
   max-height: 600px !important;
 }
 
+.slick-track
+{
+    display: flex !important;
+}
+
+.slick-slide
+{
+    height: inherit !important;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}
+.slick-dots li {
+  margin: 0px !important;
+}
 ol,
 ul {
   list-style: auto !important;

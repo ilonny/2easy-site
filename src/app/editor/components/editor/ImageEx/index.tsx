@@ -134,9 +134,12 @@ export const ImageEx: FC<TProps> = ({
         <div className="flex flex-wrap">
           {images?.map((image, index) => {
             return (
-              <div key={index} className="w-[25%] p-2">
-                <div className="image-item relative w-full h-full flex items-center justify-center">
-                  <img src={image.dataURL} style={{ width: "100%" }} />
+              <div key={index} className="w-[25%] p-2 h-[150px] mb-12">
+                <div
+                  className="image-item relative w-full h-full flex items-center justify-center bg-white"
+                  style={{ borderRadius: 10, overflow: "hidden" }}
+                >
+                  <img src={image.dataURL} style={{ height: "100%" }} />
                   <div className="image-item__btn-wrapper top-0 right-0 absolute">
                     <Button
                       isIconOnly
@@ -152,6 +155,7 @@ export const ImageEx: FC<TProps> = ({
                     </Button>
                   </div>
                 </div>
+                <div className="h-2"></div>
                 <Input
                   onChange={(e) =>
                     changeImageDescription(e.target.value, index)

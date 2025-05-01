@@ -104,7 +104,10 @@ export const AudioExView: FC<TProps> = ({ data, isPreview = false }) => {
                     radius="md"
                     shadow="none"
                     className="p-4"
-                    style={{ border: "1px solid #3F28C6" }}
+                    style={{
+                      border: "1px solid #3F28C6",
+                      whiteSpace: "break-spaces",
+                    }}
                   >
                     {data.audioDescription}
                   </Card>

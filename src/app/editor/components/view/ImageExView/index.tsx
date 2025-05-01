@@ -6,6 +6,8 @@ import { FC } from "react";
 import { TImageExData } from "../../editor/ImageEx/types";
 import ArrowIcon from "@/assets/icons/slick_arrow.svg";
 import Image from "next/image";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 type TProps = {
   data: TImageExData;
@@ -86,7 +88,9 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
                 {data?.images?.map((image) => {
                   return (
                     <div key={image.dataURL}>
-                      <img src={image.dataURL} alt="image" />
+                      <Zoom>
+                        <img src={image.dataURL} alt="image" />
+                      </Zoom>
                       {image?.text && (
                         <p
                           className="mt-2 text-center font-bold"
@@ -108,7 +112,9 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
             {data?.images?.map((image) => {
               return (
                 <div key={image.dataURL} className="w-[50%] p-4">
-                  <img src={image.dataURL} alt="image" />
+                  <Zoom>
+                    <img src={image.dataURL} alt="image" />
+                  </Zoom>
                   {image?.text && (
                     <p
                       className="mt-2 text-center font-bold"
@@ -127,7 +133,9 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
             {data?.images?.map((image) => {
               return (
                 <div key={image.dataURL} className="w-[33.3333333%] p-4">
-                  <img src={image.dataURL} alt="image" />
+                  <Zoom>
+                    <img src={image.dataURL} alt="image" />
+                  </Zoom>
                   {image?.text && (
                     <p
                       className="mt-2 text-center font-bold"

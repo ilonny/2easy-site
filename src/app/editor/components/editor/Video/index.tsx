@@ -69,7 +69,11 @@ export const Video: FC<TProps> = ({
 
   const onChangeSticker = useCallback(
     (text: string, index: number, key: "content" | "title") => {
-      if (key === "content" && text.includes("youtube.com")) {
+      if (
+        key === "content" &&
+        !text.includes("iframe") &&
+        (text.includes("youtube.com") || text.includes("youtu.be"))
+      ) {
         const regExp =
           /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
         const match = text.match(regExp);
@@ -81,6 +85,23 @@ export const Video: FC<TProps> = ({
           '<iframe width="100%" height="400" src="//www.youtube.com/embed/' +
           id +
           '" frameborder="0" allowfullscreen></iframe>';
+      }
+      if (
+        key === "content" &&
+        !text.includes("iframe") &&
+        text.includes("rutube.ru/video")
+      ) {
+        const id = text.split("/").reverse()[1];
+        text = `<iframe width="100%" height="400" src="https://rutube.ru/play/embed/${id}/" frameBorder="0" allow="clipboard-write; autoplay" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>`;
+      }
+      if (
+        key === "content" &&
+        !text.includes("iframe") &&
+        text.includes("vkvideo.ru")
+      ) {
+        const oid = text.split("video-")[1].split("_")[0];
+        const id = text.split("video-")[1].split("_")[1];
+        text = `<iframe src="https://vkvideo.ru/video_ext.php?oid=-${oid}&id=${id}&hd=2&autoplay=1" width="100%" height="400" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>`;
       }
       data.videos[index][key] = text;
       changeData("videos", [...data.videos]);
