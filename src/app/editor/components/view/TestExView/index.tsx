@@ -56,11 +56,9 @@ export const TestStep = (props: TTestStepProps) => {
   if (!question) {
     return <></>;
   }
-  console.log("error map", errorMap);
   const defaultValue = !Object.keys(errorMap).length
     ? undefined
     : Object.keys(errorMap.current)[0];
-  console.log("defaultValue", defaultValue);
   return (
     <>
       <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 30 }}>
@@ -81,7 +79,6 @@ export const TestStep = (props: TTestStepProps) => {
               !errorMap.current[option.id] &&
               selectedMap.current[option.id];
             const isIncorrect = isSubmitted && errorMap.current[option.id];
-            console.log("option", option, isIncorrect);
             return (
               <label
                 className="flex items-start wrap"
@@ -303,7 +300,14 @@ export const TestExView: FC<TProps> = ({ data, isPreview = false }) => {
             />
           )}
           {!isFinished && (
-            <p style={{ color: "#B7B7B7", textAlign: "center", marginTop: 40 }}>
+            <p
+              style={{
+                color: "#B7B7B7",
+                textAlign: "center",
+                marginTop: 40,
+                fontSize: 14,
+              }}
+            >
               {currentStep}/{totalSteps}
             </p>
           )}

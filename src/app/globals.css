@@ -84,18 +84,22 @@ blockquote {
     font-family: inherit !important;
     font-size: inherit !important;
     line-height: inherit !important;
-    display: inline !important;
+    /* display: inline !important; */
+}
+
+.contentEditable:focus-visible {
+  outline: none;
 }
 
 .contentEditableDrag .popover-wrapper .drag-word{
   background-color: #EEEBFF !important;
-  padding: 4px 10px;
+  padding: 0px 5px;
   border-radius: 4px;
 }
 
-.answerWrapperArea .answer-wrapper{
+.answerWrapperArea:not(.fill-gaps-input-area) .answer-wrapper{
   background-color: #EEEBFF !important;
-  padding: 4px 10px;
+  padding: 2px 5px;
   border-radius: 4px;
   min-height: 25px;
   vertical-align: middle;
@@ -103,23 +107,43 @@ blockquote {
 
 .answerWrapperArea .answer-wrapper.select-answer-wrapper {
   background-color: transparent !important;
+  padding: 0px 5px;
 }
 
-.answer-wrapper .inputcustom.isCorrect [data-slot="input-wrapper"]::after {
+.answer-wrapper .inputcustom input{
+  color: black !important;
+  font-size: 16px;
+  padding-top: 3px;
+}
+
+/* .answerWrapperArea .answer-wrapper .inputcustom.isCorrect [data-slot="input-wrapper"]::after {
   background-color: rgb(23, 201, 100) !important;
   width: 100% !important;
 }
-.answer-wrapper .inputcustom.isIncorrect [data-slot="input-wrapper"]::after {
+.answerWrapperArea .answer-wrapper .inputcustom.isIncorrect [data-slot="input-wrapper"]::after {
   background-color: rgb(243, 18, 96) !important;
   width: 100% !important;
+} */
+
+/* .answerWrapperArea .answer-wrapper .inputcustom.isCorrect {
+  background-color: rgb(23, 201, 100) !important;
+  width: 100% !important;
 }
+.answerWrapperArea .answer-wrapper .inputcustom.isIncorrect {
+  background-color: rgb(243, 18, 96) !important;
+  width: 100% !important;
+} */
+
 
 .answerWrapperArea *:not(.answer-wrapper):not([data-slot]) .teacher-placeholer {
   color: gray !important;
 }
 
 .answerWrapperArea .answer-wrapper.mx-2.bg-success {
-  background-color: #17c964 !important;
+  background-color: #d1f4e0 !important;
+}
+.answerWrapperArea .answer-wrapper.mx-2.bg-error {
+  background-color: #fdd0df !important;
 }
 
 /* .answerWrapperArea .answer-wrapper.mx-2.bg-success .success-placeholder {

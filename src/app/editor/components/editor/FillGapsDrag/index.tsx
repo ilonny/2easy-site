@@ -3,7 +3,7 @@ import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
 import { TField, TFillGapsDragData } from "./types";
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
 import { Button } from "@nextui-org/react";
@@ -155,6 +155,64 @@ export const FillGapsDrag: FC<TProps> = ({
     }, 500);
   }, [data.dataText, data.fields, changeData]);
 
+  const contentEditableRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === "childList") {
+          mutation.removedNodes.forEach((removedNode) => {
+            if (
+              removedNode.classList &&
+              removedNode.classList.contains("answerWrapper")
+            ) {
+              mutation.previousSibling.nodeValue =
+                mutation.previousSibling?.nodeValue +
+                " " +
+                removedNode
+                  ?.getAttribute("answer")
+                  .replace("[", "")
+                  .replace("]", "") +
+                " ";
+              onChangeText(contentEditableRef.current?.innerHTML || "");
+            }
+          });
+        }
+      });
+    });
+
+    const currentRef = contentEditableRef.current;
+
+    if (currentRef) {
+      observer.observe(currentRef, {
+        childList: true,
+        subtree: true,
+        characterData: false,
+      });
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [onChangeText]);
+
+  useEffect(() => {
+    const pasteListener = (e) => {
+      e.preventDefault();
+      // get text representation of clipboard
+      const text = (e.originalEvent || e).clipboardData.getData("text/plain");
+      // insert text manually
+      document.execCommand("insertHTML", false, text);
+    };
+    document
+      .getElementById("contentEditableWrapper")
+      ?.addEventListener("paste", pasteListener);
+    return () =>
+      document
+        .getElementById("contentEditableWrapper")
+        ?.removeEventListener("paste", pasteListener);
+  }, []);
+
   return (
     <div>
       <div className="flex flex-wrap">
@@ -217,7 +275,7 @@ export const FillGapsDrag: FC<TProps> = ({
           className={`p-4 contentEditable contentEditableDrag ${styles["contentEditable"]}`}
           style={{ borderRadius: 20, background: "#fff" }}
           onBlur={(e) => onChangeText(e.currentTarget.innerHTML || "")}
-          // dangerouslySetInnerHTML={{ __html: content }}
+          ref={contentEditableRef}
         ></div>
         <AddItemCard onClickAddSelection={onClickAddSelection} />
       </div>

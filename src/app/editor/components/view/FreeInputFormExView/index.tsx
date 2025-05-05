@@ -69,7 +69,7 @@ export const FreeInputFormExView: FC<TProps> = ({
         )}
       </div>
       <div
-        className={`py-8 w-[886px] m-auto`}
+        className={`py-8 w-[540px] m-auto`}
         style={
           image && {
             backgroundImage: `url(${image.dataURL})`,
@@ -87,7 +87,7 @@ export const FreeInputFormExView: FC<TProps> = ({
                 <Textarea
                   placeholder="Введите текст"
                   classNames={{ inputWrapper: "bg-white p-4" }}
-                  minRows={5}
+                  minRows={1}
                   style={{ fontSize: 16 }}
                 />
               </Card>

@@ -33,20 +33,26 @@ const AnswerField: FC<{
   field: TField;
   isTeacher: boolean;
   isCorrect: boolean;
-}> = ({ field, isTeacher, isCorrect }) => {
+  dataId: number;
+  errorAnswerId: number;
+}> = ({ field, isTeacher, isCorrect, errorAnswerId }) => {
   return (
     <div
-      className={`answer-wrapper mx-2 ${isCorrect && "bg-success"}`}
+      className={`answer-wrapper mx-2 ${isCorrect && "bg-success"} ${
+        field.id == String(errorAnswerId) && "bg-error"
+      }`}
       data-id={field?.id}
       id={"answer-wrapper-" + field?.id}
       style={{
         display: "inline-block",
-        minWidth: 150,
+        minWidth: isCorrect ? "initial" : 150,
         borderRadius: 30,
+        position: "relative",
+        top: -1,
       }}
     >
       <div className={`drag-word`}>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 px-1">
           {isTeacher && !isCorrect && (
             <div className="teacher-placeholer">{field.value}</div>
           )}
@@ -63,21 +69,28 @@ const DraggableItem = (props: {
   field: TField;
   setActiveDragId: (id: number | null) => void;
   isIntersected: MutableRefObject<boolean>;
+  isMissedIntersectedId: MutableRefObject<number>;
   onDrop: () => void;
   setCorrectIds: Dispatch<SetStateAction<number[]>>;
+  setErrorAnswerId: Dispatch<SetStateAction<number>>;
   isCorrect: boolean;
+  activeDragId: number | null;
 }) => {
   const {
     field,
     setActiveDragId,
     isIntersected,
+    isMissedIntersectedId,
     onDrop,
     setCorrectIds,
     isCorrect,
+    activeDragId,
+    setErrorAnswerId,
   } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
   const [isError, setIsError] = useState(false);
+  const isActiveDrag = activeDragId === Number(field.id);
 
   const handleDrag = useCallback((id: number, x: number, y: number) => {
     setActiveDragId(id);
@@ -100,6 +113,27 @@ const DraggableItem = (props: {
         draggableRect.left > droppableRect.right
       );
       isIntersected.current = intersects;
+      if (!intersects) {
+        isMissedIntersectedId.current = 0;
+        //@ts-ignore
+        const allWrappers = document
+          ?.getElementById("draggable-" + id)
+          ?.closest(".fill-the-gaps-draggable")
+          .querySelectorAll(".answer-wrapper");
+        const isAnyIntersects = Array.from(allWrappers)?.some((w) => {
+          const droppableRect = w.getBoundingClientRect();
+          const intersects = !(
+            draggableRect.top > droppableRect.bottom ||
+            draggableRect.bottom < droppableRect.top ||
+            draggableRect.right < droppableRect.left ||
+            draggableRect.left > droppableRect.right
+          );
+          if (intersects) {
+            isMissedIntersectedId.current = w?.dataset?.id;
+          }
+          return intersects;
+        });
+      }
     } catch (err) {}
   }, []);
 
@@ -121,13 +155,17 @@ const DraggableItem = (props: {
       onStop={() => {
         onDrop();
         setActiveDragId(null);
+        if (isMissedIntersectedId.current) {
+          setX(0);
+          setY(0);
+          setErrorAnswerId(isMissedIntersectedId.current);
+          setTimeout(() => {
+            setErrorAnswerId(0);
+          }, 2000);
+        }
         if (!isIntersected.current) {
           setX(0);
           setY(0);
-          setIsError(true);
-          setTimeout(() => {
-            setIsError(false);
-          }, 2000);
           return;
         }
         setCorrectIds((ids) => ids.concat(field?.id));
@@ -137,7 +175,7 @@ const DraggableItem = (props: {
         id={"draggable-" + field?.id}
         size="md"
         color={isError ? "danger" : "primary"}
-        className="handle"
+        className={`${isActiveDrag && "bg-[#271399]"} handle`}
         style={{ zIndex: 1, cursor: "pointer" }}
       >
         <span style={{ fontSize: 14 }}>{field.value}</span>
@@ -151,6 +189,8 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
   const { profile } = useContext(AuthContext);
   const [activeDragId, setActiveDragId] = useState<number | null>();
   const isIntersected = useRef(false);
+  const isMissedIntersectedId = useRef<number>(0);
+  const [errorAnswerId, setErrorAnswerId] = useState<number>(0);
   const [correctIds, setCorrectIds] = useState<number[]>([]);
 
   const renderContent = useCallback(() => {
@@ -170,17 +210,19 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
                 field={field}
                 isTeacher={profile?.role_id === 2}
                 isCorrect={correctIds.includes(field?.id)}
+                dataId={data?.id}
+                errorAnswerId={errorAnswerId}
               />
             )}
           </>
         );
       });
-  }, [data?.id, data.fields, profile?.role_id, correctIds]);
+  }, [data?.id, data.fields, profile?.role_id, correctIds, errorAnswerId]);
 
   useEffect(() => {
     renderContent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.dataText, correctIds]);
+  }, [data.dataText, correctIds, errorAnswerId]);
 
   const editableContent = useMemo(() => {
     return (
@@ -197,12 +239,10 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
     return [...data.fields].sort(() => 0.5 - Math.random());
   }, [data.fields]);
 
-  const onDrop = useCallback(() => {
-    console.log("onDrop?", isIntersected.current, activeDragId);
-  }, [activeDragId]);
+  const onDrop = useCallback(() => {}, [activeDragId]);
 
   return (
-    <>
+    <div className="fill-the-gaps-draggable">
       <div className={`py-8 w-[886px] m-auto`}>
         <p
           style={{
@@ -245,10 +285,13 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
                 key={field?.id}
                 field={field}
                 setActiveDragId={setActiveDragId}
+                activeDragId={activeDragId}
                 isIntersected={isIntersected}
+                isMissedIntersectedId={isMissedIntersectedId}
                 onDrop={onDrop}
                 setCorrectIds={setCorrectIds}
                 isCorrect={correctIds.includes(field?.id)}
+                setErrorAnswerId={setErrorAnswerId}
               />
             );
           })}
@@ -267,6 +310,6 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
           </div>
         </Card>
       </div>
-    </>
+    </div>
   );
 };

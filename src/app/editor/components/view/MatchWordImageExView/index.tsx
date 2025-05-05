@@ -16,6 +16,8 @@ import { TMatchWordImageData } from "../../editor/MatchWordImage/types";
 import { Card, Chip, Input } from "@nextui-org/react";
 import Draggable from "react-draggable";
 import { AuthContext } from "@/auth";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 type TProps = {
   data: TMatchWordImageData;
@@ -123,6 +125,7 @@ const InputItem = (props: {
         placeholder={isTeacher ? chip : ""}
         style={{ height: 50 }}
         isDisabled={isCorrect}
+        classNames={{ inputWrapper: "bg-white" }}
       />
     </>
   );
@@ -210,11 +213,13 @@ export const MatchWordImageExView: FC<TProps> = ({
               return (
                 <div key={image.dataURL} className="w-[33.3333333%] p-4">
                   <div className="h-[220px] flex items-center justify-center">
-                    <img
-                      src={image.dataURL}
-                      alt="image"
-                      style={{ margin: "0 auto", maxHeight: "100%" }}
-                    />
+                    <Zoom>
+                      <img
+                        src={image.dataURL}
+                        alt="image"
+                        style={{ margin: "0 auto", maxHeight: "100%" }}
+                      />
+                    </Zoom>
                   </div>
                   {data.viewType === "drag" && (
                     <Card
@@ -239,9 +244,9 @@ export const MatchWordImageExView: FC<TProps> = ({
                       style={{
                         height: 40,
                         width: "100%",
-                        border: isCorrect
-                          ? "2px solid #219F59"
-                          : "2px solid transparent",
+                        // border: isCorrect
+                        //   ? "2px solid #219F59"
+                        //   : "2px solid transparent",
                         background: isCorrect ? "#E9FEE8" : "transparent",
                       }}
                     >

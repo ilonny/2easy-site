@@ -107,7 +107,13 @@ export const PopoverFields: FC<TProps> = ({
         <Button
           variant="light"
           color="default"
-          endContent={<Image src={ChevronIconDown} alt="down" />}
+          endContent={
+            <Image
+              src={ChevronIconDown}
+              alt="down"
+              style={{ position: "relative", top: 5 }}
+            />
+          }
         >
           <span style={{ color: "#3F28C6 important!" }}>______</span>
         </Button>

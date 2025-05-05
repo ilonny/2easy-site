@@ -7,6 +7,7 @@ export type TField = {
       isCorrect: boolean;
     }
   ];
+  originalWord: string;
 };
 
 export type TFillGapsSelectData = {

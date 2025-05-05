@@ -56,6 +56,7 @@ const PopoverInput = ({
           onBlur(inputValue);
         }
       }}
+      style={{ position: "relative", top: 2 }}
     />
   );
 };
@@ -105,9 +106,16 @@ export const PopoverFields: FC<TProps> = ({
     >
       <PopoverTrigger>
         <Button
+          size="sm"
           variant="light"
           color="default"
-          endContent={<Image src={ChevronIconDown} alt="down" />}
+          endContent={
+            <Image
+              src={ChevronIconDown}
+              alt="down"
+              style={{ position: "relative", top: 5 }}
+            />
+          }
         >
           <span style={{ color: "#3F28C6 important!" }}>______</span>
         </Button>
@@ -142,22 +150,25 @@ export const PopoverFields: FC<TProps> = ({
                     onChangeFieldValue(id, optionIndex, val);
                   }}
                 />
-                <Button
-                  onClick={() => {
-                    setIsOpen(false);
-                    deleteOption(id, optionIndex);
-                    setTimeout(() => {
-                      document
-                        .getElementById("popover-wrapper-" + id)
-                        ?.firstChild?.click();
-                    }, 100);
-                  }}
-                  isIconOnly
-                  variant="flat"
-                  size="sm"
-                >
-                  <Image src={Close} alt="delete option" />
-                </Button>
+                {field?.options.length > 1 && (
+                  <Button
+                    onClick={() => {
+                      setIsOpen(false);
+                      deleteOption(id, optionIndex);
+                      setTimeout(() => {
+                        document
+                          .getElementById("popover-wrapper-" + id)
+                          ?.firstChild?.click();
+                      }, 100);
+                    }}
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    className="hover:!bg-transparent"
+                  >
+                    <Image src={Close} alt="delete option" />
+                  </Button>
+                )}
 
                 {/* <Input
                   value={option.value}

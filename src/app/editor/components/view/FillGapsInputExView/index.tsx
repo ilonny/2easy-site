@@ -31,7 +31,7 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
     if (isDisabled) {
       return false;
     }
-    return !!field.options?.find((o) => o.value === selectedValue)?.isCorrect;
+    return !!field?.options?.find((o) => o.value === selectedValue)?.isCorrect;
   }, [selectedValue, field?.options, isDisabled]);
 
   const onChangeSelection = useCallback((val: string) => {
@@ -61,7 +61,7 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
       <Input
         placeholder={isTeacher ? field.options[0]?.value : ""}
         onBlur={onBlur}
-        variant="underlined"
+        variant="flat"
         className={`${styles["answer-wrapper"]} inputcustom ${
           isCorrect && "isCorrect"
         } ${(isDisabled || isIncorrect) && "isIncorrect"}`}
@@ -97,7 +97,7 @@ export const FillGapsInputExView: FC<TProps> = ({
         const root = ReactDOM.createRoot(el);
         root.render(
           <div
-            className="answer-wrapper mx-2"
+            className="answer-wrapper mx-2 !bg-transparent"
             id={"answer-wrapper-" + field?.id}
             style={{
               display: "inline-block",
@@ -167,8 +167,13 @@ export const FillGapsInputExView: FC<TProps> = ({
           <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
             <div
               className={
-                "answerWrapperArea answerWrapperArea-" +
+                "fill-gaps-input-area answerWrapperArea answerWrapperArea-" +
                 (data?.id || 0).toString()
+              }
+              onBlur={() =>
+                setTimeout(() => {
+                  renderContent();
+                }, 300)
               }
               dangerouslySetInnerHTML={{ __html: data.dataText }}
             ></div>

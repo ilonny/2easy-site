@@ -171,7 +171,6 @@ export const TestEx: FC<TProps> = ({
     [changeData, data.questions]
   );
 
-  console.log("data", data);
   return (
     <div>
       <div className="flex flex-wrap">
@@ -308,7 +307,7 @@ export const TestEx: FC<TProps> = ({
                     // className="w-[300px]"
                     // className="px-0"
                   >
-                    + Добавить еще
+                    + Добавить вариант
                   </Button>
                 </div>
               )}

@@ -91,7 +91,14 @@ export const NoteExView: FC<TProps> = ({
           </div>
         </div>
         {data.description && (
-          <p className="mt-2" style={{ fontSize: 18, color: "#8580A1" }}>
+          <p
+            className="mt-2"
+            style={{
+              fontSize: 18,
+              color: "#8580A1",
+              whiteSpace: "break-spaces",
+            }}
+          >
             {data.description}
           </p>
         )}

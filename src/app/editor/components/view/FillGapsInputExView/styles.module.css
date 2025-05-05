@@ -1,19 +1,7 @@
-.card-rotate:nth-child(4n + 1) {
-  transform: rotate(1deg);
-}
-
-.card-rotate:nth-child(4n + 2) {
-  transform: rotate(-2deg);
-}
-
-.card-rotate:nth-child(4n + 3) {
-  transform: rotate(-1deg);
-}
-
-.card-rotate:nth-child(4n + 4) {
-  transform: rotate(1deg);
-}
-
 .answer-wrapper span[data-slot="value"] {
   color: black !important;
+  font-size: 16px !important;
+}
+.answer-wrapper .inner-wrapper input {
+  font-size: 16px !important;
 }

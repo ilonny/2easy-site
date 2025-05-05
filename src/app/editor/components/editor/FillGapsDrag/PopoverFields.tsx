@@ -22,7 +22,24 @@ export const PopoverFields: FC<TProps> = ({ id, field }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="drag-word">
-      <div className="flex items-center gap-1">{field?.value}</div>
+      <div className="flex items-center gap-1">
+        <span>{field?.value}</span>
+        <Button
+          onClick={(e) => {
+            e.target?.closest(".answerWrapper")?.remove();
+          }}
+          isIconOnly
+          size="sm"
+          variant="light"
+          className="hover:!bg-transparent"
+        >
+          <Image
+            src={Close}
+            alt="delete option"
+            style={{ position: "relative", top: 1 }}
+          />
+        </Button>
+      </div>
     </div>
   );
 };

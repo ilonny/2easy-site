@@ -51,7 +51,8 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
       <Select
         // variant="bordered"
         // isInvalid={!isCorrect}
-        className={styles["answer-wrapper"]}
+        className={`${styles["answer-wrapper"]} font-normal`}
+        style={{ backgroundColor: "#eeebff", borderRadius: "8px" }}
         size="sm"
         color={isCorrect ? "success" : selectedValue ? "danger" : "primary"}
         onChange={(e) => onChangeSelection(e.target.value)}
@@ -120,7 +121,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
   useEffect(() => {
     renderContent();
   }, [renderContent]);
-  console.log("data???", data);
+
   return (
     <>
       <div className={`py-8 w-[886px] m-auto`}>

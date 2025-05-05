@@ -41,14 +41,12 @@ const DraggableItem = (props: {
         const draggableRect = document
           ?.getElementById("draggable-" + chip.id)
           .getBoundingClientRect();
-        // console.log("draggableRect?", draggableRect);
         //@ts-ignore
         const droppableRect = document
           ?.getElementById(
             "answer-wrapper-" + chip?.id?.split("-")?.reverse()?.[0]
           )
           .getBoundingClientRect();
-        // console.log("droppableRect?", droppableRect);
         const intersects = !(
           draggableRect.top > droppableRect.bottom ||
           draggableRect.bottom < droppableRect.top ||
@@ -56,7 +54,6 @@ const DraggableItem = (props: {
           draggableRect.left > droppableRect.right
         );
         isIntersected.current = intersects;
-        console.log("intersects?", intersects);
       } catch (err) {}
     },
     [isIntersected, setActiveChip]
@@ -196,7 +193,6 @@ export const MatchWordColumnExView: FC<TProps> = ({
           {!!data?.columns?.length && (
             <div className="flex flex-wrap justify-center gap-4">
               {data?.columns?.map((column) => {
-                console.log("activeChip?", activeChip, isTeacher);
                 const isCorrect =
                   !!correctChips.find((c) => c.word === activeChip?.word) ||
                   (isTeacher &&

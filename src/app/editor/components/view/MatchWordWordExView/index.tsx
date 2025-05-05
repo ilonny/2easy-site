@@ -136,7 +136,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                   <Card
                     shadow="sm"
                     radius="sm"
-                    className="p-8"
+                    className="p-4"
                     style={{
                       cursor: "pointer",
                       border:
@@ -153,7 +153,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                   onClick={() => onClickAnswer(m.correctId)}
                 >
                   <Card
-                    className="p-8"
+                    className="p-4"
                     shadow="sm"
                     radius="sm"
                     style={{

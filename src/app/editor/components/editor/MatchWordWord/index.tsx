@@ -149,10 +149,12 @@ export const MatchWordWord: FC<TProps> = ({
           return (
             <div key={index} className="w-[100%] mb-4">
               <div className="">
-                <div className="flex justify-between items-center mb-2">
-                  <p className="w-[50%]">Слово</p>
-                  <p className="w-[50%]">Определение</p>
-                </div>
+                {index === 0 && (
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="w-[50%]">Слово</p>
+                    <p className="w-[50%]">Определение</p>
+                  </div>
+                )}
                 <div className="flex justify-between items-center mb-2">
                   <div className=""></div>
                   {data.matches.length > 1 && (
@@ -170,8 +172,8 @@ export const MatchWordWord: FC<TProps> = ({
                 <div className="flex justify-between items-center">
                   <div className="w-[50%] odd:pr-4">
                     <Textarea
-                      variant="bordered"
                       value={sticker.value}
+                      classNames={{ inputWrapper: "bg-white" }}
                       onChange={(e) =>
                         onChangeSticker(e.target.value, index, "value")
                       }
@@ -179,7 +181,7 @@ export const MatchWordWord: FC<TProps> = ({
                   </div>
                   <div className="w-[50%] odd:pr-4">
                     <Textarea
-                      variant="bordered"
+                      classNames={{ inputWrapper: "bg-white" }}
                       value={sticker.correctValue}
                       onChange={(e) =>
                         onChangeSticker(e.target.value, index, "correctValue")
