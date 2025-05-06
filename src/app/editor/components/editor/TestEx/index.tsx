@@ -105,6 +105,11 @@ export const TestEx: FC<TProps> = ({
           isCorrect: false,
           value: "",
         },
+        {
+          id: uuidv4(),
+          isCorrect: false,
+          value: "",
+        },
       ],
     });
     changeData("questions", copy);
@@ -229,7 +234,7 @@ export const TestEx: FC<TProps> = ({
           <div className="question-wrapper items-start mb-4" key={q.id}>
             <div className="w-[100%]">
               <div className="flex justify-between items-center">
-                <p className="font-light mb-2">Вопрос</p>
+                <p className="font-light mb-2">Вопрос {qIndex + 1}</p>
               </div>
 
               <div

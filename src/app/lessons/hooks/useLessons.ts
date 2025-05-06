@@ -15,7 +15,7 @@ export const useLessons = () => {
     });
     const data = await res?.json();
     if (data) {
-      setLessons(data?.lessons || []);
+      setLessons(data?.lessons?.reverse() || []);
     }
     setLessonsListIslLoading(false);
     return data;

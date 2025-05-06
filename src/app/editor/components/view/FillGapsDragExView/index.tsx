@@ -39,7 +39,7 @@ const AnswerField: FC<{
   return (
     <div
       className={`answer-wrapper mx-2 ${isCorrect && "bg-success"} ${
-        field.id == String(errorAnswerId) && "bg-error"
+        field.id == String(errorAnswerId) && !isCorrect && "bg-error"
       }`}
       data-id={field?.id}
       id={"answer-wrapper-" + field?.id}
@@ -155,13 +155,14 @@ const DraggableItem = (props: {
       onStop={() => {
         onDrop();
         setActiveDragId(null);
-        if (isMissedIntersectedId.current) {
+        if (isMissedIntersectedId.current && !isIntersected.current) {
           setX(0);
           setY(0);
           setErrorAnswerId(isMissedIntersectedId.current);
           setTimeout(() => {
             setErrorAnswerId(0);
           }, 2000);
+          // return
         }
         if (!isIntersected.current) {
           setX(0);
@@ -278,7 +279,7 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
         )}
       </div>
       <div className={`py-8 w-[886px] m-auto`}>
-        <div className="flex justify-center items-center mb-4 gap-2 ">
+        <div className="flex justify-center items-center mb-8 gap-2 max-w-[500px] flex-wrap mx-auto">
           {sortedFields.map((field) => {
             return (
               <DraggableItem

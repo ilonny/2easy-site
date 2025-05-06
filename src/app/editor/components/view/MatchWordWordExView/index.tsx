@@ -157,6 +157,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                     shadow="sm"
                     radius="sm"
                     style={{
+                      cursor: "pointer",
                       background:
                         profile?.role_id === 2 &&
                         selectedMatchId &&

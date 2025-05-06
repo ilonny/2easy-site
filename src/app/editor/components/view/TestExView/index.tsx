@@ -27,11 +27,8 @@ type TTestStepProps = {
 
 export const TestStep = (props: TTestStepProps) => {
   const { question, onPressNext, setScore } = props;
-  const isSingleAnswer = useMemo(() => {
-    return (
-      question?.options?.map((o) => o.isCorrect)?.filter(Boolean).length === 1
-    );
-  }, [question]);
+  const isSingleAnswer =
+    question?.options?.map((o) => o.isCorrect)?.filter(Boolean).length === 1;
 
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -39,6 +36,7 @@ export const TestStep = (props: TTestStepProps) => {
   const errorMap = useRef<Record<string, boolean>>({});
 
   const onSubmitResult = useCallback(() => {
+    console.log("onSubmitResult: ", selectedMap.current);
     question?.options?.forEach((option) => {
       if (option.isCorrect && !selectedMap.current[option.id]) {
         errorMap.current[option.id] = true;
@@ -51,7 +49,7 @@ export const TestStep = (props: TTestStepProps) => {
     if (!Object.keys(errorMap.current).length) {
       setScore((s) => s + 1);
     }
-  }, [question?.options]);
+  }, [question?.options, setScore]);
 
   if (!question) {
     return <></>;
@@ -74,11 +72,17 @@ export const TestStep = (props: TTestStepProps) => {
           value={defaultValue}
         >
           {question.options.map((option) => {
-            const isCorrect =
-              isSubmitted &&
-              !errorMap.current[option.id] &&
-              selectedMap.current[option.id];
-            const isIncorrect = isSubmitted && errorMap.current[option.id];
+            const isSelected = selectedMap.current[option.id];
+            const isError = errorMap.current[option.id];
+
+            const isCorrect = isSubmitted && isSelected && !isError;
+            const isIncorrect = isSubmitted && isSelected && isError;
+            const color = isCorrect
+              ? "success"
+              : isIncorrect
+              ? "danger"
+              : "primary";
+
             return (
               <label
                 className="flex items-start wrap"
@@ -86,10 +90,9 @@ export const TestStep = (props: TTestStepProps) => {
                 style={{ marginBottom: 30, cursor: "pointer" }}
               >
                 <Radio
-                  color={
-                    isCorrect ? "success" : isIncorrect ? "danger" : "primary"
-                  }
+                  color={color}
                   value={option.id}
+                  className={`radio-force-${color}`}
                 />
                 <div>
                   <p
@@ -217,6 +220,10 @@ export const TestExView: FC<TProps> = ({ data, isPreview = false }) => {
     setIsFinished(false);
   }, []);
 
+  const onGoBack = useCallback(() => {
+    setActiveIndex((i) => (i - 1 < 0 ? 0 : i - 1));
+  }, []);
+
   return (
     <>
       <div className={`py-8 w-[886px] m-auto`}>
@@ -300,16 +307,38 @@ export const TestExView: FC<TProps> = ({ data, isPreview = false }) => {
             />
           )}
           {!isFinished && (
-            <p
-              style={{
-                color: "#B7B7B7",
-                textAlign: "center",
-                marginTop: 40,
-                fontSize: 14,
-              }}
-            >
-              {currentStep}/{totalSteps}
-            </p>
+            <div className="flex justify-between items-center">
+              <div className="w-[100px]">
+                {activeIndex !== 0 && (
+                  <p
+                    style={{
+                      color: "#B7B7B7",
+                      textAlign: "left",
+                      marginTop: 40,
+                      fontSize: 14,
+                      cursor: "pointer",
+                    }}
+                    className="hover:underline"
+                    onClick={onGoBack}
+                  >
+                    Back
+                  </p>
+                )}
+              </div>
+              <div className="w-[100px]">
+                <p
+                  style={{
+                    color: "#B7B7B7",
+                    textAlign: "center",
+                    marginTop: 40,
+                    fontSize: 14,
+                  }}
+                >
+                  {currentStep}/{totalSteps}
+                </p>
+              </div>
+              <div className="w-[100px]"></div>
+            </div>
           )}
         </Card>
       </div>

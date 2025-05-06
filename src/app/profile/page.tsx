@@ -2,7 +2,7 @@
 import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SibscribeContext } from "@/subscribe/context";
 import { ProfileInfoForm } from "./components/ProfileInfoForm";
 import { ProfileSubscribeInformer } from "../subscription/components/ProfileSubscribeInformer";
@@ -12,13 +12,18 @@ import { ProfileStudents } from "../student/components/ProfileStudents";
 export default function StartRegistrationPage() {
   const { isAuthorized, authIsLoading } = useContext(AuthContext);
   const { subscription } = useContext(SibscribeContext);
-
   const hasTariff =
     subscription?.subscribe_type_id && subscription?.subscribe_type_id !== 1;
 
   const [tabIndex, setTabIndex] = useState<"profile" | "lessons" | "students">(
-    "lessons"
+    "profile"
   );
+
+  useEffect(() => {
+    if (window.location.search?.includes("lessons")) {
+      setTabIndex("lessons");
+    }
+  }, []);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>

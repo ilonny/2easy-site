@@ -10,6 +10,7 @@ import {
   ModalHeader,
   Select,
   SelectItem,
+  Textarea,
 } from "@nextui-org/react";
 import { Tag, TagInput } from "emblor";
 import { FC, useCallback, useState } from "react";
@@ -47,7 +48,7 @@ export const EditLessonModalForm: FC<TProps> = ({
       ...lesson,
     },
   });
-
+  const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState(
     lesson?.image_path
       ? [
@@ -61,6 +62,7 @@ export const EditLessonModalForm: FC<TProps> = ({
 
   const onSubmit = useCallback(
     async (_data) => {
+      setIsLoading(true);
       const imagesToUpload = images.filter((image) => !!image?.file);
       let attachments;
       if (imagesToUpload?.length) {
@@ -80,6 +82,7 @@ export const EditLessonModalForm: FC<TProps> = ({
         },
       });
       const lesson = await lessonRes.json();
+      setIsLoading(false);
       if (lesson.success) {
         onSuccess();
       }
@@ -98,7 +101,6 @@ export const EditLessonModalForm: FC<TProps> = ({
       ?.filter((tag) => !!tag.text) || []
   );
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
-
   return (
     <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
       <ModalContent>
@@ -127,8 +129,9 @@ export const EditLessonModalForm: FC<TProps> = ({
               name="description"
               control={control}
               render={({ field }) => (
-                <Input
+                <Textarea
                   {...field}
+                  minRows={3}
                   label="Описание"
                   className="mb-5"
                   radius="sm"
@@ -196,7 +199,13 @@ export const EditLessonModalForm: FC<TProps> = ({
               />
             </div>
             <div className="h-5" />
-            <Button color="primary" type="submit" className="w-full" size="lg">
+            <Button
+              color="primary"
+              type="submit"
+              className="w-full"
+              size="lg"
+              isLoading={isLoading}
+            >
               Подтвердить
             </Button>
             <div className="h-10" />

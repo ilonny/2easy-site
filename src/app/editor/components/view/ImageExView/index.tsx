@@ -81,15 +81,38 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
             style={{ backgroundColor: "#D9D9D9" }}
           />
         )}
-        {!!data?.images?.length && data?.viewType === "carousel" && (
+        {data?.images?.length === 1 && data?.viewType === "carousel" && (
+          <div className="max-w-[810px] m-auto">
+            <Zoom>
+              <img
+                src={data?.images[0].dataURL}
+                alt="image"
+                className="max-w-[810px]"
+              />
+            </Zoom>
+            {data?.images[0]?.text && (
+              <p
+                className="mt-2 text-center font-bold"
+                style={{ fontSize: 18 }}
+              >
+                {data?.images[0].text}
+              </p>
+            )}
+          </div>
+        )}
+        {data?.images?.length >= 2 && data?.viewType === "carousel" && (
           <>
             <div className="slider-container">
               <Slider {...settings}>
                 {data?.images?.map((image) => {
                   return (
-                    <div key={image.dataURL}>
+                    <div key={image.dataURL} className="max-w-[810px]">
                       <Zoom>
-                        <img src={image.dataURL} alt="image" />
+                        <img
+                          src={image.dataURL}
+                          alt="image"
+                          className="max-w-[810px]"
+                        />
                       </Zoom>
                       {image?.text && (
                         <p

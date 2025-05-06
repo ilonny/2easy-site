@@ -183,3 +183,14 @@ blockquote {
   font-size: 10px;
   font-weight: 700;
 }
+
+.radio-force-danger span{
+  border-color: rgb(164, 41, 41) !important;
+}
+
+.radio-force-danger span:nth-child(1) {
+  width: 8px !important;
+  height: 8px !important;
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}

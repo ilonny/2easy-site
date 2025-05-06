@@ -212,7 +212,7 @@ export const MatchWordImageExView: FC<TProps> = ({
                 (isTeacher && image.text === activeChip);
               return (
                 <div key={image.dataURL} className="w-[33.3333333%] p-4">
-                  <div className="h-[220px] flex items-center justify-center">
+                  <div className="h-[220px] flex items-center justify-center overflow-hidden">
                     <Zoom>
                       <img
                         src={image.dataURL}

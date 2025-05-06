@@ -10,6 +10,7 @@ import {
   ModalHeader,
   Select,
   SelectItem,
+  Textarea,
 } from "@nextui-org/react";
 import { Tag, TagInput } from "emblor";
 import { FC, useCallback, useState } from "react";
@@ -18,7 +19,7 @@ import { Controller, useForm } from "react-hook-form";
 type TProps = {
   isVisible: boolean;
   setIsVisible: (val: boolean) => void;
-  onSuccess: () => void;
+  onSuccess: (createdLessonId: number) => void;
 };
 
 type TFieldList = {
@@ -47,10 +48,12 @@ export const CreateLessonModalForm: FC<TProps> = ({
 
   const [images, setImages] = useState([]);
   const { uploadImages } = useUploadImage();
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = useCallback(
     async (_data) => {
       let attachments;
+      setIsLoading(true);
       if (images?.length) {
         attachments = await uploadImages(images);
       }
@@ -66,8 +69,9 @@ export const CreateLessonModalForm: FC<TProps> = ({
         },
       });
       const lesson = await lessonRes.json();
+      setIsLoading(false);
       if (lesson.success) {
-        onSuccess();
+        onSuccess(lesson.createdLesson.id);
       }
     },
     [images, uploadImages, onSuccess]
@@ -106,9 +110,10 @@ export const CreateLessonModalForm: FC<TProps> = ({
               name="description"
               control={control}
               render={({ field }) => (
-                <Input
+                <Textarea
                   {...field}
                   label="Описание"
+                  minRows={3}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -174,7 +179,13 @@ export const CreateLessonModalForm: FC<TProps> = ({
               />
             </div>
             <div className="h-5" />
-            <Button color="primary" type="submit" className="w-full" size="lg">
+            <Button
+              color="primary"
+              type="submit"
+              className="w-full"
+              size="lg"
+              isLoading={isLoading}
+            >
               Создать урок
             </Button>
             <div className="h-10" />

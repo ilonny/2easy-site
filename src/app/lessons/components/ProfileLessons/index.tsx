@@ -4,8 +4,10 @@ import { useLessons } from "../../hooks/useLessons";
 import { ProfileEmptyLessons } from "../ProfileEmptyLessons";
 import { CreateLessonModalForm } from "../CreateLessonModalForm";
 import { LessonsList } from "../LessonsList";
+import { useRouter } from "next/navigation";
 
 export const ProfileLessons = () => {
+  const router = useRouter();
   const [tabIndex, setTabIndex] = useState<"userLessons" | "savedLessons">(
     "userLessons"
   );
@@ -37,10 +39,14 @@ export const ProfileLessons = () => {
     getLessons();
   }, [getLessons]);
 
-  const onCreateLesson = useCallback(() => {
-    setCreateLessonModalIsVisible(false);
-    getLessons();
-  }, [getLessons]);
+  const onCreateLesson = useCallback(
+    (lessonId: number) => {
+      setCreateLessonModalIsVisible(false);
+      getLessons();
+      router.push("/editor/" + lessonId);
+    },
+    [getLessons, router]
+  );
 
   return (
     <>

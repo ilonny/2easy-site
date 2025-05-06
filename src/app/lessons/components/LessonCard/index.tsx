@@ -126,7 +126,9 @@ export const LessonCard: FC<TProps> = ({
         <div className="h-2" />
         {!!tags && tags}
         <div className="h-2" />
-        {!!lesson.description && <div>{lesson.description}</div>}
+        {!!lesson.description && (
+          <div style={{ whiteSpace: "break-spaces" }}>{lesson.description}</div>
+        )}
       </div>
     </div>
   );

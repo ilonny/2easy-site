@@ -97,6 +97,7 @@ export default function EditorPage() {
           <div className="h-14" />
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
+            <BreadcrumbItem href="/profile?lessons">Мои уроки</BreadcrumbItem>
             <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
           </Breadcrumbs>
         </div>
