@@ -1,4 +1,4 @@
-import { fetchPostJson } from "@/api";
+import { checkResponse, fetchPostJson } from "@/api";
 import {
   Button,
   Input,
@@ -46,6 +46,7 @@ export const CreateGroupModalForm: FC<TProps> = ({
       if (lesson.success) {
         onSuccess();
       }
+      checkResponse(lesson);
     },
     [onSuccess]
   );

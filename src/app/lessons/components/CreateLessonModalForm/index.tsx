@@ -1,4 +1,4 @@
-import { fetchPostJson } from "@/api";
+import { checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import {
@@ -26,7 +26,7 @@ type TFieldList = {
   title: string;
   description: string;
   student_id: string;
-  tags: Tag[];
+  tags: string;
 };
 
 export const CreateLessonModalForm: FC<TProps> = ({
@@ -58,20 +58,27 @@ export const CreateLessonModalForm: FC<TProps> = ({
         attachments = await uploadImages(images);
       }
 
-      const tagsArr = (_data?.tags || [])?.map((t) => (t.text ? t.text : ""));
-      const lessonRes = await fetchPostJson({
-        path: "/lesson/create-lesson",
-        isSecure: true,
-        data: {
-          ..._data,
-          tags: tagsArr?.join?.(",") || "",
-          image_id: attachments?.attachments?.[0]?.id,
-        },
-      });
-      const lesson = await lessonRes.json();
-      setIsLoading(false);
-      if (lesson.success) {
-        onSuccess(lesson.createdLesson.id);
+      // const tagsArr = (_data?.tags || [])?.map((t) => (t.text ? t.text : ""));
+      try {
+        const lessonRes = await fetchPostJson({
+          path: "/lesson/create-lesson",
+          isSecure: true,
+          data: {
+            ..._data,
+            // tags: tagsArr?.join?.(",") || "",
+            image_id: attachments?.attachments?.[0]?.id,
+          },
+        });
+        const lesson = await lessonRes.json();
+        console.log("lesson res:", lesson);
+        setIsLoading(false);
+        if (lesson.success) {
+          onSuccess(lesson.createdLesson.id);
+        }
+        checkResponse(lesson);
+      } catch (e) {
+      } finally {
+        setIsLoading(false);
       }
     },
     [images, uploadImages, onSuccess]
@@ -143,30 +150,14 @@ export const CreateLessonModalForm: FC<TProps> = ({
               name="tags"
               control={control}
               render={({ field }) => (
-                <TagInput
+                <Input
                   {...field}
-                  placeholder="Теги (видны только вам, вводить через enter)"
-                  styleClasses={{
-                    inlineTagsContainer: "p-0 h-15",
-                    input: "h-16 bg-default-100",
-                    tag: {
-                      body: "pl-2",
-                    },
-                    tagList: {
-                      container: "bg-default-100 pl-2",
-                      sortableList: "bg-default-100 pl-2",
-                    },
-                    tagPopover: {
-                      popoverContent: "bg-default-100 pl-2",
-                    },
-                  }}
-                  tags={tags}
-                  setTags={(newTags) => {
-                    setTags(newTags);
-                    setValue("tags", newTags as [Tag, ...Tag[]]);
-                  }}
-                  activeTagIndex={activeTagIndex}
-                  setActiveTagIndex={setActiveTagIndex}
+                  label="Уровень"
+                  className="mb-5"
+                  radius="sm"
+                  size="lg"
+                  errorMessage={errors?.tags?.message}
+                  isInvalid={!!errors.tags?.message}
                 />
               )}
             />

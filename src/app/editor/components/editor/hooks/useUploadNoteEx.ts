@@ -1,5 +1,5 @@
 import { TNoteData } from "./../Note/types";
-import { fetchPostJson } from "@/api";
+import { checkResponse, fetchPostJson } from "@/api";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 
@@ -38,6 +38,7 @@ export const useUploadNoteEx = (lastSortIndex?: number) => {
         if (createdEx?.success) {
           setSuccess(true);
         }
+        checkResponse(createdEx);
       } catch (err) {
       } finally {
         setIsLoading(false);

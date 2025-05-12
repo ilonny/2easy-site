@@ -1,4 +1,4 @@
-import { fetchPostJson } from "@/api";
+import { checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 
 import {
@@ -41,6 +41,7 @@ export const DeleteLessonModalForm: FC<TProps> = ({
     if (lessonResJson.success) {
       onSuccess();
     }
+    checkResponse(lessonResJson);
   }, [onSuccess, lesson]);
 
   return (

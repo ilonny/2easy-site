@@ -1,4 +1,4 @@
-import { fetchGet, fetchPostJson } from "@/api";
+import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useCallback, useState } from "react";
 
 export const useStudentList = () => {
@@ -19,8 +19,9 @@ export const useStudentList = () => {
       isSecure: true,
       data: { id },
     });
-    
-    return await res?.json();
+    const student = await res?.json();
+    checkResponse(student);
+    return student;
   }, []);
 
   return { students, getStudents, deleteStudent };

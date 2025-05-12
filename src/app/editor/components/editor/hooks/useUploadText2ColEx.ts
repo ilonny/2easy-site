@@ -1,5 +1,5 @@
 import { TText2ColData } from "./../Text2Col/types";
-import { fetchPostJson } from "@/api";
+import { checkResponse, fetchPostJson } from "@/api";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
@@ -123,6 +123,7 @@ export const useUploadText2ColEx = (lastSortIndex: number) => {
         if (createdEx?.success) {
           setSuccess(true);
         }
+        checkResponse(createdEx);
       } catch (err) {
       } finally {
         setIsLoading(false);

@@ -29,7 +29,7 @@ export default function StartRegistrationPage() {
     if (window.location.search?.includes("students")) {
       setTabIndex("students");
     }
-  }, [window.location.search]);
+  }, []);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>

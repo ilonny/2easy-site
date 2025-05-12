@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { getTokenFromLocalStorage } from "@/auth/utils";
+import { toast } from "react-toastify";
 
 export const ApiProvider = ({ children }) => {
   const [client] = useState(new QueryClient());
@@ -10,8 +11,8 @@ export const ApiProvider = ({ children }) => {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
 
-// export const BASE_URL = "http://localhost:8888";
-export const BASE_URL = "https://d2b9lzt8-8888.euw.devtunnels.ms";
+export const BASE_URL = "http://localhost:8888";
+// export const BASE_URL = "https://d2b9lzt8-8888.euw.devtunnels.ms";
 
 export const API_URL = BASE_URL + "/api";
 
@@ -36,6 +37,25 @@ const mapHeaders = (params: TParams) => {
     headers.append("Authorization", `Bearer ${token}`);
   }
   return headers;
+};
+
+export const checkResponse = (res: {
+  success: boolean;
+  message?: string;
+  successMessage?: string;
+}) => {
+  if (!res?.success) {
+    console.log("SHOW TOAST HERE");
+    toast(res?.message ? res?.message : "Что-то пошло не так", {
+      type: "error",
+    });
+    return;
+  }
+  if (res?.success && res?.successMessage) {
+    toast(res?.successMessage, {
+      type: "success",
+    });
+  }
 };
 
 export const fetchPostJson = (params: TParams) => {

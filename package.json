@@ -40,6 +40,7 @@
     "react-medium-image-zoom": "^5.2.14",
     "react-responsive-carousel": "^3.2.23",
     "react-slick": "^0.30.3",
+    "react-toastify": "^11.0.5",
     "sass": "^1.85.1",
     "slick-carousel": "^1.8.1",
     "use-file-picker": "^2.1.2"

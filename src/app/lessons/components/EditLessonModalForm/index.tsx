@@ -1,4 +1,4 @@
-import { BASE_URL, fetchPostJson } from "@/api";
+import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import {
@@ -68,23 +68,24 @@ export const EditLessonModalForm: FC<TProps> = ({
       if (imagesToUpload?.length) {
         attachments = await uploadImages(imagesToUpload);
       }
-      const tagsArr =
-        typeof _data.tags === "string"
-          ? _data?.tags?.split(",")
-          : (_data?.tags || [])?.map((t) => (t.text ? t.text : ""));
-      const lessonRes = await fetchPostJson({
-        path: "/lesson/edit-lesson",
-        isSecure: true,
-        data: {
-          ..._data,
-          tags: tagsArr?.join?.(",") || "",
-          image_id: attachments?.attachments?.[0]?.id,
-        },
-      });
-      const lesson = await lessonRes.json();
-      setIsLoading(false);
-      if (lesson.success) {
-        onSuccess();
+      try {
+        const lessonRes = await fetchPostJson({
+          path: "/lesson/edit-lesson",
+          isSecure: true,
+          data: {
+            ..._data,
+            image_id: attachments?.attachments?.[0]?.id,
+          },
+        });
+        const lesson = await lessonRes.json();
+        setIsLoading(false);
+        if (lesson.success) {
+          onSuccess();
+        }
+        checkResponse(lesson);
+      } catch (e) {
+      } finally {
+        setIsLoading(false);
       }
     },
     [images, uploadImages, onSuccess]
@@ -92,15 +93,6 @@ export const EditLessonModalForm: FC<TProps> = ({
 
   const title = watch("title");
 
-  const [tags, setTags] = useState<Tag[]>(
-    lesson?.tags
-      ?.replaceAll("[", "")
-      ?.replaceAll("]", "")
-      ?.split(",")
-      ?.map((tag) => ({ text: tag, id: tag }))
-      ?.filter((tag) => !!tag.text) || []
-  );
-  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
   return (
     <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
       <ModalContent>
@@ -162,30 +154,14 @@ export const EditLessonModalForm: FC<TProps> = ({
               name="tags"
               control={control}
               render={({ field }) => (
-                <TagInput
+                <Input
                   {...field}
-                  placeholder="Теги (видны только вам, вводить через enter)"
-                  styleClasses={{
-                    inlineTagsContainer: "p-0 h-15",
-                    input: "h-16 bg-default-100",
-                    tag: {
-                      body: "pl-2",
-                    },
-                    tagList: {
-                      container: "bg-default-100 pl-2",
-                      sortableList: "bg-default-100 pl-2",
-                    },
-                    tagPopover: {
-                      popoverContent: "bg-default-100 pl-2",
-                    },
-                  }}
-                  tags={tags}
-                  setTags={(newTags) => {
-                    setTags(newTags);
-                    setValue("tags", newTags as [Tag, ...Tag[]]);
-                  }}
-                  activeTagIndex={activeTagIndex}
-                  setActiveTagIndex={setActiveTagIndex}
+                  label="Уровень"
+                  className="mb-5"
+                  radius="sm"
+                  size="lg"
+                  errorMessage={errors?.tags?.message}
+                  isInvalid={!!errors.tags?.message}
                 />
               )}
             />

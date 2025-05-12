@@ -15,7 +15,7 @@ export const ProfileLessons = () => {
   const [createLessonModalIsVisible, setCreateLessonModalIsVisible] =
     useState(false);
 
-  const { lessons, getLessons } = useLessons();
+  const { lessons, getLessons, lessonsListIslLoading } = useLessons();
 
   const data = useMemo(() => {
     const title =
@@ -69,6 +69,17 @@ export const ProfileLessons = () => {
         </Button>
       </div>
       <div className="h-10" />
+      {lessonsListIslLoading && (
+        <div className="w-full h-[225px] flex justify-center items-center ">
+          <Button
+            isIconOnly
+            isLoading={lessonsListIslLoading}
+            color="primary"
+            variant="light"
+            size="lg"
+          />
+        </div>
+      )}
       {!lessons.length && (
         <ProfileEmptyLessons
           title={data.title}
