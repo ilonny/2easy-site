@@ -14,6 +14,8 @@ import { Card, Chip } from "@nextui-org/react";
 import Draggable from "react-draggable";
 import { AuthContext } from "@/auth";
 import { TMatchWordColumnData } from "../../editor/MatchWordColumn/types";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 type TProps = {
   data: TMatchWordColumnData;
@@ -84,7 +86,7 @@ const DraggableItem = (props: {
         color={isError ? "danger" : "primary"}
         style={{ zIndex: 1, cursor: "pointer" }}
         id={"draggable-" + chip.id}
-        className="handle"
+        className="handle text-[18px] cursor-pointer"
       >
         {chip.word}
       </Chip>
@@ -163,21 +165,18 @@ export const MatchWordColumnExView: FC<TProps> = ({
         </p>
       )}
       <div className="h-10" />
-      <div
-        className={`py-8 w-[886px] m-auto`}
-        style={
-          image && {
-            backgroundImage: `url(${image.dataURL})`,
-            backgroundSize: "cover",
-          }
-        }
-      >
+      {!!image && (
+        <Zoom>
+          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
+        </Zoom>
+      )}
+      <div className={`py-8 w-[886px] m-auto`}>
         <div
           style={{
             margin: "0 auto",
           }}
         >
-          <div className="flex items-center wrap gap-4 justify-center mb-4">
+          <div className="flex items-center wrap gap-4 justify-center m-auto mb-4 max-w-[500px] flex-wrap">
             {sortedChips.map((chip) => {
               return (
                 <DraggableItem

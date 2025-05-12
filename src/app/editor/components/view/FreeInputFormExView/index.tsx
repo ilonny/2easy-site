@@ -20,6 +20,8 @@ import {
 import Close from "@/assets/icons/cross_white.png";
 import Image from "next/image";
 import { TFreeInputFormData } from "../../editor/FreeInputFormEx/types";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 type TProps = {
   data: TFreeInputFormData;
@@ -68,15 +70,12 @@ export const FreeInputFormExView: FC<TProps> = ({
           </p>
         )}
       </div>
-      <div
-        className={`py-8 w-[540px] m-auto`}
-        style={
-          image && {
-            backgroundImage: `url(${image.dataURL})`,
-            backgroundSize: "cover",
-          }
-        }
-      >
+      {!!image && (
+        <Zoom>
+          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
+        </Zoom>
+      )}
+      <div className={`py-8 w-[540px] m-auto`}>
         {data.questions.map((question) => {
           return (
             <div key={question.id} className="mb-6">

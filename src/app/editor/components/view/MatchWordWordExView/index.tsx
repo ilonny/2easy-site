@@ -3,6 +3,9 @@ import { FC, useCallback, useContext, useMemo, useState } from "react";
 import { Card } from "@nextui-org/react";
 import { TMatch, TMatchWordWordData } from "../../editor/MatchWordWord/types";
 import { AuthContext } from "@/auth";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
+
 type TProps = {
   data: TMatchWordWordData;
   isPreview?: boolean;
@@ -104,15 +107,12 @@ export const MatchWordWordExView: FC<TProps> = ({
           </p>
         )}
       </div>
-      <div
-        className={`py-8 w-[886px] m-auto`}
-        style={
-          image && {
-            backgroundImage: `url(${image.dataURL})`,
-            backgroundSize: "cover",
-          }
-        }
-      >
+      {!!image && (
+        <Zoom>
+          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
+        </Zoom>
+      )}
+      <div className={`py-8 w-[886px] m-auto`}>
         <div
           className={` flex items-center justify-center flex-wrap`}
           style={{ margin: "0 auto" }}

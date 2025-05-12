@@ -135,7 +135,7 @@ export const Video: FC<TProps> = ({
           />
         </div>
         <div className="w-[50%] pl-2">
-          <p className="font-light mb-2">Фоновое изображение блока</p>
+          <p className="font-light mb-2">Изображение для задания</p>
           <ImageUpload
             images={images}
             setImages={setImages}

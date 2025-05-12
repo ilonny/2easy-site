@@ -24,6 +24,8 @@ import {
 import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 type TProps = {
   data: TFillGapsDragData;
   isPreview?: boolean;
@@ -45,9 +47,11 @@ const AnswerField: FC<{
       id={"answer-wrapper-" + field?.id}
       style={{
         display: "inline-block",
+        lineHeight: "initial",
         minWidth: isCorrect ? "initial" : 150,
         borderRadius: 30,
         position: "relative",
+        fontSize: 18,
         top: -1,
       }}
     >
@@ -176,10 +180,12 @@ const DraggableItem = (props: {
         id={"draggable-" + field?.id}
         size="md"
         color={isError ? "danger" : "primary"}
-        className={`${isActiveDrag && "bg-[#271399]"} handle`}
+        className={`${
+          isActiveDrag && "bg-[#271399]"
+        } handle text-[18px] cursor-pointer`}
         style={{ zIndex: 1, cursor: "pointer" }}
       >
-        <span style={{ fontSize: 14 }}>{field.value}</span>
+        <span style={{ fontSize: 18, fontWeight: 400 }}>{field.value}</span>
       </Chip>
     </Draggable>
   );
@@ -297,16 +303,20 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
             );
           })}
         </div>
-        <Card
-          className={`p-10 px-10 box relative`}
-          style={
-            image && {
-              backgroundImage: `url(${image.dataURL})`,
-              backgroundSize: "cover",
-            }
-          }
-        >
-          <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
+        {!!image && (
+          <Zoom>
+            <img
+              src={image.dataURL}
+              style={{ maxHeight: 400 }}
+              className="m-auto mb-8"
+            />
+          </Zoom>
+        )}
+        <Card className={`p-10 px-10 box relative`}>
+          <div
+            style={{ margin: "0 auto", lineHeight: "200%" }}
+            className="flex flex-col gap-10"
+          >
             {editableContent}
           </div>
         </Card>

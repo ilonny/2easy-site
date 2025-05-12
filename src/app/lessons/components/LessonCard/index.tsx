@@ -35,7 +35,7 @@ export const LessonCard: FC<TProps> = ({
             return (
               <Button
                 size="sm"
-                color="warning"
+                color="primary"
                 radius="full"
                 className="text-white"
                 key={tag}

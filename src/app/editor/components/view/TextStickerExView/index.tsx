@@ -5,6 +5,9 @@ import { FC } from "react";
 import { Card } from "@nextui-org/react";
 import { TTextStickerData } from "../../editor/TextSticker/types";
 import styles from "./styles.module.css";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
+
 type TProps = {
   data: TTextStickerData;
   isPreview?: boolean;
@@ -49,15 +52,12 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
           </p>
         )}
       </div>
-      <div
-        className={`py-8 w-[886px] m-auto`}
-        style={
-          image && {
-            backgroundImage: `url(${image.dataURL})`,
-            backgroundSize: "cover",
-          }
-        }
-      >
+      {!!image && (
+        <Zoom>
+          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
+        </Zoom>
+      )}
+      <div className={`py-8 w-[886px] m-auto`}>
         <div
           className={` flex items-center justify-center flex-wrap`}
           style={{ margin: "0 auto" }}

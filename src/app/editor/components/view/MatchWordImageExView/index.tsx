@@ -90,7 +90,7 @@ const DraggableItem = (props: {
         color={isError ? "danger" : "primary"}
         style={{ zIndex: 1, cursor: "pointer" }}
         id={"draggable-" + chip}
-        className="handle"
+        className="handle text-[18px] cursor-pointer"
       >
         {chip}
       </Chip>
@@ -190,7 +190,7 @@ export const MatchWordImageExView: FC<TProps> = ({
           />
         )}
         {data.viewType === "drag" && (
-          <div className="flex items-center wrap gap-4 justify-center mb-4">
+          <div className="flex items-center wrap gap-4 justify-center m-auto mb-4 max-w-[500px] flex-wrap">
             {sortedChips.map((chip, chipIndex) => {
               return (
                 <DraggableItem

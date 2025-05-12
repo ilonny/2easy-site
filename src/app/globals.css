@@ -83,7 +83,7 @@ blockquote {
     background-color: inherit !important;
     font-family: inherit !important;
     font-size: inherit !important;
-    line-height: inherit !important;
+    /* line-height: initial !important; */
     /* display: inline !important; */
 }
 

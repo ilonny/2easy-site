@@ -9,6 +9,9 @@ import { getImageNameFromPath } from "../../editor/mappers";
 import ScriptIcon from "@/assets/icons/audio_script_icon.svg";
 import ScriptCloseIcon from "@/assets/icons/audio_script_close_icon.svg";
 import Image from "next/image";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
+
 type TProps = {
   data: TAudioData;
   isPreview?: boolean;
@@ -57,15 +60,12 @@ export const AudioExView: FC<TProps> = ({ data, isPreview = false }) => {
           </p>
         )}
       </div>
-      <div
-        className={`py-8 w-[886px] m-auto`}
-        style={
-          image && {
-            backgroundImage: `url(${image.dataURL})`,
-            backgroundSize: "cover",
-          }
-        }
-      >
+      {!!image && (
+        <Zoom>
+          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
+        </Zoom>
+      )}
+      <div className={`py-8 w-[886px] m-auto`}>
         {!!audioFileName && (
           <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
             <Card radius="md" className="p-4">

@@ -13,6 +13,9 @@ import { Card, Checkbox, Select, SelectItem } from "@nextui-org/react";
 import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
+
 type TProps = {
   data: TFillGapsSelectData;
   isPreview?: boolean;
@@ -158,16 +161,13 @@ export const FillGapsSelectExView: FC<TProps> = ({
           </p>
         )}
       </div>
+      {!!image && (
+        <Zoom>
+          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
+        </Zoom>
+      )}
       <div className={`py-8 w-[886px] m-auto`}>
-        <Card
-          className={`p-10 px-10 `}
-          style={
-            image && {
-              backgroundImage: `url(${image.dataURL})`,
-              backgroundSize: "cover",
-            }
-          }
-        >
+        <Card className={`p-10 px-10 `}>
           <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
             <div
               className={

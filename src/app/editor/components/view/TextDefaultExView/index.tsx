@@ -2,6 +2,8 @@
 import { FC } from "react";
 import { TTextDefaultData } from "../../editor/TextDefault/types";
 import { Card } from "@nextui-org/react";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 type TProps = {
   data: TTextDefaultData;
@@ -47,15 +49,12 @@ export const TextDefaultExView: FC<TProps> = ({ data, isPreview = false }) => {
           </p>
         )}
       </div>
-      <div
-        className={`py-8 w-[886px] m-auto`}
-        style={
-          image && {
-            backgroundImage: `url(${image.dataURL})`,
-            backgroundSize: "cover",
-          }
-        }
-      >
+      {!!image && (
+        <Zoom>
+          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
+        </Zoom>
+      )}
+      <div className={`py-8 w-[886px] m-auto`}>
         <Card
           className={`p-10 editor-view`}
           style={{

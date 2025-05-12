@@ -13,6 +13,8 @@ import { TQuestion, TTestData } from "../../editor/TestEx/types";
 import { Button, Card, Checkbox, Radio, RadioGroup } from "@nextui-org/react";
 import Close from "@/assets/icons/cross_white.png";
 import Image from "next/image";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 type TProps = {
   data: TTestData;
@@ -260,15 +262,12 @@ export const TestExView: FC<TProps> = ({ data, isPreview = false }) => {
           </p>
         )}
       </div>
-      <div
-        className={`py-8 w-[886px] m-auto`}
-        style={
-          image && {
-            backgroundImage: `url(${image.dataURL})`,
-            backgroundSize: "cover",
-          }
-        }
-      >
+      {!!image && (
+        <Zoom>
+          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
+        </Zoom>
+      )}
+      <div className={`py-8 w-[886px] m-auto`}>
         <Card
           className={`max-w-[540px]`}
           style={{ margin: "0 auto", padding: 30 }}

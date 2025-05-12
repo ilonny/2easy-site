@@ -5,6 +5,9 @@ import { FC } from "react";
 import { Card } from "@nextui-org/react";
 import { TVideoData } from "../../editor/Video/types";
 import styles from "./styles.module.css";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
+
 type TProps = {
   data: TVideoData;
   isPreview?: boolean;
@@ -49,15 +52,12 @@ export const VideoExView: FC<TProps> = ({ data, isPreview = false }) => {
           </p>
         )}
       </div>
-      <div
-        className={`py-8 w-[886px] m-auto`}
-        style={
-          image && {
-            backgroundImage: `url(${image.dataURL})`,
-            backgroundSize: "cover",
-          }
-        }
-      >
+      {!!image && (
+        <Zoom>
+          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
+        </Zoom>
+      )}
+      <div className={`py-8 w-[886px] m-auto`}>
         <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
           {data.videos?.map((video, index) => {
             return (

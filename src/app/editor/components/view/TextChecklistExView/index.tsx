@@ -3,6 +3,8 @@
 import { FC } from "react";
 import { Card, Checkbox } from "@nextui-org/react";
 import { TTextStickerData } from "../../editor/TextSticker/types";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 type TProps = {
   data: TTextStickerData;
@@ -52,15 +54,12 @@ export const TextChecklistExView: FC<TProps> = ({
           </p>
         )}
       </div>
-      <div
-        className={`py-8 w-[886px] m-auto`}
-        style={
-          image && {
-            backgroundImage: `url(${image.dataURL})`,
-            backgroundSize: "cover",
-          }
-        }
-      >
+      {!!image && (
+        <Zoom>
+          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
+        </Zoom>
+      )}
+      <div className={`py-8 w-[886px] m-auto`}>
         <div
           className={` flex items-stretch justify-center flex-wrap`}
           style={{ margin: "0 auto" }}
