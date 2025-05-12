@@ -23,8 +23,10 @@ import { ExList } from "../components/view/ExList";
 import { BASE_URL } from "@/api";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { withLogin } from "@/auth/hooks/withLogin";
 
 export default function EditorPage() {
+  withLogin();
   const params = useParams();
   const { lesson, getLesson } = useLessons();
   const { exList, getExList, exListIsLoading, changeSortIndex, deleteEx } =

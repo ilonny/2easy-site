@@ -58,7 +58,7 @@ export const StudentList = () => {
 
   return (
     <>
-      {!students.length && (
+      {!students?.length && (
         <ProfileEmptyLessons
           title="У вас пока нет учеников"
           buttonTitle="Добавить"
@@ -102,7 +102,7 @@ export const StudentList = () => {
                       <PopoverContent className="bg-white p-2">
                         <Button
                           fullWidth
-                          color="secondary"
+                          color="primary"
                           onClick={() => {
                             onPressCreateGroup(student);
                           }}
@@ -113,7 +113,7 @@ export const StudentList = () => {
                         <Button
                           fullWidth
                           color="danger"
-                          variant="faded"
+                          variant="light"
                           onClick={() => {
                             onPressDelete(student);
                           }}

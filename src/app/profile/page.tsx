@@ -8,9 +8,11 @@ import { ProfileInfoForm } from "./components/ProfileInfoForm";
 import { ProfileSubscribeInformer } from "../subscription/components/ProfileSubscribeInformer";
 import { ProfileLessons } from "../lessons/components/ProfileLessons";
 import { ProfileStudents } from "../student/components/ProfileStudents";
+import { withLogin } from "@/auth/hooks/withLogin";
 
 export default function StartRegistrationPage() {
-  const { isAuthorized, authIsLoading } = useContext(AuthContext);
+  withLogin();
+  const { authIsLoading } = useContext(AuthContext);
   const { subscription } = useContext(SibscribeContext);
   const hasTariff =
     subscription?.subscribe_type_id && subscription?.subscribe_type_id !== 1;
@@ -30,6 +32,16 @@ export default function StartRegistrationPage() {
       setTabIndex("students");
     }
   }, []);
+
+  // useEffect(() => {
+  //   console.log('')
+  //   if (!authIsLoading && !profile?.id) {
+  //     toast("Ошибка авторизации", {
+  //       type: "success",
+  //     });
+  //     router.push("/login");
+  //   }
+  // }, [authIsLoading && !profile]);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>

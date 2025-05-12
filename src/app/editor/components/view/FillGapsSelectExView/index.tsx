@@ -55,9 +55,16 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
         // variant="bordered"
         // isInvalid={!isCorrect}
         className={`${styles["answer-wrapper"]} font-normal`}
-        style={{ backgroundColor: "#eeebff", borderRadius: "8px" }}
+        style={{
+          backgroundColor: isCorrect
+            ? "rgb(23, 201, 100)"
+            : selectedValue
+            ? "rgb(243, 18, 96)"
+            : "#eeebff",
+          borderRadius: "8px",
+        }}
         size="sm"
-        color={isCorrect ? "success" : selectedValue ? "danger" : "primary"}
+        // color={isCorrect ? "success" : selectedValue ? "danger" : "primary"}
         onChange={(e) => onChangeSelection(e.target.value)}
         defaultSelectedKeys={[selectedValue]}
         selectedKeys={[selectedValue]}
@@ -78,6 +85,7 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
           );
         })}
       </Select>
+      {isCorrect && "correct"}
     </>
   );
 };
@@ -108,7 +116,9 @@ export const FillGapsSelectExView: FC<TProps> = ({
             id={"answer-wrapper-" + field?.id}
             style={{
               display: "inline-block",
-              minWidth: maxOptionLength * (maxOptionLength < 5 ? 20 : 17),
+              minWidth:
+                maxOptionLength *
+                (maxOptionLength < 10 ? 30 : maxOptionLength > 20 ? 10 : 13),
             }}
           >
             <AnswerField

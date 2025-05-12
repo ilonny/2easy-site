@@ -50,7 +50,8 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
     }
   }, [count, field.options, isCorrect, selectedValue]);
 
-  const onBlur = useCallback(() => {
+  const onBlur = useCallback((e) => {
+    e.stopPropagation()
     setCount((c) => c + 1);
     if (count < 3 && !isCorrect) {
       setSelectedValue("");

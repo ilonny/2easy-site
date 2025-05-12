@@ -45,7 +45,6 @@ export const checkResponse = (res: {
   successMessage?: string;
 }) => {
   if (!res?.success) {
-    console.log("SHOW TOAST HERE");
     toast(res?.message ? res?.message : "Что-то пошло не так", {
       type: "error",
     });

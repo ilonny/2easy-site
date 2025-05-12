@@ -61,7 +61,7 @@ export const DeleteLessonModalForm: FC<TProps> = ({
               Подтвердить
             </Button>
             <Button
-              color="secondary"
+              color="primary"
               className="w-full"
               size="lg"
               onClick={() => setIsVisible(false)}

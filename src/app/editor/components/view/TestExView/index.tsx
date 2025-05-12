@@ -79,11 +79,15 @@ export const TestStep = (props: TTestStepProps) => {
 
             const isCorrect = isSubmitted && isSelected && !isError;
             const isIncorrect = isSubmitted && isSelected && isError;
-            const color = isCorrect
-              ? "success"
-              : isIncorrect
-              ? "danger"
-              : "primary";
+
+            const isCorrectAndNotSelected =
+              isSubmitted && !isSelected && option.isCorrect;
+            const color =
+              isCorrectAndNotSelected || isCorrect
+                ? "success"
+                : isIncorrect
+                ? "danger"
+                : "primary";
 
             return (
               <label
