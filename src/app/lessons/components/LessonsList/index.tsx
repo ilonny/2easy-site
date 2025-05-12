@@ -69,7 +69,14 @@ export const LessonsList: FC<TProps> = ({
               }}
             />
           </div>
-          <div className="p-4 bg-white ">
+          <div
+            className="p-4 bg-white flex items-center justify-center"
+            style={{
+              height: 135,
+              borderBottomLeftRadius: 4,
+              borderBottomRightRadius: 4,
+            }}
+          >
             <Button
               color="primary"
               className="w-full"
@@ -78,7 +85,6 @@ export const LessonsList: FC<TProps> = ({
             >
               Создать урок
             </Button>
-            <div className="h-2" />
           </div>
         </div>
       )}

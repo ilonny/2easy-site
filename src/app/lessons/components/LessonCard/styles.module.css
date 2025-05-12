@@ -31,3 +31,9 @@
   top: 0;
   transition: all 100ms ease;
 }
+
+.image-bg {
+  background-size: cover !important;
+  background-position: center !important;
+  transition: all 250ms ease;
+}

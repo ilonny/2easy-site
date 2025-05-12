@@ -32,13 +32,22 @@ export const HeaderProfile = () => {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <button className={styles["header-profile-short-wrapper"]}>
+        <button
+          className={styles["header-profile-short-wrapper"]}
+          style={{ outline: "none" }}
+        >
           <p className={styles.title}>{profile.name?.[0] || "A"}</p>
         </button>
       </DropdownTrigger>
       <DropdownMenu aria-label="Profile Actions">
         <DropdownItem key="profile">
-          <Link href="/profile">Профиль</Link>
+          <Link href="/profile?lessons">Мои уроки</Link>
+        </DropdownItem>
+        <DropdownItem key="profile">
+          <Link href="/profile?students">Мои ученики</Link>
+        </DropdownItem>
+        <DropdownItem key="profile">
+          <Link href="/profile?profile">Личные данные</Link>
         </DropdownItem>
         <DropdownItem onClick={logout} key="logout">
           Выйти

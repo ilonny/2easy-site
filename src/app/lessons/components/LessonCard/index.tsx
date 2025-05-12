@@ -12,6 +12,7 @@ import Ellipse from "@/assets/icons/ellipse.svg";
 import DeleteIcon from "@/assets/icons/delete.svg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Bg from "@/assets/images/create_lesson_bg_card.png";
 
 type TProps = {
   lesson: TLesson;
@@ -70,10 +71,11 @@ export const LessonCard: FC<TProps> = ({
             width: "100%",
             height: "100%",
             background: `url(${
-              BASE_URL + "/" + lesson.image_path
-            }) center center no-repeat #fff`,
-            backgroundSize: "cover",
+              lesson.image_path ? BASE_URL + "/" + lesson.image_path : Bg.src
+            })`,
+            // backgroundPosition: "center",
             transition: "all 500ms ease",
+            // backgroundSize: "cover",
           }}
         />
         <div className={styles["shadow"]} />
@@ -121,13 +123,24 @@ export const LessonCard: FC<TProps> = ({
           </Popover>
         </div>
       </div>
-      <div className="p-4 bg-white ">
+      <div
+        className="p-4 bg-white "
+        style={{
+          borderBottomLeftRadius: 4,
+          borderBottomRightRadius: 4,
+          height: "135px",
+        }}
+      >
         <p className="text-black font-bold">{lesson.title}</p>
         <div className="h-2" />
         {!!tags && tags}
         <div className="h-2" />
         {!!lesson.description && (
-          <div style={{ whiteSpace: "break-spaces" }}>{lesson.description}</div>
+          <div style={{ whiteSpace: "break-spaces", fontSize: 14 }}>
+            {lesson.description.length > 100
+              ? lesson.description.slice(0, 110) + "..."
+              : lesson.description}
+          </div>
         )}
       </div>
     </div>

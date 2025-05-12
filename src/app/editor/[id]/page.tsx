@@ -20,6 +20,9 @@ import { TTemplate } from "../components/create/ChooseTemplateModal/templates";
 import { EditorRootModal } from "../components/editor/EditorRootModal";
 import { useExList } from "../hooks/useExList";
 import { ExList } from "../components/view/ExList";
+import { BASE_URL } from "@/api";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 export default function EditorPage() {
   const params = useParams();
@@ -112,6 +115,40 @@ export default function EditorPage() {
             borderRadius: 10,
           }}
         >
+          <h1
+            style={{
+              fontSize: 44,
+              textAlign: "center",
+              color: "#3f28c6",
+              fontWeight: 700,
+            }}
+          >
+            {lesson?.title}
+          </h1>
+          {!!lesson?.description && (
+            <h2
+              style={{
+                fontSize: 20,
+                textAlign: "center",
+                // color: "#3f28c6",
+                fontWeight: 500,
+                maxWidth: 800,
+                margin: "auto",
+              }}
+            >
+              {lesson?.description}
+            </h2>
+          )}
+          <div className="h-8"></div>
+          {!!lesson?.image_path && (
+            <Zoom>
+              <img
+                src={BASE_URL + "/" + lesson.image_path}
+                style={{ maxHeight: 400, margin: "auto" }}
+              />
+            </Zoom>
+          )}
+          <div className="h-8"></div>
           <ExList
             list={exList}
             onPressEdit={onPressEditEx}

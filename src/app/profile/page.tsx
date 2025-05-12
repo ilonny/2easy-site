@@ -16,14 +16,20 @@ export default function StartRegistrationPage() {
     subscription?.subscribe_type_id && subscription?.subscribe_type_id !== 1;
 
   const [tabIndex, setTabIndex] = useState<"profile" | "lessons" | "students">(
-    "profile"
+    "lessons"
   );
 
   useEffect(() => {
     if (window.location.search?.includes("lessons")) {
       setTabIndex("lessons");
     }
-  }, []);
+    if (window.location.search?.includes("profile")) {
+      setTabIndex("profile");
+    }
+    if (window.location.search?.includes("students")) {
+      setTabIndex("students");
+    }
+  }, [window.location.search]);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
@@ -49,11 +55,6 @@ export default function StartRegistrationPage() {
             color="primary"
           >
             <Tab
-              key="profile"
-              title="Личные данные и подписка"
-              className="uppercase font-bold"
-            />
-            <Tab
               key="lessons"
               title="Мои уроки"
               className="uppercase font-bold"
@@ -61,6 +62,11 @@ export default function StartRegistrationPage() {
             <Tab
               key="students"
               title="Мои ученики"
+              className="uppercase font-bold"
+            />
+            <Tab
+              key="profile"
+              title="Личные данные и подписка"
               className="uppercase font-bold"
             />
           </Tabs>
