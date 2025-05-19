@@ -1,5 +1,5 @@
 export type TMatch = {
-  id: number;
+  id: string;
   value: string;
   correctValue: string;
 };

@@ -36,7 +36,7 @@ export const Audio: FC<TProps> = ({
 }) => {
   const [filePickerError, setFilePickerError] = useState("");
   const { isLoading, saveAudioEx, success } = useUploadAudioEx(lastSortIndex);
-  const { data, changeData } = useExData<TAudioData>(
+  const { data, changeData, resetData } = useExData<TAudioData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TAudioData["images"]>(
@@ -64,8 +64,9 @@ export const Audio: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const audioFile = data?.editorImages?.[0]?.file || data?.editorImages?.[0];
   const audioFileName =

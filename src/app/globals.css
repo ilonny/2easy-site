@@ -74,7 +74,7 @@ blockquote {
 }
 
 .editorClassName {
-  min-height: 300px;
+  /* min-height: 300px; */
 }
 
 .editor-view p {
@@ -163,7 +163,7 @@ blockquote {
 }
 
 .editorClassName {
-  padding: 14px;
+  /* padding: 14px; */
 }
 
 .editorClassName h1 {

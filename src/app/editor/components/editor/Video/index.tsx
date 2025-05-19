@@ -33,7 +33,7 @@ export const Video: FC<TProps> = ({
   lastSortIndex,
 }) => {
   const { isLoading, saveVideoEx, success } = useUploadVideoEx(lastSortIndex);
-  const { data, changeData } = useExData<TVideoData>(
+  const { data, changeData, resetData } = useExData<TVideoData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TVideoData["images"]>(
@@ -47,8 +47,9 @@ export const Video: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const onDeleteVideo = useCallback(
     (index: number) => {
@@ -82,7 +83,7 @@ export const Video: FC<TProps> = ({
           return text;
         }
         text =
-          '<iframe width="100%" height="400" src="//www.youtube.com/embed/' +
+          '<iframe width="100%" height="500" src="//www.youtube.com/embed/' +
           id +
           '" frameborder="0" allowfullscreen></iframe>';
       }
@@ -92,7 +93,7 @@ export const Video: FC<TProps> = ({
         text.includes("rutube.ru/video")
       ) {
         const id = text.split("/").reverse()[1];
-        text = `<iframe width="100%" height="400" src="https://rutube.ru/play/embed/${id}/" frameBorder="0" allow="clipboard-write; autoplay" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>`;
+        text = `<iframe width="100%" height="500" src="https://rutube.ru/play/embed/${id}/" frameBorder="0" allow="clipboard-write; autoplay" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>`;
       }
       if (
         key === "content" &&
@@ -101,7 +102,7 @@ export const Video: FC<TProps> = ({
       ) {
         const oid = text.split("video-")[1].split("_")[0];
         const id = text.split("video-")[1].split("_")[1];
-        text = `<iframe src="https://vkvideo.ru/video_ext.php?oid=-${oid}&id=${id}&hd=2&autoplay=1" width="100%" height="400" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>`;
+        text = `<iframe src="https://vkvideo.ru/video_ext.php?oid=-${oid}&id=${id}&hd=2&autoplay=1" width="100%" height="500" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>`;
       }
       data.videos[index][key] = text;
       changeData("videos", [...data.videos]);

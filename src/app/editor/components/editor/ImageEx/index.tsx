@@ -31,7 +31,7 @@ export const ImageEx: FC<TProps> = ({
   lastSortIndex,
 }) => {
   const { isLoading, saveImageEx, success } = useUploadImageEx(lastSortIndex);
-  const { data, changeData } = useExData<TImageExData>(
+  const { data, changeData, resetData } = useExData<TImageExData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TImageExData["images"]>(
@@ -52,8 +52,9 @@ export const ImageEx: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [success]);
+  }, [success, resetData, onSuccess]);
 
   return (
     <div>

@@ -131,7 +131,9 @@ export const LessonCard: FC<TProps> = ({
           height: "135px",
         }}
       >
-        <p className="text-black font-bold">{lesson.title}</p>
+        <p className="text-black font-bold" style={{ fontSize: 18 }}>
+          {lesson.title}
+        </p>
         <div className="h-2" />
         {!!tags && tags}
         <div className="h-2" />

@@ -69,7 +69,7 @@ export const TestEx: FC<TProps> = ({
   lastSortIndex,
 }) => {
   const { isLoading, saveTestEx, success } = useUploadTestEx(lastSortIndex);
-  const { data, changeData } = useExData<TTestData>(
+  const { data, changeData, resetData } = useExData<TTestData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TTestData["images"]>(
@@ -83,8 +83,9 @@ export const TestEx: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const onDeleteQuestion = useCallback(
     (qIndex: number) => {

@@ -38,7 +38,7 @@ export const FreeInputFormEx: FC<TProps> = ({
 }) => {
   const { isLoading, saveFreeInputFormEx, success } =
     useUploadFreeInputFormEx(lastSortIndex);
-  const { data, changeData } = useExData<TFreeInputFormData>(
+  const { data, changeData, resetData } = useExData<TFreeInputFormData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TFreeInputFormData["images"]>(
@@ -52,8 +52,9 @@ export const FreeInputFormEx: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const onDeleteQuestion = useCallback(
     (qIndex: number) => {

@@ -36,7 +36,7 @@ export const TextSticker: FC<TProps> = ({
 }) => {
   const { isLoading, saveTextStickerEx, success } =
     useUploadTextStickerEx(lastSortIndex);
-  const { data, changeData } = useExData<TTextStickerData>(
+  const { data, changeData, resetData } = useExData<TTextStickerData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TTextStickerData["images"]>(
@@ -50,8 +50,9 @@ export const TextSticker: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const onDeleteSticker = useCallback(
     (index: number) => {

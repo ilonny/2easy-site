@@ -36,7 +36,7 @@ export const TextChecklist: FC<TProps> = ({
 }) => {
   const { isLoading, saveTextChecklistEx, success } =
     useUploadTextChecklistEx(lastSortIndex);
-  const { data, changeData } = useExData<TTextStickerData>(
+  const { data, changeData, resetData } = useExData<TTextStickerData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TTextStickerData["images"]>(
@@ -55,8 +55,9 @@ export const TextChecklist: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const onDeleteSticker = useCallback(
     (index: number) => {

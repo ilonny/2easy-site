@@ -37,7 +37,7 @@ export const FillGapsDrag: FC<TProps> = ({
 }) => {
   const { isLoading, saveFillGapsDragEx, success } =
     useUploadFillGapsDragEx(lastSortIndex);
-  const { data, changeData } = useExData<TFillGapsDragData>(
+  const { data, changeData, resetData } = useExData<TFillGapsDragData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TFillGapsDragData["images"]>(
@@ -51,8 +51,9 @@ export const FillGapsDrag: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const checkFields = useCallback(() => {
     // const fields = [...data.fields];

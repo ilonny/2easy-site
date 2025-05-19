@@ -37,7 +37,7 @@ export const FillGapsInput: FC<TProps> = ({
 }) => {
   const { isLoading, saveFillGapsInputEx, success } =
     useUploadFillGapsInputEx(lastSortIndex);
-  const { data, changeData } = useExData<TFillGapsInputData>(
+  const { data, changeData, resetData } = useExData<TFillGapsInputData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TFillGapsInputData["images"]>(
@@ -51,8 +51,9 @@ export const FillGapsInput: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const renderContent = useCallback(() => {
     document

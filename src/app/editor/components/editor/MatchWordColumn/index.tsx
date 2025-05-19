@@ -46,7 +46,7 @@ export const MatchWordColumn: FC<TProps> = ({
 }) => {
   const { isLoading, saveMathWordColumnEx, success } =
     useUploadMatchWordColumnEx(lastSortIndex);
-  const { data, changeData } = useExData<TMatchWordColumnData>(
+  const { data, changeData, resetData } = useExData<TMatchWordColumnData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TMatchWordColumnData["images"]>(
@@ -60,8 +60,9 @@ export const MatchWordColumn: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const onChangeColumnTitle = useCallback(
     (title: string, index: number) => {

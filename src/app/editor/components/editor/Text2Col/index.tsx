@@ -55,7 +55,7 @@ export const Text2ColEx: FC<TProps> = ({
   const { isLoading, saveText2ColEx, success } =
     useUploadText2ColEx(lastSortIndex);
 
-  const { data, changeData } = useExData<TText2ColData>(
+  const { data, changeData, resetData } = useExData<TText2ColData>(
     defaultValues || defaultValuesStub
   );
 
@@ -89,8 +89,9 @@ export const Text2ColEx: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const [isLoaded, setIsLoaded] = useState(false);
 

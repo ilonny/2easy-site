@@ -32,7 +32,7 @@ export const MatchWordImage: FC<TProps> = ({
 }) => {
   const { isLoading, saveMatchWordImageEx, success } =
     useUploadMatchWordImage(lastSortIndex);
-  const { data, changeData } = useExData<TMatchWordImageData>(
+  const { data, changeData, resetData } = useExData<TMatchWordImageData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TMatchWordImageData["images"]>(
@@ -53,8 +53,9 @@ export const MatchWordImage: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [success]);
+  }, [success, resetData, onSuccess]);
 
   return (
     <div>

@@ -27,15 +27,16 @@ export const Note: FC<TProps> = ({
   onChangeIsVisible,
 }) => {
   const { isLoading, saveNoteEx, success } = useUploadNoteEx(lastSortIndex);
-  const { data, changeData } = useExData<TNoteData>(
+  const { data, changeData, resetData } = useExData<TNoteData>(
     defaultValues || defaultValuesStub
   );
 
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   return (
     <div>

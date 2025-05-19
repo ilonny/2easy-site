@@ -51,24 +51,16 @@ export const DeleteLessonModalForm: FC<TProps> = ({
           <p>{"Удалить урок " + lesson.title + "?"}</p>
         </ModalHeader>
         <ModalBody>
-          <div className="flex gap-4">
-            <Button
-              color="danger"
-              className="w-full"
-              size="lg"
-              onClick={onSubmit}
-            >
-              Подтвердить
-            </Button>
-            <Button
-              color="primary"
-              className="w-full"
-              size="lg"
-              onClick={() => setIsVisible(false)}
-            >
-              Отменить
-            </Button>
-          </div>
+          <Button color="danger" variant="light" onClick={onSubmit}>
+            Да, удалить
+          </Button>
+          <Button
+            color="primary"
+            className="w-full"
+            onClick={() => setIsVisible(false)}
+          >
+            Отменить
+          </Button>
         </ModalBody>
       </ModalContent>
     </Modal>

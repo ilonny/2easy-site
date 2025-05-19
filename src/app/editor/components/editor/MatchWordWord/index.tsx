@@ -10,6 +10,7 @@ import { Button, Textarea } from "@nextui-org/react";
 import { useUploadMatchWordWordEx } from "../hooks/useUploadMatchWordWordEx";
 import Close from "@/assets/icons/close.svg";
 import { MatchWordWordExView } from "../../view/MatchWordWordExView";
+import { uuidv4 } from "@/app/editor/helpers";
 
 const defaultValuesStub: TMatchWordWordData = {
   title: "New vocab!",
@@ -19,17 +20,17 @@ const defaultValuesStub: TMatchWordWordData = {
   images: [],
   matches: [
     {
-      id: new Date().getTime(),
+      id: uuidv4(),
       value: "",
       correctValue: "",
     },
     {
-      id: new Date().getTime() + 1,
+      id: uuidv4(),
       value: "",
       correctValue: "",
     },
     {
-      id: new Date().getTime() + 2,
+      id: uuidv4(),
       value: "",
       correctValue: "",
     },
@@ -49,7 +50,7 @@ export const MatchWordWord: FC<TProps> = ({
 }) => {
   const { isLoading, saveMathWordWordEx, success } =
     useUploadMatchWordWordEx(lastSortIndex);
-  const { data, changeData } = useExData<TMatchWordWordData>(
+  const { data, changeData, resetData } = useExData<TMatchWordWordData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TMatchWordWordData["images"]>(
@@ -63,8 +64,10 @@ export const MatchWordWord: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
+      console.log('on success fired')
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const onDeleteSticker = useCallback(
     (index: number) => {
@@ -90,7 +93,8 @@ export const MatchWordWord: FC<TProps> = ({
     },
     [data?.matches, changeData]
   );
-
+  console.log('defaultValuesStub', defaultValuesStub);
+  console.log('data', data);
   return (
     <div>
       <div className="flex flex-wrap">

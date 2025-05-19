@@ -55,7 +55,7 @@ export const TextDefaultEx: FC<TProps> = ({
 }) => {
   const { isLoading, saveTextDefaultEx, success } =
     useUploadTextDefaultEx(lastSortIndex);
-  const { data, changeData } = useExData<TTextDefaultData>(
+  const { data, changeData, resetData } = useExData<TTextDefaultData>(
     defaultValues || defaultValuesStub
   );
   const [images, setImages] = useState<TTextDefaultData["images"]>(
@@ -76,8 +76,9 @@ export const TextDefaultEx: FC<TProps> = ({
   useEffect(() => {
     if (success) {
       onSuccess?.();
+      resetData(defaultValuesStub);
     }
-  }, [onSuccess, success]);
+  }, [onSuccess, success, resetData]);
 
   const [isLoaded, setIsLoaded] = useState(false);
 

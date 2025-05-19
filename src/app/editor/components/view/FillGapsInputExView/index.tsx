@@ -50,15 +50,18 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
     }
   }, [count, field.options, isCorrect, selectedValue]);
 
-  const onBlur = useCallback((e) => {
-    e.stopPropagation()
-    setCount((c) => c + 1);
-    if (count < 3 && !isCorrect) {
-      setSelectedValue("");
-      setIsIncorrect(true);
-      return;
-    }
-  }, [count, isCorrect]);
+  const onBlur = useCallback(
+    (e) => {
+      e.stopPropagation();
+      setCount((c) => c + 1);
+      if (count < 3 && !isCorrect) {
+        setSelectedValue("");
+        setIsIncorrect(true);
+        return;
+      }
+    },
+    [count, isCorrect]
+  );
 
   return (
     <>
@@ -70,6 +73,7 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
           isCorrect && "isCorrect"
         } ${(isDisabled || isIncorrect) && "isIncorrect"}`}
         size="sm"
+        classNames={{ inputWrapper: "bg-[#eeebfe]" }}
         color={isCorrect ? "success" : selectedValue ? "danger" : "primary"}
         value={selectedValue}
         onValueChange={onChangeSelection}
@@ -105,7 +109,8 @@ export const FillGapsInputExView: FC<TProps> = ({
             id={"answer-wrapper-" + field?.id}
             style={{
               display: "inline-block",
-              maxWidth: maxOptionLength * 15,
+              maxWidth: maxOptionLength * (maxOptionLength < 5 ? 30 : 15),
+              lineHeight: "initial",
             }}
           >
             <AnswerField
@@ -165,7 +170,10 @@ export const FillGapsInputExView: FC<TProps> = ({
       )}
       <div className={`py-8 w-[886px] m-auto`}>
         <Card className={`p-10 px-10 `}>
-          <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
+          <div
+            style={{ margin: "0 auto", lineHeight: "200%" }}
+            className="flex flex-col gap-10"
+          >
             <div
               className={
                 "fill-gaps-input-area answerWrapperArea answerWrapperArea-" +
