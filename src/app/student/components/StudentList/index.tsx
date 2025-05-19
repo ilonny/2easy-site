@@ -19,7 +19,14 @@ import styles from "./styles.module.css";
 import Image from "next/image";
 import Ellipse from "@/assets/icons/ellipse.svg";
 
-export const StudentList = () => {
+type TProps = {
+  hideAddButton?: boolean;
+  hidePopoverButton?: boolean;
+  onClickStudent?: (id: number) => void;
+};
+
+export const StudentList = (props: TProps) => {
+  const { hideAddButton, hidePopoverButton, onClickStudent } = props;
   const [createIsVisible, setCreateIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
   const { students, getStudents, deleteStudent } = useStudentList();
@@ -66,83 +73,94 @@ export const StudentList = () => {
         />
       )}
       {!!students?.length && (
-        <div className="w-[600px] gap-5 flex flex-wrap flex-col">
+        <div className="max-w-[600px] gap-5 flex flex-wrap flex-col">
           {students?.map((student) => {
             return (
-              <Card key={student.id} radius="md" className="p-2">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="flex items-center gap-4">
-                      <button
-                        className={styles["header-profile-short-wrapper"]}
-                      >
-                        <p className={styles.title}>
-                          {getShortName(student.name) || "A"}
-                        </p>
-                      </button>
-                      <div>
-                        <p className="font-bold">{student.name}</p>
-                        <p className="font-light">{student.email}</p>
+              <div
+                key={student.id}
+                onClick={() =>
+                  onClickStudent && onClickStudent(student?.id || 0)
+                }
+              >
+                <Card radius="md" className="p-2">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="flex items-center gap-4">
+                        <button
+                          className={styles["header-profile-short-wrapper"]}
+                        >
+                          <p className={styles.title}>
+                            {getShortName(student.name) || "A"}
+                          </p>
+                        </button>
+                        <div>
+                          <p className="font-bold">{student.name}</p>
+                          <p className="font-light">{student.email}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div>
-                    <Popover
-                      color="foreground"
-                      placement="bottom-end"
-                      key={chosenStudent?.id}
-                      // isOpen={popoverIsOpen}
-                      // onOpenChange={(open) => setPopoverIsOpen(open)}
-                    >
-                      <PopoverTrigger>
-                        <Button isIconOnly>
-                          <Image src={Ellipse} alt="icon" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="bg-white p-2">
-                        <Button
-                          fullWidth
-                          color="primary"
-                          onClick={() => {
-                            onPressCreateGroup(student);
-                          }}
+                    {!hidePopoverButton && (
+                      <div>
+                        <Popover
+                          color="foreground"
+                          placement="bottom-end"
+                          key={chosenStudent?.id}
+                          // isOpen={popoverIsOpen}
+                          // onOpenChange={(open) => setPopoverIsOpen(open)}
                         >
-                          Редактировать
-                        </Button>
-                        <div className="h-2" />
-                        <Button
-                          fullWidth
-                          color="danger"
-                          variant="light"
-                          onClick={() => {
-                            onPressDelete(student);
-                          }}
-                        >
-                          Удалить
-                        </Button>
-                      </PopoverContent>
-                    </Popover>
+                          <PopoverTrigger>
+                            <Button isIconOnly>
+                              <Image src={Ellipse} alt="icon" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="bg-white p-2">
+                            <Button
+                              fullWidth
+                              color="primary"
+                              onClick={() => {
+                                onPressCreateGroup(student);
+                              }}
+                            >
+                              Редактировать
+                            </Button>
+                            <div className="h-2" />
+                            <Button
+                              fullWidth
+                              color="danger"
+                              variant="light"
+                              onClick={() => {
+                                onPressDelete(student);
+                              }}
+                            >
+                              Удалить
+                            </Button>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    )}
                   </div>
-                </div>
-                {!!student.tag && (
-                  <p className="mt-4">
-                    <Chip color="warning">
-                      <p className="text-white">{student.tag}</p>
-                    </Chip>
-                  </p>
-                )}
-              </Card>
+                  {!!student.tag && (
+                    <p className="mt-4">
+                      <Chip color="warning">
+                        <p className="text-white">{student.tag}</p>
+                      </Chip>
+                    </p>
+                  )}
+                </Card>
+              </div>
             );
           })}
-          <Button
-            radius="md"
-            color="primary"
-            className="px-10"
-            onClick={() => onPressCreateGroup(null)}
-            size="lg"
-          >
-            Добавить ученика
-          </Button>
+          {!hideAddButton && (
+            <Button
+              radius="md"
+              color="primary"
+              className="px-10"
+              onClick={() => onPressCreateGroup(null)}
+              size="lg"
+            >
+              Добавить ученика
+            </Button>
+          )}
         </div>
       )}
       <div className="h-10" />

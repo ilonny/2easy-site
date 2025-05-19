@@ -18,12 +18,14 @@ type TProps = {
   lesson: TLesson;
   onPressEdit?: (lesson: TLesson) => void;
   onPressDelete?: (lesson: TLesson) => void;
+  onPressAttach?: (lesson: TLesson) => void;
 };
 
 export const LessonCard: FC<TProps> = ({
   lesson,
   onPressEdit,
   onPressDelete,
+  onPressAttach,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -94,8 +96,9 @@ export const LessonCard: FC<TProps> = ({
             <PopoverContent className="bg-white p-2">
               {!!onPressEdit && (
                 <Button
+                  size="sm"
                   variant="light"
-                  className="w-full text-default-foreground py-1 p-x-4 text-left"
+                  className="w-full text-default-foreground py-1 p-x-4 text-left justify-start"
                   style={{ fontSize: 16 }}
                   onClick={() => {
                     setPopoverIsOpen(false);
@@ -105,10 +108,25 @@ export const LessonCard: FC<TProps> = ({
                   Редактировать
                 </Button>
               )}
+              {!!onPressAttach && (
+                <Button
+                  size="sm"
+                  variant="light"
+                  className="w-full text-default-foreground py-1 p-x-4 text-left justify-start"
+                  style={{ fontSize: 16 }}
+                  onClick={() => {
+                    setPopoverIsOpen(false);
+                    onPressAttach(lesson);
+                  }}
+                >
+                  Прикрепить к ученику
+                </Button>
+              )}
               {!!onPressDelete && (
                 <Button
+                  size="sm"
                   variant="light"
-                  className="w-full text-default-foreground py-1 p-x-4"
+                  className="w-full text-default-foreground py-1 p-x-4 justify-start"
                   style={{ fontSize: 16 }}
                   endContent={<Image src={DeleteIcon} alt="icon" />}
                   onClick={() => {

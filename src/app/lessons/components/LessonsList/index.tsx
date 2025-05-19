@@ -5,10 +5,12 @@ import Bg from "@/assets/images/create_lesson_bg_card.png";
 import { Button } from "@nextui-org/react";
 import { EditLessonModalForm } from "../EditLessonModalForm";
 import { DeleteLessonModalForm } from "../DeleteLessonModalForm";
+import { AttachLessonModalForm } from "../AttachLessonModalForm";
 
 type TProps = {
   lessons: TLesson[];
   canCreateLesson?: boolean;
+  canAttachLesson?: boolean;
   onPressCreate?: () => void;
   getLessons: () => void;
 };
@@ -18,11 +20,12 @@ export const LessonsList: FC<TProps> = ({
   canCreateLesson,
   onPressCreate,
   getLessons,
+  canAttachLesson,
 }) => {
   const [editIsVisible, setEditIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
   const [chosenLesson, setChosenLesson] = useState<TLesson | null>(null);
-
+  const [attachLessonModal, setAttachLessonModal] = useState(false);
   const onPressEdit = useCallback((lesson: TLesson) => {
     setChosenLesson(lesson);
     setEditIsVisible(true);
@@ -38,6 +41,11 @@ export const LessonsList: FC<TProps> = ({
     getLessons();
     setChosenLesson(null);
   }, [getLessons]);
+
+  const onAttachLesson = useCallback((lesson: TLesson) => {
+    setChosenLesson(lesson);
+    setAttachLessonModal(true);
+  }, []);
 
   useEffect(() => {
     if (!editIsVisible && !deleteIsVisible) {
@@ -95,6 +103,7 @@ export const LessonsList: FC<TProps> = ({
             lesson={lesson}
             onPressEdit={onPressEdit}
             onPressDelete={onPressDelete}
+            onPressAttach={onAttachLesson}
           />
         );
       })}
@@ -114,6 +123,12 @@ export const LessonsList: FC<TProps> = ({
             lesson={chosenLesson}
             key={chosenLesson?.id}
             onSuccess={onSuccessEdit}
+          />
+          <AttachLessonModalForm
+            isVisible={attachLessonModal}
+            setIsVisible={setAttachLessonModal}
+            onSuccess={() => {}}
+            lesson={chosenLesson}
           />
         </>
       )}
