@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Button,
   Card,
+  Checkbox,
   Chip,
   Divider,
   Modal,
@@ -23,10 +24,11 @@ type TProps = {
   hideAddButton?: boolean;
   hidePopoverButton?: boolean;
   onClickStudent?: (id: number) => void;
+  chosenIds?: number[];
 };
 
 export const StudentList = (props: TProps) => {
-  const { hideAddButton, hidePopoverButton, onClickStudent } = props;
+  const { hideAddButton, hidePopoverButton, onClickStudent, chosenIds } = props;
   const [createIsVisible, setCreateIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
   const { students, getStudents, deleteStudent } = useStudentList();
@@ -73,8 +75,12 @@ export const StudentList = (props: TProps) => {
         />
       )}
       {!!students?.length && (
-        <div className="max-w-[600px] gap-5 flex flex-wrap flex-col">
+        <div
+          className="max-w-[600px] gap-5 flex flex-wrap flex-col"
+          style={{ cursor: onClickStudent ? "pointer" : "default" }}
+        >
           {students?.map((student) => {
+            const isChosen = chosenIds?.includes(student?.id);
             return (
               <div
                 key={student.id}
@@ -82,9 +88,21 @@ export const StudentList = (props: TProps) => {
                   onClickStudent && onClickStudent(student?.id || 0)
                 }
               >
-                <Card radius="md" className="p-2">
+                <Card
+                  radius="md"
+                  className="p-2"
+                  style={{ backgroundColor: isChosen ? "#eeebff" : "#fff" }}
+                >
                   <div className="flex justify-between items-center">
-                    <div>
+                    <div className="flex items-center">
+                      {onClickStudent && (
+                        <div className="w-[50px] pl-2">
+                          <Checkbox
+                            isSelected={isChosen}
+                            onChange={() => onClickStudent(student?.id || 0)}
+                          />
+                        </div>
+                      )}
                       <div className="flex items-center gap-4">
                         <button
                           className={styles["header-profile-short-wrapper"]}
@@ -93,9 +111,20 @@ export const StudentList = (props: TProps) => {
                             {getShortName(student.name) || "A"}
                           </p>
                         </button>
-                        <div>
-                          <p className="font-bold">{student.name}</p>
-                          <p className="font-light">{student.email}</p>
+                        <div className="">
+                          <div className="flex items-center gap-4">
+                            <p className="font-bold">{student.name}</p>
+                            <p className="font-light">{student.email}</p>
+                          </div>
+                          {!!student.tag && (
+                            <div className="flex items-center">
+                              <p className="mt-4">
+                                <Chip color="warning">
+                                  <span className="text-white">{student.tag}</span>
+                                </Chip>
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -139,13 +168,6 @@ export const StudentList = (props: TProps) => {
                       </div>
                     )}
                   </div>
-                  {!!student.tag && (
-                    <p className="mt-4">
-                      <Chip color="warning">
-                        <p className="text-white">{student.tag}</p>
-                      </Chip>
-                    </p>
-                  )}
                 </Card>
               </div>
             );

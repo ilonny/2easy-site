@@ -127,7 +127,9 @@ export const LessonsList: FC<TProps> = ({
           <AttachLessonModalForm
             isVisible={attachLessonModal}
             setIsVisible={setAttachLessonModal}
-            onSuccess={() => {}}
+            onSuccess={() => {
+              setAttachLessonModal(false);
+            }}
             lesson={chosenLesson}
           />
         </>

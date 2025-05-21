@@ -5,8 +5,10 @@ import {
   ModalBody,
   ModalContent,
   ModalHeader,
+  Select,
+  SelectItem,
 } from "@nextui-org/react";
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { TLesson } from "../../types";
 import { StudentList } from "@/app/student/components/StudentList";
 
@@ -24,22 +26,32 @@ export const AttachLessonModalForm: FC<TProps> = ({
   lesson,
 }) => {
   const [chosenIds, setChosenIds] = useState<number[]>([]);
+  const [step, setStep] = useState(0);
+  const [status, setStatus] = useState<"open" | "close">("open");
+  const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = useCallback(async () => {
-    const lessonRes = await fetchPostJson({
-      path: "/lesson/",
-      isSecure: true,
-      data: {
-        id: lesson.id,
-      },
+    setIsLoading(true);
+    const allRes = await Promise.all(
+      chosenIds.map(async (student_id) => {
+        const res = await fetchPostJson({
+          path: "/lesson-relation/create",
+          isSecure: true,
+          data: {
+            lesson_id: lesson.id,
+            student_id,
+            status,
+          },
+        });
+        return await res.json();
+      })
+    );
+    setIsLoading(false);
+    allRes.forEach((res) => {
+      checkResponse(res);
     });
-    const lessonResJson = await lessonRes.json();
-    if (lessonResJson.success) {
-      onSuccess();
-      setChosenIds([]);
-    }
-    checkResponse(lessonResJson);
-  }, [onSuccess, lesson]);
+    onSuccess();
+  }, [chosenIds, lesson.id, onSuccess, status]);
 
   const onClickStudent = useCallback(
     (id: number) => {
@@ -52,25 +64,89 @@ export const AttachLessonModalForm: FC<TProps> = ({
     [chosenIds]
   );
 
+  useEffect(() => {
+    if (!isVisible) {
+      setChosenIds([]);
+      setStep(0);
+    }
+  }, [isVisible]);
+
+  console.log("chosenIds", chosenIds);
+  console.log("status", status);
   return (
-    <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
+    <Modal
+      size="xl"
+      isOpen={isVisible}
+      onClose={() => setIsVisible(false)}
+      scrollBehavior="outside"
+    >
       <ModalContent>
         <ModalHeader>
-          <p>Выберите учеников, чтобы прикрепить урок</p>
+          <p>
+            {step === 0
+              ? "Выберите учеников, чтобы прикрепить урок"
+              : "Укажите статус урока"}
+          </p>
         </ModalHeader>
         <ModalBody>
-          <StudentList
-            hideAddButton
-            hidePopoverButton
-            onClickStudent={onClickStudent}
-          />
-          <Button
-            color="primary"
-            className="w-full"
-            onClick={() => setIsVisible(false)}
-          >
-            Отменить
-          </Button>
+          {step === 0 && (
+            <>
+              <StudentList
+                hideAddButton
+                hidePopoverButton
+                onClickStudent={onClickStudent}
+                chosenIds={chosenIds}
+              />
+              <Button
+                disabled={!chosenIds?.length}
+                size="lg"
+                color={!chosenIds?.length ? "default" : "primary"}
+                className="w-full"
+                onClick={() => setStep(1)}
+              >
+                Дальше
+              </Button>
+            </>
+          )}
+          {step === 1 && (
+            <>
+              <Select
+                defaultSelectedKeys={[status]}
+                size="lg"
+                description={
+                  status === "open"
+                    ? "Доступен ученику"
+                    : "Ученик видит урок, но не может открыть"
+                }
+                placeholder="Выберите статус урока"
+                onChange={(e) => {
+                  setStatus(e.target.value);
+                }}
+              >
+                <SelectItem key="open">Урок открыт</SelectItem>
+                <SelectItem key="close">Урок закрыт</SelectItem>
+              </Select>
+              <div className="h-4"></div>
+              <Button
+                size="lg"
+                color="primary"
+                className="w-full"
+                onClick={onSubmit}
+              >
+                Прикрепить
+              </Button>
+              <Button
+                isLoading={isLoading}
+                size="lg"
+                variant="light"
+                color="primary"
+                className="w-full"
+                onClick={() => setStep(0)}
+              >
+                Назад
+              </Button>
+            </>
+          )}
         </ModalBody>
       </ModalContent>
     </Modal>

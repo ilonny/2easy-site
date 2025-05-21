@@ -59,7 +59,7 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
           backgroundColor: isCorrect
             ? "rgb(23, 201, 100)"
             : selectedValue
-            ? "#A42929"
+            ? "#F76A6D"
             : "#eeebff",
           borderRadius: "8px",
         }}
