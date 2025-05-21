@@ -212,3 +212,16 @@ blockquote {
   opacity: 1 !important;
   transform: scale(1) !important;
 }
+
+.z-50 {
+  z-index: 9999999 !important;
+}
+
+.data-\[hover\=true\]\:bg-default-200[data-hover="true"] {
+  background-color: #eaeaea !important;
+}
+
+.group[data-focus="true"] .group-data-\[focus\=true\]\:bg-default-100 {
+  background-color: #fefefe !important;
+}
+

@@ -19,21 +19,36 @@ import { CreateStudentModalForm } from "../CreateStudentModalForm";
 import styles from "./styles.module.css";
 import Image from "next/image";
 import Ellipse from "@/assets/icons/ellipse.svg";
+import { useRouter } from "next/navigation";
 
 type TProps = {
   hideAddButton?: boolean;
   hidePopoverButton?: boolean;
   onClickStudent?: (id: number) => void;
   chosenIds?: number[];
+  studentsList?: Array<Record<string, never>>;
+  hideAccountButton?: boolean;
+  onSuccessEditCallback?: () => void;
+  onSuccessDeleteCallback?: () => void;
 };
 
 export const StudentList = (props: TProps) => {
-  const { hideAddButton, hidePopoverButton, onClickStudent, chosenIds } = props;
+  const {
+    hideAddButton,
+    hidePopoverButton,
+    onClickStudent,
+    chosenIds,
+    studentsList,
+    hideAccountButton,
+    onSuccessEditCallback,
+    onSuccessDeleteCallback,
+  } = props;
   const [createIsVisible, setCreateIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
-  const { students, getStudents, deleteStudent } = useStudentList();
+  const { students, getStudents, deleteStudent } = useStudentList(studentsList);
   const [chosenStudent, setChosenStudent] = useState(null);
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     getStudents();
@@ -48,7 +63,10 @@ export const StudentList = (props: TProps) => {
   const onSuccessCreate = useCallback(() => {
     setCreateIsVisible(false);
     setChosenStudent(null);
-  }, []);
+    if (onSuccessEditCallback) {
+      onSuccessEditCallback();
+    }
+  }, [onSuccessEditCallback]);
 
   const onPressDelete = useCallback((student) => {
     setChosenStudent(student || {});
@@ -90,10 +108,11 @@ export const StudentList = (props: TProps) => {
               >
                 <Card
                   radius="md"
-                  className="p-2"
+                  className="p-4"
                   style={{ backgroundColor: isChosen ? "#eeebff" : "#fff" }}
+                  shadow="none"
                 >
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-start">
                     <div className="flex items-center">
                       {onClickStudent && (
                         <div className="w-[50px] pl-2">
@@ -106,13 +125,14 @@ export const StudentList = (props: TProps) => {
                       <div className="flex items-center gap-4">
                         <button
                           className={styles["header-profile-short-wrapper"]}
+                          style={{ flexShrink: 0 }}
                         >
                           <p className={styles.title}>
                             {getShortName(student.name) || "A"}
                           </p>
                         </button>
                         <div className="">
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-bold">{student.name}</p>
                             <p className="font-light">{student.email}</p>
                           </div>
@@ -120,7 +140,9 @@ export const StudentList = (props: TProps) => {
                             <div className="flex items-center">
                               <p className="mt-4">
                                 <Chip color="warning">
-                                  <span className="text-white">{student.tag}</span>
+                                  <span className="text-white">
+                                    {student.tag}
+                                  </span>
                                 </Chip>
                               </p>
                             </div>
@@ -131,6 +153,7 @@ export const StudentList = (props: TProps) => {
                     {!hidePopoverButton && (
                       <div>
                         <Popover
+                          as="div"
                           color="foreground"
                           placement="bottom-end"
                           key={chosenStudent?.id}
@@ -143,11 +166,30 @@ export const StudentList = (props: TProps) => {
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="bg-white p-2">
+                            {!hideAccountButton && (
+                              <>
+                                <Button
+                                  fullWidth
+                                  color="primary"
+                                  onClick={() => {
+                                    router.push(
+                                      "/student-account/" + student?.id
+                                    );
+                                  }}
+                                >
+                                  В кабинет ученика →
+                                </Button>
+                                <div className="h-2" />
+                              </>
+                            )}
                             <Button
                               fullWidth
                               color="primary"
-                              onClick={() => {
-                                onPressCreateGroup(student);
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setTimeout(() => {
+                                  onPressCreateGroup(student);
+                                }, 100);
                               }}
                             >
                               Редактировать
@@ -185,7 +227,7 @@ export const StudentList = (props: TProps) => {
           )}
         </div>
       )}
-      <div className="h-10" />
+      {/* <div className="h-10" /> */}
       <CreateStudentModalForm
         key={chosenStudent?.id}
         chosenStudent={chosenStudent}
@@ -210,6 +252,9 @@ export const StudentList = (props: TProps) => {
                 deleteStudent(chosenStudent.id).then(() => {
                   setDeleteIsVisible(false);
                   setChosenStudent(null);
+                  if (onSuccessDeleteCallback) {
+                    onSuccessDeleteCallback();
+                  }
                 });
               }}
             >
