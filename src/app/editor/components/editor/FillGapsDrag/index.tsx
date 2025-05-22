@@ -45,6 +45,18 @@ export const FillGapsDrag: FC<TProps> = ({
   );
 
   useEffect(() => {
+    resetData({
+      title: "Let's practice!",
+      titleColor: "#3F28C6",
+      subtitle: "Fill in the gaps with the correct words",
+      description: "Answer the questions below",
+      images: [],
+      dataText: "",
+      fields: [],
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     changeData("images", images);
   }, [images, changeData]);
 

@@ -214,7 +214,7 @@ blockquote {
 }
 
 .z-50 {
-  z-index: 9999999 !important;
+  /* z-index: 9999999 !important; */
 }
 
 .data-\[hover\=true\]\:bg-default-200[data-hover="true"] {

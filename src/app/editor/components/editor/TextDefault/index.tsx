@@ -69,6 +69,19 @@ export const TextDefaultEx: FC<TProps> = ({
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   useEffect(() => {
+    resetData({
+      title: "Let's read!",
+      titleColor: "#3F28C6",
+      subtitle: "Read the article",
+      description: "Answer the questions below",
+      images: [],
+      editorImages: [],
+      viewType: "carousel",
+      content: "",
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     changeData("images", images);
     changeData("editorImages", editorImages);
   }, [images, changeData, editorImages]);

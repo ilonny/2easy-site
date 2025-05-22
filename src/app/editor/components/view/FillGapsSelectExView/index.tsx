@@ -57,9 +57,9 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
         className={`${styles["answer-wrapper"]} font-normal`}
         style={{
           backgroundColor: isCorrect
-            ? "rgb(23, 201, 100)"
+            ? "#EBFFEE"
             : selectedValue
-            ? "#F76A6D"
+            ? "#FFE5E5"
             : "#eeebff",
           borderRadius: "8px",
         }}
@@ -73,19 +73,22 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
         {(field?.options || [])?.map((o) => {
           return (
             <SelectItem color="default" key={o.value} textValue={o.value}>
-              <div className="flex gap-1 items-center">
-                {isTeacher && o.isCorrect && (
+              <div
+                className={`flex gap-1 items-center ${
+                  isTeacher && o.isCorrect && "text-success"
+                }`}
+              >
+                {/* {isTeacher && o.isCorrect && (
                   <div>
                     <Checkbox isSelected isDisabled />
                   </div>
-                )}
+                )} */}
                 {o.value}
               </div>
             </SelectItem>
           );
         })}
       </Select>
-      {isCorrect && "correct"}
     </>
   );
 };
@@ -116,9 +119,9 @@ export const FillGapsSelectExView: FC<TProps> = ({
             id={"answer-wrapper-" + field?.id}
             style={{
               display: "inline-block",
-              minWidth:
-                maxOptionLength *
-                (maxOptionLength < 10 ? 30 : maxOptionLength > 20 ? 10 : 13),
+              minWidth: maxOptionLength * (maxOptionLength <= 5 ? 20 : 15),
+              // maxOptionLength *
+              // (maxOptionLength < 10 ? 20 : maxOptionLength > 20 ? 7 : 10),
             }}
           >
             <AnswerField
@@ -178,7 +181,10 @@ export const FillGapsSelectExView: FC<TProps> = ({
       )}
       <div className={`py-8 w-[886px] m-auto`}>
         <Card className={`p-10 px-10 `}>
-          <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
+          <div
+            style={{ margin: "0 auto", lineHeight: "230%" }}
+            className="flex flex-col gap-10"
+          >
             <div
               className={
                 "answerWrapperArea answerWrapperArea-" +

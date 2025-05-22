@@ -54,6 +54,29 @@ export const MatchWordColumn: FC<TProps> = ({
   );
 
   useEffect(() => {
+    resetData({
+      title: "New vocab!",
+      titleColor: "#3F28C6",
+      subtitle: "Here's some more vocabulary on the topic",
+      description: "Sort these words into positive and negative columns",
+      images: [],
+      sortIndex: undefined,
+      columns: [
+        {
+          id: new Date().getTime(),
+          title: "Название колонки",
+          words: ["", "", "", "", ""],
+        },
+        {
+          id: new Date().getTime() + 1,
+          title: "Название колонки",
+          words: ["", "", "", "", ""],
+        },
+      ],
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     changeData("images", images);
   }, [images, changeData]);
 

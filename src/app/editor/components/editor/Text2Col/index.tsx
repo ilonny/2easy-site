@@ -78,6 +78,20 @@ export const Text2ColEx: FC<TProps> = ({
   );
 
   useEffect(() => {
+    resetData({
+      title: "Let’s read!",
+      titleColor: "#3F28C6",
+      subtitle: "Read the part of the article",
+      description: "Answer the questions below",
+      images: [],
+      editorImages: [],
+      content: "",
+      secondEditorImages: [],
+      secondContent: "",
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     changeData("images", images);
     changeData("editorImages", editorImages);
   }, [images, changeData, editorImages]);

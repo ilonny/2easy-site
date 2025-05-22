@@ -48,6 +48,21 @@ export const TextChecklist: FC<TProps> = ({
   >(defaultValues?.editorImages || []);
 
   useEffect(() => {
+    resetData({
+      title: "Let's speak!",
+      titleColor: "#3F28C6",
+      subtitle: "Look at the list below",
+      description:
+        "Tick the things you would like to try and explain your choices",
+      images: [],
+      editorImages: [],
+      stickers: ["", ""],
+      stickerBgColor: "#ffffff",
+      stickerTextColor: "#000000",
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     changeData("images", images);
     changeData("editorImages", editorImages);
   }, [images, changeData, editorImages]);

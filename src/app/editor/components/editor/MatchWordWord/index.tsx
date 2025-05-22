@@ -58,14 +58,41 @@ export const MatchWordWord: FC<TProps> = ({
   );
 
   useEffect(() => {
+    resetData({
+      title: "New vocab!",
+      titleColor: "#3F28C6",
+      subtitle: "Look at the words below and try to guess their meanings",
+      description: "Match the words with their definitions ",
+      images: [],
+      matches: [
+        {
+          id: uuidv4(),
+          value: "",
+          correctValue: "",
+        },
+        {
+          id: uuidv4(),
+          value: "",
+          correctValue: "",
+        },
+        {
+          id: uuidv4(),
+          value: "",
+          correctValue: "",
+        },
+      ],
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     changeData("images", images);
   }, [images, changeData]);
 
   useEffect(() => {
     if (success) {
-      onSuccess?.();
       resetData(defaultValuesStub);
-      console.log('on success fired')
+      onSuccess?.();
+      console.log("on success fired");
     }
   }, [onSuccess, success, resetData]);
 
@@ -93,8 +120,9 @@ export const MatchWordWord: FC<TProps> = ({
     },
     [data?.matches, changeData]
   );
-  console.log('defaultValuesStub', defaultValuesStub);
-  console.log('data', data);
+
+  console.log("defaultValuesStub", defaultValuesStub);
+  console.log("data", data);
   return (
     <div>
       <div className="flex flex-wrap">

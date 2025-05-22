@@ -146,7 +146,7 @@ export const LessonCard: FC<TProps> = ({
         style={{
           borderBottomLeftRadius: 4,
           borderBottomRightRadius: 4,
-          height: "135px",
+          // height: "135px",
         }}
       >
         <p className="text-black font-bold" style={{ fontSize: 18 }}>

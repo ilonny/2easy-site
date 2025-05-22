@@ -1,4 +1,4 @@
-import { use, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 
 export const useExData = <T>(val: T) => {
   const [data, setData] = useState<T>(val);
@@ -16,7 +16,12 @@ export const useExData = <T>(val: T) => {
   );
 
   const resetData = useCallback((data: T) => {
-    setData(data);
+    setData((d) => {
+      return {
+        ...d,
+        ...data,
+      };
+    });
   }, []);
 
   return { data, changeData, setData, resetData };

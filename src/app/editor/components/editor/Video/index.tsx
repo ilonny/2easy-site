@@ -41,6 +41,17 @@ export const Video: FC<TProps> = ({
   );
 
   useEffect(() => {
+    resetData({
+      title: "Let's watch!",
+      titleColor: "#3F28C6",
+      subtitle: "Watch the video and answer the questions below",
+      description: "",
+      images: [],
+      videos: [{ content: "", title: "" }],
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     changeData("images", images);
   }, [images, changeData]);
 

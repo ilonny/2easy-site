@@ -314,7 +314,7 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
         )}
         <Card className={`p-10 px-10 box relative`}>
           <div
-            style={{ margin: "0 auto", lineHeight: "200%" }}
+            style={{ margin: "0 auto", lineHeight: "230%" }}
             className="flex flex-col gap-10"
           >
             {editableContent}

@@ -39,6 +39,17 @@ export const ImageEx: FC<TProps> = ({
   );
 
   useEffect(() => {
+    resetData({
+      title: "let’s speak!",
+      titleColor: "#3F28C6",
+      subtitle: "look at the pictures",
+      description: "Describe each picture and answer the questions below",
+      images: [],
+      viewType: "carousel",
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     changeData("images", images);
   }, [images, changeData]);
 

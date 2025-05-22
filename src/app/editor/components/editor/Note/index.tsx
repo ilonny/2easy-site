@@ -32,6 +32,14 @@ export const Note: FC<TProps> = ({
   );
 
   useEffect(() => {
+    resetData({
+      title: "teacher's notes",
+      description: "",
+      isVisible: false,
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     if (success) {
       onSuccess?.();
       resetData(defaultValuesStub);

@@ -44,6 +44,20 @@ export const TextSticker: FC<TProps> = ({
   );
 
   useEffect(() => {
+    resetData({
+      title: "Warm up",
+      titleColor: "#3F28C6",
+      subtitle: "Let's discuss the following questions ",
+      description: "Answer the questions below",
+      images: [],
+      editorImages: [],
+      stickers: ["", ""],
+      stickerBgColor: "#ffffff",
+      stickerTextColor: "#000000",
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     changeData("images", images);
   }, [images, changeData]);
 

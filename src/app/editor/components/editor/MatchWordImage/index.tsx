@@ -40,6 +40,17 @@ export const MatchWordImage: FC<TProps> = ({
   );
 
   useEffect(() => {
+    resetData({
+      title: "Warm up",
+      titleColor: "#3F28C6",
+      subtitle: "Look at the pictures below",
+      description: "Match the pictures with their definitions",
+      images: [],
+      viewType: "drag",
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     changeData("images", images);
   }, [images, changeData]);
 

@@ -50,6 +50,17 @@ export const Audio: FC<TProps> = ({
     });
 
   useEffect(() => {
+    resetData({
+      title: "Let's listen!",
+      titleColor: "#3F28C6",
+      subtitle: "Listen to the audio and do the tasks below",
+      description: "",
+      images: [],
+      videos: [{ content: "", title: "" }],
+    });
+  }, [resetData]);
+
+  useEffect(() => {
     changeData("images", images);
     if (plainFiles?.[0]?.lastModified) {
       changeData(
