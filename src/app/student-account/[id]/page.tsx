@@ -18,17 +18,22 @@ import { checkResponse, fetchGet } from "@/api";
 import { useParams, useRouter } from "next/navigation";
 import { StudentList } from "@/app/student/components/StudentList";
 import Loupe from "@/assets/icons/loupe.svg";
+import { useLessons } from "@/app/lessons/hooks/useLessons";
+import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 
 export default function StartRegistrationPage() {
   withLogin();
   const router = useRouter();
   const studentId = useParams().id;
-  console.log("studentId", studentId);
+
   const { subscription } = useContext(SibscribeContext);
   const { profile, authIsLoading } = useContext(AuthContext);
 
   const [studentInfo, setStudentInfo] = useState();
   const [isLoading, setIsLoading] = useState(false);
+
+  const [lessonsListIslLoading, setLessonsListIslLoading] = useState(false);
+  const [lessons, setLessons] = useState([]);
 
   const fetchStudentInfo = useCallback(async () => {
     setIsLoading(true);
@@ -48,6 +53,28 @@ export default function StartRegistrationPage() {
   useEffect(() => {
     fetchStudentInfo();
   }, [studentId, fetchStudentInfo]);
+
+  const getLessons = useCallback(async () => {
+    setLessonsListIslLoading(true);
+
+    const res = await fetchGet({
+      path: `/lessons?student_id=${studentId}`,
+      isSecure: true,
+    });
+
+    const data = await res?.json();
+    if (data) {
+      setLessons(data?.lessons?.reverse() || []);
+    }
+    setLessonsListIslLoading(false);
+    return data;
+  }, [studentId]);
+
+  useEffect(() => {
+    if (studentInfo?.id) {
+      getLessons();
+    }
+  }, [studentInfo?.id, getLessons]);
 
   const isTeacher = profile?.role_id === 2;
 
@@ -90,7 +117,7 @@ export default function StartRegistrationPage() {
           </div>
         )}
         <div className="flex items-end gap-6">
-          <div className="w-[325px]">
+          <div className="w-[415px]">
             {!!studentInfo && (
               <StudentList
                 onSuccessEditCallback={fetchStudentInfo}
@@ -116,6 +143,7 @@ export default function StartRegistrationPage() {
             />
           </div>
         </div>
+        <ProfileLessons />
       </ContentWrapper>
     </main>
   );
