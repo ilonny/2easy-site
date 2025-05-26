@@ -5,6 +5,8 @@ import { ProfileEmptyLessons } from "../ProfileEmptyLessons";
 import { CreateLessonModalForm } from "../CreateLessonModalForm";
 import { LessonsList } from "../LessonsList";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Dino from "@/assets/images/dino.gif";
 
 export const ProfileLessons = () => {
   const router = useRouter();
@@ -70,14 +72,8 @@ export const ProfileLessons = () => {
       </div>
       <div className="h-10" />
       {lessonsListIslLoading && (
-        <div className="w-full h-[225px] flex justify-center items-center ">
-          <Button
-            isIconOnly
-            isLoading={lessonsListIslLoading}
-            color="primary"
-            variant="light"
-            size="lg"
-          />
+        <div className="w-full h-[500px] flex justify-center items-center ">
+          <Image src={Dino.src} alt="dino animated" width={150} height={150} />
         </div>
       )}
       {!lessons.length && (

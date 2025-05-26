@@ -143,6 +143,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                         m.id === selectedMatchId
                           ? "2px solid #3f28c6"
                           : "2px solid transparent",
+                      whiteSpace: "break-spaces",
                     }}
                   >
                     {m.value}
@@ -164,6 +165,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                         m.correctId === selectedMatchId
                           ? "#E9FEE8"
                           : bgColor,
+                      whiteSpace: "break-spaces",
                     }}
                   >
                     {m.correctValue}
@@ -199,6 +201,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                       cursor: "pointer",
                       border: "2px solid #219F59",
                       background: "#E9FEE8",
+                      whiteSpace: "break-spaces",
                     }}
                   >
                     {m.value}
@@ -212,6 +215,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                     style={{
                       background: "#E9FEE8",
                       border: "2px solid #219F59",
+                      whiteSpace: "break-spaces",
                     }}
                   >
                     {m.correctValue}

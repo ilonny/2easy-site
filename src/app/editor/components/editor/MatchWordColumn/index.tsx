@@ -6,7 +6,7 @@ import { TMatchWordColumnData } from "./types";
 import { FC, useCallback, useEffect, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button, Card, Input } from "@nextui-org/react";
+import { Button, Card, Input, Textarea } from "@nextui-org/react";
 import { useUploadMatchWordColumnEx } from "../hooks/useUploadMatchWordColumnEx";
 import Close from "@/assets/icons/close.svg";
 import DeleteIcon from "@/assets/icons/delete_black.svg";
@@ -203,10 +203,11 @@ export const MatchWordColumn: FC<TProps> = ({
           return (
             <Card key={column.id} className="p-6 w-[49%]">
               <div className="flex items-center justify-between gap-4">
-                <Input
+                <Textarea
                   value={column.title}
                   variant="flat"
                   onValueChange={(val) => onChangeColumnTitle(val, columnIndex)}
+                  minRows={1}
                 />
                 {data.columns.length > 2 && (
                   <Button
@@ -226,7 +227,8 @@ export const MatchWordColumn: FC<TProps> = ({
                 return (
                   <Card key={wordIndex} className="p-4 w-[100%] mt-4">
                     <div className="flex justify-between items-center gap-2">
-                      <Input
+                      <Textarea
+                        minRows={1}
                         value={word}
                         size="sm"
                         onValueChange={(val) =>

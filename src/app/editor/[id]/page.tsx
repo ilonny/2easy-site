@@ -146,7 +146,7 @@ export default function EditorPage() {
             <Zoom>
               <img
                 src={BASE_URL + "/" + lesson.image_path}
-                style={{ maxHeight: 400, margin: "auto" }}
+                style={{ maxHeight: 400, margin: "auto", marginBottom: 60 }}
               />
             </Zoom>
           )}

@@ -84,9 +84,9 @@ const DraggableItem = (props: {
     >
       <Chip
         color={isError ? "danger" : "primary"}
-        style={{ zIndex: 1, cursor: "pointer" }}
+        style={{ zIndex: 1, cursor: "pointer", maxWidth: 800 }}
         id={"draggable-" + chip.id}
-        className="handle text-[18px] cursor-pointer"
+        className="handle text-[18px] cursor-pointer max-w-[800px] chip-handle"
       >
         {chip.word}
       </Chip>

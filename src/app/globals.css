@@ -225,3 +225,9 @@ blockquote {
   background-color: #fefefe !important;
 }
 
+
+.chip-handle span {
+  max-width: 800px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
