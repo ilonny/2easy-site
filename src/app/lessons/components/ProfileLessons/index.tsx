@@ -8,7 +8,26 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Dino from "@/assets/images/dino.gif";
 
-export const ProfileLessons = () => {
+type TProps = {
+  canCreateLesson?: boolean;
+  studentId?: string;
+  hideTabs?: boolean;
+  hideAttachButton?: boolean;
+  showChangeStatusButton?: boolean;
+  hideDeleteLessonButton?: boolean;
+  searchString?: string;
+};
+
+export const ProfileLessons = (props: TProps) => {
+  const {
+    canCreateLesson = true,
+    studentId,
+    hideTabs,
+    hideAttachButton,
+    showChangeStatusButton,
+    hideDeleteLessonButton,
+    searchString,
+  } = props;
   const router = useRouter();
   const [tabIndex, setTabIndex] = useState<"userLessons" | "savedLessons">(
     "userLessons"
@@ -17,7 +36,13 @@ export const ProfileLessons = () => {
   const [createLessonModalIsVisible, setCreateLessonModalIsVisible] =
     useState(false);
 
-  const { lessons, getLessons, lessonsListIslLoading } = useLessons();
+  const {
+    lessons,
+    getLessons,
+    lessonsListIslLoading,
+    changeLessonStatus,
+    deleteLessonRelation,
+  } = useLessons(studentId, searchString);
 
   const data = useMemo(() => {
     const title =
@@ -37,10 +62,6 @@ export const ProfileLessons = () => {
     return { title, buttonTitle, onButtonPress };
   }, [tabIndex]);
 
-  useEffect(() => {
-    getLessons();
-  }, [getLessons]);
-
   const onCreateLesson = useCallback(
     (lessonId: number) => {
       setCreateLessonModalIsVisible(false);
@@ -52,24 +73,26 @@ export const ProfileLessons = () => {
 
   return (
     <>
-      <div className="flex gap-5">
-        <Button
-          radius="full"
-          color="primary"
-          variant={tabIndex === "userLessons" ? "solid" : "faded"}
-          onClick={() => setTabIndex("userLessons")}
-        >
-          Созданные уроки
-        </Button>
-        <Button
-          radius="full"
-          color="primary"
-          variant={tabIndex === "savedLessons" ? "solid" : "faded"}
-          onClick={() => setTabIndex("savedLessons")}
-        >
-          Сохранённые уроки
-        </Button>
-      </div>
+      {!hideTabs && (
+        <div className="flex gap-5">
+          <Button
+            radius="full"
+            color="primary"
+            variant={tabIndex === "userLessons" ? "solid" : "faded"}
+            onClick={() => setTabIndex("userLessons")}
+          >
+            Созданные уроки
+          </Button>
+          <Button
+            radius="full"
+            color="primary"
+            variant={tabIndex === "savedLessons" ? "solid" : "faded"}
+            onClick={() => setTabIndex("savedLessons")}
+          >
+            Сохранённые уроки
+          </Button>
+        </div>
+      )}
       <div className="h-10" />
       {lessonsListIslLoading && (
         <div className="w-full h-[500px] flex justify-center items-center ">
@@ -86,9 +109,14 @@ export const ProfileLessons = () => {
       {!!lessons?.length && (
         <LessonsList
           onPressCreate={() => setCreateLessonModalIsVisible(true)}
-          canCreateLesson
+          canCreateLesson={canCreateLesson}
           lessons={lessons}
           getLessons={getLessons}
+          hideAttachButton={hideAttachButton}
+          showChangeStatusButton={showChangeStatusButton}
+          changeLessonStatus={changeLessonStatus}
+          hideDeleteLessonButton={hideDeleteLessonButton}
+          deleteLessonRelation={deleteLessonRelation}
         />
       )}
       <CreateLessonModalForm

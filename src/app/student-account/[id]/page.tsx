@@ -23,6 +23,7 @@ import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 
 export default function StartRegistrationPage() {
   withLogin();
+  const [searchString, setSearchString] = useState("");
   const router = useRouter();
   const studentId = useParams().id;
 
@@ -31,9 +32,6 @@ export default function StartRegistrationPage() {
 
   const [studentInfo, setStudentInfo] = useState();
   const [isLoading, setIsLoading] = useState(false);
-
-  const [lessonsListIslLoading, setLessonsListIslLoading] = useState(false);
-  const [lessons, setLessons] = useState([]);
 
   const fetchStudentInfo = useCallback(async () => {
     setIsLoading(true);
@@ -53,28 +51,6 @@ export default function StartRegistrationPage() {
   useEffect(() => {
     fetchStudentInfo();
   }, [studentId, fetchStudentInfo]);
-
-  const getLessons = useCallback(async () => {
-    setLessonsListIslLoading(true);
-
-    const res = await fetchGet({
-      path: `/lessons?student_id=${studentId}`,
-      isSecure: true,
-    });
-
-    const data = await res?.json();
-    if (data) {
-      setLessons(data?.lessons?.reverse() || []);
-    }
-    setLessonsListIslLoading(false);
-    return data;
-  }, [studentId]);
-
-  useEffect(() => {
-    if (studentInfo?.id) {
-      getLessons();
-    }
-  }, [studentInfo?.id, getLessons]);
 
   const isTeacher = profile?.role_id === 2;
 
@@ -130,6 +106,8 @@ export default function StartRegistrationPage() {
           </div>
           <div className="w-[525px]">
             <Input
+              value={searchString}
+              onValueChange={setSearchString}
               placeholder="Поиск уроков"
               size="lg"
               classNames={{ inputWrapper: "bg-white hove" }}
@@ -143,7 +121,18 @@ export default function StartRegistrationPage() {
             />
           </div>
         </div>
-        <ProfileLessons />
+        {!!studentInfo && (
+          <ProfileLessons
+            searchString={searchString}
+            canCreateLesson={false}
+            //@ts-ignore
+            studentId={studentId}
+            hideTabs
+            hideAttachButton
+            showChangeStatusButton
+            hideDeleteLessonButton
+          />
+        )}
       </ContentWrapper>
     </main>
   );

@@ -13,6 +13,11 @@ type TProps = {
   canAttachLesson?: boolean;
   onPressCreate?: () => void;
   getLessons: () => void;
+  hideAttachButton?: boolean;
+  showChangeStatusButton?: boolean;
+  changeLessonStatus?: (relation_id?: number, status?: string) => void;
+  deleteLessonRelation?: (relation_id?: number) => void;
+  hideDeleteLessonButton?: boolean;
 };
 
 export const LessonsList: FC<TProps> = ({
@@ -20,7 +25,11 @@ export const LessonsList: FC<TProps> = ({
   canCreateLesson,
   onPressCreate,
   getLessons,
-  canAttachLesson,
+  hideAttachButton,
+  showChangeStatusButton,
+  changeLessonStatus,
+  hideDeleteLessonButton,
+  deleteLessonRelation,
 }) => {
   const [editIsVisible, setEditIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
@@ -99,11 +108,18 @@ export const LessonsList: FC<TProps> = ({
       {lessons?.map((lesson) => {
         return (
           <LessonCard
-            key={lesson.id}
+            key={
+              lesson.id.toString() + lesson?.["lesson_relations.status"] || 0
+            }
             lesson={lesson}
             onPressEdit={onPressEdit}
             onPressDelete={onPressDelete}
             onPressAttach={onAttachLesson}
+            hideAttachButton={hideAttachButton}
+            showChangeStatusButton={showChangeStatusButton}
+            changeLessonStatus={changeLessonStatus}
+            hideDeleteLessonButton={hideDeleteLessonButton}
+            deleteLessonRelation={deleteLessonRelation}
           />
         );
       })}

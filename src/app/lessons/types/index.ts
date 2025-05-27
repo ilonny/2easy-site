@@ -8,4 +8,6 @@ export type TLesson = {
   image_id?: string;
   image_path?: string;
   user_id: number;
+  ["lesson_relations.status"]?: "open" | "close" | "complete";
+  ["lesson_relations.id"]?: number;
 };
