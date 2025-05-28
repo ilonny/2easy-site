@@ -17,6 +17,9 @@ type TProps = {
   setIsVisible: (val: boolean) => void;
   onSuccess: () => void;
   lesson: TLesson;
+  skipChoseStatus?: boolean;
+  title?: string;
+  hideToast?: boolean;
 };
 
 export const AttachLessonModalForm: FC<TProps> = ({
@@ -24,6 +27,9 @@ export const AttachLessonModalForm: FC<TProps> = ({
   setIsVisible,
   onSuccess,
   lesson,
+  skipChoseStatus,
+  title,
+  hideToast,
 }) => {
   const [chosenIds, setChosenIds] = useState<number[]>([]);
   const [step, setStep] = useState(0);
@@ -47,9 +53,11 @@ export const AttachLessonModalForm: FC<TProps> = ({
       })
     );
     setIsLoading(false);
-    allRes.forEach((res) => {
-      checkResponse(res);
-    });
+    if (!hideToast) {
+      allRes.forEach((res) => {
+        checkResponse(res);
+      });
+    }
     onSuccess();
   }, [chosenIds, lesson.id, onSuccess, status]);
 
@@ -71,20 +79,19 @@ export const AttachLessonModalForm: FC<TProps> = ({
     }
   }, [isVisible]);
 
-  console.log("chosenIds", chosenIds);
-  console.log("status", status);
   return (
     <Modal
       size="xl"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
       scrollBehavior="outside"
+      style={{ backgroundColor: "#F9F9F9" }}
     >
       <ModalContent>
         <ModalHeader>
           <p>
             {step === 0
-              ? "Выберите учеников, чтобы прикрепить урок"
+              ? title || "Выберите учеников, чтобы прикрепить урок"
               : "Укажите статус урока"}
           </p>
         </ModalHeader>
@@ -102,9 +109,15 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 size="lg"
                 color={!chosenIds?.length ? "default" : "primary"}
                 className="w-full"
-                onClick={() => setStep(1)}
+                onClick={() => {
+                  if (skipChoseStatus) {
+                    onSubmit();
+                  } else {
+                    setStep(1);
+                  }
+                }}
               >
-                Дальше
+                {skipChoseStatus ? "Начать урок" : "Дальше"}
               </Button>
             </>
           )}
@@ -147,6 +160,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
               </Button>
             </>
           )}
+          <div className="h-4"></div>
         </ModalBody>
       </ModalContent>
     </Modal>

@@ -24,6 +24,7 @@ import { BASE_URL } from "@/api";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { withLogin } from "@/auth/hooks/withLogin";
+import { StartLessonButton } from "@/app/lessons/components/StartLessonButton";
 
 export default function EditorPage() {
   withLogin();
@@ -117,6 +118,7 @@ export default function EditorPage() {
             borderRadius: 10,
           }}
         >
+          <StartLessonButton lesson={lesson} />
           <h1
             style={{
               fontSize: 44,
