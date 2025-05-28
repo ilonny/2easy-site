@@ -28,6 +28,7 @@ type TProps = {
   changeLessonStatus?: (relation_id?: number, status?: string) => void;
   deleteLessonRelation?: (relation?: number) => void;
   hideDeleteLessonButton?: boolean;
+  showStartLessonButton?: boolean;
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -40,6 +41,7 @@ export const LessonCard: FC<TProps> = ({
   changeLessonStatus,
   hideDeleteLessonButton,
   deleteLessonRelation,
+  showStartLessonButton,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -227,6 +229,19 @@ export const LessonCard: FC<TProps> = ({
               ? lesson.description.slice(0, 110) + "..."
               : lesson.description}
           </div>
+        )}
+        {!!showStartLessonButton && (
+          <>
+            <div className="h-4"></div>
+            <Button
+              color="primary"
+              className="w-full"
+              size="md"
+              onClick={() => router.push(`/lessons/${lesson.id}`)}
+            >
+              Начать урок
+            </Button>
+          </>
         )}
       </div>
     </div>

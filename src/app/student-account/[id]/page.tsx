@@ -65,7 +65,9 @@ export default function StartRegistrationPage() {
               <BreadcrumbItem href="/profile?students">
                 Мои ученики
               </BreadcrumbItem>
-              <BreadcrumbItem>lalala</BreadcrumbItem>
+              {!!studentInfo && (
+                <BreadcrumbItem>{studentInfo.name}</BreadcrumbItem>
+              )}
             </Breadcrumbs>
           )}
         </div>
@@ -131,6 +133,7 @@ export default function StartRegistrationPage() {
             hideAttachButton
             showChangeStatusButton
             hideDeleteLessonButton
+            showStartLessonButton
           />
         )}
       </ContentWrapper>

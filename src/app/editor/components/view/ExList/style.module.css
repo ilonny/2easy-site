@@ -18,6 +18,10 @@
   border: 1px dashed #3f28c6;
 }
 
+.is-view:hover {
+  border: 1px dashed transparent;
+}
+
 .wrapper:hover .edit-wrapper {
   opacity: 1;
   pointer-events: all;

@@ -53,7 +53,7 @@ export const StartLessonButton = (props: TProps) => {
         className="hover:opacity-[0.8]"
         onClick={() => onPressButton()}
       >
-        <p>Начать урок</p>
+        <p className="text-center">Начать урок</p>
       </div>
       {!!lesson && (
         <AttachLessonModalForm

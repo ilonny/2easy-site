@@ -16,6 +16,7 @@ type TProps = {
   showChangeStatusButton?: boolean;
   hideDeleteLessonButton?: boolean;
   searchString?: string;
+  showStartLessonButton?: boolean;
 };
 
 export const ProfileLessons = (props: TProps) => {
@@ -27,6 +28,7 @@ export const ProfileLessons = (props: TProps) => {
     showChangeStatusButton,
     hideDeleteLessonButton,
     searchString,
+    showStartLessonButton,
   } = props;
   const router = useRouter();
   const [tabIndex, setTabIndex] = useState<"userLessons" | "savedLessons">(
@@ -101,7 +103,8 @@ export const ProfileLessons = (props: TProps) => {
       )}
       {!lessons.length && (
         <ProfileEmptyLessons
-          title={data.title}
+          title={studentId ? "Пока нет уроков." : data.title}
+          hideButton={!!studentId}
           buttonTitle={data.buttonTitle}
           onButtonPress={data.onButtonPress}
         />
@@ -117,6 +120,7 @@ export const ProfileLessons = (props: TProps) => {
           changeLessonStatus={changeLessonStatus}
           hideDeleteLessonButton={hideDeleteLessonButton}
           deleteLessonRelation={deleteLessonRelation}
+          showStartLessonButton={showStartLessonButton}
         />
       )}
       <CreateLessonModalForm

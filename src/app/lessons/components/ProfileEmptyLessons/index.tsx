@@ -6,12 +6,14 @@ type TProps = {
   title: string;
   buttonTitle: string;
   onButtonPress: () => void;
+  hideButton?: boolean;
 };
 
 export const ProfileEmptyLessons: FC<TProps> = ({
   title,
   buttonTitle,
   onButtonPress,
+  hideButton,
 }) => {
   return (
     <div
@@ -22,14 +24,16 @@ export const ProfileEmptyLessons: FC<TProps> = ({
       }}
     >
       <p className="text-center">{title}</p>
-      <Button
-        size="lg"
-        color="primary"
-        style={{ minWidth: 310 }}
-        onClick={onButtonPress}
-      >
-        {buttonTitle}
-      </Button>
+      {!hideButton && (
+        <Button
+          size="lg"
+          color="primary"
+          style={{ minWidth: 310 }}
+          onClick={onButtonPress}
+        >
+          {buttonTitle}
+        </Button>
+      )}
     </div>
   );
 };
