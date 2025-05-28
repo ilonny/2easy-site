@@ -45,7 +45,7 @@ export const FillGapsSelect: FC<TProps> = ({
   );
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "Let's practice!",
       titleColor: "#3F28C6",
       subtitle: "Choose the correct option to complete the sentences",

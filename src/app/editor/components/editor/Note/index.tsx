@@ -32,7 +32,7 @@ export const Note: FC<TProps> = ({
   );
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "teacher's notes",
       description: "",
       isVisible: false,

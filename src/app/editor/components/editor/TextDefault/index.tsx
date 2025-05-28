@@ -69,7 +69,7 @@ export const TextDefaultEx: FC<TProps> = ({
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "Let's read!",
       titleColor: "#3F28C6",
       subtitle: "Read the article",

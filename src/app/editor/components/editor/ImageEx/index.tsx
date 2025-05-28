@@ -39,7 +39,7 @@ export const ImageEx: FC<TProps> = ({
   );
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "let’s speak!",
       titleColor: "#3F28C6",
       subtitle: "look at the pictures",

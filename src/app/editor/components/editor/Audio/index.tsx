@@ -50,7 +50,7 @@ export const Audio: FC<TProps> = ({
     });
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "Let's listen!",
       titleColor: "#3F28C6",
       subtitle: "Listen to the audio and do the tasks below",

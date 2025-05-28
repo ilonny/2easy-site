@@ -78,7 +78,7 @@ export const Text2ColEx: FC<TProps> = ({
   );
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "Let’s read!",
       titleColor: "#3F28C6",
       subtitle: "Read the part of the article",

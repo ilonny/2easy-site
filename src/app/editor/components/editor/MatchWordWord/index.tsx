@@ -58,7 +58,7 @@ export const MatchWordWord: FC<TProps> = ({
   );
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "New vocab!",
       titleColor: "#3F28C6",
       subtitle: "Look at the words below and try to guess their meanings",

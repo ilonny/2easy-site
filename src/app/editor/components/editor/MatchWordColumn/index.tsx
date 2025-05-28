@@ -54,7 +54,7 @@ export const MatchWordColumn: FC<TProps> = ({
   );
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "New vocab!",
       titleColor: "#3F28C6",
       subtitle: "Here's some more vocabulary on the topic",

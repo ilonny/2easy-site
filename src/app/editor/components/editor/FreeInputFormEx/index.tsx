@@ -46,7 +46,7 @@ export const FreeInputFormEx: FC<TProps> = ({
   );
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "Let's practice!",
       titleColor: "#3F28C6",
       subtitle: "Look at the questions below",

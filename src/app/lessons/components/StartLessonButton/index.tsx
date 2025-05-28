@@ -16,7 +16,7 @@ export const StartLessonButton = (props: TProps) => {
 
   const onSuccess = useCallback(() => {
     router.push(`/lessons/${lesson.id}`);
-  }, [lesson.id, router]);
+  }, [lesson?.id, router]);
 
   const onPressButton = useCallback(() => {
     console.log("lesson", lesson);

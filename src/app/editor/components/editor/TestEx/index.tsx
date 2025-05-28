@@ -77,7 +77,7 @@ export const TestEx: FC<TProps> = ({
   );
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "Let's test yourself!",
       titleColor: "#3F28C6",
       subtitle: "Choose the correct option for each question",

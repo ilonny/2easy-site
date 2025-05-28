@@ -40,7 +40,7 @@ export const MatchWordImage: FC<TProps> = ({
   );
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "Warm up",
       titleColor: "#3F28C6",
       subtitle: "Look at the pictures below",

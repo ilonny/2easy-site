@@ -44,7 +44,7 @@ export const TextSticker: FC<TProps> = ({
   );
 
   useEffect(() => {
-    resetData({
+    !data?.id && resetData({
       title: "Warm up",
       titleColor: "#3F28C6",
       subtitle: "Let's discuss the following questions ",
