@@ -31,7 +31,9 @@ type TProps = {
 export const FreeInputFormExView: FC<TProps> = ({
   data,
   isPreview = false,
+  ...rest
 }) => {
+  console.log("rest props", rest);
   const image = data?.images?.[0];
 
   return (

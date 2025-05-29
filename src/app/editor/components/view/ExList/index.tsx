@@ -148,18 +148,25 @@ const mapComponent = (type: string, outerProps: never) => {
 };
 
 export const ExList: FC<TProps> = (props) => {
-  const { list, onPressEdit, changeSortIndex, onPressDelete, isView } = props;
+  const {
+    list,
+    onPressEdit,
+    changeSortIndex,
+    onPressDelete,
+    isView,
+    activeStudentId,
+  } = props;
   return (
     <div className="flex flex-col gap-10">
       {list.map((ex, exIndex) => {
         const Viewer = mapComponent(ex.type, { ...props, id: ex.id });
         return (
           <div
-            className={`${styles["wrapper"]} ${styles["is-view"]}`}
+            className={`${styles["wrapper"]} ${isView && styles["is-view"]}`}
             style={{ fontSize: 18 }}
             key={ex.id}
           >
-            <Viewer data={ex.data} />
+            <Viewer data={ex.data} activeStudentId={activeStudentId} />
             {!isView && (
               <div className={`${styles["edit-wrapper"]} p-4`}>
                 <div className="flex justify-end gap-2">
