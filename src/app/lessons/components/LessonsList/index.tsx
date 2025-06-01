@@ -19,6 +19,7 @@ type TProps = {
   deleteLessonRelation?: (relation_id?: number) => void;
   hideDeleteLessonButton?: boolean;
   showStartLessonButton?: boolean;
+  isStudent?: boolean;
 };
 
 export const LessonsList: FC<TProps> = ({
@@ -32,6 +33,7 @@ export const LessonsList: FC<TProps> = ({
   hideDeleteLessonButton,
   deleteLessonRelation,
   showStartLessonButton,
+  isStudent,
 }) => {
   const [editIsVisible, setEditIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
@@ -123,6 +125,7 @@ export const LessonsList: FC<TProps> = ({
             hideDeleteLessonButton={hideDeleteLessonButton}
             deleteLessonRelation={deleteLessonRelation}
             showStartLessonButton={showStartLessonButton}
+            isStudent={isStudent}
           />
         );
       })}

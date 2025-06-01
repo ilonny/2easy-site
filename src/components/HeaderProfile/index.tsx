@@ -1,12 +1,17 @@
 import { SubscribeCounter } from "@/subscribe/components";
 import { HeaderProfile as HeaderProfileShort } from "@/profile/components";
 
-export const HeaderProfile = () => {
+type TProps = {
+  isStudent?: boolean;
+};
+
+export const HeaderProfile = (props: TProps) => {
+  const { isStudent } = props;
   return (
     <div className="flex flex-row items-center">
-      <SubscribeCounter />
+      {!props.isStudent && <SubscribeCounter />}
       <div className="ml-4">
-        <HeaderProfileShort />
+        <HeaderProfileShort isStudent={isStudent} />
       </div>
     </div>
   );

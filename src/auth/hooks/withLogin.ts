@@ -7,7 +7,7 @@ export const withLogin = () => {
   const { authIsLoading, profile } = useContext(AuthContext);
   const router = useRouter();
   useEffect(() => {
-    if (!authIsLoading && !profile?.login) {
+    if (!authIsLoading && !profile?.login && !profile?.studentId) {
       toast("Ошибка авторизации", {
         type: "success",
       });

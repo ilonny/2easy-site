@@ -1,5 +1,5 @@
 "use client";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
 import {
@@ -13,7 +13,13 @@ import { fetchPostJson } from "@/api";
 import { writeToLocalStorage } from "@/auth/utils";
 import { redirect, useRouter } from "next/navigation";
 import Link from "next/link";
-export const HeaderProfile = () => {
+
+type TProps = {
+  isStudent?: boolean;
+};
+
+export const HeaderProfile = (props: TProps) => {
+  const { isStudent } = props;
   const { profile, setProfile } = useContext(AuthContext);
   const router = useRouter();
 
@@ -39,20 +45,34 @@ export const HeaderProfile = () => {
           <p className={styles.title}>{profile.name?.[0] || "A"}</p>
         </button>
       </DropdownTrigger>
-      <DropdownMenu aria-label="Profile Actions">
-        <DropdownItem key="profile">
-          <Link href="/profile?lessons">Мои уроки</Link>
-        </DropdownItem>
-        <DropdownItem key="profile">
-          <Link href="/profile?students">Мои ученики</Link>
-        </DropdownItem>
-        <DropdownItem key="profile">
-          <Link href="/profile?profile">Личные данные</Link>
-        </DropdownItem>
-        <DropdownItem onClick={logout} key="logout">
-          Выйти
-        </DropdownItem>
-      </DropdownMenu>
+      {isStudent ? (
+        <DropdownMenu aria-label="Profile Actions">
+          <DropdownItem key="profile">
+            <Link href={`/student-account/${profile?.studentId}`}>
+              <p>{profile?.name}</p>
+              {!!profile?.email && <p>{profile?.email}</p>}
+            </Link>
+          </DropdownItem>
+          <DropdownItem onClick={logout} key="logout">
+            Выйти
+          </DropdownItem>
+        </DropdownMenu>
+      ) : (
+        <DropdownMenu aria-label="Profile Actions">
+          <DropdownItem key="profile">
+            <Link href="/profile?lessons">Мои уроки</Link>
+          </DropdownItem>
+          <DropdownItem key="profile">
+            <Link href="/profile?students">Мои ученики</Link>
+          </DropdownItem>
+          <DropdownItem key="profile">
+            <Link href="/profile?profile">Личные данные</Link>
+          </DropdownItem>
+          <DropdownItem onClick={logout} key="logout">
+            Выйти
+          </DropdownItem>
+        </DropdownMenu>
+      )}
     </Dropdown>
   );
 };

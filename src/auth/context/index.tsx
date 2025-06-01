@@ -8,6 +8,7 @@ type TContextValue = {
   profile?: TProfile;
   setProfile?: (p: TProfile) => void;
   authIsLoading: boolean;
+  isStudent?: boolean;
 };
 
 export const AuthContext = createContext<TContextValue>({

@@ -29,6 +29,7 @@ type TProps = {
   deleteLessonRelation?: (relation?: number) => void;
   hideDeleteLessonButton?: boolean;
   showStartLessonButton?: boolean;
+  isStudent?: boolean;
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -42,6 +43,7 @@ export const LessonCard: FC<TProps> = ({
   hideDeleteLessonButton,
   deleteLessonRelation,
   showStartLessonButton,
+  isStudent,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -49,6 +51,9 @@ export const LessonCard: FC<TProps> = ({
   const isTeacher = profile?.role_id === 2;
 
   const tags = useMemo(() => {
+    if (isStudent) {
+      return <></>;
+    }
     if (lesson?.tags) {
       return (
         <div className="flex flex-wrap gap-2 items-center">
@@ -68,13 +73,23 @@ export const LessonCard: FC<TProps> = ({
         </div>
       );
     }
-  }, [lesson?.tags]);
+  }, [lesson?.tags, isStudent]);
+
+  const isDisabled =
+    isStudent && lesson?.["lesson_relations.status"] === "close";
 
   return (
     <div style={{ width: "25%" }} className={`p-2 ${styles["lesson-card"]}`}>
       <div
         onClick={() => {
-          router.push("/editor/" + lesson?.id);
+          if (isDisabled) {
+            return;
+          }
+          if (isStudent) {
+            router.push("/lessons/" + lesson?.id);
+          } else {
+            router.push("/editor/" + lesson?.id);
+          }
         }}
         className="image-wrapper"
         style={{
@@ -100,59 +115,92 @@ export const LessonCard: FC<TProps> = ({
           }}
         />
         <div className={styles["shadow"]} />
-        <div className={styles["btn-wrapper"]}>
-          <Popover
-            color="foreground"
-            placement="bottom-end"
-            isOpen={popoverIsOpen}
-            onOpenChange={(open) => setPopoverIsOpen(open)}
-          >
-            <PopoverTrigger>
-              <Button isIconOnly variant="flat">
-                <Image src={Ellipse} alt="icon" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="bg-white p-2 items-start">
-              {!!onPressEdit && (
-                <Button
-                  variant="light"
-                  className="w-full text-default-foreground py-1 px-2 text-left justify-start"
-                  style={{ fontSize: 14 }}
-                  onClick={() => {
-                    setPopoverIsOpen(false);
-                    onPressEdit(lesson);
-                  }}
-                >
-                  Редактировать
+        {!isStudent && (
+          <div className={styles["btn-wrapper"]}>
+            <Popover
+              color="foreground"
+              placement="bottom-end"
+              isOpen={popoverIsOpen}
+              onOpenChange={(open) => setPopoverIsOpen(open)}
+            >
+              <PopoverTrigger>
+                <Button isIconOnly variant="flat">
+                  <Image src={Ellipse} alt="icon" />
                 </Button>
-              )}
-              {!!showChangeStatusButton && (
-                <>
-                  <div className="py-1 px-2">
-                    <p className="mb-2">Статус урока:</p>
-                    <RadioGroup
-                      value={lesson?.["lesson_relations.status"]}
-                      onValueChange={(val) => {
-                        if (changeLessonStatus) {
-                          changeLessonStatus(
-                            lesson?.["lesson_relations.id"],
-                            val
-                          );
+              </PopoverTrigger>
+              <PopoverContent className="bg-white p-2 items-start">
+                {!!onPressEdit && (
+                  <Button
+                    variant="light"
+                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
+                    style={{ fontSize: 14 }}
+                    onClick={() => {
+                      setPopoverIsOpen(false);
+                      onPressEdit(lesson);
+                    }}
+                  >
+                    Редактировать
+                  </Button>
+                )}
+                {!!showChangeStatusButton && (
+                  <>
+                    <div className="py-1 px-2">
+                      <p className="mb-2">Статус урока:</p>
+                      <RadioGroup
+                        value={lesson?.["lesson_relations.status"]}
+                        onValueChange={(val) => {
+                          if (changeLessonStatus) {
+                            changeLessonStatus(
+                              lesson?.["lesson_relations.id"],
+                              val
+                            );
+                          }
+                        }}
+                        color="default"
+                      >
+                        <Radio size="sm" value="open">
+                          Открыт
+                        </Radio>
+                        <Radio size="sm" value="close">
+                          Закрыт
+                        </Radio>
+                        <Radio size="sm" value="complete">
+                          Пройден
+                        </Radio>
+                      </RadioGroup>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="light"
+                      className="w-full text-default-foreground py-1 px-2 justify-start"
+                      style={{ fontSize: 14 }}
+                      endContent={<Image src={DeleteIcon} alt="icon" />}
+                      onClick={() => {
+                        setPopoverIsOpen(false);
+                        if (deleteLessonRelation) {
+                          deleteLessonRelation(lesson?.["lesson_relations.id"]);
                         }
                       }}
-                      color="default"
                     >
-                      <Radio size="sm" value="open">
-                        Открыт
-                      </Radio>
-                      <Radio size="sm" value="close">
-                        Закрыт
-                      </Radio>
-                      <Radio size="sm" value="complete">
-                        Пройден
-                      </Radio>
-                    </RadioGroup>
-                  </div>
+                      Удалить у ученика
+                    </Button>
+                  </>
+                )}
+                {!!onPressAttach && !hideAttachButton && (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
+                    style={{ fontSize: 14 }}
+                    onClick={() => {
+                      setPopoverIsOpen(false);
+                      onPressAttach(lesson);
+                    }}
+                  >
+                    Прикрепить к ученику
+                  </Button>
+                )}
+                {!!onPressDelete && !hideDeleteLessonButton && (
                   <Button
                     size="sm"
                     variant="light"
@@ -161,47 +209,16 @@ export const LessonCard: FC<TProps> = ({
                     endContent={<Image src={DeleteIcon} alt="icon" />}
                     onClick={() => {
                       setPopoverIsOpen(false);
-                      if (deleteLessonRelation) {
-                        deleteLessonRelation(lesson?.["lesson_relations.id"]);
-                      }
+                      onPressDelete(lesson);
                     }}
                   >
-                    Удалить у ученика
+                    Удалить
                   </Button>
-                </>
-              )}
-              {!!onPressAttach && !hideAttachButton && (
-                <Button
-                  size="sm"
-                  variant="light"
-                  className="w-full text-default-foreground py-1 px-2 text-left justify-start"
-                  style={{ fontSize: 14 }}
-                  onClick={() => {
-                    setPopoverIsOpen(false);
-                    onPressAttach(lesson);
-                  }}
-                >
-                  Прикрепить к ученику
-                </Button>
-              )}
-              {!!onPressDelete && !hideDeleteLessonButton && (
-                <Button
-                  size="sm"
-                  variant="light"
-                  className="w-full text-default-foreground py-1 px-2 justify-start"
-                  style={{ fontSize: 14 }}
-                  endContent={<Image src={DeleteIcon} alt="icon" />}
-                  onClick={() => {
-                    setPopoverIsOpen(false);
-                    onPressDelete(lesson);
-                  }}
-                >
-                  Удалить
-                </Button>
-              )}
-            </PopoverContent>
-          </Popover>
-        </div>
+                )}
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
       </div>
       <div
         className="p-4 bg-white "
@@ -237,9 +254,10 @@ export const LessonCard: FC<TProps> = ({
               color="primary"
               className="w-full"
               size="md"
+              isDisabled={isDisabled}
               onClick={() => router.push(`/lessons/${lesson.id}`)}
             >
-              Начать урок
+              {isStudent ? "Открыть" : "Начать урок"}
             </Button>
           </>
         )}

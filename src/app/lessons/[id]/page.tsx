@@ -31,6 +31,7 @@ export default function StartRegistrationPage() {
   const { subscription } = useContext(SibscribeContext);
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2;
+  const isStudent = profile?.isStudent;
   const { exList, getExList } = useExList(params.id);
   const { lesson, getLesson } = useLessons();
 
@@ -82,6 +83,7 @@ export default function StartRegistrationPage() {
                 maxWidth: 1160,
                 backgroundColor: "#fff",
                 borderRadius: 10,
+                margin: isStudent ? "auto" : "none",
               }}
             >
               <h1
@@ -122,70 +124,72 @@ export default function StartRegistrationPage() {
               <ExList list={exList} isView activeStudentId={activeStudentId} />
             </div>
           </div>
-          <div
-            className="w-[200px]"
-            style={{ position: "sticky", top: 40, marginTop: -48 }}
-          >
-            <div className="flex">
-              <p
-                style={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: "#231F20",
-                  marginBottom: 27,
-                }}
-              >
-                УЧАСТНИКИ
-              </p>
-            </div>
-            {students?.map((s) => {
-              const isActive = s?.student_id === activeStudentId;
-              return (
-                <div
-                  key={s.id}
-                  onClick={() => setActiveStudentId(s.student_id)}
-                  style={{ cursor: "pointer" }}
+          {!isStudent && (
+            <div
+              className="w-[200px]"
+              style={{ position: "sticky", top: 40, marginTop: -48 }}
+            >
+              <div className="flex">
+                <p
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: "#231F20",
+                    marginBottom: 27,
+                  }}
                 >
-                  <Card
-                    className="p-4 w-[200px] mb-4"
-                    shadow="none"
-                    style={{ backgroundColor: isActive ? "#EEEBFF" : "#fff" }}
+                  УЧАСТНИКИ
+                </p>
+              </div>
+              {students?.map((s) => {
+                const isActive = s?.student_id === activeStudentId;
+                return (
+                  <div
+                    key={s.id}
+                    onClick={() => setActiveStudentId(s.student_id)}
+                    style={{ cursor: "pointer" }}
                   >
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 700,
-                        color: "#231F20",
-                      }}
-                      className="uppercase"
+                    <Card
+                      className="p-4 w-[200px] mb-4"
+                      shadow="none"
+                      style={{ backgroundColor: isActive ? "#EEEBFF" : "#fff" }}
                     >
-                      {s["student.name"]}
-                    </p>
-                    {!!s["student.email"] && (
                       <p
                         style={{
                           fontSize: 14,
-                          color: "#767676",
+                          fontWeight: 700,
+                          color: "#231F20",
                         }}
+                        className="uppercase"
                       >
-                        {s["student.email"]}
+                        {s["student.name"]}
                       </p>
-                    )}
-                  </Card>
-                </div>
-              );
-            })}
-            {!!activeStudentId && (
-              <Button
-                color="primary"
-                className="w-full uppercase"
-                size="md"
-                onClick={() => setActiveStudentId(0)}
-              >
-                {"<-teacher’s screen"}
-              </Button>
-            )}
-          </div>
+                      {!!s["student.email"] && (
+                        <p
+                          style={{
+                            fontSize: 14,
+                            color: "#767676",
+                          }}
+                        >
+                          {s["student.email"]}
+                        </p>
+                      )}
+                    </Card>
+                  </div>
+                );
+              })}
+              {!!activeStudentId && (
+                <Button
+                  color="primary"
+                  className="w-full uppercase"
+                  size="md"
+                  onClick={() => setActiveStudentId(0)}
+                >
+                  {"<-teacher’s screen"}
+                </Button>
+              )}
+            </div>
+          )}
         </div>
         <div className="h-20"></div>
       </ContentWrapper>

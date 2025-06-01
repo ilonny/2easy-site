@@ -53,6 +53,7 @@ export default function StartRegistrationPage() {
   }, [studentId, fetchStudentInfo]);
 
   const isTeacher = profile?.role_id === 2;
+  const isStudent = profile?.isStudent;
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
@@ -74,7 +75,11 @@ export default function StartRegistrationPage() {
         <div className="h-10" />
         <div className="h-10" />
         <div className="flex items-end justify-center gap-6">
-          <Link href="/profile?students">← все ученики</Link>
+          {isTeacher ? (
+            <Link href="/profile?students">← все ученики</Link>
+          ) : (
+            <div className="w-[112px]"></div>
+          )}
           <h1
             className={"text-primary text-center font-bold text-3xl uppercase"}
           >
@@ -82,6 +87,11 @@ export default function StartRegistrationPage() {
           </h1>
           <div className="w-[112px]"></div>
         </div>
+        {isStudent && (
+          <div className="flex items-end justify-center gap-6">
+            <></>
+          </div>
+        )}
         <div className="h-5" />
         {(isLoading || authIsLoading) && (
           <div className="w-full h-[225px] flex justify-center items-center ">
@@ -96,7 +106,7 @@ export default function StartRegistrationPage() {
         )}
         <div className="flex items-end gap-6">
           <div className="w-[415px]">
-            {!!studentInfo && (
+            {!!studentInfo && isTeacher && (
               <StudentList
                 onSuccessEditCallback={fetchStudentInfo}
                 onSuccessDeleteCallback={() => router.push("/profile?students")}
@@ -134,6 +144,7 @@ export default function StartRegistrationPage() {
             showChangeStatusButton
             hideDeleteLessonButton
             showStartLessonButton
+            isStudent={isStudent}
           />
         )}
       </ContentWrapper>

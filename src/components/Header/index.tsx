@@ -25,9 +25,17 @@ export const Header = () => {
   }
   return (
     <ContentWrapper>
-      <div className="flex flex-row items-center justify-between border-b-[1px] border-[#D9D9D9] mx-8 py-8 min-h-[115px]">
+      <div
+        className={`flex flex-row items-center justify-between border-b-[${
+          profile?.isStudent ? "0" : "1"
+        }px] border-[#D9D9D9] mx-8 py-8 min-h-[115px]`}
+      >
         <div className="left"></div>
-        <a href="/">
+        <a
+          href={
+            profile?.studentId ? `/student-account/${profile.studentId}` : "/"
+          }
+        >
           <div className="center absolute top-8 left-1/2 -ml-[53px]">
             <Image priority={false} src={Logo} alt="logo" />
           </div>
@@ -41,7 +49,7 @@ export const Header = () => {
           ) : (
             <>
               {profile?.name ? (
-                <HeaderProfile />
+                <HeaderProfile isStudent={profile?.isStudent} />
               ) : (
                 <div className="flex items-center gap-4">
                   <Link href="/start-registration">
@@ -60,7 +68,7 @@ export const Header = () => {
           )}
         </div>
       </div>
-      <HeaderMenuList />
+      {!profile?.isStudent && <HeaderMenuList />}
     </ContentWrapper>
   );
 };

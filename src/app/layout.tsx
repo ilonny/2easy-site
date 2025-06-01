@@ -7,6 +7,7 @@ import { ApiProvider } from "@/api";
 import { Manrope } from "next/font/google";
 import { SibscribeContextProvider } from "@/subscribe/context";
 import { ToastWrapper } from "./ToastWrapper";
+import { BodyContainer } from "./BodyContainer";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
@@ -35,7 +36,7 @@ export default function RootLayout({
             <AuthContextProvider>
               <SibscribeContextProvider>
                 <Header />
-                {children}
+                <BodyContainer>{children}</BodyContainer>
                 <ToastWrapper />
               </SibscribeContextProvider>
             </AuthContextProvider>
