@@ -30,6 +30,7 @@ export const useLessons = (studentId?: string, searchString?: string) => {
     const data = await res?.json();
     setLesson(data?.lesson);
     setLessonsListIslLoading(false);
+    checkResponse(data);
     return data;
   }, []);
 
@@ -74,9 +75,9 @@ export const useLessons = (studentId?: string, searchString?: string) => {
     [getLessons]
   );
 
-  useEffect(() => {
-    getLessons();
-  }, [getLessons]);
+  // useEffect(() => {
+  //   getLessons();
+  // }, [getLessons]);
 
   const filteredLessons = useMemo(() => {
     if (!searchString) {

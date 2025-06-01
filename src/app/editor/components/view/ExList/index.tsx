@@ -29,7 +29,7 @@ type TProps = {
   onPressDelete?: (exId: number) => void;
   onChangeIsVisible?: () => void;
   isView?: boolean;
-  activeStudentId?: boolean;
+  activeStudentId: number;
 };
 
 const mapComponent = (type: string, outerProps: never) => {

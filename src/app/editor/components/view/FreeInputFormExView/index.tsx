@@ -4,6 +4,7 @@ import {
   FC,
   SetStateAction,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -22,6 +23,10 @@ import Image from "next/image";
 import { TFreeInputFormData } from "../../editor/FreeInputFormEx/types";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { AuthContext } from "@/auth";
+import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { useParams } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
 
 type TProps = {
   data: TFreeInputFormData;
@@ -33,9 +38,20 @@ export const FreeInputFormExView: FC<TProps> = ({
   isPreview = false,
   ...rest
 }) => {
-  console.log("rest props", rest);
   const image = data?.images?.[0];
+  const lesson_id = useParams()?.id;
+  const student_id = useContext(AuthContext)?.profile?.studentId;
+  const ex_id = data?.id;
+  const { writeAnswer } = useExAnswer({ student_id, lesson_id, ex_id });
 
+  const onValueChange = useDebouncedCallback(
+    (q_id: number | string, answer: string) => {
+      console.log("onValueChange", q_id, answer);
+      writeAnswer(q_id, answer);
+    },
+    500
+  );
+  console.log("data", data);
   return (
     <>
       <div className={`py-8 w-[886px] m-auto`}>
@@ -79,6 +95,7 @@ export const FreeInputFormExView: FC<TProps> = ({
       )}
       <div className={`py-8 w-[540px] m-auto`}>
         {data.questions.map((question) => {
+          console.log("question", question);
           return (
             <div key={question.id} className="mb-6">
               <p style={{ fontSize: 18, marginBottom: 20, fontWeight: 500 }}>
@@ -90,6 +107,12 @@ export const FreeInputFormExView: FC<TProps> = ({
                   classNames={{ inputWrapper: "bg-white p-4" }}
                   minRows={1}
                   style={{ fontSize: 16 }}
+                  onValueChange={(val) => {
+                    if (!student_id) {
+                      return;
+                    }
+                    onValueChange(question.id, val);
+                  }}
                 />
               </Card>
             </div>

@@ -7,9 +7,12 @@ import { FC, useContext, useEffect } from "react";
 export const BodyContainer: FC<any> = ({ children }) => {
   const { profile } = useContext(AuthContext);
   const router = useRouter();
-  console.log('BodyContainer render')
   useEffect(() => {
-    if (profile?.isStudent) {
+    if (
+      profile?.isStudent &&
+      !window?.location?.pathname?.includes("/lessons/") &&
+      !window?.location?.pathname?.includes("/login")
+    ) {
       router.push(`/student-account/${profile.studentId}`);
     }
   }, [profile?.isStudent]);

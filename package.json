@@ -28,6 +28,7 @@
     "i": "^0.3.7",
     "next": "14.2.14",
     "npm": "^11.1.0",
+    "p-limit": "^6.2.0",
     "react": "^18",
     "react-contenteditable": "^3.3.7",
     "react-dom": "^18",
@@ -43,6 +44,7 @@
     "react-toastify": "^11.0.5",
     "sass": "^1.85.1",
     "slick-carousel": "^1.8.1",
+    "use-debounce": "^10.0.4",
     "use-file-picker": "^2.1.2"
   },
   "devDependencies": {

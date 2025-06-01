@@ -21,6 +21,7 @@ const defaultValuesStub: TFreeInputFormData = {
   questions: [
     {
       value: "",
+      id: uuidv4(),
     },
   ],
 };
@@ -46,19 +47,21 @@ export const FreeInputFormEx: FC<TProps> = ({
   );
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "Let's practice!",
-      titleColor: "#3F28C6",
-      subtitle: "Look at the questions below",
-      description: "Write down your answers for each of them",
-      images: [],
-      questions: [
-        {
-          value: "",
-        },
-      ],
-    });
-  }, [resetData]);
+    !data?.id &&
+      resetData({
+        title: "Let's practice!",
+        titleColor: "#3F28C6",
+        subtitle: "Look at the questions below",
+        description: "Write down your answers for each of them",
+        images: [],
+        questions: [
+          {
+            value: "",
+            id: uuidv4(),
+          },
+        ],
+      });
+  }, []);
 
   useEffect(() => {
     changeData("images", images);

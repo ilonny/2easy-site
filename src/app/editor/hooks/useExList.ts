@@ -173,6 +173,9 @@ export const useExList = (lesson_id: number) => {
       isSecure: true,
     });
     const list = await listRes?.json();
+    if (!list?.map) {
+      return;
+    }
     const mappedList = list
       ?.map((l, index) => {
         const dataMapper = getDataMapper(l.type);

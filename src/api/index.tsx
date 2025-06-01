@@ -4,6 +4,7 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { getTokenFromLocalStorage } from "@/auth/utils";
 import { toast } from "react-toastify";
+import Router from "next/router";
 
 export const ApiProvider = ({ children }) => {
   const [client] = useState(new QueryClient());
@@ -44,6 +45,9 @@ export const checkResponse = (res: {
   message?: string;
   successMessage?: string;
 }) => {
+  if (res?.status === 401 && window.location.pathname !== "/login") {
+    window.location.pathname = "/login";
+  }
   if (!res?.success) {
     toast(res?.message ? res?.message : "Что-то пошло не так", {
       type: "error",

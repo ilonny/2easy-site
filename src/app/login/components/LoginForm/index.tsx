@@ -48,7 +48,11 @@ export const LoginForm = () => {
           writeToLocalStorage("token", res.token);
           writeToLocalStorage("profile", JSON.stringify(res));
           setProfile(res);
-          router.replace("/");
+          if (res?.studentId) {
+            router.replace(`/student-account/${res.studentId}`);
+          } else {
+            router.replace("/");
+          }
         }
       });
     },
