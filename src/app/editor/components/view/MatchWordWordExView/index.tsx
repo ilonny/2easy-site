@@ -118,7 +118,6 @@ export const MatchWordWordExView: FC<TProps> = ({
   }, [answers, isTeacher]);
 
   useEffect(() => {
-    console.log("correctIds", correctIds);
     if (correctIds.length) {
       writeAnswer(data.id, JSON.stringify(correctIds));
     }

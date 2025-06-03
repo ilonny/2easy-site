@@ -18,6 +18,8 @@ import Draggable from "react-draggable";
 import { AuthContext } from "@/auth";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { useParams } from "next/navigation";
+import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
 
 type TProps = {
   data: TMatchWordImageData;
@@ -134,12 +136,26 @@ const InputItem = (props: {
 export const MatchWordImageExView: FC<TProps> = ({
   data,
   isPreview = false,
+  ...rest
 }) => {
   const { profile } = useContext(AuthContext);
   const isIntersected = useRef(false);
   const [correctChips, setCorrectChips] = useState<string[]>([]);
   const [activeChip, setActiveChip] = useState("");
   const isTeacher = profile?.role_id === 2;
+
+  const lesson_id = useParams()?.id;
+  const student_id = profile?.studentId;
+  const ex_id = data?.id;
+
+  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+    student_id,
+    lesson_id,
+    ex_id,
+    activeStudentId: rest.activeStudentId,
+    isTeacher,
+  });
+
   const sortedChips = useMemo(() => {
     return [...data.images]
       .filter((i) => !!i.text && !correctChips.includes(i.text))
@@ -147,6 +163,34 @@ export const MatchWordImageExView: FC<TProps> = ({
       .sort(() => 0.5 - Math.random());
   }, [correctChips, data.images]);
 
+  useEffect(() => {
+    if (student_id) {
+      getAnswers(true).then((a) => {
+        console.log("a", a);
+        try {
+          setCorrectChips(JSON.parse(a[data.id].answer));
+        } catch (err) {}
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student_id]);
+
+  useEffect(() => {
+    if (!answers && !isTeacher) {
+      return;
+    }
+    try {
+      setCorrectChips(JSON.parse(answers[data.id].answer));
+    } catch (err) {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers, isTeacher]);
+
+  useEffect(() => {
+    if (correctChips.length) {
+      writeAnswer(data.id, JSON.stringify(correctChips));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [correctChips, writeAnswer]);
   return (
     <div className={`py-8 w-[886px] m-auto`}>
       <p

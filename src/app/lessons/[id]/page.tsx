@@ -66,9 +66,8 @@ export default function StartRegistrationPage() {
           {isTeacher && (
             <Breadcrumbs>
               <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-              <BreadcrumbItem href="/profile?students">
-                Мои ученики
-              </BreadcrumbItem>
+              <BreadcrumbItem href="/profile?lessons">Мои уроки</BreadcrumbItem>
+              <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
             </Breadcrumbs>
           )}
         </div>
