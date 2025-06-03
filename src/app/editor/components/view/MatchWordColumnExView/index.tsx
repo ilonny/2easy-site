@@ -144,7 +144,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
         );
       })
       .sort(() => 0.5 - Math.random());
-  }, [correctChips, data.columns]);
+  }, [correctChips?.length, data.columns]);
 
   useEffect(() => {
     if (student_id) {
