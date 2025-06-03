@@ -19,7 +19,6 @@ export const StartLessonButton = (props: TProps) => {
   }, [lesson?.id, router]);
 
   const onPressButton = useCallback(() => {
-    console.log("lesson", lesson);
     if (!isSkipCreateRealtion) {
       setModalVisible(true);
       return;

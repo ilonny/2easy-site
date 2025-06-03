@@ -77,49 +77,50 @@ export const TestEx: FC<TProps> = ({
   );
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "Let's test yourself!",
-      titleColor: "#3F28C6",
-      subtitle: "Choose the correct option for each question",
-      description: "",
-      images: [],
-      questions: [
-        {
-          id: uuidv4(),
-          images: [],
-          value: "",
-          options: [
-            {
-              id: uuidv4(),
-              isCorrect: false,
-              value: "",
-            },
-            {
-              id: uuidv4(),
-              isCorrect: false,
-              value: "",
-            },
-          ],
-        },
-        {
-          id: uuidv4(),
-          images: [],
-          value: "",
-          options: [
-            {
-              id: uuidv4(),
-              isCorrect: false,
-              value: "",
-            },
-            {
-              id: uuidv4(),
-              isCorrect: false,
-              value: "",
-            },
-          ],
-        },
-      ],
-    });
+    !data?.id &&
+      resetData({
+        title: "Let's test yourself!",
+        titleColor: "#3F28C6",
+        subtitle: "Choose the correct option for each question",
+        description: "",
+        images: [],
+        questions: [
+          {
+            id: uuidv4(),
+            images: [],
+            value: "",
+            options: [
+              {
+                id: uuidv4(),
+                isCorrect: false,
+                value: "",
+              },
+              {
+                id: uuidv4(),
+                isCorrect: false,
+                value: "",
+              },
+            ],
+          },
+          {
+            id: uuidv4(),
+            images: [],
+            value: "",
+            options: [
+              {
+                id: uuidv4(),
+                isCorrect: false,
+                value: "",
+              },
+              {
+                id: uuidv4(),
+                isCorrect: false,
+                value: "",
+              },
+            ],
+          },
+        ],
+      });
   }, [resetData]);
 
   useEffect(() => {
@@ -128,7 +129,6 @@ export const TestEx: FC<TProps> = ({
 
   useEffect(() => {
     if (success) {
-      console.log("reset data fired");
       resetData(defaultValuesStub);
       onSuccess?.();
     }
@@ -223,7 +223,7 @@ export const TestEx: FC<TProps> = ({
     },
     [changeData, data.questions]
   );
-  console.log("data", data);
+
   return (
     <div>
       <div className="flex flex-wrap">

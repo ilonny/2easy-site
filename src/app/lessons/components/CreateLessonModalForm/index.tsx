@@ -70,7 +70,6 @@ export const CreateLessonModalForm: FC<TProps> = ({
           },
         });
         const lesson = await lessonRes.json();
-        console.log("lesson res:", lesson);
         setIsLoading(false);
         if (lesson.success) {
           onSuccess(lesson.createdLesson.id);

@@ -38,7 +38,6 @@ export const TestStep = (props: TTestStepProps) => {
   const errorMap = useRef<Record<string, boolean>>({});
 
   const onSubmitResult = useCallback(() => {
-    console.log("onSubmitResult: ", selectedMap.current);
     question?.options?.forEach((option) => {
       if (option.isCorrect && !selectedMap.current[option.id]) {
         errorMap.current[option.id] = true;

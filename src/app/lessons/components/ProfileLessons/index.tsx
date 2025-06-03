@@ -75,6 +75,10 @@ export const ProfileLessons = (props: TProps) => {
     [getLessons, router]
   );
 
+  useEffect(() => {
+    getLessons();
+  }, [getLessons]);
+
   return (
     <>
       {!hideTabs && (

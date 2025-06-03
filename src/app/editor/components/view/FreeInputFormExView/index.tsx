@@ -40,18 +40,34 @@ export const FreeInputFormExView: FC<TProps> = ({
 }) => {
   const image = data?.images?.[0];
   const lesson_id = useParams()?.id;
-  const student_id = useContext(AuthContext)?.profile?.studentId;
+  const profile = useContext(AuthContext)?.profile;
+  const student_id = profile?.studentId;
+  const isTeacher = profile?.role_id === 2;
   const ex_id = data?.id;
-  const { writeAnswer } = useExAnswer({ student_id, lesson_id, ex_id });
+  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+    student_id,
+    lesson_id,
+    ex_id,
+    activeStudentId: rest.activeStudentId,
+    isTeacher,
+  });
 
   const onValueChange = useDebouncedCallback(
     (q_id: number | string, answer: string) => {
-      console.log("onValueChange", q_id, answer);
       writeAnswer(q_id, answer);
     },
     500
   );
-  console.log("data", data);
+
+  useEffect(() => {
+    if (student_id) {
+      console.log("student_id?", student_id);
+      getAnswers(true);
+    }
+  }, [student_id]);
+
+  console.log("answers", answers);
+
   return (
     <>
       <div className={`py-8 w-[886px] m-auto`}>
@@ -95,7 +111,9 @@ export const FreeInputFormExView: FC<TProps> = ({
       )}
       <div className={`py-8 w-[540px] m-auto`}>
         {data.questions.map((question) => {
-          console.log("question", question);
+          const value = answers[question.id]
+            ? answers[question.id].answer
+            : undefined;
           return (
             <div key={question.id} className="mb-6">
               <p style={{ fontSize: 18, marginBottom: 20, fontWeight: 500 }}>
@@ -108,11 +126,23 @@ export const FreeInputFormExView: FC<TProps> = ({
                   minRows={1}
                   style={{ fontSize: 16 }}
                   onValueChange={(val) => {
+                    console.log("val:", val);
                     if (!student_id) {
                       return;
                     }
                     onValueChange(question.id, val);
+                    setAnswers((a) => {
+                      const q_id = question.id;
+                      return {
+                        ...a,
+                        [q_id]: {
+                          ...[a.q_id],
+                          answer: val,
+                        },
+                      };
+                    });
                   }}
+                  value={value}
                 />
               </Card>
             </div>
