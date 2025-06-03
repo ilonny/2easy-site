@@ -6,6 +6,7 @@ import {
   SetStateAction,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -16,6 +17,8 @@ import { AuthContext } from "@/auth";
 import { TMatchWordColumnData } from "../../editor/MatchWordColumn/types";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { useParams } from "next/navigation";
+import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
 
 type TProps = {
   data: TMatchWordColumnData;
@@ -99,6 +102,7 @@ type TSortedWord = { word: string; id: string };
 export const MatchWordColumnExView: FC<TProps> = ({
   data,
   isPreview = false,
+  ...rest
 }) => {
   const image = data?.images?.[0];
   const { profile } = useContext(AuthContext);
@@ -106,6 +110,18 @@ export const MatchWordColumnExView: FC<TProps> = ({
   const [correctChips, setCorrectChips] = useState<TSortedWord[]>([]);
   const [activeChip, setActiveChip] = useState<TSortedWord | null>();
   const isTeacher = profile?.role_id === 2;
+
+  const lesson_id = useParams()?.id;
+  const student_id = profile?.studentId;
+  const ex_id = data?.id;
+
+  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+    student_id,
+    lesson_id,
+    ex_id,
+    activeStudentId: rest.activeStudentId,
+    isTeacher,
+  });
 
   const sortedChips = useMemo(() => {
     const copy = [...data.columns];
@@ -129,6 +145,35 @@ export const MatchWordColumnExView: FC<TProps> = ({
       })
       .sort(() => 0.5 - Math.random());
   }, [correctChips, data.columns]);
+
+  useEffect(() => {
+    if (student_id) {
+      getAnswers(true).then((a) => {
+        console.log("a", a);
+        try {
+          setCorrectChips(JSON.parse(a[data.id].answer));
+        } catch (err) {}
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student_id]);
+
+  useEffect(() => {
+    if (!answers && !isTeacher) {
+      return;
+    }
+    try {
+      setCorrectChips(JSON.parse(answers[data.id].answer));
+    } catch (err) {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers, isTeacher]);
+
+  useEffect(() => {
+    if (correctChips.length) {
+      writeAnswer(data.id, JSON.stringify(correctChips));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [correctChips, writeAnswer]);
 
   return (
     <div className={`py-8 w-[886px] m-auto`}>
