@@ -1,10 +1,19 @@
 /* eslint-disable @next/next/no-img-element */
-import { FC, useCallback, useContext, useMemo, useState } from "react";
+import {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Card } from "@nextui-org/react";
 import { TMatch, TMatchWordWordData } from "../../editor/MatchWordWord/types";
 import { AuthContext } from "@/auth";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { useParams } from "next/navigation";
 
 type TProps = {
   data: TMatchWordWordData;
@@ -14,9 +23,23 @@ type TProps = {
 export const MatchWordWordExView: FC<TProps> = ({
   data,
   isPreview = false,
+  ...rest
 }) => {
   const { profile } = useContext(AuthContext);
   const image = data?.images?.[0];
+
+  const lesson_id = useParams()?.id;
+  const student_id = profile?.studentId;
+  const isTeacher = profile?.role_id === 2;
+  const ex_id = data?.id;
+
+  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+    student_id,
+    lesson_id,
+    ex_id,
+    activeStudentId: rest.activeStudentId,
+    isTeacher,
+  });
 
   const [selectedMatchId, setSelectedMatchId] = useState<number | undefined>(0);
 
@@ -46,7 +69,7 @@ export const MatchWordWordExView: FC<TProps> = ({
         correctId: randomKeys?.find((r) => r.answer === randomValues[i])?.id,
       };
     });
-  }, [data.matches, correctIds]);
+  }, [data.matches, correctIds.length]);
 
   const correctedMatches = useMemo(() => {
     const initialArr = [...data.matches];
@@ -71,6 +94,36 @@ export const MatchWordWordExView: FC<TProps> = ({
     },
     [sortedMatches, selectedMatchId]
   );
+
+  useEffect(() => {
+    if (student_id) {
+      getAnswers(true).then((a) => {
+        console.log("a", a);
+        try {
+          setCorrectIds(JSON.parse(a[data.id].answer));
+        } catch (err) {}
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student_id]);
+
+  useEffect(() => {
+    if (!answers && !isTeacher) {
+      return;
+    }
+    try {
+      setCorrectIds(JSON.parse(answers[data.id].answer));
+    } catch (err) {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers, isTeacher]);
+
+  useEffect(() => {
+    console.log("correctIds", correctIds);
+    if (correctIds.length) {
+      writeAnswer(data.id, JSON.stringify(correctIds));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [correctIds, writeAnswer]);
   return (
     <>
       <div className={`py-8 w-[886px] m-auto`}>

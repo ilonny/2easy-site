@@ -63,12 +63,13 @@ export const useExAnswer = (params: TParams) => {
         map[obj.q_id] = obj;
         return map;
       }, {});
-      console.log("answersMap", answersMap);
       setAnswers(answersMap);
       if (!once) {
         await sleep(1000);
         getAnswers();
+        return;
       }
+      return answersMap;
     },
     [lesson_id, ex_id, student_id, isTeacher, activeStudentId]
   );

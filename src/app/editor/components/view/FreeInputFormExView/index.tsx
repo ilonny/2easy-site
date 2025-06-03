@@ -66,8 +66,6 @@ export const FreeInputFormExView: FC<TProps> = ({
     }
   }, [student_id]);
 
-  console.log("answers", answers);
-
   return (
     <>
       <div className={`py-8 w-[886px] m-auto`}>
