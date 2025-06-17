@@ -57,9 +57,8 @@ export const useExAnswer = (params: TParams) => {
         isSecure: true,
       });
 
-      const data = await res?.json();
-      console.log("data", data);
-      const answersMap = data.reduce(function (map, obj) {
+      const data = (await res?.json()) || [];
+      const answersMap = data?.reduce(function (map, obj) {
         map[obj.q_id] = obj;
         return map;
       }, {});

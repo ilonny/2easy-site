@@ -122,15 +122,17 @@ const mapComponent = (type: string, outerProps: never) => {
         />
       );
     case "test":
-      return (props) => (
-        <TestExView
-          {...props}
-          data={{
-            ...props.data,
-            id: outerProps.id,
-          }}
-        />
-      );
+      return (props) => {
+        return (
+          <TestExView
+            {...props}
+            data={{
+              ...props.data,
+              id: outerProps.id,
+            }}
+          />
+        );
+      };
     case "free-input-form":
       return (props) => (
         <FreeInputFormExView

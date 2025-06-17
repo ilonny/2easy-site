@@ -162,6 +162,27 @@ blockquote {
   stroke: #fff;
 }
 
+.checkbox-test-option-success span:nth-child(2) svg polyline {
+  stroke-dashoffset: 44 !important;
+  transition: stroke-dashoffset 250ms linear 0.2s !important;
+  /* opacity: 1 !important;
+  transition-delay: 500ms !important; */
+}
+
+/* .checkbox-test-option-success span:nth-child(2)::after {
+  opacity: 1 !important;
+  transform: scale(1);
+} */
+
+.checkbox-test-option-danger span:nth-child(2)::after {
+  opacity: 1 !important;
+  transform: scale(1);
+}
+.checkbox-test-option-danger span:nth-child(2) img {
+  opacity: 1 !important;
+}
+
+
 .editorClassName {
   /* padding: 14px; */
 }

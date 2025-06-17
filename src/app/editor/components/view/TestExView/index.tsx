@@ -4,7 +4,9 @@ import {
   FC,
   SetStateAction,
   useCallback,
+  useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -15,6 +17,9 @@ import Close from "@/assets/icons/cross_white.png";
 import Image from "next/image";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { AuthContext } from "@/auth";
+import { useParams } from "next/navigation";
+import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
 
 type TProps = {
   data: TTestData;
@@ -25,10 +30,13 @@ type TTestStepProps = {
   question: TQuestion;
   onPressNext: () => void;
   setScore: Dispatch<SetStateAction<number>>;
+  writeAnswer: any;
+  answers: any; //ref maps in json format
 };
 
 export const TestStep = (props: TTestStepProps) => {
-  const { question, onPressNext, setScore } = props;
+  const { question, onPressNext, setScore, writeAnswer, answers } = props;
+  const [rerender, setRerender] = useState(0);
   const isSingleAnswer =
     question?.options?.map((o) => o.isCorrect)?.filter(Boolean).length === 1;
 
@@ -36,6 +44,20 @@ export const TestStep = (props: TTestStepProps) => {
 
   const selectedMap = useRef<Record<string, boolean>>({});
   const errorMap = useRef<Record<string, boolean>>({});
+
+  useEffect(() => {
+    try {
+      const answersParsed = JSON.parse(answers.answer);
+      console.log("answersParsed", answersParsed);
+      if (!answersParsed) {
+        return;
+      }
+      errorMap.current = answersParsed.errorMap;
+      selectedMap.current = answersParsed.selectedMap;
+      setIsSubmitted(true);
+      setRerender((s) => s + 1);
+    } catch (err) {}
+  }, [answers]);
 
   const onSubmitResult = useCallback(() => {
     question?.options?.forEach((option) => {
@@ -46,11 +68,28 @@ export const TestStep = (props: TTestStepProps) => {
         errorMap.current[option.id] = true;
       }
     });
+    writeAnswer(
+      question?.id,
+      JSON.stringify({
+        errorMap: errorMap.current,
+        selectedMap: selectedMap.current,
+      })
+    );
     setIsSubmitted(true);
     if (!Object.keys(errorMap.current).length) {
       setScore((s) => s + 1);
     }
-  }, [question?.options, setScore]);
+  }, [question?.id, question?.options, setScore, writeAnswer]);
+
+  useEffect(() => {
+    Array.from(
+      document.getElementsByClassName("checkbox-test-option-success")
+    ).forEach((el) => {
+      if (!el?.dataset?.selected) {
+        el?.click();
+      }
+    });
+  }, [rerender]);
 
   if (!question) {
     return <></>;
@@ -58,6 +97,7 @@ export const TestStep = (props: TTestStepProps) => {
   const defaultValue = !Object.keys(errorMap).length
     ? undefined
     : Object.keys(errorMap.current)[0];
+
   return (
     <>
       <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 30 }}>
@@ -126,7 +166,13 @@ export const TestStep = (props: TTestStepProps) => {
             selectedMap.current[option.id];
           const isMissed =
             isSubmitted && option.isCorrect && !selectedMap.current[option.id];
-
+          const color = isMissed
+            ? "default"
+            : isCorrect
+            ? "success"
+            : isIncorrect
+            ? "danger"
+            : "primary";
           return (
             <label
               className="flex items-start wrap"
@@ -135,21 +181,13 @@ export const TestStep = (props: TTestStepProps) => {
             >
               <div className="mr-2">
                 <Checkbox
-                  color={
-                    isMissed
-                      ? "default"
-                      : isCorrect
-                      ? "success"
-                      : isIncorrect
-                      ? "danger"
-                      : "primary"
-                  }
+                  color={color}
                   isSelected={isMissed ? isMissed : undefined}
                   isDisabled={isSubmitted && !isCorrect}
                   size="lg"
                   className={`py-0 ${
                     isCorrect && "checkbox-test-option-success"
-                  }`}
+                  } ${isIncorrect && "checkbox-test-option-danger"}`}
                   onValueChange={(val) => {
                     selectedMap.current[option.id] = val;
                   }}
@@ -201,7 +239,11 @@ export const TestStep = (props: TTestStepProps) => {
   );
 };
 
-export const TestExView: FC<TProps> = ({ data, isPreview = false }) => {
+export const TestExView: FC<TProps> = ({
+  data,
+  isPreview = false,
+  ...rest
+}) => {
   const image = data?.images?.[0];
   const [activeIndex, setActiveIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -211,12 +253,32 @@ export const TestExView: FC<TProps> = ({ data, isPreview = false }) => {
   const isLastStep = currentStep === totalSteps;
   const [isFinished, setIsFinished] = useState(false);
 
+  const { profile } = useContext(AuthContext);
+  const isTeacher = profile?.role_id === 2;
+  const lesson_id = useParams()?.id;
+  const student_id = profile?.studentId;
+  const ex_id = data?.id;
+
+  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+    student_id,
+    lesson_id,
+    ex_id,
+    activeStudentId: rest.activeStudentId,
+    isTeacher,
+  });
+
+  // useEffect(() => {
+  //   if (student_id) {
+  //     getAnswers(true);
+  //   }
+  // }, [student_id]);
+
   const onPressNext = useCallback(() => {
-    if (!isLastStep) {
-      setActiveIndex((i) => i + 1);
-      return;
-    }
-    setIsFinished(true);
+    setActiveIndex((i) => i + 1);
+    // if (!isLastStep) {
+    //   return;
+    // }
+    setIsFinished(isLastStep);
   }, [isLastStep]);
 
   const onPressRestart = useCallback(() => {
@@ -228,6 +290,33 @@ export const TestExView: FC<TProps> = ({ data, isPreview = false }) => {
   const onGoBack = useCallback(() => {
     setActiveIndex((i) => (i - 1 < 0 ? 0 : i - 1));
   }, []);
+
+  useEffect(() => {
+    writeAnswer("step", activeIndex.toString());
+    writeAnswer("score", score.toString());
+  }, [activeIndex, writeAnswer, score]);
+
+  useEffect(() => {
+    if (!isTeacher) {
+      return;
+    }
+    const newActiveIndex = Number(answers["step"]?.answer);
+    const newScore = Number(answers["score"]?.answer);
+    console.log("newActiveIndex?", newActiveIndex);
+    if (!isNaN(newActiveIndex)) {
+      setActiveIndex(newActiveIndex);
+      setScore(newScore);
+    }
+    if (currentStep > totalSteps && newActiveIndex !== 0) {
+      setIsFinished(true);
+    } else {
+      setIsFinished(false);
+    }
+  }, [answers, currentStep, isTeacher, totalSteps]);
+
+  const questionStepAnswers = useMemo(() => {
+    return answers?.[activeQuestion?.id];
+  }, [answers, activeQuestion?.id]);
 
   return (
     <>
@@ -306,6 +395,8 @@ export const TestExView: FC<TProps> = ({ data, isPreview = false }) => {
               question={activeQuestion}
               onPressNext={onPressNext}
               setScore={setScore}
+              writeAnswer={writeAnswer}
+              answers={questionStepAnswers}
             />
           )}
           {!isFinished && (
