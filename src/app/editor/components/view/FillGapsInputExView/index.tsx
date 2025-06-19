@@ -53,7 +53,7 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
       setSelectedValue(field.options.find((o) => o.isCorrect)?.value || "");
       return;
     }
-  }, [count, field.options, isCorrect, selectedValue]);
+  }, [count, field?.options, isCorrect, selectedValue]);
 
   const onBlur = useCallback(
     (e) => {

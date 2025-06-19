@@ -25,6 +25,7 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { StartLessonButton } from "@/app/lessons/components/StartLessonButton";
+import { useCheckSubscription } from "@/app/subscription/helpers";
 
 export default function EditorPage() {
   withLogin();
@@ -41,6 +42,9 @@ export default function EditorPage() {
   const [currentSortIndexToShift, setCurrentSortIndexToShift] = useState<
     number | undefined
   >();
+
+  const { checkSubscription } = useCheckSubscription();
+
   useEffect(() => {
     //@ts-ignore
     getLesson(params.id);
@@ -53,12 +57,17 @@ export default function EditorPage() {
     setEditorModal(true);
   }, []);
 
-  const onPressCreate = useCallback((sortIndexToShift?: number) => {
-    setCurrentSortIndexToShift(sortIndexToShift);
-    setChosenTemplate(null);
-    setExCreateTemplateModal(true);
-    setChosenExToEdit(null);
-  }, []);
+  const onPressCreate = useCallback(
+    (sortIndexToShift?: number) => {
+      if (checkSubscription()) {
+        setCurrentSortIndexToShift(sortIndexToShift);
+        setChosenTemplate(null);
+        setExCreateTemplateModal(true);
+        setChosenExToEdit(null);
+      }
+    },
+    [checkSubscription]
+  );
 
   const onSuccessCreate = useCallback(() => {
     setChosenTemplate(null);
@@ -67,33 +76,47 @@ export default function EditorPage() {
     getExList();
   }, [getExList]);
 
-  const onPressEditEx = useCallback((ex) => {
-    setChosenTemplate(null);
-    setChosenExToEdit({
-      ...ex.data,
-      id: ex.id,
-      type: ex.type,
-      sortIndex: ex.sortIndex,
-    });
-    setEditorModal(true);
-  }, []);
+  const onPressEditEx = useCallback(
+    (ex) => {
+      if (checkSubscription()) {
+        setChosenTemplate(null);
+        setChosenExToEdit({
+          ...ex.data,
+          id: ex.id,
+          type: ex.type,
+          sortIndex: ex.sortIndex,
+        });
+        setEditorModal(true);
+      }
+    },
+    [checkSubscription]
+  );
 
   const onChangeSort = useCallback(
     async (exId: number, newIndex: number) => {
-      await changeSortIndex(exId, newIndex);
-      getExList();
+      if (checkSubscription()) {
+        await changeSortIndex(exId, newIndex);
+        getExList();
+      }
     },
-    [changeSortIndex, getExList]
+    [changeSortIndex, getExList, checkSubscription]
   );
 
-  const onPressDelete = useCallback((exId: number) => {
-    setDeleteId(exId);
-    setDeleteModal(true);
-  }, []);
+  const onPressDelete = useCallback(
+    (exId: number) => {
+      if (checkSubscription()) {
+        setDeleteId(exId);
+        setDeleteModal(true);
+      }
+    },
+    [checkSubscription]
+  );
 
   const onChangeIsVisible = useCallback(() => {
-    getExList();
-  }, [getExList]);
+    if (checkSubscription()) {
+      getExList();
+    }
+  }, [getExList, checkSubscription]);
 
   const lastSortIndex = useMemo(() => {
     return exList.length;

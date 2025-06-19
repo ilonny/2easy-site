@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from "react";
+import React, { FC, useContext, useMemo } from "react";
 import { ImageExView } from "../ImageExView";
 import styles from "./style.module.css";
 import ArrowUpIcon from "@/assets/icons/editor_arrow_up.svg";
@@ -22,6 +22,8 @@ import { MatchWordColumnExView } from "../MatchWordColumnExView";
 import { TestExView } from "../TestExView";
 import { FreeInputFormExView } from "../FreeInputFormExView";
 import PlusIcon from "@/assets/icons/plus_ex.svg";
+import { SibscribeContext } from "@/subscribe/context";
+import { useCheckSubscription } from "@/app/subscription/helpers";
 
 type TProps = {
   list: Array<any>;
@@ -171,7 +173,6 @@ export const ExList: FC<TProps> = (props) => {
               className={`${styles["wrapper"]} ${isView && styles["is-view"]}`}
               style={{ fontSize: 18 }}
             >
-              {ex.sortIndex}
               <Viewer data={ex.data} activeStudentId={activeStudentId} />
               {!isView && (
                 <div className={`${styles["edit-wrapper"]} p-4`}>
@@ -249,7 +250,7 @@ export const ExList: FC<TProps> = (props) => {
                 </div>
               )}
             </div>
-            {exIndex !== list.length - 1 && (
+            {!isView && exIndex !== list.length - 1 && (
               <div className={`ex-add-button mt-8 relative`}>
                 <div className={`${styles.dashed}`}></div>
                 <Image

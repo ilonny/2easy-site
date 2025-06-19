@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
 import { LessonStatus } from "./LessonStatus";
 import { AuthContext } from "@/auth";
+import { useCheckSubscription } from "@/app/subscription/helpers";
 
 type TProps = {
   lesson: TLesson;
@@ -77,7 +78,7 @@ export const LessonCard: FC<TProps> = ({
 
   const isDisabled =
     isStudent && lesson?.["lesson_relations.status"] === "close";
-
+  const { checkSubscription } = useCheckSubscription();
   return (
     <div style={{ width: "25%" }} className={`p-2 ${styles["lesson-card"]}`}>
       <div
@@ -121,7 +122,11 @@ export const LessonCard: FC<TProps> = ({
               color="foreground"
               placement="bottom-end"
               isOpen={popoverIsOpen}
-              onOpenChange={(open) => setPopoverIsOpen(open)}
+              onOpenChange={(open) => {
+                if (checkSubscription()) {
+                  setPopoverIsOpen(open);
+                }
+              }}
             >
               <PopoverTrigger>
                 <Button isIconOnly variant="flat">
@@ -255,7 +260,11 @@ export const LessonCard: FC<TProps> = ({
               className="w-full"
               size="md"
               isDisabled={isDisabled}
-              onClick={() => router.push(`/lessons/${lesson.id}`)}
+              onClick={() => {
+                if (!isStudent && checkSubscription()) {
+                  router.push(`/lessons/${lesson.id}`);
+                }
+              }}
             >
               {isStudent ? "Открыть" : "Начать урок"}
             </Button>

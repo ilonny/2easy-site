@@ -88,7 +88,7 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
       setIsDisabled(true);
       setSelectedValue(field.options.find((o) => o.isCorrect)?.value || "");
     }
-  }, [count, field.options, isCorrect, selectedValue]);
+  }, [count, field?.options, isCorrect, selectedValue]);
 
   return (
     <>

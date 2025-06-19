@@ -20,6 +20,7 @@ import styles from "./styles.module.css";
 import Image from "next/image";
 import Ellipse from "@/assets/icons/ellipse.svg";
 import { useRouter } from "next/navigation";
+import { useCheckSubscription } from "@/app/subscription/helpers";
 
 type TProps = {
   hideAddButton?: boolean;
@@ -83,6 +84,7 @@ export const StudentList = (props: TProps) => {
       ?.filter(Boolean);
   };
 
+  const { checkSubscription } = useCheckSubscription();
   return (
     <>
       {!students?.length && (
@@ -186,10 +188,12 @@ export const StudentList = (props: TProps) => {
                               fullWidth
                               color="primary"
                               onClick={(e) => {
-                                e.preventDefault();
-                                setTimeout(() => {
-                                  onPressCreateGroup(student);
-                                }, 100);
+                                if (checkSubscription()) {
+                                  e.preventDefault();
+                                  setTimeout(() => {
+                                    onPressCreateGroup(student);
+                                  }, 100);
+                                }
                               }}
                             >
                               Редактировать
@@ -200,7 +204,9 @@ export const StudentList = (props: TProps) => {
                               color="danger"
                               variant="light"
                               onClick={() => {
-                                onPressDelete(student);
+                                if (checkSubscription()) {
+                                  onPressDelete(student);
+                                }
                               }}
                             >
                               Удалить
@@ -219,7 +225,11 @@ export const StudentList = (props: TProps) => {
               radius="md"
               color="primary"
               className="px-10"
-              onClick={() => onPressCreateGroup(null)}
+              onClick={() => {
+                if (checkSubscription()) {
+                  onPressCreateGroup(null);
+                }
+              }}
               size="lg"
             >
               Добавить ученика

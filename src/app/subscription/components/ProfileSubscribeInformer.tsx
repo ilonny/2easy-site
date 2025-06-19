@@ -11,12 +11,13 @@ import {
   PopoverTrigger,
 } from "@nextui-org/react";
 import dayjs from "dayjs";
+import { useRouter } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 
 export const ProfileSubscribeInformer = () => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const { subscription } = useContext(SibscribeContext);
-
   const diffDate = useMemo(() => {
     if (!subscription) {
       return 0;
@@ -75,6 +76,9 @@ export const ProfileSubscribeInformer = () => {
           href="/subscription"
           color="primary"
           className="w-full"
+          onClick={() => {
+            router.push("/subscription");
+          }}
           //   size="sm"
         >
           Выбрать тариф

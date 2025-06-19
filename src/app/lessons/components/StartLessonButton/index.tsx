@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { AttachLessonModalForm } from "../AttachLessonModalForm";
 import { TLesson } from "../../types";
 import { useRouter } from "next/navigation";
+import { useCheckSubscription } from "@/app/subscription/helpers";
 
 type TProps = {
   isSkipCreateRealtion?: boolean;
@@ -11,7 +12,7 @@ type TProps = {
 export const StartLessonButton = (props: TProps) => {
   const { isSkipCreateRealtion, lesson } = props;
   const router = useRouter();
-
+  const { checkSubscription } = useCheckSubscription();
   const [modalVisible, setModalVisible] = useState(false);
 
   const onSuccess = useCallback(() => {
@@ -19,12 +20,14 @@ export const StartLessonButton = (props: TProps) => {
   }, [lesson?.id, router]);
 
   const onPressButton = useCallback(() => {
-    if (!isSkipCreateRealtion) {
-      setModalVisible(true);
-      return;
+    if (checkSubscription()) {
+      if (!isSkipCreateRealtion) {
+        setModalVisible(true);
+        return;
+      }
+      onSuccess();
     }
-    onSuccess();
-  }, [isSkipCreateRealtion, lesson, onSuccess]);
+  }, [isSkipCreateRealtion, onSuccess, checkSubscription]);
 
   return (
     <>

@@ -7,6 +7,7 @@ import { LessonsList } from "../LessonsList";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Dino from "@/assets/images/dino.gif";
+import { useCheckSubscription } from "@/app/subscription/helpers";
 
 type TProps = {
   canCreateLesson?: boolean;
@@ -79,6 +80,8 @@ export const ProfileLessons = (props: TProps) => {
     getLessons();
   }, [getLessons]);
 
+  const { checkSubscription } = useCheckSubscription();
+
   return (
     <>
       {!hideTabs && (
@@ -117,7 +120,11 @@ export const ProfileLessons = (props: TProps) => {
       )}
       {!!lessons?.length && (
         <LessonsList
-          onPressCreate={() => setCreateLessonModalIsVisible(true)}
+          onPressCreate={() => {
+            if (checkSubscription()) {
+              setCreateLessonModalIsVisible(true);
+            }
+          }}
           canCreateLesson={canCreateLesson}
           lessons={lessons}
           getLessons={getLessons}
