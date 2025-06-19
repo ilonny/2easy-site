@@ -167,7 +167,7 @@ export default function EditorPage() {
           <div className="h-10" />
           <div className="h-10" />
           <Card radius="none" shadow="none">
-            <CreateExButton onPress={onPressCreate} />
+            <CreateExButton onPress={() => onPressCreate(null)} />
           </Card>
           <div className="h-10" />
           <div className="h-10" />

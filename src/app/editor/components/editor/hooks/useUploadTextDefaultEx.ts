@@ -79,7 +79,7 @@ export const useUploadTextDefaultEx = (
       try {
         delete exData.images;
         delete exData.editorImages;
-
+        console.log('currentSortIndexToShift', currentSortIndexToShift)
         const createdExRes = await fetchPostJson({
           path: "/ex/create",
           isSecure: true,
@@ -98,7 +98,10 @@ export const useUploadTextDefaultEx = (
           setSuccess(true);
         }
         checkResponse(createdEx);
+        setSuccess(true);
       } catch (err) {
+        console.log('data', data, exData)
+        console.log('err', err)
       } finally {
         setIsLoading(false);
       }

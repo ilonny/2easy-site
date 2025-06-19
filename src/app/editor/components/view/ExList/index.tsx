@@ -171,6 +171,7 @@ export const ExList: FC<TProps> = (props) => {
               className={`${styles["wrapper"]} ${isView && styles["is-view"]}`}
               style={{ fontSize: 18 }}
             >
+              {ex.sortIndex}
               <Viewer data={ex.data} activeStudentId={activeStudentId} />
               {!isView && (
                 <div className={`${styles["edit-wrapper"]} p-4`}>
