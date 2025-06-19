@@ -4,7 +4,10 @@ import { useUploadImage } from "@/hooks/useUploadImage";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 
-export const useUploadFillGapsInputEx = (lastSortIndex: number) => {
+export const useUploadFillGapsInputEx = (
+  lastSortIndex: number,
+  currentSortIndexToShift?: number
+) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -56,6 +59,7 @@ export const useUploadFillGapsInputEx = (lastSortIndex: number) => {
             data: JSON.stringify(exData),
             sortIndex:
               data.sortIndex === 0 ? 0 : data.sortIndex || lastSortIndex || 0,
+            currentSortIndexToShift,
           },
         });
         const createdEx = await createdExRes.json();
@@ -68,7 +72,7 @@ export const useUploadFillGapsInputEx = (lastSortIndex: number) => {
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id, uploadImages]
+    [currentSortIndexToShift, lastSortIndex, params.id, uploadImages]
   );
 
   return { isLoading, saveFillGapsInputEx, success };

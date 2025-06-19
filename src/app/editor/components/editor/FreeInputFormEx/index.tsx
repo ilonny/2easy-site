@@ -30,15 +30,19 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const FreeInputFormEx: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
-  const { isLoading, saveFreeInputFormEx, success } =
-    useUploadFreeInputFormEx(lastSortIndex);
+  const { isLoading, saveFreeInputFormEx, success } = useUploadFreeInputFormEx(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
   const { data, changeData, resetData } = useExData<TFreeInputFormData>(
     defaultValues || defaultValuesStub
   );

@@ -3,7 +3,10 @@ import { checkResponse, fetchPostJson } from "@/api";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 
-export const useUploadNoteEx = (lastSortIndex?: number) => {
+export const useUploadNoteEx = (
+  lastSortIndex?: number,
+  currentSortIndexToShift?: number
+) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -21,6 +24,7 @@ export const useUploadNoteEx = (lastSortIndex?: number) => {
           id: data.id,
           type: "note",
           data: JSON.stringify(exData),
+          currentSortIndexToShift,
         };
         if (
           (data.sortIndex !== undefined && data.sortIndex !== null) ||
@@ -44,7 +48,7 @@ export const useUploadNoteEx = (lastSortIndex?: number) => {
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id]
+    [lastSortIndex, params.id, currentSortIndexToShift]
   );
 
   return { isLoading, saveNoteEx, success };

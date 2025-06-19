@@ -23,14 +23,19 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const ImageEx: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
-  const { isLoading, saveImageEx, success } = useUploadImageEx(lastSortIndex);
+  const { isLoading, saveImageEx, success } = useUploadImageEx(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
   const { data, changeData, resetData } = useExData<TImageExData>(
     defaultValues || defaultValuesStub
   );
@@ -39,14 +44,15 @@ export const ImageEx: FC<TProps> = ({
   );
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "let’s speak!",
-      titleColor: "#3F28C6",
-      subtitle: "look at the pictures",
-      description: "Describe each picture and answer the questions below",
-      images: [],
-      viewType: "carousel",
-    });
+    !data?.id &&
+      resetData({
+        title: "let’s speak!",
+        titleColor: "#3F28C6",
+        subtitle: "look at the pictures",
+        description: "Describe each picture and answer the questions below",
+        images: [],
+        viewType: "carousel",
+      });
   }, [resetData]);
 
   useEffect(() => {

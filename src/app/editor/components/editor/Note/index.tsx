@@ -18,6 +18,7 @@ type TProps = {
   defaultValues?: any;
   lastSortIndex: number;
   onChangeIsVisible: () => void;
+  currentSortIndexToShift?: number;
 };
 
 export const Note: FC<TProps> = ({
@@ -25,18 +26,23 @@ export const Note: FC<TProps> = ({
   defaultValues,
   lastSortIndex,
   onChangeIsVisible,
+  currentSortIndexToShift,
 }) => {
-  const { isLoading, saveNoteEx, success } = useUploadNoteEx(lastSortIndex);
+  const { isLoading, saveNoteEx, success } = useUploadNoteEx(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
   const { data, changeData, resetData } = useExData<TNoteData>(
     defaultValues || defaultValuesStub
   );
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "teacher's notes",
-      description: "",
-      isVisible: false,
-    });
+    !data?.id &&
+      resetData({
+        title: "teacher's notes",
+        description: "",
+        isVisible: false,
+      });
   }, [resetData]);
 
   useEffect(() => {

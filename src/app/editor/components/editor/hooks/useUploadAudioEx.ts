@@ -4,7 +4,10 @@ import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { TAudioData } from "../Audio/types";
 
-export const useUploadAudioEx = (lastSortIndex: number) => {
+export const useUploadAudioEx = (
+  lastSortIndex: number,
+  currentSortIndexToShift?: number
+) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -86,6 +89,7 @@ export const useUploadAudioEx = (lastSortIndex: number) => {
             data: JSON.stringify(exData),
             sortIndex:
               data.sortIndex === 0 ? 0 : data.sortIndex || lastSortIndex || 0,
+            currentSortIndexToShift,
           },
         });
         const createdEx = await createdExRes.json();
@@ -98,7 +102,7 @@ export const useUploadAudioEx = (lastSortIndex: number) => {
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id, uploadImages]
+    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift]
   );
 
   return { isLoading, saveAudioEx, success };

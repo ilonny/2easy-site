@@ -61,14 +61,19 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const TestEx: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
-  const { isLoading, saveTestEx, success } = useUploadTestEx(lastSortIndex);
+  const { isLoading, saveTestEx, success } = useUploadTestEx(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
   const { data, changeData, resetData } = useExData<TTestData>(
     defaultValues || defaultValuesStub
   );

@@ -27,15 +27,20 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const Audio: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
   const [filePickerError, setFilePickerError] = useState("");
-  const { isLoading, saveAudioEx, success } = useUploadAudioEx(lastSortIndex);
+  const { isLoading, saveAudioEx, success } = useUploadAudioEx(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
   const { data, changeData, resetData } = useExData<TAudioData>(
     defaultValues || defaultValuesStub
   );
@@ -50,14 +55,15 @@ export const Audio: FC<TProps> = ({
     });
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "Let's listen!",
-      titleColor: "#3F28C6",
-      subtitle: "Listen to the audio and do the tasks below",
-      description: "",
-      images: [],
-      videos: [{ content: "", title: "" }],
-    });
+    !data?.id &&
+      resetData({
+        title: "Let's listen!",
+        titleColor: "#3F28C6",
+        subtitle: "Listen to the audio and do the tasks below",
+        description: "",
+        images: [],
+        videos: [{ content: "", title: "" }],
+      });
   }, [resetData]);
 
   useEffect(() => {

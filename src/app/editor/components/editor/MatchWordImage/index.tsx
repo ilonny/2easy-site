@@ -23,15 +23,19 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const MatchWordImage: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
-  const { isLoading, saveMatchWordImageEx, success } =
-    useUploadMatchWordImage(lastSortIndex);
+  const { isLoading, saveMatchWordImageEx, success } = useUploadMatchWordImage(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
   const { data, changeData, resetData } = useExData<TMatchWordImageData>(
     defaultValues || defaultValuesStub
   );
@@ -40,14 +44,15 @@ export const MatchWordImage: FC<TProps> = ({
   );
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "Warm up",
-      titleColor: "#3F28C6",
-      subtitle: "Look at the pictures below",
-      description: "Match the pictures with their definitions",
-      images: [],
-      viewType: "drag",
-    });
+    !data?.id &&
+      resetData({
+        title: "Warm up",
+        titleColor: "#3F28C6",
+        subtitle: "Look at the pictures below",
+        description: "Match the pictures with their definitions",
+        images: [],
+        viewType: "drag",
+      });
   }, [resetData]);
 
   useEffect(() => {

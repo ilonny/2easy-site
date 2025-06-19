@@ -21,6 +21,7 @@ import { MatchWordImageExView } from "../MatchWordImageExView";
 import { MatchWordColumnExView } from "../MatchWordColumnExView";
 import { TestExView } from "../TestExView";
 import { FreeInputFormExView } from "../FreeInputFormExView";
+import PlusIcon from "@/assets/icons/plus_ex.svg";
 
 type TProps = {
   list: Array<any>;
@@ -30,6 +31,7 @@ type TProps = {
   onChangeIsVisible?: () => void;
   isView?: boolean;
   activeStudentId: number;
+  onPressCreate: (indexToShift?: number) => void;
 };
 
 const mapComponent = (type: string, outerProps: never) => {
@@ -157,91 +159,104 @@ export const ExList: FC<TProps> = (props) => {
     onPressDelete,
     isView,
     activeStudentId,
+    onPressCreate,
   } = props;
   return (
     <div className="flex flex-col gap-10">
       {list.map((ex, exIndex) => {
         const Viewer = mapComponent(ex.type, { ...props, id: ex.id });
         return (
-          <div
-            className={`${styles["wrapper"]} ${isView && styles["is-view"]}`}
-            style={{ fontSize: 18 }}
-            key={ex.id}
-          >
-            <Viewer data={ex.data} activeStudentId={activeStudentId} />
-            {!isView && (
-              <div className={`${styles["edit-wrapper"]} p-4`}>
-                <div className="flex justify-end gap-2">
-                  {exIndex !== 0 && (
-                    <div
-                      onClick={() => {
-                        //up
+          <div key={ex.id}>
+            <div
+              className={`${styles["wrapper"]} ${isView && styles["is-view"]}`}
+              style={{ fontSize: 18 }}
+            >
+              <Viewer data={ex.data} activeStudentId={activeStudentId} />
+              {!isView && (
+                <div className={`${styles["edit-wrapper"]} p-4`}>
+                  <div className="flex justify-end gap-2">
+                    {exIndex !== 0 && (
+                      <div
+                        onClick={() => {
+                          //up
 
-                        if (list[exIndex - 1]) {
-                          const prevEx = list[exIndex - 1];
-                          changeSortIndex(prevEx.id, prevEx.sortIndex + 1);
-                        }
-                        changeSortIndex(ex.id, ex.sortIndex - 1);
-                      }}
-                      className="flex justify-center items-center bg-white w-[40px] h-[40px] rounded-[10px]"
-                      style={{
-                        boxShadow: "0px 8px 24px 0px #908BA826",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Image src={ArrowUpIcon} alt="arrow icon" />
-                    </div>
-                  )}
-                  {exIndex < list.length - 1 && (
-                    <div
-                      onClick={() => {
-                        //down
+                          if (list[exIndex - 1]) {
+                            const prevEx = list[exIndex - 1];
+                            changeSortIndex(prevEx.id, prevEx.sortIndex + 1);
+                          }
+                          changeSortIndex(ex.id, ex.sortIndex - 1);
+                        }}
+                        className="flex justify-center items-center bg-white w-[40px] h-[40px] rounded-[10px]"
+                        style={{
+                          boxShadow: "0px 8px 24px 0px #908BA826",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <Image src={ArrowUpIcon} alt="arrow icon" />
+                      </div>
+                    )}
+                    {exIndex < list.length - 1 && (
+                      <div
+                        onClick={() => {
+                          //down
 
-                        if (list[exIndex + 1]) {
-                          const next = list[exIndex + 1];
+                          if (list[exIndex + 1]) {
+                            const next = list[exIndex + 1];
 
-                          changeSortIndex(next.id, next.sortIndex - 1);
-                        }
-                        changeSortIndex(ex.id, ex.sortIndex + 1);
-                      }}
-                      className="flex justify-center items-center bg-white w-[40px] h-[40px] rounded-[10px]"
-                      style={{
-                        boxShadow: "0px 8px 24px 0px #908BA826",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Image
-                        src={ArrowUpIcon}
-                        alt="arrow icon"
-                        style={{ transform: "rotate(180deg)" }}
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="h-4" />
-                <div
-                  className="p-4 bg-white w-[260px] rounded-[10px]"
-                  style={{
-                    boxShadow: "0px 8px 24px 0px #908BA826",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div
-                    className="flex justify-between items-center"
-                    onClick={() => onPressEdit(ex)}
-                  >
-                    <p>Редактировать задание</p>
-                    <Image src={EditIcon} alt="arrow icon" />
+                            changeSortIndex(next.id, next.sortIndex - 1);
+                          }
+                          changeSortIndex(ex.id, ex.sortIndex + 1);
+                        }}
+                        className="flex justify-center items-center bg-white w-[40px] h-[40px] rounded-[10px]"
+                        style={{
+                          boxShadow: "0px 8px 24px 0px #908BA826",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <Image
+                          src={ArrowUpIcon}
+                          alt="arrow icon"
+                          style={{ transform: "rotate(180deg)" }}
+                        />
+                      </div>
+                    )}
                   </div>
-                  <Divider className="my-2" />
+                  <div className="h-4" />
                   <div
-                    className="flex justify-between items-center"
-                    onClick={() => onPressDelete(ex.id)}
+                    className="p-4 bg-white w-[260px] rounded-[10px]"
+                    style={{
+                      boxShadow: "0px 8px 24px 0px #908BA826",
+                      cursor: "pointer",
+                    }}
                   >
-                    <p style={{ color: "#A42929" }}>Удалить задание</p>
-                    <Image src={DeleteIcon} alt="arrow icon" />
+                    <div
+                      className="flex justify-between items-center"
+                      onClick={() => onPressEdit(ex)}
+                    >
+                      <p>Редактировать задание</p>
+                      <Image src={EditIcon} alt="arrow icon" />
+                    </div>
+                    <Divider className="my-2" />
+                    <div
+                      className="flex justify-between items-center"
+                      onClick={() => onPressDelete(ex.id)}
+                    >
+                      <p style={{ color: "#A42929" }}>Удалить задание</p>
+                      <Image src={DeleteIcon} alt="arrow icon" />
+                    </div>
                   </div>
                 </div>
+              )}
+            </div>
+            {exIndex !== list.length - 1 && (
+              <div className={`ex-add-button mt-8 relative`}>
+                <div className={`${styles.dashed}`}></div>
+                <Image
+                  onClick={() => onPressCreate(ex.sortIndex)}
+                  src={PlusIcon}
+                  alt="plus icon"
+                  className="m-auto relative z-index-[2] cursor-pointer hover:opacity-[0.8]"
+                />
               </div>
             )}
           </div>

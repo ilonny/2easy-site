@@ -27,15 +27,19 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const TextSticker: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
-  const { isLoading, saveTextStickerEx, success } =
-    useUploadTextStickerEx(lastSortIndex);
+  const { isLoading, saveTextStickerEx, success } = useUploadTextStickerEx(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
   const { data, changeData, resetData } = useExData<TTextStickerData>(
     defaultValues || defaultValuesStub
   );
@@ -44,17 +48,18 @@ export const TextSticker: FC<TProps> = ({
   );
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "Warm up",
-      titleColor: "#3F28C6",
-      subtitle: "Let's discuss the following questions ",
-      description: "Answer the questions below",
-      images: [],
-      editorImages: [],
-      stickers: ["", ""],
-      stickerBgColor: "#ffffff",
-      stickerTextColor: "#000000",
-    });
+    !data?.id &&
+      resetData({
+        title: "Warm up",
+        titleColor: "#3F28C6",
+        subtitle: "Let's discuss the following questions ",
+        description: "Answer the questions below",
+        images: [],
+        editorImages: [],
+        stickers: ["", ""],
+        stickerBgColor: "#ffffff",
+        stickerTextColor: "#000000",
+      });
   }, [resetData]);
 
   useEffect(() => {

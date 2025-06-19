@@ -25,14 +25,19 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const Video: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
-  const { isLoading, saveVideoEx, success } = useUploadVideoEx(lastSortIndex);
+  const { isLoading, saveVideoEx, success } = useUploadVideoEx(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
   const { data, changeData, resetData } = useExData<TVideoData>(
     defaultValues || defaultValuesStub
   );
@@ -41,14 +46,15 @@ export const Video: FC<TProps> = ({
   );
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "Let's watch!",
-      titleColor: "#3F28C6",
-      subtitle: "Watch the video and answer the questions below",
-      description: "",
-      images: [],
-      videos: [{ content: "", title: "" }],
-    });
+    !data?.id &&
+      resetData({
+        title: "Let's watch!",
+        titleColor: "#3F28C6",
+        subtitle: "Watch the video and answer the questions below",
+        description: "",
+        images: [],
+        videos: [{ content: "", title: "" }],
+      });
   }, [resetData]);
 
   useEffect(() => {

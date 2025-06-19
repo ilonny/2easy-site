@@ -28,15 +28,17 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: boolean;
 };
 
 export const FillGapsSelect: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
   const { isLoading, saveFillGapsSelectEx, success } =
-    useUploadFillGapsSelectEx(lastSortIndex);
+    useUploadFillGapsSelectEx(lastSortIndex, currentSortIndexToShift);
   const { data, changeData, resetData } = useExData<TFillGapsSelectData>(
     defaultValues || defaultValuesStub
   );
@@ -45,15 +47,16 @@ export const FillGapsSelect: FC<TProps> = ({
   );
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "Let's practice!",
-      titleColor: "#3F28C6",
-      subtitle: "Choose the correct option to complete the sentences",
-      description: "Answer the questions below",
-      images: [],
-      dataText: "",
-      fields: [],
-    });
+    !data?.id &&
+      resetData({
+        title: "Let's practice!",
+        titleColor: "#3F28C6",
+        subtitle: "Choose the correct option to complete the sentences",
+        description: "Answer the questions below",
+        images: [],
+        dataText: "",
+        fields: [],
+      });
   }, [resetData]);
 
   useEffect(() => {

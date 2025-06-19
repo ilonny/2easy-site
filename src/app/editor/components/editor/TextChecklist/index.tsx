@@ -27,15 +27,19 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const TextChecklist: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
-  const { isLoading, saveTextChecklistEx, success } =
-    useUploadTextChecklistEx(lastSortIndex);
+  const { isLoading, saveTextChecklistEx, success } = useUploadTextChecklistEx(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
   const { data, changeData, resetData } = useExData<TTextStickerData>(
     defaultValues || defaultValuesStub
   );
@@ -48,18 +52,19 @@ export const TextChecklist: FC<TProps> = ({
   >(defaultValues?.editorImages || []);
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "Let's speak!",
-      titleColor: "#3F28C6",
-      subtitle: "Look at the list below",
-      description:
-        "Tick the things you would like to try and explain your choices",
-      images: [],
-      editorImages: [],
-      stickers: ["", ""],
-      stickerBgColor: "#ffffff",
-      stickerTextColor: "#000000",
-    });
+    !data?.id &&
+      resetData({
+        title: "Let's speak!",
+        titleColor: "#3F28C6",
+        subtitle: "Look at the list below",
+        description:
+          "Tick the things you would like to try and explain your choices",
+        images: [],
+        editorImages: [],
+        stickers: ["", ""],
+        stickerBgColor: "#ffffff",
+        stickerTextColor: "#000000",
+      });
   }, [resetData]);
 
   useEffect(() => {

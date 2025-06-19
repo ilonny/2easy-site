@@ -4,7 +4,10 @@ import { useUploadImage } from "@/hooks/useUploadImage";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 
-export const useUploadVideoEx = (lastSortIndex: number) => {
+export const useUploadVideoEx = (
+  lastSortIndex: number,
+  currentSortIndexToShift?: number
+) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -56,6 +59,7 @@ export const useUploadVideoEx = (lastSortIndex: number) => {
             data: JSON.stringify(exData),
             sortIndex:
               data.sortIndex === 0 ? 0 : data.sortIndex || lastSortIndex || 0,
+            currentSortIndexToShift,
           },
         });
         const createdEx = await createdExRes.json();
@@ -68,7 +72,7 @@ export const useUploadVideoEx = (lastSortIndex: number) => {
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id, uploadImages]
+    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift]
   );
 
   return { isLoading, saveVideoEx, success };

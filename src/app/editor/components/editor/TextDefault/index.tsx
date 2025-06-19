@@ -46,15 +46,19 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const TextDefaultEx: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
-  const { isLoading, saveTextDefaultEx, success } =
-    useUploadTextDefaultEx(lastSortIndex);
+  const { isLoading, saveTextDefaultEx, success } = useUploadTextDefaultEx(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
   const { data, changeData, resetData } = useExData<TTextDefaultData>(
     defaultValues || defaultValuesStub
   );
@@ -69,16 +73,17 @@ export const TextDefaultEx: FC<TProps> = ({
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "Let's read!",
-      titleColor: "#3F28C6",
-      subtitle: "Read the article",
-      description: "Answer the questions below",
-      images: [],
-      editorImages: [],
-      viewType: "carousel",
-      content: "",
-    });
+    !data?.id &&
+      resetData({
+        title: "Let's read!",
+        titleColor: "#3F28C6",
+        subtitle: "Read the article",
+        description: "Answer the questions below",
+        images: [],
+        editorImages: [],
+        viewType: "carousel",
+        content: "",
+      });
   }, [resetData]);
 
   useEffect(() => {

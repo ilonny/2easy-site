@@ -26,3 +26,12 @@
   opacity: 1;
   pointer-events: all;
 }
+
+.dashed {
+  border: 1px dashed #D3D3D3;
+  height: 1px;
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  margin-top: -0.5;
+}

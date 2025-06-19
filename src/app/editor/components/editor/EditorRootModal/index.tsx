@@ -28,6 +28,7 @@ type TProps = {
   onSuccess: () => void;
   chosenExToEdit?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const EditorRootModal: FC<TProps> = ({
@@ -39,6 +40,7 @@ export const EditorRootModal: FC<TProps> = ({
   onSuccess,
   chosenExToEdit,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
   const EditorComponent = useMemo(() => {
     const exType = type || chosenExToEdit?.type;
@@ -106,6 +108,7 @@ export const EditorRootModal: FC<TProps> = ({
               onSuccess={onSuccess}
               defaultValues={chosenExToEdit ? chosenExToEdit : undefined}
               lastSortIndex={lastSortIndex}
+              currentSortIndexToShift={currentSortIndexToShift}
             />
           )}
         </ModalBody>

@@ -38,7 +38,9 @@ export default function EditorPage() {
   const [chosenExToEdit, setChosenExToEdit] = useState<any>(null);
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState<number | undefined>();
-
+  const [currentSortIndexToShift, setCurrentSortIndexToShift] = useState<
+    number | undefined
+  >();
   useEffect(() => {
     //@ts-ignore
     getLesson(params.id);
@@ -51,7 +53,8 @@ export default function EditorPage() {
     setEditorModal(true);
   }, []);
 
-  const onPressCreate = useCallback(() => {
+  const onPressCreate = useCallback((sortIndexToShift?: number) => {
+    setCurrentSortIndexToShift(sortIndexToShift);
     setChosenTemplate(null);
     setExCreateTemplateModal(true);
     setChosenExToEdit(null);
@@ -159,6 +162,7 @@ export default function EditorPage() {
             changeSortIndex={onChangeSort}
             onPressDelete={onPressDelete}
             onChangeIsVisible={onChangeIsVisible}
+            onPressCreate={onPressCreate}
           />
           <div className="h-10" />
           <div className="h-10" />
@@ -181,6 +185,7 @@ export default function EditorPage() {
         onSuccess={onSuccessCreate}
         chosenExToEdit={chosenExToEdit}
         lastSortIndex={lastSortIndex}
+        currentSortIndexToShift={currentSortIndexToShift}
         onBack={() => {
           setChosenTemplate(null);
           setEditorModal(false);

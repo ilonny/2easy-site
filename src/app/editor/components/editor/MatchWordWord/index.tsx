@@ -41,15 +41,19 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const MatchWordWord: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
-  const { isLoading, saveMathWordWordEx, success } =
-    useUploadMatchWordWordEx(lastSortIndex);
+  const { isLoading, saveMathWordWordEx, success } = useUploadMatchWordWordEx(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
   const { data, changeData, resetData } = useExData<TMatchWordWordData>(
     defaultValues || defaultValuesStub
   );

@@ -45,15 +45,19 @@ type TProps = {
   onSuccess: () => void;
   defaultValues?: any;
   lastSortIndex: number;
+  currentSortIndexToShift?: number;
 };
 
 export const Text2ColEx: FC<TProps> = ({
   onSuccess,
   defaultValues,
   lastSortIndex,
+  currentSortIndexToShift,
 }) => {
-  const { isLoading, saveText2ColEx, success } =
-    useUploadText2ColEx(lastSortIndex);
+  const { isLoading, saveText2ColEx, success } = useUploadText2ColEx(
+    lastSortIndex,
+    currentSortIndexToShift
+  );
 
   const { data, changeData, resetData } = useExData<TText2ColData>(
     defaultValues || defaultValuesStub
@@ -78,17 +82,18 @@ export const Text2ColEx: FC<TProps> = ({
   );
 
   useEffect(() => {
-    !data?.id && resetData({
-      title: "Let’s read!",
-      titleColor: "#3F28C6",
-      subtitle: "Read the part of the article",
-      description: "Answer the questions below",
-      images: [],
-      editorImages: [],
-      content: "",
-      secondEditorImages: [],
-      secondContent: "",
-    });
+    !data?.id &&
+      resetData({
+        title: "Let’s read!",
+        titleColor: "#3F28C6",
+        subtitle: "Read the part of the article",
+        description: "Answer the questions below",
+        images: [],
+        editorImages: [],
+        content: "",
+        secondEditorImages: [],
+        secondContent: "",
+      });
   }, [resetData]);
 
   useEffect(() => {
