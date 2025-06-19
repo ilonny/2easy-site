@@ -87,12 +87,6 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
     }
   }, [field.id, isCorrect]);
 
-  // useEffect(() => {
-  //   if (localAnswers.includes(field.id)) {
-  //     setSelectedValue(field.options[0].value);
-  //   }
-  // }, [localAnswers?.length]);
-
   return (
     <>
       <Input

@@ -15,6 +15,8 @@ import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { useParams } from "next/navigation";
 
 type TProps = {
   data: TFillGapsSelectData;
@@ -24,10 +26,24 @@ type TProps = {
 const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
   field,
   isTeacher,
+  localAnswers,
+  setLocalAnswers,
 }) => {
   const [selectedValue, setSelectedValue] = useState("");
   const [count, setCount] = useState(0);
   const [isDisabled, setIsDisabled] = useState(false);
+
+  const localAnswer = useMemo(() => {
+    return localAnswers.findLast((a) => a.id === field.id);
+  }, [localAnswers, field.id]);
+  console.log('localAnswers', localAnswers)
+  useEffect(() => {
+    if (localAnswer) {
+      setSelectedValue(localAnswer?.word || "");
+    }
+  }, [localAnswer]);
+
+  console.log("localAnswer", localAnswer);
 
   const isCorrect = useMemo(() => {
     if (isDisabled) {
@@ -36,11 +52,36 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
     return !!field.options?.find((o) => o.value === selectedValue)?.isCorrect;
   }, [selectedValue, field?.options, isDisabled]);
 
-  const onChangeSelection = useCallback((val: string) => {
-    setSelectedValue(val);
-    setCount((c) => c + 1);
-    return;
-  }, []);
+  const onChangeSelection = useCallback(
+    (val: string) => {
+      setSelectedValue(val);
+      setCount((c) => c + 1);
+      console.log("val", val);
+      // if (!isCorrect) {
+      // }
+      setLocalAnswers((a) =>
+        a.concat({
+          id: field.id,
+          isCorrect,
+          word: val,
+        })
+      );
+      return;
+    },
+    [isCorrect]
+  );
+
+  // useEffect(() => {
+  //   if (isCorrect) {
+  //     setLocalAnswers((a) =>
+  //       a.concat({
+  //         id: field.id,
+  //         isCorrect: true,
+  //         word: field.options[0].value,
+  //       })
+  //     );
+  //   }
+  // }, [field.id, isCorrect]);
 
   useEffect(() => {
     if (count >= field.options.length - 1 && !isCorrect) {
@@ -96,9 +137,61 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
 export const FillGapsSelectExView: FC<TProps> = ({
   data,
   isPreview = false,
+  ...rest
 }) => {
   const image = data?.images?.[0];
   const { profile } = useContext(AuthContext);
+
+  const [localAnswers, setLocalAnswers] = useState<
+    {
+      id: number;
+      word: string;
+      isCorrect: boolean;
+    }[]
+  >([]);
+
+  const isTeacher = profile?.role_id === 2;
+
+  const lesson_id = useParams()?.id;
+  const student_id = profile?.studentId;
+  const ex_id = data?.id;
+  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+    student_id,
+    lesson_id,
+    ex_id,
+    activeStudentId: rest.activeStudentId,
+    isTeacher,
+    sleepDelay: 3000,
+  });
+
+  useEffect(() => {
+    if (student_id) {
+      getAnswers(true).then((a) => {
+        console.log("a", a);
+        try {
+          setLocalAnswers(JSON.parse(a[data.id].answer));
+        } catch (err) {}
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student_id]);
+
+  useEffect(() => {
+    if (!answers && !isTeacher) {
+      return;
+    }
+    try {
+      setLocalAnswers(JSON.parse(answers[data.id].answer));
+    } catch (err) {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers, isTeacher]);
+
+  useEffect(() => {
+    if (localAnswers.length) {
+      writeAnswer(data.id, JSON.stringify(localAnswers));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localAnswers, writeAnswer]);
 
   const renderContent = useCallback(() => {
     document
@@ -124,15 +217,33 @@ export const FillGapsSelectExView: FC<TProps> = ({
               // (maxOptionLength < 10 ? 20 : maxOptionLength > 20 ? 7 : 10),
             }}
           >
+            {/* {localAnswers.find((f) => f.id === field.id && f.isCorrect) ? (
+              <>success</>
+            ) : isTeacher &&
+              localAnswers.findLast(
+                (f) => f.id === field.id && !f.isCorrect
+              ) ? (
+              <>error</>
+            ) : (
+            )} */}
             <AnswerField
               field={field}
               key={field?.id}
               isTeacher={profile?.role_id === 2}
+              localAnswers={localAnswers}
+              setLocalAnswers={setLocalAnswers}
             />
           </div>
         );
       });
-  }, [data.fields, data?.id, profile?.role_id]);
+  }, [
+    data.fields,
+    data?.id,
+    profile?.role_id,
+    answers,
+    localAnswers,
+    rest.activeStudentId,
+  ]);
 
   useEffect(() => {
     renderContent();
