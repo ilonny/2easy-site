@@ -26,6 +26,8 @@ import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { useParams } from "next/navigation";
+import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
 type TProps = {
   data: TFillGapsDragData;
   isPreview?: boolean;
@@ -191,7 +193,7 @@ const DraggableItem = (props: {
   );
 };
 
-export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
+export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false, ...rest }) => {
   const image = data?.images?.[0];
   const { profile } = useContext(AuthContext);
   const [activeDragId, setActiveDragId] = useState<number | null>();
@@ -199,6 +201,19 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
   const isMissedIntersectedId = useRef<number>(0);
   const [errorAnswerId, setErrorAnswerId] = useState<number>(0);
   const [correctIds, setCorrectIds] = useState<number[]>([]);
+
+  const isTeacher = profile?.role_id === 2;
+
+  const lesson_id = useParams()?.id;
+  const student_id = profile?.studentId;
+  const ex_id = data?.id;
+  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+    student_id,
+    lesson_id,
+    ex_id,
+    activeStudentId: rest.activeStudentId,
+    isTeacher,
+  });
 
   const renderContent = useCallback(() => {
     document
@@ -225,6 +240,35 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false }) => {
         );
       });
   }, [data?.id, data.fields, profile?.role_id, correctIds, errorAnswerId]);
+
+  useEffect(() => {
+    if (student_id) {
+      getAnswers(true).then((a) => {
+        console.log("a", a);
+        try {
+          setCorrectIds(JSON.parse(a[data.id].answer));
+        } catch (err) {}
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student_id]);
+
+  useEffect(() => {
+    if (!answers && !isTeacher) {
+      return;
+    }
+    try {
+      setCorrectIds(JSON.parse(answers[data.id].answer));
+    } catch (err) {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers, isTeacher]);
+
+  useEffect(() => {
+    if (correctIds.length) {
+      writeAnswer(data.id, JSON.stringify(correctIds));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [correctIds, writeAnswer]);
 
   useEffect(() => {
     renderContent();

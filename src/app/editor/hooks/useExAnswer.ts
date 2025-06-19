@@ -8,6 +8,7 @@ type TParams = {
   ex_id: number;
   isTeacher?: boolean;
   activeStudentId?: number;
+  sleepDelay?: number;
 };
 
 const limit = pLimit(1);
@@ -15,7 +16,14 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 let idRef = 0;
 
 export const useExAnswer = (params: TParams) => {
-  const { student_id, lesson_id, ex_id, isTeacher, activeStudentId } = params;
+  const {
+    student_id,
+    lesson_id,
+    ex_id,
+    isTeacher,
+    activeStudentId,
+    sleepDelay,
+  } = params;
   // const [activeStudentId, setActiveStudentId] = useState(0);
   const queue = useRef<Promise<Response>[]>([]);
   const [answers, setAnswers] = useState({});
@@ -64,13 +72,13 @@ export const useExAnswer = (params: TParams) => {
       }, {});
       setAnswers(answersMap);
       if (!once) {
-        await sleep(1000);
+        await sleep(sleepDelay || 1000);
         getAnswers();
         return;
       }
       return answersMap;
     },
-    [lesson_id, ex_id, student_id, isTeacher, activeStudentId]
+    [isTeacher, activeStudentId, lesson_id, ex_id, student_id, sleepDelay]
   );
 
   useEffect(() => {
