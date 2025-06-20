@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { FC, useCallback } from "react";
+import { FC, useCallback, useContext } from "react";
 import { TNoteData } from "../../editor/Note/types";
 import "./styles.scss";
 import InfoIcon from "@/assets/icons/note_info_icon.svg";
@@ -7,6 +7,7 @@ import EyeEnabledIcon from "@/assets/icons/eye_enable.svg";
 import EyeDisabledIcon from "@/assets/icons/eye_disabled.svg";
 import Image from "next/image";
 import { useUploadNoteEx } from "../../editor/hooks/useUploadNoteEx";
+import { AuthContext } from "@/auth";
 type TProps = {
   data: TNoteData;
   isPreview?: boolean;
@@ -20,6 +21,8 @@ export const NoteExView: FC<TProps> = ({
   onChangeIsVisible,
   changeData,
 }) => {
+  const { profile } = useContext(AuthContext);
+  const isTeacher = profile?.role_id === 2;
   const { saveNoteEx } = useUploadNoteEx(data.sortIndex);
   const onClickEye = useCallback(async () => {
     if (typeof onChangeIsVisible === "function") {
@@ -35,6 +38,11 @@ export const NoteExView: FC<TProps> = ({
       return;
     }
   }, [data, saveNoteEx, onChangeIsVisible, changeData]);
+
+  if (!isTeacher && !data.isVisible) {
+    return <></>;
+  }
+
   return (
     <div
       className="flex items-start justify-between gap-2 py-8"
@@ -44,33 +52,35 @@ export const NoteExView: FC<TProps> = ({
       }}
     >
       <div style={{ width: 55 }}>
-        <div
-          className="flex flex-col items-start gap-2"
-          style={{ cursor: "pointer" }}
-          onClick={() => onClickEye()}
-        >
+        {isTeacher && (
           <div
-            style={{ width: 24, height: 28 }}
-            className="flex justify-center items-center"
+            className="flex flex-col items-start gap-2"
+            style={{ cursor: "pointer" }}
+            onClick={() => onClickEye()}
           >
-            <Image
-              src={data.isVisible ? EyeEnabledIcon : EyeDisabledIcon}
-              alt=""
-            />
+            <div
+              style={{ width: 24, height: 28 }}
+              className="flex justify-center items-center"
+            >
+              <Image
+                src={data.isVisible ? EyeEnabledIcon : EyeDisabledIcon}
+                alt=""
+              />
+            </div>
+            <p
+              style={{
+                color: data.isVisible ? "#3F28C6" : "#B3B3B3",
+                fontSize: 12,
+                textAlign: "left",
+                lineHeight: "100%",
+              }}
+            >
+              {data.isVisible
+                ? "заметка видна ученику"
+                : "заметка не видна ученику"}
+            </p>
           </div>
-          <p
-            style={{
-              color: data.isVisible ? "#3F28C6" : "#B3B3B3",
-              fontSize: 12,
-              textAlign: "left",
-              lineHeight: "100%",
-            }}
-          >
-            {data.isVisible
-              ? "заметка видна ученику"
-              : "заметка не видна ученику"}
-          </p>
-        </div>
+        )}
       </div>
       <div
         style={{
