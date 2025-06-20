@@ -61,7 +61,6 @@ export const FreeInputFormExView: FC<TProps> = ({
 
   useEffect(() => {
     if (student_id) {
-      console.log("student_id?", student_id);
       getAnswers(true);
     }
   }, [student_id]);
@@ -124,7 +123,6 @@ export const FreeInputFormExView: FC<TProps> = ({
                   minRows={1}
                   style={{ fontSize: 16 }}
                   onValueChange={(val) => {
-                    console.log("val:", val);
                     if (!student_id) {
                       return;
                     }

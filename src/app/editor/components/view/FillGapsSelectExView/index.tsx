@@ -36,14 +36,11 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
   const localAnswer = useMemo(() => {
     return localAnswers.findLast((a) => a.id === field.id);
   }, [localAnswers, field.id]);
-  console.log('localAnswers', localAnswers)
   useEffect(() => {
     if (localAnswer) {
       setSelectedValue(localAnswer?.word || "");
     }
   }, [localAnswer]);
-
-  console.log("localAnswer", localAnswer);
 
   const isCorrect = useMemo(() => {
     if (isDisabled) {
@@ -56,7 +53,6 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
     (val: string) => {
       setSelectedValue(val);
       setCount((c) => c + 1);
-      console.log("val", val);
       // if (!isCorrect) {
       // }
       setLocalAnswers((a) =>
@@ -167,7 +163,6 @@ export const FillGapsSelectExView: FC<TProps> = ({
   useEffect(() => {
     if (student_id) {
       getAnswers(true).then((a) => {
-        console.log("a", a);
         try {
           setLocalAnswers(JSON.parse(a[data.id].answer));
         } catch (err) {}

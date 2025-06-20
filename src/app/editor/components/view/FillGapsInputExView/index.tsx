@@ -148,7 +148,6 @@ export const FillGapsInputExView: FC<TProps> = ({
   useEffect(() => {
     if (student_id) {
       getAnswers(true).then((a) => {
-        console.log("a", a);
         try {
           setLocalAnswers(JSON.parse(a[data.id].answer));
         } catch (err) {}
@@ -175,7 +174,6 @@ export const FillGapsInputExView: FC<TProps> = ({
   }, [localAnswers, writeAnswer]);
 
   const renderContent = useCallback(() => {
-    console.log("render");
     document
       .querySelectorAll(
         `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`

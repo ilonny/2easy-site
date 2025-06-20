@@ -48,7 +48,6 @@ export const TestStep = (props: TTestStepProps) => {
   useEffect(() => {
     try {
       const answersParsed = JSON.parse(answers.answer);
-      console.log("answersParsed", answersParsed);
       if (!answersParsed) {
         return;
       }
@@ -302,7 +301,6 @@ export const TestExView: FC<TProps> = ({
     }
     const newActiveIndex = Number(answers["step"]?.answer);
     const newScore = Number(answers["score"]?.answer);
-    console.log("newActiveIndex?", newActiveIndex);
     if (!isNaN(newActiveIndex)) {
       setActiveIndex(newActiveIndex);
       setScore(newScore);

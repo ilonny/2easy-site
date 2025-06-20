@@ -186,6 +186,7 @@ export default function EditorPage() {
             onPressDelete={onPressDelete}
             onChangeIsVisible={onChangeIsVisible}
             onPressCreate={onPressCreate}
+            onSuccessCreate={onSuccessCreate}
           />
           <div className="h-10" />
           <div className="h-10" />

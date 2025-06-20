@@ -166,7 +166,6 @@ export const MatchWordImageExView: FC<TProps> = ({
   useEffect(() => {
     if (student_id) {
       getAnswers(true).then((a) => {
-        console.log("a", a);
         try {
           setCorrectChips(JSON.parse(a[data.id].answer));
         } catch (err) {}

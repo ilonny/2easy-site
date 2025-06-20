@@ -98,7 +98,6 @@ export const MatchWordWordExView: FC<TProps> = ({
   useEffect(() => {
     if (student_id) {
       getAnswers(true).then((a) => {
-        console.log("a", a);
         try {
           setCorrectIds(JSON.parse(a[data.id].answer));
         } catch (err) {}

@@ -55,7 +55,6 @@ export const TextDefaultEx: FC<TProps> = ({
   lastSortIndex,
   currentSortIndexToShift,
 }) => {
-  console.log('text def', currentSortIndexToShift)
   const { isLoading, saveTextDefaultEx, success } = useUploadTextDefaultEx(
     lastSortIndex,
     currentSortIndexToShift

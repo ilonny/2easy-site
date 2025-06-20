@@ -1,4 +1,4 @@
-import React, { FC, useContext, useMemo } from "react";
+import React, { FC, useContext, useEffect, useMemo, useState } from "react";
 import { ImageExView } from "../ImageExView";
 import styles from "./style.module.css";
 import ArrowUpIcon from "@/assets/icons/editor_arrow_up.svg";
@@ -22,8 +22,13 @@ import { MatchWordColumnExView } from "../MatchWordColumnExView";
 import { TestExView } from "../TestExView";
 import { FreeInputFormExView } from "../FreeInputFormExView";
 import PlusIcon from "@/assets/icons/plus_ex.svg";
+import CopyIcon from "@/assets/icons/copy.svg";
+import PasteIcon from "@/assets/icons/paste.svg";
 import { SibscribeContext } from "@/subscribe/context";
 import { useCheckSubscription } from "@/app/subscription/helpers";
+import { readFromLocalStorage, writeToLocalStorage } from "@/auth/utils";
+import { toast } from "react-toastify";
+import { fetchPostJson } from "@/api";
 
 type TProps = {
   list: Array<any>;
@@ -34,6 +39,7 @@ type TProps = {
   isView?: boolean;
   activeStudentId: number;
   onPressCreate: (indexToShift?: number) => void;
+  onSuccessCreate?: () => void;
 };
 
 const mapComponent = (type: string, outerProps: never) => {
@@ -162,7 +168,22 @@ export const ExList: FC<TProps> = (props) => {
     isView,
     activeStudentId,
     onPressCreate,
+    onSuccessCreate,
   } = props;
+
+  const [copyData, setCopyData] = useState("");
+
+  useEffect(() => {
+    if (isView) {
+      return;
+    }
+    const interval = setInterval(() => {
+      const exCopyData = readFromLocalStorage("exCopy");
+      setCopyData(exCopyData || "");
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isView]);
+
   return (
     <div className="flex flex-col gap-10">
       {list.map((ex, exIndex) => {
@@ -238,6 +259,50 @@ export const ExList: FC<TProps> = (props) => {
                       <p>Редактировать задание</p>
                       <Image src={EditIcon} alt="arrow icon" />
                     </div>
+                    <Divider className="my-2" />
+                    <div
+                      className="flex justify-between items-center"
+                      onClick={() => {
+                        writeToLocalStorage(
+                          "exCopy",
+                          JSON.stringify({
+                            lesson_id: ex.lesson_id,
+                            id: ex.id,
+                            currentSortIndexToShift: ex.sortIndex,
+                          })
+                        );
+                        toast("Задание скопировано в буфер обмена", {
+                          type: "success",
+                        });
+                      }}
+                    >
+                      <p>Копировать задание</p>
+                      <Image src={CopyIcon} alt="arrow icon" />
+                    </div>
+                    {!!copyData && (
+                      <>
+                        <Divider className="my-2" />
+                        <div
+                          className="flex justify-between items-center"
+                          onClick={async () => {
+                            const res = await fetchPostJson({
+                              path: "/ex/copy",
+                              isSecure: true,
+                              data: JSON.parse(copyData),
+                            });
+                            const data = await res.json();
+                            console.log("data??", data);
+                            if (typeof onSuccessCreate === "function") {
+                              onSuccessCreate();
+                            }
+                            writeToLocalStorage("exCopy", "");
+                          }}
+                        >
+                          <p>Вставить задание</p>
+                          <Image src={PasteIcon} alt="arrow icon" />
+                        </div>
+                      </>
+                    )}
                     <Divider className="my-2" />
                     <div
                       className="flex justify-between items-center"

@@ -244,7 +244,6 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false, ...res
   useEffect(() => {
     if (student_id) {
       getAnswers(true).then((a) => {
-        console.log("a", a);
         try {
           setCorrectIds(JSON.parse(a[data.id].answer));
         } catch (err) {}
