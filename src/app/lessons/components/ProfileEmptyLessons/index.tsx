@@ -20,7 +20,7 @@ export const ProfileEmptyLessons: FC<TProps> = ({
       className="w-full h-[225px] flex justify-center items-center flex-col gap-7"
       style={{
         background: `url(${Bg.src}) center center no-repeat #fff`,
-        backgroundSize: "contain",
+        backgroundSize: "cover",
       }}
     >
       <p className="text-center">{title}</p>

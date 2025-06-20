@@ -178,6 +178,7 @@ export const ExList: FC<TProps> = (props) => {
       return;
     }
     const interval = setInterval(() => {
+      console.log("effect");
       const exCopyData = readFromLocalStorage("exCopy");
       setCopyData(exCopyData || "");
     }, 1000);
@@ -198,7 +199,7 @@ export const ExList: FC<TProps> = (props) => {
               {!isView && (
                 <div className={`${styles["edit-wrapper"]} p-4`}>
                   <div className="flex justify-end gap-2">
-                    {exIndex !== 0 && (
+                    {!ex.isDisabledEx && exIndex !== 0 && (
                       <div
                         onClick={() => {
                           //up
@@ -218,7 +219,7 @@ export const ExList: FC<TProps> = (props) => {
                         <Image src={ArrowUpIcon} alt="arrow icon" />
                       </div>
                     )}
-                    {exIndex < list.length - 1 && (
+                    {!ex.isDisabledEx && exIndex < list.length - 1 && (
                       <div
                         onClick={() => {
                           //down
@@ -252,14 +253,18 @@ export const ExList: FC<TProps> = (props) => {
                       cursor: "pointer",
                     }}
                   >
-                    <div
-                      className="flex justify-between items-center"
-                      onClick={() => onPressEdit(ex)}
-                    >
-                      <p>Редактировать задание</p>
-                      <Image src={EditIcon} alt="arrow icon" />
-                    </div>
-                    <Divider className="my-2" />
+                    {!ex.isDisabledEx && (
+                      <>
+                        <div
+                          className="flex justify-between items-center"
+                          onClick={() => onPressEdit(ex)}
+                        >
+                          <p>Редактировать задание</p>
+                          <Image src={EditIcon} alt="arrow icon" />
+                        </div>
+                        <Divider className="my-2" />
+                      </>
+                    )}
                     <div
                       className="flex justify-between items-center"
                       onClick={() => {
@@ -279,16 +284,21 @@ export const ExList: FC<TProps> = (props) => {
                       <p>Копировать задание</p>
                       <Image src={CopyIcon} alt="arrow icon" />
                     </div>
-                    {!!copyData && (
+                    {!!copyData && !ex.isDisabledEx && (
                       <>
                         <Divider className="my-2" />
                         <div
                           className="flex justify-between items-center"
                           onClick={async () => {
+                            const copyObj = JSON.parse(copyData);
                             const res = await fetchPostJson({
                               path: "/ex/copy",
                               isSecure: true,
-                              data: JSON.parse(copyData),
+                              data: {
+                                ...copyObj,
+                                lesson_id: ex.lesson_id,
+                                currentSortIndexToShift: ex.sortIndex,
+                              },
                             });
                             const data = await res.json();
                             console.log("data??", data);
@@ -303,19 +313,23 @@ export const ExList: FC<TProps> = (props) => {
                         </div>
                       </>
                     )}
-                    <Divider className="my-2" />
-                    <div
-                      className="flex justify-between items-center"
-                      onClick={() => onPressDelete(ex.id)}
-                    >
-                      <p style={{ color: "#A42929" }}>Удалить задание</p>
-                      <Image src={DeleteIcon} alt="arrow icon" />
-                    </div>
+                    {!ex.isDisabledEx && (
+                      <>
+                        <Divider className="my-2" />
+                        <div
+                          className="flex justify-between items-center"
+                          onClick={() => onPressDelete(ex.id)}
+                        >
+                          <p style={{ color: "#A42929" }}>Удалить задание</p>
+                          <Image src={DeleteIcon} alt="arrow icon" />
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
             </div>
-            {!isView && exIndex !== list.length - 1 && (
+            {!ex.isDisabledEx && !isView && exIndex !== list.length - 1 && (
               <div className={`ex-add-button mt-8 relative`}>
                 <div className={`${styles.dashed}`}></div>
                 <Image

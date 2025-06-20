@@ -134,7 +134,7 @@ export const LessonCard: FC<TProps> = ({
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="bg-white p-2 items-start">
-                {!!onPressEdit && (
+                {!!onPressEdit && lesson.canEdit && (
                   <Button
                     variant="light"
                     className="w-full text-default-foreground py-1 px-2 text-left justify-start"
@@ -205,21 +205,23 @@ export const LessonCard: FC<TProps> = ({
                     Прикрепить к ученику
                   </Button>
                 )}
-                {!!onPressDelete && !hideDeleteLessonButton && (
-                  <Button
-                    size="sm"
-                    variant="light"
-                    className="w-full text-default-foreground py-1 px-2 justify-start"
-                    style={{ fontSize: 14 }}
-                    endContent={<Image src={DeleteIcon} alt="icon" />}
-                    onClick={() => {
-                      setPopoverIsOpen(false);
-                      onPressDelete(lesson);
-                    }}
-                  >
-                    Удалить
-                  </Button>
-                )}
+                {!!onPressDelete &&
+                  !hideDeleteLessonButton &&
+                  lesson.canEdit && (
+                    <Button
+                      size="sm"
+                      variant="light"
+                      className="w-full text-default-foreground py-1 px-2 justify-start"
+                      style={{ fontSize: 14 }}
+                      endContent={<Image src={DeleteIcon} alt="icon" />}
+                      onClick={() => {
+                        setPopoverIsOpen(false);
+                        onPressDelete(lesson);
+                      }}
+                    >
+                      Удалить
+                    </Button>
+                  )}
               </PopoverContent>
             </Popover>
           </div>

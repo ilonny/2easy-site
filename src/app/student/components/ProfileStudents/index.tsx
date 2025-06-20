@@ -27,9 +27,7 @@ export const ProfileStudents = () => {
         </Button>
       </div>
       <div className="h-10" /> */}
-      <div className="w-[600px]">
-        <StudentList />
-      </div>
+      <StudentList />
       {/* {tabIndex === "students" && <StudentList />}
       {tabIndex === "groups" && <GroupList />} */}
     </>

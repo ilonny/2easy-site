@@ -191,7 +191,12 @@ export default function EditorPage() {
           <div className="h-10" />
           <div className="h-10" />
           <Card radius="none" shadow="none">
-            <CreateExButton onPress={() => onPressCreate(null)} />
+            <CreateExButton
+              onPress={() => onPressCreate(null)}
+              onSuccessCreate={onSuccessCreate}
+              lesson_id={params.id}
+              currentSortIndexToShift={exList[exList.length - 1]?.sortIndex || 0}
+            />
           </Card>
           <div className="h-10" />
           <div className="h-10" />

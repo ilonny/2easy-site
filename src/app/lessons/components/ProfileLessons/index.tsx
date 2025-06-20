@@ -1,5 +1,5 @@
 import { Button } from "@nextui-org/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLessons } from "../../hooks/useLessons";
 import { ProfileEmptyLessons } from "../ProfileEmptyLessons";
 import { CreateLessonModalForm } from "../CreateLessonModalForm";
@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Dino from "@/assets/images/dino.gif";
 import { useCheckSubscription } from "@/app/subscription/helpers";
+import { AuthContext } from "@/auth";
 
 type TProps = {
   canCreateLesson?: boolean;
@@ -34,6 +35,9 @@ export const ProfileLessons = (props: TProps) => {
     isStudent,
   } = props;
   const router = useRouter();
+  const { profile } = useContext(AuthContext);
+  const isTeacher = profile?.role_id === 2;
+
   const [tabIndex, setTabIndex] = useState<"userLessons" | "savedLessons">(
     "userLessons"
   );
@@ -82,6 +86,16 @@ export const ProfileLessons = (props: TProps) => {
 
   const { checkSubscription } = useCheckSubscription();
 
+  const lessonsToRender = useMemo(() => {
+    if (!isTeacher) {
+      return lessons;
+    }
+    if (tabIndex === "userLessons") {
+      return lessons.filter((l) => l.user_id !== 1);
+    }
+    return lessons.filter((l) => l.user_id === 1);
+  }, [isTeacher, lessons, tabIndex]);
+
   return (
     <>
       {!hideTabs && (
@@ -92,7 +106,7 @@ export const ProfileLessons = (props: TProps) => {
             variant={tabIndex === "userLessons" ? "solid" : "faded"}
             onClick={() => setTabIndex("userLessons")}
           >
-            Созданные уроки
+            Мои уроки
           </Button>
           <Button
             radius="full"
@@ -100,7 +114,7 @@ export const ProfileLessons = (props: TProps) => {
             variant={tabIndex === "savedLessons" ? "solid" : "faded"}
             onClick={() => setTabIndex("savedLessons")}
           >
-            Сохранённые уроки
+            Уроки 2EASY
           </Button>
         </div>
       )}
@@ -126,7 +140,7 @@ export const ProfileLessons = (props: TProps) => {
             }
           }}
           canCreateLesson={canCreateLesson}
-          lessons={lessons}
+          lessons={lessonsToRender}
           getLessons={getLessons}
           hideAttachButton={hideAttachButton}
           showChangeStatusButton={showChangeStatusButton}

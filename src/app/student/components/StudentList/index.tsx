@@ -96,7 +96,7 @@ export const StudentList = (props: TProps) => {
       )}
       {!!students?.length && (
         <div
-          className="max-w-[600px] gap-5 flex flex-wrap flex-col"
+          className="w-[100%] max-w-[600px] gap-5 flex flex-wrap flex-col"
           style={{ cursor: onClickStudent ? "pointer" : "default" }}
         >
           {students?.map((student) => {
