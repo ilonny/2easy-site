@@ -13,9 +13,11 @@ export const HeaderMenuList = () => {
       <Button variant="light" className="font-bold">
         GAMES & DISCUSSION CARDS
       </Button>
-      <Button variant="light" className="font-bold">
-        GRAMMAR
-      </Button>
+      <Link href="/grammar">
+        <Button variant="light" className="font-bold">
+          GRAMMAR
+        </Button>
+      </Link>
       <Link href="/subscription">
         <Button variant="light" className="font-bold">
           ПОДПИСКА
