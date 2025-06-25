@@ -3,10 +3,10 @@
 import { ContentWrapper } from "@/components";
 import { SquareList } from "@/components/SquareList";
 import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
-import { data } from "./data";
-import { useCheckSubscription } from "../subscription/helpers";
-import { useEffect } from "react";
+import { useCheckSubscription } from "@/app/subscription/helpers";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { data } from "./data";
 
 export default function GrammarPage() {
   const { checkSubscription } = useCheckSubscription();
@@ -16,6 +16,7 @@ export default function GrammarPage() {
       router.push("/subscription");
     }
   }, [checkSubscription, router]);
+
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
@@ -24,6 +25,9 @@ export default function GrammarPage() {
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
             <BreadcrumbItem href="/grammar">Grammar</BreadcrumbItem>
+            <BreadcrumbItem href="/grammar/be_going_to">
+              Be going to
+            </BreadcrumbItem>
           </Breadcrumbs>
         </div>
         <div className="h-10" />
@@ -37,16 +41,8 @@ export default function GrammarPage() {
             fontWeight: 700,
           }}
         >
-          GRAMMAR
+          BE GOING TO
         </h1>
-        <p
-          className="max-w-[600px] text-center m-auto"
-          style={{ fontSize: 20, fontWeight: 500, lineHeight: "26px" }}
-        >
-          В этом разделе нет теории, правил и заданий на раскрытие скобок. Мы
-          собрали здесь только разговорные упражнения и игры, чтобы после
-          прохождения грамматической темы ученик сразу мог отработать ее в речи
-        </p>
         <div className="h-10" />
         <SquareList data={data} />
       </ContentWrapper>

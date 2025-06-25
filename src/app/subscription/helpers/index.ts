@@ -7,12 +7,16 @@ export const useCheckSubscription = () => {
   const router = useRouter();
 
   const checkSubscription = useCallback(() => {
+    console.log("subscription", subscription);
+    if (subscription === undefined) {
+      return true;
+    }
     if (!subscription?.success) {
       router.push("/subscription");
       return false;
     }
     return true;
-  }, [router, subscription?.success]);
+  }, [router, subscription]);
 
   return { checkSubscription };
 };

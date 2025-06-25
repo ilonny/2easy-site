@@ -13,13 +13,13 @@ type TProps = {
   data: TSquare[];
 };
 
-export const SquareList = (props: TProps) => {
+export const GalleryList = (props: TProps) => {
   const { data } = props;
   return (
     <div className="flex flex-wrap wrap">
       {data.map((s) => {
         return (
-          <div className="w-[25%] p-2 min-h-[320px] mb-4" key={s.title}>
+          <div className="w-[33.33333%] p-2 min-h-[320px] mb-4" key={s.title}>
             <a href={s.link ? s.link : "#"}>
               <div
                 className="square items-center justify-center h-full flex flex-col gap-2"
