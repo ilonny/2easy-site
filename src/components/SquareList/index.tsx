@@ -20,7 +20,6 @@ export type TSquare = {
   description?: string;
   isGallery?: boolean;
   label?: string;
-  withToggle?: boolean;
 };
 
 type TProps = {
@@ -29,6 +28,8 @@ type TProps = {
   squareHeight?: string;
   isGallery?: boolean;
   isCarousel?: boolean;
+  withToggle?: boolean;
+  hideDots?: boolean;
 };
 
 const settings = {
@@ -56,16 +57,22 @@ const settings = {
 };
 
 export const SquareList = (props: TProps) => {
-  const { data, squareWidth, squareHeight, isGallery, isCarousel, withToggle } =
-    props;
+  const {
+    data,
+    squareWidth,
+    squareHeight,
+    isGallery,
+    isCarousel,
+    withToggle,
+    hideDots,
+  } = props;
   const [toggleIsOpen, setToggleIsOpen] = useState(withToggle ? false : true);
-  console.log("data", data);
 
   if (isCarousel) {
     return (
       <>
         <div className="slider-container">
-          <Slider {...settings}>
+          <Slider {...settings} dots={hideDots ? false : true}>
             {data?.map((image) => {
               return (
                 <div key={image.bgImage.src} className="max-w-[810px]">
