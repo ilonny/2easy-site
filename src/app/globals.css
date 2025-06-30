@@ -268,3 +268,7 @@ blockquote {
   align-items: center;
   justify-content: center;
 }
+
+ol, ul {
+  list-style-position: inside !important;
+}

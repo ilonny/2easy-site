@@ -83,7 +83,7 @@ export const data: TSquare[] = [
   },
   {
     bgImage: grammar_15,
-    link: "/grammar/first_condition",
+    link: "/grammar/past_continuous",
   },
   {
     bgImage: grammar_16,
