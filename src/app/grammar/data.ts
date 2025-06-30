@@ -87,11 +87,11 @@ export const data: TSquare[] = [
   },
   {
     bgImage: grammar_16,
-    link: "/grammar/the_passive",
+    link: "/grammar/infinitive_gerund",
   },
   {
     bgImage: grammar_17,
-    link: "/grammar/question_tags",
+    link: "/grammar/past_simple",
   },
   {
     bgImage: grammar_18,
@@ -107,7 +107,7 @@ export const data: TSquare[] = [
   },
   {
     bgImage: grammar_21,
-    link: "/grammar/past_simple",
+    link: "/grammar/question_tags",
   },
   {
     bgImage: grammar_22,
@@ -119,6 +119,6 @@ export const data: TSquare[] = [
   },
   {
     bgImage: grammar_24,
-    link: "/grammar/infinitive_gerund",
+    link: "/grammar/the_passive",
   },
 ];

@@ -31,6 +31,7 @@ type TProps = {
   withToggle?: boolean;
   hideDots?: boolean;
   toggleLabel?: string[];
+  hideThumbnails?: boolean;
 };
 
 const settings = {
@@ -67,6 +68,7 @@ export const SquareList = (props: TProps) => {
     withToggle,
     hideDots,
     toggleLabel,
+    hideThumbnails,
   } = props;
   const [toggleIsOpen, setToggleIsOpen] = useState(withToggle ? false : true);
 
@@ -137,7 +139,7 @@ export const SquareList = (props: TProps) => {
                 // spacing: 0.5,
               }}
             >
-              {data.map((s) => {
+              {data.map((s, index) => {
                 return (
                   <div
                     className={`p-2 mb-4`}
@@ -151,18 +153,45 @@ export const SquareList = (props: TProps) => {
                       original={s.bgImage.src}
                       thumbnail={s.bgImage.src}
                     >
-                      {({ ref, open }) => (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          alt="image"
-                          style={{ cursor: "pointer" }}
-                          src={s.bgImage.src}
-                          // width={300}
-                          // height={300}
-                          ref={ref}
-                          onClick={open}
-                        />
-                      )}
+                      {({ ref, open }) => {
+                        if (hideThumbnails) {
+                          return (
+                            <div
+                              ref={ref}
+                              onClick={open}
+                              style={{
+                                background:
+                                  "linear-gradient(0turn,rgba(48,63,197,1) 0%,rgba(37,89,138,1) 100%)",
+                                height: "100%",
+                                cursor: "pointer",
+                              }}
+                              className="flex items-center justify-center"
+                            >
+                              <p
+                                style={{
+                                  fontSize: 40,
+                                  fontWeight: 700,
+                                  color: "#fff",
+                                }}
+                              >
+                                {index + 1}
+                              </p>
+                            </div>
+                          );
+                        }
+                        return (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            alt="image"
+                            style={{ cursor: "pointer" }}
+                            src={s.bgImage.src}
+                            // width={300}
+                            // height={300}
+                            ref={ref}
+                            onClick={open}
+                          />
+                        );
+                      }}
                     </Item>
                   </div>
                 );
