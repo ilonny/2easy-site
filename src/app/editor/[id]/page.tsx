@@ -145,16 +145,18 @@ export default function EditorPage() {
           }}
         >
           <StartLessonButton lesson={lesson} />
-          <h1
-            style={{
-              fontSize: 44,
-              textAlign: "center",
-              color: "#3f28c6",
-              fontWeight: 700,
-            }}
-          >
-            {lesson?.title}
-          </h1>
+          <div className="w-[100%] pl-[90px]">
+            <h1
+              style={{
+                fontSize: 44,
+                textAlign: "center",
+                color: "#3f28c6",
+                fontWeight: 700,
+              }}
+            >
+              {lesson?.title}
+            </h1>
+          </div>
           {!!lesson?.description && (
             <h2
               style={{
@@ -195,7 +197,9 @@ export default function EditorPage() {
               onPress={() => onPressCreate(null)}
               onSuccessCreate={onSuccessCreate}
               lesson_id={params.id}
-              currentSortIndexToShift={exList[exList.length - 1]?.sortIndex || 0}
+              currentSortIndexToShift={
+                exList[exList.length - 1]?.sortIndex || 0
+              }
             />
           </Card>
           <div className="h-10" />
