@@ -63,7 +63,7 @@ export const data: TSquare[] = [
   },
   {
     bgImage: grammar_10,
-    link: "/grammar/present_perfect_countinuous",
+    link: "/grammar/present_perfect_continuous",
   },
   {
     bgImage: grammar_11,
