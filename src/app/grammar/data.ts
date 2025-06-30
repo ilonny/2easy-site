@@ -79,7 +79,7 @@ export const data: TSquare[] = [
   },
   {
     bgImage: grammar_14,
-    link: "/grammar/modal_verbs",
+    link: "/grammar/future_simple",
   },
   {
     bgImage: grammar_15,
