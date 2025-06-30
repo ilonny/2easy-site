@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { PageLeftBlock } from "@/components/PageLeftBlock";
 import Link from "next/link";
+import { studentA, studentB } from "./data";
+import { GalleryList } from "@/components/GalleryList";
 
 export default function GrammarPage() {
   const { checkSubscription } = useCheckSubscription();
@@ -32,11 +34,11 @@ export default function GrammarPage() {
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
             <BreadcrumbItem href="/grammar">Grammar</BreadcrumbItem>
-            <BreadcrumbItem href="/grammar/be_going_to">
-              Be going to
+            <BreadcrumbItem href="/grammar/comparatives">
+              Comparatives
             </BreadcrumbItem>
-            <BreadcrumbItem href="/grammar/be_going_to/boardgame">
-              Boardgame
+            <BreadcrumbItem href="/grammar/comparatives/comparative_clues">
+              Comparative clues
             </BreadcrumbItem>
           </Breadcrumbs>
         </div>
@@ -94,6 +96,21 @@ export default function GrammarPage() {
           </Accordion>
         </div>
         <div className="h-10" />
+        <SquareList
+          data={studentA}
+          squareWidth={"33.333333%"}
+          squareHeight={"250px"}
+          isGallery
+        />
+        <div className="h-10" />
+        <div className="h-10" />
+        <div className="h-10" />
+        <SquareList
+          data={studentB}
+          squareWidth={"33.333333%"}
+          squareHeight={"250px"}
+          isGallery
+        />
       </ContentWrapper>
     </main>
   );
