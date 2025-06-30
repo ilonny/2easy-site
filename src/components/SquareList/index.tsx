@@ -30,6 +30,7 @@ type TProps = {
   isCarousel?: boolean;
   withToggle?: boolean;
   hideDots?: boolean;
+  toggleLabel?: string[];
 };
 
 const settings = {
@@ -65,6 +66,7 @@ export const SquareList = (props: TProps) => {
     isCarousel,
     withToggle,
     hideDots,
+    toggleLabel,
   } = props;
   const [toggleIsOpen, setToggleIsOpen] = useState(withToggle ? false : true);
 
@@ -112,7 +114,13 @@ export const SquareList = (props: TProps) => {
                 size="lg"
                 color="primary"
               >
-                {toggleIsOpen ? "HIDE ALL CARDS" : "SHOW ALL CARDS"}
+                {toggleIsOpen
+                  ? toggleLabel
+                    ? toggleLabel[1]
+                    : "HIDE ALL CARDS"
+                  : toggleLabel
+                  ? toggleLabel[0]
+                  : "SHOW ALL CARDS"}
               </Button>
             </div>
             <div className="h-10"></div>
