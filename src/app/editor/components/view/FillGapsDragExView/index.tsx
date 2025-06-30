@@ -193,7 +193,11 @@ const DraggableItem = (props: {
   );
 };
 
-export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false, ...rest }) => {
+export const FillGapsDragExView: FC<TProps> = ({
+  data,
+  isPreview = false,
+  ...rest
+}) => {
   const image = data?.images?.[0];
   const { profile } = useContext(AuthContext);
   const [activeDragId, setActiveDragId] = useState<number | null>();
@@ -327,8 +331,17 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false, ...res
           </p>
         )}
       </div>
-      <div className={`py-8 w-[886px] m-auto`}>
-        <div className="flex justify-center items-center mb-8 gap-2 max-w-[500px] flex-wrap mx-auto">
+      <div className={`pb-8 w-[886px] m-auto`}>
+        {!!image && (
+          <Zoom>
+            <img
+              src={image.dataURL}
+              style={{ maxHeight: 400 }}
+              className="m-auto mb-8"
+            />
+          </Zoom>
+        )}
+        <div className="flex justify-center items-center mb-8 gap-2 flex-wrap mx-auto">
           {sortedFields.map((field) => {
             return (
               <DraggableItem
@@ -346,15 +359,6 @@ export const FillGapsDragExView: FC<TProps> = ({ data, isPreview = false, ...res
             );
           })}
         </div>
-        {!!image && (
-          <Zoom>
-            <img
-              src={image.dataURL}
-              style={{ maxHeight: 400 }}
-              className="m-auto mb-8"
-            />
-          </Zoom>
-        )}
         <Card className={`p-10 px-10 box relative`}>
           <div
             style={{ margin: "0 auto", lineHeight: "230%" }}

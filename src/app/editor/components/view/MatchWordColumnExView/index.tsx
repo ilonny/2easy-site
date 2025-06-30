@@ -214,13 +214,13 @@ export const MatchWordColumnExView: FC<TProps> = ({
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`pb-8 w-[886px] m-auto`}>
         <div
           style={{
             margin: "0 auto",
           }}
         >
-          <div className="flex items-center wrap gap-4 justify-center m-auto mb-4 max-w-[500px] flex-wrap">
+          <div className="flex items-center wrap gap-4 justify-center m-auto mb-4 flex-wrap">
             {sortedChips.map((chip) => {
               return (
                 <DraggableItem

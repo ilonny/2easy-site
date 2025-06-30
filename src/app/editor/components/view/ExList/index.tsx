@@ -1,11 +1,25 @@
-import React, { FC, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ImageExView } from "../ImageExView";
 import styles from "./style.module.css";
 import ArrowUpIcon from "@/assets/icons/editor_arrow_up.svg";
+import Ellipse from "@/assets/icons/ellipse.svg";
 import EditIcon from "@/assets/icons/edit.svg";
 import DeleteIcon from "@/assets/icons/delete.svg";
 import Image from "next/image";
-import { Divider } from "@nextui-org/react";
+import {
+  Button,
+  Divider,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@nextui-org/react";
 import { TextDefaultExView } from "../TextDefaultExView";
 import { Text2ColExView } from "../Text2ColExView";
 import { TextStickerExView } from "../TextStickerExView";
@@ -185,6 +199,16 @@ export const ExList: FC<TProps> = (props) => {
     return () => clearInterval(interval);
   }, [isView]);
 
+  const [popoverMap, setPopoverMap] = useState({});
+  const closePopover = useCallback((id) => {
+    setPopoverMap((m) => {
+      return {
+        ...m,
+        [id]: false,
+      };
+    });
+  }, []);
+
   return (
     <div className="flex flex-col gap-10">
       {list.map((ex, exIndex) => {
@@ -197,136 +221,183 @@ export const ExList: FC<TProps> = (props) => {
             >
               <Viewer data={ex.data} activeStudentId={activeStudentId} />
               {!isView && (
-                <div className={`${styles["edit-wrapper"]} p-4`}>
-                  <div className="flex justify-end gap-2">
-                    {!ex.isDisabledEx && exIndex !== 0 && (
-                      <div
-                        onClick={() => {
-                          //up
-
-                          if (list[exIndex - 1]) {
-                            const prevEx = list[exIndex - 1];
-                            changeSortIndex(prevEx.id, prevEx.sortIndex + 1);
-                          }
-                          changeSortIndex(ex.id, ex.sortIndex - 1);
-                        }}
-                        className="flex justify-center items-center bg-white w-[40px] h-[40px] rounded-[10px]"
-                        style={{
-                          boxShadow: "0px 8px 24px 0px #908BA826",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <Image src={ArrowUpIcon} alt="arrow icon" />
-                      </div>
-                    )}
-                    {!ex.isDisabledEx && exIndex < list.length - 1 && (
-                      <div
-                        onClick={() => {
-                          //down
-
-                          if (list[exIndex + 1]) {
-                            const next = list[exIndex + 1];
-
-                            changeSortIndex(next.id, next.sortIndex - 1);
-                          }
-                          changeSortIndex(ex.id, ex.sortIndex + 1);
-                        }}
-                        className="flex justify-center items-center bg-white w-[40px] h-[40px] rounded-[10px]"
-                        style={{
-                          boxShadow: "0px 8px 24px 0px #908BA826",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <Image
-                          src={ArrowUpIcon}
-                          alt="arrow icon"
-                          style={{ transform: "rotate(180deg)" }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                  <div className="h-4" />
-                  <div
-                    className="p-4 bg-white w-[260px] rounded-[10px]"
-                    style={{
-                      boxShadow: "0px 8px 24px 0px #908BA826",
-                      cursor: "pointer",
+                <>
+                  <Popover
+                    color="foreground"
+                    placement="bottom-end"
+                    isOpen={!!popoverMap[ex.id]}
+                    onOpenChange={(open) => {
+                      setPopoverMap((m) => {
+                        return {
+                          ...m,
+                          [ex.id]: open,
+                        };
+                      });
                     }}
                   >
-                    {!ex.isDisabledEx && (
-                      <>
-                        <div
-                          className="flex justify-between items-center"
-                          onClick={() => onPressEdit(ex)}
-                        >
-                          <p>Редактировать задание</p>
-                          <Image src={EditIcon} alt="arrow icon" />
+                    <PopoverTrigger>
+                      <Button
+                        isIconOnly
+                        variant="flat"
+                        style={{
+                          position: "absolute",
+                          right: 20,
+                          top: 20,
+                          zIndex: 1,
+                        }}
+                      >
+                        <Image src={Ellipse} alt="icon" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="p-2 bg-white items-start">
+                      <div>
+                        <div className="flex justify-end gap-2">
+                          {!ex.isDisabledEx && exIndex !== 0 && (
+                            <div
+                              onClick={() => {
+                                //up
+
+                                if (list[exIndex - 1]) {
+                                  const prevEx = list[exIndex - 1];
+                                  changeSortIndex(
+                                    prevEx.id,
+                                    prevEx.sortIndex + 1
+                                  );
+                                }
+                                changeSortIndex(ex.id, ex.sortIndex - 1);
+                                closePopover(ex.id);
+                              }}
+                              className="flex justify-center items-center bg-white w-[40px] h-[40px] rounded-[10px]"
+                              style={{
+                                boxShadow: "0px 8px 24px 0px #908BA826",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <Image src={ArrowUpIcon} alt="arrow icon" />
+                            </div>
+                          )}
+                          {!ex.isDisabledEx && exIndex < list.length - 1 && (
+                            <div
+                              onClick={() => {
+                                //down
+
+                                if (list[exIndex + 1]) {
+                                  const next = list[exIndex + 1];
+
+                                  changeSortIndex(next.id, next.sortIndex - 1);
+                                }
+                                changeSortIndex(ex.id, ex.sortIndex + 1);
+                                closePopover(ex.id);
+                              }}
+                              className="flex justify-center items-center bg-white w-[40px] h-[40px] rounded-[10px]"
+                              style={{
+                                boxShadow: "0px 8px 24px 0px #908BA826",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <Image
+                                src={ArrowUpIcon}
+                                alt="arrow icon"
+                                style={{ transform: "rotate(180deg)" }}
+                              />
+                            </div>
+                          )}
                         </div>
-                        <Divider className="my-2" />
-                      </>
-                    )}
-                    <div
-                      className="flex justify-between items-center"
-                      onClick={() => {
-                        writeToLocalStorage(
-                          "exCopy",
-                          JSON.stringify({
-                            lesson_id: ex.lesson_id,
-                            id: ex.id,
-                            currentSortIndexToShift: ex.sortIndex,
-                          })
-                        );
-                        toast("Задание скопировано в буфер обмена", {
-                          type: "success",
-                        });
-                      }}
-                    >
-                      <p>Копировать задание</p>
-                      <Image src={CopyIcon} alt="arrow icon" />
-                    </div>
-                    {!!copyData && !ex.isDisabledEx && (
-                      <>
-                        <Divider className="my-2" />
+                        <div className="h-4" />
                         <div
-                          className="flex justify-between items-center"
-                          onClick={async () => {
-                            const copyObj = JSON.parse(copyData);
-                            const res = await fetchPostJson({
-                              path: "/ex/copy",
-                              isSecure: true,
-                              data: {
-                                ...copyObj,
-                                lesson_id: ex.lesson_id,
-                                currentSortIndexToShift: ex.sortIndex,
-                              },
-                            });
-                            const data = await res.json();
-                            console.log("data??", data);
-                            if (typeof onSuccessCreate === "function") {
-                              onSuccessCreate();
-                            }
-                            writeToLocalStorage("exCopy", "");
+                          className="p-2 bg-white w-[260px] rounded-[10px]"
+                          style={{
+                            // boxShadow: "0px 8px 24px 0px #908BA826",
+                            cursor: "pointer",
                           }}
                         >
-                          <p>Вставить задание</p>
-                          <Image src={PasteIcon} alt="arrow icon" />
+                          {!ex.isDisabledEx && (
+                            <>
+                              <div
+                                className="flex justify-between items-center"
+                                onClick={() => {
+                                  onPressEdit(ex);
+                                  closePopover(ex.id);
+                                }}
+                              >
+                                <p>Редактировать задание</p>
+                                <Image src={EditIcon} alt="arrow icon" />
+                              </div>
+                              <Divider className="my-2" />
+                            </>
+                          )}
+                          <div
+                            className="flex justify-between items-center"
+                            onClick={() => {
+                              writeToLocalStorage(
+                                "exCopy",
+                                JSON.stringify({
+                                  lesson_id: ex.lesson_id,
+                                  id: ex.id,
+                                  currentSortIndexToShift: ex.sortIndex,
+                                })
+                              );
+                              toast("Задание скопировано в буфер обмена", {
+                                type: "success",
+                              });
+                              closePopover(ex.id);
+                            }}
+                          >
+                            <p>Копировать задание</p>
+                            <Image src={CopyIcon} alt="arrow icon" />
+                          </div>
+                          {!!copyData && !ex.isDisabledEx && (
+                            <>
+                              <Divider className="my-2" />
+                              <div
+                                className="flex justify-between items-center"
+                                onClick={async () => {
+                                  const copyObj = JSON.parse(copyData);
+                                  const res = await fetchPostJson({
+                                    path: "/ex/copy",
+                                    isSecure: true,
+                                    data: {
+                                      ...copyObj,
+                                      lesson_id: ex.lesson_id,
+                                      currentSortIndexToShift: ex.sortIndex,
+                                    },
+                                  });
+                                  const data = await res.json();
+                                  console.log("data??", data);
+                                  if (typeof onSuccessCreate === "function") {
+                                    onSuccessCreate();
+                                  }
+                                  writeToLocalStorage("exCopy", "");
+                                  closePopover(ex.id);
+                                }}
+                              >
+                                <p>Вставить задание</p>
+                                <Image src={PasteIcon} alt="arrow icon" />
+                              </div>
+                            </>
+                          )}
+                          {!ex.isDisabledEx && (
+                            <>
+                              <Divider className="my-2" />
+                              <div
+                                className="flex justify-between items-center"
+                                onClick={() => {
+                                  onPressDelete(ex.id);
+                                  closePopover(ex.id);
+                                }}
+                              >
+                                <p style={{ color: "#A42929" }}>
+                                  Удалить задание
+                                </p>
+                                <Image src={DeleteIcon} alt="arrow icon" />
+                              </div>
+                            </>
+                          )}
                         </div>
-                      </>
-                    )}
-                    {!ex.isDisabledEx && (
-                      <>
-                        <Divider className="my-2" />
-                        <div
-                          className="flex justify-between items-center"
-                          onClick={() => onPressDelete(ex.id)}
-                        >
-                          <p style={{ color: "#A42929" }}>Удалить задание</p>
-                          <Image src={DeleteIcon} alt="arrow icon" />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </>
               )}
             </div>
             {!ex.isDisabledEx && !isView && exIndex !== list.length - 1 && (

@@ -50,7 +50,7 @@ export const StartLessonButton = (props: TProps) => {
           top: 40,
           zIndex: 10,
           float: "right",
-          marginRight: -150,
+          // marginRight: -150,
         }}
         className="hover:opacity-[0.8]"
         onClick={() => onPressButton()}

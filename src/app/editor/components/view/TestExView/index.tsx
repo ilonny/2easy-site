@@ -142,7 +142,7 @@ export const TestStep = (props: TTestStepProps) => {
                   <p
                     style={{
                       fontSize: 18,
-                      lineHeight: "18px",
+                      lineHeight: "24px",
                     }}
                   >
                     {option.value}
@@ -205,7 +205,7 @@ export const TestStep = (props: TTestStepProps) => {
                 <p
                   style={{
                     fontSize: 18,
-                    lineHeight: "18px",
+                    lineHeight: "24px",
                     marginTop: isIncorrect ? 2 : 0,
                   }}
                 >
