@@ -1105,6 +1105,6 @@ export const tabs = [
   {
     id: 18,
     label: "Post-vacation questions",
-    key: "movpost_vacationies",
+    key: "post_vacation",
   },
 ];

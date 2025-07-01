@@ -25,6 +25,12 @@ export const HeaderMenuList = () => {
                 CONTROVERSIAL STATEMENTS
               </Button>
             </Link>
+            <br />
+            <Link href="/first_meeting">
+              <Button variant="light" className="font-bold" size="sm">
+                FIRST MEETING
+              </Button>
+            </Link>
           </div>
         }
       >

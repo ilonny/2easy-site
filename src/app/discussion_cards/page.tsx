@@ -29,8 +29,6 @@ export default function GrammarPage() {
     return data.filter((d) => d.category === category);
   }, [selectedTabKey]);
 
-  console.log("dataToRender", dataToRender, selectedTabKey);
-
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
