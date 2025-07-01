@@ -99,7 +99,7 @@ export const data: TSquare[] = [
   },
   {
     bgImage: grammar_19,
-    link: "/grammar/past_simple_present_perfect",
+    link: "/grammar/first_condition",
   },
   {
     bgImage: grammar_20,
