@@ -73,13 +73,32 @@ export const SquareList = (props: TProps) => {
   const [toggleIsOpen, setToggleIsOpen] = useState(withToggle ? false : true);
 
   if (isCarousel) {
+    if (data.length === 1) {
+      const image = data[0];
+      return (
+        <div key={image.bgImage.src} className="max-w-[810px]  m-auto">
+          <Zoom>
+            <img
+              src={image.bgImage.src}
+              alt="image"
+              className="max-w-[810px]"
+            />
+          </Zoom>
+          {image?.label && (
+            <p className="mt-2 text-center font-bold" style={{ fontSize: 18 }}>
+              {image.label}
+            </p>
+          )}
+        </div>
+      );
+    }
     return (
       <>
         <div className="slider-container">
           <Slider {...settings} dots={hideDots ? false : true}>
             {data?.map((image) => {
               return (
-                <div key={image.bgImage.src} className="max-w-[810px]">
+                <div key={image.bgImage.src} className="max-w-[810px] m-auto">
                   <Zoom>
                     <img
                       src={image.bgImage.src}
@@ -129,7 +148,11 @@ export const SquareList = (props: TProps) => {
           </>
         )}
         {toggleIsOpen && (
-          <div className="flex flex-wrap wrap">
+          <div
+            className={`flex flex-wrap wrap ${
+              data.length === 1 && "justify-center"
+            }`}
+          >
             <Gallery
               id="my-gallery"
               options={{
@@ -183,7 +206,7 @@ export const SquareList = (props: TProps) => {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             alt="image"
-                            style={{ cursor: "pointer" }}
+                            style={{ cursor: "pointer", margin: "auto" }}
                             src={s.bgImage.src}
                             // width={300}
                             // height={300}
