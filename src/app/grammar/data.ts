@@ -115,10 +115,10 @@ export const data: TSquare[] = [
   },
   {
     bgImage: grammar_23,
-    link: "/grammar/past_continuous",
+    link: "/grammar/past_simple_present_perfect",
   },
   {
     bgImage: grammar_24,
-    link: "/grammar/the_passive",
+    link: "/grammar/i_wish",
   },
 ];
