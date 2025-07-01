@@ -95,7 +95,7 @@ export const data: TSquare[] = [
   },
   {
     bgImage: grammar_18,
-    link: "/grammar/past_modals",
+    link: "/grammar/modal_verbs",
   },
   {
     bgImage: grammar_19,
