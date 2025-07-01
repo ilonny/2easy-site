@@ -111,7 +111,7 @@ export const data: TSquare[] = [
   },
   {
     bgImage: grammar_22,
-    link: "/grammar/future_simple",
+    link: "/grammar/past_modals",
   },
   {
     bgImage: grammar_23,
