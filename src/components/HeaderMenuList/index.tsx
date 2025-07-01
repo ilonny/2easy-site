@@ -1,4 +1,4 @@
-import { Button } from "@nextui-org/react";
+import { Button, Tooltip } from "@nextui-org/react";
 import Link from "next/link";
 
 export const HeaderMenuList = () => {
@@ -10,9 +10,23 @@ export const HeaderMenuList = () => {
       <Button variant="light" className="font-bold">
         LESSONS PLANS
       </Button>
-      <Button variant="light" className="font-bold">
-        GAMES & DISCUSSION CARDS
-      </Button>
+      <Tooltip
+        placement="bottom"
+        content={
+          <div className="">
+            <Link href="/discussion_cards">
+              <Button variant="light" className="font-bold" size="sm">
+                DISCUSSION CARDS
+              </Button>
+            </Link>
+          </div>
+        }
+      >
+        <Button variant="light" className="font-bold">
+          GAMES & DISCUSSION CARDS
+        </Button>
+      </Tooltip>
+
       <Link href="/grammar">
         <Button variant="light" className="font-bold">
           GRAMMAR
