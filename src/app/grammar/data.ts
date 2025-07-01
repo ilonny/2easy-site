@@ -103,7 +103,7 @@ export const data: TSquare[] = [
   },
   {
     bgImage: grammar_20,
-    link: "/grammar/i_wish",
+    link: "/grammar/the_passive",
   },
   {
     bgImage: grammar_21,
