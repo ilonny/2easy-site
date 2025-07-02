@@ -47,7 +47,10 @@ export const HeaderProfile = (props: TProps) => {
       </DropdownTrigger>
       {isStudent ? (
         <DropdownMenu aria-label="Profile Actions">
-          <DropdownItem key="profile">
+          <DropdownItem
+            key="profile"
+            href={`/student-account/${profile?.studentId}`}
+          >
             <Link href={`/student-account/${profile?.studentId}`}>
               <p>{profile?.name}</p>
               {!!profile?.email && <p>{profile?.email}</p>}
@@ -59,14 +62,14 @@ export const HeaderProfile = (props: TProps) => {
         </DropdownMenu>
       ) : (
         <DropdownMenu aria-label="Profile Actions">
-          <DropdownItem key="profile">
-            <Link href="/profile?lessons">Мои уроки</Link>
+          <DropdownItem key="lessons" href="/profile?lessons">
+            <p>Мои уроки</p>
           </DropdownItem>
-          <DropdownItem key="profile">
-            <Link href="/profile?students">Мои ученики</Link>
+          <DropdownItem key="students" href="/profile?students">
+            <p>Мои ученики</p>
           </DropdownItem>
-          <DropdownItem key="profile">
-            <Link href="/profile?profile">Личные данные</Link>
+          <DropdownItem key="profile" href="/profile?profile">
+            <p>Личные данные</p>
           </DropdownItem>
           <DropdownItem onClick={logout} key="logout">
             Выйти
