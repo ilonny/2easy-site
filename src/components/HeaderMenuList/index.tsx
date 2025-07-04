@@ -31,6 +31,12 @@ export const HeaderMenuList = () => {
                 FIRST MEETING
               </Button>
             </Link>
+            <br />
+            <Link href="/never_have_i_ever">
+              <Button variant="light" className="font-bold" size="sm">
+                NEVER HAVE I EVER
+              </Button>
+            </Link>
           </div>
         }
       >
