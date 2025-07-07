@@ -175,7 +175,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
   }, [correctChips, writeAnswer]);
 
   return (
-    <div className={`py-8 w-[886px] m-auto`}>
+    <div className={`py-8 w-[886px] m-auto`} id={`ex-${ex_id}`}>
       <p
         style={{
           color: data.titleColor,

@@ -13,9 +13,9 @@ type TParams = {
 
 const limit = pLimit(1);
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-let idRef = 0;
 
 export const useExAnswer = (params: TParams) => {
+  let idRef = 0;
   const {
     student_id,
     lesson_id,
@@ -82,13 +82,40 @@ export const useExAnswer = (params: TParams) => {
   );
 
   useEffect(() => {
-    idRef = activeStudentId || 0;
-    if (activeStudentId) {
-      getAnswers();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            idRef = activeStudentId || 0;
+            if (activeStudentId) {
+              getAnswers();
+            }
+            // console.log(`Элемент ex-${ex_id} появился в поле зрения`);
+          } else {
+            idRef = 0;
+            // console.log(`Элемент ex-${ex_id} исчез из поля зрения`);
+          }
+        });
+      },
+      {
+        root: null, // Следим за видимостью относительно viewport (окна браузера)
+        rootMargin: "0px", // Не добавляем отступы
+        // threshold: 0, // Элемент должен быть виден хотя бы на 0%
+      }
+    );
+
+    const target = document.getElementById(`ex-${ex_id}`);
+
+    if (target) {
+      observer.observe(target);
     }
+
     return () => {
+      observer.unobserve(target);
+      observer.disconnect(); //отключает все наблюдаемые элементы.
       idRef = 0;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTeacher, activeStudentId, getAnswers]);
 
   return { writeAnswer, answers, getAnswers, setAnswers };
