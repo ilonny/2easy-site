@@ -42,12 +42,12 @@ export default function GrammarPage() {
           LESSONS PLANS
         </h1>
         <p
-          className="max-w-[600px] text-center m-auto"
+          className="max-w-[745px] text-center m-auto"
           style={{ fontSize: 20, fontWeight: 500, lineHeight: "26px" }}
         >
-          {/* В этом разделе нет теории, правил и заданий на раскрытие скобок. Мы
-          собрали здесь только разговорные упражнения и игры, чтобы после
-          прохождения грамматической темы ученик сразу мог отработать ее в речи */}
+          Ready-to-use lessons on current topics with juicy vocabulary,
+          authentic videos and stories, complemented by grammar topics,
+          exercises and quizzes.
         </p>
         <div className="h-10" />
         <div className="h-10" />

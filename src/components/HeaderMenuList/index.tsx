@@ -1,12 +1,14 @@
-import { Button, Tooltip } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
 import Link from "next/link";
 
 export const HeaderMenuList = () => {
   return (
     <div className="mx-8 flex items-center justify-center gap-3 py-2 pb-6">
-      <Button variant="light" className="font-bold">
-        ABOUT US
-      </Button>
+      <Link href="/about_us">
+        <Button variant="light" className="font-bold">
+          ABOUT US
+        </Button>
+      </Link>
       <Link href="/lessons_plans">
         <Button variant="light" className="font-bold">
           LESSONS PLANS
