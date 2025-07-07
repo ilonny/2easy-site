@@ -2,20 +2,12 @@
 
 import { ContentWrapper } from "@/components";
 import { SquareList } from "@/components/SquareList";
-import {
-  Accordion,
-  AccordionItem,
-  BreadcrumbItem,
-  Breadcrumbs,
-  Button,
-} from "@nextui-org/react";
+import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { PageLeftBlock } from "@/components/PageLeftBlock";
-import Link from "next/link";
 import { data } from "./data";
-import { GalleryList } from "@/components/GalleryList";
 
 export default function GrammarPage() {
   const { checkSubscription } = useCheckSubscription();
@@ -33,8 +25,11 @@ export default function GrammarPage() {
           <div className="h-14" />
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/controversial_statements">
-              Controversial Statements
+            <BreadcrumbItem href="/speaking_games">
+              Speaking games
+            </BreadcrumbItem>
+            <BreadcrumbItem href="/speaking_games/if_you_could">
+              If you could
             </BreadcrumbItem>
           </Breadcrumbs>
         </div>
@@ -42,34 +37,41 @@ export default function GrammarPage() {
         <div className="h-10" />
         <div className="flex items-end gap-4">
           <PageLeftBlock
-            title={"Controversial statements"}
-            isOrange
+            title={"If you could"}
             content={
               <>
                 <br />
-                <div>
-                  There are 30 cards featuring controversial statements on
-                  different topics. The point is to read a statement and not
-                  only make a verdict - agree or disagree - but also provide
-                  arguments and explain the reasoning behind your opinion. These
-                  statements include thought-provoking topics that stimulate
-                  critical thinking.
+                <h2>
+                  The goal of the game is to spark conversation, get to know
+                  each other better, and have fun!
                   <br />
+                  The starting player asks an "If You Could" question to the
+                  group. <br />
                   <br />
-                  For group activities, we recommend splitting the class into
-                  two teams. Give both teams one controversial statement, with
-                  one team presenting arguments 'for' and the other team
-                  presenting arguments 'against' the statement.
-                </div>
+                  <strong>For example:</strong>
+                  <br />
+                  "If you could travel anywhere in the world, where would you
+                  go?" <br />
+                  <br />
+                  Each player takes turns answering the question. After everyone
+                  has answered, players can discuss the responses. The game can
+                  end whenever players choose, either after a set number of
+                  rounds or when everyone feels satisfied.
+                </h2>
               </>
             }
           />
         </div>
         <div className="h-10" />
+        <SquareList data={data} squareWidth={"33.333333%"} isCarousel />
         <div className="h-10" />
-        <SquareList data={data} isCarousel />
         <div className="h-10" />
-        <SquareList data={data} isGallery withToggle squareWidth="33.33333%" />
+        <SquareList
+          data={data}
+          squareWidth={"33.333333%"}
+          isGallery
+          withToggle
+        />
         <div className="h-10" />
       </ContentWrapper>
     </main>

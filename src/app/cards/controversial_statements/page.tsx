@@ -33,25 +33,35 @@ export default function GrammarPage() {
           <div className="h-14" />
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/first_meeting">First Meeting</BreadcrumbItem>
+            <BreadcrumbItem href="/cards">Discussion cards</BreadcrumbItem>
+            <BreadcrumbItem href="/cards/controversial_statements">
+              Controversial Statements
+            </BreadcrumbItem>
           </Breadcrumbs>
         </div>
         <div className="h-10" />
         <div className="h-10" />
         <div className="flex items-end gap-4">
           <PageLeftBlock
-            title={"First Meeting"}
+            title={"Controversial statements"}
             isOrange
             content={
               <>
                 <br />
-                <h2>
-                  If you are tired of asking the same questions, such as “What
-                  is your hobby?” or “How many siblings do you have?” with all
-                  your new students, this set of cards is definitely for you.
-                  Here, you will find non-trivial and truly interesting
-                  questions for your first meeting with a student.
-                </h2>
+                <div>
+                  There are 30 cards featuring controversial statements on
+                  different topics. The point is to read a statement and not
+                  only make a verdict - agree or disagree - but also provide
+                  arguments and explain the reasoning behind your opinion. These
+                  statements include thought-provoking topics that stimulate
+                  critical thinking.
+                  <br />
+                  <br />
+                  For group activities, we recommend splitting the class into
+                  two teams. Give both teams one controversial statement, with
+                  one team presenting arguments 'for' and the other team
+                  presenting arguments 'against' the statement.
+                </div>
               </>
             }
           />

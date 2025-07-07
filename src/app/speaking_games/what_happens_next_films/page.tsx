@@ -73,11 +73,10 @@ export default function GrammarPage() {
           <div className="h-14" />
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/grammar">Grammar</BreadcrumbItem>
-            <BreadcrumbItem href="/grammar/be_going_to">
-              Be going to
+            <BreadcrumbItem href="/speaking_games">
+              Speaking games
             </BreadcrumbItem>
-            <BreadcrumbItem href="/grammar/be_going_to/what_happens_next">
+            <BreadcrumbItem href="/speaking_games/what_happens_next">
               What happens next films & series
             </BreadcrumbItem>
           </Breadcrumbs>

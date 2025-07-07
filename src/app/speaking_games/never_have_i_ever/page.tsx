@@ -27,11 +27,10 @@ export default function GrammarPage() {
           <div className="h-14" />
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/grammar">Grammar</BreadcrumbItem>
-            <BreadcrumbItem href="/grammar/present_perfect">
-              Present perfect
+            <BreadcrumbItem href="/speaking_games">
+              Speaking games
             </BreadcrumbItem>
-            <BreadcrumbItem href="/grammar/present_perfect/never_have_i_ever">
+            <BreadcrumbItem href="/speaking_games/never_have_i_ever">
               Never have i ever
             </BreadcrumbItem>
           </Breadcrumbs>

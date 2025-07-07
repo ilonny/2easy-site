@@ -1,25 +1,13 @@
-/* eslint-disable jsx-a11y/alt-text */
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { ContentWrapper } from "@/components";
 import { SquareList } from "@/components/SquareList";
-import {
-  BreadcrumbItem,
-  Breadcrumbs,
-  Button,
-  Tab,
-  Tabs,
-} from "@nextui-org/react";
+import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PageLeftBlock } from "@/components/PageLeftBlock";
-import { CheckboxList } from "@/components/CheckboxList";
-import { data, data1, data2, summerData } from "./data";
-import Link from "next/link";
-import Zoom from "react-medium-image-zoom";
-import "react-medium-image-zoom/dist/styles.css";
+import { data, dataA1, dataB1 } from "./data";
 
 export default function GrammarPage() {
   const { checkSubscription } = useCheckSubscription();
@@ -30,7 +18,7 @@ export default function GrammarPage() {
     }
   }, [checkSubscription, router]);
 
-  const [tabIndex, setTabIndex] = useState("all");
+  const [tabIndex, setTabIndex] = useState("A1");
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
@@ -39,12 +27,11 @@ export default function GrammarPage() {
           <div className="h-14" />
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/grammar">Grammar</BreadcrumbItem>
-            <BreadcrumbItem href="/grammar/modal_verbs">
-              Modal verbs
+            <BreadcrumbItem href="/speaking_games">
+              Speaking games
             </BreadcrumbItem>
-            <BreadcrumbItem href="/grammar/modal_verbs/would_you_rather">
-              Would you rather
+            <BreadcrumbItem href="/speaking_games/name_three">
+              Name three
             </BreadcrumbItem>
           </Breadcrumbs>
         </div>
@@ -52,22 +39,22 @@ export default function GrammarPage() {
         <div className="h-10" />
         <div className="flex items-end gap-4">
           <PageLeftBlock
-            title={'"Would you rather?"'}
+            title={"Name three"}
             content={
               <>
                 <br />
                 <h2>
-                  The game features thought-provoking questions, such as “Would
-                  you rather eat and not gain weight or always eat for free?” It
-                  aims to practice the construction "I'd rather" and stimulate
-                  engaging discussions. It is suitable for B1 level students and
-                  above.
+                  This game encourages students to quickly apply their skills by
+                  naming three things related to the topic on the card. It
+                  develops their ability to think quickly in English and boosts
+                  vocabulary.
+                  <br />
+                  <br />
+                  The point of the game is to name three things related to the
+                  topic on the card within a limited amount of time. The time
+                  allowed depends on the student's level, but we recommend
+                  giving no more than 7 seconds for each card.
                 </h2>
-                <br />
-                Players take turns reading out “Would you rather” questions,
-                other students choose one option and explain their reasoning. If
-                playing with an individual student, ask follow-up questions to
-                elicit more details about their choice.
               </>
             }
           />
@@ -86,20 +73,24 @@ export default function GrammarPage() {
             tab: "w-[49%]",
           }}
         >
-          <Tab key={"all"} title={"Basic"} />
-          <Tab key={"summer"} title={"Summer edition"} />
+          <Tab key={"A1"} title={"A1 - A2"} />
+          <Tab key={"B1"} title={"B1 - B2"} />
         </Tabs>
         <div className="h-10"></div>
-        <SquareList data={tabIndex === "all" ? data : summerData} isCarousel />
-        <div className="h-10" />
+        <SquareList
+          data={tabIndex === "A1" ? dataA1 : dataB1}
+          squareWidth={"33.333333%"}
+          isCarousel
+        />
         <div className="h-10" />
         <div className="h-10" />
         <SquareList
-          data={tabIndex === "all" ? data : summerData}
-          // squareWidth={"33.333333%"}
+          data={tabIndex === "A1" ? dataA1 : dataB1}
+          squareWidth={"33.333333%"}
           isGallery
           withToggle
         />
+        <div className="h-10" />
       </ContentWrapper>
     </main>
   );

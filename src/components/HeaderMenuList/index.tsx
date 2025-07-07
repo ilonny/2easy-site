@@ -7,10 +7,22 @@ export const HeaderMenuList = () => {
       <Button variant="light" className="font-bold">
         ABOUT US
       </Button>
-      <Button variant="light" className="font-bold">
-        LESSONS PLANS
-      </Button>
-      <Tooltip
+      <Link href="/lessons_plans">
+        <Button variant="light" className="font-bold">
+          LESSONS PLANS
+        </Button>
+      </Link>
+      <Link href="/speaking_games">
+        <Button variant="light" className="font-bold">
+          SPEAKING GAMES
+        </Button>
+      </Link>
+      <Link href="/cards">
+        <Button variant="light" className="font-bold">
+          DISCUSSION CARDS
+        </Button>
+      </Link>
+      {/* <Tooltip
         placement="bottom"
         content={
           <div className="">
@@ -85,7 +97,7 @@ export const HeaderMenuList = () => {
         <Button variant="light" className="font-bold">
           GAMES & DISCUSSION CARDS
         </Button>
-      </Tooltip>
+      </Tooltip> */}
 
       <Link href="/grammar">
         <Button variant="light" className="font-bold">

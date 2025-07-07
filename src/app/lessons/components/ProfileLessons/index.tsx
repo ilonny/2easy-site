@@ -100,7 +100,7 @@ export const ProfileLessons = (props: TProps) => {
   return (
     <>
       {!hideTabs && (
-        <div className="flex gap-5">
+        <div className="flex gap-5 justify-center">
           <Button
             radius="full"
             color="primary"
