@@ -13,11 +13,12 @@ import {
 import Ellipse from "@/assets/icons/ellipse.svg";
 import DeleteIcon from "@/assets/icons/delete.svg";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
 import { LessonStatus } from "./LessonStatus";
 import { AuthContext } from "@/auth";
 import { useCheckSubscription } from "@/app/subscription/helpers";
+import { writeToLocalStorage } from "@/auth/utils";
 
 type TProps = {
   lesson: TLesson;
@@ -48,6 +49,7 @@ export const LessonCard: FC<TProps> = ({
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
+  const params = useParams();
   const { profile } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2;
 
@@ -265,6 +267,11 @@ export const LessonCard: FC<TProps> = ({
               onClick={() => {
                 if (!isStudent && checkSubscription()) {
                   router.push(`/lessons/${lesson.id}`);
+                  console.log("params", [Number(params.id)]);
+                  writeToLocalStorage(
+                    "start_lesson_selected_ids",
+                    JSON.stringify([params.id])
+                  );
                   return;
                 }
                 if (isStudent) {

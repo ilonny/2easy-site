@@ -23,7 +23,6 @@ export const CreateExButton: FC<TProps> = ({
 
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log("effect");
       const exCopyData = readFromLocalStorage("exCopy");
       setCopyData(exCopyData || "");
     }, 1000);
@@ -67,7 +66,6 @@ export const CreateExButton: FC<TProps> = ({
                   },
                 });
                 const data = await res.json();
-                console.log("data??", data);
                 if (typeof onSuccessCreate === "function") {
                   onSuccessCreate();
                 }

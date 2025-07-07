@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/alt-text */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import {
   BreadcrumbItem,
@@ -7,6 +9,9 @@ import {
   Image,
   Input,
   Link,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
@@ -23,6 +28,10 @@ import { ExList } from "@/app/editor/components/view/ExList";
 import { useExList } from "@/app/editor/hooks/useExList";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { readFromLocalStorage } from "@/auth/utils";
+import LinkIcon from "@/assets/icons/link.svg";
+import CopyIcon from "@/assets/icons/copy.svg";
+import { toast } from "react-toastify";
 
 export default function StartRegistrationPage() {
   withLogin();
@@ -38,6 +47,8 @@ export default function StartRegistrationPage() {
   const [students, setStudents] = useState([]);
   const [activeStudentId, setActiveStudentId] = useState(0);
 
+  const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+
   useEffect(() => {
     //@ts-ignore
     getLesson(params.id);
@@ -51,7 +62,21 @@ export default function StartRegistrationPage() {
         isSecure: true,
       })
     )?.json();
-    setStudents(list?.studentList);
+    try {
+      const selectedIds = JSON.parse(
+        readFromLocalStorage("start_lesson_selected_ids") || ""
+      )?.map((el) => Number(el));
+
+      const filteredIds = selectedIds?.length
+        ? list?.studentList?.filter((s) => {
+            return selectedIds.includes(s.student_id);
+          })
+        : list?.studentList;
+      setStudents(filteredIds);
+      if (filteredIds?.length === 1) {
+        setActiveStudentId(filteredIds[0]?.student_id);
+      }
+    } catch (err) {}
   }, [params.id]);
 
   useEffect(() => {
@@ -64,11 +89,60 @@ export default function StartRegistrationPage() {
         <div className="">
           <div className="h-14" />
           {isTeacher && (
-            <Breadcrumbs>
-              <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-              <BreadcrumbItem href="/profile?lessons">Мои уроки</BreadcrumbItem>
-              <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
-            </Breadcrumbs>
+            <div className="flex items-start justify-between">
+              <Breadcrumbs>
+                <BreadcrumbItem href="/">Главная</BreadcrumbItem>
+                <BreadcrumbItem href="/profile?lessons">
+                  Мои уроки
+                </BreadcrumbItem>
+                <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
+              </Breadcrumbs>
+              <div className="">
+                <Popover
+                  color="foreground"
+                  placement="bottom-end"
+                  isOpen={popoverIsOpen}
+                  onOpenChange={(open) => {
+                    setPopoverIsOpen(open);
+                  }}
+                >
+                  <PopoverTrigger>
+                    <Button
+                      endContent={<img src={LinkIcon.src} alt="icon" />}
+                      variant="light"
+                    >
+                      Ссылка на урок
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="p-4 bg-white items-start cursor-pointer">
+                    <div
+                      className=""
+                      onClick={() => {
+                        navigator.clipboard
+                          .writeText(window.location.href)
+                          .then(() => {
+                            toast.success(
+                              "Ссылка на урок скопирована в буфер обмена. Вы можете поделиться ей с учеником"
+                            );
+                            setPopoverIsOpen(false)
+                          });
+                      }}
+                    >
+                      <div className="flex justify-between items-center gap-4">
+                        <p>Скопировать ссылку</p>
+                        <img src={CopyIcon.src} />
+                      </div>
+                      <div
+                        className="p-2 mt-2"
+                        style={{ border: "1px solid #191919" }}
+                      >
+                        {window.location.href}
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
           )}
         </div>
         <div className="h-10" />
@@ -177,7 +251,8 @@ export default function StartRegistrationPage() {
                   </div>
                 );
               })}
-              {!!activeStudentId && (
+              {/* пока скрываем */}
+              {/* {!!activeStudentId && (
                 <Button
                   color="primary"
                   className="w-full uppercase"
@@ -186,7 +261,7 @@ export default function StartRegistrationPage() {
                 >
                   {"<-teacher’s screen"}
                 </Button>
-              )}
+              )} */}
             </div>
           )}
         </div>

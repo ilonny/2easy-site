@@ -192,7 +192,6 @@ export const ExList: FC<TProps> = (props) => {
       return;
     }
     const interval = setInterval(() => {
-      console.log("effect");
       const exCopyData = readFromLocalStorage("exCopy");
       setCopyData(exCopyData || "");
     }, 1000);
@@ -363,7 +362,6 @@ export const ExList: FC<TProps> = (props) => {
                                     },
                                   });
                                   const data = await res.json();
-                                  console.log("data??", data);
                                   if (typeof onSuccessCreate === "function") {
                                     onSuccessCreate();
                                   }

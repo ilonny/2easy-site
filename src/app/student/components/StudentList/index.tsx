@@ -31,6 +31,7 @@ type TProps = {
   hideAccountButton?: boolean;
   onSuccessEditCallback?: () => void;
   onSuccessDeleteCallback?: () => void;
+  btnSecondary?: boolean;
 };
 
 export const StudentList = (props: TProps) => {
@@ -43,6 +44,7 @@ export const StudentList = (props: TProps) => {
     hideAccountButton,
     onSuccessEditCallback,
     onSuccessDeleteCallback,
+    btnSecondary,
   } = props;
   const [createIsVisible, setCreateIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
@@ -224,6 +226,7 @@ export const StudentList = (props: TProps) => {
             <Button
               radius="md"
               color="primary"
+              variant={btnSecondary ? "bordered" : undefined}
               className="px-10"
               onClick={() => {
                 if (checkSubscription()) {
@@ -232,7 +235,7 @@ export const StudentList = (props: TProps) => {
               }}
               size="lg"
             >
-              Добавить ученика
+              Добавить нового ученика
             </Button>
           )}
         </div>

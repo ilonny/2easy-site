@@ -7,7 +7,6 @@ export const useCheckSubscription = () => {
   const router = useRouter();
 
   const checkSubscription = useCallback(() => {
-    console.log("subscription", subscription);
     if (subscription === undefined) {
       return true;
     }

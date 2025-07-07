@@ -29,7 +29,6 @@ export default function GrammarPage() {
       version === "Short video" ? el?.shortVersion : el?.fullVersion;
     return video;
   }, [currentIndex, version]);
-  console.log("currentVideo?", currentVideo, currentIndex);
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>

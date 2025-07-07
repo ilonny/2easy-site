@@ -11,6 +11,7 @@ import {
 import { FC, useCallback, useEffect, useState } from "react";
 import { TLesson } from "../../types";
 import { StudentList } from "@/app/student/components/StudentList";
+import { writeToLocalStorage } from "@/auth/utils";
 
 type TProps = {
   isVisible: boolean;
@@ -58,7 +59,13 @@ export const AttachLessonModalForm: FC<TProps> = ({
         checkResponse(res);
       });
     }
-    onSuccess();
+    try {
+      writeToLocalStorage(
+        "start_lesson_selected_ids",
+        JSON.stringify(chosenIds)
+      );
+      onSuccess();
+    } catch (err) {}
   }, [chosenIds, lesson.id, onSuccess, status]);
 
   const onClickStudent = useCallback(
@@ -99,7 +106,8 @@ export const AttachLessonModalForm: FC<TProps> = ({
           {step === 0 && (
             <>
               <StudentList
-                hideAddButton
+                // hideAddButton
+                btnSecondary
                 hidePopoverButton
                 onClickStudent={onClickStudent}
                 chosenIds={chosenIds}
