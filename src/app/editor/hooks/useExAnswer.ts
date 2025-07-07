@@ -111,8 +111,11 @@ export const useExAnswer = (params: TParams) => {
     }
 
     return () => {
-      observer.unobserve(target);
-      observer.disconnect(); //отключает все наблюдаемые элементы.
+      try {
+        observer?.unobserve(target);
+        observer?.disconnect(); //отключает все наблюдаемые элементы.
+      } catch (err) {}
+
       idRef = 0;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -3,7 +3,7 @@ import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
 import { TTestData } from "./types";
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
 import { Button, Card, Checkbox, Input, Textarea } from "@nextui-org/react";
@@ -229,6 +229,15 @@ export const TestEx: FC<TProps> = ({
     [changeData, data.questions]
   );
 
+  const hasError = useMemo(() => {
+    return data.questions.some((q) => {
+      if (!q.value) {
+        return true;
+      }
+      return q.options.some((o) => !o.value);
+    });
+  }, [data.questions]);
+
   return (
     <div>
       <div className="flex flex-wrap">
@@ -298,6 +307,8 @@ export const TestEx: FC<TProps> = ({
                   value={q.value}
                   classNames={{ inputWrapper: "bg-white" }}
                   onValueChange={(val) => onChangeQuestionValue(qIndex, val)}
+                  errorMessage="Поле обязательное для заполнения."
+                  isInvalid={!q.value}
                 />
                 {data.questions.length > 1 && (
                   <div className="flex justify-end">
@@ -338,6 +349,8 @@ export const TestEx: FC<TProps> = ({
                           onValueChange={(val) =>
                             onChangeOptionValue(val, qIndex, optionIndex)
                           }
+                          errorMessage="Поле обязательное для заполнения."
+                          isInvalid={!option.value}
                         />
                       </div>
                       {q.options.length > 1 && (
@@ -408,6 +421,7 @@ export const TestEx: FC<TProps> = ({
             size="lg"
             onClick={() => saveTestEx(data)}
             isLoading={isLoading}
+            isDisabled={hasError}
           >
             Сохранить
           </Button>

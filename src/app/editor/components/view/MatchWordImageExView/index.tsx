@@ -189,7 +189,7 @@ export const MatchWordImageExView: FC<TProps> = ({
       writeAnswer(data.id, JSON.stringify(correctChips));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [correctChips, writeAnswer]);
+  }, [correctChips?.length, writeAnswer]);
   return (
     <div className={`py-8 w-[886px] m-auto`}>
       <p
@@ -233,7 +233,15 @@ export const MatchWordImageExView: FC<TProps> = ({
           />
         )}
         {data.viewType === "drag" && (
-          <div className="flex items-center wrap gap-4 justify-center m-auto mb-4 max-w-[500px] flex-wrap">
+          <div
+            className="flex items-center wrap gap-4 justify-center m-auto py-4 flex-wrap"
+            style={{
+              position: "sticky",
+              zIndex: 2,
+              background: "#fff",
+              top: 0,
+            }}
+          >
             {sortedChips.map((chip, chipIndex) => {
               return (
                 <DraggableItem

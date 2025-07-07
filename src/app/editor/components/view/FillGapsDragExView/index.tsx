@@ -341,7 +341,10 @@ export const FillGapsDragExView: FC<TProps> = ({
             />
           </Zoom>
         )}
-        <div className="flex justify-center items-center mb-8 gap-2 flex-wrap mx-auto">
+        <div
+          className="flex justify-center items-center py-4 gap-2 flex-wrap mx-auto"
+          style={{ position: "sticky", zIndex: 2, background: "#fff", top: 0 }}
+        >
           {sortedFields.map((field) => {
             return (
               <DraggableItem

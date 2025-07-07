@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { FC } from "react";
+import { FC, memo } from "react";
 import { Card } from "@nextui-org/react";
 import { TVideoData } from "../../editor/Video/types";
 import styles from "./styles.module.css";
@@ -13,7 +13,7 @@ type TProps = {
   isPreview?: boolean;
 };
 
-export const VideoExView: FC<TProps> = ({ data, isPreview = false }) => {
+const VideoExViewComp: FC<TProps> = ({ data, isPreview = false }) => {
   const image = data?.images?.[0];
 
   return (
@@ -82,3 +82,5 @@ export const VideoExView: FC<TProps> = ({ data, isPreview = false }) => {
     </>
   );
 };
+
+export const VideoExView = memo(VideoExViewComp);

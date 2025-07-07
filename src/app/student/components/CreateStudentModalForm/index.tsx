@@ -85,7 +85,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
             <Controller
               name="email"
               control={control}
-              rules={{ required: "E-mail обязательное поле" }}
+              rules={{ required: "E-mail обязательное поле" }}  
               render={({ field }) => (
                 <Input
                   {...field}
@@ -95,6 +95,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
                   size="lg"
                   errorMessage={errors?.email?.message}
                   isInvalid={!!errors.email?.message}
+                  description="На указанный e-mail придут данные для входа в личный кабинет"
                 />
               )}
             />

@@ -99,16 +99,20 @@ export const StudentList = (props: TProps) => {
       {!!students?.length && (
         <div
           className="w-[100%] max-w-[600px] gap-5 flex flex-wrap flex-col"
-          style={{ cursor: onClickStudent ? "pointer" : "default" }}
+          style={{ cursor: "pointer" }}
         >
           {students?.map((student) => {
             const isChosen = chosenIds?.includes(student?.id);
             return (
               <div
                 key={student.id}
-                onClick={() =>
-                  onClickStudent && onClickStudent(student?.id || 0)
-                }
+                onClick={(e) => {
+                  if (onClickStudent) {
+                    onClickStudent(student?.id || 0);
+                    return;
+                  }
+                  router.push("/student-account/" + student?.id);
+                }}
               >
                 <Card
                   radius="md"
