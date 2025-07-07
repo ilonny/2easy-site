@@ -207,7 +207,9 @@ export const FillGapsSelectExView: FC<TProps> = ({
             id={"answer-wrapper-" + field?.id}
             style={{
               display: "inline-block",
-              minWidth: maxOptionLength * (maxOptionLength <= 5 ? 20 : 15),
+              minWidth:
+                maxOptionLength *
+                (maxOptionLength <= 5 ? 20 : maxOptionLength >= 20 ? 10 : 15),
               // maxOptionLength *
               // (maxOptionLength < 10 ? 20 : maxOptionLength > 20 ? 7 : 10),
             }}

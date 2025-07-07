@@ -45,6 +45,7 @@ export const MatchWordWordExView: FC<TProps> = ({
 
   const [incorrectId, setIncorrectId] = useState(0);
   const [correctIds, setCorrectIds] = useState<number[]>([]);
+  const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
 
   const sortedMatches = useMemo(() => {
     const initialArr = [...data.matches];
@@ -76,6 +77,15 @@ export const MatchWordWordExView: FC<TProps> = ({
     return initialArr.filter((r) => correctIds.includes(r.id));
   }, [data.matches, correctIds]);
 
+  const incorrectedMatches = useMemo(() => {
+    const initialArr = [...data.matches];
+    return initialArr
+      .filter((r) => incorrectIdsMap?.[r.id] && !correctIds.includes(r.id))
+      .map((el) => {
+        return { ...el, selectedValue: incorrectIdsMap?.[el.id] };
+      });
+  }, [data.matches, correctIds, incorrectIdsMap]);
+
   const onClickAnswer = useCallback(
     (id: number) => {
       const m = sortedMatches.find((m) => m.correctId === id);
@@ -90,6 +100,12 @@ export const MatchWordWordExView: FC<TProps> = ({
         setTimeout(() => {
           setIncorrectId(0);
         }, 2000);
+        setIncorrectIdsMap((incorrectIds) => {
+          return {
+            ...incorrectIds,
+            [selectedM.id]: m?.correctValue,
+          };
+        });
       }
     },
     [sortedMatches, selectedMatchId]
@@ -99,7 +115,8 @@ export const MatchWordWordExView: FC<TProps> = ({
     if (student_id) {
       getAnswers(true).then((a) => {
         try {
-          setCorrectIds(JSON.parse(a[data.id].answer));
+          const parsedIds = JSON.parse(answers[data.id]?.answer);
+          setCorrectIds(parsedIds?.correctIds);
         } catch (err) {}
       });
     }
@@ -111,17 +128,20 @@ export const MatchWordWordExView: FC<TProps> = ({
       return;
     }
     try {
-      setCorrectIds(JSON.parse(answers[data.id].answer));
+      const parsedIds = JSON.parse(answers[data.id]?.answer);
+      setCorrectIds(parsedIds?.correctIds);
+      setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
     } catch (err) {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher]);
 
   useEffect(() => {
-    if (correctIds.length) {
-      writeAnswer(data.id, JSON.stringify(correctIds));
+    if (correctIds.length || Object.keys(incorrectIdsMap)?.length) {
+      writeAnswer(data.id, JSON.stringify({ correctIds, incorrectIdsMap }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [correctIds, writeAnswer]);
+  }, [correctIds, writeAnswer, incorrectIdsMap]);
+
   return (
     <>
       <div className={`py-8 w-[886px] m-auto`}>
@@ -220,6 +240,57 @@ export const MatchWordWordExView: FC<TProps> = ({
                     }}
                   >
                     {m.correctValue}
+                  </Card>
+                </div>
+              </div>
+            );
+          })}
+
+          {incorrectedMatches.map((m) => {
+            return (
+              <div
+                className="flex items-start gap-4 w-[100%] mb-4 relative"
+                key={m.id}
+              >
+                <div
+                  className="line"
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    background: "fdd0df",
+                    height: 2,
+                    width: 100,
+                    marginLeft: -30,
+                  }}
+                ></div>
+                <div className=" w-[50%] radius-10">
+                  <Card
+                    shadow="sm"
+                    radius="sm"
+                    className="p-8"
+                    style={{
+                      cursor: "pointer",
+                      border: "2px solid rgb(164, 41, 41) ",
+                      background: "#fdd0df",
+                      whiteSpace: "break-spaces",
+                    }}
+                  >
+                    {m.value} {m.id}
+                  </Card>
+                </div>
+                <div className=" w-[50%] radius-10">
+                  <Card
+                    className="p-8"
+                    shadow="sm"
+                    radius="sm"
+                    style={{
+                      border: "2px solid rgb(164, 41, 41) ",
+                      background: "#fdd0df",
+                      whiteSpace: "break-spaces",
+                    }}
+                  >
+                    {m.selectedValue}
                   </Card>
                 </div>
               </div>

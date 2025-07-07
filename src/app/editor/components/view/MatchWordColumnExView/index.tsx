@@ -30,8 +30,19 @@ const DraggableItem = (props: {
   isIntersected: MutableRefObject<boolean>;
   setCorrectChips: Dispatch<SetStateAction<TSortedWord[]>>;
   setActiveChip: Dispatch<SetStateAction<TSortedWord | null | undefined>>;
+  hoveredTeacherColumnId: null | number;
+  setIncorrectIdsMap: any;
+  isMissedIntersectedId: MutableRefObject<number>;
 }) => {
-  const { chip, isIntersected, setCorrectChips, setActiveChip } = props;
+  const {
+    chip,
+    isIntersected,
+    setCorrectChips,
+    setActiveChip,
+    hoveredTeacherColumnId,
+    setIncorrectIdsMap,
+    isMissedIntersectedId,
+  } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
   const [isError, setIsError] = useState(false);
@@ -42,15 +53,15 @@ const DraggableItem = (props: {
       setX(x);
       setY(y);
       try {
+        const answerWrapperId =
+          "answer-wrapper-" + chip?.id?.split("-")?.reverse()?.[0];
         //@ts-ignore
         const draggableRect = document
           ?.getElementById("draggable-" + chip.id)
           .getBoundingClientRect();
         //@ts-ignore
         const droppableRect = document
-          ?.getElementById(
-            "answer-wrapper-" + chip?.id?.split("-")?.reverse()?.[0]
-          )
+          ?.getElementById(answerWrapperId)
           .getBoundingClientRect();
         const intersects = !(
           draggableRect.top > droppableRect.bottom ||
@@ -59,11 +70,38 @@ const DraggableItem = (props: {
           draggableRect.left > droppableRect.right
         );
         isIntersected.current = intersects;
+
+        if (!intersects) {
+          isMissedIntersectedId.current = 0;
+          //@ts-ignore
+          const allWrappers = document
+            ?.getElementById("draggable-" + chip.id)
+            ?.closest(".match-word-column")
+            .querySelectorAll(".answer-wrapper");
+          const isAnyIntersects = Array.from(allWrappers)?.some((w) => {
+            const droppableRect = w.getBoundingClientRect();
+            const intersects = !(
+              draggableRect.top > droppableRect.bottom ||
+              draggableRect.bottom < droppableRect.top ||
+              draggableRect.right < droppableRect.left ||
+              draggableRect.left > droppableRect.right
+            );
+            if (intersects) {
+              const wId = w?.id?.split("-")?.reverse()?.[0];
+
+              isMissedIntersectedId.current = Number(wId);
+            }
+            return intersects;
+          });
+        }
       } catch (err) {}
     },
-    [isIntersected, setActiveChip]
+    [isIntersected, isMissedIntersectedId, setActiveChip]
   );
 
+  const isHoveredColumn =
+    hoveredTeacherColumnId &&
+    Number(chip.id.split("-")?.[1]) === Number(hoveredTeacherColumnId);
   return (
     <Draggable
       key={chip.id}
@@ -80,13 +118,26 @@ const DraggableItem = (props: {
           setTimeout(() => {
             setIsError(false);
           }, 2000);
+
+          //
+          setIncorrectIdsMap((m) => {
+            const missedWords = m?.[isMissedIntersectedId.current] || [];
+
+            if (!missedWords.includes(chip.word)) {
+              missedWords.push(chip.word);
+            }
+            return {
+              ...m,
+              [isMissedIntersectedId.current]: missedWords,
+            };
+          });
           return;
         }
         setCorrectChips((chips) => chips.concat(chip));
       }}
     >
       <Chip
-        color={isError ? "danger" : "primary"}
+        color={isHoveredColumn ? "success" : isError ? "danger" : "primary"}
         style={{ zIndex: 1, cursor: "pointer", maxWidth: 800 }}
         id={"draggable-" + chip.id}
         className="handle text-[18px] cursor-pointer max-w-[800px] chip-handle"
@@ -114,6 +165,11 @@ export const MatchWordColumnExView: FC<TProps> = ({
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
   const ex_id = data?.id;
+
+  const [hoveredTeacherColumnId, setHoveredTeacherColumnId] = useState(null);
+  const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
+
+  const isMissedIntersectedId = useRef<number>(0);
 
   const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
     student_id,
@@ -150,7 +206,8 @@ export const MatchWordColumnExView: FC<TProps> = ({
     if (student_id) {
       getAnswers(true).then((a) => {
         try {
-          setCorrectChips(JSON.parse(a[data.id].answer));
+          const parsedIds = JSON.parse(answers[data.id]?.answer);
+          setCorrectChips(parsedIds?.correctIds);
         } catch (err) {}
       });
     }
@@ -162,20 +219,28 @@ export const MatchWordColumnExView: FC<TProps> = ({
       return;
     }
     try {
-      setCorrectChips(JSON.parse(answers[data.id].answer));
+      const parsedIds = JSON.parse(answers[data.id]?.answer);
+      setCorrectChips(parsedIds?.correctIds);
+      setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
     } catch (err) {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher]);
 
   useEffect(() => {
-    if (correctChips.length) {
-      writeAnswer(data.id, JSON.stringify(correctChips));
+    if (correctChips.length || Object.keys(incorrectIdsMap)?.length) {
+      writeAnswer(
+        data.id,
+        JSON.stringify({ correctIds: correctChips, incorrectIdsMap })
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [correctChips.length, writeAnswer]);
+  }, [correctChips.length, writeAnswer, incorrectIdsMap]);
 
   return (
-    <div className={`py-8 w-[886px] m-auto`} id={`ex-${ex_id}`}>
+    <div
+      className={`py-8 w-[886px] m-auto match-word-column`}
+      id={`ex-${ex_id}`}
+    >
       <p
         style={{
           color: data.titleColor,
@@ -221,12 +286,13 @@ export const MatchWordColumnExView: FC<TProps> = ({
           }}
         >
           <div
-            className="flex items-center wrap gap-4 justify-center m-auto py-4 flex-wrap"
+            className="flex items-center wrap gap-4 justify-center m-auto py-4 flex-wrap  shadow-lg"
             style={{
               position: "sticky",
               zIndex: 2,
               background: "#fff",
               top: 0,
+              borderRadius: 10,
             }}
           >
             {sortedChips.map((chip) => {
@@ -237,20 +303,50 @@ export const MatchWordColumnExView: FC<TProps> = ({
                   isIntersected={isIntersected}
                   setCorrectChips={setCorrectChips}
                   setActiveChip={setActiveChip}
+                  hoveredTeacherColumnId={hoveredTeacherColumnId}
+                  setIncorrectIdsMap={setIncorrectIdsMap}
+                  isMissedIntersectedId={isMissedIntersectedId}
                 />
               );
             })}
           </div>
           {!!data?.columns?.length && (
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-4 mt-2">
               {data?.columns?.map((column) => {
                 const isCorrect =
                   !!correctChips.find((c) => c.word === activeChip?.word) ||
                   (isTeacher &&
                     column.id.toString() ===
                       (activeChip?.id.split("-")?.reverse()?.[0] || 0));
+
+                const correctedChipsToRender = correctChips?.filter(
+                  (correctChip) => {
+                    return column.words.includes(correctChip.word);
+                  }
+                );
+
+                const errorChipToRender = (
+                  incorrectIdsMap?.[column?.id] || []
+                ).filter((incorrectWord) => {
+                  return !correctedChipsToRender.includes(incorrectWord);
+                });
+
                 return (
-                  <Card key={column.id} className="w-[47%] p-6">
+                  <Card
+                    key={column.id}
+                    className="w-[47%] p-6 answer-wrapper"
+                    id={"answer-wrapper-" + column.id}
+                    onMouseOver={() => {
+                      if (isTeacher) {
+                        setHoveredTeacherColumnId(column.id);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (isTeacher) {
+                        setHoveredTeacherColumnId(null);
+                      }
+                    }}
+                  >
                     <p
                       style={{ fontWeight: 600, fontSize: 20 }}
                       className="text-center"
@@ -260,7 +356,6 @@ export const MatchWordColumnExView: FC<TProps> = ({
                     <Card
                       shadow="none"
                       className="mt-4 p-2"
-                      id={"answer-wrapper-" + column.id}
                       style={{
                         minHeight: 250,
                         width: "100%",
@@ -270,22 +365,34 @@ export const MatchWordColumnExView: FC<TProps> = ({
                         background: isCorrect ? "#E9FEE8" : "transparent",
                       }}
                     >
-                      {correctChips
-                        ?.filter((correctChip) => {
-                          return column.words.includes(correctChip.word);
-                        })
-                        .map((chip) => {
+                      {correctedChipsToRender.map((chip) => {
+                        return (
+                          <Card
+                            className="p-4 mb-4"
+                            key={chip.word + chip.id}
+                            shadow="none"
+                            style={{
+                              border: "2px solid #219F59",
+                              background: "#E9FEE8",
+                            }}
+                          >
+                            {chip.word}
+                          </Card>
+                        );
+                      })}
+                      {isTeacher &&
+                        errorChipToRender.map((chip: string) => {
                           return (
                             <Card
                               className="p-4 mb-4"
-                              key={chip.word + chip.id}
+                              key={chip}
                               shadow="none"
                               style={{
-                                border: "2px solid #219F59",
-                                background: "#E9FEE8",
+                                border: "2px solid rgb(164, 41, 41)",
+                                background: "#fdd0df",
                               }}
                             >
-                              {chip.word}
+                              {chip}
                             </Card>
                           );
                         })}

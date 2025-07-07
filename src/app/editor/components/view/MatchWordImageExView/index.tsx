@@ -13,7 +13,7 @@ import {
 } from "react";
 import Image from "next/image";
 import { TMatchWordImageData } from "../../editor/MatchWordImage/types";
-import { Card, Chip, Input } from "@nextui-org/react";
+import { Card, Chip, Input, Tooltip } from "@nextui-org/react";
 import Draggable from "react-draggable";
 import { AuthContext } from "@/auth";
 import Zoom from "react-medium-image-zoom";
@@ -27,12 +27,23 @@ type TProps = {
 };
 
 const DraggableItem = (props: {
+  id: any;
   chip: string;
   isIntersected: MutableRefObject<boolean>;
   setCorrectChips: Dispatch<SetStateAction<string[]>>;
   setActiveChip: Dispatch<SetStateAction<string>>;
+  setIncorrectIdsMap: any;
+  isMissedIntersectedId: MutableRefObject<number>;
 }) => {
-  const { chip, isIntersected, setCorrectChips, setActiveChip } = props;
+  const {
+    chip,
+    isIntersected,
+    setCorrectChips,
+    setActiveChip,
+    setIncorrectIdsMap,
+    isMissedIntersectedId,
+    id,
+  } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
   const [isError, setIsError] = useState(false);
@@ -45,11 +56,11 @@ const DraggableItem = (props: {
       try {
         //@ts-ignore
         const draggableRect = document
-          ?.getElementById("draggable-" + chip)
+          ?.getElementById("draggable-" + id)
           .getBoundingClientRect();
         //@ts-ignore
         const droppableRect = document
-          ?.getElementById("answer-wrapper-" + chip)
+          ?.getElementById("answer-wrapper-" + id)
           .getBoundingClientRect();
 
         const intersects = !(
@@ -60,9 +71,26 @@ const DraggableItem = (props: {
         );
         isIntersected.current = intersects;
         if (!intersects) {
-          setX(0);
-          setY(0);
-          return;
+          isMissedIntersectedId.current = 0;
+          //@ts-ignore
+          const allWrappers = document
+            ?.getElementById("draggable-" + id)
+            ?.closest(".match-word-image")
+            .querySelectorAll(".answer-wrapper");
+
+          const isAnyIntersects = Array.from(allWrappers)?.some((w) => {
+            const droppableRect = w.getBoundingClientRect();
+            const intersects = !(
+              draggableRect.top > droppableRect.bottom ||
+              draggableRect.bottom < droppableRect.top ||
+              draggableRect.right < droppableRect.left ||
+              draggableRect.left > droppableRect.right
+            );
+            if (intersects) {
+              isMissedIntersectedId.current = w?.id?.split("-")?.reverse()[0];
+            }
+            return intersects;
+          });
         }
       } catch (err) {}
     },
@@ -79,10 +107,20 @@ const DraggableItem = (props: {
       onStop={() => {
         setActiveChip("");
         if (!isIntersected.current) {
+          setX(0);
+          setY(0);
           setIsError(true);
           setTimeout(() => {
             setIsError(false);
           }, 2000);
+
+          //
+          setIncorrectIdsMap((m) => {
+            return {
+              ...m,
+              [isMissedIntersectedId.current]: chip,
+            };
+          });
           return;
         }
         setCorrectChips((chips) => chips.concat(chip));
@@ -91,7 +129,7 @@ const DraggableItem = (props: {
       <Chip
         color={isError ? "danger" : "primary"}
         style={{ zIndex: 1, cursor: "pointer" }}
-        id={"draggable-" + chip}
+        id={"draggable-" + id}
         className="handle text-[18px] cursor-pointer"
       >
         {chip}
@@ -105,8 +143,19 @@ const InputItem = (props: {
   setCorrectChips: Dispatch<SetStateAction<string[]>>;
   isCorrect: boolean;
   isTeacher: boolean;
+  isIncorrectWord?: string;
+  id: string;
+  setIncorrectIdsMap: any;
 }) => {
-  const { chip, setCorrectChips, isCorrect, isTeacher } = props;
+  const {
+    chip,
+    setCorrectChips,
+    isCorrect,
+    isTeacher,
+    isIncorrectWord,
+    id,
+    setIncorrectIdsMap,
+  } = props;
   const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
@@ -118,17 +167,53 @@ const InputItem = (props: {
     }
   }, [inputValue, chip, setCorrectChips]);
 
+  useEffect(() => {
+    if (isTeacher) {
+      if (isIncorrectWord && !isCorrect) {
+        setInputValue(isIncorrectWord);
+        return;
+      }
+
+      setInputValue(chip);
+    }
+  }, [isIncorrectWord, isCorrect, chip, isTeacher]);
+
+  const onBlur = useCallback(() => {
+    if (!inputValue) {
+      return;
+    }
+    if (inputValue.toLowerCase() !== chip.toLowerCase()) {
+      setIncorrectIdsMap((m) => {
+        return {
+          ...m,
+          [id]: inputValue,
+        };
+      });
+    }
+  }, [chip, id, inputValue, setIncorrectIdsMap]);
+
   return (
     <>
-      <Input
-        color={inputValue && !isCorrect ? "danger" : "default"}
-        value={inputValue}
-        onValueChange={setInputValue}
-        placeholder={isTeacher ? chip : ""}
-        style={{ height: 50 }}
-        isDisabled={isCorrect}
-        classNames={{ inputWrapper: "bg-white" }}
-      />
+      <Tooltip
+        isDisabled={!isTeacher}
+        content={isTeacher && <div className="teacher-placeholer">{chip}</div>}
+      >
+        <Input
+          color={inputValue && !isCorrect ? "danger" : "default"}
+          value={inputValue}
+          onValueChange={setInputValue}
+          placeholder={isTeacher ? chip : ""}
+          style={{ height: 50 }}
+          isDisabled={isCorrect}
+          classNames={{ inputWrapper: "bg-white" }}
+          onBlur={onBlur}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              onBlur(event);
+            }
+          }}
+        />
+      </Tooltip>
     </>
   );
 };
@@ -141,6 +226,8 @@ export const MatchWordImageExView: FC<TProps> = ({
   const { profile } = useContext(AuthContext);
   const isIntersected = useRef(false);
   const [correctChips, setCorrectChips] = useState<string[]>([]);
+  const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
+  const isMissedIntersectedId = useRef<number>(0);
   const [activeChip, setActiveChip] = useState("");
   const isTeacher = profile?.role_id === 2;
 
@@ -161,13 +248,14 @@ export const MatchWordImageExView: FC<TProps> = ({
       .filter((i) => !!i.text && !correctChips.includes(i.text))
       .map((img) => img.text)
       .sort(() => 0.5 - Math.random());
-  }, [correctChips, data.images]);
+  }, [correctChips.length, data.images]);
 
   useEffect(() => {
     if (student_id) {
       getAnswers(true).then((a) => {
         try {
-          setCorrectChips(JSON.parse(a[data.id].answer));
+          const parsedIds = JSON.parse(answers[data.id]?.answer);
+          setCorrectChips(parsedIds?.correctIds);
         } catch (err) {}
       });
     }
@@ -179,19 +267,24 @@ export const MatchWordImageExView: FC<TProps> = ({
       return;
     }
     try {
-      setCorrectChips(JSON.parse(answers[data.id].answer));
+      const parsedIds = JSON.parse(answers[data.id]?.answer);
+      setCorrectChips(parsedIds?.correctIds);
+      setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
     } catch (err) {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher]);
 
   useEffect(() => {
-    if (correctChips.length) {
-      writeAnswer(data.id, JSON.stringify(correctChips));
+    if (correctChips.length || Object.keys(incorrectIdsMap)?.length) {
+      writeAnswer(
+        data.id,
+        JSON.stringify({ correctIds: correctChips, incorrectIdsMap })
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [correctChips?.length, writeAnswer]);
+  }, [correctChips?.length, writeAnswer, incorrectIdsMap]);
   return (
-    <div className={`py-8 w-[886px] m-auto`}>
+    <div className={`py-8 w-[886px] m-auto match-word-image`}>
       <p
         style={{
           color: data.titleColor,
@@ -234,22 +327,26 @@ export const MatchWordImageExView: FC<TProps> = ({
         )}
         {data.viewType === "drag" && (
           <div
-            className="flex items-center wrap gap-4 justify-center m-auto py-4 flex-wrap"
+            className="flex items-center wrap gap-4 justify-center m-auto py-4 flex-wrap shadow-lg"
             style={{
               position: "sticky",
               zIndex: 2,
               background: "#fff",
               top: 0,
+              borderRadius: 10,
             }}
           >
             {sortedChips.map((chip, chipIndex) => {
               return (
                 <DraggableItem
+                  id={data.images.find((i) => i.text === chip)?.id}
                   chip={chip}
                   key={chip + chipIndex}
                   isIntersected={isIntersected}
                   setCorrectChips={setCorrectChips}
                   setActiveChip={setActiveChip}
+                  setIncorrectIdsMap={setIncorrectIdsMap}
+                  isMissedIntersectedId={isMissedIntersectedId}
                 />
               );
             })}
@@ -261,6 +358,8 @@ export const MatchWordImageExView: FC<TProps> = ({
               const isCorrect =
                 correctChips.includes(image.text) ||
                 (isTeacher && image.text === activeChip);
+              const isIncorrectWord =
+                isTeacher && !isCorrect && incorrectIdsMap?.[image?.id];
               return (
                 <div key={image.dataURL} className="w-[33.3333333%] p-4">
                   <div className="h-[220px] flex items-center justify-center overflow-hidden">
@@ -273,20 +372,36 @@ export const MatchWordImageExView: FC<TProps> = ({
                     </Zoom>
                   </div>
                   {data.viewType === "drag" && (
-                    <Card
-                      className="mt-4 flex items-center justify-center p-2"
-                      id={"answer-wrapper-" + image.text}
-                      style={{
-                        height: 40,
-                        width: "100%",
-                        border: isCorrect
-                          ? "2px solid #219F59"
-                          : "2px solid transparent",
-                        background: isCorrect ? "#E9FEE8" : "transparent",
-                      }}
+                    <Tooltip
+                      isDisabled={!isTeacher}
+                      content={
+                        isTeacher && (
+                          <div className="teacher-placeholer">{image.text}</div>
+                        )
+                      }
                     >
-                      {isCorrect && image.text}
-                    </Card>
+                      <Card
+                        className="mt-4 flex items-center justify-center p-2 answer-wrapper"
+                        id={"answer-wrapper-" + image.id}
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          border: isCorrect
+                            ? "2px solid #219F59"
+                            : isIncorrectWord
+                            ? "2px solid rgb(164, 41, 41)"
+                            : "2px solid transparent",
+                          background: isCorrect
+                            ? "#E9FEE8"
+                            : isIncorrectWord
+                            ? "#fdd0df"
+                            : "transparent",
+                        }}
+                      >
+                        {isCorrect && image.text}
+                        {isIncorrectWord && isIncorrectWord}
+                      </Card>
+                    </Tooltip>
                   )}
                   {data.viewType === "input" && (
                     <Card
@@ -298,14 +413,21 @@ export const MatchWordImageExView: FC<TProps> = ({
                         // border: isCorrect
                         //   ? "2px solid #219F59"
                         //   : "2px solid transparent",
-                        background: isCorrect ? "#E9FEE8" : "transparent",
+                        background: isCorrect
+                          ? "#E9FEE8"
+                          : isIncorrectWord
+                          ? "#fdd0df"
+                          : "transparent",
                       }}
                     >
                       <InputItem
+                        id={image.id}
                         isTeacher={isTeacher}
                         isCorrect={isCorrect}
                         chip={image.text}
                         setCorrectChips={setCorrectChips}
+                        isIncorrectWord={isIncorrectWord}
+                        setIncorrectIdsMap={setIncorrectIdsMap}
                       />
                     </Card>
                   )}

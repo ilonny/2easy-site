@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import Draggable, { DraggableCore } from "react-draggable"; // Both at the same time
+import Draggable from "react-draggable"; // Both at the same time
 import {
   Dispatch,
   FC,
@@ -20,6 +20,7 @@ import {
   Input,
   Select,
   SelectItem,
+  Tooltip,
 } from "@nextui-org/react";
 import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
@@ -39,35 +40,50 @@ const AnswerField: FC<{
   isCorrect: boolean;
   dataId: number;
   errorAnswerId: number;
-}> = ({ field, isTeacher, isCorrect, errorAnswerId }) => {
+  incorrectIdsMap: any;
+}> = ({ field, isTeacher, isCorrect, errorAnswerId, incorrectIdsMap }) => {
+  const hasIncorrectAnswerForTeacher =
+    isTeacher && !!incorrectIdsMap?.[field.id];
+
   return (
-    <div
-      className={`answer-wrapper mx-2 ${isCorrect && "bg-success"} ${
-        field.id == String(errorAnswerId) && !isCorrect && "bg-error"
-      }`}
-      data-id={field?.id}
-      id={"answer-wrapper-" + field?.id}
-      style={{
-        display: "inline-block",
-        lineHeight: "initial",
-        minWidth: isCorrect ? "initial" : 150,
-        borderRadius: 30,
-        position: "relative",
-        fontSize: 18,
-        top: -1,
-      }}
+    <Tooltip
+      isDisabled={!isTeacher}
+      content={
+        isTeacher && <div className="teacher-placeholer">{field.value}</div>
+      }
     >
-      <div className={`drag-word`}>
-        <div className="flex items-center gap-1 px-1">
-          {isTeacher && !isCorrect && (
-            <div className="teacher-placeholer">{field.value}</div>
-          )}
-          {isCorrect && (
-            <div className="success-placeholder">{field.value}</div>
-          )}
+      <div
+        className={`answer-wrapper mx-2 ${isCorrect && "bg-success"} ${
+          ((field.id == String(errorAnswerId) && !isCorrect) ||
+            (hasIncorrectAnswerForTeacher && !isCorrect)) &&
+          "bg-error"
+        }`}
+        data-id={field?.id}
+        id={"answer-wrapper-" + field?.id}
+        style={{
+          display: "inline-block",
+          lineHeight: "initial",
+          minWidth: isCorrect ? "initial" : 150,
+          borderRadius: 30,
+          position: "relative",
+          fontSize: 18,
+          top: -1,
+        }}
+      >
+        <div className={`drag-word`}>
+          <div className="flex items-center gap-1 px-1">
+            {isCorrect && (
+              <div className="success-placeholder">{field.value}</div>
+            )}
+            {!isCorrect && hasIncorrectAnswerForTeacher && (
+              <div className="bg-error error-placeholder">
+                {incorrectIdsMap?.[field.id]}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </Tooltip>
   );
 };
 
@@ -81,6 +97,7 @@ const DraggableItem = (props: {
   setErrorAnswerId: Dispatch<SetStateAction<number>>;
   isCorrect: boolean;
   activeDragId: number | null;
+  setIncorrectIdsMap: any;
 }) => {
   const {
     field,
@@ -92,6 +109,7 @@ const DraggableItem = (props: {
     isCorrect,
     activeDragId,
     setErrorAnswerId,
+    setIncorrectIdsMap,
   } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
@@ -168,6 +186,14 @@ const DraggableItem = (props: {
           setTimeout(() => {
             setErrorAnswerId(0);
           }, 2000);
+
+          //
+          setIncorrectIdsMap((m) => {
+            return {
+              ...m,
+              [isMissedIntersectedId.current]: field.value,
+            };
+          });
           // return
         }
         if (!isIntersected.current) {
@@ -205,6 +231,7 @@ export const FillGapsDragExView: FC<TProps> = ({
   const isMissedIntersectedId = useRef<number>(0);
   const [errorAnswerId, setErrorAnswerId] = useState<number>(0);
   const [correctIds, setCorrectIds] = useState<number[]>([]);
+  const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
 
   const isTeacher = profile?.role_id === 2;
 
@@ -238,18 +265,27 @@ export const FillGapsDragExView: FC<TProps> = ({
                 isCorrect={correctIds.includes(field?.id)}
                 dataId={data?.id}
                 errorAnswerId={errorAnswerId}
+                incorrectIdsMap={incorrectIdsMap}
               />
             )}
           </>
         );
       });
-  }, [data?.id, data.fields, profile?.role_id, correctIds, errorAnswerId]);
+  }, [
+    data?.id,
+    data.fields,
+    profile?.role_id,
+    correctIds,
+    errorAnswerId,
+    incorrectIdsMap,
+  ]);
 
   useEffect(() => {
     if (student_id) {
       getAnswers(true).then((a) => {
         try {
-          setCorrectIds(JSON.parse(a[data.id].answer));
+          const parsedIds = JSON.parse(answers[data.id]?.answer);
+          setCorrectIds(parsedIds?.correctIds);
         } catch (err) {}
       });
     }
@@ -261,17 +297,19 @@ export const FillGapsDragExView: FC<TProps> = ({
       return;
     }
     try {
-      setCorrectIds(JSON.parse(answers[data.id].answer));
+      const parsedIds = JSON.parse(answers[data.id]?.answer);
+      setCorrectIds(parsedIds?.correctIds);
+      setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
     } catch (err) {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher]);
 
   useEffect(() => {
-    if (correctIds.length) {
-      writeAnswer(data.id, JSON.stringify(correctIds));
+    if (correctIds.length || Object.keys(incorrectIdsMap)?.length) {
+      writeAnswer(data.id, JSON.stringify({ correctIds, incorrectIdsMap }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [correctIds, writeAnswer]);
+  }, [correctIds, writeAnswer, incorrectIdsMap]);
 
   useEffect(() => {
     renderContent();
@@ -342,8 +380,14 @@ export const FillGapsDragExView: FC<TProps> = ({
           </Zoom>
         )}
         <div
-          className="flex justify-center items-center py-4 gap-2 flex-wrap mx-auto"
-          style={{ position: "sticky", zIndex: 2, background: "#fff", top: 0 }}
+          className="flex justify-center items-center py-4 gap-2 flex-wrap mx-auto shadow-lg"
+          style={{
+            position: "sticky",
+            zIndex: 2,
+            background: "#fff",
+            top: 0,
+            borderRadius: 10,
+          }}
         >
           {sortedFields.map((field) => {
             return (
@@ -356,13 +400,14 @@ export const FillGapsDragExView: FC<TProps> = ({
                 isMissedIntersectedId={isMissedIntersectedId}
                 onDrop={onDrop}
                 setCorrectIds={setCorrectIds}
-                isCorrect={correctIds.includes(field?.id)}
+                isCorrect={correctIds?.includes(field?.id)}
                 setErrorAnswerId={setErrorAnswerId}
+                setIncorrectIdsMap={setIncorrectIdsMap}
               />
             );
           })}
         </div>
-        <Card className={`p-10 px-10 box relative`}>
+        <Card className={`p-10 px-10 box relative mt-2`}>
           <div
             style={{ margin: "0 auto", lineHeight: "230%" }}
             className="flex flex-col gap-10"

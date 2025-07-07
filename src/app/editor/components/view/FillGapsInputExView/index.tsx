@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { TField, TFillGapsSelectData } from "../../editor/FillGapsSelect/types";
-import { Card, Input, Select, SelectItem } from "@nextui-org/react";
+import { Card, Input, Select, SelectItem, Tooltip } from "@nextui-org/react";
 import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
@@ -186,6 +186,10 @@ export const FillGapsInputExView: FC<TProps> = ({
         );
         el.setAttribute("index", field?.id?.toString());
         const root = ReactDOM.createRoot(el);
+        const toolTipContent = field?.options
+          .filter((o) => o.isCorrect)
+          .map((o) => o.value)
+          .join(", ");
         root.render(
           <div
             className="answer-wrapper mx-2 !bg-transparent"
@@ -196,47 +200,55 @@ export const FillGapsInputExView: FC<TProps> = ({
               lineHeight: "initial",
             }}
           >
-            {localAnswers.find((f) => f.id === field.id && f.isCorrect) ? (
-              <Input
-                variant="flat"
-                className={`${styles["answer-wrapper"]} inputcustom isCorrect`}
-                size="sm"
-                classNames={{
-                  inputWrapper: "bg-[#EBFFEE]",
-                }}
-                color={"success"}
-                value={field?.options[0]?.value}
-              />
-            ) : isTeacher &&
-              localAnswers.findLast(
-                (f) => f.id === field.id && !f.isCorrect
-              ) ? (
-              <Input
-                variant="flat"
-                className={`${styles["answer-wrapper"]} inputcustom isIncorrect`}
-                size="sm"
-                isDisabled={isTeacher}
-                classNames={{
-                  inputWrapper: "bg-[#eeebfe]",
-                }}
-                color={"danger"}
-                value={
-                  localAnswers.findLast(
-                    (f) => f.id === field.id && !f.isCorrect
-                  )?.word
-                }
-              />
-            ) : (
-              <AnswerField
-                field={field}
-                key={field?.id}
-                isTeacher={profile?.role_id === 2}
-                localAnswers={localAnswers}
-                setLocalAnswers={setLocalAnswers}
-                // localAnswers={localAnswers}
-                // setLocalAnswers={setLocalAnswers}
-              />
-            )}
+            <Tooltip isDisabled={!isTeacher} content={toolTipContent}>
+              {localAnswers.find((f) => f.id === field.id && f.isCorrect) ? (
+                <div className="">
+                  <Input
+                    variant="flat"
+                    className={`${styles["answer-wrapper"]} inputcustom isCorrect`}
+                    size="sm"
+                    classNames={{
+                      inputWrapper: "bg-[#EBFFEE]",
+                    }}
+                    color={"success"}
+                    value={field?.options[0]?.value}
+                  />
+                </div>
+              ) : isTeacher &&
+                localAnswers.findLast(
+                  (f) => f.id === field.id && !f.isCorrect
+                ) ? (
+                <div className="">
+                  <Input
+                    variant="flat"
+                    className={`${styles["answer-wrapper"]} inputcustom isIncorrect`}
+                    size="sm"
+                    isDisabled={isTeacher}
+                    classNames={{
+                      inputWrapper: "bg-[#eeebfe]",
+                    }}
+                    color={"danger"}
+                    value={
+                      localAnswers.findLast(
+                        (f) => f.id === field.id && !f.isCorrect
+                      )?.word
+                    }
+                  />
+                </div>
+              ) : (
+                <div className="">
+                  <AnswerField
+                    field={field}
+                    key={field?.id}
+                    isTeacher={profile?.role_id === 2}
+                    localAnswers={localAnswers}
+                    setLocalAnswers={setLocalAnswers}
+                    // localAnswers={localAnswers}
+                    // setLocalAnswers={setLocalAnswers}
+                  />
+                </div>
+              )}
+            </Tooltip>
           </div>
         );
       });
@@ -246,13 +258,15 @@ export const FillGapsInputExView: FC<TProps> = ({
     profile?.role_id,
     answers,
     localAnswers,
-    rest.activeStudentId,
+    isTeacher,
+    // rest.activeStudentId,
+    // rest.activeStudentId,
   ]);
 
   useEffect(() => {
     renderContent();
   }, [renderContent]);
-
+  console.log("localAnswers", localAnswers);
   return (
     <>
       <div className={`py-8 w-[886px] m-auto`}>
