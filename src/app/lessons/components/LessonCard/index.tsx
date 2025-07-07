@@ -265,6 +265,10 @@ export const LessonCard: FC<TProps> = ({
               onClick={() => {
                 if (!isStudent && checkSubscription()) {
                   router.push(`/lessons/${lesson.id}`);
+                  return;
+                }
+                if (isStudent) {
+                  router.push(`/lessons/${lesson.id}`);
                 }
               }}
             >

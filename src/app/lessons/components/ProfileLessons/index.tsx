@@ -93,8 +93,8 @@ export const ProfileLessons = (props: TProps) => {
     if (tabIndex === "userLessons" && !studentId) {
       return lessons.filter((l) => l.user_id !== 1);
     }
-    return lessons;
-    // return lessons.filter((l) => l.user_id === 1);
+    // return lessons;
+    return lessons.filter((l) => l.user_id === 1);
   }, [isTeacher, lessons, tabIndex, studentId]);
 
   return (

@@ -37,6 +37,48 @@ export const HeaderMenuList = () => {
                 NEVER HAVE I EVER
               </Button>
             </Link>
+            <br />
+            <Link href="/would_you_rather">
+              <Button variant="light" className="font-bold" size="sm">
+                WOULD YOU RATHER
+              </Button>
+            </Link>
+            <br />
+            <Link href="/never_have_i_ever">
+              <Button variant="light" className="font-bold" size="sm">
+                NEVER HAVE I EVER
+              </Button>
+            </Link>
+            <br />
+            <Link href="/what_happens_next">
+              <Button variant="light" className="font-bold" size="sm">
+                WHAT HAPPENS NEXT
+              </Button>
+            </Link>
+            <br />
+            <Link href="/what_happens_next_films">
+              <Button variant="light" className="font-bold" size="sm">
+                WHAT HAPPENS NEXT FILMS & SERIES
+              </Button>
+            </Link>
+            <br />
+            <Link href="/name_three">
+              <Button variant="light" className="font-bold" size="sm">
+                NAME THREE
+              </Button>
+            </Link>
+            <br />
+            <Link href="/if_you_could">
+              <Button variant="light" className="font-bold" size="sm">
+                IF YOU COULD
+              </Button>
+            </Link>
+            <br />
+            <Link href="/taboo">
+              <Button variant="light" className="font-bold" size="sm">
+                TABOO
+              </Button>
+            </Link>
           </div>
         }
       >
