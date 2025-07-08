@@ -80,6 +80,9 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
   // }, [field.id, isCorrect]);
 
   useEffect(() => {
+    if (field.options.length === 1) {
+      return;
+    }
     if (count >= field.options.length - 1 && !isCorrect) {
       setIsDisabled(true);
       setSelectedValue(field.options.find((o) => o.isCorrect)?.value || "");
@@ -93,11 +96,14 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
         // isInvalid={!isCorrect}
         className={`${styles["answer-wrapper"]} font-normal`}
         style={{
-          backgroundColor: isCorrect
-            ? "#EBFFEE"
-            : selectedValue
-            ? "#FFE5E5"
-            : "#eeebff",
+          backgroundColor:
+            field.options.length === 1
+              ? "#eeebff"
+              : isCorrect
+              ? "#EBFFEE"
+              : selectedValue
+              ? "#FFE5E5"
+              : "#eeebff",
           borderRadius: "8px",
         }}
         size="sm"
@@ -201,6 +207,9 @@ export const FillGapsSelectExView: FC<TProps> = ({
         );
         el.setAttribute("index", field?.id?.toString());
         const root = ReactDOM.createRoot(el);
+        // if (field?.options.length === 1) {
+        //   return root.render(<span>{field?.options[0].value}</span>);
+        // }
         root.render(
           <div
             className="answer-wrapper mx-2 select-answer-wrapper"
@@ -209,7 +218,13 @@ export const FillGapsSelectExView: FC<TProps> = ({
               display: "inline-block",
               minWidth:
                 maxOptionLength *
-                (maxOptionLength <= 5 ? 20 : maxOptionLength >= 20 ? 10 : 15),
+                (maxOptionLength <= 5
+                  ? 25
+                  : maxOptionLength <= 10
+                  ? 20
+                  : maxOptionLength >= 20
+                  ? 10
+                  : 15),
               // maxOptionLength *
               // (maxOptionLength < 10 ? 20 : maxOptionLength > 20 ? 7 : 10),
             }}

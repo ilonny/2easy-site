@@ -169,13 +169,6 @@ export const PopoverFields: FC<TProps> = ({
                     <Image src={Close} alt="delete option" />
                   </Button>
                 )}
-
-                {/* <Input
-                  value={option.value}
-                  onChange={(e) =>
-                    onChangeFieldValue(id, optionIndex, e.target.value)
-                  }
-                /> */}
               </div>
             );
           })}
