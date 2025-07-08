@@ -205,6 +205,8 @@ export default function EditorPage() {
           <div className="h-10" />
           <div className="h-10" />
         </div>
+        <div className="h-10" />
+        <div className="h-10" />
       </ContentWrapper>
       <ChooseTemplateModal
         onChooseTemplate={onChooseTemplate}
