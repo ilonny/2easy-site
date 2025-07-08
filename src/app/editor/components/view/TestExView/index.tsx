@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 import {
   Dispatch,
@@ -20,6 +21,7 @@ import "react-medium-image-zoom/dist/styles.css";
 import { AuthContext } from "@/auth";
 import { useParams } from "next/navigation";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import CheckedIcon from "@/assets/icons/checked.svg";
 
 type TProps = {
   data: TTestData;
@@ -36,7 +38,10 @@ type TTestStepProps = {
 
 export const TestStep = (props: TTestStepProps) => {
   const { question, onPressNext, setScore, writeAnswer, answers } = props;
+  const { profile } = useContext(AuthContext);
+
   const [rerender, setRerender] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
   const isSingleAnswer =
     question?.options?.map((o) => o.isCorrect)?.filter(Boolean).length === 1;
 
@@ -44,6 +49,8 @@ export const TestStep = (props: TTestStepProps) => {
 
   const selectedMap = useRef<Record<string, boolean>>({});
   const errorMap = useRef<Record<string, boolean>>({});
+
+  const isTeacher = profile?.role_id === 2;
 
   useEffect(() => {
     try {
@@ -96,9 +103,16 @@ export const TestStep = (props: TTestStepProps) => {
   const defaultValue = !Object.keys(errorMap).length
     ? undefined
     : Object.keys(errorMap.current)[0];
-
+  console.log("isHovered", isHovered);
   return (
-    <>
+    <div
+      onMouseEnter={() => {
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+      }}
+    >
       <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 30 }}>
         {question.value}
       </p>
@@ -120,13 +134,17 @@ export const TestStep = (props: TTestStepProps) => {
 
             const isCorrectAndNotSelected =
               isSubmitted && !isSelected && option.isCorrect;
-            const color =
+            let color =
               isCorrectAndNotSelected || isCorrect
                 ? "success"
                 : isIncorrect
                 ? "danger"
                 : "primary";
-
+            if (isTeacher && isHovered) {
+              if (option.isCorrect) {
+                color = "success";
+              }
+            }
             return (
               <label
                 className="flex items-start wrap"
@@ -172,12 +190,35 @@ export const TestStep = (props: TTestStepProps) => {
             : isIncorrect
             ? "danger"
             : "primary";
+          const isHoverByTeacher = isTeacher && isHovered;
           return (
             <label
               className="flex items-start wrap"
               key={option.id}
-              style={{ marginBottom: 30, cursor: "pointer" }}
+              style={{
+                marginBottom: 30,
+                cursor: "pointer",
+                position: "relative",
+              }}
             >
+              <div
+                className="mr-2"
+                style={{
+                  width: 26,
+                  height: 26,
+                  zIndex: 2,
+                  flexShrink: 0,
+                  position: "absolute",
+                  background: isHoverByTeacher ? "#fff" : 'transparent',
+                }}
+              >
+                {isHoverByTeacher && option.isCorrect && (
+                  <img
+                    src={CheckedIcon.src}
+                    style={{ width: 26, height: 26, zIndex: 2 }}
+                  />
+                )}
+              </div>
               <div className="mr-2">
                 <Checkbox
                   color={color}
@@ -234,7 +275,7 @@ export const TestStep = (props: TTestStepProps) => {
           Next →
         </Button>
       )}
-    </>
+    </div>
   );
 };
 
