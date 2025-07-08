@@ -140,7 +140,7 @@ export const TestStep = (props: TTestStepProps) => {
                 : isIncorrect
                 ? "danger"
                 : "primary";
-            if (isTeacher && isHovered) {
+            if (isTeacher && isHovered && !isSubmitted) {
               if (option.isCorrect) {
                 color = "success";
               }
@@ -190,7 +190,7 @@ export const TestStep = (props: TTestStepProps) => {
             : isIncorrect
             ? "danger"
             : "primary";
-          const isHoverByTeacher = isTeacher && isHovered;
+          const isHoverByTeacher = isTeacher && !isSubmitted && isHovered;
           return (
             <label
               className="flex items-start wrap"
@@ -209,7 +209,7 @@ export const TestStep = (props: TTestStepProps) => {
                   zIndex: 2,
                   flexShrink: 0,
                   position: "absolute",
-                  background: isHoverByTeacher ? "#fff" : 'transparent',
+                  background: isHoverByTeacher ? "#fff" : "transparent",
                 }}
               >
                 {isHoverByTeacher && option.isCorrect && (
