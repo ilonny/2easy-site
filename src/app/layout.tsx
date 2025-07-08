@@ -8,10 +8,12 @@ import { Manrope } from "next/font/google";
 import { SibscribeContextProvider } from "@/subscribe/context";
 import { ToastWrapper } from "./ToastWrapper";
 import { BodyContainer } from "./BodyContainer";
+import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
-  description: "",
+  description:
+    "Сайт для преподавателей английского: готовые уроки и разговорные игры.",
 };
 
 export const viewport: Viewport = {
@@ -37,6 +39,7 @@ export default function RootLayout({
               <SibscribeContextProvider>
                 <Header />
                 <BodyContainer>{children}</BodyContainer>
+                <Footer />
                 <ToastWrapper />
               </SibscribeContextProvider>
             </AuthContextProvider>

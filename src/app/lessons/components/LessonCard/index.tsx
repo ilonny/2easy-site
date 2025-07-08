@@ -1,4 +1,4 @@
-import { FC, useContext, useMemo, useState } from "react";
+import { FC, useCallback, useContext, useMemo, useState } from "react";
 import { TLesson } from "../../types";
 import { BASE_URL } from "@/api";
 import styles from "./styles.module.css";
@@ -53,6 +53,20 @@ export const LessonCard: FC<TProps> = ({
   const { profile } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2;
 
+  const isDisabled =
+    isStudent && lesson?.["lesson_relations.status"] === "close";
+
+  const onPressLesson = useCallback(() => {
+    if (isDisabled) {
+      return;
+    }
+    if (isStudent) {
+      router.push("/lessons/" + lesson?.id);
+    } else {
+      router.push("/editor/" + lesson?.id);
+    }
+  }, [isDisabled, isStudent, lesson?.id, router]);
+
   const tags = useMemo(() => {
     if (isStudent) {
       return <></>;
@@ -68,6 +82,7 @@ export const LessonCard: FC<TProps> = ({
                 radius="full"
                 className="text-white"
                 key={tag}
+                onPress={onPressLesson}
               >
                 {tag.replaceAll("[", "").replaceAll("]", "")}
               </Button>
@@ -76,24 +91,13 @@ export const LessonCard: FC<TProps> = ({
         </div>
       );
     }
-  }, [lesson?.tags, isStudent]);
+  }, [lesson?.tags, isStudent, onPressLesson]);
 
-  const isDisabled =
-    isStudent && lesson?.["lesson_relations.status"] === "close";
   const { checkSubscription } = useCheckSubscription();
   return (
     <div style={{ width: "25%" }} className={`p-2 ${styles["lesson-card"]}`}>
       <div
-        onClick={() => {
-          if (isDisabled) {
-            return;
-          }
-          if (isStudent) {
-            router.push("/lessons/" + lesson?.id);
-          } else {
-            router.push("/editor/" + lesson?.id);
-          }
-        }}
+        onClick={onPressLesson}
         className="image-wrapper"
         style={{
           width: "100%",
@@ -230,6 +234,7 @@ export const LessonCard: FC<TProps> = ({
         )}
       </div>
       <div
+        onClick={onPressLesson}
         className="p-4 bg-white "
         style={{
           borderBottomLeftRadius: 4,
