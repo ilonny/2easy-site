@@ -276,7 +276,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                       whiteSpace: "break-spaces",
                     }}
                   >
-                    {m.value} {m.id}
+                    {m.value}
                   </Card>
                 </div>
                 <div className=" w-[50%] radius-10">
