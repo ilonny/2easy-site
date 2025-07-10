@@ -96,7 +96,7 @@ export const RegistrationForm = () => {
       <form key={2} onSubmit={confirmSubmit(onSubmitConfirm)}>
         <div className="relative mb-16">
           <h3 className="text-center font-extrabold text-2xl mb-2">
-            Регистрация
+            Регистрация 333
           </h3>
           <button
             type="button"

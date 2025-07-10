@@ -67,7 +67,8 @@ export const checkResponse = (res: {
 export const fetchPostJson = (params: TParams) => {
   const { path, data } = params;
   const headers = mapHeaders(params);
-  return fetch(API_URL + path, {
+  const url = (API_URL + path).replace("/undefined", "");
+  return fetch(url, {
     method: "POST",
     body: JSON.stringify(data),
     headers,
@@ -79,7 +80,8 @@ export const fetchPostMultipart = (params: TParams) => {
   const headers = mapHeaders(params);
   headers.set("Content-Type", "multipart/form-data");
   headers.delete("Content-Type");
-  return fetch(API_URL + path, {
+  const url = (API_URL + path).replace("/undefined", "");
+  return fetch(url, {
     method: "POST",
     body: data,
     headers,
@@ -92,7 +94,8 @@ export const fetchGet = (params: TParams) => {
     return;
   }
   const headers = mapHeaders(params);
-  return fetch(API_URL + path, {
+  const url = (API_URL + path).replace("/undefined", "");
+  return fetch(url, {
     method: "GET",
     headers,
   });
