@@ -26,7 +26,7 @@ jobs:
       # - run: cd ./frontend && npm ci --legacy-peer-deps && npm run build
       # - run: cd ./site && yarn && npm run build
       # Deploy
-      - run: cd ./ && sshpass -p '${{ secrets.pass }}' rsync -e "ssh -o StrictHostKeyChecking=no" --exclude 'uploads' --exclude '.git' --exclude 'src' src --archive --compress --delete --exclude '.env' . 2easy@89.111.152.174:/var/www/2easy/data/www/beta.2easyeng.com
+      - run: cd ./ && sshpass -p '${{ secrets.pass }}' rsync -e "ssh -o StrictHostKeyChecking=no" --exclude 'uploads' --exclude '.git' src --archive --compress --delete --exclude '.env' . 2easy@89.111.152.174:/var/www/2easy/data/www/beta.2easyeng.com
       # - run: sshpass -p '${{ secrets.pass }}' ssh 2easy@89.111.152.174 "pm2 start /var/www/2easy/data/www/beta.2easyeng.com/dist/index.js"
       # - run: sshpass -p '${{ secrets.pass }}' ssh 2easy@89.111.152.174 "cd /var/www/2easy/data/www/beta.2easyeng.com && npm run pm2Restart"
       
