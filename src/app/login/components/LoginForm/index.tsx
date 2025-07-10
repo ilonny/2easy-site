@@ -60,7 +60,7 @@ export const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <h3 className="text-center font-bold text-2xl mb-8">Вход</h3>
+      <h3 className="text-center font-bold text-2xl mb-8">Вход TEST</h3>
       <Controller
         name="login"
         control={control}

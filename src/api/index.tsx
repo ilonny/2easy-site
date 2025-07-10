@@ -12,7 +12,7 @@ export const ApiProvider = ({ children }) => {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
 
-export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.replace(
+export const BASE_URL = process.env.BASE_URL?.replace(
   "/undefined",
   ""
 );
