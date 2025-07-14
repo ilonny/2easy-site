@@ -3,19 +3,8 @@
 "use client";
 
 import { ContentWrapper } from "@/components";
-import { SquareList } from "@/components/SquareList";
-import {
-  BreadcrumbItem,
-  Breadcrumbs,
-  Button,
-  Tab,
-  Tabs,
-} from "@nextui-org/react";
-import { useCheckSubscription } from "@/app/subscription/helpers";
-import { useRouter } from "next/navigation";
-import { useContext, useEffect } from "react";
-import { PageLeftBlock } from "@/components/PageLeftBlock";
-import { ProfileLessons } from "../lessons/components/ProfileLessons";
+import { BreadcrumbItem, Breadcrumbs, Button } from "@nextui-org/react";
+import { useContext } from "react";
 import img1 from "@/assets/images/about_us_1.png";
 import img2 from "@/assets/images/about_us_2.png";
 import Link from "next/link";
@@ -24,14 +13,6 @@ import { SubscribeTariffs } from "@/subscribe";
 import bg from "@/assets/images/feedback_bg.svg";
 
 export default function GrammarPage() {
-  const { checkSubscription } = useCheckSubscription();
-  const router = useRouter();
-  useEffect(() => {
-    if (!checkSubscription()) {
-      router.push("/subscription");
-    }
-  }, [checkSubscription, router]);
-
   const { subscription } = useContext(SibscribeContext);
 
   const hasTariff =
