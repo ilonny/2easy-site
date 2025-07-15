@@ -22,9 +22,11 @@ export const SubscribeTariffs = () => {
   const { subscription } = useContext(SibscribeContext);
 
   const isMonthTariff = subscription?.subscribe_type_id === 2;
-  const isYearTariff = subscription?.subscribe_type_id === 3;
-  const hasTariff =
-    subscription?.subscribe_type_id && subscription?.subscribe_type_id !== 1;
+  // const isYearTariff = subscription?.subscribe_type_id === 3;
+  // const hasTariff =
+  //   subscription?.subscribe_type_id && subscription?.subscribe_type_id !== 1;
+  const isYearTariff = false;
+  const hasTariff = false;
 
   const [regModalIsOpened, setRegModalIsOpened] = useState(false);
   const [paymentOpened, setPaymentOpened] = useState(false);
@@ -45,15 +47,29 @@ export const SubscribeTariffs = () => {
 
   return (
     <div>
-      <div className="flex items-stretch justify-center gap-4">
+      <div
+        className="
+        flex
+        items-stretch
+        justify-center
+        gap-4
+        flex-wrap
+        wrap
+      "
+      >
         {!isYearTariff && (
           <div
-            className="text-white"
+            className="
+              text-white
+              w-[100%]
+              lg:w-[376px]
+              max-w-[376px]
+            "
             style={{
               background: "linear-gradient(180deg, #7B2DD6 0%, #3F28C6 100%)",
-              width: 376,
               borderRadius: 10,
               padding: "20px",
+              maxWidth: 376,
             }}
           >
             <div className="flex items-center justify-between">
@@ -97,11 +113,17 @@ export const SubscribeTariffs = () => {
         )}
         {isMonthTariff ? (
           <div
+            className="
+              text-white
+              w-[100%]
+              lg:w-[376px]
+              max-w-[376px]
+              "
             style={{
               background: `url(${Bg.src})  center center / cover no-repeat rgb(255, 255, 255)`,
-              width: 376,
               borderRadius: 10,
               padding: "20px",
+              maxWidth: 376,
             }}
           ></div>
         ) : (
@@ -156,10 +178,10 @@ export const SubscribeTariffs = () => {
         )}
       </div>
       <div className="h-4" />
-      <div className="flex items-start justify-center gap-4">
+      <div className="flex items-start justify-center gap-4 flex-wrap">
         <div
           style={{
-            width: 376,
+            maxWidth: 376,
           }}
         >
           {!hasTariff && (
@@ -175,7 +197,7 @@ export const SubscribeTariffs = () => {
         </div>
         <div
           style={{
-            width: 376,
+            maxWidth: 376,
           }}
         >
           {!hasTariff && (

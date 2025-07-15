@@ -8,11 +8,32 @@ import { ContentWrapper } from "../ContentWrapper";
 
 export const Footer = () => {
   return (
-    <div className="mt-10">
+    <div
+      className="
+    mt-0
+    lg:mt-10
+    "
+    >
       <ContentWrapper>
-        <div className="flex items-center justify-between py-20">
+        <div
+          className="
+          flex
+          items-center
+          py-5
+          flex-col
+          justify-center
+          lg:flex-row
+          lg:justify-between
+          lg:py-20
+          "
+        >
           <div className="w-[140px]">
-            <Image priority={false} src={Logo} alt="logo" />
+            <Image
+              priority={false}
+              src={Logo}
+              alt="logo"
+              className="m-auto lg:m-0"
+            />
           </div>
           <div className="text-center flex flex-col">
             <p>© 2023 – 2025 2EASY</p>
@@ -32,7 +53,19 @@ export const Footer = () => {
               Публичная оферта
             </Link>
           </div>
-          <div className="w-[140px] flex items-center gap-4">
+          <div
+            className="
+            w-[140px]
+            flex
+            items-center
+            gap-4
+            m-auto
+            mt-4
+            justify-center
+            lg:m-0
+            lg:justify-start
+            "
+          >
             <Link
               href="#"
               target="_blank"

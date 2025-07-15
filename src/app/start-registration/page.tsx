@@ -9,8 +9,24 @@ import Bg from "@/assets/images/start_registration_bg.png";
 
 export default function StartRegistrationPage() {
   return (
-    <main className="flex flex-col flex-1 justify-center items-center justify-items-center min-h-screen p-8 pb-20 gap-6 bg-[#20107D]">
-      <div className="w-[771px]">
+    <main
+      className="
+      flex
+      flex-col
+      flex-1
+      justify-center
+      items-center
+      justify-items-center
+      min-h-screen
+      bg-[#20107D]
+      p-4
+      pb-0
+      gap-3
+      lg:p-8
+      lg:pb-20
+      lg:gap-6"
+    >
+      <div className="w-[100%] max-w-[771px]">
         <Panel>
           <div className="flex justify-center">
             <Link href={"/"}>
@@ -19,7 +35,7 @@ export default function StartRegistrationPage() {
           </div>
         </Panel>
       </div>
-      <div className="w-[771px] border-pinkSecondary border-3 rounded-[13px] overflow-hidden relative">
+      <div className="w-[100%] max-w-[771px] border-pinkSecondary border-3 rounded-[13px] overflow-hidden relative">
         <Panel
           style={{
             background: `url(${Bg.src}) right top no-repeat #fff`,

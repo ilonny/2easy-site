@@ -1,4 +1,7 @@
-import type { Metadata, Viewport } from "next";
+import type {
+  Metadata,
+  // Viewport
+} from "next";
 import "./globals.css";
 import { Header } from "@/components";
 import { AuthContextProvider } from "@/auth";
@@ -16,12 +19,12 @@ export const metadata: Metadata = {
     "Сайт для преподавателей английского: готовые уроки и разговорные игры.",
 };
 
-export const viewport: Viewport = {
-  width: "1200",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-};
+// export const viewport: Viewport = {
+//   width: "1200",
+//   initialScale: 1,
+//   maximumScale: 1,
+//   userScalable: false,
+// };
 
 const manrope = Manrope({ subsets: ["cyrillic"] });
 
