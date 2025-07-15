@@ -98,6 +98,7 @@ const DraggableItem = (props: {
   isCorrect: boolean;
   activeDragId: number | null;
   setIncorrectIdsMap: any;
+  fields: TField[];
 }) => {
   const {
     field,
@@ -110,6 +111,7 @@ const DraggableItem = (props: {
     activeDragId,
     setErrorAnswerId,
     setIncorrectIdsMap,
+    fields,
   } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
@@ -180,6 +182,20 @@ const DraggableItem = (props: {
         onDrop();
         setActiveDragId(null);
         if (isMissedIntersectedId.current && !isIntersected.current) {
+          //maybe word is correct, but id is missed
+          const isMissedIntersectValue = fields.find(
+            (f) => f.id == isMissedIntersectedId.current
+          )?.value;
+          console.log("isMissedIntersectValue", isMissedIntersectValue);
+          if (isMissedIntersectValue === field.value) {
+            setCorrectIds((ids) =>
+              ids.concat(Number(isMissedIntersectedId.current))
+            );
+            setX(0);
+            setY(0);
+            return;
+          }
+          //
           setX(0);
           setY(0);
           setErrorAnswerId(isMissedIntersectedId.current);
@@ -332,7 +348,7 @@ export const FillGapsDragExView: FC<TProps> = ({
   }, [data.fields]);
 
   const onDrop = useCallback(() => {}, [activeDragId]);
-
+  console.log("correctIds", correctIds);
   return (
     <div className="fill-the-gaps-draggable">
       <div className={`py-8 w-[886px] m-auto`}>
@@ -403,6 +419,7 @@ export const FillGapsDragExView: FC<TProps> = ({
                 isCorrect={correctIds?.includes(field?.id)}
                 setErrorAnswerId={setErrorAnswerId}
                 setIncorrectIdsMap={setIncorrectIdsMap}
+                fields={data.fields}
               />
             );
           })}
