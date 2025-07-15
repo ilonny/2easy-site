@@ -59,23 +59,34 @@ export default function GrammarPage() {
         <div className="flex items-start flex-wrap wrap">
           {data.map((el) => {
             return (
-              <div className="w-[33.333333%] p-2 mb-4" key={el.id}>
-                <img src={el.img.src} />
-                <div className="mt-4 p-4 bg-white" style={{ borderRadius: 12 }}>
-                  <p
-                    className="uppercase mb-2"
-                    style={{ fontSize: 18, color: "#5837dc", fontWeight: 700 }}
+              <Link
+                className="w-[33.333333%] p-2 mb-4"
+                key={el.id}
+                href={el.link}
+              >
+                <div>
+                  <img src={el.img.src} />
+                  <div
+                    className="mt-4 p-4 bg-white"
+                    style={{ borderRadius: 12 }}
                   >
-                    {el.title}
-                  </p>
-                  <p>{el.text}</p>
-                  <div className="flex justify-end mt-2">
-                    <Link href={el.link} style={{ color: "#5837dc" }}>
-                      Open
-                    </Link>
+                    <p
+                      className="uppercase mb-2"
+                      style={{
+                        fontSize: 18,
+                        color: "#5837dc",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {el.title}
+                    </p>
+                    <p>{el.text}</p>
+                    <div className="flex justify-end mt-2">
+                      <span style={{ color: "#5837dc" }}>Open</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

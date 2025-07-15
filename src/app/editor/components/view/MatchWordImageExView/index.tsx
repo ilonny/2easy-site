@@ -303,7 +303,7 @@ export const MatchWordImageExView: FC<TProps> = ({
   }, [correctIds?.length, writeAnswer, incorrectIdsMap]);
 
   // console.log('data', data)
-  console.log("correctIds", correctIds);
+  // console.log("correctIds", correctIds);
   return (
     <div className={`py-8 w-[886px] m-auto match-word-image`}>
       <p
