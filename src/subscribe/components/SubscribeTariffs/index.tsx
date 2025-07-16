@@ -22,11 +22,9 @@ export const SubscribeTariffs = () => {
   const { subscription } = useContext(SibscribeContext);
 
   const isMonthTariff = subscription?.subscribe_type_id === 2;
-  // const isYearTariff = subscription?.subscribe_type_id === 3;
-  // const hasTariff =
-  //   subscription?.subscribe_type_id && subscription?.subscribe_type_id !== 1;
-  const isYearTariff = false;
-  const hasTariff = false;
+  const isYearTariff = subscription?.subscribe_type_id === 3;
+  const hasTariff =
+    subscription?.subscribe_type_id && subscription?.subscribe_type_id !== 1;
 
   const [regModalIsOpened, setRegModalIsOpened] = useState(false);
   const [paymentOpened, setPaymentOpened] = useState(false);

@@ -7,6 +7,19 @@ export const useLessons = (studentId?: string, searchString?: string) => {
   const [lesson, setLesson] = useState<TLesson | undefined>();
   const [lessonsListIslLoading, setLessonsListIslLoading] = useState(false);
 
+  const getMainPageLessons = useCallback(async () => {
+    setLessonsListIslLoading(true);
+    const res = await fetchGet({
+      path: "/main-page-lessons",
+    });
+    const data = await res?.json();
+    if (data) {
+      setLessons(data?.lessons?.reverse() || []);
+    }
+    setLessonsListIslLoading(false);
+    return data;
+  }, []);
+
   const getLessons = useCallback(async () => {
     setLessonsListIslLoading(true);
     const res = await fetchGet({
@@ -96,5 +109,6 @@ export const useLessons = (studentId?: string, searchString?: string) => {
     lesson,
     changeLessonStatus,
     deleteLessonRelation,
+    getMainPageLessons,
   };
 };

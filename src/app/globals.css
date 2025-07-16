@@ -273,3 +273,12 @@ blockquote {
 ol, ul {
   list-style-position: inside !important;
 }
+
+@media (min-width: 1024px) {
+  .lg\:order-1 {
+      order: 1;
+  }
+  .lg\:order-2 {
+      order: 2;
+  }
+}

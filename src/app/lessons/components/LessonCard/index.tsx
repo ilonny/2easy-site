@@ -32,6 +32,7 @@ type TProps = {
   hideDeleteLessonButton?: boolean;
   showStartLessonButton?: boolean;
   isStudent?: boolean;
+  disableClick?: boolean;
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -46,6 +47,7 @@ export const LessonCard: FC<TProps> = ({
   deleteLessonRelation,
   showStartLessonButton,
   isStudent,
+  disableClick,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -57,7 +59,7 @@ export const LessonCard: FC<TProps> = ({
     isStudent && lesson?.["lesson_relations.status"] === "close";
 
   const onPressLesson = useCallback(() => {
-    if (isDisabled) {
+    if (isDisabled || disableClick) {
       return;
     }
     if (isStudent) {
@@ -65,7 +67,7 @@ export const LessonCard: FC<TProps> = ({
     } else {
       router.push("/editor/" + lesson?.id);
     }
-  }, [isDisabled, isStudent, lesson?.id, router]);
+  }, [isDisabled, isStudent, lesson?.id, router, disableClick]);
 
   const tags = useMemo(() => {
     if (isStudent) {
@@ -95,7 +97,9 @@ export const LessonCard: FC<TProps> = ({
 
   const { checkSubscription } = useCheckSubscription();
   return (
-    <div className={`p-2 w-[100%] lg:w-[25%] ${styles["lesson-card"]}`}>
+    <div
+      className={`p-2 w-[100%] lg:w-[25%] ${styles["lesson-card"]} flex-shrink-0`}
+    >
       <div
         onClick={onPressLesson}
         className="image-wrapper"
@@ -122,7 +126,7 @@ export const LessonCard: FC<TProps> = ({
           }}
         />
         <div className={styles["shadow"]} />
-        {!isStudent && (
+        {!isStudent && !disableClick && (
           <div className={styles["btn-wrapper"]}>
             <Popover
               color="foreground"
