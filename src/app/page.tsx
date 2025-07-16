@@ -156,7 +156,7 @@ export default function Home() {
           </p>
           <div className="h-6 lg:h-14"></div>
           <div className="flex relative">
-            <div className="flex overflow-scroll">
+            <div className="flex overflow-scroll w-[100%]">
               {lessons.map((lesson) => {
                 return (
                   <LessonCard lesson={lesson} key={lesson.id} disableClick />
