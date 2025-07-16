@@ -40,8 +40,13 @@ export const ProfileInfoForm = () => {
 
   return (
     <div className="flex gap-16">
-      <ProfileImagePicker />
-      <form onSubmit={handleSubmit(onSubmit)} className="min-w-[450px]">
+      <div className="hidden lg:block">
+        <ProfileImagePicker />
+      </div>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-[100%] lg:min-w-[450px]"
+      >
         <Controller
           name="name"
           control={control}

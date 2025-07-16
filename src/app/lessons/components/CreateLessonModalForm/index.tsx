@@ -89,7 +89,12 @@ export const CreateLessonModalForm: FC<TProps> = ({
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   return (
-    <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
+    <Modal
+      size="xl"
+      isOpen={isVisible}
+      onClose={() => setIsVisible(false)}
+      scrollBehavior="outside"
+    >
       <ModalContent>
         <ModalHeader>
           <p>{title ? title : "Новый урок"}</p>

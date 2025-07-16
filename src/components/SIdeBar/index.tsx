@@ -16,6 +16,7 @@ export const SideBar: FC<TProps> = ({ isOpened }) => {
       className={`top-[80px] left-0 fixed w-[100%] h-[100%] bg-white p-4 ${
         !isOpened && "hidden"
       }`}
+      style={{ zIndex: 3 }}
     >
       <HeaderMenuList />
     </div>

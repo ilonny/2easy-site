@@ -75,7 +75,7 @@ export default function GrammarPage() {
           fullWidth
           classNames={{
             tabList: "flex flex-wrap wrap justify-between",
-            tab: "w-[9%]",
+            tab: "w-[100%] lg:w-[9%]",
           }}
         >
           {data.map((tab) => {

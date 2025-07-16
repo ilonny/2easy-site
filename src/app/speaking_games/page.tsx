@@ -60,7 +60,7 @@ export default function GrammarPage() {
           {data.map((el) => {
             return (
               <Link
-                className="w-[33.333333%] p-2 mb-4"
+                className="w-[100%] lg:w-[33.333333%] p-2 mb-4"
                 key={el.id}
                 href={el.link}
               >

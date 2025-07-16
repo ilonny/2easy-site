@@ -18,7 +18,7 @@ export default function StartRegistrationPage() {
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
-        <div className="w-[771px] mx-8">
+        <div className="w-[100%] lg:w-[771px]">
           <div className="h-14" />
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
@@ -76,7 +76,9 @@ export default function StartRegistrationPage() {
             </>
           )}
           <div className="h-10" />
-          <SubscribeTariffs />
+          <ContentWrapper>
+            <SubscribeTariffs />
+          </ContentWrapper>
           <div className="h-10" />
           <div className="h-10" />
           <div className="h-10" />

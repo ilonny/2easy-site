@@ -16,7 +16,7 @@ import { RegistrationForm } from "@/app/registration";
 export const SubscribeFreeBlock = () => {
   const [modalIsOpen, setModalIsOpened] = useState(false);
   return (
-    <div className="w-[771px] border-pinkSecondary border-3 rounded-[13px] overflow-hidden relative">
+    <div className="w-[100%] lg:w-[771px] border-pinkSecondary border-3 rounded-[13px] overflow-hidden relative">
       <Panel
         style={{
           background: `url(${Bg.src}) right top no-repeat #fff`,
