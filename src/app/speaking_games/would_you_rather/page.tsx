@@ -82,7 +82,7 @@ export default function GrammarPage() {
           fullWidth
           classNames={{
             tabList: "flex flex-wrap wrap justify-between max-w-[500px] m-auto",
-            tab: "w-[49%]",
+            tab: "w-[100%] lg:w-[49%]",
           }}
         >
           <Tab key={"all"} title={"Basic"} />

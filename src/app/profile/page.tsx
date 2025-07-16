@@ -82,7 +82,16 @@ export default function StartRegistrationPage() {
           <div className="h-10" />
           <div className="mx-8"></div>
           {tabIndex === "profile" && !authIsLoading && (
-            <div className="flex items-start justify-center w-full gap-40">
+            <div
+              className="
+              flex
+              items-start
+              justify-center
+              w-full
+              flex-wrap
+              lg:gap-40
+            "
+            >
               <ProfileInfoForm />
               <ProfileSubscribeInformer />
             </div>

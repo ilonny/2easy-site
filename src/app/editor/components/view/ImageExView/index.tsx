@@ -40,7 +40,7 @@ const settings = {
 
 export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
   return (
-    <div className={`py-8 w-[886px] m-auto`}>
+    <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
       <p
         style={{
           color: data.titleColor,
@@ -74,7 +74,7 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
         </p>
       )}
       <div className="h-10" />
-      <div className={`py-8 w-[886px] m-auto`} style={{ margin: "0 auto" }}>
+      <div className={`py-8 w-[100%] max-w-[886px] m-auto`} style={{ margin: "0 auto" }}>
         {!Boolean(data?.images?.length) && (
           <div
             className="w-full h-[250px]"

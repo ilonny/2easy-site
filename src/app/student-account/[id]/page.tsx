@@ -104,8 +104,8 @@ export default function StartRegistrationPage() {
             />
           </div>
         )}
-        <div className="flex items-end gap-6">
-          <div className="w-[415px]">
+        <div className="flex items-end gap-6 flex-wrap">
+          <div className="w-[100%] lg:w-[415px]">
             {!!studentInfo && isTeacher && (
               <StudentList
                 onSuccessEditCallback={fetchStudentInfo}
@@ -116,7 +116,7 @@ export default function StartRegistrationPage() {
               />
             )}
           </div>
-          <div className="w-[525px]">
+          <div className="w-[100%] lg:w-[525px]">
             <Input
               value={searchString}
               onValueChange={setSearchString}

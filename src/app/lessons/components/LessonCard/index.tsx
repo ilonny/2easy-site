@@ -95,7 +95,7 @@ export const LessonCard: FC<TProps> = ({
 
   const { checkSubscription } = useCheckSubscription();
   return (
-    <div style={{ width: "25%" }} className={`p-2 ${styles["lesson-card"]}`}>
+    <div className={`p-2 w-[100%] lg:w-[25%] ${styles["lesson-card"]}`}>
       <div
         onClick={onPressLesson}
         className="image-wrapper"

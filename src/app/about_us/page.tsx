@@ -25,7 +25,7 @@ export default function GrammarPage() {
           <div className="h-14" />
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/about_us">Abou us</BreadcrumbItem>
+            <BreadcrumbItem href="/about_us">About us</BreadcrumbItem>
           </Breadcrumbs>
         </div>
         <div className="h-10" />
@@ -200,7 +200,18 @@ export default function GrammarPage() {
           <div className="h-10" />
           <div className="h-10" />
           <div
-            className="w-100% p-6 flex items-end justify-between"
+            className="
+              w-100%
+              flex
+              flex-col
+              p-4
+              gap-4
+              lg:gap-0
+              lg:p-6
+              lg:flex-row
+              lg:items-end
+              lg:justify-between
+            "
             style={{
               background: `url(${bg.src}) center center no-repeat`,
               backgroundSize: "cover",
@@ -208,7 +219,10 @@ export default function GrammarPage() {
             }}
           >
             <div className="">
-              <p style={{ fontWeight: 700, fontSize: 42 }}>
+              <p
+                className=" text-[30px] lg:text-[42px]"
+                style={{ fontWeight: 700 }}
+              >
                 МЫ ВСЕГДА НА СВЯЗИ
               </p>
               <p>Свяжитесь с нами, если у вас есть вопросы или пожелания</p>

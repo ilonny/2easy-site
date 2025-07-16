@@ -7,7 +7,7 @@ type TProps = {
 export const PageLeftBlock = (props: TProps) => {
   const { title, content, isOrange } = props;
   return (
-    <div className="bg-white p-10 radius-4 max-w-[645px]">
+    <div className="bg-white p-5 lg:p-10 radius-4 w-[100%] max-w-[645px]">
       <h1
         color="primary"
         style={{

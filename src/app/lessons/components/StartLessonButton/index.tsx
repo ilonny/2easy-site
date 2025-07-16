@@ -33,26 +33,32 @@ export const StartLessonButton = (props: TProps) => {
     <>
       <div
         style={{
-          width: 90,
-          height: 90,
           borderRadius: 90,
           backgroundColor: "#3f28c6",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          fontSize: 22,
           lineHeight: "22px",
           color: "#fff",
           cursor: "pointer",
           transition: "all 250ms ease",
           padding: 10,
           position: "sticky",
-          top: 40,
           zIndex: 10,
           float: "right",
           // marginRight: -150,
         }}
-        className="hover:opacity-[0.8]"
+        className="
+          hover:opacity-[0.8]
+          top-[80px]
+          h-[80px]
+          w-[80px]
+          text-[18px]
+          lg:text-[22px]
+          lg:h-[90px]
+          lg:w-[90px]
+          lg:top-[40]
+        "
         onClick={() => onPressButton()}
       >
         <p className="text-center">Начать урок</p>

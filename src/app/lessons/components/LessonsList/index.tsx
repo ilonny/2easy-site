@@ -69,7 +69,7 @@ export const LessonsList: FC<TProps> = ({
   return (
     <div className="flex items-start justify-start w-full flex-wrap">
       {canCreateLesson && (
-        <div style={{ width: "25%" }} className="p-2">
+        <div className="p-2 w-[100%] lg:w-[25%]">
           <div
             className="image-wrapper"
             style={{

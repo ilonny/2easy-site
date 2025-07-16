@@ -76,7 +76,7 @@ export default function GrammarPage() {
           fullWidth
           classNames={{
             tabList: "flex flex-wrap wrap justify-center",
-            tab: "max-w-[19%]",
+            tab: "w-[100%] lg:max-w-[19%]",
           }}
         >
           {tabs.map((tab) => {

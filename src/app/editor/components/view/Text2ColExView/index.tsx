@@ -19,7 +19,7 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
   const secondEditorImage = data?.secondEditorImages?.[0];
   return (
     <>
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -58,7 +58,7 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
         <div className="flex items-start justify-between gap-4">
           <Card
             className={`w-[50%] p-5 editor-view`}

@@ -9,7 +9,7 @@ export const HeaderProfile = (props: TProps) => {
   const { isStudent } = props;
   return (
     <div className="flex flex-row items-center">
-      {!props.isStudent && <SubscribeCounter />}
+      <div className="hidden lg:block">{!props.isStudent && <SubscribeCounter />}</div>
       <div className="ml-4">
         <HeaderProfileShort isStudent={isStudent} />
       </div>
