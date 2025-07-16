@@ -238,7 +238,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
 
   return (
     <div
-      className={`py-8 w-[886px] m-auto match-word-column`}
+      className={`py-8 w-[100%] max-w-[886px] m-auto match-word-column`}
       id={`ex-${ex_id}`}
     >
       <p
@@ -279,19 +279,30 @@ export const MatchWordColumnExView: FC<TProps> = ({
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`pb-8 w-[886px] m-auto`}>
+      <div className={`pb-8 w-[100%] max-w-[886px] m-auto`}>
         <div
           style={{
             margin: "0 auto",
           }}
         >
           <div
-            className="flex items-center wrap gap-4 justify-center m-auto py-4 flex-wrap  shadow-lg"
+            className="
+              flex
+              items-center
+              wrap
+              gap-4
+              justify-center
+              m-auto
+              py-4
+              flex-wrap
+              shadow-lg
+              top-[80px]
+              lg:top-[0px]
+            "
             style={{
               position: "sticky",
               zIndex: 2,
               background: "#fff",
-              top: 0,
               borderRadius: 10,
             }}
           >

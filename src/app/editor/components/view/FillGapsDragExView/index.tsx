@@ -351,7 +351,7 @@ export const FillGapsDragExView: FC<TProps> = ({
   console.log("correctIds", correctIds);
   return (
     <div className="fill-the-gaps-draggable">
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -385,7 +385,7 @@ export const FillGapsDragExView: FC<TProps> = ({
           </p>
         )}
       </div>
-      <div className={`pb-8 w-[886px] m-auto`}>
+      <div className={`pb-8 w-[100%] max-w-[886px] m-auto`}>
         {!!image && (
           <Zoom>
             <img
@@ -396,12 +396,22 @@ export const FillGapsDragExView: FC<TProps> = ({
           </Zoom>
         )}
         <div
-          className="flex justify-center items-center py-4 gap-2 flex-wrap mx-auto shadow-lg"
+          className="
+            flex
+            justify-center
+            items-center
+            py-4
+            gap-2
+            flex-wrap
+            mx-auto
+            shadow-lg
+            top-[80px]
+            lg:top-[0px]
+          "
           style={{
             position: "sticky",
             zIndex: 2,
             background: "#fff",
-            top: 0,
             borderRadius: 10,
           }}
         >

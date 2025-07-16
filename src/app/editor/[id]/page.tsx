@@ -136,16 +136,15 @@ export default function EditorPage() {
         <div className="h-10" />
         <div className="h-10" />
         <div
-          className="p-10"
+          className="p-2 w-[100%] lg:p-10 lg:max-w-[1160px]"
           style={{
-            width: 1160,
             margin: "0 auto",
             backgroundColor: "#fff",
             borderRadius: 10,
           }}
         >
           <StartLessonButton lesson={lesson} />
-          <div className="w-[100%] pl-[90px]">
+          <div className="w-[100%] lg:pl-[90px]">
             <h1
               style={{
                 fontSize: 44,

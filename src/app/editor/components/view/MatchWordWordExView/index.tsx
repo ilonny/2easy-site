@@ -144,7 +144,7 @@ export const MatchWordWordExView: FC<TProps> = ({
 
   return (
     <>
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -183,7 +183,7 @@ export const MatchWordWordExView: FC<TProps> = ({
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
         <div
           className={` flex items-center justify-center flex-wrap`}
           style={{ margin: "0 auto" }}

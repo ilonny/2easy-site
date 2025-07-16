@@ -150,7 +150,7 @@ export default function StartRegistrationPage() {
         <div className="flex items-start gap-4">
           <div className="w-[100%]">
             <div
-              className="p-10"
+              className="p-2 lg:p-10"
               style={{
                 width: "100%",
                 maxWidth: 1160,

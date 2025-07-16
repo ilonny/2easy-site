@@ -38,12 +38,14 @@ export const Header = () => {
           }px] border-[#D9D9D9] py-4 lg:py-8 min-h-[80px] lg:min-h-[115px]`}
         >
           <div className="left">
-            <div
-              className="lg:hidden"
-              onClick={() => setSidebarIsOpened((o) => !o)}
-            >
-              <Image src={MenuIcon} alt="menu" className="w-[40px]" />
-            </div>
+            {!profile?.isStudent && (
+              <div
+                className="lg:hidden"
+                onClick={() => setSidebarIsOpened((o) => !o)}
+              >
+                <Image src={MenuIcon} alt="menu" className="w-[40px]" />
+              </div>
+            )}
           </div>
           <a
             href={

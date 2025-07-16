@@ -305,7 +305,7 @@ export const MatchWordImageExView: FC<TProps> = ({
   // console.log('data', data)
   // console.log("correctIds", correctIds);
   return (
-    <div className={`py-8 w-[886px] m-auto match-word-image`}>
+    <div className={`py-8 w-[100%] max-w-[886px] m-auto match-word-image`}>
       <p
         style={{
           color: data.titleColor,
@@ -348,12 +348,23 @@ export const MatchWordImageExView: FC<TProps> = ({
         )}
         {data.viewType === "drag" && (
           <div
-            className="flex items-center wrap gap-4 justify-center m-auto py-4 flex-wrap shadow-lg"
+            className="
+              flex
+              items-center
+              wrap
+              gap-4
+              justify-center
+              m-auto
+              py-4
+              flex-wrap
+              shadow-lg
+              top-[80px]
+              lg:top-[0px]
+            "
             style={{
               position: "sticky",
               zIndex: 2,
               background: "#fff",
-              top: 0,
               borderRadius: 10,
             }}
           >
