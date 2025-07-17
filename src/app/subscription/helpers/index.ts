@@ -10,7 +10,7 @@ export const useCheckSubscription = () => {
 
   const checkSubscription = useCallback(() => {
     if (!authIsLoading && !profile?.login && !profile?.studentId) {
-      router.push("/login");
+      router.push("/subscription");
     }
     if (subscription === undefined) {
       return true;

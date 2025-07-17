@@ -3,25 +3,11 @@
 "use client";
 
 import { ContentWrapper } from "@/components";
-import { SquareList } from "@/components/SquareList";
-import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
-import { useCheckSubscription } from "@/app/subscription/helpers";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { PageLeftBlock } from "@/components/PageLeftBlock";
-import { ProfileLessons } from "../lessons/components/ProfileLessons";
+import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import { data } from "./data";
 import Link from "next/link";
 
 export default function GrammarPage() {
-  const { checkSubscription } = useCheckSubscription();
-  const router = useRouter();
-  useEffect(() => {
-    if (!checkSubscription()) {
-      router.push("/subscription");
-    }
-  }, [checkSubscription, router]);
-
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
