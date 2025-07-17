@@ -1,3 +1,5 @@
+"use client";
+
 import Logo from "@/assets/icons/logo.svg";
 import WaIcon from "@/assets/icons/wa.svg";
 import EmailIcon from "@/assets/icons/email.svg";
@@ -5,8 +7,13 @@ import EmailIcon from "@/assets/icons/email.svg";
 import Image from "next/image";
 import Link from "next/link";
 import { ContentWrapper } from "../ContentWrapper";
+import { usePathname } from "next/navigation";
 
 export const Footer = () => {
+  const pathname = usePathname();
+  if (pathname !== "/") {
+    return null;
+  }
   return (
     <div
       className="
