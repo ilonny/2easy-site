@@ -28,6 +28,13 @@ export const SubscribeCounter = () => {
         </>
       );
     }
+    if (subscription?.subscribe_type_id === 4) {
+      return (
+        <>
+          <p className="mb-1">Подписка на 3 месяца</p>
+        </>
+      );
+    }
     return <>Нет подписки</>;
   }, [subscription]);
 
