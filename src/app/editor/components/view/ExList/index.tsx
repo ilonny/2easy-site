@@ -201,6 +201,9 @@ export const ExList: FC<TProps> = (props) => {
   const ViewerComponent = ({ ex, exIndex }) => {
     const Viewer = mapComponent(ex.type, { ...props, id: ex.id });
     const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+    const closePopover = useCallback(() => {
+      setPopoverIsOpen(false);
+    }, []);
 
     return (
       <div key={ex.id}>
