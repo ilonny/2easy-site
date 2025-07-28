@@ -113,7 +113,14 @@ export const FreeInputFormExView: FC<TProps> = ({
             : undefined;
           return (
             <div key={question.id} className="mb-6">
-              <p style={{ fontSize: 18, marginBottom: 20, fontWeight: 500 }}>
+              <p
+                style={{
+                  fontSize: 18,
+                  marginBottom: 20,
+                  fontWeight: 500,
+                  whiteSpace: "pre-line",
+                }}
+              >
                 {question.value}
               </p>
               <Card>
