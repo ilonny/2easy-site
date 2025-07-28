@@ -29,6 +29,7 @@
 .slick-next {
   width: 50px !important;
   height: 50px !important;
+  z-index: 3;
 }
 
 .slick-next {
