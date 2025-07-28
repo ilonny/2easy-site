@@ -16,6 +16,7 @@ import Image from "next/image";
 import { useCallback, useContext, useState } from "react";
 
 import Bg from "@/assets/images/year_tariff.png";
+import Script from "next/script";
 
 export const SubscribeTariffs = () => {
   const { profile } = useContext(AuthContext);

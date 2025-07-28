@@ -105,7 +105,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Заметка (например уровень подготовки)"
+                  label="Заметка (например, уровень подготовки)"
                   className="mb-5"
                   radius="sm"
                   size="lg"

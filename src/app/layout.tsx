@@ -12,6 +12,7 @@ import { SibscribeContextProvider } from "@/subscribe/context";
 import { ToastWrapper } from "./ToastWrapper";
 import { BodyContainer } from "./BodyContainer";
 import { Footer } from "@/components/Footer";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
@@ -35,6 +36,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
+      <Script src="https://widget.cloudpayments.ru/bundles/cloudpayments.js" />
       <body className={`${manrope.className} antialiased`}>
         <ApiProvider>
           <NextUIProvider>

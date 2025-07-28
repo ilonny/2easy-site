@@ -5,6 +5,7 @@ import { usePromocode } from "@/payment/hooks/usePromocode";
 import { TSubscribePeriod } from "@/subscribe/types";
 import { Button, Input } from "@nextui-org/react";
 import { redirect } from "next/navigation";
+import Script from "next/script";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
@@ -46,8 +47,42 @@ export const PaymentForm = (props: TProps) => {
       const response = await createPayment(
         type,
         getValues().phone,
-        getValues().promocode
+        getValues().promocode,
+        getValues().login
       );
+      if (!response.success) {
+        // error
+        return;
+      }
+
+      const cp = new window.cp.CloudPayments();
+      cp.charge(
+        {
+          PublicId: response?.publicId,
+          Description: "Оплата подписки 2EASY",
+          Amount: Number(response?.amount),
+          Currency: "RUB",
+          Email: response.email,
+          // Signature: response.Signature,
+        },
+        function (options) {
+          // success
+          console.log("Payment success");
+          // Success Callback - Implement your success logic here
+        },
+        function (reason, options) {
+          // fail
+          console.log("Payment failed", reason);
+          // Failure Callback - Implement your failure logic here
+        },
+        function (reason, options) {
+          // timeout
+          console.log("Payment timeout", reason);
+          // Timeout Callback - Implement your timeout logic here
+        }
+      );
+
+      console.log("response: ", response);
     },
     [createPayment, getValues, type]
   );
@@ -56,14 +91,8 @@ export const PaymentForm = (props: TProps) => {
     if (!!promocodeValue) {
       return price * (promocodeValue / 100);
     }
-    return price;
+    return 0;
   }, [price, promocodeValue]);
-
-  useEffect(() => {
-    if (paymentStatus === "success") {
-      redirect("/");
-    }
-  }, [promocodeValue, paymentStatus]);
 
   return (
     <>
