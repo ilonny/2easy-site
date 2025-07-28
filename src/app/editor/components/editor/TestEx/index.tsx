@@ -229,6 +229,8 @@ export const TestEx: FC<TProps> = ({
     [changeData, data.questions]
   );
 
+  const [isSubmitted, setSubmitted] = useState(false);
+
   const hasError = useMemo(() => {
     return data.questions.some((q) => {
       if (!q.value) {
@@ -308,7 +310,7 @@ export const TestEx: FC<TProps> = ({
                   classNames={{ inputWrapper: "bg-white" }}
                   onValueChange={(val) => onChangeQuestionValue(qIndex, val)}
                   errorMessage="Поле обязательное для заполнения."
-                  isInvalid={!q.value}
+                  isInvalid={isSubmitted && !q.value}
                 />
                 {data.questions.length > 1 && (
                   <div className="flex justify-end">
@@ -350,7 +352,7 @@ export const TestEx: FC<TProps> = ({
                             onChangeOptionValue(val, qIndex, optionIndex)
                           }
                           errorMessage="Поле обязательное для заполнения."
-                          isInvalid={!option.value}
+                          isInvalid={isSubmitted && !option.value}
                         />
                       </div>
                       {q.options.length > 1 && (
@@ -419,9 +421,14 @@ export const TestEx: FC<TProps> = ({
             color="primary"
             className="min-w-[310px]"
             size="lg"
-            onClick={() => saveTestEx(data)}
+            onClick={() => {
+              setSubmitted(true);
+              if (!hasError) {
+                saveTestEx(data);
+              }
+            }}
             isLoading={isLoading}
-            isDisabled={hasError}
+            isDisabled={isSubmitted && hasError}
           >
             Сохранить
           </Button>
