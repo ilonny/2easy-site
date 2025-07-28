@@ -163,7 +163,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
-    sleepDelay: 3000,
+    sleepDelay: 1000,
   });
 
   useEffect(() => {
@@ -195,11 +195,13 @@ export const FillGapsSelectExView: FC<TProps> = ({
   }, [localAnswers, writeAnswer]);
 
   const renderContent = useCallback(() => {
+    console.log("renderContent fired");
     document
       .querySelectorAll(
         `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`
       )
       .forEach((el, index) => {
+        console.log("el?", el);
         const id = el.id;
         const field = data.fields.find((f) => f.id == id);
         const maxOptionLength = Math?.max(
@@ -252,14 +254,25 @@ export const FillGapsSelectExView: FC<TProps> = ({
     data.fields,
     data?.id,
     profile?.role_id,
-    answers,
+    answers.length,
     localAnswers,
-    rest.activeStudentId,
+    // rest.activeStudentId,
   ]);
 
   useEffect(() => {
     renderContent();
   }, [renderContent]);
+
+  const content = useMemo(() => {
+    return (
+      <div
+        className={
+          "answerWrapperArea answerWrapperArea-" + (data?.id || 0).toString()
+        }
+        dangerouslySetInnerHTML={{ __html: data.dataText }}
+      ></div>
+    );
+  }, [data.dataText, data?.id]);
 
   return (
     <>
@@ -308,13 +321,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
             style={{ margin: "0 auto", lineHeight: "230%" }}
             className="flex flex-col gap-10"
           >
-            <div
-              className={
-                "answerWrapperArea answerWrapperArea-" +
-                (data?.id || 0).toString()
-              }
-              dangerouslySetInnerHTML={{ __html: data.dataText }}
-            ></div>
+            {content}
           </div>
         </Card>
       </div>
