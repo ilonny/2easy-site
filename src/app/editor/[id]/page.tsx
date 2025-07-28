@@ -86,6 +86,7 @@ export default function EditorPage() {
           type: ex.type,
           sortIndex: ex.sortIndex,
         });
+        window.location.hash = `ex-${ex.id}`
         setEditorModal(true);
       }
     },

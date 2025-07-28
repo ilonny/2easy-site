@@ -103,7 +103,7 @@ export const TestStep = (props: TTestStepProps) => {
   const defaultValue = !Object.keys(errorMap).length
     ? undefined
     : Object.keys(errorMap.current)[0];
-  console.log("isHovered", isHovered);
+
   return (
     <div
       onMouseEnter={() => {

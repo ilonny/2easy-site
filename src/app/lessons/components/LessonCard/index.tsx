@@ -276,7 +276,7 @@ export const LessonCard: FC<TProps> = ({
               onClick={() => {
                 if (!isStudent && checkSubscription()) {
                   router.push(`/lessons/${lesson.id}`);
-                  console.log("params", [Number(params.id)]);
+
                   writeToLocalStorage(
                     "start_lesson_selected_ids",
                     JSON.stringify([params.id])

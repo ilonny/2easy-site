@@ -1,11 +1,4 @@
-import React, {
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { FC, useCallback, useEffect, useState } from "react";
 import { ImageExView } from "../ImageExView";
 import styles from "./style.module.css";
 import ArrowUpIcon from "@/assets/icons/editor_arrow_up.svg";
@@ -173,7 +166,7 @@ const mapComponent = (type: string, outerProps: never) => {
   }
 };
 
-export const ExList: FC<TProps> = (props) => {
+export const ExListComp: FC<TProps> = (props) => {
   const {
     list,
     onPressEdit,
@@ -397,6 +390,14 @@ export const ExList: FC<TProps> = (props) => {
     );
   };
 
+  useEffect(() => {
+    if (window.location.hash) {
+      const id = window.location.hash.replace("#", "");
+      const el = document.getElementById(id);
+      el?.scrollIntoView();
+    }
+  }, [list]);
+
   return (
     <div className="flex flex-col gap-10">
       {list.map((ex, exIndex) => {
@@ -405,3 +406,5 @@ export const ExList: FC<TProps> = (props) => {
     </div>
   );
 };
+
+export const ExList = React.memo(ExListComp);

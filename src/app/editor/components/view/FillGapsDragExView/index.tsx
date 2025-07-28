@@ -186,7 +186,6 @@ const DraggableItem = (props: {
           const isMissedIntersectValue = fields.find(
             (f) => f.id == isMissedIntersectedId.current
           )?.value;
-          console.log("isMissedIntersectValue", isMissedIntersectValue);
           if (isMissedIntersectValue === field.value) {
             setCorrectIds((ids) =>
               ids.concat(Number(isMissedIntersectedId.current))
@@ -348,7 +347,6 @@ export const FillGapsDragExView: FC<TProps> = ({
   }, [data.fields]);
 
   const onDrop = useCallback(() => {}, [activeDragId]);
-  console.log("correctIds", correctIds);
   return (
     <div className="fill-the-gaps-draggable">
       <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>

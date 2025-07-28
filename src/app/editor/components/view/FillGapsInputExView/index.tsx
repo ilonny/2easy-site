@@ -266,7 +266,7 @@ export const FillGapsInputExView: FC<TProps> = ({
   useEffect(() => {
     renderContent();
   }, [renderContent]);
-  console.log("localAnswers", localAnswers);
+
   return (
     <>
       <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
