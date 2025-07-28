@@ -58,11 +58,13 @@ export const PaymentForm = (props: TProps) => {
       const cp = new window.cp.CloudPayments();
       cp.charge(
         {
-          PublicId: response?.publicId,
-          Description: "Оплата подписки 2EASY",
-          Amount: Number(response?.amount),
-          Currency: "RUB",
-          Email: response.email,
+          publicId: response?.publicId,
+          publicTerminalId: response?.publicId,
+          description: "Оплата подписки 2EASY",
+          amount: Number(response?.amount),
+          currency: "RUB",
+          email: response.email,
+          externalId: response.id,
           // Signature: response.Signature,
         },
         function (options) {
