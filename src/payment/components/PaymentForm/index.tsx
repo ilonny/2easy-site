@@ -65,6 +65,14 @@ export const PaymentForm = (props: TProps) => {
           currency: "RUB",
           email: response.email,
           externalId: response.id.toString(),
+          userInfo: {
+            phone: response.phone,
+            name: profile?.name,
+            surname: profile?.surname,
+          },
+          metadata: {
+            response,
+          },
         },
         function (options) {
           // success
