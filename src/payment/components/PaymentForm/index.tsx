@@ -64,12 +64,12 @@ export const PaymentForm = (props: TProps) => {
           amount: Number(response?.amount),
           currency: "RUB",
           email: response.email,
-          externalId: response.id,
-          // Signature: response.Signature,
+          externalId: response.id.toString(),
         },
         function (options) {
           // success
           console.log("Payment success");
+          window.location.reload();
           // Success Callback - Implement your success logic here
         },
         function (reason, options) {
