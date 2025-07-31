@@ -48,36 +48,9 @@ export default function StartRegistrationPage() {
           </p>
           <div className="h-10" />
           <div className="h-10" />
-          {!isAuthorized && !authIsLoading && (
-            <>
-              <SubscribeFreeBlock />
-              <div className="h-10" />
-              <div className="h-10" />
-            </>
-          )}
-          <h1 className={"text-primary font-bold text-3xl uppercase"}>
-            {hasTariff ? "ВАШ ТАРИФ" : "тарифы 2easy"}
-          </h1>
-          {!hasTariff && (
-            <>
-              <div className="h-3" />
-              <h2 className="font-medium text-lg text-center">
-                Выберите тариф, чтобы оформить подписку на сайт,
-                <br />
-                или{" "}
-                <Link href="/login">
-                  <span className="text-primary underline">
-                    войдите в личный кабинет
-                  </span>
-                </Link>
-                , если у вас уже есть подписка
-              </h2>
-              <div className="h-10" />
-            </>
-          )}
-          <div className="h-10" />
+
           <ContentWrapper>
-            <SubscribeTariffs />
+            <SubscribeTariffs hideTitle />
           </ContentWrapper>
           <div className="h-10" />
           <div className="h-10" />

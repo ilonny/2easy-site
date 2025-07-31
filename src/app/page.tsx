@@ -206,25 +206,7 @@ export default function Home() {
           <MainPageGamesSlider data={discussionCards} />
           <div className="h-6 lg:h-14"></div>
           <div className="h-6 lg:h-14"></div>
-          <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-            Тарифы 2easy
-          </h1>
-          <div className="h-2"></div>
-          <p className="max-w-[650px] m-auto text-center font-normal text-[18px]">
-            Полный доступ ко всем материалам, платформе для создания уроков и
-            личному кабинету с учениками для проведения уроков в real-time
-            <br />
-            Выберите тариф, чтобы оформить подписку на сайт, или{" "}
-            <Link href="/login" className="text-[#3E1BC9]">
-              войдите в личный кабинет
-            </Link>
-            , если у вас уже есть подписка
-          </p>
-          <div className="h-6 lg:h-14"></div>
           <SubscribeTariffs />
-          <div className="h-6 lg:h-14"></div>
-          <div className="h-6 lg:h-14"></div>
-          <SubscribeFreeBlock />
 
           <div className="h-6 lg:h-14"></div>
           <div className="h-6 lg:h-14"></div>

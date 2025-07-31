@@ -12,58 +12,77 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { RegistrationForm } from "@/app/registration";
+import SubscribeGreenImage from "@/assets/images/subscribe_green.png";
+import CardIcon from "@/assets/icons/card.svg";
 
 export const SubscribeFreeBlock = () => {
   const [modalIsOpen, setModalIsOpened] = useState(false);
   return (
-    <div className="w-[100%] lg:w-[771px] border-pinkSecondary border-3 rounded-[13px] overflow-hidden relative m-auto">
-      <Panel
+    <>
+      <div
+        className="p-4 lg:p-10"
         style={{
-          background: `url(${Bg.src}) right top no-repeat #fff`,
-          backgroundSize: "contain",
+          width: "100%",
+          minHeight: 318,
+          maxWidth: 793,
+          background: `url(${SubscribeGreenImage.src}) center center no-repeat`,
+          backgroundSize: "cover",
+          margin: "auto",
+          borderRadius: 20,
         }}
       >
-        <h1 className={"text-primary font-bold text-3xl uppercase"}>
-          Еще не пользовались 2easy?
-        </h1>
-        <div className="h-4" />
-
-        <h2
-          className="font-medium text-lg cursor-pointer"
-          onClick={() => setModalIsOpened(true)}
+        <p
+          style={{
+            maxWidth: 482,
+            fontWeight: 600,
+            fontSize: 22,
+            lineHeight: "120%",
+            color: "#292929",
+          }}
         >
-          Начните с{" "}
-          <span className="border-primary border-b-2">
-            бесплатного пробного периода
-          </span>
-        </h2>
-
+          Еще не пользовались 2easy?
+        </p>
         <div className="h-4" />
-        <div className="max-w-[420px]">
-          У вас будет 3 дня полного доступа ко всему, что есть на сайте. Это
-          позволит познакомиться с платформой перед оформлением подписки
-        </div>
-        <div className="h-4" />
-        <div className="max-w-[420px] flex items-center gap-4">
-          <Image priority={false} src={CheckedIcon} alt="ckecked-icon" />
-          <p className="text-[#219F59] text-small">
-            Не нужно вводить данные карты, пока сами не захотите оформить
-            подписку
+        <div style={{ maxWidth: 570 }}>
+          <p>Начните с бесплатного пробного периода.</p>
+          <p className="mt-2">
+            У вас будет 3 дня полного доступа ко всему, что есть на сайте -- это
+            позволит познакомиться с платформой перед оформлением подписки.
           </p>
         </div>
-        <div className="h-9" />
-        <div className="max-w-[320px]">
-          <Button
-            fullWidth
-            size="lg"
-            color="warning"
-            style={{ backgroundColor: "#FF7EB3", color: "#fff" }}
-            onClick={() => setModalIsOpened(true)}
+        <div className="h-4"></div>
+        <div className="inline-block">
+          <div
+            className="py-2 px-4 flex items-center gap-2"
+            style={{
+              background: "rgba(255, 255, 255, 0.3)",
+              borderRadius: 100,
+              fontSize: 14,
+            }}
+          >
+            <Image src={CardIcon} alt="card icon" />
+            <p>Не нужно вводить данные карты</p>
+          </div>
+        </div>
+        <div className="h-4"></div>
+        <Button
+          onClick={() => setModalIsOpened(true)}
+          style={{ backgroundColor: "#D2FF88", float: "right" }}
+          className="uppercase"
+          size="lg"
+        >
+          <span
+            style={{
+              fontSize: 14,
+              fontWeight: 600,
+              lineHeight: "120%",
+              letterSpacing: 1,
+            }}
           >
             Начать бесплатно
-          </Button>
-        </div>
-      </Panel>
+          </span>
+        </Button>
+      </div>
       <Modal
         size="lg"
         isOpen={modalIsOpen}
@@ -77,6 +96,6 @@ export const SubscribeFreeBlock = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
-    </div>
+    </>
   );
 };

@@ -64,6 +64,16 @@ export const ProfileSubscribeInformer = () => {
         </>
       );
     }
+    if (subscription?.subscribe_type_id === 4) {
+      return (
+        <>
+          <p className="mb-1">
+            Подписка 2easy до{" "}
+            {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
+          </p>
+        </>
+      );
+    }
     return (
       <div>
         <p className="font-medium">Нет активных подписок</p>
@@ -85,22 +95,13 @@ export const ProfileSubscribeInformer = () => {
         </Button>
       </div>
     );
-  }, [subscription]);
+  }, [router, subscription?.dateEnd, subscription?.subscribe_type_id]);
 
   return (
     <div>
       <Card shadow="none">
         <CardBody>
           <p>{diffText}</p>
-          {!!subscription?.subscribe_type_id && (
-            <Link
-              size="sm"
-              className="cursor-pointer text-small"
-              color="danger"
-            >
-              <p className="underline">Отменить подписку</p>
-            </Link>
-          )}
         </CardBody>
       </Card>
     </div>

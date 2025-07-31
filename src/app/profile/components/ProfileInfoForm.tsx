@@ -11,6 +11,7 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { ChangePasswordForm } from "@/app/login/components/ChangePasswordForm";
+import { SubscribeCancel } from "@/subscribe/components/SubscribeCancel";
 
 type TFieldList = {
   name: string;
@@ -39,96 +40,99 @@ export const ProfileInfoForm = () => {
   const onSubmit = useCallback((_data) => {}, []);
 
   return (
-    <div className="flex gap-16">
-      <div className="hidden lg:block">
-        <ProfileImagePicker />
-      </div>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-[100%] lg:min-w-[450px]"
-      >
-        <Controller
-          name="name"
-          control={control}
-          rules={{ required: "Имя обязательное поле" }}
-          render={({ field }) => (
-            <Input
-              {...field}
-              label="Имя"
-              className="mb-5"
-              radius="sm"
-              size="lg"
-              errorMessage={errors?.name?.message}
-              isInvalid={!!errors.name?.message}
-              variant="bordered"
-              labelPlacement="outside"
-              color="primary"
-              isReadOnly
-            />
-          )}
-        />
-        <div className="h-2" />
-        <Controller
-          name="login"
-          control={control}
-          render={({ field }) => (
-            <Input
-              {...field}
-              isDisabled
-              label="E-mail"
-              className="mb-5"
-              radius="sm"
-              size="lg"
-              variant="bordered"
-              labelPlacement="outside"
-              color="primary"
-            />
-          )}
-        />
-        <div className="h-2" />
-        <div className="flex gap-2 items-baseline">
+    <>
+      <div className="flex gap-16">
+        <div className="hidden lg:block">
+          <ProfileImagePicker />
+        </div>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="w-[100%] lg:min-w-[450px]"
+        >
           <Controller
-            name="password"
+            name="name"
+            control={control}
+            rules={{ required: "Имя обязательное поле" }}
+            render={({ field }) => (
+              <Input
+                {...field}
+                label="Имя"
+                className="mb-5"
+                radius="sm"
+                size="lg"
+                errorMessage={errors?.name?.message}
+                isInvalid={!!errors.name?.message}
+                variant="bordered"
+                labelPlacement="outside"
+                color="primary"
+                isReadOnly
+              />
+            )}
+          />
+          <div className="h-2" />
+          <Controller
+            name="login"
             control={control}
             render={({ field }) => (
               <Input
                 {...field}
                 isDisabled
-                label="Пароль"
+                label="E-mail"
                 className="mb-5"
                 radius="sm"
                 size="lg"
                 variant="bordered"
                 labelPlacement="outside"
                 color="primary"
-                type="password"
-                value="*************"
               />
             )}
           />
-          <Button
-            size="lg"
-            type="button"
-            className="text-small bg-black text-white"
-            onClick={() => setChangePasswordIsVisible(true)}
-          >
-            Изменить
-          </Button>
-          <Modal
-            size="lg"
-            isOpen={changePasswordIsVisible}
-            onClose={() => setChangePasswordIsVisible(false)}
-          >
-            <ModalContent>
-              <ModalHeader></ModalHeader>
-              <ModalBody>
-                <ChangePasswordForm />
-                <div className="h-10" />
-              </ModalBody>
-            </ModalContent>
-          </Modal>
-        </div>
-      </form>
-    </div>
+          <div className="h-2" />
+          <div className="flex gap-2 items-baseline">
+            <Controller
+              name="password"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  isDisabled
+                  label="Пароль"
+                  className="mb-5"
+                  radius="sm"
+                  size="lg"
+                  variant="bordered"
+                  labelPlacement="outside"
+                  color="primary"
+                  type="password"
+                  value="*************"
+                />
+              )}
+            />
+            <Button
+              size="lg"
+              type="button"
+              className="text-small bg-black text-white"
+              onClick={() => setChangePasswordIsVisible(true)}
+            >
+              Изменить
+            </Button>
+            <Modal
+              size="lg"
+              isOpen={changePasswordIsVisible}
+              onClose={() => setChangePasswordIsVisible(false)}
+            >
+              <ModalContent>
+                <ModalHeader></ModalHeader>
+                <ModalBody>
+                  <ChangePasswordForm />
+                  <div className="h-10" />
+                </ModalBody>
+              </ModalContent>
+            </Modal>
+          </div>
+          <SubscribeCancel />
+        </form>
+      </div>
+    </>
   );
 };
