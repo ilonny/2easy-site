@@ -16,8 +16,8 @@ export const ApiProvider = ({ children }) => {
 //   "/undefined",
 //   ""
 // );
-export const BASE_URL = "http://localhost:8888";
-// export const BASE_URL = "https://beta-api.2easyeng.com";
+// export const BASE_URL = "http://localhost:8888";
+export const BASE_URL = "https://beta-api.2easyeng.com";
 
 export const API_URL = BASE_URL + "/api";
 
