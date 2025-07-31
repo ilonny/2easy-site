@@ -48,7 +48,7 @@ export const ProfileSubscribeInformer = () => {
       return (
         <>
           <p className="mb-1">
-            Подписка 2easy до{" "}
+            Подписка активна до{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
         </>
@@ -58,7 +58,7 @@ export const ProfileSubscribeInformer = () => {
       return (
         <>
           <p className="mb-1">
-            Подписка 2easy до{" "}
+            Подписка активна до{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
         </>
@@ -68,7 +68,7 @@ export const ProfileSubscribeInformer = () => {
       return (
         <>
           <p className="mb-1">
-            Подписка 2easy до{" "}
+            Подписка активна до{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
         </>

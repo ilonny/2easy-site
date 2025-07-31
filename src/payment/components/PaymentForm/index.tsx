@@ -22,7 +22,10 @@ type TFieldList = {
 export const PaymentForm = (props: TProps) => {
   const { type } = props;
   const { profile } = useContext(AuthContext);
-  const [price, setPrice] = useState(type === "month" ? 790 : 6990);
+
+  const [price, setPrice] = useState(
+    type === "month" ? 790 : type === "3month" ? 1890 : 6990
+  );
 
   const {
     control,

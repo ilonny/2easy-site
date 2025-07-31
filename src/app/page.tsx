@@ -58,7 +58,7 @@ export default function Home() {
           </p>
           <div className="h-5"></div>
           <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-            2EASY -- платформа для преподавателей английского с готовыми
+            2EASY -- интерактивная платформа для преподавателей с готовыми
             уроками, играми и разговорными картами
           </h1>
           <div className="h-6 lg:h-14"></div>
@@ -200,7 +200,7 @@ export default function Home() {
           <div className="h-2"></div>
           <p className="max-w-[650px] m-auto text-center font-normal text-[18px]">
             Нетривиальные вопросы на актуальные темы: психология, отношения,
-            бизнес, феминизма и многое другое
+            бизнес, феминизм и многое другое
           </p>
           <div className="h-6 lg:h-14"></div>
           <MainPageGamesSlider data={discussionCards} />
