@@ -4,9 +4,7 @@ import { usePayment } from "@/payment/hooks/usePayment";
 import { usePromocode } from "@/payment/hooks/usePromocode";
 import { TSubscribePeriod } from "@/subscribe/types";
 import { Button, Input } from "@nextui-org/react";
-import { redirect } from "next/navigation";
-import Script from "next/script";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 
@@ -56,45 +54,75 @@ export const PaymentForm = (props: TProps) => {
       }
 
       const cp = new window.cp.CloudPayments();
-      cp.charge(
-        {
-          publicId: response?.publicId,
-          publicTerminalId: response?.publicId,
-          description: "Оплата подписки 2EASY",
-          amount: Number(response?.amount),
-          currency: "RUB",
-          email: response.email,
-          externalId: response.id.toString(),
-          userInfo: {
-            phone: response.phone,
-            name: profile?.name,
-            surname: profile?.surname,
-          },
-          metadata: {
-            response,
-          },
-        },
-        function (options) {
-          // success
-          console.log("Payment success");
-          window.location.reload();
-          // Success Callback - Implement your success logic here
-        },
-        function (reason, options) {
-          // fail
-          console.log("Payment failed", reason);
-          // Failure Callback - Implement your failure logic here
-        },
-        function (reason, options) {
-          // timeout
-          console.log("Payment timeout", reason);
-          // Timeout Callback - Implement your timeout logic here
-        }
-      );
 
-      console.log("response: ", response);
+      let reccurentData;
+
+      if (type === "month") {
+        reccurentData = {
+          period: 1,
+          interval: "Month",
+          amount: Number(price),
+          // startDate: new Date(),
+        };
+      }
+
+      if (type === "year") {
+        reccurentData = {
+          period: 12,
+          interval: "Month",
+          amount: Number(price),
+          // startDate: new Date()
+        };
+      }
+
+      if (type === "3month") {
+        reccurentData = {
+          period: 3,
+          interval: "Month",
+          amount: Number(price),
+          // startDate: new Date()
+        };
+      }
+
+      const intentData = {
+        publicId: response?.publicId,
+        publicTerminalId: response?.publicId,
+        description: "Оплата подписки 2EASY",
+        amount: Number(response?.amount),
+        currency: "RUB",
+        email: response.email || profile?.login,
+        Email: response.email || profile?.login,
+        receiptEmail: response.email || profile?.login,
+        emailBehavior: "Required",
+        externalId: response.id.toString(),
+        userInfo: {
+          accountId: response.user_id,
+          email: response?.email || profile?.login,
+          phone: response.paymentModel.phone,
+          name: profile?.name,
+          surname: profile?.surname || "",
+        },
+        metadata: { response, type },
+        paymentSchema: "Single",
+        type,
+        recurrent: reccurentData,
+      };
+
+      cp.start(intentData).then((startResult) => {
+        setTimeout(() => {
+          window.location.reload();
+        }, 300);
+      });
     },
-    [createPayment, getValues, type]
+    [
+      createPayment,
+      getValues,
+      price,
+      profile?.login,
+      profile?.name,
+      profile?.surname,
+      type,
+    ]
   );
 
   const priceWithPromo = useMemo(() => {
