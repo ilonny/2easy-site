@@ -9,6 +9,7 @@ import Image from "next/image";
 import Dino from "@/assets/images/dino.gif";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { AuthContext } from "@/auth";
+import { readFromLocalStorage, writeToLocalStorage } from "@/auth/utils";
 
 type TProps = {
   canCreateLesson?: boolean;
@@ -96,6 +97,19 @@ export const ProfileLessons = (props: TProps) => {
     // return lessons;
     return lessons.filter((l) => l.user_id === 1);
   }, [isTeacher, lessons, tabIndex, studentId]);
+
+  useEffect(() => {
+    const index = readFromLocalStorage("saved_lessons_tab");
+    if (index) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      setTabIndex(index);
+    }
+  }, []);
+
+  useEffect(() => {
+    writeToLocalStorage("saved_lessons_tab", tabIndex);
+  }, [tabIndex]);
 
   return (
     <>

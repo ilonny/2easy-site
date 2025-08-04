@@ -6,6 +6,7 @@ import { Button } from "@nextui-org/react";
 import { EditLessonModalForm } from "../EditLessonModalForm";
 import { DeleteLessonModalForm } from "../DeleteLessonModalForm";
 import { AttachLessonModalForm } from "../AttachLessonModalForm";
+import { checkResponse, fetchPostJson } from "@/api";
 
 type TProps = {
   lessons: TLesson[];
@@ -65,6 +66,22 @@ export const LessonsList: FC<TProps> = ({
       setChosenLesson(null);
     }
   }, [editIsVisible, deleteIsVisible]);
+
+  const copyLesson = useCallback(
+    async (lesson_id: number) => {
+      const res = await fetchPostJson({
+        path: "/lessons/copy",
+        isSecure: true,
+        data: {
+          lesson_id,
+        },
+      });
+      const data = await res.json();
+      checkResponse(data);
+      getLessons();
+    },
+    [getLessons]
+  );
 
   return (
     <div className="flex items-start justify-start w-full flex-wrap">
@@ -126,6 +143,7 @@ export const LessonsList: FC<TProps> = ({
             deleteLessonRelation={deleteLessonRelation}
             showStartLessonButton={showStartLessonButton}
             isStudent={isStudent}
+            copyLesson={copyLesson}
           />
         );
       })}

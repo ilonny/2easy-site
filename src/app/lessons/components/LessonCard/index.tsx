@@ -33,6 +33,7 @@ type TProps = {
   showStartLessonButton?: boolean;
   isStudent?: boolean;
   disableClick?: boolean;
+  copyLesson?: (lesson_id: number) => Promise<void>;
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -48,6 +49,7 @@ export const LessonCard: FC<TProps> = ({
   showStartLessonButton,
   isStudent,
   disableClick,
+  copyLesson,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -213,6 +215,20 @@ export const LessonCard: FC<TProps> = ({
                     }}
                   >
                     Прикрепить к ученику
+                  </Button>
+                )}
+                {!!copyLesson && !showChangeStatusButton && (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
+                    style={{ fontSize: 14 }}
+                    onClick={() => {
+                      setPopoverIsOpen(false);
+                      copyLesson(lesson.id);
+                    }}
+                  >
+                    Копировать урок
                   </Button>
                 )}
                 {!!onPressDelete &&
