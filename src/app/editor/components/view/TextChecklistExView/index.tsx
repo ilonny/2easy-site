@@ -1,10 +1,13 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import { FC } from "react";
+import { FC, useContext, useEffect } from "react";
 import { Card, Checkbox } from "@nextui-org/react";
 import { TTextStickerData } from "../../editor/TextSticker/types";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { useParams } from "next/navigation";
+import { AuthContext } from "@/auth";
 
 type TProps = {
   data: TTextStickerData;
@@ -14,9 +17,30 @@ type TProps = {
 export const TextChecklistExView: FC<TProps> = ({
   data,
   isPreview = false,
+  ...rest
 }) => {
   const image = data?.images?.[0];
   const editorImage = data?.editorImages?.[0];
+
+  const lesson_id = useParams()?.id;
+  const profile = useContext(AuthContext)?.profile;
+  const student_id = profile?.studentId;
+  const isTeacher = profile?.role_id === 2;
+  const ex_id = data?.id;
+
+  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+    student_id,
+    lesson_id,
+    ex_id,
+    activeStudentId: rest.activeStudentId,
+    isTeacher,
+  });
+
+  useEffect(() => {
+    if (student_id) {
+      getAnswers(true);
+    }
+  }, [student_id]);
 
   return (
     <>
@@ -70,13 +94,24 @@ export const TextChecklistExView: FC<TProps> = ({
                 if (!sticker) {
                   return <></>;
                 }
+                const answerString = answers[sticker]?.answer;
+                const isChecked = answerString
+                  ? JSON.parse(answerString)
+                  : false;
                 return (
                   <label
                     className="flex items-baseline gap-2"
                     key={index}
                     style={{ cursor: "pointer" }}
                   >
-                    <Checkbox size="lg" color="primary" />
+                    <Checkbox
+                      size="lg"
+                      color="primary"
+                      onValueChange={(val) => {
+                        writeAnswer(sticker, JSON.stringify(val));
+                      }}
+                      isSelected={isTeacher ? isChecked : undefined}
+                    />
                     <p style={{ fontSize: 18 }}>{sticker}</p>
                   </label>
                 );

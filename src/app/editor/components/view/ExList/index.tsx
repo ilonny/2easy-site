@@ -60,7 +60,15 @@ const mapComponent = (type: string, outerProps: never) => {
     case "text-sticker":
       return (props) => <TextStickerExView {...props} />;
     case "text-checklist":
-      return (props) => <TextChecklistExView {...props} />;
+      return (props) => (
+        <TextChecklistExView
+          {...props}
+          data={{
+            ...props.data,
+            id: outerProps.id,
+          }}
+        />
+      );
     case "video":
       return (props) => <VideoExView {...props} />;
     case "audio":
