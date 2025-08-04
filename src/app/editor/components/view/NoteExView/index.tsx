@@ -107,6 +107,7 @@ export const NoteExView: FC<TProps> = ({
               fontSize: 18,
               color: "#8580A1",
               whiteSpace: "break-spaces",
+              wordBreak: "break-all",
             }}
           >
             {data.description}
