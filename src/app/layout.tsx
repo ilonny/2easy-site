@@ -13,6 +13,7 @@ import { ToastWrapper } from "./ToastWrapper";
 import { BodyContainer } from "./BodyContainer";
 import { Footer } from "@/components/Footer";
 import Script from "next/script";
+import { EditorContextProvider } from "./editor/context";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
@@ -43,10 +44,12 @@ export default function RootLayout({
           <NextUIProvider>
             <AuthContextProvider>
               <SibscribeContextProvider>
-                <Header />
-                <BodyContainer>{children}</BodyContainer>
-                <Footer />
-                <ToastWrapper />
+                <EditorContextProvider>
+                  <Header />
+                  <BodyContainer>{children}</BodyContainer>
+                  <Footer />
+                  <ToastWrapper />
+                </EditorContextProvider>
               </SibscribeContextProvider>
             </AuthContextProvider>
           </NextUIProvider>

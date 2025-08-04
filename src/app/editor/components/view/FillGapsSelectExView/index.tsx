@@ -195,13 +195,11 @@ export const FillGapsSelectExView: FC<TProps> = ({
   }, [localAnswers, writeAnswer]);
 
   const renderContent = useCallback(() => {
-    console.log("renderContent fired");
     document
       .querySelectorAll(
         `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`
       )
       .forEach((el, index) => {
-        console.log("el?", el);
         const id = el.id;
         const field = data.fields.find((f) => f.id == id);
         const maxOptionLength = Math?.max(

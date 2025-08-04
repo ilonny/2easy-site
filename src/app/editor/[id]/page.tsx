@@ -13,7 +13,14 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { CreateExButton } from "../components/create/CreateExButton";
 import { ChooseTemplateModal } from "../components/create/ChooseTemplateModal";
 import { TTemplate } from "../components/create/ChooseTemplateModal/templates";
@@ -26,6 +33,7 @@ import "react-medium-image-zoom/dist/styles.css";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { StartLessonButton } from "@/app/lessons/components/StartLessonButton";
 import { useCheckSubscription } from "@/app/subscription/helpers";
+import { EditorContext } from "../context";
 
 export default function EditorPage() {
   withLogin();
@@ -44,6 +52,35 @@ export default function EditorPage() {
   >();
 
   const { checkSubscription } = useCheckSubscription();
+
+  const { scrollToExId, setScrollToExId } = useContext(EditorContext);
+  const exListRef = useRef([]);
+
+  useEffect(() => {
+    if (!exListRef.current.length) {
+      exListRef.current = exList;
+      return;
+    }
+
+    if (exList?.length > exListRef?.current?.length) {
+      const oldExIds = exListRef?.current?.map((ex) => ex.id);
+
+      const newId = exList.find((ex) => !oldExIds.includes(ex.id))?.id;
+      if (newId) {
+        const el = document.getElementById(`ex-${newId}`);
+        el?.scrollIntoView();
+      }
+    }
+    exListRef.current = exList;
+    // if (scrollToExId) {
+    //   //
+    //   const el = document.getElementById(`ex-${scrollToExId}`);
+    //   el?.scrollIntoView();
+    //   window.setTimeout(() => {
+    //     setScrollToExId(undefined);
+    //   }, 1000);
+    // }
+  }, [scrollToExId, exList, setScrollToExId]);
 
   useEffect(() => {
     //@ts-ignore
@@ -69,12 +106,16 @@ export default function EditorPage() {
     [checkSubscription]
   );
 
-  const onSuccessCreate = useCallback(() => {
-    setChosenTemplate(null);
-    setExCreateTemplateModal(false);
-    setEditorModal(false);
-    getExList();
-  }, [getExList]);
+  const onSuccessCreate = useCallback(
+    (ex_id: number) => {
+      setChosenTemplate(null);
+      setExCreateTemplateModal(false);
+      setEditorModal(false);
+      setScrollToExId(ex_id);
+      getExList();
+    },
+    [getExList, setScrollToExId]
+  );
 
   const onPressEditEx = useCallback(
     (ex) => {
@@ -86,7 +127,7 @@ export default function EditorPage() {
           type: ex.type,
           sortIndex: ex.sortIndex,
         });
-        window.location.hash = `ex-${ex.id}`
+        window.location.hash = `ex-${ex.id}`;
         setEditorModal(true);
       }
     },

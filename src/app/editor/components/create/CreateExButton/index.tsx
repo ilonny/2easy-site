@@ -8,7 +8,7 @@ import { fetchPostJson } from "@/api";
 
 type TProps = {
   onPress: () => void;
-  onSuccessCreate: () => void;
+  onSuccessCreate: (id: number) => void;
   lesson_id: string;
   currentSortIndexToShift: number;
 };
@@ -67,7 +67,7 @@ export const CreateExButton: FC<TProps> = ({
                 });
                 const data = await res.json();
                 if (typeof onSuccessCreate === "function") {
-                  onSuccessCreate();
+                  onSuccessCreate(data?.id);
                 }
                 writeToLocalStorage("exCopy", "");
               }}

@@ -46,7 +46,7 @@ type TProps = {
   isView?: boolean;
   activeStudentId: number;
   onPressCreate: (indexToShift?: number) => void;
-  onSuccessCreate?: () => void;
+  onSuccessCreate?: (id: number) => void;
 };
 
 const mapComponent = (type: string, outerProps: never) => {
@@ -342,7 +342,7 @@ export const ExListComp: FC<TProps> = (props) => {
                               });
                               const data = await res.json();
                               if (typeof onSuccessCreate === "function") {
-                                onSuccessCreate();
+                                onSuccessCreate(data?.id);
                               }
                               writeToLocalStorage("exCopy", "");
                               closePopover(ex.id);
