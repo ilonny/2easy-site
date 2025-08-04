@@ -15,10 +15,10 @@ import {
 } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { SibscribeContext } from "@/subscribe/context";
 import { withLogin } from "@/auth/hooks/withLogin";
-import { BASE_URL, checkResponse, fetchGet } from "@/api";
+import { BASE_URL, checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useParams, useRouter } from "next/navigation";
 import { StudentList } from "@/app/student/components/StudentList";
 import Loupe from "@/assets/icons/loupe.svg";
@@ -41,7 +41,7 @@ export default function StartRegistrationPage() {
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2;
   const isStudent = profile?.isStudent;
-  const { exList, getExList } = useExList(params.id);
+  const { exList, getExList, setExList } = useExList(params.id);
   const { lesson, getLesson } = useLessons();
 
   const [students, setStudents] = useState([]);
@@ -82,6 +82,42 @@ export default function StartRegistrationPage() {
   useEffect(() => {
     fetchStudents();
   }, [fetchStudents]);
+
+  useEffect(() => {
+    if (!isStudent) {
+      return;
+    }
+    let canGetList = true;
+    const getList = async () => {
+      if (!canGetList) {
+        return;
+      }
+      const res = await fetchGet({
+        path: `/ex/list?lesson_id=${params.id}`,
+        isSecure: true,
+      });
+      const list = await res?.json();
+      console.log("list ", list);
+      console.log("exList ", exList);
+      if (exList.length && list.length && list.length !== exList.length) {
+        console.log("list", list);
+        console.log("exList", exList);
+        getExList()
+        // setExList(list);
+      }
+
+      setTimeout(() => {
+        getList();
+      }, 1000);
+      return list;
+    };
+    getList();
+    return () => (canGetList = false);
+    // const interval = setInterval(() => {
+    //   getExList();
+    // }, 1000);
+    // return () => clearInterval(interval);
+  }, [getExList, isStudent, params.id, exList, setExList]);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
@@ -197,7 +233,14 @@ export default function StartRegistrationPage() {
                 </Zoom>
               )}
               <div className="h-8"></div>
-              <ExList list={exList} isView activeStudentId={activeStudentId} />
+              <div key={exList.length}>
+                <ExList
+                  list={exList}
+                  isView
+                  activeStudentId={activeStudentId}
+                  key={exList.length}
+                />
+              </div>
             </div>
           </div>
           {!isStudent && (

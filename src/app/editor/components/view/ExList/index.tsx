@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useState } from "react";
+import React, { FC, useCallback, useContext, useEffect, useState } from "react";
 import { ImageExView } from "../ImageExView";
 import styles from "./style.module.css";
 import ArrowUpIcon from "@/assets/icons/editor_arrow_up.svg";
@@ -35,7 +35,10 @@ import { SibscribeContext } from "@/subscribe/context";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { readFromLocalStorage, writeToLocalStorage } from "@/auth/utils";
 import { toast } from "react-toastify";
-import { fetchPostJson } from "@/api";
+import { checkResponse, fetchPostJson } from "@/api";
+import EyeEnabledIcon from "@/assets/icons/eye_enable.svg";
+import EyeDisabledIcon from "@/assets/icons/eye_disabled.svg";
+import { AuthContext } from "@/auth";
 
 type TProps = {
   list: Array<any>;
@@ -200,19 +203,70 @@ export const ExListComp: FC<TProps> = (props) => {
   }, [isView]);
 
   const ViewerComponent = ({ ex, exIndex }) => {
+    const { profile } = useContext(AuthContext);
+    const isTeacher = profile?.role_id === 2;
+
     const Viewer = mapComponent(ex.type, { ...props, id: ex.id });
     const [popoverIsOpen, setPopoverIsOpen] = useState(false);
     const closePopover = useCallback(() => {
       setPopoverIsOpen(false);
     }, []);
     const { checkSubscription } = useCheckSubscription();
+    const [isVisible, setIsVisible] = useState(!!ex?.is_visible);
+
     return (
       <div key={ex.id}>
         <div
-          className={`${styles["wrapper"]} ${isView && styles["is-view"]}`}
+          className={`${styles["wrapper"]} ${
+            isView && styles["is-view"]
+          } relative`}
           style={{ fontSize: 18 }}
           id={`ex-${ex.id}`}
         >
+          {isTeacher && (
+            <div className="w-[55px] absolute left-[10px] top-[10px]">
+              <div
+                className="flex flex-col items-start gap-2"
+                style={{ cursor: "pointer" }}
+                onClick={async () => {
+                  setIsVisible(!isVisible);
+                  const res = await fetchPostJson({
+                    path: "/ex/change-visible",
+                    isSecure: true,
+                    data: { is_visible: !isVisible, id: ex.id },
+                  });
+                  const data = await res.json();
+                  checkResponse(data);
+                }}
+              >
+                <div
+                  style={{ width: 24, height: 28 }}
+                  className="flex justify-center items-center"
+                >
+                  <Image
+                    src={isVisible ? EyeEnabledIcon : EyeDisabledIcon}
+                    alt=""
+                  />
+                </div>
+                <p
+                  style={{
+                    color: isVisible ? "#3F28C6" : "#B3B3B3",
+                    fontSize: 12,
+                    textAlign: "left",
+                    lineHeight: "100%",
+                  }}
+                >
+                  {isVisible
+                    ? ex.type === "note"
+                      ? "заметка видна ученику"
+                      : "задание видно ученику"
+                    : ex.type === "note"
+                    ? "заметка не видна ученику"
+                    : "задание не видно ученику"}
+                </p>
+              </div>
+            </div>
+          )}
           <Viewer data={ex.data} activeStudentId={activeStudentId} />
           {!isView && (
             <>
@@ -384,6 +438,7 @@ export const ExListComp: FC<TProps> = (props) => {
               </Popover>
             </>
           )}
+          {/* <div className="w-[55px]">eye here</div> */}
         </div>
         {!ex.isDisabledEx && !isView && exIndex !== list.length - 1 && (
           <div className={`ex-add-button mt-8 relative`}>

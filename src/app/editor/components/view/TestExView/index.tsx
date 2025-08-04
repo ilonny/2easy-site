@@ -287,7 +287,7 @@ export const TestExView: FC<TProps> = ({
   const image = data?.images?.[0];
   const [activeIndex, setActiveIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const activeQuestion = data.questions[activeIndex];
+  const activeQuestion = data.questions?.[activeIndex];
   const currentStep = activeIndex + 1;
   const totalSteps = data?.questions?.length;
   const isLastStep = currentStep === totalSteps;

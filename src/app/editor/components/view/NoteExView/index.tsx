@@ -39,9 +39,9 @@ export const NoteExView: FC<TProps> = ({
     }
   }, [data, saveNoteEx, onChangeIsVisible, changeData]);
 
-  if (!isTeacher && !data.isVisible) {
-    return <></>;
-  }
+  // if (!isTeacher && !data.isVisible) {
+  //   return <></>;
+  // }
 
   return (
     <div
@@ -52,7 +52,7 @@ export const NoteExView: FC<TProps> = ({
       }}
     >
       <div style={{ width: 55 }}>
-        {isTeacher && (
+        {/* {isTeacher && (
           <div
             className="flex flex-col items-start gap-2"
             style={{ cursor: "pointer" }}
@@ -80,7 +80,7 @@ export const NoteExView: FC<TProps> = ({
                 : "заметка не видна ученику"}
             </p>
           </div>
-        )}
+        )} */}
       </div>
       <div
         style={{
