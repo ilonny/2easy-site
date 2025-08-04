@@ -93,6 +93,7 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
                       fontWeight: 500,
                       color: data.stickerTextColor || "#000",
                       lineHeight: "130%",
+                      whiteSpace: "break-spaces",
                     }}
                   >
                     {sticker}
