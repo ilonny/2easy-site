@@ -56,20 +56,38 @@ export const LessonCard: FC<TProps> = ({
   const params = useParams();
   const { profile } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2;
+  const { checkSubscription, hasSubscription } = useCheckSubscription();
 
   const isDisabled =
     isStudent && lesson?.["lesson_relations.status"] === "close";
-
   const onPressLesson = useCallback(() => {
     if (isDisabled || disableClick) {
       return;
     }
     if (isStudent) {
       router.push("/lessons/" + lesson?.id);
-    } else {
-      router.push("/editor/" + lesson?.id);
+      return;
     }
-  }, [isDisabled, isStudent, lesson?.id, router, disableClick]);
+
+    if (
+      !hasSubscription &&
+      (lesson?.created_from_2easy || lesson?.user_id === 1)
+    ) {
+      router.push("/subscription");
+      return;
+    }
+
+    router.push("/editor/" + lesson?.id);
+  }, [
+    isDisabled,
+    disableClick,
+    isStudent,
+    router,
+    lesson?.id,
+    lesson?.created_from_2easy,
+    lesson?.user_id,
+    hasSubscription,
+  ]);
 
   const tags = useMemo(() => {
     if (isStudent) {
@@ -97,7 +115,6 @@ export const LessonCard: FC<TProps> = ({
     }
   }, [lesson?.tags, isStudent, onPressLesson]);
 
-  const { checkSubscription } = useCheckSubscription();
   return (
     <div
       className={`p-2 w-[100%] lg:w-[25%] ${styles["lesson-card"]} flex-shrink-0`}

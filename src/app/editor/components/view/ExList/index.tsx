@@ -197,7 +197,7 @@ export const ExListComp: FC<TProps> = (props) => {
     const closePopover = useCallback(() => {
       setPopoverIsOpen(false);
     }, []);
-
+    const { checkSubscription } = useCheckSubscription();
     return (
       <div key={ex.id}>
         <div
@@ -307,18 +307,20 @@ export const ExListComp: FC<TProps> = (props) => {
                       <div
                         className="flex justify-between items-center"
                         onClick={() => {
-                          writeToLocalStorage(
-                            "exCopy",
-                            JSON.stringify({
-                              lesson_id: ex.lesson_id,
-                              id: ex.id,
-                              currentSortIndexToShift: ex.sortIndex,
-                            })
-                          );
-                          toast("Задание скопировано в буфер обмена", {
-                            type: "success",
-                          });
-                          closePopover(ex.id);
+                          if (checkSubscription()) {
+                            writeToLocalStorage(
+                              "exCopy",
+                              JSON.stringify({
+                                lesson_id: ex.lesson_id,
+                                id: ex.id,
+                                currentSortIndexToShift: ex.sortIndex,
+                              })
+                            );
+                            toast("Задание скопировано в буфер обмена", {
+                              type: "success",
+                            });
+                            closePopover(ex.id);
+                          }
                         }}
                       >
                         <p>Копировать задание</p>

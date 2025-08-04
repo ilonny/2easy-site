@@ -22,5 +22,7 @@ export const useCheckSubscription = () => {
     return true;
   }, [authIsLoading, profile?.login, profile?.studentId, router, subscription]);
 
-  return { checkSubscription };
+  const hasSubscription = subscription?.success;
+
+  return { checkSubscription, subscription, hasSubscription };
 };
