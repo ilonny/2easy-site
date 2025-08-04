@@ -90,13 +90,16 @@ export default function StartRegistrationPage() {
           <div className="h-14" />
           {isTeacher && (
             <div className="flex items-start justify-between">
-              <Breadcrumbs>
+              <Link href={`/editor/${params.id}`} className="text-secondary">
+                <Button variant="light">← Вернуться к редактированию</Button>
+              </Link>
+              {/* <Breadcrumbs>
                 <BreadcrumbItem href="/">Главная</BreadcrumbItem>
                 <BreadcrumbItem href="/profile?lessons">
                   Мои уроки
                 </BreadcrumbItem>
                 <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
-              </Breadcrumbs>
+              </Breadcrumbs> */}
               <div className="">
                 <Popover
                   color="foreground"
@@ -124,7 +127,7 @@ export default function StartRegistrationPage() {
                             toast.success(
                               "Ссылка на урок скопирована в буфер обмена. Вы можете поделиться ей с учеником"
                             );
-                            setPopoverIsOpen(false)
+                            setPopoverIsOpen(false);
                           });
                       }}
                     >
