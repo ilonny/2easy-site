@@ -56,6 +56,9 @@ export const checkResponse = (res: {
     toast(res?.message ? res?.message : "Что-то пошло не так", {
       type: "error",
     });
+    if (res?.needRedirect) {
+      window.location.pathname = "/";
+    }
     return;
   }
   if (res?.success && res?.successMessage) {
