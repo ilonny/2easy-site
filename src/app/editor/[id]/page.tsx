@@ -34,10 +34,12 @@ import { withLogin } from "@/auth/hooks/withLogin";
 import { StartLessonButton } from "@/app/lessons/components/StartLessonButton";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { EditorContext } from "../context";
+import { AuthContext } from "@/auth";
 
 export default function EditorPage() {
   withLogin();
   const params = useParams();
+  const { profile } = useContext(AuthContext);
   const { lesson, getLesson } = useLessons();
   const { exList, getExList, exListIsLoading, changeSortIndex, deleteEx } =
     useExList(params.id);
@@ -164,6 +166,16 @@ export default function EditorPage() {
     return exList.length;
   }, [exList.length]);
 
+  const is2easy = lesson?.user_id === 1;
+  const isAdmin = profile?.role_id === 1;
+
+  const showCreateExBtn = useMemo(() => {
+    if (is2easy) {
+      return isAdmin;
+    }
+    return true;
+  }, [is2easy, isAdmin]);
+
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
@@ -230,21 +242,27 @@ export default function EditorPage() {
             onChangeIsVisible={onChangeIsVisible}
             onPressCreate={onPressCreate}
             onSuccessCreate={onSuccessCreate}
+            is2easy={is2easy}
+            isAdmin={isAdmin}
           />
           <div className="h-10" />
           <div className="h-10" />
-          <Card radius="none" shadow="none">
-            <CreateExButton
-              onPress={() => onPressCreate(null)}
-              onSuccessCreate={onSuccessCreate}
-              lesson_id={params.id}
-              currentSortIndexToShift={
-                exList[exList.length - 1]?.sortIndex || 0
-              }
-            />
-          </Card>
-          <div className="h-10" />
-          <div className="h-10" />
+          {showCreateExBtn && (
+            <>
+              <Card radius="none" shadow="none">
+                <CreateExButton
+                  onPress={() => onPressCreate(null)}
+                  onSuccessCreate={onSuccessCreate}
+                  lesson_id={params.id}
+                  currentSortIndexToShift={
+                    exList[exList.length - 1]?.sortIndex || 0
+                  }
+                />
+              </Card>
+              <div className="h-10" />
+              <div className="h-10" />
+            </>
+          )}
         </div>
         <div className="h-10" />
         <div className="h-10" />

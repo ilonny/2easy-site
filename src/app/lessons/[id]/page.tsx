@@ -102,7 +102,7 @@ export default function StartRegistrationPage() {
       if (exList.length && list.length && list.length !== exList.length) {
         console.log("list", list);
         console.log("exList", exList);
-        getExList()
+        getExList();
         // setExList(list);
       }
 
@@ -239,6 +239,8 @@ export default function StartRegistrationPage() {
                   isView
                   activeStudentId={activeStudentId}
                   key={exList.length}
+                  is2easy={lesson?.user_id === 1}
+                  isAdmin={profile?.role_id === 1}
                 />
               </div>
             </div>

@@ -1,4 +1,11 @@
-import React, { FC, useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ImageExView } from "../ImageExView";
 import styles from "./style.module.css";
 import ArrowUpIcon from "@/assets/icons/editor_arrow_up.svg";
@@ -50,6 +57,8 @@ type TProps = {
   activeStudentId: number;
   onPressCreate: (indexToShift?: number) => void;
   onSuccessCreate?: (id: number) => void;
+  is2easy?: boolean;
+  isAdmin?: boolean;
 };
 
 const mapComponent = (type: string, outerProps: never) => {
@@ -187,6 +196,8 @@ export const ExListComp: FC<TProps> = (props) => {
     activeStudentId,
     onPressCreate,
     onSuccessCreate,
+    is2easy,
+    isAdmin,
   } = props;
 
   const [copyData, setCopyData] = useState("");
@@ -202,7 +213,7 @@ export const ExListComp: FC<TProps> = (props) => {
     return () => clearInterval(interval);
   }, [isView]);
 
-  const ViewerComponent = ({ ex, exIndex }) => {
+  const ViewerComponent = ({ ex, exIndex, is2easy, isAdmin }) => {
     const { profile } = useContext(AuthContext);
     const isTeacher = profile?.role_id === 2;
 
@@ -213,7 +224,13 @@ export const ExListComp: FC<TProps> = (props) => {
     }, []);
     const { checkSubscription } = useCheckSubscription();
     const [isVisible, setIsVisible] = useState(!!ex?.is_visible);
-
+    const canEditEye = useMemo(() => {
+      if (is2easy) {
+        return isAdmin;
+      }
+      return isTeacher;
+    }, [is2easy, isAdmin, isTeacher]);
+    console.log("is2easy", is2easy, isAdmin);
     return (
       <div key={ex.id}>
         <div
@@ -229,6 +246,15 @@ export const ExListComp: FC<TProps> = (props) => {
                 className="flex flex-col items-start gap-2"
                 style={{ cursor: "pointer" }}
                 onClick={async () => {
+                  if (!canEditEye) {
+                    toast(
+                      "Добавьте урок к себе, что менять видимость заданий",
+                      {
+                        type: "error",
+                      }
+                    );
+                    return;
+                  }
                   setIsVisible(!isVisible);
                   const res = await fetchPostJson({
                     path: "/ex/change-visible",
@@ -466,7 +492,15 @@ export const ExListComp: FC<TProps> = (props) => {
   return (
     <div className="flex flex-col gap-10">
       {list.map((ex, exIndex) => {
-        return <ViewerComponent key={ex.id} ex={ex} exIndex={exIndex} />;
+        return (
+          <ViewerComponent
+            key={ex.id}
+            ex={ex}
+            exIndex={exIndex}
+            isAdmin={isAdmin}
+            is2easy={is2easy}
+          />
+        );
       })}
     </div>
   );
