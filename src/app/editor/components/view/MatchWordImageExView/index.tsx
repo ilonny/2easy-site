@@ -245,7 +245,7 @@ export const MatchWordImageExView: FC<TProps> = ({
   const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
   const isMissedIntersectedId = useRef<number>(0);
   const [activeChip, setActiveChip] = useState("");
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;

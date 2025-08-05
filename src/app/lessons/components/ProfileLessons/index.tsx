@@ -40,7 +40,7 @@ export const ProfileLessons = (props: TProps) => {
   } = props;
   const router = useRouter();
   const { profile } = useContext(AuthContext);
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const [activeFilterTab, setActiveFilterTab] = useState("");
 
   const [tabIndex, setTabIndex] = useState<"userLessons" | "savedLessons">(

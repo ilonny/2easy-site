@@ -50,7 +50,7 @@ export const TestStep = (props: TTestStepProps) => {
   const selectedMap = useRef<Record<string, boolean>>({});
   const errorMap = useRef<Record<string, boolean>>({});
 
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
   useEffect(() => {
     try {
@@ -294,7 +294,7 @@ export const TestExView: FC<TProps> = ({
   const [isFinished, setIsFinished] = useState(false);
 
   const { profile } = useContext(AuthContext);
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
   const ex_id = data?.id;

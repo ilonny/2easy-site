@@ -215,7 +215,7 @@ export const ExListComp: FC<TProps> = (props) => {
 
   const ViewerComponent = ({ ex, exIndex, is2easy, isAdmin }) => {
     const { profile } = useContext(AuthContext);
-    const isTeacher = profile?.role_id === 2;
+    const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
     const Viewer = mapComponent(ex.type, { ...props, id: ex.id });
     const [popoverIsOpen, setPopoverIsOpen] = useState(false);

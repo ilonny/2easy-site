@@ -39,7 +39,7 @@ export default function StartRegistrationPage() {
   const params = useParams();
   const { subscription } = useContext(SibscribeContext);
   const { profile, authIsLoading } = useContext(AuthContext);
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
   const { exList, getExList, setExList } = useExList(params.id);
   const { lesson, getLesson } = useLessons();

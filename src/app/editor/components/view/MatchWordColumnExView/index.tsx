@@ -160,7 +160,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
   const isIntersected = useRef(false);
   const [correctChips, setCorrectChips] = useState<TSortedWord[]>([]);
   const [activeChip, setActiveChip] = useState<TSortedWord | null>();
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;

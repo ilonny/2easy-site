@@ -22,7 +22,7 @@ export const NoteExView: FC<TProps> = ({
   changeData,
 }) => {
   const { profile } = useContext(AuthContext);
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const { saveNoteEx } = useUploadNoteEx(data.sortIndex);
   const onClickEye = useCallback(async () => {
     if (typeof onChangeIsVisible === "function") {

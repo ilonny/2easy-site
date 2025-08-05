@@ -55,7 +55,7 @@ export const LessonCard: FC<TProps> = ({
   const router = useRouter();
   const params = useParams();
   const { profile } = useContext(AuthContext);
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const { checkSubscription, hasSubscription } = useCheckSubscription();
 
   const isDisabled =

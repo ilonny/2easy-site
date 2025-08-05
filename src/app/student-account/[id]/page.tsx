@@ -52,7 +52,7 @@ export default function StartRegistrationPage() {
     fetchStudentInfo();
   }, [studentId, fetchStudentInfo]);
 
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
 
   return (

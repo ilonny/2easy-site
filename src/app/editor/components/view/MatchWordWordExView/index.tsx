@@ -30,7 +30,7 @@ export const MatchWordWordExView: FC<TProps> = ({
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const ex_id = data?.id;
 
   const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
