@@ -281,6 +281,7 @@ export const ExListComp: FC<TProps> = (props) => {
                     textAlign: "left",
                     lineHeight: "100%",
                   }}
+                  className={`${styles["eye-text"]}`}
                 >
                   {isVisible
                     ? ex.type === "note"

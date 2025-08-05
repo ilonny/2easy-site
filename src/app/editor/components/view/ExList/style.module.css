@@ -27,6 +27,15 @@
   pointer-events: all;
 }
 
+.wrapper .eye-text { 
+  opacity: 0;
+  transition: all 250ms ease;
+}
+
+.wrapper:hover .eye-text { 
+  opacity: 1;
+}
+
 .dashed {
   border: 1px dashed #D3D3D3;
   height: 1px;
