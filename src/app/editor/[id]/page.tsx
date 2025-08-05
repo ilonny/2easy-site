@@ -12,7 +12,7 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { useParams } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 import {
   useCallback,
   useContext,
@@ -27,7 +27,7 @@ import { TTemplate } from "../components/create/ChooseTemplateModal/templates";
 import { EditorRootModal } from "../components/editor/EditorRootModal";
 import { useExList } from "../hooks/useExList";
 import { ExList } from "../components/view/ExList";
-import { BASE_URL } from "@/api";
+import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { withLogin } from "@/auth/hooks/withLogin";
@@ -247,7 +247,7 @@ export default function EditorPage() {
           />
           <div className="h-10" />
           <div className="h-10" />
-          {showCreateExBtn && (
+          {showCreateExBtn ? (
             <>
               <Card radius="none" shadow="none">
                 <CreateExButton
@@ -262,6 +262,27 @@ export default function EditorPage() {
               <div className="h-10" />
               <div className="h-10" />
             </>
+          ) : (
+            <div className="justify-center flex">
+              <Button
+                size="lg"
+                color="primary"
+                onClick={async () => {
+                  const res = await fetchPostJson({
+                    path: "/lessons/copy",
+                    isSecure: true,
+                    data: {
+                      lesson_id: params.id,
+                    },
+                  });
+                  const data = await res.json();
+                  checkResponse(data);
+                  window.location.pathname = `/editor/${data.id}`;
+                }}
+              >
+                {'Добавить в "Мои уроки"'}
+              </Button>
+            </div>
           )}
         </div>
         <div className="h-10" />
