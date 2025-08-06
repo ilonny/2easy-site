@@ -143,7 +143,13 @@ const DraggableItem = (props: {
     >
       <Chip
         color={isError ? "danger" : "primary"}
-        style={{ zIndex: 1, cursor: "pointer" }}
+        style={{
+          zIndex: 1,
+          cursor: "pointer",
+          whiteSpace: "break-spaces",
+          height: "auto",
+          textAlign: "center",
+        }}
         id={"draggable-" + id}
         className="handle text-[18px] cursor-pointer"
       >
@@ -418,7 +424,7 @@ export const MatchWordImageExView: FC<TProps> = ({
                         className="mt-4 flex items-center justify-center p-2 answer-wrapper"
                         id={"answer-wrapper-" + image.id}
                         style={{
-                          height: 40,
+                          minHeight: 40,
                           width: "100%",
                           border: isCorrect
                             ? "2px solid #219F59"

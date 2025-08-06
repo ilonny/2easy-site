@@ -226,7 +226,13 @@ const DraggableItem = (props: {
         className={`${
           isActiveDrag && "bg-[#271399]"
         } handle text-[18px] cursor-pointer`}
-        style={{ zIndex: 1, cursor: "pointer" }}
+        style={{
+          zIndex: 1,
+          cursor: "pointer",
+          whiteSpace: "break-spaces",
+          height: "auto",
+          textAlign: "center",
+        }}
       >
         <span style={{ fontSize: 18, fontWeight: 400 }}>{field.value}</span>
       </Chip>
