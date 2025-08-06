@@ -213,11 +213,11 @@ export const ExListComp: FC<TProps> = (props) => {
     return () => clearInterval(interval);
   }, [isView]);
 
-  const ViewerComponent = ({ ex, exIndex, is2easy, isAdmin }) => {
+  const ViewerComponent = ({ ex, exIndex, is2easy, isAdmin, isView }) => {
     const { profile } = useContext(AuthContext);
     const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
-    const Viewer = mapComponent(ex.type, { ...props, id: ex.id });
+    const Viewer = mapComponent(ex.type, { ...props, id: ex.id, isView });
     const [popoverIsOpen, setPopoverIsOpen] = useState(false);
     const closePopover = useCallback(() => {
       setPopoverIsOpen(false);
@@ -293,7 +293,11 @@ export const ExListComp: FC<TProps> = (props) => {
               </div>
             </div>
           )}
-          <Viewer data={ex.data} activeStudentId={activeStudentId} />
+          <Viewer
+            data={ex.data}
+            activeStudentId={activeStudentId}
+            isView={isView}
+          />
           {!isView && (
             <>
               <Popover
@@ -499,6 +503,7 @@ export const ExListComp: FC<TProps> = (props) => {
             exIndex={exIndex}
             isAdmin={isAdmin}
             is2easy={is2easy}
+            isView={isView}
           />
         );
       })}

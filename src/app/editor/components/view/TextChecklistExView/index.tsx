@@ -25,7 +25,7 @@ export const TextChecklistExView: FC<TProps> = ({
   const lesson_id = useParams()?.id;
   const profile = useContext(AuthContext)?.profile;
   const student_id = profile?.studentId;
-  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
+  const isTeacher = profile?.role_id === 2;
   const ex_id = data?.id;
 
   const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
@@ -104,14 +104,18 @@ export const TextChecklistExView: FC<TProps> = ({
                     key={index}
                     style={{ cursor: "pointer" }}
                   >
-                    <Checkbox
-                      size="lg"
-                      color="primary"
-                      onValueChange={(val) => {
-                        writeAnswer(sticker, JSON.stringify(val));
-                      }}
-                      isSelected={isTeacher ? isChecked : undefined}
-                    />
+                    {rest.isView ? (
+                      <Checkbox
+                        size="lg"
+                        color="primary"
+                        onValueChange={(val) => {
+                          writeAnswer(sticker, JSON.stringify(val));
+                        }}
+                        isSelected={isTeacher ? isChecked : undefined}
+                      />
+                    ) : (
+                      <Checkbox size="lg" color="primary" />
+                    )}
                     <p style={{ fontSize: 18 }}>{sticker}</p>
                   </label>
                 );
