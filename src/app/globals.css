@@ -286,3 +286,7 @@ ol, ul {
     width: 33.33333%;
   }
 }
+
+.cs-message--outgoing .cs-message__sender-name, .cs-message--incoming .cs-message__sender-name {
+  display: block !important;
+}

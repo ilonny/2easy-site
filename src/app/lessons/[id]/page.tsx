@@ -32,6 +32,7 @@ import { readFromLocalStorage } from "@/auth/utils";
 import LinkIcon from "@/assets/icons/link.svg";
 import CopyIcon from "@/assets/icons/copy.svg";
 import { toast } from "react-toastify";
+import { Chat } from "@/components/Chat";
 
 export default function StartRegistrationPage() {
   withLogin();
@@ -97,11 +98,7 @@ export default function StartRegistrationPage() {
         isSecure: true,
       });
       const list = await res?.json();
-      console.log("list ", list);
-      console.log("exList ", exList);
       if (exList.length && list.length && list.length !== exList.length) {
-        console.log("list", list);
-        console.log("exList", exList);
         getExList();
         // setExList(list);
       }
@@ -312,6 +309,15 @@ export default function StartRegistrationPage() {
               )} */}
             </div>
           )}
+        </div>
+        <div className="relative">
+          <div className="fixed right-0 bottom-0" style={{ zIndex: 10 }}>
+            <Chat
+              students={students}
+              lesson_id={lesson?.id || 0}
+              isTeacher={isTeacher}
+            />
+          </div>
         </div>
         <div className="h-20"></div>
       </ContentWrapper>

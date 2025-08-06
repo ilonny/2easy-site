@@ -12,7 +12,7 @@ type TParams = {
 };
 
 const limit = pLimit(1);
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const useExAnswer = (params: TParams) => {
   let idRef = 0;

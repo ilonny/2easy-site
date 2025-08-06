@@ -230,7 +230,6 @@ export const ExListComp: FC<TProps> = (props) => {
       }
       return isTeacher;
     }, [is2easy, isAdmin, isTeacher]);
-    console.log("is2easy", is2easy, isAdmin);
     return (
       <div key={ex.id}>
         <div
