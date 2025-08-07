@@ -9,6 +9,10 @@ import {
   Image,
   Input,
   Link,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -31,6 +35,9 @@ import "react-medium-image-zoom/dist/styles.css";
 import { readFromLocalStorage } from "@/auth/utils";
 import LinkIcon from "@/assets/icons/link.svg";
 import CopyIcon from "@/assets/icons/copy.svg";
+import InfoIcon from "@/assets/icons/info.svg";
+import CheckedYellow from "@/assets/icons/checked_yellow.svg";
+import HeartImage from "@/assets/images/3d-glassy-fuzzy-pink-heart-with-a-happy-face.png";
 import { toast } from "react-toastify";
 import { Chat } from "@/components/Chat";
 
@@ -44,6 +51,7 @@ export default function StartRegistrationPage() {
   const isStudent = profile?.isStudent;
   const { exList, getExList, setExList } = useExList(params.id);
   const { lesson, getLesson } = useLessons();
+  const [tutorialOpen, setTutorialOpen] = useState(false);
 
   const [students, setStudents] = useState([]);
   const [activeStudentId, setActiveStudentId] = useState(0);
@@ -122,7 +130,7 @@ export default function StartRegistrationPage() {
         <div className="">
           <div className="h-14" />
           {isTeacher && (
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between flex-wrap">
               <Link href={`/editor/${params.id}`} className="text-secondary">
                 <Button variant="light">← Вернуться к редактированию</Button>
               </Link>
@@ -134,6 +142,13 @@ export default function StartRegistrationPage() {
                 <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
               </Breadcrumbs> */}
               <div className="">
+                <Button
+                  endContent={<img src={InfoIcon.src} alt="icon" />}
+                  variant="light"
+                  onClick={() => setTutorialOpen(true)}
+                >
+                  Как работает режим урока?
+                </Button>
                 <Popover
                   color="foreground"
                   placement="bottom-end"
@@ -321,6 +336,87 @@ export default function StartRegistrationPage() {
         </div>
         <div className="h-20"></div>
       </ContentWrapper>
+      <Modal
+        size="xl"
+        isOpen={tutorialOpen}
+        onClose={() => setTutorialOpen(false)}
+        style={{ background: "#F9F9F9" }}
+        className="p-6 relative"
+      >
+        <ModalContent>
+          <ModalHeader className="justify-center">
+            <p style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}>
+              Как работает режим урока?
+            </p>
+          </ModalHeader>
+          <ModalBody>
+            <div style={{ maxWidth: 430 }}>
+              <div className="flex items-start gap-2 mb-2">
+                <div className="shrink-0 pt-[3px]">
+                  <Image src={CheckedYellow.src} alt="checked" />
+                </div>
+                <p>вы видите ответы ученика в заданиях и тестах</p>
+              </div>
+              <div className="flex items-start gap-2 mb-2">
+                <div className="shrink-0 pt-[3px]">
+                  <Image src={CheckedYellow.src} alt="checked" />
+                </div>
+                <p>
+                  если занятие групповое, вы можете переключаться между
+                  учениками на панели справа, чтобы увидеть ответы каждого из
+                  них
+                </p>
+              </div>
+              <div className="flex items-start gap-2 mb-2">
+                <div className="shrink-0 pt-[3px]">
+                  <Image src={CheckedYellow.src} alt="checked" />
+                </div>
+                <p>
+                  нажимая на глазик слева от задания, вы делаете задание
+                  невидимым для ученика
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="shrink-0 pt-[3px]">
+                  <Image src={CheckedYellow.src} alt="checked" />
+                </div>
+                <p>
+                  чат урока в правом нижнем углу позволяет общаться с учениками
+                  во время урока*
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="shrink-0 pt-[3px] opacity-0">
+                  <Image src={CheckedYellow.src} alt="checked" />
+                </div>
+                <p style={{ color: "#ACACAC", fontSize: 12 }}>
+                  *История чата сохраняется: если ученик снова зайдет в урока,
+                  он будет видеть все сообщения
+                </p>
+              </div>
+            </div>
+            <Button
+              color="primary"
+              className="w-full"
+              size="lg"
+              onClick={() => setTutorialOpen(false)}
+            >
+              <p>Принято!</p>
+            </Button>
+            <div
+              style={{
+                width: 140,
+                position: "absolute",
+                top: 0,
+                right: 0,
+                zIndex: -1,
+              }}
+            >
+              <Image src={HeartImage.src} alt="heart image" />
+            </div>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </main>
   );
 }
