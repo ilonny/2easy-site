@@ -282,7 +282,7 @@ export const FillGapsDragExView: FC<TProps> = ({
             {field && (
               <AnswerField
                 field={field}
-                isTeacher={profile?.role_id === 2}
+                isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
                 isCorrect={correctIds.includes(field?.id)}
                 dataId={data?.id}
                 errorAnswerId={errorAnswerId}

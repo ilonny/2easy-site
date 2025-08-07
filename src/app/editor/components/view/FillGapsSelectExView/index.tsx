@@ -241,7 +241,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
             <AnswerField
               field={field}
               key={field?.id}
-              isTeacher={profile?.role_id === 2}
+              isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
               localAnswers={localAnswers}
               setLocalAnswers={setLocalAnswers}
             />
