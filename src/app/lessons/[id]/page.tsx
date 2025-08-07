@@ -33,13 +33,16 @@ import { useExList } from "@/app/editor/hooks/useExList";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { readFromLocalStorage } from "@/auth/utils";
-import LinkIcon from "@/assets/icons/link.svg";
-import CopyIcon from "@/assets/icons/copy.svg";
+import EyeIcon from "@/assets/icons/eye_enable.svg";
 import InfoIcon from "@/assets/icons/info.svg";
 import CheckedYellow from "@/assets/icons/checked_yellow.svg";
+import Tutor2 from "@/assets/images/tutor_2.png";
+import Tutor1 from "@/assets/images/tutor_1.png";
+import Tutor3 from "@/assets/images/tutor_3.png";
 import HeartImage from "@/assets/images/3d-glassy-fuzzy-pink-heart-with-a-happy-face.png";
 import { toast } from "react-toastify";
 import { Chat } from "@/components/Chat";
+import { CopyLessonLink } from "../components/CopyLessonLink";
 
 export default function StartRegistrationPage() {
   withLogin();
@@ -52,7 +55,7 @@ export default function StartRegistrationPage() {
   const { exList, getExList, setExList } = useExList(params.id);
   const { lesson, getLesson } = useLessons();
   const [tutorialOpen, setTutorialOpen] = useState(false);
-
+  const [tutorialStep, setTutorialStep] = useState(1);
   const [students, setStudents] = useState([]);
   const [activeStudentId, setActiveStudentId] = useState(0);
 
@@ -124,6 +127,12 @@ export default function StartRegistrationPage() {
     // return () => clearInterval(interval);
   }, [getExList, isStudent, params.id, exList, setExList]);
 
+  useEffect(() => {
+    if (!tutorialOpen) {
+      setTutorialStep(1);
+    }
+  }, [tutorialOpen]);
+
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
@@ -149,49 +158,7 @@ export default function StartRegistrationPage() {
                 >
                   Как работает режим урока?
                 </Button>
-                <Popover
-                  color="foreground"
-                  placement="bottom-end"
-                  isOpen={popoverIsOpen}
-                  onOpenChange={(open) => {
-                    setPopoverIsOpen(open);
-                  }}
-                >
-                  <PopoverTrigger>
-                    <Button
-                      endContent={<img src={LinkIcon.src} alt="icon" />}
-                      variant="light"
-                    >
-                      Ссылка на урок
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="p-4 bg-white items-start cursor-pointer">
-                    <div
-                      className=""
-                      onClick={() => {
-                        navigator.clipboard
-                          .writeText(window.location.href)
-                          .then(() => {
-                            toast.success(
-                              "Ссылка на урок скопирована в буфер обмена. Вы можете поделиться ей с учеником"
-                            );
-                            setPopoverIsOpen(false);
-                          });
-                      }}
-                    >
-                      <div className="flex justify-between items-center gap-4">
-                        <p>Скопировать ссылку</p>
-                        <img src={CopyIcon.src} />
-                      </div>
-                      <div
-                        className="p-2 mt-2"
-                        style={{ border: "1px solid #191919" }}
-                      >
-                        {window.location.href}
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                <CopyLessonLink />
               </div>
             </div>
           )}
@@ -341,79 +308,300 @@ export default function StartRegistrationPage() {
         isOpen={tutorialOpen}
         onClose={() => setTutorialOpen(false)}
         style={{ background: "#F9F9F9" }}
-        className="p-6 relative"
+        className=" relative"
       >
         <ModalContent>
-          <ModalHeader className="justify-center">
-            <p style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}>
-              Как работает режим урока?
-            </p>
-          </ModalHeader>
-          <ModalBody>
-            <div style={{ maxWidth: 430 }}>
-              <div className="flex items-start gap-2 mb-2">
-                <div className="shrink-0 pt-[3px]">
-                  <Image src={CheckedYellow.src} alt="checked" />
-                </div>
-                <p>вы видите ответы ученика в заданиях и тестах</p>
-              </div>
-              <div className="flex items-start gap-2 mb-2">
-                <div className="shrink-0 pt-[3px]">
-                  <Image src={CheckedYellow.src} alt="checked" />
-                </div>
-                <p>
-                  если занятие групповое, вы можете переключаться между
-                  учениками на панели справа, чтобы увидеть ответы каждого из
-                  них
+          <ModalHeader className="justify-center"></ModalHeader>
+          <ModalBody style={{ minHeight: 460 }}>
+            {tutorialStep === 1 && (
+              <>
+                <div className="h-14"></div>
+                <p
+                  style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
+                >
+                  Сейчас вы находитесь в режиме урока
                 </p>
-              </div>
-              <div className="flex items-start gap-2 mb-2">
-                <div className="shrink-0 pt-[3px]">
-                  <Image src={CheckedYellow.src} alt="checked" />
-                </div>
-                <p>
-                  нажимая на глазик слева от задания, вы делаете задание
-                  невидимым для ученика
+                <p className="text-center mb-2">
+                  Пролистайте небольшой туториал, который
+                  <br />
+                  расскажет, что можно делать в этом режиме
                 </p>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="shrink-0 pt-[3px]">
-                  <Image src={CheckedYellow.src} alt="checked" />
+                <div
+                  style={{
+                    backgroundColor: "#F0EEFF",
+                    padding: 12,
+                    borderRadius: 10,
+                    margin: "auto",
+                    maxWidth: 350,
+                    width: "100%",
+                  }}
+                >
+                  <p className="text-primary text-center">
+                    Время на изучение ~ 1 минута
+                  </p>
+                  <p className="text-primary text-center">
+                    Польза в работе + 110%
+                  </p>
                 </div>
-                <p>
-                  чат урока в правом нижнем углу позволяет общаться с учениками
-                  во время урока*
-                </p>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="shrink-0 pt-[3px] opacity-0">
-                  <Image src={CheckedYellow.src} alt="checked" />
+                <div className="h-4"></div>
+                <Button
+                  color="primary"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => setTutorialStep(2)}
+                >
+                  <p>Листать →</p>
+                </Button>
+                <div
+                  style={{
+                    width: 175,
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    zIndex: -1,
+                  }}
+                >
+                  <Image src={HeartImage.src} alt="heart image" />
                 </div>
-                <p style={{ color: "#ACACAC", fontSize: 12 }}>
-                  *История чата сохраняется: если ученик снова зайдет в урока,
-                  он будет видеть все сообщения
+              </>
+            )}
+            {tutorialStep === 2 && (
+              <>
+                <p
+                  style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
+                >
+                  Чтобы начать урок, нужно
+                  <br />
+                  поделиться им с учеником
                 </p>
+                <p className="text-center mb-2">
+                  Сделать это можно двумя способами:
+                </p>
+                <div style={{ maxWidth: 500, margin: "auto" }}>
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="shrink-0 pt-[3px]">
+                      <Image src={CheckedYellow.src} alt="checked" />
+                    </div>
+                    <p>
+                      попросить ученика зайти в нужный урок в своем личном
+                      кабинете
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="shrink-0 pt-[3px]">
+                      <Image src={CheckedYellow.src} alt="checked" />
+                    </div>
+                    <p>отправить ученику прямую ссылку на урок</p>
+                  </div>
+                  <div className="flex justify-end">
+                    <CopyLessonLink />
+                  </div>
+                </div>
+                <div className="h-4"></div>
+                <Button
+                  color="primary"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => setTutorialStep(3)}
+                >
+                  <p>Дальше →</p>
+                </Button>
+              </>
+            )}
+            {tutorialStep === 3 && (
+              <>
+                <p
+                  style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
+                >
+                  Когда ученик присоединился к уроку,
+                  <br />
+                  вы можете:
+                </p>
+                <p className="text-center mb-2"></p>
+                <div style={{ maxWidth: 500, margin: "auto" }}>
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="shrink-0 pt-[3px]">
+                      <Image src={CheckedYellow.src} alt="checked" />
+                    </div>
+                    <p>видеть его ответы в режиме real-time</p>
+                  </div>
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="shrink-0 pt-[3px]">
+                      <Image src={CheckedYellow.src} alt="checked" />
+                    </div>
+                    <p>
+                      менять видимость заданий прямо на уроке с помощью{" "}
+                      <img
+                        src={EyeIcon.src}
+                        style={{ display: "inline", margin: "0 5px" }}
+                      />{" "}
+                      слева от задания
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="shrink-0 pt-[3px]">
+                      <Image src={CheckedYellow.src} alt="checked" />
+                    </div>
+                    <p>
+                      делать заметки или записывать новые слова в чате урока
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="shrink-0 pt-[3px] opacity-0">
+                      <Image src={CheckedYellow.src} alt="checked" />
+                    </div>
+                    <p style={{ color: "#ACACAC", fontSize: 12 }}>
+                      *История чата сохраняется: если ученик снова зайдет в
+                      урок, он будет видеть все сообщения
+                    </p>
+                  </div>
+                </div>
+                <div className="h-4"></div>
+                <Button
+                  color="primary"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => setTutorialStep(4)}
+                >
+                  <p>Дальше →</p>
+                </Button>
+              </>
+            )}
+            {tutorialStep === 4 && (
+              <>
+                <div className="flex flex-col flex-1 justify-between">
+                  <div>
+                    <p
+                      style={{
+                        fontSize: 22,
+                        fontWeight: 500,
+                        textAlign: "center",
+                      }}
+                    >
+                      Если вы ведете групповой урок:
+                    </p>
+                    <p></p>
+                    <div className="h-2"></div>
+                    <div style={{ maxWidth: 500, margin: "auto" }}>
+                      <div className="flex items-start gap-2 mb-2">
+                        <div className="shrink-0 pt-[3px]">
+                          <Image src={CheckedYellow.src} alt="checked" />
+                        </div>
+                        <p>
+                          если занятие групповое, вы можете переключаться между
+                          учениками на панели справа, чтобы увидеть ответы
+                          каждого* из них
+                        </p>
+                      </div>
+                      <div className="flex items-start justify-between flex-wrap">
+                        <div className="flex items-start gap-2 mb-2 pt-4">
+                          <div className="shrink-0 pt-[3px] opacity-0">
+                            <Image src={CheckedYellow.src} alt="checked" />
+                          </div>
+                          <p style={{ color: "#3F28C6", fontSize: 12 }}>
+                            *Светло-фиолетовым отмечен ученик,
+                            <br />
+                            ответы которого отображаются на экране
+                          </p>
+                        </div>
+                        <img src={Tutor2.src} style={{ width: 183 }} />
+                      </div>
+                      {/* <div className="h-6"></div> */}
+                    </div>
+                  </div>
+                  <Button
+                    color="primary"
+                    className="w-full"
+                    size="lg"
+                    onClick={() => setTutorialStep(5)}
+                  >
+                    <p>Дальше →</p>
+                  </Button>
+                </div>
+
+                <img
+                  src={Tutor1.src}
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    bottom: 0,
+                    zIndex: -1,
+                    width: 370,
+                  }}
+                />
+              </>
+            )}
+            {tutorialStep === 5 && (
+              <>
+                <div className="flex flex-col flex-1 justify-between">
+                  <div>
+                    <p
+                      style={{
+                        fontSize: 22,
+                        fontWeight: 500,
+                        textAlign: "center",
+                      }}
+                    >
+                      После завершения урока
+                    </p>
+                    <p className="text-center">
+                      Все ответы ученика сохраняются.
+                      <br />
+                      Посмотреть ответы после завершения урока вы можете,
+                      <br />
+                      перейдя в личный кабинет ученика и выбрав нужный урок
+                    </p>
+                    <div className="h-4"></div>
+                  </div>
+                  <Button
+                    color="primary"
+                    className="w-full"
+                    size="lg"
+                    onClick={() => setTutorialOpen(false)}
+                  >
+                    <p>За работу!</p>
+                  </Button>
+                </div>
+
+                <img
+                  src={Tutor3.src}
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    bottom: 0,
+                    zIndex: -1,
+                    width: 500,
+                  }}
+                />
+              </>
+            )}
+            <div className="flex items-center justify-between">
+              <div className="w-[100px]">
+                {tutorialStep >= 2 && (
+                  <div
+                    style={{
+                      fontSize: 14,
+                      color:
+                        tutorialStep === 4 || tutorialStep === 5
+                          ? "#fff"
+                          : "#B7B7B7",
+                    }}
+                    className="cursor-pointer hover:underline"
+                    onClick={() => setTutorialStep((s) => s - 1)}
+                  >
+                    ← назад
+                  </div>
+                )}
               </div>
+              <p
+                className="text-center"
+                style={{ fontSize: 14, color: "#B7B7B7" }}
+              >
+                {tutorialStep} / 5
+              </p>
+              <div className="w-[100px]"></div>
             </div>
-            <Button
-              color="primary"
-              className="w-full"
-              size="lg"
-              onClick={() => setTutorialOpen(false)}
-            >
-              <p>Принято!</p>
-            </Button>
-            <div
-              style={{
-                width: 140,
-                position: "absolute",
-                top: 0,
-                right: 0,
-                zIndex: -1,
-              }}
-            >
-              <Image src={HeartImage.src} alt="heart image" />
-            </div>
+            <div className="h-2"></div>
           </ModalBody>
         </ModalContent>
       </Modal>
