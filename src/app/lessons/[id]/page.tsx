@@ -307,7 +307,7 @@ export default function StartRegistrationPage() {
         size="xl"
         isOpen={tutorialOpen}
         onClose={() => setTutorialOpen(false)}
-        style={{ background: "#F9F9F9" }}
+        style={{ background: "#fff  " }}
         className=" relative"
       >
         <ModalContent>
@@ -393,8 +393,11 @@ export default function StartRegistrationPage() {
                     </div>
                     <p>отправить ученику прямую ссылку на урок</p>
                   </div>
+                  <div className="h-8"></div>
                   <div className="flex justify-end">
-                    <CopyLessonLink />
+                    <div style={{ marginRight: -30 }}>
+                      <CopyLessonLink />
+                    </div>
                   </div>
                 </div>
                 <div className="h-4"></div>
@@ -595,7 +598,13 @@ export default function StartRegistrationPage() {
               </div>
               <p
                 className="text-center"
-                style={{ fontSize: 14, color: "#B7B7B7" }}
+                style={{
+                  fontSize: 14,
+                  color:
+                    tutorialStep === 4 || tutorialStep === 5
+                      ? "#fff"
+                      : "#B7B7B7",
+                }}
               >
                 {tutorialStep} / 5
               </p>
