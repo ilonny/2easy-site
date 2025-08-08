@@ -51,37 +51,6 @@ export const NoteExView: FC<TProps> = ({
         maxWidth: 780,
       }}
     >
-      <div style={{ width: 55 }}>
-        {/* {isTeacher && (
-          <div
-            className="flex flex-col items-start gap-2"
-            style={{ cursor: "pointer" }}
-            onClick={() => onClickEye()}
-          >
-            <div
-              style={{ width: 24, height: 28 }}
-              className="flex justify-center items-center"
-            >
-              <Image
-                src={data.isVisible ? EyeEnabledIcon : EyeDisabledIcon}
-                alt=""
-              />
-            </div>
-            <p
-              style={{
-                color: data.isVisible ? "#3F28C6" : "#B3B3B3",
-                fontSize: 12,
-                textAlign: "left",
-                lineHeight: "100%",
-              }}
-            >
-              {data.isVisible
-                ? "заметка видна ученику"
-                : "заметка не видна ученику"}
-            </p>
-          </div>
-        )} */}
-      </div>
       <div
         style={{
           // margin: "0 auto",
@@ -114,7 +83,6 @@ export const NoteExView: FC<TProps> = ({
           </p>
         )}
       </div>
-      <div style={{ width: 55 }}></div>
     </div>
   );
 };

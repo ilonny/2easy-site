@@ -59,9 +59,9 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
         </Zoom>
       )}
       <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <Card
-            className={`w-[50%] p-5 editor-view`}
+            className={`w-[100%] lg:w-[50%] p-5 editor-view`}
             style={{
               margin: "0 auto",
               backgroundColor: "#fff",
@@ -79,7 +79,7 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
             />
           </Card>
           <Card
-            className={`w-[50%] p-5 editor-view`}
+            className={`w-[100%] lg:w-[50%] p-5 editor-view`}
             style={{
               margin: "0 auto",
               backgroundColor: "#fff",

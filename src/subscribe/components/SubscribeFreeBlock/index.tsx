@@ -20,7 +20,7 @@ export const SubscribeFreeBlock = () => {
   return (
     <>
       <div
-        className="p-4 lg:p-10"
+        className="p-4 lg:p-10 flex flex-col justify-between flex-1 gap-4"
         style={{
           width: "100%",
           minHeight: 318,
@@ -31,57 +31,60 @@ export const SubscribeFreeBlock = () => {
           borderRadius: 20,
         }}
       >
-        <p
-          style={{
-            maxWidth: 482,
-            fontWeight: 600,
-            fontSize: 22,
-            lineHeight: "120%",
-            color: "#292929",
-          }}
-        >
-          Еще не пользовались 2easy?
-        </p>
-        <div className="h-4" />
-        <div style={{ maxWidth: 570 }}>
-          <p>Начните с бесплатного пробного периода.</p>
-          <p className="mt-2">
-            У вас будет 3 дня полного доступа ко всему, что есть на сайте -- это
-            позволит познакомиться с платформой перед оформлением подписки.
-          </p>
-        </div>
-        <div className="h-4"></div>
-        <div className="inline-block">
-          <div
-            className="py-2 px-4 flex items-center gap-2"
+        <div>
+          <p
             style={{
-              background: "rgba(255, 255, 255, 0.3)",
-              borderRadius: 100,
-              fontSize: 14,
+              maxWidth: 482,
+              fontWeight: 600,
+              fontSize: 22,
+              lineHeight: "120%",
+              color: "#292929",
             }}
           >
-            <Image src={CardIcon} alt="card icon" />
-            <p>Не нужно вводить данные карты</p>
+            Еще не пользовались 2easy?
+          </p>
+          <div className="h-4" />
+          <div style={{ maxWidth: 570 }}>
+            <p>Начните с бесплатного пробного периода.</p>
+            <p className="mt-2">
+              У вас будет 3 дня полного доступа ко всему, что есть на сайте --
+              это позволит познакомиться с платформой перед оформлением
+              подписки.
+            </p>
           </div>
         </div>
-        <div className="h-4"></div>
-        <Button
-          onClick={() => setModalIsOpened(true)}
-          style={{ backgroundColor: "#D2FF88", float: "right" }}
-          className="uppercase"
-          size="lg"
-        >
-          <span
-            style={{
-              fontSize: 14,
-              fontWeight: 600,
-              lineHeight: "120%",
-              letterSpacing: 1,
-            }}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="inline-block">
+            <div
+              className="py-2 px-4 flex items-center gap-2"
+              style={{
+                background: "rgba(255, 255, 255, 0.3)",
+                borderRadius: 100,
+                fontSize: 14,
+              }}
+            >
+              <Image src={CardIcon} alt="card icon" />
+              <p>Не нужно вводить данные карты</p>
+            </div>
+          </div>
+          <Button
+            onClick={() => setModalIsOpened(true)}
+            style={{ backgroundColor: "#D2FF88" }}
+            className="uppercase"
+            size="lg"
           >
-            Начать бесплатно
-          </span>
-        </Button>
+            <span
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                lineHeight: "120%",
+                letterSpacing: 1,
+              }}
+            >
+              Начать бесплатно
+            </span>
+          </Button>
+        </div>
       </div>
       <Modal
         size="lg"

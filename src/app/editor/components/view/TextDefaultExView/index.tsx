@@ -56,11 +56,12 @@ export const TextDefaultExView: FC<TProps> = ({ data, isPreview = false }) => {
       )}
       <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
         <Card
-          className={`p-10 editor-view`}
+          className={`p-4 lg:p-10 editor-view`}
           style={{
             margin: "0 auto",
             backgroundColor: "#fff",
             borderRadius: 14,
+            wordBreak: "break-word",
           }}
         >
           {/* eslint-disable-next-line jsx-a11y/alt-text */}

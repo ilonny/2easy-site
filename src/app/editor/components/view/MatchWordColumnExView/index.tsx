@@ -345,7 +345,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
                 return (
                   <Card
                     key={column.id}
-                    className="w-[47%] p-6 answer-wrapper"
+                    className="w-[100%] lg:w-[47%] p-6 answer-wrapper"
                     id={"answer-wrapper-" + column.id}
                     onMouseOver={() => {
                       if (isTeacher) {

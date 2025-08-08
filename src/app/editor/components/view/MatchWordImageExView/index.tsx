@@ -401,7 +401,7 @@ export const MatchWordImageExView: FC<TProps> = ({
               const isIncorrectWord =
                 isTeacher && !isCorrect && incorrectIdsMap?.[image?.id];
               return (
-                <div key={image.dataURL} className="w-[33.3333333%] p-4">
+                <div key={image.dataURL} className="w-[33.3333333%] p-1 lg:p-4">
                   <div className="h-[220px] flex items-center justify-center overflow-hidden">
                     <Zoom>
                       <img

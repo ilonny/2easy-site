@@ -57,7 +57,7 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
+      <div className={`py-2 lg:py-8 w-[100%] max-w-[886px] m-auto`}>
         <div
           className={` flex items-center justify-center flex-wrap`}
           style={{ margin: "0 auto" }}
@@ -65,7 +65,7 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
           {data.stickers?.map((sticker, index) => {
             return (
               <div
-                className={`w-[50%] shrink-0 p-4 ${styles["card-rotate"]} `}
+                className={`w-[100%] lg:w-[50%] shrink-0 p-4 ${styles["card-rotate"]} `}
                 key={index}
               >
                 <Card

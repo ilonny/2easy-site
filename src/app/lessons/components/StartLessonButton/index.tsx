@@ -58,6 +58,8 @@ export const StartLessonButton = (props: TProps) => {
           lg:h-[90px]
           lg:w-[90px]
           lg:top-[40]
+          mt-[-90px]
+          lg:mt-0
         "
         onClick={() => onPressButton()}
       >

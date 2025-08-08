@@ -198,10 +198,9 @@ export default function EditorPage() {
           }}
         >
           <StartLessonButton lesson={lesson} />
-          <div className="w-[100%] lg:pl-[90px]">
+          <div className="w-[100%] lg:pl-[90px] text-[38px] lg:text-[44px]">
             <h1
               style={{
-                fontSize: 44,
                 textAlign: "center",
                 color: "#3f28c6",
                 fontWeight: 700,

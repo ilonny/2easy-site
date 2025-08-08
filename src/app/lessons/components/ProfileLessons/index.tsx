@@ -56,7 +56,7 @@ export const ProfileLessons = (props: TProps) => {
     lessonsListIslLoading,
     changeLessonStatus,
     deleteLessonRelation,
-  } = useLessons(studentId, searchString);
+  } = useLessons(studentId, searchString, !!profile?.name);
 
   const data = useMemo(() => {
     const title =

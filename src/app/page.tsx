@@ -155,30 +155,32 @@ export default function Home() {
             видео и статьями, дополненные грамматикой, упражнениями и квизами
           </p>
           <div className="h-6 lg:h-14"></div>
-          <div className="flex relative">
-            <div className="flex overflow-scroll w-[100%]">
-              {lessons.map((lesson) => {
-                return (
-                  <LessonCard lesson={lesson} key={lesson.id} disableClick />
-                );
-              })}
-            </div>
-            <div
-              className={`
-                  absolute
-                  bottom-0
-                  right-0
-                  lg:hidden
-                  w-[40px]
-                  transition-opacity duration-500 ${
-                    handIconIsVisible ? "opacity-100" : "opacity-0"
-                  }
+          <Link href="/lessons_plans">
+            <div className="flex relative">
+              <div className="flex overflow-scroll w-[100%]">
+                {lessons.map((lesson) => {
+                  return (
+                    <LessonCard lesson={lesson} key={lesson.id} disableClick />
+                  );
+                })}
+              </div>
+              <div
+                className={`
+                absolute
+                bottom-0
+                right-0
+                lg:hidden
+                w-[40px]
+                transition-opacity duration-500 ${
+                  handIconIsVisible ? "opacity-100" : "opacity-0"
+                }
                 `}
-              style={{ pointerEvents: "none" }}
-            >
-              <Image src={HandIcon} alt="hand icon" />
+                style={{ pointerEvents: "none" }}
+              >
+                <Image src={HandIcon} alt="hand icon" />
+              </div>
             </div>
-          </div>
+          </Link>
           <div className="h-6 lg:h-14"></div>
           <div className="h-6 lg:h-14"></div>
           <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">

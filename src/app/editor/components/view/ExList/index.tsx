@@ -231,11 +231,11 @@ export const ExListComp: FC<TProps> = (props) => {
       return isTeacher;
     }, [is2easy, isAdmin, isTeacher]);
     return (
-      <div key={ex.id}>
+      <div key={ex.id} className="">
         <div
           className={`${styles["wrapper"]} ${
             isView && styles["is-view"]
-          } relative`}
+          } relative pt-[55px] lg:pt-0`}
           style={{ fontSize: 18 }}
           id={`ex-${ex.id}`}
         >

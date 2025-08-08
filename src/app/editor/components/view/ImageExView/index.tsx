@@ -74,7 +74,10 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
         </p>
       )}
       <div className="h-10" />
-      <div className={`py-8 w-[100%] max-w-[886px] m-auto`} style={{ margin: "0 auto" }}>
+      <div
+        className={`py-8 w-[100%] max-w-[886px] m-auto`}
+        style={{ margin: "0 auto" }}
+      >
         {!Boolean(data?.images?.length) && (
           <div
             className="w-full h-[250px]"
@@ -102,16 +105,16 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
         )}
         {data?.images?.length >= 2 && data?.viewType === "carousel" && (
           <>
-            <div className="slider-container">
+            <div className="slider-container max-w-[810px] m-auto">
               <Slider {...settings}>
                 {data?.images?.map((image) => {
                   return (
-                    <div key={image.dataURL} className="max-w-[810px]">
+                    <div key={image.dataURL} className="max-w-[100%]">
                       <Zoom>
                         <img
                           src={image.dataURL}
                           alt="image"
-                          className="max-w-[810px]"
+                          className="max-w-[100%]"
                         />
                       </Zoom>
                       {image?.text && (
@@ -155,7 +158,7 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
           <div className="flex flex-wrap justify-center">
             {data?.images?.map((image) => {
               return (
-                <div key={image.dataURL} className="w-[33.3333333%] p-4">
+                <div key={image.dataURL} className="w-[33.3333333%] p-1 lg:p-4">
                   <Zoom>
                     <img src={image.dataURL} alt="image" />
                   </Zoom>

@@ -106,7 +106,7 @@ export const FreeInputFormExView: FC<TProps> = ({
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[540px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[540px] m-auto`}>
         {data.questions.map((question) => {
           const value = answers[question.id]
             ? answers[question.id].answer
