@@ -177,29 +177,33 @@ export const ProfileLessons = (props: TProps) => {
 
   return (
     <>
-      {!hideTabs && profile?.name && (
+      {!hideTabs && (
         <>
-          <div className="flex gap-5 justify-center">
-            <Button
-              radius="full"
-              color="primary"
-              variant={tabIndex !== "userLessons" ? "solid" : "faded"}
-              onClick={() => setTabIndex("userLessons")}
-            >
-              Мои уроки
-            </Button>
-            <Button
-              radius="full"
-              color="primary"
-              variant={tabIndex !== "savedLessons" ? "solid" : "faded"}
-              onClick={() => setTabIndex("savedLessons")}
-            >
-              Уроки 2EASY
-            </Button>
-          </div>
+          {!!profile?.name && (
+            <>
+              <div className="flex gap-5 justify-center">
+                <Button
+                  radius="full"
+                  color="primary"
+                  variant={tabIndex !== "userLessons" ? "solid" : "faded"}
+                  onClick={() => setTabIndex("userLessons")}
+                >
+                  Мои уроки
+                </Button>
+                <Button
+                  radius="full"
+                  color="primary"
+                  variant={tabIndex !== "savedLessons" ? "solid" : "faded"}
+                  onClick={() => setTabIndex("savedLessons")}
+                >
+                  Уроки 2EASY
+                </Button>
+              </div>
+              <div className="h-6"></div>
+            </>
+          )}
           {tabsToRender?.length >= 2 && (
             <>
-              <div className="h-6"></div>
               <Tabs
                 color="primary"
                 size="lg"
