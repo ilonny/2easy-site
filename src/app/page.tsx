@@ -113,7 +113,7 @@ export default function Home() {
                   "интерактивные задания, тексты, видео и многое другое -- в простом конструкторе 2easy",
               },
               {
-                videoSrc: "MAIN VIDEO SRC",
+                videoSrc: "/video/area23.mp4",
               },
             ]}
           />

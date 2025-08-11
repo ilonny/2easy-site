@@ -183,7 +183,7 @@ export const ProfileLessons = (props: TProps) => {
             <Button
               radius="full"
               color="primary"
-              variant={tabIndex === "userLessons" ? "solid" : "faded"}
+              variant={tabIndex !== "userLessons" ? "solid" : "faded"}
               onClick={() => setTabIndex("userLessons")}
             >
               Мои уроки
@@ -191,7 +191,7 @@ export const ProfileLessons = (props: TProps) => {
             <Button
               radius="full"
               color="primary"
-              variant={tabIndex === "savedLessons" ? "solid" : "faded"}
+              variant={tabIndex !== "savedLessons" ? "solid" : "faded"}
               onClick={() => setTabIndex("savedLessons")}
             >
               Уроки 2EASY
