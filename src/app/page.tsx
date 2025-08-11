@@ -58,8 +58,8 @@ export default function Home() {
           </p>
           <div className="h-5"></div>
           <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-            2EASY -- интерактивная платформа для преподавателей с готовыми
-            уроками, играми и разговорными картами
+            2EASY -- интерактивная платформа с готовыми материалами для создания
+            и проведения языковых уроков
           </h1>
           <div className="h-6 lg:h-14"></div>
           <MainPageInfoBlock
