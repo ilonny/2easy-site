@@ -1,5 +1,5 @@
 import { Button, ButtonProps } from "@nextui-org/react";
-import { FC } from "react";
+import { FC, useEffect, useRef } from "react";
 
 type TSide = {
   buttons?: ButtonProps[];
@@ -14,6 +14,40 @@ type TProps = {
 };
 
 export const MainPageInfoBlock: FC<TProps> = ({ sides, flipMobileOrder }) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry?.target?.play();
+          } else {
+            entry?.target?.pause();
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.8,
+      }
+    );
+
+    const target = videoRef.current;
+
+    if (target) {
+      observer.observe(target);
+    }
+
+    return () => {
+      try {
+        observer?.unobserve(target);
+        observer?.disconnect(); //отключает все наблюдаемые элементы.
+      } catch (err) {}
+    };
+  }, []);
+
   return (
     <div className="flex items-center flex-wrap">
       {sides.map((side, sideIndex) => {
@@ -31,8 +65,20 @@ export const MainPageInfoBlock: FC<TProps> = ({ sides, flipMobileOrder }) => {
           >
             {videoSrc && (
               <div className="min-h-[300px] lg:min-h-[412px] rounded-lg bg-white">
-                <video src={videoSrc} autoPlay loop muted playsinline>
-                  <source src={videoSrc} playsinline />
+                <video
+                  src={videoSrc}
+                  autoPlay
+                  loop
+                  muted
+                  ref={videoRef}
+                  //@ts-ignore
+                  playsinline
+                >
+                  <source
+                    src={videoSrc}
+                    //@ts-ignore
+                    playsinline
+                  />
                 </video>
               </div>
             )}
