@@ -177,7 +177,7 @@ export const ProfileLessons = (props: TProps) => {
 
   return (
     <>
-      {!hideTabs && (
+      {!hideTabs && profile?.name && (
         <>
           <div className="flex gap-5 justify-center">
             <Button

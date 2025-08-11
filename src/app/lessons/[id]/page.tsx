@@ -143,13 +143,6 @@ export default function StartRegistrationPage() {
               <Link href={`/editor/${params.id}`} className="text-secondary">
                 <Button variant="light">← Вернуться к редактированию</Button>
               </Link>
-              {/* <Breadcrumbs>
-                <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-                <BreadcrumbItem href="/profile?lessons">
-                  Мои уроки
-                </BreadcrumbItem>
-                <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
-              </Breadcrumbs> */}
               <div className="">
                 <Button
                   endContent={<img src={InfoIcon.src} alt="icon" />}
