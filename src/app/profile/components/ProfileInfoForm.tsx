@@ -130,7 +130,7 @@ export const ProfileInfoForm = () => {
               </ModalContent>
             </Modal>
           </div>
-          <SubscribeCancel />
+          <SubscribeCancel disableUppercase />
         </form>
       </div>
     </>

@@ -5,12 +5,18 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { useCallback, useState } from "react";
+import { FC, useCallback, useState } from "react";
 import ErrorIcon from "@/assets/icons/error.svg";
 import Image from "next/image";
 import { checkResponse, fetchPostJson } from "@/api";
 
-export const SubscribeCancel = () => {
+type TProps = {
+  disableUppercase?: boolean;
+};
+
+export const SubscribeCancel: FC<disableUppercase> = ({
+  disableUppercase = false,
+}) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [isLoading, setLoading] = useState(false);
 
@@ -37,7 +43,7 @@ export const SubscribeCancel = () => {
           // fontWeight: 600,
           lineHeight: "120%",
           letterSpacing: 1,
-          textTransform: "uppercase",
+          textTransform: disableUppercase ? "initial" : "uppercase",
           paddingLeft: 0,
         }}
         onClick={() => setModalIsOpen(true)}
