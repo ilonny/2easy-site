@@ -93,6 +93,7 @@ export const SubscribeCancel: FC<disableUppercase> = ({
             <Button color="primary" onClick={() => setModalIsOpen(false)}>
               Отмена
             </Button>
+            <div className="h-4" />
           </ModalBody>
         </ModalContent>
       </Modal>

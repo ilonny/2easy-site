@@ -31,8 +31,8 @@ export const MainPageInfoBlock: FC<TProps> = ({ sides, flipMobileOrder }) => {
           >
             {videoSrc && (
               <div className="min-h-[300px] lg:min-h-[412px] rounded-lg bg-white">
-                <video src={videoSrc} autoPlay loop muted>
-                  <source src={videoSrc} />
+                <video src={videoSrc} autoPlay loop muted playsinline>
+                  <source src={videoSrc} playsinline />
                 </video>
               </div>
             )}
