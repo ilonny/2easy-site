@@ -71,14 +71,9 @@ export const MainPageInfoBlock: FC<TProps> = ({ sides, flipMobileOrder }) => {
                   loop
                   muted
                   ref={videoRef}
-                  //@ts-ignore
-                  playsinline
+                  playsInline
                 >
-                  <source
-                    src={videoSrc}
-                    //@ts-ignore
-                    playsinline
-                  />
+                  <source src={videoSrc} />
                 </video>
               </div>
             )}

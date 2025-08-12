@@ -122,7 +122,7 @@ export default function Home() {
             flipMobileOrder
             sides={[
               {
-                videoSrc: "MAIN VIDEO SRC",
+                videoSrc: "/video/Area22222.mp4",
               },
               {
                 title: "Используй готовые lesson plans",
