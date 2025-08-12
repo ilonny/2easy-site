@@ -14,11 +14,11 @@ export const HeaderMenuList = () => {
       lg:py-2
       lg:pb-6
     ">
-      <Link href="/about_us">
+      {/* <Link href="/about_us">
         <Button variant="light" className="font-bold">
           ABOUT US
         </Button>
-      </Link>
+      </Link> */}
       <Link href="/lessons_plans">
         <Button variant="light" className="font-bold">
           LESSONS PLANS
