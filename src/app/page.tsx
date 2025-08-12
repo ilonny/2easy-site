@@ -140,7 +140,7 @@ export default function Home() {
                   "добавляй учеников и проводи уроки в режиме real-time",
               },
               {
-                videoSrc: "MAIN VIDEO SRC",
+                videoSrc: "/video/Area333.mp4",
               },
             ]}
           />
