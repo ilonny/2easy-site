@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 //   userScalable: false,
 // };
 
-const manrope = Manrope({ subsets: ["cyrillic"] });
+const manrope = Manrope({ subsets: ["cyrillic-ext", "latin-ext"] });
 
 export default function RootLayout({
   children,
