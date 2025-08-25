@@ -204,9 +204,9 @@ export const TestStep = (props: TTestStepProps) => {
               <div
                 className="mr-2"
                 style={{
-                  width: 26,
-                  height: 26,
-                  zIndex: 2,
+                  width: 24,
+                  height: 24,
+                  zIndex: 333,
                   flexShrink: 0,
                   position: "absolute",
                   background: isHoverByTeacher ? "#fff" : "transparent",

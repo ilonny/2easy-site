@@ -295,3 +295,7 @@ ol, ul {
 .text-danger {
   color: #A42929 !important;
 }
+
+.match-word-column .text-success-foreground {
+  color: #fff !important;
+}

@@ -82,7 +82,7 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
           </div>
           <div className="w-[100%] lg:w-[50%] p-2">
             <Card
-              className={`w-[100%] p-5 editor-view p-2`}
+              className={`w-[100%] p-5 editor-view`}
               style={{
                 margin: "0 auto",
                 backgroundColor: "#fff",

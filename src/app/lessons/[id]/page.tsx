@@ -189,6 +189,7 @@ export default function StartRegistrationPage() {
                     fontWeight: 500,
                     maxWidth: 800,
                     margin: "auto",
+                    whiteSpace: "break-spaces",
                   }}
                 >
                   {lesson?.description}
