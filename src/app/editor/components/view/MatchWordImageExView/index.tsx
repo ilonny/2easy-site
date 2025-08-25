@@ -311,7 +311,7 @@ export const MatchWordImageExView: FC<TProps> = ({
   // console.log('data', data)
   // console.log("correctIds", correctIds);
   return (
-    <div className={`py-8 w-[100%] max-w-[886px] m-auto match-word-image`}>
+    <div className={`py-8 w-[100%] max-w-[866px] m-auto match-word-image`}>
       <p
         style={{
           color: data.titleColor,

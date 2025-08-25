@@ -269,7 +269,7 @@ export const FillGapsInputExView: FC<TProps> = ({
 
   return (
     <>
-      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[866px] m-auto`}>
         <p
           style={{
             color: data.titleColor,

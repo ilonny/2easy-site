@@ -40,7 +40,7 @@ const settings = {
 
 export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
   return (
-    <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
+    <div className={`py-8 w-[100%] max-w-[866px] m-auto`}>
       <p
         style={{
           color: data.titleColor,

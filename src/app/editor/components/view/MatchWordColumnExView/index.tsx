@@ -238,7 +238,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
 
   return (
     <div
-      className={`py-8 w-[100%] max-w-[886px] m-auto match-word-column`}
+      className={`py-8 w-[100%] max-w-[866px] m-auto match-word-column`}
       id={`ex-${ex_id}`}
     >
       <p
