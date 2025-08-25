@@ -1,4 +1,14 @@
 import { TCard } from "./types";
+import Taboo from "@/assets/images/main_page/Taboo.png";
+import NeverHaveIEver from "@/assets/images/main_page/Never have I ever.png";
+import WouldYouRather from "@/assets/images/main_page/Would you rather.png";
+import WhatHappensNext from "@/assets/images/main_page/What happens next.png";
+import Films from "@/assets/images/main_page/films & series.png";
+import IfYouCould from "@/assets/images/main_page/If I could.png";
+import NameThree from "@/assets/images/main_page/Name three.png";
+import DiscussionCards from "@/assets/images/main_page/Discussion cards.png";
+import Contr from "@/assets/images/main_page/Controversials.png";
+import FirstMeeting from "@/assets/images/main_page/Fisrt meeting.png";
 
 export const speakingGames: TCard[] = [
   {
@@ -8,6 +18,7 @@ export const speakingGames: TCard[] = [
       "захватывающая игра, в которой игроки должны объяснить слово, не используя список «taboo words», которые указаны на карточке",
     link: "/speaking_games/taboo",
     videoSrc: "",
+    imageSrc: Taboo,
   },
   {
     title: "Never have I ever",
@@ -16,6 +27,7 @@ export const speakingGames: TCard[] = [
       "идеальная игра для практики Present Perfect. 80 карточек с высказываниями, которые легко использовать в последние 5 минут занятия или включить в урок, как полноценную активность",
     link: "/speaking_games/never_have_i_ever",
     videoSrc: "",
+    imageSrc: NeverHaveIEver,
   },
   {
     title: "Would you rather",
@@ -24,6 +36,7 @@ export const speakingGames: TCard[] = [
       "Карточки с thought-provoking вопросами, где ученику нужно выбрать одну из предложенных опций, например: «Would you rather: be single for 5 years or not travel for 5 years?»",
     link: "/speaking_games/would_you_rather",
     videoSrc: "",
+    imageSrc: WouldYouRather,
   },
   {
     title: "What happens next",
@@ -32,6 +45,7 @@ export const speakingGames: TCard[] = [
       "Игра направлена ​​на отработку конструкции «be going to» для учеников уровня A2 и выше. студенты должны угадать, что произойдет дальше, посмотрев короткое видео",
     link: "/speaking_games/what_happens_next",
     videoSrc: "",
+    imageSrc: WhatHappensNext,
   },
   {
     title: "What happens next",
@@ -40,6 +54,7 @@ export const speakingGames: TCard[] = [
       "студенты смотрят короткий видео-отрывок из фильма/сериала и пытаются угадать, что произойдет дальше, используя конструкцию «be going to»",
     link: "/speaking_games/what_happens_next_films",
     videoSrc: "",
+    imageSrc: Films,
   },
   {
     title: "If you could",
@@ -48,6 +63,7 @@ export const speakingGames: TCard[] = [
       "студенты по очереди задают друг другу вопросы с «IF you could»,например: «If you could travel anywhere in the world, where would you go?»",
     link: "/speaking_games/if_you_could",
     videoSrc: "",
+    imageSrc: IfYouCould,
   },
   {
     title: "Name three",
@@ -56,6 +72,7 @@ export const speakingGames: TCard[] = [
       "игра, где студентам нужно назвать 3 определенные вещи за 5-10-15 секунд (как решит тичер 💅🏼). Классный вариант, когда до конца урока остается несколько минут, которые нужно провести с пользой",
     link: "/speaking_games/name_three",
     videoSrc: "",
+    imageSrc: NameThree,
   },
 ];
 
@@ -67,6 +84,7 @@ export const discussionCards: TCard[] = [
       "Более 140 нетривиальных вопросов на разные жизненные темы — от еды до феминизма и бизнеса. Подходит для студентов уровня A2 и выше",
     link: "/cards/discussion_cards",
     videoSrc: "",
+    imageSrc: DiscussionCards,
   },
   {
     title: "Controversial statements",
@@ -75,6 +93,7 @@ export const discussionCards: TCard[] = [
       "карточки с Противоречивыми утверждениями на разные темы, помогающие студенту вести дискуссию на английском",
     link: "/cards/controversial_statements",
     videoSrc: "",
+    imageSrc: Contr,
   },
   {
     title: "First meeting",
@@ -83,5 +102,6 @@ export const discussionCards: TCard[] = [
       "карточки с небанальными вопросами для знакомства с новым учеником",
     link: "/cards/first_meeting",
     videoSrc: "",
+    imageSrc: FirstMeeting,
   },
 ];

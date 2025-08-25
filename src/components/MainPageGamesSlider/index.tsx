@@ -46,8 +46,13 @@ export const MainPageGamesSlider: FC<TProps> = ({ data }) => {
             })}
           </div>
           <div className="w-[100%] max-w-[800px]">
-            <div className="bg-white min-h-[412px] rounded-[20px]">
-              <video src={activeEl.videoSrc} />
+            <div
+              className={`${activeEl.videoSrc} min-h-[412px] rounded-[20px]`}
+            >
+              {!!activeEl.videoSrc && <video src={activeEl.videoSrc} />}
+              {!!activeEl.imageSrc && (
+                <Image alt="image" src={activeEl.imageSrc} />
+              )}
             </div>
             <div className="h-6"></div>
             <p className="font-semibold text-[24px] leading-[120%]">

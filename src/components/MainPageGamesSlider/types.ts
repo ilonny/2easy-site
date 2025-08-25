@@ -5,6 +5,7 @@ export type TCard = {
   description: string;
   videoSrc: string;
   link: string;
+  imageSrc?: object;
 };
 
 export type TProps = {
