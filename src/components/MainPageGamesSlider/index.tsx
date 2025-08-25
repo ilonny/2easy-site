@@ -82,7 +82,10 @@ export const MainPageGamesSlider: FC<TProps> = ({ data }) => {
               return (
                 <div key={activeEl.title} className="w-[100%] flex-shrink-0">
                   <div className="bg-white min-h-[212px] rounded-[20px]">
-                    <video src={activeEl.videoSrc} />
+                    {!!activeEl.videoSrc && <video src={activeEl.videoSrc} />}
+                    {!!activeEl.imageSrc && (
+                      <Image alt="image" src={activeEl.imageSrc} />
+                    )}
                   </div>
                   <div className="h-6"></div>
                   <p className="font-semibold text-[24px] leading-[120%]">
