@@ -41,7 +41,7 @@ export default function GrammarPage() {
             fontWeight: 700,
           }}
         >
-          SECOND CONDITIONAL
+          THIRD CONDITIONAL
         </h1>
         <div className="h-10" />
         <SquareList data={data} />
