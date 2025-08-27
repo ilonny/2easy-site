@@ -26,7 +26,7 @@ export const AudioExView: FC<TProps> = ({ data, isPreview = false }) => {
   const [scriptIsVisible, setScriptIsVisible] = useState(false);
   return (
     <>
-      <div className={`py-8 w-[100%] max-w-[866px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
