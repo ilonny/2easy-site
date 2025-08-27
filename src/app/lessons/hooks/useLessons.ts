@@ -18,7 +18,7 @@ export const useLessons = (
     });
     const data = await res?.json();
     if (data) {
-      setLessons(data?.lessons?.reverse() || []);
+      setLessons(data?.lessons || []);
     }
     setLessonsListIslLoading(false);
     return data;
@@ -39,7 +39,7 @@ export const useLessons = (
     }
     const data = await res?.json();
     if (data) {
-      setLessons(data?.lessons?.reverse() || []);
+      setLessons(data?.lessons || []);
     }
     setLessonsListIslLoading(false);
     return data;
