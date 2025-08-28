@@ -145,8 +145,7 @@ export default function Home() {
         </>
       );
     }
-    if (true) {
-      // if (profile?.name && !hasSubscription) {
+    if (profile?.name && !hasSubscription) {
       return (
         <>
           <div className="h-6 lg:h-14"></div>
