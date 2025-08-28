@@ -21,6 +21,7 @@ jobs:
       - run: mkdir "$HOME/.ssh"
       - run: echo "${{ secrets.key }}" > "$HOME/.ssh/key"
       - run: chmod 600 "$HOME/.ssh/key"
+      - run: export NEXT_PUBLIC_BASE_URL=${{secrets.NEXT_PUBLIC_BASE_URL}}
       # Build
       - run: cd ./ && npm ci && npm run build
       # - run: cd ./frontend && npm ci --legacy-peer-deps && npm run build
