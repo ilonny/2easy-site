@@ -74,14 +74,14 @@ export const Footer = () => {
             "
           >
             <Link
-              href="#"
+              href="https://wa.me/+79111898637"
               target="_blank"
               className="text-primary underline hover:opacity-[0.8]"
             >
               <Image src={WaIcon} alt="whatsapp" />
             </Link>
             <Link
-              href="#"
+              href="mailto:double2easy@gmail.com"
               target="_blank"
               className="text-primary underline hover:opacity-[0.8]"
             >
