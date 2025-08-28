@@ -158,9 +158,7 @@ export const ProfileLessons = (props: TProps) => {
           .split(",")
           .map((part) => part.trim())
           .map((part) => part.toLowerCase());
-        console.log("tagsFilterTabArray", tagsFilterTabArray);
-        console.log("lessonTagsArray", lessonTagsArray);
-        console.log("lesson tags:", lesson.tags);
+
         if (
           !!lesson.tags &&
           !!lessonTagsArray?.find((t) => tagsFilterTabArray.includes(t))

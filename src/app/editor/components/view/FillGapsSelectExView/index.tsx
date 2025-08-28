@@ -210,21 +210,25 @@ export const FillGapsSelectExView: FC<TProps> = ({
         // if (field?.options.length === 1) {
         //   return root.render(<span>{field?.options[0].value}</span>);
         // }
+        let minWidth =
+          maxOptionLength *
+          (maxOptionLength <= 5
+            ? 75
+            : maxOptionLength <= 10
+            ? 20
+            : maxOptionLength >= 20
+            ? 10
+            : 15);
+        if (minWidth < 70) {
+          minWidth = 85;
+        }
         root.render(
           <div
             className="answer-wrapper mx-2 select-answer-wrapper"
             id={"answer-wrapper-" + field?.id}
             style={{
               display: "inline-block",
-              minWidth:
-                maxOptionLength *
-                (maxOptionLength <= 5
-                  ? 25
-                  : maxOptionLength <= 10
-                  ? 20
-                  : maxOptionLength >= 20
-                  ? 10
-                  : 15),
+              minWidth,
               // maxOptionLength *
               // (maxOptionLength < 10 ? 20 : maxOptionLength > 20 ? 7 : 10),
             }}
@@ -274,7 +278,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
 
   return (
     <>
-      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[866px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
