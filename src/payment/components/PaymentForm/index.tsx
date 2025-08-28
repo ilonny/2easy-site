@@ -3,7 +3,7 @@ import { AuthContext } from "@/auth";
 import { usePayment } from "@/payment/hooks/usePayment";
 import { usePromocode } from "@/payment/hooks/usePromocode";
 import { TSubscribePeriod } from "@/subscribe/types";
-import { Button, Input } from "@nextui-org/react";
+import { Button, Checkbox, Input } from "@nextui-org/react";
 import { useCallback, useContext, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
@@ -17,6 +17,7 @@ type TFieldList = {
   login: string;
   phone: string;
   promocode: string;
+  privacy: string;
 };
 
 export const PaymentForm = (props: TProps) => {
@@ -240,6 +241,43 @@ export const PaymentForm = (props: TProps) => {
                 )}
               </div>
             </div>
+          )}
+        />
+        <div className="h-3"></div>
+        <Controller
+          name="privacy"
+          control={control}
+          rules={{
+            required: "Обязательное поле",
+          }}
+          render={({ field }) => (
+            <Checkbox
+              {...field}
+              radius="sm"
+              className="mb-5"
+              errorMessage={errors?.privacy?.message}
+              isInvalid={!!errors.privacy?.message}
+            >
+              <p className="text-small">
+                Я принимаю условия{" "}
+                <a
+                  className="text-primary"
+                  href="/public_offer"
+                  target="_blank"
+                >
+                  публичной оферты
+                </a>{" "}
+                и{" "}
+                <a
+                  className="text-primary"
+                  href="/privacy_policy"
+                  target="_blank"
+                >
+                  политики конфиденциальности
+                </a>{" "}
+                и даю свое согласие на обработку персональных данных
+              </p>
+            </Checkbox>
           )}
         />
         <div className="h-5" />

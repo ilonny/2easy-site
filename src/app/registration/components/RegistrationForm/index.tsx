@@ -3,7 +3,7 @@ import { fetchPostJson } from "@/api";
 import { AuthContext } from "@/auth";
 import { writeToLocalStorage } from "@/auth/utils";
 import { Button } from "@/ui";
-import { Input } from "@nextui-org/react";
+import { Checkbox, Input } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 
 import Link from "next/link";
@@ -14,6 +14,7 @@ import { useForm, SubmitHandler, Controller } from "react-hook-form";
 type TLoginInputs = {
   name: string;
   login: string;
+  privacy: string;
 };
 
 type TConfirmInputs = {
@@ -190,6 +191,38 @@ export const RegistrationForm = () => {
             errorMessage={errors?.login?.message}
             isInvalid={!!errors.login?.message}
           />
+        )}
+      />
+      <Controller
+        name="privacy"
+        control={control}
+        rules={{
+          required: "Обязательное поле",
+        }}
+        render={({ field }) => (
+          <Checkbox
+            {...field}
+            radius="sm"
+            className="mb-5"
+            errorMessage={errors?.privacy?.message}
+            isInvalid={!!errors.privacy?.message}
+          >
+            <p className="text-small">
+              Я принимаю условия{" "}
+              <a className="text-primary" href="/public_offer" target="_blank">
+                публичной оферты
+              </a>{" "}
+              и{" "}
+              <a
+                className="text-primary"
+                href="/privacy_policy"
+                target="_blank"
+              >
+                политики конфиденциальности
+              </a>{" "}
+              и даю свое согласие на обработку персональных данных
+            </p>
+          </Checkbox>
         )}
       />
       <div className="mb-10">
