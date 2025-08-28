@@ -143,11 +143,23 @@ export const ProfileLessons = (props: TProps) => {
     let res = lessonsToRender;
     if (activeFilterTab !== "All lessons") {
       res = res.filter((lesson: TLesson) => {
+        const tagsFilterTabArray = activeFilterTab
+          .replace(/\s+/g, "")
+          .replace("+", "")
+          .split("-")
+          .map((part) => part.trim())
+          .map((part) => part.toLowerCase());
+        const lessonTagsArray = lesson.tags
+          ?.replace(/[–-]/g, "-")
+          ?.replace(/\s+/g, "")
+          .replace("+", "")
+          .split("-")
+          .map((part) => part.trim())
+          .map((part) => part.toLowerCase());
+
         if (
           !!lesson.tags &&
-          activeFilterTab
-            ?.toLowerCase()
-            ?.includes(lesson.tags?.toLowerCase() || "")
+          !!lessonTagsArray?.find((t) => tagsFilterTabArray.includes(t))
         ) {
           return true;
         }
