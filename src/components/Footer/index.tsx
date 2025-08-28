@@ -46,14 +46,14 @@ export const Footer = () => {
             <p className="mt-2 lg:mt-0">© 2023 – 2025 2EASY</p>
             <br />
             <Link
-              href="#"
+              href="/privacy_policy"
               target="_blank"
               className="text-primary underline decoration-1 hover:decoration-0"
             >
               Политика конфиденциальности
             </Link>
             <Link
-              href="#"
+              href="/public_offer"
               target="_blank"
               className="text-primary underline decoration-1 hover:decoration-0"
             >
