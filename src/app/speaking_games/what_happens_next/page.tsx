@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { data } from "./data";
 import { PageLeftBlock } from "@/components/PageLeftBlock";
+import Link from "next/link";
 
 export default function GrammarPage() {
   const { checkSubscription } = useCheckSubscription();
@@ -110,6 +111,16 @@ export default function GrammarPage() {
           <Tab key={"Short video"} title={"Short video"} />
           <Tab key={"Full version"} title={"Full version"} />
         </Tabs>
+        <div className="h-10" />
+        <div className="h-10" />
+        <Link
+          className="text-primary underline text-center block"
+          href="https://drive.google.com/drive/folders/1gULCChRDPbH4kyXRfE418v6OnjMMMGsK?usp=sharing"
+          target="_blank"
+        >
+          Link to the videos
+        </Link>
+        <div className="h-10" />
         <div className="h-10" />
       </ContentWrapper>
     </main>
