@@ -206,11 +206,11 @@ export const ExListComp: FC<TProps> = (props) => {
     if (isView) {
       return;
     }
-    const interval = setInterval(() => {
-      const exCopyData = readFromLocalStorage("exCopy");
-      setCopyData(exCopyData || "");
-    }, 1000);
-    return () => clearInterval(interval);
+    const exCopyData = readFromLocalStorage("exCopy");
+    setCopyData(exCopyData || "");
+    // const interval = setInterval(() => {
+    // }, 1000);
+    // return () => clearInterval(interval);
   }, [isView]);
 
   const ViewerComponent = ({ ex, exIndex, is2easy, isAdmin, isView }) => {
@@ -400,14 +400,14 @@ export const ExListComp: FC<TProps> = (props) => {
                         className="flex justify-between items-center"
                         onClick={() => {
                           if (checkSubscription()) {
-                            writeToLocalStorage(
-                              "exCopy",
-                              JSON.stringify({
-                                lesson_id: ex.lesson_id,
-                                id: ex.id,
-                                currentSortIndexToShift: ex.sortIndex,
-                              })
-                            );
+                            const dataJson = JSON.stringify({
+                              lesson_id: ex.lesson_id,
+                              id: ex.id,
+                              currentSortIndexToShift: ex.sortIndex,
+                            });
+                            writeToLocalStorage("exCopy", dataJson);
+                            setCopyData(dataJson);
+                            window.location.hash = `ex-${ex.id}`;
                             toast("Задание скопировано в буфер обмена", {
                               type: "success",
                             });
@@ -440,6 +440,7 @@ export const ExListComp: FC<TProps> = (props) => {
                               }
                               writeToLocalStorage("exCopy", "");
                               closePopover(ex.id);
+                              window.location.hash = `ex-${data.id}`;
                             }}
                           >
                             <p>Вставить задание</p>
