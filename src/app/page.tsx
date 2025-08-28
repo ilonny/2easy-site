@@ -3,7 +3,7 @@ import { AuthContext } from "@/auth";
 import { ContentWrapper } from "@/components";
 import { MainPageInfoBlock } from "@/components/MainPageInfoBlock";
 import { useRouter } from "next/navigation";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLessons } from "./lessons/hooks/useLessons";
 import { LessonCard } from "./lessons/components/LessonCard";
 import HandIcon from "@/assets/icons/hand.png";
@@ -14,15 +14,17 @@ import {
   discussionCards,
 } from "@/components/MainPageGamesSlider/data";
 import Link from "next/link";
-import { SubscribeFreeBlock, SubscribeTariffs } from "@/subscribe";
+import { SubscribeTariffs } from "@/subscribe";
 import { Button } from "@nextui-org/react";
 import ArrowRightIcon from "@/assets/icons/arrow_right.svg";
 import ArrowRightIconBlack from "@/assets/icons/arrow_right_black.svg";
 import MainBg from "@/assets/images/main_page_bg.png";
 import MainImage from "@/assets/images/main_image.png";
+import { useCheckSubscription } from "./subscription/helpers";
 
 export default function Home() {
   const { profile, authIsLoading } = useContext(AuthContext);
+  const { checkSubscription, hasSubscription } = useCheckSubscription();
   const router = useRouter();
 
   const onPressRegistration = useCallback(() => {
@@ -53,33 +55,17 @@ export default function Home() {
     return () => clearInterval(intervalId);
   }, []);
 
-  return (
-    <>
-      <section
-        className="bg-[#F9F9F9]"
-        style={{
-          background: `url(${MainBg.src}) center center no-repeat`,
-          backgroundSize: "cover",
-          backgroundColor: "#F9F9F9",
-          overflow: "hidden",
-        }}
-      >
-        <ContentWrapper>
-          <div className="h-6 lg:h-14"></div>
-          <p className="text-center text-primary font-semibold uppercase">
-            ⚡ 2000+ тичеров уже присоединились к 2EASY
-          </p>
-          <div className="h-5"></div>
-          <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-            2EASY -- интерактивная платформа с готовыми материалами для{" "}
-            <span style={{ color: "#3E1BC9" }}>создания и проведения</span>{" "}
-            языковых уроков
-          </h1>
+  const buttonsContent = useMemo(() => {
+    console.log("profile?.name", profile?.name);
+    console.log("hasSubscription", hasSubscription);
+    if (!profile?.name) {
+      return (
+        <>
           <div className="h-6 lg:h-14"></div>
           <div className="flex justify-center flex-wrap items-center gap-4">
             <Button
               color="primary"
-              className={`min-h-[58px] lg:min-h-[68px] w-[100%] lg:w-[306px] ${
+              className={`min-h-[58px] lg:min-h-[68px] w-[100%] lg:w-[306px] pr-[8px] ${
                 profile?.name && "hidden"
               }`}
               style={{ borderRadius: 100 }}
@@ -92,20 +78,24 @@ export default function Home() {
                     backgroundColor: "#9A84F0",
                   }}
                   className="
-                    flex
-                    justify-center
-                    items-center
-                    w-[42px]
-                    lg:w-[52px]
-                    h-[42px]
-                    lg:h-[52px]
-                  "
+                  shrink-0
+              flex
+              justify-center
+              items-center
+              w-[42px]
+              lg:w-[52px]
+              h-[42px]
+              lg:h-[52px]
+              "
                 >
                   <Image src={ArrowRightIcon} alt="arrow" />
                 </div>
               }
             >
-              <p style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}>
+              <p
+                style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
+                className="w-[100%] text-center"
+              >
                 НАЧАТЬ БЕСПЛАТНО
               </p>
             </Button>
@@ -113,7 +103,7 @@ export default function Home() {
               color="primary"
               variant={"flat"}
               className={
-                "bg-[#F2F2F2] min-h-[58px] lg:min-h-[68px] w-[100%] lg:w-[346px]"
+                "bg-[#F2F2F2] min-h-[58px] lg:min-h-[68px] w-[100%] lg:w-[346px] pr-[8px]"
               }
               style={{ borderRadius: 100 }}
               size={"lg"}
@@ -125,6 +115,7 @@ export default function Home() {
                     backgroundColor: "#fff",
                   }}
                   className="
+                    shrink-0
                     flex
                     justify-center
                     items-center
@@ -145,11 +136,100 @@ export default function Home() {
                   fontWeight: 600,
                   color: "#262626",
                 }}
+                className="w-[100%] text-center"
               >
                 ВОЙТИ В ЛИЧНЫЙ КАБИНЕТ
               </p>
             </Button>
           </div>
+        </>
+      );
+    }
+    if (true) {
+      // if (profile?.name && !hasSubscription) {
+      return (
+        <>
+          <div className="h-6 lg:h-14"></div>
+          <div className="flex justify-center flex-wrap items-center">
+            <Button
+              color="primary"
+              className={`min-h-[58px] lg:min-h-[68px] w-[100%] lg:w-[206px] pr-[8px] justify-between`}
+              style={{ borderRadius: 100 }}
+              size="lg"
+              onClick={() => router.push("/subscription")}
+              endContent={
+                <div
+                  style={{
+                    borderRadius: 52,
+                    backgroundColor: "#9A84F0",
+                  }}
+                  className="
+                    shrink-0
+                    flex
+                    justify-center
+                    items-center
+                    w-[42px]
+                    lg:w-[52px]
+                    h-[42px]
+                    lg:h-[52px]
+                  "
+                >
+                  <Image src={ArrowRightIcon} alt="arrow" />
+                </div>
+              }
+            >
+              <p
+                style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
+                className="text-center w-[100%]"
+              >
+                ТАРИФЫ
+              </p>
+            </Button>
+          </div>
+        </>
+      );
+    }
+    return <></>;
+  }, [
+    profile?.name,
+    hasSubscription,
+    onPressRegistration,
+    onPressLogin,
+    router,
+  ]);
+
+  return (
+    <div
+      style={{
+        background: `url(${MainBg.src}) top center no-repeat`,
+        backgroundSize: "100% auto",
+        backgroundColor: "#F9F9F9",
+        overflow: "hidden",
+      }}
+    >
+      <section
+        // className="bg-[#F9F9F9]"
+        style={
+          {
+            // background: `url(${MainBg.src}) center center no-repeat`,
+            // backgroundSize: "cover",
+            // backgroundColor: "#F9F9F9",
+            // overflow: "hidden",
+          }
+        }
+      >
+        <ContentWrapper>
+          <div className="h-6 lg:h-14"></div>
+          <p className="text-center text-primary font-semibold uppercase">
+            ⚡ 2000+ тичеров уже присоединились к 2EASY
+          </p>
+          <div className="h-5"></div>
+          <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
+            2EASY -- интерактивная платформа с готовыми материалами для{" "}
+            <span style={{ color: "#3E1BC9" }}>создания и проведения</span>{" "}
+            языковых уроков
+          </h1>
+          {buttonsContent}
           <div className="h-6 lg:h-14"></div>
           <div className="m-auto">
             <Image
@@ -167,7 +247,9 @@ export default function Home() {
         </ContentWrapper>
         <div className="h-6 lg:h-14"></div>
       </section>
-      <div className="bg-[#F9F9F9]">
+      <div
+      // className="bg-[#F9F9F9]"
+      >
         <ContentWrapper>
           <>
             <div className="h-6 lg:h-14"></div>
@@ -290,6 +372,6 @@ export default function Home() {
           </>
         </ContentWrapper>
       </div>
-    </>
+    </div>
   );
 }
