@@ -40,7 +40,7 @@ const settings = {
 
 export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
   return (
-    <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
+    <div className={`py-8 w-[100%] max-w-[866px] m-auto`}>
       <p
         style={{
           color: data.titleColor,
@@ -90,7 +90,7 @@ export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
               <img
                 src={data?.images[0].dataURL}
                 alt="image"
-                className="max-w-[810px]"
+                className="max-w-[810px] m-auto"
               />
             </Zoom>
             {data?.images[0]?.text && (
