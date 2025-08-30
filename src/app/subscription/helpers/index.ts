@@ -1,12 +1,17 @@
+import { AuthContext } from "@/auth";
 import { SibscribeContext } from "@/subscribe/context";
 import { useRouter } from "next/navigation";
 import { useCallback, useContext } from "react";
 
 export const useCheckSubscription = () => {
   const { subscription } = useContext(SibscribeContext);
+  const { authIsLoading, profile } = useContext(AuthContext);
   const router = useRouter();
 
   const checkSubscription = useCallback(() => {
+    if (!authIsLoading && !profile?.login && !profile?.studentId) {
+      router.push("/subscription");
+    }
     if (subscription === undefined) {
       return true;
     }
@@ -15,7 +20,9 @@ export const useCheckSubscription = () => {
       return false;
     }
     return true;
-  }, [router, subscription]);
+  }, [authIsLoading, profile?.login, profile?.studentId, router, subscription]);
 
-  return { checkSubscription };
+  const hasSubscription = subscription?.success;
+
+  return { checkSubscription, subscription, hasSubscription };
 };

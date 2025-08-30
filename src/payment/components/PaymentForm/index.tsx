@@ -3,9 +3,8 @@ import { AuthContext } from "@/auth";
 import { usePayment } from "@/payment/hooks/usePayment";
 import { usePromocode } from "@/payment/hooks/usePromocode";
 import { TSubscribePeriod } from "@/subscribe/types";
-import { Button, Input } from "@nextui-org/react";
-import { redirect } from "next/navigation";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { Button, Checkbox, Input } from "@nextui-org/react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 
@@ -18,12 +17,16 @@ type TFieldList = {
   login: string;
   phone: string;
   promocode: string;
+  privacy: string;
 };
 
 export const PaymentForm = (props: TProps) => {
   const { type } = props;
   const { profile } = useContext(AuthContext);
-  const [price, setPrice] = useState(type === "month" ? 790 : 6990);
+
+  const [price, setPrice] = useState(
+    type === "month" ? 790 : type === "3month" ? 1890 : 6990
+  );
 
   const {
     control,
@@ -46,24 +49,96 @@ export const PaymentForm = (props: TProps) => {
       const response = await createPayment(
         type,
         getValues().phone,
-        getValues().promocode
+        getValues().promocode,
+        getValues().login
       );
+      if (!response.success) {
+        // error
+        return;
+      }
+
+      const cp = new window.cp.CloudPayments();
+
+      let reccurentData;
+
+      if (type === "month") {
+        reccurentData = {
+          period: 1,
+          interval: "Month",
+          amount: Number(price),
+          // startDate: new Date(),
+        };
+      }
+
+      if (type === "year") {
+        reccurentData = {
+          period: 12,
+          interval: "Month",
+          amount: Number(price),
+          // startDate: new Date()
+        };
+      }
+
+      if (type === "3month") {
+        reccurentData = {
+          period: 3,
+          interval: "Month",
+          amount: Number(price),
+          // startDate: new Date()
+        };
+      }
+
+      const intentData = {
+        publicId: response?.publicId,
+        publicTerminalId: response?.publicId,
+        description: "Оплата подписки 2EASY",
+        amount: Number(response?.amount),
+        currency: "RUB",
+        email: response.email || profile?.login,
+        Email: response.email || profile?.login,
+        receiptEmail: response.email || profile?.login,
+        emailBehavior: "Required",
+        externalId: response.id.toString(),
+        userInfo: {
+          accountId: response.user_id,
+          email: response?.email || profile?.login,
+          phone: response.paymentModel.phone,
+          name: profile?.name,
+          surname: profile?.surname || "",
+        },
+        metadata: { response, type },
+        paymentSchema: "Single",
+        type,
+        recurrent: reccurentData,
+      };
+
+      cp.start(intentData).then((startResult) => {
+        console.log("startResult", startResult);
+        if (startResult?.status === "success") {
+          window?.ym(103952819, "reachGoal", "buy-subscribe-success");
+        }
+        setTimeout(() => {
+          window.location.reload();
+        }, 300);
+      });
     },
-    [createPayment, getValues, type]
+    [
+      createPayment,
+      getValues,
+      price,
+      profile?.login,
+      profile?.name,
+      profile?.surname,
+      type,
+    ]
   );
 
   const priceWithPromo = useMemo(() => {
     if (!!promocodeValue) {
       return price * (promocodeValue / 100);
     }
-    return price;
+    return 0;
   }, [price, promocodeValue]);
-
-  useEffect(() => {
-    if (paymentStatus === "success") {
-      redirect("/");
-    }
-  }, [promocodeValue, paymentStatus]);
 
   return (
     <>
@@ -170,6 +245,43 @@ export const PaymentForm = (props: TProps) => {
                 )}
               </div>
             </div>
+          )}
+        />
+        <div className="h-3"></div>
+        <Controller
+          name="privacy"
+          control={control}
+          rules={{
+            required: "Обязательное поле",
+          }}
+          render={({ field }) => (
+            <Checkbox
+              {...field}
+              radius="sm"
+              className="mb-5"
+              errorMessage={errors?.privacy?.message}
+              isInvalid={!!errors.privacy?.message}
+            >
+              <p className="text-small">
+                Я принимаю условия{" "}
+                <a
+                  className="text-primary"
+                  href="/public_offer"
+                  target="_blank"
+                >
+                  публичной оферты
+                </a>{" "}
+                и{" "}
+                <a
+                  className="text-primary"
+                  href="/privacy_policy"
+                  target="_blank"
+                >
+                  политики конфиденциальности
+                </a>{" "}
+                и даю свое согласие на обработку персональных данных
+              </p>
+            </Checkbox>
           )}
         />
         <div className="h-5" />

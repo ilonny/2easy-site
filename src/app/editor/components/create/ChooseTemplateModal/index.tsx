@@ -71,7 +71,7 @@ export const ChooseTemplateModal: FC<TProps> = ({
             {templatesToShow?.map((template) => {
               return (
                 <Card
-                  className="w-[50%] p-2"
+                  className="w-[100%] lg:w-[50%] p-2"
                   shadow="none"
                   radius="none"
                   key={template.type}

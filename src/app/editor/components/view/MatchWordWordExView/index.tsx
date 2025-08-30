@@ -30,7 +30,7 @@ export const MatchWordWordExView: FC<TProps> = ({
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const ex_id = data?.id;
 
   const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
@@ -144,7 +144,7 @@ export const MatchWordWordExView: FC<TProps> = ({
 
   return (
     <>
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -183,7 +183,7 @@ export const MatchWordWordExView: FC<TProps> = ({
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
         <div
           className={` flex items-center justify-center flex-wrap`}
           style={{ margin: "0 auto" }}
@@ -231,7 +231,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                     style={{
                       cursor: "pointer",
                       background:
-                        profile?.role_id === 2 &&
+                        (profile?.role_id === 2 || profile?.role_id === 1) &&
                         selectedMatchId &&
                         m.correctId === selectedMatchId
                           ? "#E9FEE8"
@@ -276,7 +276,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                       whiteSpace: "break-spaces",
                     }}
                   >
-                    {m.value} {m.id}
+                    {m.value}
                   </Card>
                 </div>
                 <div className=" w-[50%] radius-10">

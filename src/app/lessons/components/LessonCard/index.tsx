@@ -32,6 +32,8 @@ type TProps = {
   hideDeleteLessonButton?: boolean;
   showStartLessonButton?: boolean;
   isStudent?: boolean;
+  disableClick?: boolean;
+  copyLesson?: (lesson_id: number) => Promise<void>;
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -46,26 +48,46 @@ export const LessonCard: FC<TProps> = ({
   deleteLessonRelation,
   showStartLessonButton,
   isStudent,
+  disableClick,
+  copyLesson,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
   const params = useParams();
   const { profile } = useContext(AuthContext);
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
+  const { checkSubscription, hasSubscription } = useCheckSubscription();
 
   const isDisabled =
     isStudent && lesson?.["lesson_relations.status"] === "close";
-
   const onPressLesson = useCallback(() => {
-    if (isDisabled) {
+    if (isDisabled || disableClick) {
       return;
     }
     if (isStudent) {
       router.push("/lessons/" + lesson?.id);
-    } else {
-      router.push("/editor/" + lesson?.id);
+      return;
     }
-  }, [isDisabled, isStudent, lesson?.id, router]);
+
+    if (
+      !hasSubscription &&
+      (lesson?.created_from_2easy || lesson?.user_id === 1)
+    ) {
+      router.push("/subscription");
+      return;
+    }
+
+    router.push("/editor/" + lesson?.id);
+  }, [
+    isDisabled,
+    disableClick,
+    isStudent,
+    router,
+    lesson?.id,
+    lesson?.created_from_2easy,
+    lesson?.user_id,
+    hasSubscription,
+  ]);
 
   const tags = useMemo(() => {
     if (isStudent) {
@@ -93,9 +115,10 @@ export const LessonCard: FC<TProps> = ({
     }
   }, [lesson?.tags, isStudent, onPressLesson]);
 
-  const { checkSubscription } = useCheckSubscription();
   return (
-    <div style={{ width: "25%" }} className={`p-2 ${styles["lesson-card"]}`}>
+    <div
+      className={`p-2 w-[100%] lg:w-[25%] ${styles["lesson-card"]} flex-shrink-0`}
+    >
       <div
         onClick={onPressLesson}
         className="image-wrapper"
@@ -122,7 +145,7 @@ export const LessonCard: FC<TProps> = ({
           }}
         />
         <div className={styles["shadow"]} />
-        {!isStudent && (
+        {!isStudent && !disableClick && (
           <div className={styles["btn-wrapper"]}>
             <Popover
               color="foreground"
@@ -211,6 +234,20 @@ export const LessonCard: FC<TProps> = ({
                     Прикрепить к ученику
                   </Button>
                 )}
+                {!!copyLesson && !showChangeStatusButton && (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
+                    style={{ fontSize: 14 }}
+                    onClick={() => {
+                      setPopoverIsOpen(false);
+                      copyLesson(lesson.id);
+                    }}
+                  >
+                    Копировать урок
+                  </Button>
+                )}
                 {!!onPressDelete &&
                   !hideDeleteLessonButton &&
                   lesson.canEdit && (
@@ -272,7 +309,7 @@ export const LessonCard: FC<TProps> = ({
               onClick={() => {
                 if (!isStudent && checkSubscription()) {
                   router.push(`/lessons/${lesson.id}`);
-                  console.log("params", [Number(params.id)]);
+
                   writeToLocalStorage(
                     "start_lesson_selected_ids",
                     JSON.stringify([params.id])

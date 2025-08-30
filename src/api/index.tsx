@@ -11,9 +11,14 @@ export const ApiProvider = ({ children }) => {
 
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
-
-export const BASE_URL = "http://localhost:8888";
-// export const BASE_URL = "https://d2b9lzt8-8888.euw.devtunnels.ms";
+console.log('process.env?', process.env)
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.replace(
+  "/undefined",
+  ""
+);
+console.log('BASE_URL', BASE_URL)
+// export const BASE_URL = "http://localhost:8888";
+// export const BASE_URL = "https://beta-api.2easyeng.com";
 
 export const API_URL = BASE_URL + "/api";
 
@@ -52,6 +57,9 @@ export const checkResponse = (res: {
     toast(res?.message ? res?.message : "Что-то пошло не так", {
       type: "error",
     });
+    if (res?.needRedirect) {
+      window.location.pathname = "/";
+    }
     return;
   }
   if (res?.success && res?.successMessage) {
@@ -64,7 +72,8 @@ export const checkResponse = (res: {
 export const fetchPostJson = (params: TParams) => {
   const { path, data } = params;
   const headers = mapHeaders(params);
-  return fetch(API_URL + path, {
+  const url = (API_URL + path).replace("/undefined", "");
+  return fetch(url, {
     method: "POST",
     body: JSON.stringify(data),
     headers,
@@ -76,7 +85,8 @@ export const fetchPostMultipart = (params: TParams) => {
   const headers = mapHeaders(params);
   headers.set("Content-Type", "multipart/form-data");
   headers.delete("Content-Type");
-  return fetch(API_URL + path, {
+  const url = (API_URL + path).replace("/undefined", "");
+  return fetch(url, {
     method: "POST",
     body: data,
     headers,
@@ -89,7 +99,8 @@ export const fetchGet = (params: TParams) => {
     return;
   }
   const headers = mapHeaders(params);
-  return fetch(API_URL + path, {
+  const url = (API_URL + path).replace("/undefined", "");
+  return fetch(url, {
     method: "GET",
     headers,
   });

@@ -50,7 +50,7 @@ export const TestStep = (props: TTestStepProps) => {
   const selectedMap = useRef<Record<string, boolean>>({});
   const errorMap = useRef<Record<string, boolean>>({});
 
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
   useEffect(() => {
     try {
@@ -103,7 +103,7 @@ export const TestStep = (props: TTestStepProps) => {
   const defaultValue = !Object.keys(errorMap).length
     ? undefined
     : Object.keys(errorMap.current)[0];
-  console.log("isHovered", isHovered);
+
   return (
     <div
       onMouseEnter={() => {
@@ -204,9 +204,9 @@ export const TestStep = (props: TTestStepProps) => {
               <div
                 className="mr-2"
                 style={{
-                  width: 26,
-                  height: 26,
-                  zIndex: 2,
+                  width: 24,
+                  height: 24,
+                  zIndex: 333,
                   flexShrink: 0,
                   position: "absolute",
                   background: isHoverByTeacher ? "#fff" : "transparent",
@@ -287,14 +287,14 @@ export const TestExView: FC<TProps> = ({
   const image = data?.images?.[0];
   const [activeIndex, setActiveIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const activeQuestion = data.questions[activeIndex];
+  const activeQuestion = data.questions?.[activeIndex];
   const currentStep = activeIndex + 1;
   const totalSteps = data?.questions?.length;
   const isLastStep = currentStep === totalSteps;
   const [isFinished, setIsFinished] = useState(false);
 
   const { profile } = useContext(AuthContext);
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
   const ex_id = data?.id;
@@ -359,7 +359,7 @@ export const TestExView: FC<TProps> = ({
 
   return (
     <>
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[100%] max-w-[886px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -398,7 +398,7 @@ export const TestExView: FC<TProps> = ({
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[100%] max-w-[886px] m-auto`}>
         <Card
           className={`max-w-[540px]`}
           style={{ margin: "0 auto", padding: 30 }}

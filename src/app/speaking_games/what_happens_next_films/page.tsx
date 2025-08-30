@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { data } from "./data";
 import { PageLeftBlock } from "@/components/PageLeftBlock";
+import Link from "next/link";
 
 type TVideoComponentProps = {
   video: {
@@ -44,7 +45,7 @@ const VideoComponent = (props: TVideoComponentProps) => {
         fullWidth
         classNames={{
           tabList: "flex flex-wrap wrap justify-between max-w-[500px] m-auto",
-          tab: "w-[49%]",
+          tab: "w-[100%] lg:w-[49%]",
         }}
       >
         <Tab key={"Short video"} title={"Short video"} />
@@ -128,6 +129,16 @@ export default function GrammarPage() {
         {currentObj?.videos.map((video) => {
           return <VideoComponent video={video} key={video.fullVersion} />;
         })}
+        <div className="h-10" />
+        <div className="h-10" />
+        <Link
+          className="text-primary underline text-center block"
+          href="https://drive.google.com/drive/folders/1rf4jRF_CQBiD5FQNFd_WBsLQ74EBvT4o?usp=sharing"
+          target="_blank"
+        >
+          Link to the videos
+        </Link>
+        <div className="h-10" />
         <div className="h-10" />
       </ContentWrapper>
     </main>

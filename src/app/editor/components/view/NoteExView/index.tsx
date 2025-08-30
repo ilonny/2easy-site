@@ -22,7 +22,7 @@ export const NoteExView: FC<TProps> = ({
   changeData,
 }) => {
   const { profile } = useContext(AuthContext);
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const { saveNoteEx } = useUploadNoteEx(data.sortIndex);
   const onClickEye = useCallback(async () => {
     if (typeof onChangeIsVisible === "function") {
@@ -39,9 +39,9 @@ export const NoteExView: FC<TProps> = ({
     }
   }, [data, saveNoteEx, onChangeIsVisible, changeData]);
 
-  if (!isTeacher && !data.isVisible) {
-    return <></>;
-  }
+  // if (!isTeacher && !data.isVisible) {
+  //   return <></>;
+  // }
 
   return (
     <div
@@ -51,37 +51,6 @@ export const NoteExView: FC<TProps> = ({
         maxWidth: 780,
       }}
     >
-      <div style={{ width: 55 }}>
-        {isTeacher && (
-          <div
-            className="flex flex-col items-start gap-2"
-            style={{ cursor: "pointer" }}
-            onClick={() => onClickEye()}
-          >
-            <div
-              style={{ width: 24, height: 28 }}
-              className="flex justify-center items-center"
-            >
-              <Image
-                src={data.isVisible ? EyeEnabledIcon : EyeDisabledIcon}
-                alt=""
-              />
-            </div>
-            <p
-              style={{
-                color: data.isVisible ? "#3F28C6" : "#B3B3B3",
-                fontSize: 12,
-                textAlign: "left",
-                lineHeight: "100%",
-              }}
-            >
-              {data.isVisible
-                ? "заметка видна ученику"
-                : "заметка не видна ученику"}
-            </p>
-          </div>
-        )}
-      </div>
       <div
         style={{
           // margin: "0 auto",
@@ -107,13 +76,13 @@ export const NoteExView: FC<TProps> = ({
               fontSize: 18,
               color: "#8580A1",
               whiteSpace: "break-spaces",
+              wordBreak: "break-word",
             }}
           >
             {data.description}
           </p>
         )}
       </div>
-      <div style={{ width: 55 }}></div>
     </div>
   );
 };

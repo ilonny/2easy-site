@@ -158,7 +158,7 @@ const getDataMapper = (type: string) => {
     case "match-word-image":
       return mapImageExData;
     default:
-      return (_data?: string) => (_data ? JSON.parse(_data) : {});
+      return mapImageExData;
   }
 };
 
@@ -219,5 +219,5 @@ export const useExList = (lesson_id: number) => {
     });
   }, []);
 
-  return { exListIsLoading, exList, getExList, changeSortIndex, deleteEx };
+  return { exListIsLoading, exList, getExList, changeSortIndex, deleteEx, setExList };
 };

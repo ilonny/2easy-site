@@ -1,1 +1,1 @@
-export type TSubscribePeriod = "month" | "year";
+export type TSubscribePeriod = "month" | "3month" |"year";

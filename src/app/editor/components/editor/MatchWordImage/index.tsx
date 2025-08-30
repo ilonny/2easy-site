@@ -148,7 +148,7 @@ export const MatchWordImage: FC<TProps> = ({
         <div className="flex flex-wrap">
           {images?.map((image, index) => {
             return (
-              <div key={index} className="w-[25%] p-2">
+              <div key={index} className="w-[25%] p-2 mb-4">
                 <div className="image-item relative w-full h-full flex items-center justify-center">
                   <img src={image.dataURL} style={{ width: "100%" }} />
                   <div className="image-item__btn-wrapper top-0 right-0 absolute">

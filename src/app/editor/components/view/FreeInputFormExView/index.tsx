@@ -42,7 +42,7 @@ export const FreeInputFormExView: FC<TProps> = ({
   const lesson_id = useParams()?.id;
   const profile = useContext(AuthContext)?.profile;
   const student_id = profile?.studentId;
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const ex_id = data?.id;
   const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
     student_id,
@@ -67,7 +67,7 @@ export const FreeInputFormExView: FC<TProps> = ({
 
   return (
     <>
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -106,14 +106,21 @@ export const FreeInputFormExView: FC<TProps> = ({
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[540px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[540px] m-auto`}>
         {data.questions.map((question) => {
           const value = answers[question.id]
             ? answers[question.id].answer
             : undefined;
           return (
             <div key={question.id} className="mb-6">
-              <p style={{ fontSize: 18, marginBottom: 20, fontWeight: 500 }}>
+              <p
+                style={{
+                  fontSize: 18,
+                  marginBottom: 20,
+                  fontWeight: 500,
+                  whiteSpace: "pre-line",
+                }}
+              >
                 {question.value}
               </p>
               <Card>

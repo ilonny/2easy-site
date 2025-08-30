@@ -50,7 +50,7 @@ export const Audio: FC<TProps> = ({
 
   const { openFilePicker, filesContent, clear, plainFiles, errors } =
     useFilePicker({
-      accept: [".mp3", ".wav"],
+      accept: [".mp3", ".wav", ".m4a"],
       validators: [new FileSizeValidator({ maxFileSize: 10 * 1024 * 1024 })],
     });
 
@@ -141,7 +141,9 @@ export const Audio: FC<TProps> = ({
         </div>
       </div>
       <div className="h-5" />
-      <p>Аудиофайл (не более 10 мб)</p>
+      <p>
+        Аудиофайл (не более 10 мб, поддерживаемые форматы: .mp3, .wav, .m4a)
+      </p>
       <Button
         onClick={openFilePicker}
         variant="faded"

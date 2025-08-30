@@ -19,7 +19,7 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
   const secondEditorImage = data?.secondEditorImages?.[0];
   return (
     <>
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -58,44 +58,48 @@ export const Text2ColExView: FC<TProps> = ({ data, isPreview = false }) => {
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[886px] m-auto`}>
-        <div className="flex items-start justify-between gap-4">
-          <Card
-            className={`w-[50%] p-5 editor-view`}
-            style={{
-              margin: "0 auto",
-              backgroundColor: "#fff",
-              borderRadius: 14,
-              minWidth: "50%",
-            }}
-          >
-            {/* eslint-disable-next-line jsx-a11y/alt-text */}
-            {!!editorImage && (
-              <img src={editorImage.dataURL} className="mb-4" />
-            )}
-            <div
-              dangerouslySetInnerHTML={{ __html: data?.content }}
-              className="editorClassName"
-            />
-          </Card>
-          <Card
-            className={`w-[50%] p-5 editor-view`}
-            style={{
-              margin: "0 auto",
-              backgroundColor: "#fff",
-              borderRadius: 14,
-              minWidth: "50%",
-            }}
-          >
-            {/* eslint-disable-next-line jsx-a11y/alt-text */}
-            {!!secondEditorImage && (
-              <img src={secondEditorImage.dataURL} className="mb-4" />
-            )}
-            <div
-              dangerouslySetInnerHTML={{ __html: data?.secondContent }}
-              className="editorClassName"
-            />
-          </Card>
+      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
+        <div className="flex flex-wrap items-start justify-between">
+          <div className="w-[100%] lg:w-[50%] p-2">
+            <Card
+              className={` p-5 editor-view`}
+              style={{
+                margin: "0 auto",
+                backgroundColor: "#fff",
+                borderRadius: 14,
+                minWidth: "50%",
+              }}
+            >
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
+              {!!editorImage && (
+                <img src={editorImage.dataURL} className="mb-4" />
+              )}
+              <div
+                dangerouslySetInnerHTML={{ __html: data?.content }}
+                className="editorClassName"
+              />
+            </Card>
+          </div>
+          <div className="w-[100%] lg:w-[50%] p-2">
+            <Card
+              className={`w-[100%] p-5 editor-view`}
+              style={{
+                margin: "0 auto",
+                backgroundColor: "#fff",
+                borderRadius: 14,
+                minWidth: "50%",
+              }}
+            >
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
+              {!!secondEditorImage && (
+                <img src={secondEditorImage.dataURL} className="mb-4" />
+              )}
+              <div
+                dangerouslySetInnerHTML={{ __html: data?.secondContent }}
+                className="editorClassName"
+              />
+            </Card>
+          </div>
         </div>
       </div>
     </>

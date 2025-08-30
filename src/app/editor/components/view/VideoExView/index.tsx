@@ -18,7 +18,7 @@ const VideoExViewComp: FC<TProps> = ({ data, isPreview = false }) => {
 
   return (
     <>
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -57,7 +57,7 @@ const VideoExViewComp: FC<TProps> = ({ data, isPreview = false }) => {
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
         <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
           {data.videos?.map((video, index) => {
             return (

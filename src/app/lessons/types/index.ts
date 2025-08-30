@@ -11,4 +11,6 @@ export type TLesson = {
   ["lesson_relations.status"]?: "open" | "close" | "complete";
   ["lesson_relations.id"]?: number;
   canEdit?: boolean;
+  created_from_id?: number;
+  created_from_2easy?: number;
 };

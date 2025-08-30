@@ -15,7 +15,7 @@ const config: Config = {
         foreground: "var(--foreground)",
         primary: "#3F28C6",
         pinkSecondary: "#FF7EB3",
-        black: "#2D2D2D"
+        black: "#2D2D2D",
       },
       borderColor: {
         primary: "#3F28C6",
@@ -24,5 +24,6 @@ const config: Config = {
     },
   },
   plugins: [nextui()],
+  mode: "jit",
 };
 export default config;

@@ -12,24 +12,34 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { redirect, useParams } from "next/navigation";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { CreateExButton } from "../components/create/CreateExButton";
 import { ChooseTemplateModal } from "../components/create/ChooseTemplateModal";
 import { TTemplate } from "../components/create/ChooseTemplateModal/templates";
 import { EditorRootModal } from "../components/editor/EditorRootModal";
 import { useExList } from "../hooks/useExList";
 import { ExList } from "../components/view/ExList";
-import { BASE_URL } from "@/api";
+import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { StartLessonButton } from "@/app/lessons/components/StartLessonButton";
 import { useCheckSubscription } from "@/app/subscription/helpers";
+import { EditorContext } from "../context";
+import { AuthContext } from "@/auth";
 
 export default function EditorPage() {
   withLogin();
   const params = useParams();
+  const { profile } = useContext(AuthContext);
   const { lesson, getLesson } = useLessons();
   const { exList, getExList, exListIsLoading, changeSortIndex, deleteEx } =
     useExList(params.id);
@@ -44,6 +54,35 @@ export default function EditorPage() {
   >();
 
   const { checkSubscription } = useCheckSubscription();
+
+  const { scrollToExId, setScrollToExId } = useContext(EditorContext);
+  const exListRef = useRef([]);
+
+  useEffect(() => {
+    if (!exListRef.current.length) {
+      exListRef.current = exList;
+      return;
+    }
+
+    if (exList?.length > exListRef?.current?.length) {
+      const oldExIds = exListRef?.current?.map((ex) => ex.id);
+
+      const newId = exList.find((ex) => !oldExIds.includes(ex.id))?.id;
+      if (newId) {
+        const el = document.getElementById(`ex-${newId}`);
+        el?.scrollIntoView();
+      }
+    }
+    exListRef.current = exList;
+    // if (scrollToExId) {
+    //   //
+    //   const el = document.getElementById(`ex-${scrollToExId}`);
+    //   el?.scrollIntoView();
+    //   window.setTimeout(() => {
+    //     setScrollToExId(undefined);
+    //   }, 1000);
+    // }
+  }, [scrollToExId, exList, setScrollToExId]);
 
   useEffect(() => {
     //@ts-ignore
@@ -69,12 +108,16 @@ export default function EditorPage() {
     [checkSubscription]
   );
 
-  const onSuccessCreate = useCallback(() => {
-    setChosenTemplate(null);
-    setExCreateTemplateModal(false);
-    setEditorModal(false);
-    getExList();
-  }, [getExList]);
+  const onSuccessCreate = useCallback(
+    (ex_id: number) => {
+      setChosenTemplate(null);
+      setExCreateTemplateModal(false);
+      setEditorModal(false);
+      setScrollToExId(ex_id);
+      getExList();
+    },
+    [getExList, setScrollToExId]
+  );
 
   const onPressEditEx = useCallback(
     (ex) => {
@@ -86,6 +129,7 @@ export default function EditorPage() {
           type: ex.type,
           sortIndex: ex.sortIndex,
         });
+        window.location.hash = `ex-${ex.id}`;
         setEditorModal(true);
       }
     },
@@ -122,6 +166,16 @@ export default function EditorPage() {
     return exList.length;
   }, [exList.length]);
 
+  const is2easy = lesson?.user_id === 1;
+  const isAdmin = profile?.role_id === 1;
+
+  const showCreateExBtn = useMemo(() => {
+    if (is2easy) {
+      return isAdmin;
+    }
+    return true;
+  }, [is2easy, isAdmin]);
+
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
@@ -136,19 +190,17 @@ export default function EditorPage() {
         <div className="h-10" />
         <div className="h-10" />
         <div
-          className="p-10"
+          className="p-2 w-[100%] lg:p-10 lg:max-w-[1160px]"
           style={{
-            width: 1160,
             margin: "0 auto",
             backgroundColor: "#fff",
             borderRadius: 10,
           }}
         >
           <StartLessonButton lesson={lesson} />
-          <div className="w-[100%] pl-[90px]">
+          <div className="w-[100%] lg:pl-[90px] text-[38px] lg:text-[44px]">
             <h1
               style={{
-                fontSize: 44,
                 textAlign: "center",
                 color: "#3f28c6",
                 fontWeight: 700,
@@ -166,6 +218,7 @@ export default function EditorPage() {
                 fontWeight: 500,
                 maxWidth: 800,
                 margin: "auto",
+                whiteSpace: "break-spaces",
               }}
             >
               {lesson?.description}
@@ -189,21 +242,48 @@ export default function EditorPage() {
             onChangeIsVisible={onChangeIsVisible}
             onPressCreate={onPressCreate}
             onSuccessCreate={onSuccessCreate}
+            is2easy={is2easy}
+            isAdmin={isAdmin}
           />
           <div className="h-10" />
           <div className="h-10" />
-          <Card radius="none" shadow="none">
-            <CreateExButton
-              onPress={() => onPressCreate(null)}
-              onSuccessCreate={onSuccessCreate}
-              lesson_id={params.id}
-              currentSortIndexToShift={
-                exList[exList.length - 1]?.sortIndex || 0
-              }
-            />
-          </Card>
-          <div className="h-10" />
-          <div className="h-10" />
+          {showCreateExBtn ? (
+            <>
+              <Card radius="none" shadow="none">
+                <CreateExButton
+                  onPress={() => onPressCreate(null)}
+                  onSuccessCreate={onSuccessCreate}
+                  lesson_id={params.id}
+                  currentSortIndexToShift={
+                    exList[exList.length - 1]?.sortIndex || 0
+                  }
+                />
+              </Card>
+              <div className="h-10" />
+              <div className="h-10" />
+            </>
+          ) : (
+            <div className="justify-center flex">
+              <Button
+                size="lg"
+                color="primary"
+                onClick={async () => {
+                  const res = await fetchPostJson({
+                    path: "/lessons/copy",
+                    isSecure: true,
+                    data: {
+                      lesson_id: params.id,
+                    },
+                  });
+                  const data = await res.json();
+                  checkResponse(data);
+                  window.location.pathname = `/editor/${data.id}`;
+                }}
+              >
+                {'Добавить в "Мои уроки"'}
+              </Button>
+            </div>
+          )}
         </div>
         <div className="h-10" />
         <div className="h-10" />

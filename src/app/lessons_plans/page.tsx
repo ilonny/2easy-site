@@ -12,11 +12,11 @@ import { ProfileLessons } from "../lessons/components/ProfileLessons";
 export default function GrammarPage() {
   const { checkSubscription } = useCheckSubscription();
   const router = useRouter();
-  useEffect(() => {
-    if (!checkSubscription()) {
-      router.push("/subscription");
-    }
-  }, [checkSubscription, router]);
+  // useEffect(() => {
+  //   if (!checkSubscription()) {
+  //     router.push("/subscription");
+  //   }
+  // }, [checkSubscription, router]);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>

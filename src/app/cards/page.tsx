@@ -3,25 +3,11 @@
 "use client";
 
 import { ContentWrapper } from "@/components";
-import { SquareList } from "@/components/SquareList";
-import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
-import { useCheckSubscription } from "@/app/subscription/helpers";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { PageLeftBlock } from "@/components/PageLeftBlock";
-import { ProfileLessons } from "../lessons/components/ProfileLessons";
+import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import { data } from "./data";
 import Link from "next/link";
 
 export default function GrammarPage() {
-  const { checkSubscription } = useCheckSubscription();
-  const router = useRouter();
-  useEffect(() => {
-    if (!checkSubscription()) {
-      router.push("/subscription");
-    }
-  }, [checkSubscription, router]);
-
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
@@ -59,23 +45,34 @@ export default function GrammarPage() {
         <div className="flex items-start flex-wrap wrap">
           {data.map((el) => {
             return (
-              <div className="w-[33.333333%] p-2 mb-4" key={el.id}>
-                <img src={el.img.src} />
-                <div className="mt-4 p-4 bg-white" style={{ borderRadius: 12 }}>
-                  <p
-                    className="uppercase mb-2"
-                    style={{ fontSize: 18, color: "#5837dc", fontWeight: 700 }}
+              <Link
+                className="w-[100%] lg:w-[33.33333%] p-2 mb-4"
+                key={el.id}
+                href={el.link}
+              >
+                <div>
+                  <img src={el.img.src} />
+                  <div
+                    className="mt-4 p-4 bg-white"
+                    style={{ borderRadius: 12 }}
                   >
-                    {el.title}
-                  </p>
-                  <p>{el.text}</p>
-                  <div className="flex justify-end mt-2">
-                    <Link href={el.link} style={{ color: "#5837dc" }}>
-                      Open
-                    </Link>
+                    <p
+                      className="uppercase mb-2"
+                      style={{
+                        fontSize: 18,
+                        color: "#5837dc",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {el.title}
+                    </p>
+                    <p>{el.text}</p>
+                    <div className="flex justify-end mt-2">
+                      <span style={{ color: "#5837dc" }}>Open</span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

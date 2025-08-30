@@ -1,0 +1,34 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      # Setup key
+      - run: set -eu
+      - run: mkdir "$HOME/.ssh"
+      - run: echo "${{ secrets.key }}" > "$HOME/.ssh/key"
+      - run: chmod 600 "$HOME/.ssh/key"
+      # Build
+      - run: cd ./ && npm ci && npm run build
+      # - run: cd ./frontend && npm ci --legacy-peer-deps && npm run build
+      # - run: cd ./site && yarn && npm run build
+      # Deploy
+      - run: cd ./ && sshpass -p '${{ secrets.pass }}' rsync -e "ssh -o StrictHostKeyChecking=no" --exclude 'uploads' --exclude '.git' src --archive --compress --delete --exclude '.env' . 2easy@89.111.152.174:/var/www/2easy/data/www/2easyeng.com
+      # - run: sshpass -p '${{ secrets.pass }}' ssh 2easy@89.111.152.174 "pm2 start /var/www/2easy/data/www/2easyeng.com/dist/index.js"
+      - run: sshpass -p '${{ secrets.pass }}' ssh 2easy@89.111.152.174 "cd /var/www/2easy/data/www/2easyeng.com && pm2 restart all"
+      
+      # - run: cd ./frontend/dist && rsync -e "ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete . mdc@194.58.107.74:/var/www/mdc/data/www/194.58.107.74/realty-dev/frontend
+      # - run: cd ./site/build && rsync -e "ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete . mdc@194.58.107.74:/var/www/mdc/data/www/194.58.107.74/realty-dev/site

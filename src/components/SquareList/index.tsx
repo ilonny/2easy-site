@@ -98,12 +98,12 @@ export const SquareList = (props: TProps) => {
           <Slider {...settings} dots={hideDots ? false : true}>
             {data?.map((image) => {
               return (
-                <div key={image.bgImage.src} className="max-w-[810px] m-auto">
+                <div key={image.bgImage.src} className="w-[100%] max-w-[810px] m-auto">
                   <Zoom>
                     <img
                       src={image.bgImage.src}
                       alt="image"
-                      className="max-w-[810px]"
+                      className="w-[100%] max-w-[810px]"
                     />
                   </Zoom>
                   {image?.label && (
@@ -165,10 +165,11 @@ export const SquareList = (props: TProps) => {
               {data.map((s, index) => {
                 return (
                   <div
-                    className={`p-2 mb-4`}
+                    className={`p-2 mb-4 w-[100%] lg:w-[${
+                      squareWidth ? squareWidth : "25%"
+                    }]`}
                     key={s.title}
                     style={{
-                      width: squareWidth ? squareWidth : "25%",
                       minHeight: squareHeight ? squareHeight : "320px",
                     }}
                   >
@@ -231,10 +232,11 @@ export const SquareList = (props: TProps) => {
       {data.map((s) => {
         return (
           <div
-            className={`p-2 mb-4`}
+            className={`p-2 mb-4 w-[100%] lg:w-[${
+              squareWidth ? squareWidth : "25%"
+            }]`}
             key={s.title}
             style={{
-              width: squareWidth ? squareWidth : "25%",
               minHeight: squareHeight ? squareHeight : "320px",
             }}
           >

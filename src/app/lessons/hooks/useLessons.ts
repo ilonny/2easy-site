@@ -2,24 +2,48 @@ import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { TLesson } from "../types";
 
-export const useLessons = (studentId?: string, searchString?: string) => {
+export const useLessons = (
+  studentId?: string,
+  searchString?: string,
+  isAuth?: boolean = true
+) => {
   const [lessons, setLessons] = useState<TLesson[]>([]);
   const [lesson, setLesson] = useState<TLesson | undefined>();
   const [lessonsListIslLoading, setLessonsListIslLoading] = useState(false);
 
-  const getLessons = useCallback(async () => {
+  const getMainPageLessons = useCallback(async () => {
     setLessonsListIslLoading(true);
     const res = await fetchGet({
-      path: studentId ? `/lessons?student_id=${studentId}` : "/lessons",
-      isSecure: true,
+      path: "/main-page-lessons",
     });
     const data = await res?.json();
     if (data) {
-      setLessons(data?.lessons?.reverse() || []);
+      setLessons(data?.lessons || []);
     }
     setLessonsListIslLoading(false);
     return data;
-  }, [studentId]);
+  }, []);
+
+  const getLessons = useCallback(async () => {
+    setLessonsListIslLoading(true);
+    let res;
+    if (isAuth === false) {
+      res = await fetchGet({
+        path: "/main-page-lessons?disable_limit=1",
+      });
+    } else {
+      res = await fetchGet({
+        path: studentId ? `/lessons?student_id=${studentId}` : "/lessons",
+        isSecure: true,
+      });
+    }
+    const data = await res?.json();
+    if (data) {
+      setLessons(data?.lessons || []);
+    }
+    setLessonsListIslLoading(false);
+    return data;
+  }, [isAuth, studentId]);
 
   const getLesson = useCallback(async (id: string) => {
     setLessonsListIslLoading(true);
@@ -96,5 +120,6 @@ export const useLessons = (studentId?: string, searchString?: string) => {
     lesson,
     changeLessonStatus,
     deleteLessonRelation,
+    getMainPageLessons,
   };
 };

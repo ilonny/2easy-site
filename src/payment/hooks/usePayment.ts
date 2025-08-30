@@ -10,7 +10,7 @@ export const usePayment = () => {
   >();
 
   const createPayment = useCallback(
-    async (type: "month" | "year", phone: string, promocode: string) => {
+    async (type: "month" | "year", phone: string, promocode: string, email?: string) => {
       setPaymentIsLoading(true);
       const res = await fetchPostJson({
         path: "/payment/create-payment",
@@ -19,6 +19,7 @@ export const usePayment = () => {
           type,
           phone,
           promocode,
+          email
         },
       });
       try {
@@ -28,6 +29,7 @@ export const usePayment = () => {
         } else {
           setPaymentStatus("error");
         }
+        return data;
       } catch (e) {
         setPaymentStatus("error");
       } finally {

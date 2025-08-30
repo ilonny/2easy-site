@@ -112,7 +112,7 @@ export const templates: TTemplate[] = [
   },
   {
     type: "match_words",
-    title: "Смэтчить слова",
+    title: "Мэтч",
     description: "Сопоставить слово с картинкой или определением",
     bgImage: MatchBg,
     subItems: [

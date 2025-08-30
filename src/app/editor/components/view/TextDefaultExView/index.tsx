@@ -15,7 +15,7 @@ export const TextDefaultExView: FC<TProps> = ({ data, isPreview = false }) => {
   const editorImage = data?.editorImages?.[0];
   return (
     <>
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -54,13 +54,14 @@ export const TextDefaultExView: FC<TProps> = ({ data, isPreview = false }) => {
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
         <Card
-          className={`p-10 editor-view`}
+          className={`p-4 lg:p-10 editor-view`}
           style={{
             margin: "0 auto",
             backgroundColor: "#fff",
             borderRadius: 14,
+            wordBreak: "break-word",
           }}
         >
           {/* eslint-disable-next-line jsx-a11y/alt-text */}

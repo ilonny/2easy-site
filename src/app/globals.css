@@ -5,7 +5,8 @@
 :root {
   --primary: #3f28c6;
   --danger: #A42929;
-  --nextui-box-shadow-medium: 0px 0px 15px 0px rgb(0 0 0 / 0.03), 0px 0px 30px 0px rgb(0 0 0 / 0.08), 0px 0px 0px 0px rgb(0 0 0 / 0.3)
+  --nextui-box-shadow-medium: 0px 0px 15px 0px rgb(0 0 0 / 0.03), 0px 0px 30px 0px rgb(0 0 0 / 0.08), 0px 0px 0px 0px rgb(0 0 0 / 0.3);
+  --nextui-danger: 0 60% 40%;
 }
 .bg-primary {
   background-color: #3f28c6 !important;
@@ -29,6 +30,7 @@
 .slick-next {
   width: 50px !important;
   height: 50px !important;
+  z-index: 3;
 }
 
 .slick-next {
@@ -272,4 +274,28 @@ blockquote {
 
 ol, ul {
   list-style-position: inside !important;
+}
+
+@media (min-width: 1024px) {
+  .lg\:order-1 {
+      order: 1;
+  }
+  .lg\:order-2 {
+      order: 2;
+  }
+  .lg\:w-\[33\.33333\%\] {
+    width: 33.33333%;
+  }
+}
+
+.cs-message--outgoing .cs-message__sender-name, .cs-message--incoming .cs-message__sender-name {
+  display: block !important;
+}
+
+.text-danger {
+  color: #A42929 !important;
+}
+
+.match-word-column .text-success-foreground {
+  color: #fff !important;
 }

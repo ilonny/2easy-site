@@ -98,6 +98,7 @@ const DraggableItem = (props: {
   isCorrect: boolean;
   activeDragId: number | null;
   setIncorrectIdsMap: any;
+  fields: TField[];
 }) => {
   const {
     field,
@@ -110,6 +111,7 @@ const DraggableItem = (props: {
     activeDragId,
     setErrorAnswerId,
     setIncorrectIdsMap,
+    fields,
   } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
@@ -180,6 +182,19 @@ const DraggableItem = (props: {
         onDrop();
         setActiveDragId(null);
         if (isMissedIntersectedId.current && !isIntersected.current) {
+          //maybe word is correct, but id is missed
+          const isMissedIntersectValue = fields.find(
+            (f) => f.id == isMissedIntersectedId.current
+          )?.value;
+          if (isMissedIntersectValue === field.value) {
+            setCorrectIds((ids) =>
+              ids.concat(Number(isMissedIntersectedId.current))
+            );
+            setX(0);
+            setY(0);
+            return;
+          }
+          //
           setX(0);
           setY(0);
           setErrorAnswerId(isMissedIntersectedId.current);
@@ -211,7 +226,13 @@ const DraggableItem = (props: {
         className={`${
           isActiveDrag && "bg-[#271399]"
         } handle text-[18px] cursor-pointer`}
-        style={{ zIndex: 1, cursor: "pointer" }}
+        style={{
+          zIndex: 1,
+          cursor: "pointer",
+          whiteSpace: "break-spaces",
+          height: "auto",
+          textAlign: "center",
+        }}
       >
         <span style={{ fontSize: 18, fontWeight: 400 }}>{field.value}</span>
       </Chip>
@@ -233,7 +254,7 @@ export const FillGapsDragExView: FC<TProps> = ({
   const [correctIds, setCorrectIds] = useState<number[]>([]);
   const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
 
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
@@ -261,7 +282,7 @@ export const FillGapsDragExView: FC<TProps> = ({
             {field && (
               <AnswerField
                 field={field}
-                isTeacher={profile?.role_id === 2}
+                isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
                 isCorrect={correctIds.includes(field?.id)}
                 dataId={data?.id}
                 errorAnswerId={errorAnswerId}
@@ -332,10 +353,9 @@ export const FillGapsDragExView: FC<TProps> = ({
   }, [data.fields]);
 
   const onDrop = useCallback(() => {}, [activeDragId]);
-
   return (
     <div className="fill-the-gaps-draggable">
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -369,7 +389,7 @@ export const FillGapsDragExView: FC<TProps> = ({
           </p>
         )}
       </div>
-      <div className={`pb-8 w-[886px] m-auto`}>
+      <div className={`pb-8 w-[100%] max-w-[886px] m-auto`}>
         {!!image && (
           <Zoom>
             <img
@@ -380,12 +400,22 @@ export const FillGapsDragExView: FC<TProps> = ({
           </Zoom>
         )}
         <div
-          className="flex justify-center items-center py-4 gap-2 flex-wrap mx-auto shadow-lg"
+          className="
+            flex
+            justify-center
+            items-center
+            py-4
+            gap-2
+            flex-wrap
+            mx-auto
+            shadow-lg
+            top-[80px]
+            lg:top-[0px]
+          "
           style={{
             position: "sticky",
             zIndex: 2,
             background: "#fff",
-            top: 0,
             borderRadius: 10,
           }}
         >
@@ -403,6 +433,7 @@ export const FillGapsDragExView: FC<TProps> = ({
                 isCorrect={correctIds?.includes(field?.id)}
                 setErrorAnswerId={setErrorAnswerId}
                 setIncorrectIdsMap={setIncorrectIdsMap}
+                fields={data.fields}
               />
             );
           })}

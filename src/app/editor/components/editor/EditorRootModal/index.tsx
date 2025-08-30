@@ -25,7 +25,7 @@ type TProps = {
   type?: TTemplate["type"];
   onBack?: () => void;
   id?: number;
-  onSuccess: () => void;
+  onSuccess: (id: number) => void;
   chosenExToEdit?: any;
   lastSortIndex: number;
   currentSortIndexToShift?: number;

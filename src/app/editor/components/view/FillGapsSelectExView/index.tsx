@@ -152,7 +152,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
     }[]
   >([]);
 
-  const isTeacher = profile?.role_id === 2;
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
@@ -163,7 +163,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
-    sleepDelay: 3000,
+    sleepDelay: 1000,
   });
 
   useEffect(() => {
@@ -210,21 +210,25 @@ export const FillGapsSelectExView: FC<TProps> = ({
         // if (field?.options.length === 1) {
         //   return root.render(<span>{field?.options[0].value}</span>);
         // }
+        let minWidth =
+          maxOptionLength *
+          (maxOptionLength <= 5
+            ? 75
+            : maxOptionLength <= 10
+            ? 20
+            : maxOptionLength >= 20
+            ? 10
+            : 15);
+        if (minWidth < 70) {
+          minWidth = 85;
+        }
         root.render(
           <div
             className="answer-wrapper mx-2 select-answer-wrapper"
             id={"answer-wrapper-" + field?.id}
             style={{
               display: "inline-block",
-              minWidth:
-                maxOptionLength *
-                (maxOptionLength <= 5
-                  ? 25
-                  : maxOptionLength <= 10
-                  ? 20
-                  : maxOptionLength >= 20
-                  ? 10
-                  : 15),
+              minWidth,
               // maxOptionLength *
               // (maxOptionLength < 10 ? 20 : maxOptionLength > 20 ? 7 : 10),
             }}
@@ -241,7 +245,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
             <AnswerField
               field={field}
               key={field?.id}
-              isTeacher={profile?.role_id === 2}
+              isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
               localAnswers={localAnswers}
               setLocalAnswers={setLocalAnswers}
             />
@@ -252,18 +256,29 @@ export const FillGapsSelectExView: FC<TProps> = ({
     data.fields,
     data?.id,
     profile?.role_id,
-    answers,
+    answers.length,
     localAnswers,
-    rest.activeStudentId,
+    // rest.activeStudentId,
   ]);
 
   useEffect(() => {
     renderContent();
   }, [renderContent]);
 
+  const content = useMemo(() => {
+    return (
+      <div
+        className={
+          "answerWrapperArea answerWrapperArea-" + (data?.id || 0).toString()
+        }
+        dangerouslySetInnerHTML={{ __html: data.dataText }}
+      ></div>
+    );
+  }, [data.dataText, data?.id]);
+
   return (
     <>
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[866px] m-auto`}>
         <p
           style={{
             color: data.titleColor,
@@ -302,19 +317,13 @@ export const FillGapsSelectExView: FC<TProps> = ({
           <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
         </Zoom>
       )}
-      <div className={`py-8 w-[886px] m-auto`}>
+      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
         <Card className={`p-10 px-10 `}>
           <div
             style={{ margin: "0 auto", lineHeight: "230%" }}
             className="flex flex-col gap-10"
           >
-            <div
-              className={
-                "answerWrapperArea answerWrapperArea-" +
-                (data?.id || 0).toString()
-              }
-              dangerouslySetInnerHTML={{ __html: data.dataText }}
-            ></div>
+            {content}
           </div>
         </Card>
       </div>
