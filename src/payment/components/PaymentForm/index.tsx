@@ -113,6 +113,10 @@ export const PaymentForm = (props: TProps) => {
       };
 
       cp.start(intentData).then((startResult) => {
+        console.log("startResult", startResult);
+        if (startResult?.status === "success") {
+          window?.ym(103952819, "reachGoal", "buy-subscribe-success");
+        }
         setTimeout(() => {
           window.location.reload();
         }, 300);

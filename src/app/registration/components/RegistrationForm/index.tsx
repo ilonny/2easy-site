@@ -86,6 +86,7 @@ export const RegistrationForm = () => {
           writeToLocalStorage("token", res.token);
           writeToLocalStorage("profile", JSON.stringify(res));
           setProfile(res);
+          window?.ym(103952819,'reachGoal','register-success')
           router.replace("/");
         }
       });
