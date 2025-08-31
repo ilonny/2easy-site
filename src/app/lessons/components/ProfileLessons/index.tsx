@@ -118,7 +118,7 @@ export const ProfileLessons = (props: TProps) => {
   }, [isTeacher, lessons, tabIndex, studentId]);
 
   const tabsToRender = useMemo(() => {
-    if (tabIndex === "savedLessons") {
+    if (tabIndex === "savedLessons" || !profile?.name) {
       return tabs;
     }
     return ["All lessons"].concat(
@@ -130,7 +130,7 @@ export const ProfileLessons = (props: TProps) => {
         )
       ).filter(Boolean)
     );
-  }, [lessonsToRender, tabIndex]);
+  }, [lessonsToRender, tabIndex, profile?.name]);
 
   useEffect(() => {
     if (tabsToRender.length) {
