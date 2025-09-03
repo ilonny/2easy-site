@@ -107,7 +107,7 @@ export const ProfileLessons = (props: TProps) => {
   const [filterSearchString, setFilterSearchString] = useState("");
 
   const lessonsToRender = useMemo(() => {
-    if (!isTeacher) {
+    if (!isTeacher || studentId) {
       return lessons;
     }
     if (tabIndex === "userLessons" && !studentId) {
@@ -188,7 +188,8 @@ export const ProfileLessons = (props: TProps) => {
     }
     return res;
   }, [activeFilterTab, filterSearchString, lessonsToRender]);
-
+  console.log("lessons to render", lessonsToRender);
+  console.log("filtered lessons", filteredLessons);
   return (
     <>
       {!hideTabs && (
