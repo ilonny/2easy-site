@@ -49,6 +49,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
       });
       const lesson = await lessonRes.json();
       if (lesson.success) {
+        window?.ym(103955671, "reachGoal", "student-create");
         onSuccess();
       }
       checkResponse(lesson);
@@ -85,7 +86,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
             <Controller
               name="email"
               control={control}
-              rules={{ required: "E-mail обязательное поле" }}  
+              rules={{ required: "E-mail обязательное поле" }}
               render={({ field }) => (
                 <Input
                   {...field}

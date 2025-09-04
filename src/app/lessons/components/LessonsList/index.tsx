@@ -77,6 +77,7 @@ export const LessonsList: FC<TProps> = ({
         },
       });
       const data = await res.json();
+      window?.ym(103955671, "reachGoal", "lesson-copy");
       checkResponse(data);
       getLessons();
     },

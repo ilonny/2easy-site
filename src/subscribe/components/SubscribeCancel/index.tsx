@@ -28,6 +28,7 @@ export const SubscribeCancel: FC<disableUppercase> = ({
     });
 
     const cancel = await cancelRes.json();
+    window?.ym(103955671, "reachGoal", "subscribe-cancel");
     setLoading(false);
     checkResponse(cancel);
     setModalIsOpen(false);

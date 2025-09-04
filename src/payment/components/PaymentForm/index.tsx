@@ -56,7 +56,7 @@ export const PaymentForm = (props: TProps) => {
         // error
         return;
       }
-
+      window?.ym(103955671, "reachGoal", "create-payment");
       const cp = new window.cp.CloudPayments();
 
       let reccurentData;
@@ -115,7 +115,7 @@ export const PaymentForm = (props: TProps) => {
       cp.start(intentData).then((startResult) => {
         console.log("startResult", startResult);
         if (startResult?.status === "success") {
-          window?.ym(103955671,'reachGoal','buy-subscribe-success')
+          window?.ym(103955671, "reachGoal", "buy-subscribe-success");
         }
         setTimeout(() => {
           window.location.reload();

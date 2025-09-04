@@ -49,6 +49,7 @@ export const SubscribeTariffs: FC<TProps> = ({ hideTitle = false }) => {
 
       setSelectedType(type);
       setPaymentOpened(true);
+      window?.ym(103955671, "reachGoal", "open-subscribe-modal");
     },
     [profile?.login]
   );
