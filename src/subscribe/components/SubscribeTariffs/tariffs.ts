@@ -20,7 +20,7 @@ export const tariffs = [
     title: "Подписка на год",
     color: "#B5E8FF",
     id: 3,
-    price: 6600,
+    price: 6990,
     oldPrice: 9480,
     desc: "/ год",
     type: "year",
