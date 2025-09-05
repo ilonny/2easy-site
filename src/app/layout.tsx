@@ -14,6 +14,7 @@ import { BodyContainer } from "./BodyContainer";
 import { Footer } from "@/components/Footer";
 import Script from "next/script";
 import { EditorContextProvider } from "./editor/context";
+import { JivoSite } from "@/components/JivoSite";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
@@ -65,6 +66,7 @@ export default function RootLayout({
             ym(103955671, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
           `}
         </Script>
+        <JivoSite />
         <noscript>
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
