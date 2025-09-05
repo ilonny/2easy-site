@@ -50,6 +50,7 @@ export const FreeInputFormExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
+    isPresentationMode: rest?.isPresentationMode
   });
 
   const onValueChange = useDebouncedCallback(

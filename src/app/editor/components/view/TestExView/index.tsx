@@ -319,6 +319,7 @@ export const TestExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
+    isPresentationMode: rest?.isPresentationMode
   });
 
   // useEffect(() => {

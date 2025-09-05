@@ -265,6 +265,7 @@ export const MatchWordImageExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
+    isPresentationMode: rest?.isPresentationMode,
   });
 
   const sortedChips = useMemo(() => {
@@ -472,6 +473,7 @@ export const MatchWordImageExView: FC<TProps> = ({
                         setCorrectIds={setCorrectIds}
                         isIncorrectWord={isIncorrectWord}
                         setIncorrectIdsMap={setIncorrectIdsMap}
+                        isPresentationMode={rest?.isPresentationMode}
                       />
                     </Card>
                   )}

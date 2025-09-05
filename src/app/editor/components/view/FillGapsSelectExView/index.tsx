@@ -172,6 +172,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
     activeStudentId: rest.activeStudentId,
     isTeacher,
     sleepDelay: 1000,
+    isPresentationMode: rest?.isPresentationMode
   });
 
   useEffect(() => {

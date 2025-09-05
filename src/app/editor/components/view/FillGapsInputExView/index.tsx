@@ -150,6 +150,7 @@ export const FillGapsInputExView: FC<TProps> = ({
     activeStudentId: rest.activeStudentId,
     isTeacher,
     sleepDelay: 3000,
+    isPresentationMode: rest?.isPresentationMode,
   });
 
   useEffect(() => {
@@ -224,27 +225,6 @@ export const FillGapsInputExView: FC<TProps> = ({
                     value={field?.options[0]?.value}
                   />
                 </div>
-              ) : isTeacher &&
-                localAnswers.findLast(
-                  (f) => f.id === field.id && !f.isCorrect
-                ) ? (
-                <div className="">
-                  <Input
-                    variant="flat"
-                    className={`${styles["answer-wrapper"]} inputcustom isIncorrect`}
-                    size="sm"
-                    isDisabled={isTeacher}
-                    classNames={{
-                      inputWrapper: "bg-[#eeebfe]",
-                    }}
-                    color={"danger"}
-                    value={
-                      localAnswers.findLast(
-                        (f) => f.id === field.id && !f.isCorrect
-                      )?.word
-                    }
-                  />
-                </div>
               ) : (
                 <div className="">
                   <AnswerField
@@ -267,12 +247,9 @@ export const FillGapsInputExView: FC<TProps> = ({
     data.fields,
     data?.id,
     profile?.role_id,
-    answers,
     localAnswers,
     isTeacher,
     rest?.isPresentationMode,
-    // rest.activeStudentId,
-    // rest.activeStudentId,
   ]);
 
   useEffect(() => {

@@ -39,6 +39,7 @@ export const MatchWordWordExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
+    isPresentationMode: rest?.isPresentationMode
   });
 
   const [selectedMatchId, setSelectedMatchId] = useState<number | undefined>(0);

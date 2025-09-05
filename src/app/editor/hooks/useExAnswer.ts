@@ -9,6 +9,7 @@ type TParams = {
   isTeacher?: boolean;
   activeStudentId?: number;
   sleepDelay?: number;
+  isPresentationMode?: boolean;
 };
 
 const limit = pLimit(1);
@@ -23,6 +24,7 @@ export const useExAnswer = (params: TParams) => {
     isTeacher,
     activeStudentId,
     sleepDelay,
+    isPresentationMode,
   } = params;
   // const [activeStudentId, setActiveStudentId] = useState(0);
   const queue = useRef<Promise<Response>[]>([]);
@@ -55,6 +57,9 @@ export const useExAnswer = (params: TParams) => {
 
   const getAnswers = useCallback(
     async (once?: boolean) => {
+      if (isPresentationMode) {
+        return;
+      }
       if (!once && (!isTeacher || !activeStudentId || !idRef)) {
         return;
       }
@@ -78,7 +83,16 @@ export const useExAnswer = (params: TParams) => {
       }
       return answersMap;
     },
-    [isTeacher, activeStudentId, lesson_id, ex_id, student_id, sleepDelay]
+    [
+      isTeacher,
+      activeStudentId,
+      lesson_id,
+      ex_id,
+      student_id,
+      sleepDelay,
+      isPresentationMode,
+      idRef,
+    ]
   );
 
   useEffect(() => {

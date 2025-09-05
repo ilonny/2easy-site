@@ -34,6 +34,7 @@ export const TextChecklistExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
+    isPresentationMode: rest?.isPresentationMode,
   });
 
   useEffect(() => {
