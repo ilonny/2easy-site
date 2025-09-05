@@ -162,7 +162,7 @@ const getDataMapper = (type: string) => {
   }
 };
 
-export const useExList = (lesson_id: number) => {
+export const useExList = (lesson_id: number, isPresentationMode?: boolean) => {
   const [exListIsLoading, setExListIsLoading] = useState(false);
   const [exList, setExList] = useState([]);
 
@@ -176,7 +176,7 @@ export const useExList = (lesson_id: number) => {
     if (!list?.map) {
       return;
     }
-    const mappedList = list
+    let mappedList = list
       ?.map((l, index) => {
         const dataMapper = getDataMapper(l.type);
         return {
@@ -190,10 +190,15 @@ export const useExList = (lesson_id: number) => {
         if (a.sortIndex > b.sortIndex) return 1;
         return 0;
       });
-
+    if (isPresentationMode) {
+      mappedList = mappedList.filter(
+        (l) =>
+          l.is_visible === null || l.is_visible === "1" || l.is_visible === 1
+      );
+    }
     setExList(mappedList || []);
     setExListIsLoading(false);
-  }, []);
+  }, [isPresentationMode, lesson_id]);
 
   const changeSortIndex = useCallback(
     async (exId: number, newSortIndex: number) => {
@@ -219,5 +224,12 @@ export const useExList = (lesson_id: number) => {
     });
   }, []);
 
-  return { exListIsLoading, exList, getExList, changeSortIndex, deleteEx, setExList };
+  return {
+    exListIsLoading,
+    exList,
+    getExList,
+    changeSortIndex,
+    deleteEx,
+    setExList,
+  };
 };

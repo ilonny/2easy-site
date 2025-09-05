@@ -18,7 +18,7 @@ import { EditorContextProvider } from "./editor/context";
 export const metadata: Metadata = {
   title: "2EASY Interactive",
   description:
-    "Сайт для преподавателей английского: готовые уроки и разговорные игры.",
+    "Интерактивная платформа с готовыми материалами для создания и проведения языковых уроков",
 };
 
 // export const viewport: Viewport = {

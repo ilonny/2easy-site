@@ -279,7 +279,15 @@ export const PaymentForm = (props: TProps) => {
                 >
                   политики конфиденциальности
                 </a>{" "}
-                и даю свое согласие на обработку персональных данных
+                и даю свое{" "}
+                <a
+                  className="text-primary"
+                  href="/personal_agreement"
+                  target="_blank"
+                >
+                  согласие
+                </a>{" "}
+                на обработку персональных данных
               </p>
             </Checkbox>
           )}
@@ -289,13 +297,13 @@ export const PaymentForm = (props: TProps) => {
           <div className="flex items-center justify-between">
             <p>Скидка</p>
             <p className="text-success-600 font-bold">
-              -{price - (price - priceWithPromo)}₽
+              -{(price - (price - priceWithPromo)).toFixed(1)}₽
             </p>
           </div>
         )}
         <div className="flex items-center justify-between">
           <p>Итого</p>
-          <p className="font-bold">{price - priceWithPromo}₽</p>
+          <p className="font-bold">{(price - priceWithPromo).toFixed(1)}₽</p>
         </div>
         <div className="h-5" />
         <Button

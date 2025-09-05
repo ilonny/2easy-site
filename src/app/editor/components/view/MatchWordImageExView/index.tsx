@@ -167,6 +167,7 @@ const InputItem = (props: {
   isIncorrectWord?: string;
   id: string;
   setIncorrectIdsMap: any;
+  isPresentationMode?: boolean;
 }) => {
   const {
     chip,
@@ -176,6 +177,7 @@ const InputItem = (props: {
     isIncorrectWord,
     id,
     setIncorrectIdsMap,
+    isPresentationMode,
   } = props;
   const [inputValue, setInputValue] = useState("");
 
@@ -217,14 +219,14 @@ const InputItem = (props: {
   return (
     <>
       <Tooltip
-        isDisabled={!isTeacher}
+        isDisabled={!isTeacher || isPresentationMode}
         content={isTeacher && <div className="teacher-placeholer">{chip}</div>}
       >
         <Input
           color={inputValue && !isCorrect ? "danger" : "default"}
           value={inputValue}
           onValueChange={setInputValue}
-          placeholder={isTeacher ? chip : ""}
+          placeholder={isTeacher && !isPresentationMode ? chip : ""}
           style={{ height: 50 }}
           isDisabled={isCorrect}
           classNames={{ inputWrapper: "bg-white" }}
@@ -397,7 +399,9 @@ export const MatchWordImageExView: FC<TProps> = ({
             {data?.images?.map((image) => {
               const isCorrect =
                 correctIds.includes(image.id) ||
-                (isTeacher && image.text === activeChip);
+                (isTeacher &&
+                  !rest?.isPresentationMode &&
+                  image.text === activeChip);
               const isIncorrectWord =
                 isTeacher && !isCorrect && incorrectIdsMap?.[image?.id];
               return (
@@ -413,7 +417,7 @@ export const MatchWordImageExView: FC<TProps> = ({
                   </div>
                   {data.viewType === "drag" && (
                     <Tooltip
-                      isDisabled={!isTeacher}
+                      isDisabled={!isTeacher || rest?.isPresentationMode}
                       content={
                         isTeacher && (
                           <div className="teacher-placeholer">{image.text}</div>

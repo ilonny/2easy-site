@@ -24,11 +24,16 @@ type TProps = {
   isPreview?: boolean;
 };
 
-const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
+const AnswerField: FC<{
+  field: TField;
+  isTeacher: boolean;
+  isPresentationMode?: boolean;
+}> = ({
   field,
   isTeacher,
   localAnswers,
   setLocalAnswers,
+  isPresentationMode,
 }) => {
   const [selectedValue, setSelectedValue] = useState("");
 
@@ -90,7 +95,9 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
   return (
     <>
       <Input
-        placeholder={isTeacher ? field.options[0]?.value : ""}
+        placeholder={
+          isTeacher && !isPresentationMode ? field.options[0]?.value : ""
+        }
         onBlur={onBlur}
         variant="flat"
         className={`${styles["answer-wrapper"]} inputcustom ${
@@ -200,7 +207,10 @@ export const FillGapsInputExView: FC<TProps> = ({
               lineHeight: "initial",
             }}
           >
-            <Tooltip isDisabled={!isTeacher} content={toolTipContent}>
+            <Tooltip
+              isDisabled={!isTeacher || rest?.isPresentationMode}
+              content={toolTipContent}
+            >
               {localAnswers.find((f) => f.id === field.id && f.isCorrect) ? (
                 <div className="">
                   <Input
@@ -243,6 +253,7 @@ export const FillGapsInputExView: FC<TProps> = ({
                     isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
                     localAnswers={localAnswers}
                     setLocalAnswers={setLocalAnswers}
+                    isPresentationMode={rest?.isPresentationMode}
                     // localAnswers={localAnswers}
                     // setLocalAnswers={setLocalAnswers}
                   />
@@ -259,6 +270,7 @@ export const FillGapsInputExView: FC<TProps> = ({
     answers,
     localAnswers,
     isTeacher,
+    rest?.isPresentationMode,
     // rest.activeStudentId,
     // rest.activeStudentId,
   ]);

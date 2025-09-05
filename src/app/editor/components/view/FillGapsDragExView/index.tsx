@@ -41,13 +41,21 @@ const AnswerField: FC<{
   dataId: number;
   errorAnswerId: number;
   incorrectIdsMap: any;
-}> = ({ field, isTeacher, isCorrect, errorAnswerId, incorrectIdsMap }) => {
+  isPresentationMode?: boolean;
+}> = ({
+  field,
+  isTeacher,
+  isCorrect,
+  errorAnswerId,
+  incorrectIdsMap,
+  isPresentationMode,
+}) => {
   const hasIncorrectAnswerForTeacher =
     isTeacher && !!incorrectIdsMap?.[field.id];
 
   return (
     <Tooltip
-      isDisabled={!isTeacher}
+      isDisabled={!isTeacher || isPresentationMode}
       content={
         isTeacher && <div className="teacher-placeholer">{field.value}</div>
       }
@@ -287,6 +295,7 @@ export const FillGapsDragExView: FC<TProps> = ({
                 dataId={data?.id}
                 errorAnswerId={errorAnswerId}
                 incorrectIdsMap={incorrectIdsMap}
+                isPresentationMode={rest.isPresentationMode}
               />
             )}
           </>
@@ -299,6 +308,7 @@ export const FillGapsDragExView: FC<TProps> = ({
     correctIds,
     errorAnswerId,
     incorrectIdsMap,
+    rest.isPresentationMode,
   ]);
 
   useEffect(() => {
@@ -353,6 +363,7 @@ export const FillGapsDragExView: FC<TProps> = ({
   }, [data.fields]);
 
   const onDrop = useCallback(() => {}, [activeDragId]);
+
   return (
     <div className="fill-the-gaps-draggable">
       <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>

@@ -59,6 +59,7 @@ type TProps = {
   onSuccessCreate?: (id: number) => void;
   is2easy?: boolean;
   isAdmin?: boolean;
+  isPresentationMode?: boolean;
 };
 
 const mapComponent = (type: string, outerProps: never) => {
@@ -198,6 +199,7 @@ export const ExListComp: FC<TProps> = (props) => {
     onSuccessCreate,
     is2easy,
     isAdmin,
+    isPresentationMode,
   } = props;
 
   const [copyData, setCopyData] = useState("");
@@ -213,11 +215,23 @@ export const ExListComp: FC<TProps> = (props) => {
     // return () => clearInterval(interval);
   }, [isView]);
 
-  const ViewerComponent = ({ ex, exIndex, is2easy, isAdmin, isView }) => {
+  const ViewerComponent = ({
+    ex,
+    exIndex,
+    is2easy,
+    isAdmin,
+    isView,
+    isPresentationMode,
+  }) => {
     const { profile } = useContext(AuthContext);
     const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
-    const Viewer = mapComponent(ex.type, { ...props, id: ex.id, isView });
+    const Viewer = mapComponent(ex.type, {
+      ...props,
+      id: ex.id,
+      isView,
+      isPresentationMode,
+    });
     const [popoverIsOpen, setPopoverIsOpen] = useState(false);
     const closePopover = useCallback(() => {
       setPopoverIsOpen(false);
@@ -239,7 +253,7 @@ export const ExListComp: FC<TProps> = (props) => {
           style={{ fontSize: 18 }}
           id={`ex-${ex.id}`}
         >
-          {isTeacher && (
+          {isTeacher && !isPresentationMode && (
             <div className="w-[55px] absolute left-[10px] top-[10px]">
               <div
                 className="flex flex-col items-start gap-2"
@@ -297,6 +311,7 @@ export const ExListComp: FC<TProps> = (props) => {
             data={ex.data}
             activeStudentId={activeStudentId}
             isView={isView}
+            isPresentationMode={isPresentationMode}
           />
           {!isView && (
             <>
@@ -505,6 +520,7 @@ export const ExListComp: FC<TProps> = (props) => {
             isAdmin={isAdmin}
             is2easy={is2easy}
             isView={isView}
+            isPresentationMode={isPresentationMode}
           />
         );
       })}

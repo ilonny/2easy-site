@@ -327,6 +327,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
                 const isCorrect =
                   !!correctChips.find((c) => c.word === activeChip?.word) ||
                   (isTeacher &&
+                    !rest?.isPresentationMode &&
                     column.id.toString() ===
                       (activeChip?.id.split("-")?.reverse()?.[0] || 0));
 
@@ -348,12 +349,12 @@ export const MatchWordColumnExView: FC<TProps> = ({
                     className="w-[100%] lg:w-[47%] p-6 answer-wrapper"
                     id={"answer-wrapper-" + column.id}
                     onMouseOver={() => {
-                      if (isTeacher) {
+                      if (isTeacher && !rest?.isPresentationMode) {
                         setHoveredTeacherColumnId(column.id);
                       }
                     }}
                     onMouseLeave={() => {
-                      if (isTeacher) {
+                      if (isTeacher && !rest?.isPresentationMode) {
                         setHoveredTeacherColumnId(null);
                       }
                     }}

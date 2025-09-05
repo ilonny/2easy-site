@@ -221,7 +221,15 @@ export const RegistrationForm = () => {
               >
                 политики конфиденциальности
               </a>{" "}
-              и даю свое согласие на обработку персональных данных
+              и даю свое{" "}
+              <a
+                className="text-primary"
+                href="/personal_agreement"
+                target="_blank"
+              >
+                согласие
+              </a>{" "}
+              на обработку персональных данных
             </p>
           </Checkbox>
         )}

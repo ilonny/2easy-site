@@ -16,6 +16,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Switch,
 } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
@@ -52,7 +53,11 @@ export default function StartRegistrationPage() {
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
-  const { exList, getExList, setExList } = useExList(params.id);
+  const [isPresentationMode, setIsPresentationMode] = useState(false);
+  const { exList, getExList, setExList } = useExList(
+    params.id,
+    isPresentationMode
+  );
   const { lesson, getLesson } = useLessons();
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(1);
@@ -133,6 +138,11 @@ export default function StartRegistrationPage() {
     }
   }, [tutorialOpen]);
 
+  const onChangePresentationMode = useCallback((e) => {
+    e.stopPropagation();
+    setIsPresentationMode((s) => !s);
+  }, []);
+
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
@@ -143,7 +153,27 @@ export default function StartRegistrationPage() {
               <Link href={`/editor/${params.id}`} className="text-secondary">
                 <Button variant="light">← Вернуться к редактированию</Button>
               </Link>
-              <div className="">
+              <div className="flex items-center flex-wrap">
+                <div
+                  className="switcher flex items-center cursor-pointer"
+                  onClick={onChangePresentationMode}
+                >
+                  <p className="text-small mr-2">Режим демонстрации экрана</p>
+                  <Switch
+                    size="sm"
+                    isSelected={isPresentationMode}
+                    style={{ pointerEvents: "none" }}
+                  />
+                </div>
+                <Button
+                  endContent={<img src={InfoIcon.src} alt="icon" />}
+                  variant="light"
+                  onClick={() => {
+                    setTutorialOpen(true);
+                    setTutorialStep(4);
+                  }}
+                  isIconOnly
+                />
                 <Button
                   endContent={<img src={InfoIcon.src} alt="icon" />}
                   variant="light"
@@ -214,6 +244,7 @@ export default function StartRegistrationPage() {
                   key={exList.length}
                   is2easy={lesson?.user_id === 1}
                   isAdmin={profile?.role_id === 1}
+                  isPresentationMode={isPresentationMode}
                 />
               </div>
             </div>
@@ -466,6 +497,43 @@ export default function StartRegistrationPage() {
             )}
             {tutorialStep === 4 && (
               <>
+                <p
+                  style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
+                >
+                  Если ведете урок с помощью
+                  <br />
+                  демонстрации экрана или офлайн:
+                </p>
+                <p className="text-center mb-2"></p>
+                <div style={{ maxWidth: 500, margin: "auto" }}>
+                  <div className="flex items-start gap-2 mb-2">
+                    <div className="shrink-0 pt-[3px]">
+                      <Image src={CheckedYellow.src} alt="checked" />
+                    </div>
+                    <p>
+                      включите опцию “Режим демонстрации экрана”. Она позволит
+                      скрыть правильные ответы, подсказки и блоки, которые вы
+                      сделали невидимыми для ученика.
+                      <br />
+                      <br />
+                      По сути, вы будете видеть урок так, как видел бы его
+                      ученик в своем личном кабинете.
+                    </p>
+                  </div>
+                </div>
+                <div className="h-4"></div>
+                <Button
+                  color="primary"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => setTutorialStep(5)}
+                >
+                  <p>Дальше →</p>
+                </Button>
+              </>
+            )}
+            {tutorialStep === 5 && (
+              <>
                 <div className="flex flex-col flex-1 justify-between">
                   <div>
                     <p
@@ -510,7 +578,7 @@ export default function StartRegistrationPage() {
                     color="primary"
                     className="w-full"
                     size="lg"
-                    onClick={() => setTutorialStep(5)}
+                    onClick={() => setTutorialStep(6)}
                   >
                     <p>Дальше →</p>
                   </Button>
@@ -528,7 +596,7 @@ export default function StartRegistrationPage() {
                 />
               </>
             )}
-            {tutorialStep === 5 && (
+            {tutorialStep === 6 && (
               <>
                 <div className="flex flex-col flex-1 justify-between">
                   <div>
@@ -579,7 +647,7 @@ export default function StartRegistrationPage() {
                     style={{
                       fontSize: 14,
                       color:
-                        tutorialStep === 4 || tutorialStep === 5
+                        tutorialStep === 5 || tutorialStep === 6
                           ? "#fff"
                           : "#B7B7B7",
                     }}
@@ -595,12 +663,12 @@ export default function StartRegistrationPage() {
                 style={{
                   fontSize: 14,
                   color:
-                    tutorialStep === 4 || tutorialStep === 5
+                    tutorialStep === 5 || tutorialStep === 6
                       ? "#fff"
                       : "#B7B7B7",
                 }}
               >
-                {tutorialStep} / 5
+                {tutorialStep} / 6
               </p>
               <div className="w-[100px]"></div>
             </div>

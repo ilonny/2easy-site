@@ -34,10 +34,18 @@ type TTestStepProps = {
   setScore: Dispatch<SetStateAction<number>>;
   writeAnswer: any;
   answers: any; //ref maps in json format
+  isPresentationMode?: boolean;
 };
 
 export const TestStep = (props: TTestStepProps) => {
-  const { question, onPressNext, setScore, writeAnswer, answers } = props;
+  const {
+    question,
+    onPressNext,
+    setScore,
+    writeAnswer,
+    answers,
+    isPresentationMode,
+  } = props;
   const { profile } = useContext(AuthContext);
 
   const [rerender, setRerender] = useState(0);
@@ -107,9 +115,15 @@ export const TestStep = (props: TTestStepProps) => {
   return (
     <div
       onMouseEnter={() => {
+        if (isPresentationMode) {
+          return;
+        }
         setIsHovered(true);
       }}
       onMouseLeave={() => {
+        if (isPresentationMode) {
+          return;
+        }
         setIsHovered(false);
       }}
     >
@@ -436,6 +450,7 @@ export const TestExView: FC<TProps> = ({
               setScore={setScore}
               writeAnswer={writeAnswer}
               answers={questionStepAnswers}
+              isPresentationMode={rest?.isPresentationMode}
             />
           )}
           {!isFinished && (

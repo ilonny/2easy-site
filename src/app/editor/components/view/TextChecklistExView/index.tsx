@@ -104,7 +104,7 @@ export const TextChecklistExView: FC<TProps> = ({
                     key={index}
                     style={{ cursor: "pointer" }}
                   >
-                    {rest.isView ? (
+                    {rest.isView && !rest.isPresentationMode ? (
                       <Checkbox
                         size="lg"
                         color="primary"

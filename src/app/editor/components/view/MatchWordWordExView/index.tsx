@@ -231,6 +231,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                     style={{
                       cursor: "pointer",
                       background:
+                        !rest.isPresentationMode &&
                         (profile?.role_id === 2 || profile?.role_id === 1) &&
                         selectedMatchId &&
                         m.correctId === selectedMatchId

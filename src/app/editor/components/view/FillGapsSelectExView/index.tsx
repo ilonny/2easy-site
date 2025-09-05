@@ -23,11 +23,16 @@ type TProps = {
   isPreview?: boolean;
 };
 
-const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
+const AnswerField: FC<{
+  field: TField;
+  isTeacher: boolean;
+  isPresentationMode?: boolean;
+}> = ({
   field,
   isTeacher,
   localAnswers,
   setLocalAnswers,
+  isPresentationMode,
 }) => {
   const [selectedValue, setSelectedValue] = useState("");
   const [count, setCount] = useState(0);
@@ -118,7 +123,10 @@ const AnswerField: FC<{ field: TField; isTeacher: boolean }> = ({
             <SelectItem color="default" key={o.value} textValue={o.value}>
               <div
                 className={`flex gap-1 items-center ${
-                  isTeacher && o.isCorrect && "text-success"
+                  isTeacher &&
+                  !isPresentationMode &&
+                  o.isCorrect &&
+                  "text-success"
                 }`}
               >
                 {/* {isTeacher && o.isCorrect && (
@@ -248,6 +256,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
               isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
               localAnswers={localAnswers}
               setLocalAnswers={setLocalAnswers}
+              isPresentationMode={rest?.isPresentationMode}
             />
           </div>
         );
@@ -258,6 +267,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
     profile?.role_id,
     answers.length,
     localAnswers,
+    rest?.isPresentationMode,
     // rest.activeStudentId,
   ]);
 
