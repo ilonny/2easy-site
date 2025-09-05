@@ -94,7 +94,7 @@ export const LoginForm = () => {
           />
         )}
       />
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-16">
         {/* <Checkbox size="sm" defaultSelected>
           Запомнить
         </Checkbox> */}
