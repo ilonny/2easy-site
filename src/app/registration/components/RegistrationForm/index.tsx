@@ -86,7 +86,7 @@ export const RegistrationForm = () => {
           writeToLocalStorage("token", res.token);
           writeToLocalStorage("profile", JSON.stringify(res));
           setProfile(res);
-          window?.ym(103955671,'reachGoal','register-success')
+          window?.ym(103955671, "reachGoal", "register-success");
           router.replace("/");
         }
       });
@@ -227,9 +227,8 @@ export const RegistrationForm = () => {
                 href="/personal_agreement"
                 target="_blank"
               >
-                согласие
-              </a>{" "}
-              на обработку персональных данных
+                согласие на обработку персональных данных
+              </a>
             </p>
           </Checkbox>
         )}

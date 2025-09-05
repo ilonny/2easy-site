@@ -285,9 +285,8 @@ export const PaymentForm = (props: TProps) => {
                   href="/personal_agreement"
                   target="_blank"
                 >
-                  согласие
-                </a>{" "}
-                на обработку персональных данных
+                  согласие на обработку персональных данных
+                </a>
               </p>
             </Checkbox>
           )}
