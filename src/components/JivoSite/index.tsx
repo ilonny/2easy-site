@@ -17,9 +17,6 @@ export const JivoSite = () => {
     }
   }, [path]);
 
-  if (window?.location?.pathname?.includes("lessons/")) {
-    return <></>;
-  }
   return (
     <>
       <Script src="https://code.jivo.ru/widget/6qGntLRCf8" async />
