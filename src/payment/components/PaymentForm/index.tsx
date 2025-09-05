@@ -296,13 +296,15 @@ export const PaymentForm = (props: TProps) => {
           <div className="flex items-center justify-between">
             <p>Скидка</p>
             <p className="text-success-600 font-bold">
-              -{(price - (price - priceWithPromo)).toFixed(1)}₽
+              -{Number((price - (price - priceWithPromo)).toFixed(1))}₽
             </p>
           </div>
         )}
         <div className="flex items-center justify-between">
           <p>Итого</p>
-          <p className="font-bold">{(price - priceWithPromo).toFixed(1)}₽</p>
+          <p className="font-bold">
+            {Number((price - priceWithPromo).toFixed(1))}₽
+          </p>
         </div>
         <div className="h-5" />
         <Button

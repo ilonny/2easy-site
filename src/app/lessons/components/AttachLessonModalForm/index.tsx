@@ -113,9 +113,15 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 chosenIds={chosenIds}
               />
               <Button
-                disabled={!chosenIds?.length}
+                disabled={skipChoseStatus ? false : !chosenIds?.length}
                 size="lg"
-                color={!chosenIds?.length ? "default" : "primary"}
+                color={
+                  skipChoseStatus
+                    ? "primary"
+                    : !chosenIds?.length
+                    ? "default"
+                    : "primary"
+                }
                 className="w-full"
                 onClick={() => {
                   if (skipChoseStatus) {
