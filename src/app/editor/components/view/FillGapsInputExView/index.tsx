@@ -63,6 +63,9 @@ const AnswerField: FC<{
   const onBlur = useCallback(
     (e) => {
       e.stopPropagation();
+      if (isPresentationMode) {
+        return;
+      }
       setCount((c) => c + 1);
       if (count < 3 && !isCorrect) {
         setLocalAnswers((a) =>
@@ -77,7 +80,14 @@ const AnswerField: FC<{
         return;
       }
     },
-    [count, isCorrect, selectedValue]
+    [
+      count,
+      field.id,
+      isCorrect,
+      isPresentationMode,
+      selectedValue,
+      setLocalAnswers,
+    ]
   );
 
   useEffect(() => {
@@ -247,6 +257,7 @@ export const FillGapsInputExView: FC<TProps> = ({
     data.fields,
     data?.id,
     profile?.role_id,
+    answers,
     localAnswers,
     isTeacher,
     rest?.isPresentationMode,
