@@ -1,5 +1,9 @@
 "use client";
 import { fetchPostJson } from "@/api";
+import {
+  EyeFilledIcon,
+  EyeSlashFilledIcon,
+} from "@/app/login/components/EyeIcon";
 import { AuthContext } from "@/auth";
 import { writeToLocalStorage } from "@/auth/utils";
 import { Button } from "@/ui";
@@ -34,6 +38,10 @@ export const RegistrationForm = () => {
     handleSubmit: confirmSubmit,
     formState: { errors: confirmErrors },
   } = useForm<TConfirmInputs>();
+
+  const [isVisible, setIsVisible] = useState(false);
+
+  const toggleVisibility = () => setIsVisible(!isVisible);
 
   const [responseError, setResponseError] = useState("");
   const [step, setStep] = useState(0);
@@ -121,11 +129,25 @@ export const RegistrationForm = () => {
             <Input
               {...field}
               label="Пароль"
-              type="password"
+              type={isVisible ? "text" : "password"}
               className="mb-8"
               radius="sm"
               errorMessage={confirmErrors?.password?.message}
               isInvalid={!!confirmErrors.password?.message}
+              endContent={
+                <button
+                  aria-label="toggle password visibility"
+                  className="focus:outline-solid outline-transparent"
+                  type="button"
+                  onClick={toggleVisibility}
+                >
+                  {isVisible ? (
+                    <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                  ) : (
+                    <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                  )}
+                </button>
+              }
             />
           )}
         />

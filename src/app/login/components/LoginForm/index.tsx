@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { EyeFilledIcon, EyeSlashFilledIcon } from "../EyeIcon";
 
 type TLoginInputs = {
   login: string;
@@ -22,6 +23,10 @@ export const LoginForm = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<TLoginInputs>();
+
+  const [isVisible, setIsVisible] = useState(false);
+
+  const toggleVisibility = () => setIsVisible(!isVisible);
 
   const [responseError, setResponseError] = useState("");
   const { setProfile } = useContext(AuthContext);
@@ -86,11 +91,25 @@ export const LoginForm = () => {
           <Input
             {...field}
             label="Пароль"
-            type="password"
+            type={isVisible ? "text" : "password"}
             className="mb-8"
             radius="sm"
             errorMessage={errors?.password?.message}
             isInvalid={!!errors.password?.message}
+            endContent={
+              <button
+                aria-label="toggle password visibility"
+                className="focus:outline-solid outline-transparent"
+                type="button"
+                onClick={toggleVisibility}
+              >
+                {isVisible ? (
+                  <EyeSlashFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                ) : (
+                  <EyeFilledIcon className="text-2xl text-default-400 pointer-events-none" />
+                )}
+              </button>
+            }
           />
         )}
       />
