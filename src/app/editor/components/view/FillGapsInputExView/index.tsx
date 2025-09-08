@@ -2,9 +2,11 @@
 
 import {
   FC,
+  memo,
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -28,79 +30,73 @@ const AnswerField: FC<{
   field: TField;
   isTeacher: boolean;
   isPresentationMode?: boolean;
+  ex_id?: number;
+  lesson_id?: number;
+  student_id?: number;
+  activeStudentId?: number;
 }> = ({
   field,
   isTeacher,
-  localAnswers,
-  setLocalAnswers,
   isPresentationMode,
+  ex_id,
+  lesson_id,
+  student_id,
+  activeStudentId,
 }) => {
-  const [selectedValue, setSelectedValue] = useState("");
+  const { getAnswers, writeAnswer, answers } = useExAnswer({
+    ex_id,
+    lesson_id,
+    student_id,
+    isTeacher,
+    activeStudentId,
+    isPresentationMode,
+    sleepDelay: 2000,
+  });
 
-  const [count, setCount] = useState(0);
-  const [isDisabled, setIsDisabled] = useState(false);
+  const [selectedValue, setSelectedValue] = useState("");
   const [isIncorrect, setIsIncorrect] = useState(false);
+
   const isCorrect = useMemo(() => {
-    if (isDisabled) {
-      return false;
-    }
-    return !!field?.options?.find((o) => o.value === selectedValue)?.isCorrect;
-  }, [selectedValue, field?.options, isDisabled]);
+    return !!field?.options?.find(
+      (o) => o.value.toLowerCase() === selectedValue.toLowerCase()
+    )?.isCorrect;
+  }, [selectedValue, field?.options]);
 
   const onChangeSelection = useCallback((val: string) => {
     setSelectedValue(val);
     return;
   }, []);
 
+  //первоначальное получение старых ответов ученику
   useEffect(() => {
-    if (count >= 3 && !isCorrect) {
-      setIsDisabled(true);
-      setSelectedValue(field.options.find((o) => o.isCorrect)?.value || "");
+    if (!isTeacher) {
+      getAnswers(true).then((a) => {
+        if (a?.[field?.id]?.answer) {
+          setSelectedValue(a?.[field?.id]?.answer);
+        }
+      });
+    }
+  }, [field?.id, getAnswers, isTeacher]);
+
+  //запись ответа учеником
+  useEffect(() => {
+    if (isTeacher) {
       return;
     }
-  }, [count, field?.options, isCorrect, selectedValue]);
-
-  const onBlur = useCallback(
-    (e) => {
-      e.stopPropagation();
-      if (isPresentationMode) {
-        return;
-      }
-      setCount((c) => c + 1);
-      if (count < 3 && !isCorrect) {
-        setLocalAnswers((a) =>
-          a.concat({
-            id: field.id,
-            isCorrect: false,
-            word: selectedValue,
-          })
-        );
-        setSelectedValue("");
-        setIsIncorrect(true);
-        return;
-      }
-    },
-    [
-      count,
-      field.id,
-      isCorrect,
-      isPresentationMode,
-      selectedValue,
-      setLocalAnswers,
-    ]
-  );
-
-  useEffect(() => {
-    if (isCorrect) {
-      setLocalAnswers((a) =>
-        a.concat({
-          id: field.id,
-          isCorrect: true,
-          word: field.options[0].value,
-        })
-      );
+    if (selectedValue) {
+      writeAnswer(field.id, selectedValue);
     }
-  }, [field.id, isCorrect]);
+  }, [field.id, isTeacher, selectedValue, writeAnswer]);
+
+  //чтение ответов учителем
+  useEffect(() => {
+    if (!isTeacher || isPresentationMode) {
+      return;
+    }
+    if (answers?.[field?.id]?.answer) {
+      setSelectedValue(answers?.[field?.id]?.answer);
+    }
+  }, [isTeacher, answers, field?.id, isPresentationMode]);
 
   return (
     <>
@@ -108,11 +104,10 @@ const AnswerField: FC<{
         placeholder={
           isTeacher && !isPresentationMode ? field.options[0]?.value : ""
         }
-        onBlur={onBlur}
         variant="flat"
         className={`${styles["answer-wrapper"]} inputcustom ${
           isCorrect && "isCorrect"
-        } ${(isDisabled || isIncorrect) && "isIncorrect"}`}
+        } ${isIncorrect && "isIncorrect"}`}
         size="sm"
         classNames={{
           inputWrapper: isCorrect ? "bg-[#EBFFEE]" : "bg-[#eeebfe]",
@@ -120,19 +115,12 @@ const AnswerField: FC<{
         color={isCorrect ? "success" : selectedValue ? "danger" : "primary"}
         value={selectedValue}
         onValueChange={onChangeSelection}
-        // onChange={(e) => onChangeSelection(e.target.value)}
-        isDisabled={isDisabled}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            onBlur(event);
-          }
-        }}
       />
     </>
   );
 };
 
-export const FillGapsInputExView: FC<TProps> = ({
+export const FillGapsInputExViewComp: FC<TProps> = ({
   data,
   isPreview = false,
   ...rest
@@ -153,43 +141,6 @@ export const FillGapsInputExView: FC<TProps> = ({
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
   const ex_id = data?.id;
-  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
-    student_id,
-    lesson_id,
-    ex_id,
-    activeStudentId: rest.activeStudentId,
-    isTeacher,
-    sleepDelay: 3000,
-    isPresentationMode: rest?.isPresentationMode,
-  });
-
-  useEffect(() => {
-    if (student_id) {
-      getAnswers(true).then((a) => {
-        try {
-          setLocalAnswers(JSON.parse(a[data.id].answer));
-        } catch (err) {}
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [student_id]);
-
-  useEffect(() => {
-    if (!answers && !isTeacher) {
-      return;
-    }
-    try {
-      setLocalAnswers(JSON.parse(answers[data.id].answer));
-    } catch (err) {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers, isTeacher]);
-
-  useEffect(() => {
-    if (localAnswers.length) {
-      writeAnswer(data.id, JSON.stringify(localAnswers));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localAnswers, writeAnswer]);
 
   const renderContent = useCallback(() => {
     document
@@ -222,50 +173,48 @@ export const FillGapsInputExView: FC<TProps> = ({
               isDisabled={!isTeacher || rest?.isPresentationMode}
               content={toolTipContent}
             >
-              {localAnswers.find((f) => f.id === field.id && f.isCorrect) ? (
-                <div className="">
-                  <Input
-                    variant="flat"
-                    className={`${styles["answer-wrapper"]} inputcustom isCorrect`}
-                    size="sm"
-                    classNames={{
-                      inputWrapper: "bg-[#EBFFEE]",
-                    }}
-                    color={"success"}
-                    value={field?.options[0]?.value}
-                  />
-                </div>
-              ) : (
-                <div className="">
-                  <AnswerField
-                    field={field}
-                    key={field?.id}
-                    isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
-                    localAnswers={localAnswers}
-                    setLocalAnswers={setLocalAnswers}
-                    isPresentationMode={rest?.isPresentationMode}
-                    // localAnswers={localAnswers}
-                    // setLocalAnswers={setLocalAnswers}
-                  />
-                </div>
-              )}
+              <div className="">
+                <AnswerField
+                  field={field}
+                  key={field?.id}
+                  isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
+                  localAnswers={localAnswers}
+                  setLocalAnswers={setLocalAnswers}
+                  isPresentationMode={rest?.isPresentationMode}
+                  ex_id={ex_id}
+                  lesson_id={lesson_id}
+                  student_id={student_id}
+                  activeStudentId={rest?.activeStudentId}
+                  // localAnswers={localAnswers}
+                  // setLocalAnswers={setLocalAnswers}
+                />
+              </div>
             </Tooltip>
           </div>
         );
       });
   }, [
-    data.fields,
     data?.id,
-    profile?.role_id,
-    answers,
-    localAnswers,
+    data.fields,
     isTeacher,
     rest?.isPresentationMode,
+    rest?.activeStudentId,
+    profile?.role_id,
+    localAnswers,
+    ex_id,
+    lesson_id,
+    student_id,
   ]);
 
   useEffect(() => {
-    renderContent();
+    setTimeout(() => {
+      renderContent();
+    }, 300);
   }, [renderContent]);
+
+  const textHtml = useMemo(() => {
+    return data.dataText;
+  }, [data]);
 
   return (
     <>
@@ -319,12 +268,12 @@ export const FillGapsInputExView: FC<TProps> = ({
                 "fill-gaps-input-area answerWrapperArea answerWrapperArea-" +
                 (data?.id || 0).toString()
               }
-              onBlur={() =>
-                setTimeout(() => {
-                  renderContent();
-                }, 300)
-              }
-              dangerouslySetInnerHTML={{ __html: data.dataText }}
+              // onBlur={() =>
+              //   setTimeout(() => {
+              //     renderContent();
+              //   }, 300)
+              // }
+              dangerouslySetInnerHTML={{ __html: textHtml }}
             ></div>
           </div>
         </Card>
@@ -332,3 +281,5 @@ export const FillGapsInputExView: FC<TProps> = ({
     </>
   );
 };
+
+export const FillGapsInputExView = memo(FillGapsInputExViewComp);

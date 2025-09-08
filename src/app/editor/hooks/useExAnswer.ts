@@ -63,10 +63,12 @@ export const useExAnswer = (params: TParams) => {
       if (!once && (!isTeacher || !activeStudentId || !idRef)) {
         return;
       }
+      let reqStr = `/answer?lesson_id=${lesson_id}&ex_id=${ex_id}`;
+      if (activeStudentId || student_id) {
+        reqStr += `&student_id=${activeStudentId || student_id}`;
+      }
       const res = await fetchGet({
-        path: `/answer?lesson_id=${lesson_id}&ex_id=${ex_id}&student_id=${
-          activeStudentId || student_id
-        }`,
+        path: reqStr,
         isSecure: true,
       });
 
