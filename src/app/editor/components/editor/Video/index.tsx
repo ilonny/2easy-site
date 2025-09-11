@@ -93,7 +93,7 @@ export const Video: FC<TProps> = ({
         (text.includes("youtube.com") || text.includes("youtu.be"))
       ) {
         const regExp =
-          /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+          /^.*(youtu.be\/|v\/|u\/\w\/|shorts\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
         const match = text.match(regExp);
         const id = match && match[2].length === 11 ? match[2] : null;
         if (!id) {
