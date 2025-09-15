@@ -113,7 +113,7 @@ export default function GrammarPage() {
           <p>
             ⚡{" "}
             <Link
-              href={"/lessons_plans"}
+              href={"/lesson_plans"}
               style={{ color: "#5837dc", fontWeight: 600 }}
             >
               Готовые уроки для разных уровней – от A1 до B2.

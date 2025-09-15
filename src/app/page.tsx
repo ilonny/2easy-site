@@ -307,7 +307,7 @@ export default function Home() {
               видео и статьями, дополненные грамматикой, упражнениями и квизами
             </p>
             <div className="h-6 lg:h-14"></div>
-            <Link href="/lessons_plans">
+            <Link href="/lesson_plans">
               <div className="flex relative">
                 <div className="flex overflow-scroll w-[100%]">
                   {lessons.map((lesson) => {

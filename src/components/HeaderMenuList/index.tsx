@@ -19,9 +19,9 @@ export const HeaderMenuList = () => {
           ABOUT US
         </Button>
       </Link> */}
-      <Link href="/lessons_plans">
+      <Link href="/lesson_plans">
         <Button variant="light" className="font-bold">
-          LESSONS PLANS
+          LESSON PLANS
         </Button>
       </Link>
       <Link href="/speaking_games">
