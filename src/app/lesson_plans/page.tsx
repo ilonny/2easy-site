@@ -25,7 +25,7 @@ export default function GrammarPage() {
           <div className="h-14" />
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/lesson_plans">Lessons plans</BreadcrumbItem>
+            <BreadcrumbItem href="/lesson_plans">Lesson plans</BreadcrumbItem>
           </Breadcrumbs>
         </div>
         <div className="h-10" />
@@ -39,7 +39,7 @@ export default function GrammarPage() {
             fontWeight: 700,
           }}
         >
-          LESSONS PLANS
+          LESSON PLANS
         </h1>
         <p
           className="max-w-[745px] text-center m-auto"

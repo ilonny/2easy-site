@@ -1,7 +1,7 @@
 import React from "react";
 
 export const metadata = {
-  title: "Lessons plans",
+  title: "Lesson plans",
   description: "Готовые интерактивные уроки на самые актуальные темы",
 };
 
