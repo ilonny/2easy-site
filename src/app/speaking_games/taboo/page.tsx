@@ -75,14 +75,6 @@ export default function GrammarPage() {
                   reached. The team with the most points wins!
                   <br />
                   <br />
-                  <br />
-                  <Link
-                    target="_blank"
-                    href="/taboo_cards"
-                    className="text-primary underline"
-                  >
-                    Link for the students
-                  </Link>
                 </h2>
               </>
             }
@@ -107,12 +99,12 @@ export default function GrammarPage() {
           <Tab key={"SLANG"} title={"B1 - B2, slang"} />
         </Tabs>
         <div className="h-10" />
-        <SquareList data={dataToRender} squareWidth={"33.333333%"} isCarousel />
+        <SquareList data={dataToRender} squareWidth={"33.33333%"} isCarousel />
         <div className="h-10" />
         <div className="h-10" />
         <SquareList
           data={dataToRender}
-          squareWidth={"33.333333%"}
+          squareWidth={"33.33333%"}
           isGallery
           withToggle
         />
