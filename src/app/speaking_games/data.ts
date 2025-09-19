@@ -5,6 +5,7 @@ import img4 from "@/assets/images/speaking_games/4.png";
 import img5 from "@/assets/images/speaking_games/5.png";
 import img6 from "@/assets/images/speaking_games/6.png";
 import img7 from "@/assets/images/speaking_games/7.png";
+import bingo from "@/assets/images/speaking_games/bingo/bingo.png";
 
 export const data = [
   {
@@ -55,5 +56,12 @@ export const data = [
     text: "The point of the game is to name three things related to the topic on the card within a limited amount of time.",
     link: "/speaking_games/name_three",
     img: img7,
+  },
+  {
+    id: 8,
+    title: "bingo",
+    text: 'The point of Bingo is to be the first to complete a specific pattern on your card and shout "Bingo!"',
+    link: "/speaking_games/bingo",
+    img: bingo,
   },
 ];

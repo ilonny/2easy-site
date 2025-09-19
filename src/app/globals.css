@@ -256,11 +256,11 @@ blockquote {
 }
 
 .pswp img {
-  /* max-width: 1200px !important; */
+  max-width: initial !important;
   height: initial !important;
   top: auto !important;
   left: auto !important;
-  max-height: 600px;
+  /* max-height: 600px; */
 }
 
 .pswp__zoom-wrap {

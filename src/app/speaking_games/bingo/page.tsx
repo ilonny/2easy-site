@@ -2,7 +2,7 @@
 
 import { ContentWrapper } from "@/components";
 import { SquareList } from "@/components/SquareList";
-import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
+import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -28,47 +28,45 @@ export default function GrammarPage() {
             <BreadcrumbItem href="/speaking_games">
               Speaking games
             </BreadcrumbItem>
-            <BreadcrumbItem href="/speaking_games/if_you_could">
-              If you could
-            </BreadcrumbItem>
+            <BreadcrumbItem href="/speaking_games/Bingo">Bingo</BreadcrumbItem>
           </Breadcrumbs>
         </div>
         <div className="h-10" />
         <div className="h-10" />
         <div className="flex items-end gap-4">
           <PageLeftBlock
-            title={"If you could"}
+            title={"Bingo"}
             content={
               <>
                 <br />
                 <h2>
-                  The goal of the game is to spark conversation, get to know
-                  each other better, and have fun!
+                  The point of Bingo is to be the first to complete a specific
+                  pattern on your card and shout "Bingo!" Use unique cards on
+                  different topics with various situations (e.g., "Got a
+                  promotion").
                   <br />
-                  The starting player asks an "If You Could" question to the
-                  group. <br />
                   <br />
-                  <strong>For example:</strong>
+                  The caller or players take turns announcing a situation, and
+                  the other players cover it if they have it. The game continues
+                  until someone completes a winning pattern (row, column, or
+                  diagonal).
                   <br />
-                  "If you could travel anywhere in the world, where would you
-                  go?" <br />
                   <br />
-                  Each player takes turns answering the question. After everyone
-                  has answered, players can discuss the responses. The game can
-                  end whenever players choose, either after a set number of
-                  rounds or when everyone feels satisfied.
+                  The first to shout "Bingo!" wins, and everyone shares their
+                  stories related to the different situations on their cards and
+                  asks each other for more details.
                 </h2>
               </>
             }
           />
         </div>
         <div className="h-10" />
-        <SquareList data={data} squareWidth={"33.33333%"} isCarousel />
+        <SquareList data={data} squareWidth={"33.333333%"} isCarousel />
         <div className="h-10" />
         <div className="h-10" />
         <SquareList
           data={data}
-          squareWidth={"33.33333%"}
+          squareWidth={"33.333333%"}
           isGallery
           withToggle
         />
