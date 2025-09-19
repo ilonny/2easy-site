@@ -9,6 +9,13 @@ import bingo from "@/assets/images/speaking_games/bingo/bingo.png";
 
 export const data = [
   {
+    id: 8,
+    title: "bingo",
+    text: 'The point of Bingo is to be the first to complete a specific pattern on your card and shout "Bingo!"',
+    link: "/speaking_games/bingo",
+    img: bingo,
+  },
+  {
     id: 1,
     title: "Taboo",
     text: "Taboo is a fun word-guessing game, where players must describe a word without using specific related terms, promoting creativity and quick thinking.",
@@ -56,12 +63,5 @@ export const data = [
     text: "The point of the game is to name three things related to the topic on the card within a limited amount of time.",
     link: "/speaking_games/name_three",
     img: img7,
-  },
-  {
-    id: 8,
-    title: "bingo",
-    text: 'The point of Bingo is to be the first to complete a specific pattern on your card and shout "Bingo!"',
-    link: "/speaking_games/bingo",
-    img: bingo,
   },
 ];
