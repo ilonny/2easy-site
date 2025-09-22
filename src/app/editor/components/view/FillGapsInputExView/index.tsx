@@ -101,9 +101,9 @@ const AnswerField: FC<{
   return (
     <>
       <Input
-        placeholder={
-          isTeacher && !isPresentationMode ? field.options[0]?.value : ""
-        }
+        // placeholder={
+        //   isTeacher && !isPresentationMode ? field.options[0]?.value : ""
+        // }
         variant="flat"
         className={`${styles["answer-wrapper"]} inputcustom ${
           isCorrect && "isCorrect"
