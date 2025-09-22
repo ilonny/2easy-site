@@ -4,6 +4,6 @@ import { ToastContainer, toast } from "react-toastify";
 
 export const ToastWrapper = () => {
   return (
-    <ToastContainer position="bottom-right" autoClose={5000} theme="dark" />
+    <ToastContainer position="bottom-left" autoClose={5000} theme="dark" />
   );
 };

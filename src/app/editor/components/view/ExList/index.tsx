@@ -19,6 +19,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Tooltip,
 } from "@nextui-org/react";
 import { TextDefaultExView } from "../TextDefaultExView";
 import { Text2ColExView } from "../Text2ColExView";
@@ -46,6 +47,7 @@ import { checkResponse, fetchPostJson } from "@/api";
 import EyeEnabledIcon from "@/assets/icons/eye_enable.svg";
 import EyeDisabledIcon from "@/assets/icons/eye_disabled.svg";
 import { AuthContext } from "@/auth";
+import CopyExIcon from "@/assets/icons/copy_ex.svg";
 
 type TProps = {
   list: Array<any>;
@@ -433,36 +435,6 @@ export const ExListComp: FC<TProps> = (props) => {
                         <p>Копировать задание</p>
                         <Image src={CopyIcon} alt="arrow icon" />
                       </div>
-                      {!!copyData && !ex.isDisabledEx && (
-                        <>
-                          <Divider className="my-2" />
-                          <div
-                            className="flex justify-between items-center"
-                            onClick={async () => {
-                              const copyObj = JSON.parse(copyData);
-                              const res = await fetchPostJson({
-                                path: "/ex/copy",
-                                isSecure: true,
-                                data: {
-                                  ...copyObj,
-                                  lesson_id: ex.lesson_id,
-                                  currentSortIndexToShift: ex.sortIndex,
-                                },
-                              });
-                              const data = await res.json();
-                              if (typeof onSuccessCreate === "function") {
-                                onSuccessCreate(data?.id);
-                              }
-                              writeToLocalStorage("exCopy", "");
-                              closePopover(ex.id);
-                              window.location.hash = `ex-${data.id}`;
-                            }}
-                          >
-                            <p>Вставить задание</p>
-                            <Image src={PasteIcon} alt="arrow icon" />
-                          </div>
-                        </>
-                      )}
                       {!ex.isDisabledEx && (
                         <>
                           <Divider className="my-2" />
@@ -487,14 +459,51 @@ export const ExListComp: FC<TProps> = (props) => {
           {/* <div className="w-[55px]">eye here</div> */}
         </div>
         {!ex.isDisabledEx && !isView && exIndex !== list.length - 1 && (
-          <div className={`ex-add-button mt-8 relative`}>
+          <div
+            className={`ex-add-button mt-8 relative flex justify-center gap-4`}
+          >
             <div className={`${styles.dashed}`}></div>
-            <Image
-              onClick={() => onPressCreate(ex.sortIndex)}
-              src={PlusIcon}
-              alt="plus icon"
-              className="m-auto relative z-index-[2] cursor-pointer hover:opacity-[0.8]"
-            />
+            <Tooltip content="Создать новое задание">
+              <Image
+                onClick={() => onPressCreate(ex.sortIndex)}
+                src={PlusIcon}
+                alt="plus icon"
+                className=" relative z-index-[2] cursor-pointer hover:opacity-[0.8]"
+              />
+            </Tooltip>
+            {!!copyData && !ex.isDisabledEx && (
+              <div
+                className=""
+                onClick={async () => {
+                  const copyObj = JSON.parse(copyData);
+                  const res = await fetchPostJson({
+                    path: "/ex/copy",
+                    isSecure: true,
+                    data: {
+                      ...copyObj,
+                      lesson_id: ex.lesson_id,
+                      currentSortIndexToShift: ex.sortIndex,
+                    },
+                  });
+                  const data = await res.json();
+                  if (typeof onSuccessCreate === "function") {
+                    onSuccessCreate(data?.id);
+                  }
+                  writeToLocalStorage("exCopy", "");
+                  setCopyData("");
+                  closePopover(ex.id);
+                  window.location.hash = `ex-${data.id}`;
+                }}
+              >
+                <Tooltip content="Вставить задание">
+                  <Image
+                    src={CopyExIcon}
+                    alt="Вставить задание"
+                    className="m-auto relative z-index-[2] cursor-pointer hover:opacity-[0.8]"
+                  />
+                </Tooltip>
+              </div>
+            )}
           </div>
         )}
       </div>
