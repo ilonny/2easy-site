@@ -13,4 +13,5 @@ export type TLesson = {
   canEdit?: boolean;
   created_from_id?: number;
   created_from_2easy?: number;
+  is_free?: string;
 };

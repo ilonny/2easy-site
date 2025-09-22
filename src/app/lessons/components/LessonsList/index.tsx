@@ -21,6 +21,7 @@ type TProps = {
   hideDeleteLessonButton?: boolean;
   showStartLessonButton?: boolean;
   isStudent?: boolean;
+  isFreeTariff?: boolean;
 };
 
 export const LessonsList: FC<TProps> = ({
@@ -35,6 +36,7 @@ export const LessonsList: FC<TProps> = ({
   deleteLessonRelation,
   showStartLessonButton,
   isStudent,
+  isFreeTariff,
 }) => {
   const [editIsVisible, setEditIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
@@ -145,6 +147,7 @@ export const LessonsList: FC<TProps> = ({
             showStartLessonButton={showStartLessonButton}
             isStudent={isStudent}
             copyLesson={copyLesson}
+            isClosed={isFreeTariff && !lesson.is_free}
           />
         );
       })}

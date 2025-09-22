@@ -13,6 +13,7 @@ import { LessonsFilters } from "../LessonsFilters";
 import { tabs } from "../LessonsFilters/tabs";
 import Loupe from "@/assets/icons/loupe.svg";
 import { TLesson } from "../../types";
+import { SibscribeContext } from "@/subscribe/context";
 
 type TProps = {
   canCreateLesson?: boolean;
@@ -41,7 +42,12 @@ export const ProfileLessons = (props: TProps) => {
   const router = useRouter();
   const { profile } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
+  const { subscription } = useContext(SibscribeContext);
   const [activeFilterTab, setActiveFilterTab] = useState("");
+
+  const isFreeTariff = useMemo(() => {
+    return !subscription || subscription?.subscribe_type_id === 1;
+  }, [subscription]);
 
   const [tabIndex, setTabIndex] = useState<"userLessons" | "savedLessons">(
     "userLessons"
@@ -186,10 +192,20 @@ export const ProfileLessons = (props: TProps) => {
         return false;
       });
     }
+    if (isFreeTariff) {
+      res.sort((a, b) => {
+        if (Boolean(a.is_free) === Boolean(b.is_free)) {
+          return 0; // Same is_free value, no change in order
+        } else if (Boolean(a.is_free)) {
+          return -1; // a.is_free is true, a comes first
+        } else {
+          return 1; // b.is_free is true, b comes first
+        }
+      });
+    }
     return res;
-  }, [activeFilterTab, filterSearchString, lessonsToRender]);
-  console.log("lessons to render", lessonsToRender);
-  console.log("filtered lessons", filteredLessons);
+  }, [activeFilterTab, filterSearchString, lessonsToRender, isFreeTariff]);
+
   return (
     <>
       {!hideTabs && (
@@ -284,6 +300,7 @@ export const ProfileLessons = (props: TProps) => {
           deleteLessonRelation={deleteLessonRelation}
           showStartLessonButton={showStartLessonButton}
           isStudent={isStudent}
+          isFreeTariff={isFreeTariff}
         />
       )}
       <CreateLessonModalForm

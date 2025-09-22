@@ -19,6 +19,7 @@ import { LessonStatus } from "./LessonStatus";
 import { AuthContext } from "@/auth";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { writeToLocalStorage } from "@/auth/utils";
+import LockIcon from "@/assets/icons/lock.svg";
 
 type TProps = {
   lesson: TLesson;
@@ -34,6 +35,7 @@ type TProps = {
   isStudent?: boolean;
   disableClick?: boolean;
   copyLesson?: (lesson_id: number) => Promise<void>;
+  isClosed?: boolean;
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -50,6 +52,7 @@ export const LessonCard: FC<TProps> = ({
   isStudent,
   disableClick,
   copyLesson,
+  isClosed,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -68,7 +71,10 @@ export const LessonCard: FC<TProps> = ({
       router.push("/lessons/" + lesson?.id);
       return;
     }
-
+    if (isClosed) {
+      router.push("/subscription");
+      return;
+    }
     if (
       !hasSubscription &&
       (lesson?.created_from_2easy || lesson?.user_id === 1)
@@ -81,12 +87,13 @@ export const LessonCard: FC<TProps> = ({
   }, [
     isDisabled,
     disableClick,
+    isClosed,
     isStudent,
-    router,
-    lesson?.id,
+    hasSubscription,
     lesson?.created_from_2easy,
     lesson?.user_id,
-    hasSubscription,
+    lesson?.id,
+    router,
   ]);
 
   const tags = useMemo(() => {
@@ -271,6 +278,22 @@ export const LessonCard: FC<TProps> = ({
             </Popover>
           </div>
         )}
+        {isClosed && (
+          <div
+            style={{
+              position: "absolute",
+              background: "rgba(255, 255, 255, 0.5)",
+              width: "100%",
+              height: "100%",
+              top: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Image src={LockIcon} alt="locked" />
+          </div>
+        )}
       </div>
       <div
         onClick={onPressLesson}
@@ -324,6 +347,20 @@ export const LessonCard: FC<TProps> = ({
               }}
             >
               {isStudent ? "Открыть" : "Начать урок"}
+            </Button>
+          </>
+        )}
+        {isClosed && (
+          <>
+            <div className="h-4"></div>
+            <Button
+              color="primary"
+              className="w-full"
+              size="md"
+              isDisabled={isDisabled}
+              onClick={onPressLesson}
+            >
+              {"Открыть по подписке"}
             </Button>
           </>
         )}

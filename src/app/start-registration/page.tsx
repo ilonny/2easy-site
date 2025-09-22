@@ -56,8 +56,9 @@ export default function StartRegistrationPage() {
           </Link>
           <div className="h-4" />
           <div className="max-w-[420px]">
-            У вас будет 3 дня полного доступа ко всему, что есть на сайте. Это
-            позволит познакомиться с платформой перед оформлением подписки
+            У вас будет 3 дня доступа к конструктору уроков и части материалов
+            -- это позволит познакомиться с платформой перед оформлением
+            подписки.
           </div>
           <div className="h-4" />
           <div className="max-w-[420px] flex items-center gap-4">
