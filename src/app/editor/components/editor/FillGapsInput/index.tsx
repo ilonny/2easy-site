@@ -6,13 +6,14 @@ import { TField, TFillGapsInputData } from "./types";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button } from "@nextui-org/react";
+import { Button, Tooltip } from "@nextui-org/react";
 import { useUploadFillGapsInputEx } from "../hooks/useUploadFillGapsInputEx";
 import { AddItemCard } from "../AddItemCard";
 import ReactDOM from "react-dom/client";
 import { PopoverFields } from "./PopoverFields";
 import styles from "./styles.module.css";
 import { FillGapsInputExView } from "../../view/FillGapsInputExView";
+import InfoIcon from "@/assets/icons/info.svg";
 
 const defaultValuesStub: TFillGapsInputData = {
   title: "Let's practice!",
@@ -303,7 +304,26 @@ export const FillGapsInput: FC<TProps> = ({
         </div>
       </div>
       <div className="h-10" />
-      <p className="font-light mb-2">Введите текст задания</p>
+      <div className="flex items-center gap-2 mb-2">
+        <p className="font-light">Введите текст задания</p>
+        <Tooltip
+          content="Выделите в тексте слово, которое хотите пропустить. Нажмите на стрелку, чтобы добавить другие варианты."
+          classNames={{
+            base: [
+              // arrow color
+              "before:bg-neutral-400 dark:before:bg-white",
+            ],
+            content: [
+              "py-2 px-4 shadow-xl",
+              "text-black bg-white max-w-[255px]",
+            ],
+          }}
+          placement="right-end"
+          color="foreground"
+        >
+          <Image src={InfoIcon} alt="InfoIcon" />
+        </Tooltip>
+      </div>
       <div className="relative">
         <div
           suppressContentEditableWarning
