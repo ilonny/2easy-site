@@ -83,6 +83,7 @@ export const EditorRootModal: FC<TProps> = ({
 
   return (
     <Modal
+      isDismissable={false}
       size="5xl"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}

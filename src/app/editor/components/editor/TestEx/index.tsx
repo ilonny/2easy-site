@@ -37,23 +37,6 @@ const defaultValuesStub: TTestData = {
         },
       ],
     },
-    {
-      id: uuidv4(),
-      images: [],
-      value: "",
-      options: [
-        {
-          id: uuidv4(),
-          isCorrect: false,
-          value: "",
-        },
-        {
-          id: uuidv4(),
-          isCorrect: false,
-          value: "",
-        },
-      ],
-    },
   ],
 };
 
@@ -90,23 +73,6 @@ export const TestEx: FC<TProps> = ({
         description: "",
         images: [],
         questions: [
-          {
-            id: uuidv4(),
-            images: [],
-            value: "",
-            options: [
-              {
-                id: uuidv4(),
-                isCorrect: false,
-                value: "",
-              },
-              {
-                id: uuidv4(),
-                isCorrect: false,
-                value: "",
-              },
-            ],
-          },
           {
             id: uuidv4(),
             images: [],
