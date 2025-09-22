@@ -118,7 +118,10 @@ export const TestStep = (props: TTestStepProps) => {
         if (isPresentationMode) {
           return;
         }
-        setIsHovered(true);
+        const isAnyCorrect = question.options.some((o) => o.isCorrect);
+        if (isAnyCorrect) {
+          setIsHovered(true);
+        }
       }}
       onMouseLeave={() => {
         if (isPresentationMode) {
@@ -319,7 +322,7 @@ export const TestExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
-    isPresentationMode: rest?.isPresentationMode
+    isPresentationMode: rest?.isPresentationMode,
   });
 
   // useEffect(() => {
