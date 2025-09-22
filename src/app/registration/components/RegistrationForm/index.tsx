@@ -14,11 +14,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import ReactInputMask from "react-input-mask";
 
 type TLoginInputs = {
   name: string;
   login: string;
   privacy: string;
+  phone: string;
+  ads_agreement: string;
 };
 
 type TConfirmInputs = {
@@ -31,7 +34,15 @@ export const RegistrationForm = () => {
     handleSubmit,
     formState: { errors },
     getValues,
-  } = useForm<TLoginInputs>();
+  } = useForm<TLoginInputs>({
+    defaultValues: {
+      name: "",
+      login: "",
+      privacy: false,
+      phone: "",
+      ads_agreement: true,
+    },
+  });
 
   const {
     control: confirmControl,
@@ -217,6 +228,34 @@ export const RegistrationForm = () => {
         )}
       />
       <Controller
+        name="phone"
+        control={control}
+        rules={{
+          required: "Номер телефона обязательное поле",
+        }}
+        render={({ field }) => (
+          <ReactInputMask
+            mask="+9 (999) 999-99-999999"
+            alwaysShowMask={false}
+            maskChar=" "
+            value={getValues().phone}
+            onChange={(e) => field.onChange(e.target.value)}
+          >
+            {(inputProps) => (
+              <Input
+                {...inputProps}
+                // {...field}
+                radius="sm"
+                label="Номер телефона"
+                className="mb-5"
+                errorMessage={errors?.phone?.message}
+                isInvalid={!!errors.phone?.message}
+              />
+            )}
+          </ReactInputMask>
+        )}
+      />
+      <Controller
         name="privacy"
         control={control}
         rules={{
@@ -251,6 +290,25 @@ export const RegistrationForm = () => {
               >
                 согласие на обработку персональных данных
               </a>
+            </p>
+          </Checkbox>
+        )}
+      />
+      <Controller
+        name="ads_agreement"
+        control={control}
+        rules={{
+          required: false,
+        }}
+        render={({ field }) => (
+          <Checkbox
+            {...field}
+            radius="sm"
+            className="mb-5"
+            isSelected={!!field.value}
+          >
+            <p className="text-small">
+              Я хочу получать новости о скидках, конкурсах и новых материалах
             </p>
           </Checkbox>
         )}

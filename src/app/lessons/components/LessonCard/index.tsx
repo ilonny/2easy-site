@@ -245,7 +245,9 @@ export const LessonCard: FC<TProps> = ({
                       copyLesson(lesson.id);
                     }}
                   >
-                    Копировать урок
+                    {lesson?.user_id === 1
+                      ? 'Добавить в "Мои уроки"'
+                      : "Копировать урок"}
                   </Button>
                 )}
                 {!!onPressDelete &&
