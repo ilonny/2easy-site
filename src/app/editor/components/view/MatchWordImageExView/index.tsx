@@ -55,6 +55,10 @@ const DraggableItem = (props: {
       setActiveChip(chip);
       setX(x);
       setY(y);
+
+      if (Math.abs(x) < 50 || Math.abs(y) < 50) {
+        return;
+      }
       try {
         //@ts-ignore
         const draggableRect = document
