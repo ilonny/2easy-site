@@ -121,5 +121,6 @@ export const useLessons = (
     changeLessonStatus,
     deleteLessonRelation,
     getMainPageLessons,
+    setLesson,
   };
 };

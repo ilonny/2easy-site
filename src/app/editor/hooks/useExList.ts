@@ -162,43 +162,46 @@ const getDataMapper = (type: string) => {
   }
 };
 
-export const useExList = (lesson_id: number, isPresentationMode?: boolean) => {
+export const useExList = (lesson_id?: number, isPresentationMode?: boolean) => {
   const [exListIsLoading, setExListIsLoading] = useState(false);
   const [exList, setExList] = useState([]);
 
-  const getExList = useCallback(async () => {
-    setExListIsLoading(true);
-    const listRes = await fetchGet({
-      path: `/ex/list?lesson_id=${lesson_id}`,
-      isSecure: true,
-    });
-    const list = await listRes?.json();
-    if (!list?.map) {
-      return;
-    }
-    let mappedList = list
-      ?.map((l, index) => {
-        const dataMapper = getDataMapper(l.type);
-        return {
-          ...l,
-          data: dataMapper(l.data),
-          sortIndex: l.sortIndex,
-        };
-      })
-      ?.sort((a, b) => {
-        if (a.sortIndex < b.sortIndex) return -1;
-        if (a.sortIndex > b.sortIndex) return 1;
-        return 0;
+  const getExList = useCallback(
+    async (_lesson_id?: number) => {
+      setExListIsLoading(true);
+      const listRes = await fetchGet({
+        path: `/ex/list?lesson_id=${_lesson_id || lesson_id}`,
+        isSecure: true,
       });
-    if (isPresentationMode) {
-      mappedList = mappedList.filter(
-        (l) =>
-          l.is_visible === null || l.is_visible === "1" || l.is_visible === 1
-      );
-    }
-    setExList(mappedList || []);
-    setExListIsLoading(false);
-  }, [isPresentationMode, lesson_id]);
+      const list = await listRes?.json();
+      if (!list?.map) {
+        return;
+      }
+      let mappedList = list
+        ?.map((l, index) => {
+          const dataMapper = getDataMapper(l.type);
+          return {
+            ...l,
+            data: dataMapper(l.data),
+            sortIndex: l.sortIndex,
+          };
+        })
+        ?.sort((a, b) => {
+          if (a.sortIndex < b.sortIndex) return -1;
+          if (a.sortIndex > b.sortIndex) return 1;
+          return 0;
+        });
+      if (isPresentationMode) {
+        mappedList = mappedList.filter(
+          (l) =>
+            l.is_visible === null || l.is_visible === "1" || l.is_visible === 1
+        );
+      }
+      setExList(mappedList || []);
+      setExListIsLoading(false);
+    },
+    [isPresentationMode, lesson_id]
+  );
 
   const changeSortIndex = useCallback(
     async (exId: number, newSortIndex: number) => {
