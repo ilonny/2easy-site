@@ -1,5 +1,5 @@
 "use client";
-import { fetchGet } from "@/api";
+import { checkResponse, fetchGet } from "@/api";
 import { usePathname } from "next/navigation";
 import { createContext, useEffect, useState } from "react";
 
@@ -21,6 +21,7 @@ export const SibscribeContextProvider = ({
     if (data) {
       setSubscription(data);
     }
+    checkResponse(data);
     return data;
   };
 
