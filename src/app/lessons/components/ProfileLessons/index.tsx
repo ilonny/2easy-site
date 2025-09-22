@@ -121,14 +121,14 @@ export const ProfileLessons = (props: TProps) => {
     if (tabIndex === "savedLessons" || !profile?.name) {
       return tabs;
     }
+    const lessonsTags = lessonsToRender
+      .map((l) => {
+        return l?.tags?.split(", ") || [];
+      })
+      .flat();
+
     return ["All lessons"].concat(
-      Array.from(
-        new Set(
-          lessonsToRender.map((lesson) => {
-            return lesson.tags;
-          })
-        )
-      ).filter(Boolean)
+      Array.from(new Set(lessonsTags)).filter(Boolean)
     );
   }, [lessonsToRender, tabIndex, profile?.name]);
 
