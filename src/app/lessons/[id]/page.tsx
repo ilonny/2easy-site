@@ -83,13 +83,11 @@ export default function StartRegistrationPage() {
       const selectedIds = JSON.parse(
         readFromLocalStorage("start_lesson_selected_ids") || ""
       )?.map((el) => Number(el));
-      console.log("selectedIds", selectedIds);
       const filteredIds = selectedIds?.length
         ? list?.studentList?.filter((s) => {
             return selectedIds.includes(s.student_id);
           })
         : [];
-      console.log("filteredIds", filteredIds);
       setStudents(filteredIds);
       if (filteredIds?.length === 1) {
         setActiveStudentId(filteredIds[0]?.student_id);

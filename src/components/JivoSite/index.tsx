@@ -8,13 +8,15 @@ export const JivoSite = () => {
   const path = usePathname();
 
   useEffect(() => {
-    const jdiv = document?.getElementsByTagName("jdiv")?.[0] || { style: {} };
+    setTimeout(() => {
+      const jdiv = document?.getElementsByTagName("jdiv")?.[0] || { style: {} };
 
-    if (path?.includes("/lessons/")) {
-      jdiv.style.display = "none";
-    } else {
-      jdiv.style.display = "block";
-    }
+      if (path?.includes("/lessons/")) {
+        jdiv.style.display = "none";
+      } else {
+        jdiv.style.display = "block";
+      }
+    }, 3000);
   }, [path]);
 
   return (

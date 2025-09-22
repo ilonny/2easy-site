@@ -1,7 +1,8 @@
 "use client";
 import { checkResponse, fetchGet } from "@/api";
+import { AuthContext } from "@/auth";
 import { usePathname } from "next/navigation";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 export const SibscribeContext = createContext({});
 
@@ -12,6 +13,8 @@ export const SibscribeContextProvider = ({
 }) => {
   const [subscription, setSubscription] = useState(undefined);
   const pathname = usePathname();
+  const profile = useContext(AuthContext)?.profile;
+
   const getSubscribe = async () => {
     const res = await fetchGet({
       path: "/subscription",
@@ -21,13 +24,20 @@ export const SibscribeContextProvider = ({
     if (data) {
       setSubscription(data);
     }
-    checkResponse(data);
+
+    if (!!profile?.name && !profile.studentId) {
+      checkResponse(data);
+    }
     return data;
   };
 
   useEffect(() => {
+    if (!profile?.name) {
+      return;
+    }
+
     getSubscribe();
-  }, [pathname]);
+  }, [pathname, profile?.name]);
   return (
     <SibscribeContext.Provider value={{ subscription, getSubscribe }}>
       {children}

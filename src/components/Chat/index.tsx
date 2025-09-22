@@ -59,10 +59,11 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
         data: {
           lesson_id,
           message: messageText,
+          student_ids: students?.map((s) => s?.student_id) || [],
         },
       });
     },
-    [lesson_id]
+    [lesson_id, students]
   );
 
   if (!isOpen) {
@@ -79,7 +80,7 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
       </Button>
     );
   }
-
+  console.log("chat: ", students);
   return (
     <div style={{ position: "relative", height: "500px", minWidth: 300 }}>
       <MainContainer>
@@ -101,7 +102,7 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
             </ConversationHeader.Actions>
           </ConversationHeader>
           <MessageList>
-            {messageList.map((m) => {
+            {messageList?.map((m) => {
               return (
                 <Message key={m?.id} model={{ ...m }}>
                   <Message.Header sender={m.sender} />
