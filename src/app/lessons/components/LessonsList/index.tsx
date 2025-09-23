@@ -147,7 +147,7 @@ export const LessonsList: FC<TProps> = ({
             showStartLessonButton={showStartLessonButton}
             isStudent={isStudent}
             copyLesson={copyLesson}
-            isClosed={isFreeTariff && !lesson.is_free}
+            isClosed={isFreeTariff && !lesson.is_free && lesson.user_id === 1}
           />
         );
       })}
