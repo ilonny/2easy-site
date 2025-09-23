@@ -26,7 +26,7 @@ export const SibscribeContextProvider = ({
     }
 
     if (!!profile?.name && !profile.studentId) {
-      checkResponse(data);
+      checkResponse(data, true);
     }
     return data;
   };

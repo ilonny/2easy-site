@@ -45,13 +45,19 @@ const mapHeaders = (params: TParams) => {
   return headers;
 };
 
-export const checkResponse = (res: {
-  success: boolean;
-  message?: string;
-  successMessage?: string;
-}) => {
+export const checkResponse = (
+  res: {
+    success: boolean;
+    message?: string;
+    successMessage?: string;
+  },
+  skipToast?: boolean
+) => {
   if (res?.status === 401 && window.location.pathname !== "/login") {
     window.location.pathname = "/login";
+    return;
+  }
+  if (skipToast) {
     return;
   }
   if (!res?.success) {
