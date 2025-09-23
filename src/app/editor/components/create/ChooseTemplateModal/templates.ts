@@ -60,7 +60,7 @@ export const templates: TTemplate[] = [
   {
     type: "image",
     title: "Изображения",
-    description: "jpg, png, svg, gif",
+    description: "jpg, png, svg, gif, webp",
     bgImage: ImageBg,
   },
   {
@@ -72,7 +72,7 @@ export const templates: TTemplate[] = [
   {
     type: "audio",
     title: "Аудио",
-    description: "mp3, mp4",
+    description: "mp3, wav, m4a",
     bgImage: AudioBg,
   },
   {
