@@ -255,22 +255,7 @@ blockquote {
   text-overflow: ellipsis;
 }
 
-.pswp img {
-  max-width: initial !important;
-  height: initial !important;
-  top: auto !important;
-  left: auto !important;
-  /* max-height: 600px; */
-}
 
-.pswp__zoom-wrap {
-  bottom: 0;
-  right: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 ol, ul {
   list-style-position: inside !important;

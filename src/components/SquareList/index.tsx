@@ -98,7 +98,10 @@ export const SquareList = (props: TProps) => {
           <Slider {...settings} dots={hideDots ? false : true}>
             {data?.map((image) => {
               return (
-                <div key={image.bgImage.src} className="w-[100%] max-w-[810px] m-auto">
+                <div
+                  key={image.bgImage.src}
+                  className="w-[100%] max-w-[810px] m-auto"
+                >
                   <Zoom>
                     <img
                       src={image.bgImage.src}
@@ -155,12 +158,14 @@ export const SquareList = (props: TProps) => {
           >
             <Gallery
               id="my-gallery"
-              options={{
-                padding: { top: 300, bottom: 300, left: 300, right: 300 },
-                zoom: true,
-                initialZoomLevel: "fill",
-                // spacing: 0.5,
-              }}
+              options={
+                {
+                  // padding: { top: 300, bottom: 300, left: 300, right: 300 },
+                  // zoom: true,
+                  // initialZoomLevel: "fit",
+                  // spacing: 0.5,
+                }
+              }
             >
               {data.map((s, index) => {
                 return (
@@ -176,6 +181,8 @@ export const SquareList = (props: TProps) => {
                     <Item<HTMLImageElement>
                       original={s.bgImage.src}
                       thumbnail={s.bgImage.src}
+                      width={s.bgImage.width} // ширина исходного изображения в px
+                      height={s.bgImage.height}
                     >
                       {({ ref, open }) => {
                         if (hideThumbnails) {
