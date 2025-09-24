@@ -61,7 +61,7 @@ export default function GrammarPage() {
         <div className="h-10" />
         <SquareList data={data} isCarousel />
         <div className="h-10" />
-        <SquareList data={data} isGallery withToggle squareHeight="250px"  squareWidth="33.333333%"/>
+        <SquareList data={data} isGallery withToggle squareHeight="250px"  squareWidth="33.33333%"/>
         <div className="h-10" />
       </ContentWrapper>
     </main>

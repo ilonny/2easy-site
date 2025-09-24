@@ -86,7 +86,7 @@ export default function GrammarPage() {
         <div className="h-10"></div>
         <SquareList
           data={tabIndex === "all" ? data : summerData}
-          squareWidth={"33.333333%"}
+          squareWidth={"33.33333%"}
           isCarousel
           hideDots
         />
@@ -95,7 +95,7 @@ export default function GrammarPage() {
         <div className="h-10" />
         <SquareList
           data={tabIndex === "all" ? data : summerData}
-          // squareWidth={"33.333333%"}
+          // squareWidth={"33.33333%"}
           isGallery
           withToggle
         />

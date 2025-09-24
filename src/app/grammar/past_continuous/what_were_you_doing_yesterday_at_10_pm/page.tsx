@@ -100,7 +100,7 @@ export default function GrammarPage() {
         <div className="h-10" />
         <SquareList
           data={studentA}
-          squareWidth={"33.333333%"}
+          squareWidth={"33.33333%"}
           squareHeight={"250px"}
           isGallery
         />
@@ -108,7 +108,7 @@ export default function GrammarPage() {
         <div className="h-10" />
         <SquareList
           data={studentB}
-          squareWidth={"33.333333%"}
+          squareWidth={"33.33333%"}
           squareHeight={"250px"}
           isGallery
         />

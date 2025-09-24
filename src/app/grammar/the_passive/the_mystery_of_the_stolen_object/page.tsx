@@ -76,12 +76,12 @@ export default function GrammarPage() {
           <em>Examples of objects:</em>
         </h2>
         <div className="h-5" />
-        <SquareList data={data} squareWidth={"33.333333%"} isCarousel />
+        <SquareList data={data} squareWidth={"33.33333%"} isCarousel />
         <div className="h-10" />
         <div className="h-10" />
         <SquareList
           data={data}
-          squareWidth={"33.333333%"}
+          squareWidth={"33.33333%"}
           isGallery
           withToggle
         />

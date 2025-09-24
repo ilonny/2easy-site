@@ -91,7 +91,7 @@ export default function GrammarPage() {
             }
             return (
               <div key={d.id}>
-                <SquareList data={[d]} squareWidth={"33.333333%"} isCarousel />
+                <SquareList data={[d]} squareWidth={"33.33333%"} isCarousel />
                 <div className="h-10" />
                 <div className="h-10" />
                 <SquareList
