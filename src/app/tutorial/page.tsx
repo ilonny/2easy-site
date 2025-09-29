@@ -4,6 +4,7 @@ import { ContentWrapper } from "@/components";
 import {
   BreadcrumbItem,
   Breadcrumbs,
+  Button,
   Modal,
   ModalBody,
   ModalContent,
@@ -101,11 +102,11 @@ export default function GrammarPage() {
           isOpen={isVisible}
           onClose={() => setIsVisible(false)}
           style={{ background: "#F9F9F9", overflow: "hidden" }}
-          scrollBehavior="outside"
+          scrollBehavior="inside"
           isDismissable={false}
         >
           <ModalContent>
-            <ModalBody>
+            <ModalBody className="py-6">
               {!lesson && !exList?.length ? (
                 <div className="w-full h-[500px] flex justify-center items-center ">
                   <Image
@@ -174,10 +175,21 @@ export default function GrammarPage() {
                         isAdmin={false}
                         isPresentationMode={true}
                       />
+                      <Button
+                        variant="flat"
+                        className="w-full"
+                        size="lg"
+                        onClick={() => {
+                          setIsVisible(false);
+                        }}
+                      >
+                        Закрыть
+                      </Button>
                     </div>
                   </div>
                 </div>
               )}
+              <div className="h-10" />
             </ModalBody>
           </ModalContent>
         </Modal>

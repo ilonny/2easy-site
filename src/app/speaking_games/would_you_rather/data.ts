@@ -1,17 +1,35 @@
-import grammar_1 from "@/assets/images/grammar/modal_verbs/would_you_rather/1.svg";
-import grammar_2 from "@/assets/images/grammar/modal_verbs/would_you_rather/2.svg";
-import grammar_3 from "@/assets/images/grammar/modal_verbs/would_you_rather/3.svg";
-import grammar_4 from "@/assets/images/grammar/modal_verbs/would_you_rather/4.svg";
-import grammar_5 from "@/assets/images/grammar/modal_verbs/would_you_rather/5.svg";
-import grammar_6 from "@/assets/images/grammar/modal_verbs/would_you_rather/6.svg";
-import grammar_7 from "@/assets/images/grammar/modal_verbs/would_you_rather/7.svg";
-import grammar_8 from "@/assets/images/grammar/modal_verbs/would_you_rather/8.svg";
-import grammar_9 from "@/assets/images/grammar/modal_verbs/would_you_rather/9.svg";
-import grammar_10 from "@/assets/images/grammar/modal_verbs/would_you_rather/10.svg";
-import grammar_11 from "@/assets/images/grammar/modal_verbs/would_you_rather/11.svg";
-import grammar_12 from "@/assets/images/grammar/modal_verbs/would_you_rather/12.svg";
-import grammar_13 from "@/assets/images/grammar/modal_verbs/would_you_rather/13.svg";
-import grammar_14 from "@/assets/images/grammar/modal_verbs/would_you_rather/14.svg";
+import grammar_1 from "@/assets/images/speaking_games/would_you_rather/1.svg";
+import grammar_2 from "@/assets/images/speaking_games/would_you_rather/2.svg";
+import grammar_3 from "@/assets/images/speaking_games/would_you_rather/3.svg";
+import grammar_4 from "@/assets/images/speaking_games/would_you_rather/4.svg";
+import grammar_5 from "@/assets/images/speaking_games/would_you_rather/5.svg";
+import grammar_6 from "@/assets/images/speaking_games/would_you_rather/6.svg";
+import grammar_7 from "@/assets/images/speaking_games/would_you_rather/7.svg";
+import grammar_8 from "@/assets/images/speaking_games/would_you_rather/8.svg";
+import grammar_9 from "@/assets/images/speaking_games/would_you_rather/9.svg";
+import grammar_10 from "@/assets/images/speaking_games/would_you_rather/10.svg";
+import grammar_11 from "@/assets/images/speaking_games/would_you_rather/11.svg";
+import grammar_12 from "@/assets/images/speaking_games/would_you_rather/12.svg";
+import grammar_13 from "@/assets/images/speaking_games/would_you_rather/13.svg";
+import grammar_14 from "@/assets/images/speaking_games/would_you_rather/14.svg";
+import grammar_15 from "@/assets/images/speaking_games/would_you_rather/15.svg";
+import grammar_16 from "@/assets/images/speaking_games/would_you_rather/16.svg";
+import grammar_17 from "@/assets/images/speaking_games/would_you_rather/17.svg";
+import grammar_18 from "@/assets/images/speaking_games/would_you_rather/18.svg";
+import grammar_19 from "@/assets/images/speaking_games/would_you_rather/19.svg";
+import grammar_20 from "@/assets/images/speaking_games/would_you_rather/20.svg";
+import grammar_21 from "@/assets/images/speaking_games/would_you_rather/21.svg";
+import grammar_22 from "@/assets/images/speaking_games/would_you_rather/22.svg";
+import grammar_23 from "@/assets/images/speaking_games/would_you_rather/23.svg";
+import grammar_24 from "@/assets/images/speaking_games/would_you_rather/24.svg";
+import grammar_25 from "@/assets/images/speaking_games/would_you_rather/25.svg";
+import grammar_26 from "@/assets/images/speaking_games/would_you_rather/26.svg";
+import grammar_27 from "@/assets/images/speaking_games/would_you_rather/27.svg";
+import grammar_28 from "@/assets/images/speaking_games/would_you_rather/28.svg";
+import grammar_29 from "@/assets/images/speaking_games/would_you_rather/29.svg";
+import grammar_30 from "@/assets/images/speaking_games/would_you_rather/30.svg";
+import grammar_31 from "@/assets/images/speaking_games/would_you_rather/31.svg";
+import grammar_32 from "@/assets/images/speaking_games/would_you_rather/32.svg";
 
 import summer_1 from "@/assets/images/grammar/modal_verbs/would_you_rather/summer_1.svg";
 import summer_2 from "@/assets/images/grammar/modal_verbs/would_you_rather/summer_2.svg";
@@ -183,5 +201,77 @@ export const data = [
   {
     id: 14,
     bgImage: grammar_14,
+  },
+  {
+    id: 15,
+    bgImage: grammar_15,
+  },
+  {
+    id: 16,
+    bgImage: grammar_16,
+  },
+  {
+    id: 17,
+    bgImage: grammar_17,
+  },
+  {
+    id: 18,
+    bgImage: grammar_18,
+  },
+  {
+    id: 19,
+    bgImage: grammar_19,
+  },
+  {
+    id: 20,
+    bgImage: grammar_20,
+  },
+  {
+    id: 21,
+    bgImage: grammar_21,
+  },
+  {
+    id: 22,
+    bgImage: grammar_22,
+  },
+  {
+    id: 23,
+    bgImage: grammar_23,
+  },
+  {
+    id: 24,
+    bgImage: grammar_24,
+  },
+  {
+    id: 25,
+    bgImage: grammar_25,
+  },
+  {
+    id: 26,
+    bgImage: grammar_26,
+  },
+  {
+    id: 27,
+    bgImage: grammar_27,
+  },
+  {
+    id: 28,
+    bgImage: grammar_28,
+  },
+  {
+    id: 29,
+    bgImage: grammar_29,
+  },
+  {
+    id: 30,
+    bgImage: grammar_30,
+  },
+  {
+    id: 31,
+    bgImage: grammar_31,
+  },
+  {
+    id: 32,
+    bgImage: grammar_32,
   },
 ];

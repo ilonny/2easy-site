@@ -40,7 +40,8 @@ export const ProfileLessons = (props: TProps) => {
     isStudent,
   } = props;
   const router = useRouter();
-  const { profile } = useContext(AuthContext);
+  const { profile, createLessonModalIsVisible, setCreateLessonModalIsVisible } =
+    useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const { subscription } = useContext(SibscribeContext);
   const [activeFilterTab, setActiveFilterTab] = useState("");
@@ -52,9 +53,6 @@ export const ProfileLessons = (props: TProps) => {
   const [tabIndex, setTabIndex] = useState<"userLessons" | "savedLessons">(
     "userLessons"
   );
-
-  const [createLessonModalIsVisible, setCreateLessonModalIsVisible] =
-    useState(false);
 
   const {
     lessons,

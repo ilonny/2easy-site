@@ -3,6 +3,7 @@ import { useContext, useMemo } from "react";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
 import {
+  Button,
   Dropdown,
   DropdownItem,
   DropdownMenu,
@@ -12,7 +13,9 @@ import {
 import { fetchPostJson } from "@/api";
 import { writeToLocalStorage } from "@/auth/utils";
 import { redirect, useRouter } from "next/navigation";
+import ChevronDown from "@/assets/icons/chevron_down.svg";
 import Link from "next/link";
+import Image from "next/image";
 
 type TProps = {
   isStudent?: boolean;
@@ -38,12 +41,16 @@ export const HeaderProfile = (props: TProps) => {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <button
-          className={styles["header-profile-short-wrapper"]}
+        <Button
+          // className={styles["header-profile-short-wrapper"]}
+          color="secondary"
+          variant="flat"
           style={{ outline: "none" }}
         >
-          <p className={styles.title}>{profile.name?.[0] || "A"}</p>
-        </button>
+          <p>{profile.name || "Профиль"}</p>
+          <Image src={ChevronDown} alt="profile icon" width={14} />
+          {/* <p className={styles.title}>{profile.name?.[0] || "A"}</p> */}
+        </Button>
       </DropdownTrigger>
       {isStudent ? (
         <DropdownMenu aria-label="Profile Actions">

@@ -3,7 +3,8 @@ import Link from "next/link";
 
 export const HeaderMenuList = () => {
   return (
-    <div className="
+    <div
+      className="
       flex
       flex-col
       lg:flex-row
@@ -13,7 +14,8 @@ export const HeaderMenuList = () => {
       lg:mx-8
       lg:py-2
       lg:pb-6
-    ">
+    "
+    >
       {/* <Link href="/about_us">
         <Button variant="light" className="font-bold">
           ABOUT US
@@ -43,6 +45,11 @@ export const HeaderMenuList = () => {
       <Link href="/subscription">
         <Button variant="light" className="font-bold">
           ПОДПИСКА
+        </Button>
+      </Link>
+      <Link href="/tutorial">
+        <Button variant="light" className="font-bold">
+          ТУТОРИАЛ ✨
         </Button>
       </Link>
     </div>
