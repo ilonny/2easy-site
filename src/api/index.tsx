@@ -40,7 +40,7 @@ const mapHeaders = (params: TParams) => {
   headers.append("Content-Type", "application/json");
   if (isSecure) {
     const token = getTokenFromLocalStorage();
-    headers.append("Authorization", `Bearer ${token}`);
+    headers.append("Authorization", `Bearer ${token || ""}`);
   }
   return headers;
 };
@@ -102,9 +102,9 @@ export const fetchPostMultipart = (params: TParams) => {
 
 export const fetchGet = (params: TParams) => {
   const { path } = params;
-  if (params.isSecure && !getTokenFromLocalStorage()) {
-    return;
-  }
+  // if (params.isSecure && !getTokenFromLocalStorage()) {
+  //   return;
+  // }
   const headers = mapHeaders(params);
   const url = (API_URL + path).replace("/undefined", "");
   return fetch(url, {
