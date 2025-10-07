@@ -4,7 +4,7 @@ import { usePayment } from "@/payment/hooks/usePayment";
 import { usePromocode } from "@/payment/hooks/usePromocode";
 import { TSubscribePeriod } from "@/subscribe/types";
 import { Button, Checkbox, Input } from "@nextui-org/react";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 
@@ -46,7 +46,7 @@ export const PaymentForm = (props: TProps) => {
   const { paymentIsLoading, paymentStatus, createPayment, createPayTodayBill } =
     usePayment();
 
-  const [isRF, setIsRF] = useState(true);
+  const isRF = useRef(true);
 
   const onSubmit = useCallback(
     async (_data) => {
@@ -60,8 +60,8 @@ export const PaymentForm = (props: TProps) => {
         // error
         return;
       }
-
-      if (!isRF) {
+      console.log("isRF???", isRF.current);
+      if (!isRF.current) {
         const payTodayBillData = await createPayTodayBill(response.id);
         if (payTodayBillData?.payment_link) {
           window?.open(payTodayBillData?.payment_link, "_blank")?.focus();
@@ -331,7 +331,7 @@ export const PaymentForm = (props: TProps) => {
             color="primary"
             isLoading={paymentIsLoading}
             onClick={async () => {
-              await setIsRF(true);
+              isRF.current = true;
               const isValid = await trigger();
               if (isValid) {
                 handleSubmit(onSubmit)();
@@ -370,7 +370,7 @@ export const PaymentForm = (props: TProps) => {
             variant="bordered"
             isLoading={paymentIsLoading}
             onClick={async () => {
-              await setIsRF(false);
+              isRF.current = false;
               const isValid = await trigger();
               setTimeout(async () => {
                 if (isValid) {
