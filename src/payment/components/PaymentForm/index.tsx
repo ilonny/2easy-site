@@ -33,6 +33,7 @@ export const PaymentForm = (props: TProps) => {
     handleSubmit,
     formState: { errors },
     getValues,
+    trigger,
   } = useForm<TFieldList>({
     defaultValues: {
       login: profile?.login || "",
@@ -42,7 +43,10 @@ export const PaymentForm = (props: TProps) => {
   });
 
   const { checkPromo, promocodeValue, promocodeStatus } = usePromocode();
-  const { paymentIsLoading, paymentStatus, createPayment } = usePayment();
+  const { paymentIsLoading, paymentStatus, createPayment, createPayTodayBill } =
+    usePayment();
+
+  const [isRF, setIsRF] = useState(true);
 
   const onSubmit = useCallback(
     async (_data) => {
@@ -56,6 +60,15 @@ export const PaymentForm = (props: TProps) => {
         // error
         return;
       }
+
+      if (!isRF) {
+        const payTodayBillData = await createPayTodayBill(response.id);
+        if (payTodayBillData?.payment_link) {
+          window?.open(payTodayBillData?.payment_link, "_blank")?.focus();
+        }
+        return false;
+      }
+
       window?.ym(103955671, "reachGoal", "create-payment");
       const cp = new window.cp.CloudPayments();
 
@@ -123,8 +136,10 @@ export const PaymentForm = (props: TProps) => {
       });
     },
     [
+      createPayTodayBill,
       createPayment,
       getValues,
+      isRF,
       price,
       profile?.login,
       profile?.name,
@@ -143,7 +158,7 @@ export const PaymentForm = (props: TProps) => {
   return (
     <>
       <p className="text-primary font-bold text-3xl text-center">
-        Подписка 2 EASY {type}
+        Подписка 2EASY {type}
       </p>
       <p className="text-center font-bold text-xl">{`${price}₽`}</p>
       <div className="h-3" />
@@ -307,16 +322,68 @@ export const PaymentForm = (props: TProps) => {
           </p>
         </div>
         <div className="h-5" />
-        <Button
-          size="lg"
-          fullWidth
-          radius="sm"
-          type="submit"
-          color="primary"
-          isLoading={paymentIsLoading}
-        >
-          К оплате →
-        </Button>
+        <div className="">
+          <Button
+            size="lg"
+            fullWidth
+            radius="sm"
+            type="button"
+            color="primary"
+            isLoading={paymentIsLoading}
+            onClick={async () => {
+              await setIsRF(true);
+              const isValid = await trigger();
+              if (isValid) {
+                handleSubmit(onSubmit)();
+              } else {
+                console.log("Validation failed. Please fix the errors.");
+              }
+            }}
+          >
+            Оплатить картой РФ
+          </Button>
+          <div
+            className="flex justify-center my-4 uppercase text-center"
+            style={{}}
+          >
+            <p
+              className="px-4"
+              style={{
+                color: "rgb(177 176 176)",
+                fontWeight: "800",
+                fontSize: 14,
+                background: "#fff",
+              }}
+            >
+              или
+            </p>
+          </div>
+          <hr
+            style={{ height: 4, position: "relative", top: -26, zIndex: -1 }}
+          />
+          <Button
+            size="lg"
+            fullWidth
+            radius="sm"
+            type="button"
+            color="secondary"
+            variant="bordered"
+            isLoading={paymentIsLoading}
+            onClick={async () => {
+              await setIsRF(false);
+              const isValid = await trigger();
+              setTimeout(async () => {
+                if (isValid) {
+                  handleSubmit(onSubmit)();
+                } else {
+                  console.log("Validation failed. Please fix the errors.");
+                }
+              }, 300);
+            }}
+          >
+            Оплатить картой не РФ
+          </Button>
+        </div>
         {paymentStatus === "error" && (
           <p className="text-sm text-red-400">
             Внутренняя ошибка сервера. Попробуйте позже, или свяжитесь с

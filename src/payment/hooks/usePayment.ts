@@ -1,4 +1,4 @@
-import { fetchPostJson } from "@/api";
+import { fetchGet, fetchPostJson } from "@/api";
 import { SibscribeContext } from "@/subscribe/context";
 import { useCallback, useContext, useEffect, useState } from "react";
 
@@ -10,7 +10,12 @@ export const usePayment = () => {
   >();
 
   const createPayment = useCallback(
-    async (type: "month" | "year", phone: string, promocode: string, email?: string) => {
+    async (
+      type: "month" | "year",
+      phone: string,
+      promocode: string,
+      email?: string
+    ) => {
       setPaymentIsLoading(true);
       const res = await fetchPostJson({
         path: "/payment/create-payment",
@@ -19,7 +24,7 @@ export const usePayment = () => {
           type,
           phone,
           promocode,
-          email
+          email,
         },
       });
       try {
@@ -46,5 +51,14 @@ export const usePayment = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentStatus]);
 
-  return { paymentIsLoading, paymentStatus, createPayment };
+  const createPayTodayBill = useCallback(async (internalPaymentId: string) => {
+    let res = await fetchGet({
+      path: "/payment/createPayTodayBill?paymentId=" + internalPaymentId,
+      isSecure: true,
+    });
+    res = await res.json();
+    return res;
+  }, []);
+
+  return { paymentIsLoading, paymentStatus, createPayment, createPayTodayBill };
 };
