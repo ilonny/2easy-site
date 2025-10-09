@@ -302,6 +302,7 @@ export const SubscribeTariffs: FC<TProps> = ({ hideTitle = false }) => {
         size="lg"
         isOpen={paymentOpened}
         onClose={() => setPaymentOpened(false)}
+        scrollBehavior="inside"
       >
         <ModalContent>
           <ModalHeader></ModalHeader>
