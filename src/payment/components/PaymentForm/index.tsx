@@ -60,12 +60,18 @@ export const PaymentForm = (props: TProps) => {
         // error
         return;
       }
-      console.log("isRF???", isRF.current);
+
       if (!isRF.current) {
+        const isIphone = navigator.userAgent.toLowerCase()?.includes("iphone");
         const payTodayBillData = await createPayTodayBill(response.id);
-        if (payTodayBillData?.payment_link) {
-          window?.open(payTodayBillData?.payment_link, "_blank")?.focus();
+        if (!payTodayBillData?.payment_link) {
+          return;
         }
+        if (isIphone) {
+          window.location.href = payTodayBillData?.payment_link;
+          return;
+        }
+        window?.open(payTodayBillData?.payment_link, "_blank")?.focus();
         return false;
       }
 

@@ -11,10 +11,11 @@ export const BodyContainer: FC<any> = ({ children }) => {
     if (
       profile?.isStudent &&
       !window?.location?.pathname?.includes("/lessons/") &&
-      !window?.location?.pathname?.includes("/login")
+      !window?.location?.pathname?.includes("/login") &&
+      !window?.location?.pathname?.includes("/taboo")
     ) {
       router.push(`/student-account/${profile.studentId}`);
     }
-  }, [profile?.isStudent]);
+  }, [profile?.isStudent, profile.studentId, router]);
   return children;
 };

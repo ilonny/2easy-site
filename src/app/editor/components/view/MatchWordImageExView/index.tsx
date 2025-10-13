@@ -263,6 +263,13 @@ export const MatchWordImageExView: FC<TProps> = ({
   const student_id = profile?.studentId;
   const ex_id = data?.id;
 
+  const isSorted = useRef(false);
+  useEffect(() => {
+    setTimeout(() => {
+      isSorted.current = true;
+    }, 300);
+  }, []);
+
   const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
     student_id,
     lesson_id,
@@ -273,11 +280,16 @@ export const MatchWordImageExView: FC<TProps> = ({
   });
 
   const sortedChips = useMemo(() => {
-    return (
-      [...data.images]
-        .filter((i) => !!i.text && !correctIds.includes(i.id))
-        // .map((img) => img.text)
-        .sort(() => 0.5 - Math.random())
+    if (!isSorted.current) {
+      return (
+        [...data.images]
+          .filter((i) => !!i.text && !correctIds.includes(i.id))
+          // .map((img) => img.text)
+          .sort(() => 0.5 - Math.random())
+      );
+    }
+    return [...data.images].filter(
+      (i) => !!i.text && !correctIds.includes(i.id)
     );
   }, [correctIds.length, data.images]);
 

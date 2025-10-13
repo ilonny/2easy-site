@@ -75,6 +75,33 @@ export default function GrammarPage() {
                   reached. The team with the most points wins!
                   <br />
                   <br />
+                  <p>Link for students:</p>
+                  <Link
+                    href="/taboo_a1_a2"
+                    target="_blank"
+                    style={{ color: "#3f28c6" }}
+                    className="underline hover:decoration-0"
+                  >
+                    A1 - A2
+                  </Link>
+                  <br />
+                  <Link
+                    href="/taboo_b1_b2"
+                    target="_blank"
+                    style={{ color: "#3f28c6" }}
+                    className="underline hover:decoration-0"
+                  >
+                    B1 - B2
+                  </Link>
+                  <br />
+                  <Link
+                    href="/taboo_b1_b2_slang"
+                    target="_blank"
+                    style={{ color: "#3f28c6" }}
+                    className="underline hover:decoration-0"
+                  >
+                    B1 – B2, slang
+                  </Link>
                 </h2>
               </>
             }

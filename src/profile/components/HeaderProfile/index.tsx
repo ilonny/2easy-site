@@ -45,9 +45,21 @@ export const HeaderProfile = (props: TProps) => {
           // className={styles["header-profile-short-wrapper"]}
           color="secondary"
           variant="flat"
-          style={{ outline: "none" }}
+          style={{ outline: "none", backgroundColor: "#EBE9FE !important" }}
+          // className="!bg-[#EBE9FE]"
         >
-          <p>{profile.name || "Профиль"}</p>
+          <p
+            className="hidden md:block lg:block"
+            style={{ color: "#4031C3 !important" }}
+          >
+            {profile.name || "Профиль"}
+          </p>
+          <p
+            className="block md:hidden lg:hidden"
+            style={{ color: "#4031C3 !important" }}
+          >
+            {profile.name?.[0] || "Профиль"}
+          </p>
           <Image src={ChevronDown} alt="profile icon" width={14} />
           {/* <p className={styles.title}>{profile.name?.[0] || "A"}</p> */}
         </Button>

@@ -11,7 +11,7 @@ export const JivoSite = () => {
     setTimeout(() => {
       const jdiv = document?.getElementsByTagName("jdiv")?.[0] || { style: {} };
 
-      if (path?.includes("/lessons/")) {
+      if (path?.includes("/lessons/") || path?.includes("/grammar/")) {
         jdiv.style.display = "none";
       } else {
         jdiv.style.display = "block";

@@ -39,7 +39,7 @@ export const MatchWordWordExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
-    isPresentationMode: rest?.isPresentationMode
+    isPresentationMode: rest?.isPresentationMode,
   });
 
   const [selectedMatchId, setSelectedMatchId] = useState<number | undefined>(0);
@@ -206,7 +206,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                   onClick={() => setSelectedMatchId(m.id)}
                 >
                   <Card
-                    shadow="sm"
+                    shadow="none"
                     radius="sm"
                     className="p-4"
                     style={{
@@ -216,6 +216,9 @@ export const MatchWordWordExView: FC<TProps> = ({
                           ? "2px solid #3f28c6"
                           : "2px solid transparent",
                       whiteSpace: "break-spaces",
+                      boxShadow: "rgba(144, 137, 164, 0.15) 0px 8px 24px 0px",
+                      fontWeight: '700',
+                      fontSize: 18
                     }}
                   >
                     {m.value}
@@ -227,7 +230,6 @@ export const MatchWordWordExView: FC<TProps> = ({
                 >
                   <Card
                     className="p-4"
-                    shadow="sm"
                     radius="sm"
                     style={{
                       cursor: "pointer",
@@ -239,6 +241,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                           ? "#E9FEE8"
                           : bgColor,
                       whiteSpace: "break-spaces",
+                      boxShadow: "rgba(144, 137, 164, 0.15) 0px 8px 24px 0px",
                     }}
                   >
                     {m.correctValue}
