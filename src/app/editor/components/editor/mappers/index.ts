@@ -37,6 +37,8 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return "Тест";
     case "free-input-form":
       return "Поле для ввода текста";
+    case "int":
+      return "Интеграции";
     default:
       return type;
   }

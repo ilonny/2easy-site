@@ -48,6 +48,7 @@ import EyeEnabledIcon from "@/assets/icons/eye_enable.svg";
 import EyeDisabledIcon from "@/assets/icons/eye_disabled.svg";
 import { AuthContext } from "@/auth";
 import CopyExIcon from "@/assets/icons/copy_ex.svg";
+import { IntExView } from "../IntExView";
 
 type TProps = {
   list: Array<any>;
@@ -176,6 +177,16 @@ const mapComponent = (type: string, outerProps: never) => {
     case "free-input-form":
       return (props) => (
         <FreeInputFormExView
+          {...props}
+          data={{
+            ...props.data,
+            id: outerProps.id,
+          }}
+        />
+      );
+    case "int":
+      return (props) => (
+        <IntExView
           {...props}
           data={{
             ...props.data,

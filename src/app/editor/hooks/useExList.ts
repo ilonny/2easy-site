@@ -157,6 +157,8 @@ const getDataMapper = (type: string) => {
       return mapFillGapsSelectEx;
     case "match-word-image":
       return mapImageExData;
+    case "int":
+      return mapTextDefaultExData;
     default:
       return mapImageExData;
   }

@@ -18,6 +18,7 @@ import { MatchWordImage } from "../MatchWordImage";
 import { MatchWordColumn } from "../MatchWordColumn";
 import { TestEx } from "../TestEx";
 import { FreeInputFormEx } from "../FreeInputFormEx";
+import { IntEx } from "../Int";
 
 type TProps = {
   isVisible: boolean;
@@ -77,6 +78,8 @@ export const EditorRootModal: FC<TProps> = ({
         return TestEx;
       case "free-input-form":
         return FreeInputFormEx;
+      case "int":
+        return IntEx;
       default:
     }
   }, [type, chosenExToEdit]);

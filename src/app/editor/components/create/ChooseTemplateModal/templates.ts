@@ -17,6 +17,7 @@ import TextBg from "@/assets/images/text_template_bg.png";
 import MatchBg from "@/assets/images/match_template_bg.png";
 import TestBg from "@/assets/images/test_template_bg.png";
 import FreeFormBg from "@/assets/images/free_form_template_bg.png";
+import IntTemplateBg from "@/assets/images/int_template_bg.png";
 import { StaticImageData } from "next/image";
 
 export type TTemplate = {
@@ -138,5 +139,11 @@ export const templates: TTemplate[] = [
     title: "Поле для ввода текста",
     description: "Пустое поле для ответов ученика",
     bgImage: FreeFormBg,
+  },
+  {
+    type: "int",
+    title: "Интеграции",
+    description: "Miro, Google Drive, Worldwall, Genially, Quizlet, etc",
+    bgImage: IntTemplateBg,
   },
 ];
