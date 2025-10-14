@@ -75,7 +75,7 @@ export default function GrammarPage() {
                   reached. The team with the most points wins!
                   <br />
                   <br />
-                  <p>Link for students:</p>
+                  <p>Links for the students:</p>
                   <Link
                     href="/taboo_a1_a2"
                     target="_blank"
