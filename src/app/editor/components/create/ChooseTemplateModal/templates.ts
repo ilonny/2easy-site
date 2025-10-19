@@ -143,7 +143,7 @@ export const templates: TTemplate[] = [
   {
     type: "int",
     title: "Интеграции",
-    description: "Miro, Google Drive, Worldwall, Genially, Quizlet, etc",
+    description: "Miro, Google Drive, Wordwall, Genially, Quizlet, etc",
     bgImage: IntTemplateBg,
   },
 ];
