@@ -274,7 +274,7 @@ export const ExListComp: FC<TProps> = (props) => {
                 onClick={async () => {
                   if (!canEditEye) {
                     toast(
-                      "Добавьте урок к себе, что менять видимость заданий",
+                      "Добавьте урок к себе, чтобы менять видимость заданий",
                       {
                         type: "error",
                       }
