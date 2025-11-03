@@ -41,10 +41,13 @@ export default function GrammarPage() {
             fontWeight: 700,
           }}
         >
-          BE GOING TO
+          BE GOING TO 222
         </h1>
         <div className="h-10" />
         <SquareList data={data} />
+        <div className="h-10" />
+        <div className="h-10" />
+        <div className="h-10" />
       </ContentWrapper>
     </main>
   );

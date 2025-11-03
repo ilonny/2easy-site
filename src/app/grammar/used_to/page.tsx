@@ -43,6 +43,9 @@ export default function GrammarPage() {
         </h1>
         <div className="h-10" />
         <SquareList data={data} />
+        <div className="h-10" />
+        <div className="h-10" />
+        <div className="h-10" />
       </ContentWrapper>
     </main>
   );
