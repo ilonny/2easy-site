@@ -22,6 +22,9 @@ export const Header = () => {
       "/registration",
       "/restore-password",
       "/start-registration",
+      "/taboo_a1_a2",
+      "/taboo_b1_b2",
+      "/taboo_b1_b2_slang",
     ].includes(pathname)
   ) {
     return null;

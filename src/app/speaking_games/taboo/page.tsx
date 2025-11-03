@@ -82,7 +82,7 @@ export default function GrammarPage() {
                     style={{ color: "#3f28c6" }}
                     className="underline hover:decoration-0"
                   >
-                    A1 - A2
+                    A1 – A2
                   </Link>
                   <br />
                   <Link
@@ -91,7 +91,7 @@ export default function GrammarPage() {
                     style={{ color: "#3f28c6" }}
                     className="underline hover:decoration-0"
                   >
-                    B1 - B2
+                    B1 – B2
                   </Link>
                   <br />
                   <Link
@@ -100,7 +100,7 @@ export default function GrammarPage() {
                     style={{ color: "#3f28c6" }}
                     className="underline hover:decoration-0"
                   >
-                    B1 – B2, slang
+                    B1 – B2, slang
                   </Link>
                 </h2>
               </>
