@@ -217,8 +217,8 @@ export const MatchWordWordExView: FC<TProps> = ({
                           : "2px solid transparent",
                       whiteSpace: "break-spaces",
                       boxShadow: "rgba(144, 137, 164, 0.15) 0px 8px 24px 0px",
-                      fontWeight: '700',
-                      fontSize: 18
+                      fontWeight: "700",
+                      fontSize: 18,
                     }}
                   >
                     {m.value}
@@ -279,6 +279,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                       border: "2px solid rgb(164, 41, 41) ",
                       background: "#fdd0df",
                       whiteSpace: "break-spaces",
+                      fontWeight: "700",
                     }}
                   >
                     {m.value}
@@ -329,6 +330,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                       border: "2px solid #219F59",
                       background: "#E9FEE8",
                       whiteSpace: "break-spaces",
+                      fontWeight: "700",
                     }}
                   >
                     {m.value}
