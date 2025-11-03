@@ -14,4 +14,5 @@ export type TLesson = {
   created_from_id?: number;
   created_from_2easy?: number;
   is_free?: string;
+  is_my_lesson?: boolean;
 };

@@ -35,6 +35,9 @@ import { StartLessonButton } from "@/app/lessons/components/StartLessonButton";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { EditorContext } from "../context";
 import { AuthContext } from "@/auth";
+import EditIcon from "@/assets/icons/edit_blue.svg";
+import Image from "next/image";
+import { EditLessonModalForm } from "@/app/lessons/components/EditLessonModalForm";
 
 export default function EditorPage() {
   withLogin();
@@ -176,6 +179,14 @@ export default function EditorPage() {
     return true;
   }, [is2easy, isAdmin]);
 
+  const [editIsVisible, setEditIsVisible] = useState(false);
+
+  const onPressEdit = useCallback(() => {
+    setEditIsVisible(true);
+  }, []);
+
+  console.log("lesson:", lesson, profile);
+
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
@@ -198,41 +209,64 @@ export default function EditorPage() {
           }}
         >
           <StartLessonButton lesson={lesson} />
-          <div className="w-[100%] lg:pl-[90px] text-[38px] lg:text-[44px]">
-            <h1
-              style={{
-                textAlign: "center",
-                color: "#3f28c6",
-                fontWeight: 700,
-              }}
-            >
-              {lesson?.title}
-            </h1>
+          <div className="common_info relative group">
+            {" "}
+            {/* Добавляем класс 'group' сюда */}
+            <div className="w-[100%] lg:pl-[90px] text-[38px] lg:text-[44px]">
+              <h1
+                style={{
+                  textAlign: "center",
+                  color: "#3f28c6",
+                  fontWeight: 700,
+                }}
+              >
+                {lesson?.title}
+              </h1>
+            </div>
+            {!!lesson?.description && (
+              <h2
+                style={{
+                  fontSize: 20,
+                  textAlign: "center",
+                  // color: "#3f28c6",
+                  fontWeight: 500,
+                  maxWidth: 800,
+                  margin: "auto",
+                  whiteSpace: "break-spaces",
+                }}
+              >
+                {lesson?.description}
+              </h2>
+            )}
+            <div className="h-8"></div>
+            {!!lesson?.image_path && (
+              <Zoom>
+                <img
+                  src={BASE_URL + "/" + lesson.image_path}
+                  style={{ maxHeight: 400, margin: "auto", marginBottom: 60 }}
+                />
+              </Zoom>
+            )}
+            {!!lesson?.is_my_lesson && (
+              <div
+                onClick={() => onPressEdit()}
+                className="edit-btn absolute top-0 left-0 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-250 ease-in-out"
+              >
+                <Image src={EditIcon} alt="edit" style={{ fill: "blue" }} />
+                <div className="h-2"></div>
+                <p
+                  style={{
+                    color: "#3f28c6",
+                    fontSize: 12,
+                    textAlign: "center",
+                  }}
+                >
+                  ред.
+                </p>
+              </div>
+            )}
           </div>
-          {!!lesson?.description && (
-            <h2
-              style={{
-                fontSize: 20,
-                textAlign: "center",
-                // color: "#3f28c6",
-                fontWeight: 500,
-                maxWidth: 800,
-                margin: "auto",
-                whiteSpace: "break-spaces",
-              }}
-            >
-              {lesson?.description}
-            </h2>
-          )}
-          <div className="h-8"></div>
-          {!!lesson?.image_path && (
-            <Zoom>
-              <img
-                src={BASE_URL + "/" + lesson.image_path}
-                style={{ maxHeight: 400, margin: "auto", marginBottom: 60 }}
-              />
-            </Zoom>
-          )}
+
           <div className="h-8"></div>
           <ExList
             list={exList}
@@ -347,6 +381,15 @@ export default function EditorPage() {
           </ModalBody>
         </ModalContent>
       </Modal>
+      {!!lesson && (
+        <EditLessonModalForm
+          isVisible={editIsVisible}
+          setIsVisible={setEditIsVisible}
+          lesson={lesson}
+          key={lesson?.id}
+          onSuccess={() => window.location.reload()}
+        />
+      )}
     </main>
   );
 }
