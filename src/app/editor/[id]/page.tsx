@@ -321,6 +321,31 @@ export default function EditorPage() {
         </div>
         <div className="h-10" />
         <div className="h-10" />
+        {profile?.login === "lessons@2easy.com" && (
+          <div className="justify-center flex">
+            <Button
+              size="lg"
+              color="primary"
+              onClick={async () => {
+                if (!window?.confirm("Точно выложить урок?)")) {
+                  return;
+                }
+                const res = await fetchPostJson({
+                  path: "/lessons/release",
+                  isSecure: true,
+                  data: {
+                    lesson_id: params.id,
+                  },
+                });
+                const data = await res.json();
+                checkResponse(data);
+                window.location.pathname = `/`;
+              }}
+            >
+              {"Перенести урок в уроки 2EASY"}
+            </Button>
+          </div>
+        )}
       </ContentWrapper>
       <ChooseTemplateModal
         onChooseTemplate={onChooseTemplate}
