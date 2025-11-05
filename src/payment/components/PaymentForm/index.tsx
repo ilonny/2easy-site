@@ -63,11 +63,14 @@ export const PaymentForm = (props: TProps) => {
 
       if (!isRF.current) {
         const isIphone = navigator.userAgent.toLowerCase()?.includes("iphone");
+        const isSafari =
+          navigator.userAgent.search("Safari") >= 0 &&
+          navigator.userAgent.search("Chrome") < 0;
         const payTodayBillData = await createPayTodayBill(response.id);
         if (!payTodayBillData?.payment_link) {
           return;
         }
-        if (isIphone) {
+        if (isIphone || isSafari) {
           window.location.href = payTodayBillData?.payment_link;
           return;
         }
