@@ -38,6 +38,7 @@ import { AuthContext } from "@/auth";
 import EditIcon from "@/assets/icons/edit_blue.svg";
 import Image from "next/image";
 import { EditLessonModalForm } from "@/app/lessons/components/EditLessonModalForm";
+import styles from "../components/view/ExList/style.module.css";
 
 export default function EditorPage() {
   withLogin();
@@ -209,7 +210,9 @@ export default function EditorPage() {
           }}
         >
           <StartLessonButton lesson={lesson} />
-          <div className="common_info relative group">
+          <div
+            className={`${styles["wrapper"]} relative pt-[55px] lg:pt-0 common_info relative group`}
+          >
             {" "}
             {/* Добавляем класс 'group' сюда */}
             <div className="w-[100%] lg:pl-[90px] text-[38px] lg:text-[44px]">
@@ -250,7 +253,7 @@ export default function EditorPage() {
             {!!lesson?.is_my_lesson && (
               <div
                 onClick={() => onPressEdit()}
-                className="edit-btn absolute top-0 left-0 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-250 ease-in-out"
+                className="edit-btn absolute top-[10px] left-[10px] cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-250 ease-in-out"
               >
                 <Image src={EditIcon} alt="edit" style={{ fill: "blue" }} />
                 <div className="h-2"></div>
