@@ -21,7 +21,20 @@ import "react-medium-image-zoom/dist/styles.css";
 import { AuthContext } from "@/auth";
 import { useParams } from "next/navigation";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
-import CheckedIcon from "@/assets/icons/checked.svg";
+
+import RoundDefaultTest from "@/assets/icons/round_default_test.svg";
+import RoundHoverTest from "@/assets/icons/round_hover_test.svg";
+import RoundChosenTest from "@/assets/icons/round_chosen_test.svg";
+import RoundSuccessTest from "@/assets/icons/round_success_test.svg";
+import RoundGrayTest from "@/assets/icons/round_gray_test.svg";
+import RoundErrorTest from "@/assets/icons/round_error_test.svg";
+
+import SquareDefaultTest from "@/assets/icons/square_default_test.svg";
+import SquareHoverTest from "@/assets/icons/square_hover_test.svg";
+import SquareChosenTest from "@/assets/icons/square_chosen_test.svg";
+import SquareSuccessTest from "@/assets/icons/square_success_test.svg";
+import SquareGrayTest from "@/assets/icons/square_gray_test.svg";
+import SquareErrorTest from "@/assets/icons/square_error_test.svg";
 
 type TProps = {
   data: TTestData;
@@ -112,10 +125,12 @@ export const TestStep = (props: TTestStepProps) => {
     ? undefined
     : Object.keys(errorMap.current)[0];
 
+  const isAnySelected = !!Object.values(selectedMap.current)?.length;
+
   return (
     <div
       onMouseEnter={() => {
-        if (isPresentationMode) {
+        if (isPresentationMode || isSubmitted) {
           return;
         }
         const isAnyCorrect = question.options.some((o) => o.isCorrect);
@@ -139,6 +154,7 @@ export const TestStep = (props: TTestStepProps) => {
             selectedMap.current = {
               [val]: true,
             };
+            setRerender((r) => r + 1);
           }}
           value={defaultValue}
         >
@@ -149,30 +165,67 @@ export const TestStep = (props: TTestStepProps) => {
             const isCorrect = isSubmitted && isSelected && !isError;
             const isIncorrect = isSubmitted && isSelected && isError;
 
+            const isMissed =
+              isSubmitted &&
+              option.isCorrect &&
+              !selectedMap.current[option.id];
+
             const isCorrectAndNotSelected =
               isSubmitted && !isSelected && option.isCorrect;
-            let color =
-              isCorrectAndNotSelected || isCorrect
-                ? "success"
-                : isIncorrect
-                ? "danger"
-                : "primary";
+
+            let color = isMissed
+              ? "gray"
+              : isCorrectAndNotSelected || isCorrect
+              ? "success"
+              : isIncorrect
+              ? "danger"
+              : isSelected
+              ? "chosen"
+              : "default";
             if (isTeacher && isHovered && !isSubmitted) {
               if (option.isCorrect) {
-                color = "success";
+                color = "success-hovered";
+              } else {
+                color = "default";
               }
             }
+
             return (
               <label
-                className="flex items-start wrap"
+                className="flex items-center wrap"
                 key={option.id}
                 style={{ marginBottom: 30, cursor: "pointer" }}
               >
-                <Radio
-                  color={color}
-                  value={option.id}
-                  className={`radio-force-${color}`}
-                />
+                <div className="relative top-[-2px]">
+                  <Radio
+                    color={color}
+                    value={option.id}
+                    // className={`radio-force-${color}`}
+                  />
+                  <div
+                    className="absolute left-0 top-[5px] bg-white"
+                    style={{ zIndex: 49 }}
+                  >
+                    {color === "default" && (
+                      <Image src={RoundDefaultTest} alt="text" />
+                    )}
+                    {color === "success-hovered" && (
+                      <Image src={RoundHoverTest} alt="text" />
+                    )}
+                    {color === "chosen" && (
+                      <Image src={RoundChosenTest} alt="text" />
+                    )}
+                    {color === "success" && (
+                      <Image src={RoundSuccessTest} alt="text" />
+                    )}
+                    {color === "gray" && (
+                      <Image src={RoundGrayTest} alt="text" />
+                    )}
+                    {color === "danger" && (
+                      <Image src={RoundErrorTest} alt="text" />
+                    )}
+                  </div>
+                </div>
                 <div>
                   <p
                     style={{
@@ -200,14 +253,27 @@ export const TestStep = (props: TTestStepProps) => {
             selectedMap.current[option.id];
           const isMissed =
             isSubmitted && option.isCorrect && !selectedMap.current[option.id];
-          const color = isMissed
-            ? "default"
+
+          const isSelected = selectedMap.current[option.id];
+
+          let color = isMissed
+            ? "gray"
             : isCorrect
             ? "success"
             : isIncorrect
             ? "danger"
-            : "primary";
-          const isHoverByTeacher = isTeacher && !isSubmitted && isHovered;
+            : isSelected
+            ? "chosen"
+            : "default";
+
+          if (isTeacher && isHovered && !isSubmitted) {
+            if (option.isCorrect) {
+              color = "success-hovered";
+            } else {
+              color = "default";
+            }
+          }
+
           return (
             <label
               className="flex items-start wrap"
@@ -218,46 +284,45 @@ export const TestStep = (props: TTestStepProps) => {
                 position: "relative",
               }}
             >
-              <div
-                className="mr-2"
-                style={{
-                  width: 24,
-                  height: 24,
-                  zIndex: 333,
-                  flexShrink: 0,
-                  position: "absolute",
-                  background: isHoverByTeacher ? "#fff" : "transparent",
-                }}
-              >
-                {isHoverByTeacher && option.isCorrect && (
-                  <img
-                    src={CheckedIcon.src}
-                    style={{ width: 26, height: 26, zIndex: 2 }}
-                  />
-                )}
-              </div>
               <div className="mr-2">
-                <Checkbox
-                  color={color}
-                  isSelected={isMissed ? isMissed : undefined}
-                  isDisabled={isSubmitted && !isCorrect}
-                  size="lg"
-                  className={`py-0 ${
-                    isCorrect && "checkbox-test-option-success"
-                  } ${isIncorrect && "checkbox-test-option-danger"}`}
-                  onValueChange={(val) => {
-                    selectedMap.current[option.id] = val;
-                  }}
-                  icon={
-                    isIncorrect ? (
-                      <Image
-                        alt="close icon"
-                        src={Close}
-                        style={{ width: 10, height: 10 }}
-                      />
-                    ) : undefined
-                  }
-                />
+                <div className="relative top-[-4px]">
+                  <Checkbox
+                    color={color}
+                    isSelected={isMissed ? isMissed : undefined}
+                    isDisabled={isSubmitted && !isCorrect}
+                    size="sm"
+                    className={`py-0 ${
+                      isCorrect && "checkbox-test-option-success"
+                    } ${isIncorrect && "checkbox-test-option-danger"}`}
+                    onValueChange={(val) => {
+                      selectedMap.current[option.id] = val;
+                      setRerender((r) => r + 1);
+                    }}
+                  />
+                  <div
+                    className="absolute left-0 top-[6px] bg-white"
+                    style={{ zIndex: 49 }}
+                  >
+                    {color === "default" && (
+                      <Image src={SquareDefaultTest} alt="text" />
+                    )}
+                    {color === "success-hovered" && (
+                      <Image src={SquareHoverTest} alt="text" />
+                    )}
+                    {color === "chosen" && (
+                      <Image src={SquareChosenTest} alt="text" />
+                    )}
+                    {color === "success" && (
+                      <Image src={SquareSuccessTest} alt="text" />
+                    )}
+                    {color === "gray" && (
+                      <Image src={SquareGrayTest} alt="text" />
+                    )}
+                    {color === "danger" && (
+                      <Image src={SquareErrorTest} alt="text" />
+                    )}
+                  </div>
+                </div>
               </div>
               <div>
                 <p
