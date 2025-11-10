@@ -48,13 +48,13 @@ export const HeaderProfile = (props: TProps) => {
           className="header-secondary-bg"
         >
           <p
-            className="hidden md:block lg:block"
+            className="hidden md:block lg:block header-secondary-btn-text"
             style={{ color: "#4031C3 !important" }}
           >
             {profile.name || "Профиль"}
           </p>
           <p
-            className="block md:hidden lg:hidden"
+            className="block md:hidden lg:hidden header-secondary-btn-text"
             style={{ color: "#4031C3 !important" }}
           >
             {profile.name?.[0] || "Профиль"}
@@ -70,7 +70,7 @@ export const HeaderProfile = (props: TProps) => {
             href={`/student-account/${profile?.studentId}`}
           >
             <Link href={`/student-account/${profile?.studentId}`}>
-              <p>{profile?.name}</p>
+              <p className="header-secondary-btn-text">{profile?.name}</p>
               {!!profile?.email && <p>{profile?.email}</p>}
             </Link>
           </DropdownItem>

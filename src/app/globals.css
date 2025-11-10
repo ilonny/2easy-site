@@ -288,3 +288,7 @@ ol, ul {
 .header-secondary-bg {
   background: #EBE9FE !important;
 }
+
+.header-secondary-btn-text {
+  color: #4031C3;
+}
