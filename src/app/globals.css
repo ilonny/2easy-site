@@ -284,3 +284,7 @@ ol, ul {
 .match-word-column .text-success-foreground {
   color: #fff !important;
 }
+
+.header-secondary-bg {
+  background: #EBE9FE !important;
+}

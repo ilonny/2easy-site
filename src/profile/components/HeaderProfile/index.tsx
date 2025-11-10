@@ -42,11 +42,10 @@ export const HeaderProfile = (props: TProps) => {
     <Dropdown>
       <DropdownTrigger>
         <Button
-          // className={styles["header-profile-short-wrapper"]}
           color="secondary"
           variant="flat"
-          style={{ outline: "none", backgroundColor: "#EBE9FE !important" }}
-          // className="!bg-[#EBE9FE]"
+          style={{ outline: "none" }}
+          className="header-secondary-bg"
         >
           <p
             className="hidden md:block lg:block"
