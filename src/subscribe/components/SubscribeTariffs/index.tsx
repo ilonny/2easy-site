@@ -24,9 +24,17 @@ import { SubscribeCancel } from "../SubscribeCancel";
 
 type TProps = {
   hideTitle?: boolean;
+  hideTopBlocks?: boolean;
+  hideTariffsTitle?: boolean;
+  fullWidth?: boolean;
 };
 
-export const SubscribeTariffs: FC<TProps> = ({ hideTitle = false }) => {
+export const SubscribeTariffs: FC<TProps> = ({
+  hideTitle = false,
+  hideTopBlocks = false,
+  hideTariffsTitle = false,
+  fullWidth = false,
+}) => {
   const { profile } = useContext(AuthContext);
   const { subscription } = useContext(SibscribeContext);
 
@@ -70,8 +78,10 @@ export const SubscribeTariffs: FC<TProps> = ({ hideTitle = false }) => {
         </>
       )}
 
-      <div
-        className="
+      {!hideTopBlocks && (
+        <>
+          <div
+            className="
         flex
         items-stretch
         justify-center
@@ -79,109 +89,116 @@ export const SubscribeTariffs: FC<TProps> = ({ hideTitle = false }) => {
         flex-wrap
         wrap
       "
-      ></div>
-      <div className="h-4" />
-      <div
-        className="p-4 lg:p-10"
-        style={{
-          width: "100%",
-          minHeight: 406,
-          maxWidth: 793,
-          background: `url(${SubscribePurpleImage.src}) center center no-repeat`,
-          backgroundSize: "cover",
-          margin: "auto",
-          borderRadius: 20,
-        }}
-      >
-        <div
-          className="
+          ></div>
+          <div className="h-4" />
+          <div
+            className="p-4 lg:p-10"
+            style={{
+              width: "100%",
+              minHeight: 406,
+              maxWidth: 793,
+              background: `url(${SubscribePurpleImage.src}) center center no-repeat`,
+              backgroundSize: "cover",
+              margin: "auto",
+              borderRadius: 20,
+            }}
+          >
+            <div
+              className="
           px-4
           py-2
         "
-          style={{
-            color: "#D2FF88",
-            background: "rgb(107, 97, 205)",
-            display: "inline-block",
-            borderRadius: 100,
-            fontSize: 14,
-          }}
-        >
-          Подписка 2EASY
-        </div>
-        <div className="h-4"></div>
-        <p
-          className="
+              style={{
+                color: "#D2FF88",
+                background: "rgb(107, 97, 205)",
+                display: "inline-block",
+                borderRadius: 100,
+                fontSize: 14,
+              }}
+            >
+              Подписка 2EASY
+            </div>
+            <div className="h-4"></div>
+            <p
+              className="
             text-white
           "
-          style={{
-            maxWidth: 482,
-            fontWeight: 600,
-            fontSize: 22,
-            lineHeight: "120%",
-          }}
-        >
-          Каждый тариф включает в себя полный доступ ко всему, что есть на
-          сайте, а именно:
-        </p>
-        <div className="h-4"></div>
-        <div
-          style={{
-            width: "100%",
-            height: 1,
-            background: "rgba(255, 255, 255, 0.3)",
-          }}
-        ></div>
-        <div className="h-4"></div>
-        <div style={{ maxWidth: 410 }}>
-          <div className="flex gap-2 mb-2">
-            <img src={tariff_checked_2.src} />
-            <p className="text-white">
-              конструктор для создания интерактивных уроков
+              style={{
+                maxWidth: 482,
+                fontWeight: 600,
+                fontSize: 22,
+                lineHeight: "120%",
+              }}
+            >
+              Каждый тариф включает в себя полный доступ ко всему, что есть на
+              сайте, а именно:
             </p>
+            <div className="h-4"></div>
+            <div
+              style={{
+                width: "100%",
+                height: 1,
+                background: "rgba(255, 255, 255, 0.3)",
+              }}
+            ></div>
+            <div className="h-4"></div>
+            <div style={{ maxWidth: 410 }}>
+              <div className="flex gap-2 mb-2">
+                <img src={tariff_checked_2.src} />
+                <p className="text-white">
+                  конструктор для создания интерактивных уроков
+                </p>
+              </div>
+              <div className="flex gap-2 mb-2">
+                <img src={tariff_checked_2.src} />
+                <p className="text-white">все lesson plans 2EASY (80+)</p>
+              </div>
+              <div className="flex gap-2 mb-2">
+                <img src={tariff_checked_2.src} />
+                <p className="text-white">
+                  все speaking games (Taboo, Would you rather, etc) и duscussion
+                  cards (150+)
+                </p>
+              </div>
+              <div className="flex gap-2 mb-2">
+                <img src={tariff_checked_2.src} />
+                <p className="text-white">новые материалы каждую неделю</p>
+              </div>
+              <div className="flex gap-2 mb-2">
+                <img src={tariff_checked_2.src} />
+                <p className="text-white">
+                  раздел «grammar» с разговорными упражнениями
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-2 mb-2">
-            <img src={tariff_checked_2.src} />
-            <p className="text-white">все lesson plans 2EASY (80+)</p>
-          </div>
-          <div className="flex gap-2 mb-2">
-            <img src={tariff_checked_2.src} />
-            <p className="text-white">
-              все speaking games (Taboo, Would you rather, etc) и duscussion
-              cards (150+)
-            </p>
-          </div>
-          <div className="flex gap-2 mb-2">
-            <img src={tariff_checked_2.src} />
-            <p className="text-white">новые материалы каждую неделю</p>
-          </div>
-          <div className="flex gap-2 mb-2">
-            <img src={tariff_checked_2.src} />
-            <p className="text-white">
-              раздел «grammar» с разговорными упражнениями
-            </p>
-          </div>
-        </div>
-      </div>
-      <div className="h-10"></div>
-      {!profile?.login && (
-        <>
-          <SubscribeFreeBlock />
           <div className="h-10"></div>
+          {!profile?.login && (
+            <>
+              <SubscribeFreeBlock />
+              <div className="h-10"></div>
+            </>
+          )}
         </>
       )}
+
       {/* onClickTariff */}
 
       <div>
-        <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-          {hasTariff ? "Ваш тариф" : "Тарифы"}
-        </h1>
-        <div className="h-4" />
+        {!hideTariffsTitle && (
+          <>
+            <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
+              {hasTariff ? "Ваш тариф" : "Тарифы"}
+            </h1>
+            <div className="h-4" />
+          </>
+        )}
         <div className="flex flex-wrap wrap justify-center items-start gap-4">
           {(hasTariff ? [userTariff] : tariffs).map((tariff, index) => {
             return (
               <div
                 className="p-4 lg:p-6 bg-white w-[100%] max-w-[387px]"
-                style={{ maxWidth: 387, borderRadius: 20 }}
+                style={{ maxWidth: fullWidth ? "100%" : 387, borderRadius: 20, boxShadow: '0px 8px 24px 0px #9089A426' }}
                 key={tariff.id}
               >
                 <div className="relative">

@@ -4,6 +4,9 @@ import { BASE_URL } from "@/api";
 import styles from "./styles.module.css";
 import {
   Button,
+  Modal,
+  ModalBody,
+  ModalContent,
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -20,6 +23,10 @@ import { AuthContext } from "@/auth";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { writeToLocalStorage } from "@/auth/utils";
 import LockIcon from "@/assets/icons/lock.svg";
+import HeartImage from "@/assets/images/3d-glassy-fuzzy-pink-heart-with-a-happy-face.png";
+import { SubscribeTariffs } from "@/subscribe";
+import { RegistrationForm } from "@/app/registration";
+import Link from "next/link";
 
 type TProps = {
   lesson: TLesson;
@@ -60,6 +67,9 @@ export const LessonCard: FC<TProps> = ({
   const { profile } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const { checkSubscription, hasSubscription } = useCheckSubscription();
+  const [lockedModalOpen, setLockedModalOpen] = useState(false);
+  const [tryNowModal, setTryNowModal] = useState(false);
+  const [regModal, setRegModal] = useState(false);
 
   const isDisabled =
     isStudent && lesson?.["lesson_relations.status"] === "close";
@@ -72,14 +82,17 @@ export const LessonCard: FC<TProps> = ({
       return;
     }
     if (isClosed) {
-      router.push("/subscription");
+      setLockedModalOpen(true);
+      // router.push("/subscription");
       return;
     }
     if (
       !hasSubscription &&
       (lesson?.created_from_2easy || lesson?.user_id === 1)
     ) {
-      router.push("/subscription");
+      // try now modal
+      setTryNowModal(true);
+      // router.push("/subscription");
       return;
     }
 
@@ -365,6 +378,125 @@ export const LessonCard: FC<TProps> = ({
           </>
         )}
       </div>
+      <Modal
+        size="xl"
+        isOpen={lockedModalOpen}
+        onClose={() => setLockedModalOpen(false)}
+        style={{ background: "#fff" }}
+        className="p-6"
+        scrollBehavior="inside"
+      >
+        <ModalContent>
+          <ModalBody style={{ minHeight: 460 }}>
+            <p
+              style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
+              className="mb-4"
+            >
+              Выберите тариф, чтобы открыть доступ
+              <br />
+              ко всему, что есть на 2EASY
+            </p>
+            <p
+              style={{ fontWeight: "400", textAlign: "center" }}
+              className="mb-4"
+            >
+              Тарифы различаются только по сроку действия подписки.
+              <br />
+              Чем дольше – тем выгоднее.
+            </p>
+
+            <SubscribeTariffs
+              hideTitle
+              hideTopBlocks
+              hideTariffsTitle
+              fullWidth
+            />
+            <div className="h-4"></div>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+      <Modal
+        size="2xl"
+        isOpen={tryNowModal}
+        onClose={() => setTryNowModal(false)}
+        style={{ background: "#fff" }}
+        className="p-12"
+        scrollBehavior="inside"
+      >
+        <ModalContent>
+          <ModalBody
+            style={{ minHeight: 400 }}
+            className="flex-col justify-between"
+          >
+            <div className=""></div>
+            <div className="">
+              <p
+                style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
+                className="mb-4"
+              >
+                Еще не пользовались 2EASY?
+              </p>
+
+              <p
+                style={{ fontWeight: "400", textAlign: "center" }}
+                className="mb-4"
+              >
+                Начните с бесплатного пробного периода.
+              </p>
+              <p style={{ fontWeight: "400", textAlign: "center" }}>
+                У вас будет 3 дня доступа к конструктору уроков и части
+                материалов -- это позволит познакомиться с платформой перед
+                оформлением подписки.
+              </p>
+            </div>
+            <div
+              style={{
+                width: 175,
+                position: "absolute",
+                top: 0,
+                right: 0,
+                zIndex: -1,
+              }}
+            >
+              <Image src={HeartImage} alt="heart image" />
+            </div>
+            <div className="">
+              <Button
+                size="lg"
+                color="primary"
+                fullWidth
+                className="mb-4"
+                onClick={() => {
+                  setTryNowModal(false);
+                  setRegModal(true);
+                }}
+              >
+                Начать бесплатно
+              </Button>
+              <Link
+                href="/login"
+                className="text-[#3F28C6] underline w-[100%] text-center block"
+              >
+                У меня уже есть аккаунт
+              </Link>
+            </div>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+      <Modal
+        size="xl"
+        isOpen={regModal}
+        onClose={() => setRegModal(false)}
+        style={{ background: "#F9F9F9" }}
+        className="p-12"
+        scrollBehavior="inside"
+      >
+        <ModalContent>
+          <ModalBody style={{ minHeight: 400 }}>
+            <RegistrationForm />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };

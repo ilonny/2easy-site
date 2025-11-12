@@ -47,7 +47,7 @@ export const ProfileLessons = (props: TProps) => {
   const [activeFilterTab, setActiveFilterTab] = useState("");
 
   const isFreeTariff = useMemo(() => {
-    return !subscription || subscription?.subscribe_type_id === 1;
+    return subscription?.subscribe_type_id === 1;
   }, [subscription]);
 
   const [tabIndex, setTabIndex] = useState<"userLessons" | "savedLessons">(
