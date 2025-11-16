@@ -81,13 +81,13 @@ export const LessonCard: FC<TProps> = ({
       router.push("/lessons/" + lesson?.id);
       return;
     }
-    if (isClosed) {
+    if (isClosed || (profile?.name && !hasSubscription)) {
       setLockedModalOpen(true);
       // router.push("/subscription");
       return;
     }
     if (
-      !hasSubscription &&
+      !profile?.name &&
       (lesson?.created_from_2easy || lesson?.user_id === 1)
     ) {
       // try now modal
@@ -100,9 +100,10 @@ export const LessonCard: FC<TProps> = ({
   }, [
     isDisabled,
     disableClick,
-    isClosed,
     isStudent,
+    isClosed,
     hasSubscription,
+    profile?.name,
     lesson?.created_from_2easy,
     lesson?.user_id,
     lesson?.id,
