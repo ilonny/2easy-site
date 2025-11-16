@@ -15,6 +15,7 @@ import { Button } from "@nextui-org/react";
 export type TSquare = {
   title?: string;
   bgImage?: any;
+  answerImage?: any;
   bgColor?: string;
   link?: string;
   description?: string;
@@ -179,10 +180,10 @@ export const SquareList = (props: TProps) => {
                     }}
                   >
                     <Item<HTMLImageElement>
-                      original={s.bgImage.src}
-                      thumbnail={s.bgImage.src}
-                      width={s.bgImage.width} // ширина исходного изображения в px
-                      height={s.bgImage.height}
+                      original={s.answerImage.src || s.bgImage.src}
+                      thumbnail={s.answerImage.src || s.bgImage.src}
+                      width={s.answerImage.width || s.bgImage.width} // ширина исходного изображения в px
+                      height={s.answerImage.height || s.bgImage.height}
                     >
                       {({ ref, open }) => {
                         if (hideThumbnails) {
@@ -215,7 +216,7 @@ export const SquareList = (props: TProps) => {
                           <img
                             alt="image"
                             style={{ cursor: "pointer", margin: "auto" }}
-                            src={s.bgImage.src}
+                            src={s.answerImage.src || s.bgImage.src}
                             // width={300}
                             // height={300}
                             ref={ref}
