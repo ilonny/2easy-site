@@ -15,6 +15,7 @@ import { Footer } from "@/components/Footer";
 import Script from "next/script";
 import { EditorContextProvider } from "./editor/context";
 import { JivoSite } from "@/components/JivoSite";
+import Head from "next/head";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
@@ -38,6 +39,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Head>
+
+      </Head>
       {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
       <Script src="https://widget.cloudpayments.ru/bundles/cloudpayments.js" />
       <body className={`${manrope.className} antialiased`}>
@@ -77,7 +81,7 @@ export default function RootLayout({
             />
           </div>
         </noscript>
-        <Script id="vk-pixel">
+        <Script id="vk-pixel" strategy="beforeInteractive">
           {`var _tmr = window._tmr || (window._tmr = []);
 _tmr.push({id: "3710431", type: "pageView", start: (new Date()).getTime()});
 (function (d, w, id) {
