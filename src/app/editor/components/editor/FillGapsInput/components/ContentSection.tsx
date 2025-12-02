@@ -42,8 +42,7 @@ export const ContentSection: FC<Props> = ({
           suppressContentEditableWarning
           contentEditable
           id={CONTENT_EDITABLE_ID}
-          className={`p-4 contentEditable ${styles["contentEditable"]}`}
-          style={{ borderRadius: 20, background: "#fff" }}
+          className={`p-4 bg-white rounded-[20px] contentEditable ${styles["contentEditable"]}`}
           onBlur={(e) => onChangeText(e.currentTarget.innerHTML || "")}
           ref={contentEditableRef}
         ></div>

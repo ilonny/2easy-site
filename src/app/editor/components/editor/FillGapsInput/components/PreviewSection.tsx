@@ -15,13 +15,7 @@ export const PreviewSection: FC<Props> = ({ data, onSave, isLoading }) => {
   return (
     <div>
       <p className="font-light mb-2">Превью</p>
-      <div
-        style={{
-          border: "1px solid #3F28C6",
-          borderRadius: 4,
-          background: "#fff",
-        }}
-      >
+      <div className="border border-[#3F28C6] rounded bg-white">
         <FillGapsInputExView isPreview={true} data={data as unknown as TFillGapsSelectData} />
       </div>
       <div className="h-5" />

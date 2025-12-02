@@ -18,20 +18,9 @@ export const RightPanel: FC<Props> = ({ images, setImages }) => {
         images={images}
         setImages={setImages}
         customPlaceHolder={
-          <div
-            style={{
-              width: "100%",
-              background: "#fff",
-              height: 200,
-              borderRadius: 10,
-            }}
-            className="flex items-center justify-center flex-col gap-4"
-          >
+          <div className="w-full bg-white h-[200px] rounded-[10px] flex items-center justify-center flex-col gap-4">
             <Image src={GalleryIcon} alt="GalleryIcon" />
-            <p
-              className="text-small text-center max-w-[250px]"
-              style={{ color: "#B7B7B7" }}
-            >
+            <p className="text-small text-center max-w-[250px] text-[#B7B7B7]">
               Нажмите на этот блок или перетащите сюда изображения
             </p>
           </div>

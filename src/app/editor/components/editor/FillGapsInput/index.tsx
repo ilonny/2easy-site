@@ -144,7 +144,7 @@ export const FillGapsInput: FC<TProps> = ({
     (addItemState: { selection: string; left?: number; top?: number }) => {
       const id = String(Date.now());
       pasteHtmlAtCaret(
-        `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
+        `<div class="inline-block answerWrapper" contenteditable="false" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
       );
       const contentEditableWrapper = document.getElementById(
         "contentEditableWrapper"
@@ -182,7 +182,6 @@ export const FillGapsInput: FC<TProps> = ({
     renderContent();
   }, [renderContent, data.fields]);
 
-
     useEffect(() => {
         if (data.dataText) {
             document.getElementById("contentEditableWrapper").innerHTML =
@@ -190,7 +189,6 @@ export const FillGapsInput: FC<TProps> = ({
         }
         renderContent();
     }, []);
-
 
   const contentEditableRef = useRef<HTMLDivElement>(null);
 

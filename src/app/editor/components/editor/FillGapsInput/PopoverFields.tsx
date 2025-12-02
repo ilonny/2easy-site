@@ -111,11 +111,11 @@ export const PopoverFields: FC<TProps> = ({
             <Image
               src={ChevronIconDown}
               alt="down"
-              style={{ position: "relative", top: 5 }}
+              className="relative top-1"
             />
           }
         >
-          <span style={{ color: "#3F28C6 important!" }}>______</span>
+          <span className="text-[#3F28C6]">______</span>
         </Button>
         {/* <Select variant="bordered" size="sm" fullWidth={false} className="min-w-[100px]" /> */}
       </PopoverTrigger>
@@ -164,11 +164,7 @@ export const PopoverFields: FC<TProps> = ({
             );
           })}
           <Button
-            style={{
-              padding: 10,
-              background: "#fff",
-              cursor: "pointer",
-            }}
+            className="p-2.5 bg-white cursor-pointer hover:bg-gray-100"
             onClick={(e) => {
               setIsOpen(false);
               onAddFieldOption(id);
@@ -182,7 +178,7 @@ export const PopoverFields: FC<TProps> = ({
               }, 50);
             }}
           >
-            <p style={{ color: "#3F28C6" }}>+ добавить вариант</p>
+            <p className="text-[#3F28C6]">+ добавить вариант</p>
           </Button>
         </div>
       </PopoverContent>
