@@ -197,14 +197,16 @@ export const FillGapsInput: FC<TProps> = ({
     /** Перерисовывает содержимое при изменении полей */
     useEffect(() => {
         renderContent();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data.fields]);
 
     useEffect(() => {
         if (data.dataText) {
-            document.getElementById("contentEditableWrapper").innerHTML =
+            document.getElementById("contentEditableWrapper")!.innerHTML =
                 data.dataText;
         }
         renderContent();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     /** Ссылка на contentEditable элемент для управления фокусом и содержимым */
