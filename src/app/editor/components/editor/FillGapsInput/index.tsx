@@ -10,8 +10,8 @@ import { RightPanel } from "./components/RightPanel";
 import { ContentSection } from "./components/ContentSection";
 import { PreviewSection } from "./components/PreviewSection";
 import { useContentEditableBehavior } from "./hooks/useContentEditableBehavior";
-import { pasteHtmlAtCaret } from "./utils";
-import {DEFAULT_VALUES_STUB} from "./constants";
+import { pasteHtmlAtCaret, findFieldById } from "./utils";
+import { DEFAULT_VALUES_STUB } from "./constants";
 
 const defaultValuesStub: TFillGapsInputData = DEFAULT_VALUES_STUB as unknown as TFillGapsInputData;
 
@@ -74,10 +74,9 @@ export const FillGapsInput: FC<TProps> = ({
   const onChangeFieldOption = useCallback(
     (fieldId: string, optionIndex: number) => {
       const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id === fieldId);
+      const field = findFieldById(dataFields, fieldId);
       if (!field) return;
-      field.options[optionIndex].isCorrect =
-        !field.options[optionIndex].isCorrect;
+      field.options[optionIndex].isCorrect = !field.options[optionIndex].isCorrect;
       changeData("fields", dataFields);
     },
     [data.fields, changeData]
@@ -86,7 +85,7 @@ export const FillGapsInput: FC<TProps> = ({
   const onChangeFieldValue = useCallback(
     (fieldId: string, optionIndex: number, value: string) => {
       const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id === fieldId);
+      const field = findFieldById(dataFields, fieldId);
       if (!field) return;
       field.options[optionIndex].value = value;
       changeData("fields", dataFields);
@@ -97,9 +96,9 @@ export const FillGapsInput: FC<TProps> = ({
   const onAddFieldOption = useCallback(
     (fieldId: string) => {
       const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id === fieldId);
+      const field = findFieldById(dataFields, fieldId);
       if (!field) return;
-      field.options.push({ value: "", isCorrect: true });
+      field.options.push({ isCorrect: false, value: "" });
       changeData("fields", dataFields);
     },
     [data.fields, changeData]
@@ -108,7 +107,7 @@ export const FillGapsInput: FC<TProps> = ({
   const deleteOption = useCallback(
     (fieldId: string, optionIndex: number) => {
       const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id === fieldId);
+      const field = findFieldById(dataFields, fieldId);
       if (!field) return;
       field.options = field.options.filter((_o, i) => i !== optionIndex);
       changeData("fields", dataFields);
