@@ -10,16 +10,10 @@ import { RightPanel } from "./components/RightPanel";
 import { ContentSection } from "./components/ContentSection";
 import { PreviewSection } from "./components/PreviewSection";
 import { useContentEditableBehavior } from "./hooks/useContentEditableBehavior";
+import { pasteHtmlAtCaret } from "./utils";
+import {DEFAULT_VALUES_STUB} from "./constants";
 
-const defaultValuesStub: TFillGapsInputData = {
-  title: "Let's practice!",
-  titleColor: "#3F28C6",
-  subtitle: "Fill in the gaps with the correct words",
-  description: "Answer the questions below",
-  images: [],
-  dataText: "",
-  fields: [],
-};
+const defaultValuesStub: TFillGapsInputData = DEFAULT_VALUES_STUB as TFillGapsInputData;
 
 type TProps = {
   onSuccess: () => void;
@@ -221,26 +215,3 @@ export const FillGapsInput: FC<TProps> = ({
     </div>
   );
 };
-
-function pasteHtmlAtCaret(html: string) {
-  let sel, range;
-  if (window.getSelection) {
-    sel = window.getSelection();
-    if (!sel) {
-      return;
-    }
-    if (sel.getRangeAt && sel.rangeCount) {
-      range = sel.getRangeAt(0);
-      range.deleteContents();
-
-      const el = document.createElement("div");
-      el.innerHTML = html;
-      const frag = document.createDocumentFragment();
-      let node: ChildNode | null;
-      while ((node = el.firstChild)) {
-        frag.appendChild(node);
-      }
-      range.insertNode(frag);
-    }
-  }
-}
