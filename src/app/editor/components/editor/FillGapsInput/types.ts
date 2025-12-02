@@ -4,14 +4,15 @@ export type TOption = {
 };
 
 export type TField = {
-  startPosition: number;
+  startPosition?: number;
   id: string;
   options: TOption[];
 };
 
 export type TFillGapsInputData = {
+  id?: string;
   title: string;
-  titleColor: "#3F28C6";
+  titleColor: string;
   subtitle: string;
   description: string;
   images: Array<Record<string, string>>;

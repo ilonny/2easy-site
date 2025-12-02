@@ -13,11 +13,11 @@ import { useContentEditableBehavior } from "./hooks/useContentEditableBehavior";
 import { pasteHtmlAtCaret } from "./utils";
 import {DEFAULT_VALUES_STUB} from "./constants";
 
-const defaultValuesStub: TFillGapsInputData = DEFAULT_VALUES_STUB as TFillGapsInputData;
+const defaultValuesStub: TFillGapsInputData = DEFAULT_VALUES_STUB as unknown as TFillGapsInputData;
 
 type TProps = {
   onSuccess: () => void;
-  defaultValues?: any;
+  defaultValues?: Partial<TFillGapsInputData>;
   lastSortIndex: number;
   currentSortIndexToShift?: number;
 };
@@ -33,14 +33,14 @@ export const FillGapsInput: FC<TProps> = ({
     currentSortIndexToShift
   );
   const { data, changeData, resetData } = useExData<TFillGapsInputData>(
-    defaultValues || defaultValuesStub
+    (defaultValues as TFillGapsInputData) || defaultValuesStub
   );
   const [images, setImages] = useState<TFillGapsInputData["images"]>(
     defaultValues?.images || []
   );
 
   useEffect(() => {
-    !data?.id &&
+    if (!data?.id) {
       resetData({
         title: "Let's practice!",
         titleColor: "#3F28C6",
@@ -50,7 +50,8 @@ export const FillGapsInput: FC<TProps> = ({
         dataText: "",
         fields: [],
       });
-  }, [resetData]);
+    }
+  }, [resetData, data?.id]);
 
   useEffect(() => {
     changeData("images", images);
@@ -63,18 +64,71 @@ export const FillGapsInput: FC<TProps> = ({
     }
   }, [onSuccess, success, resetData]);
 
+  const onChangeText = useCallback(
+    (text: string) => {
+      changeData("dataText", text);
+    },
+    [changeData]
+  );
+
+  const onChangeFieldOption = useCallback(
+    (fieldId: string, optionIndex: number) => {
+      const dataFields = [...data.fields];
+      const field = dataFields.find((f) => f.id === fieldId);
+      if (!field) return;
+      field.options[optionIndex].isCorrect =
+        !field.options[optionIndex].isCorrect;
+      changeData("fields", dataFields);
+    },
+    [data.fields, changeData]
+  );
+
+  const onChangeFieldValue = useCallback(
+    (fieldId: string, optionIndex: number, value: string) => {
+      const dataFields = [...data.fields];
+      const field = dataFields.find((f) => f.id === fieldId);
+      if (!field) return;
+      field.options[optionIndex].value = value;
+      changeData("fields", dataFields);
+    },
+    [data.fields, changeData]
+  );
+
+  const onAddFieldOption = useCallback(
+    (fieldId: string) => {
+      const dataFields = [...data.fields];
+      const field = dataFields.find((f) => f.id === fieldId);
+      if (!field) return;
+      field.options.push({ value: "", isCorrect: true });
+      changeData("fields", dataFields);
+    },
+    [data.fields, changeData]
+  );
+
+  const deleteOption = useCallback(
+    (fieldId: string, optionIndex: number) => {
+      const dataFields = [...data.fields];
+      const field = dataFields.find((f) => f.id === fieldId);
+      if (!field) return;
+      field.options = field.options.filter((_o, i) => i !== optionIndex);
+      changeData("fields", dataFields);
+    },
+    [changeData, data.fields]
+  );
+
   const renderContent = useCallback(() => {
     document
       .querySelectorAll(".contentEditable .answerWrapper")
-      .forEach((el, index) => {
+      .forEach((el) => {
         const id = el.id;
-        const field = data.fields.find((f) => f.id == id);
-        el.setAttribute("index", field?.id?.toString());
+        const field = data.fields.find((f) => f.id === id);
+        if (!field) return;
+        el.setAttribute("index", field.id);
         const root = ReactDOM.createRoot(el);
         root.render(
-          <div className="popover-wrapper" id={"popover-wrapper-" + field?.id}>
+          <div className="popover-wrapper" id={"popover-wrapper-" + field.id}>
             <PopoverFields
-              id={id}
+              id={field.id}
               field={field}
               onChangeFieldOption={onChangeFieldOption}
               onChangeFieldValue={onChangeFieldValue}
@@ -84,11 +138,11 @@ export const FillGapsInput: FC<TProps> = ({
           </div>
         );
       });
-  }, [data]);
+  }, [data, onChangeFieldOption, onChangeFieldValue, onAddFieldOption, deleteOption]);
 
   const onClickAddSelection = useCallback(
-    (addItemState: any) => {
-      const id = new Date().getTime();
+    (addItemState: { selection: string; left?: number; top?: number }) => {
+      const id = String(Date.now());
       pasteHtmlAtCaret(
         `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
       );
@@ -100,15 +154,16 @@ export const FillGapsInput: FC<TProps> = ({
         selection.removeAllRanges();
       }
 
-      const field = {
+      const field: TField = {
         id,
+        startPosition: 0,
         options: [
           {
             isCorrect: true,
             value: addItemState.selection,
           },
         ],
-      } as unknown as TField;
+      };
 
       const dataFields = [...data.fields];
       dataFields.push(field);
@@ -123,65 +178,19 @@ export const FillGapsInput: FC<TProps> = ({
     [changeData, data]
   );
 
-  const onChangeText = useCallback(
-    (text: string) => {
-      changeData("dataText", text);
-    },
-    [changeData]
-  );
-
-  const onChangeFieldOption = useCallback(
-    (fieldId: number, optionIndex: number) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options[optionIndex].isCorrect =
-        !field.options[optionIndex].isCorrect;
-      changeData("fields", dataFields);
-    },
-    [data.fields, changeData]
-  );
-
-  const onChangeFieldValue = useCallback(
-    (fieldId: number, optionIndex: number, value: string) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options[optionIndex].value = value;
-      changeData("fields", dataFields);
-    },
-    [data.fields, changeData]
-  );
-
-  const onAddFieldOption = useCallback(
-    (fieldId: number) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options.push({ value: "", isCorrect: true });
-      changeData("fields", dataFields);
-    },
-    [data.fields, changeData]
-  );
-
-  const deleteOption = useCallback(
-    (fieldId: number, optionIndex: number) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options = field.options.filter((_o, i) => i !== optionIndex);
-      changeData("fields", dataFields);
-    },
-    [changeData, data.fields]
-  );
-
   useEffect(() => {
     renderContent();
-  }, [data.fields]);
+  }, [renderContent, data.fields]);
 
-  useEffect(() => {
-    if (data.dataText) {
-      document.getElementById("contentEditableWrapper").innerHTML =
-        data.dataText;
-    }
-    renderContent();
-  }, []);
+
+    useEffect(() => {
+        if (data.dataText) {
+            document.getElementById("contentEditableWrapper").innerHTML =
+                data.dataText;
+        }
+        renderContent();
+    }, []);
+
 
   const contentEditableRef = useRef<HTMLDivElement>(null);
 
@@ -202,7 +211,7 @@ export const FillGapsInput: FC<TProps> = ({
       <div className="h-10" />
 
       <ContentSection
-        contentEditableRef={contentEditableRef as any}
+        contentEditableRef={contentEditableRef}
         onChangeText={onChangeText}
         onClickAddSelection={onClickAddSelection}
       />
