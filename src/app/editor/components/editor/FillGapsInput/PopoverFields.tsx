@@ -13,12 +13,12 @@ import { TField } from "./types";
 import Close from "@/assets/icons/close.svg";
 
 type TProps = {
-  id: number;
+  id: string;
   field: TField;
-  onChangeFieldOption: (id: number, optionIndex: number) => void;
-  onChangeFieldValue: (id: number, optionIndex: number, value: string) => void;
-  onAddFieldOption: (id: number) => void;
-  deleteOption: (id: number, optionIndex: number) => void;
+  onChangeFieldOption: (id: string, optionIndex: number) => void;
+  onChangeFieldValue: (id: string, optionIndex: number, value: string) => void;
+  onAddFieldOption: (id: string) => void;
+  deleteOption: (id: string, optionIndex: number) => void;
 };
 
 const PopoverInput = ({

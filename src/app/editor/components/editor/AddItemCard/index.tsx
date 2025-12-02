@@ -2,7 +2,15 @@ import { Button, Card, Select } from "@nextui-org/react";
 import { FC, useEffect, useRef, useState } from "react";
 
 type TProps = {
-  onClickAddSelection: () => void;
+  onClickAddSelection: (
+    state: {
+      selection: string;
+      left: number;
+      top: number;
+      baseOffset: number;
+      focusOffset: number;
+    }
+  ) => void;
 };
 
 export const AddItemCard: FC<TProps> = ({ onClickAddSelection }) => {

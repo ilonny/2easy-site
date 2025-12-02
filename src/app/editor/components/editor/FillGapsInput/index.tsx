@@ -14,6 +14,7 @@ import { PopoverFields } from "./PopoverFields";
 import styles from "./styles.module.css";
 import { FillGapsInputExView } from "../../view/FillGapsInputExView";
 import InfoIcon from "@/assets/icons/info.svg";
+import { useContentEditableBehavior } from "./hooks/useContentEditableBehavior";
 
 const defaultValuesStub: TFillGapsInputData = {
   title: "Let's practice!",
@@ -195,61 +196,12 @@ export const FillGapsInput: FC<TProps> = ({
 
   const contentEditableRef = useRef(null);
 
-  useEffect(() => {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === "childList") {
-          mutation.removedNodes.forEach((removedNode) => {
-            if (
-              removedNode.classList &&
-              removedNode.classList.contains("answerWrapper")
-            ) {
-              mutation.previousSibling.nodeValue =
-                mutation.previousSibling?.nodeValue +
-                " " +
-                removedNode
-                  ?.getAttribute("answer")
-                  .replace("[", "")
-                  .replace("]", "") +
-                " ";
-              onChangeText(contentEditableRef.current?.innerHTML || "");
-            }
-          });
-        }
-      });
-    });
 
-    const currentRef = contentEditableRef.current;
 
-    if (currentRef) {
-      observer.observe(currentRef, {
-        childList: true,
-        subtree: true,
-        characterData: false,
-      });
-    }
 
-    return () => {
-      observer.disconnect();
-    };
-  }, [onChangeText]);
 
-  useEffect(() => {
-    const pasteListener = (e) => {
-      e.preventDefault();
-      // get text representation of clipboard
-      const text = (e.originalEvent || e).clipboardData.getData("text/plain");
-      // insert text manually
-      document.execCommand("insertHTML", false, text);
-    };
-    document
-      .getElementById("contentEditableWrapper")
-      ?.addEventListener("paste", pasteListener);
-    return () =>
-      document
-        .getElementById("contentEditableWrapper")
-        ?.removeEventListener("paste", pasteListener);
-  }, []);
+  // Управление contentEditable поведением
+  useContentEditableBehavior(contentEditableRef, onChangeText);
 
   return (
     <div>

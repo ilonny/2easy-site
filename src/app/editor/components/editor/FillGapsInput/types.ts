@@ -1,12 +1,12 @@
+export type TOption = {
+  value: string;
+  isCorrect: boolean;
+};
+
 export type TField = {
   startPosition: number;
   id: string;
-  options: [
-    {
-      value: string;
-      isCorrect: boolean;
-    }
-  ];
+  options: TOption[];
 };
 
 export type TFillGapsInputData = {
