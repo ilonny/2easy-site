@@ -13,6 +13,7 @@ import { useContentEditableBehavior } from "./hooks/useContentEditableBehavior";
 import { pasteHtmlAtCaret, findFieldById } from "./utils";
 import { DEFAULT_VALUES_STUB } from "./constants";
 
+/** Значения по умолчанию для создания нового упражнения */
 const defaultValuesStub: TFillGapsInputData = DEFAULT_VALUES_STUB as unknown as TFillGapsInputData;
 
 type TProps = {
@@ -22,6 +23,11 @@ type TProps = {
   currentSortIndexToShift?: number;
 };
 
+/**
+ * FillGapsInput - основной компонент редактора для упражнения на заполнение пропусков
+ * Управляет всем процессом создания упражнения: редактированием текста, добавлением пропусков,
+ * редактированием вариантов ответов и сохранением данных
+ */
 export const FillGapsInput: FC<TProps> = ({
   onSuccess,
   defaultValues,
@@ -35,10 +41,12 @@ export const FillGapsInput: FC<TProps> = ({
   const { data, changeData, resetData } = useExData<TFillGapsInputData>(
     (defaultValues as TFillGapsInputData) || defaultValuesStub
   );
+  /** Хранилище загруженных изображений для задания */
   const [images, setImages] = useState<TFillGapsInputData["images"]>(
     defaultValues?.images || []
   );
 
+  /** Инициализирует значения по умолчанию при первой загрузке компонента */
   useEffect(() => {
     if (!data?.id) {
       resetData({
@@ -53,10 +61,12 @@ export const FillGapsInput: FC<TProps> = ({
     }
   }, [resetData, data?.id]);
 
+  /** Синхронизирует локальное состояние изображений с основными данными */
   useEffect(() => {
     changeData("images", images);
   }, [images, changeData]);
 
+  /** Обрабатывает успешное сохранение данных - вызывает колбэк и очищает форму */
   useEffect(() => {
     if (success) {
       onSuccess?.();
@@ -64,6 +74,7 @@ export const FillGapsInput: FC<TProps> = ({
     }
   }, [onSuccess, success, resetData]);
 
+  /** Обновляет текст упражнения при изменении contentEditable элемента */
   const onChangeText = useCallback(
     (text: string) => {
       changeData("dataText", text);
@@ -71,6 +82,7 @@ export const FillGapsInput: FC<TProps> = ({
     [changeData]
   );
 
+  /** Переключает флаг правильности ответа для выбранного варианта */
   const onChangeFieldOption = useCallback(
     (fieldId: string, optionIndex: number) => {
       const dataFields = [...data.fields];
@@ -82,6 +94,7 @@ export const FillGapsInput: FC<TProps> = ({
     [data.fields, changeData]
   );
 
+  /** Обновляет текстовое значение варианта ответа */
   const onChangeFieldValue = useCallback(
     (fieldId: string, optionIndex: number, value: string) => {
       const dataFields = [...data.fields];
@@ -93,6 +106,7 @@ export const FillGapsInput: FC<TProps> = ({
     [data.fields, changeData]
   );
 
+  /** Добавляет новый вариант ответа к пропуску */
   const onAddFieldOption = useCallback(
     (fieldId: string) => {
       const dataFields = [...data.fields];
@@ -104,6 +118,7 @@ export const FillGapsInput: FC<TProps> = ({
     [data.fields, changeData]
   );
 
+  /** Удаляет вариант ответа из пропуска */
   const deleteOption = useCallback(
     (fieldId: string, optionIndex: number) => {
       const dataFields = [...data.fields];
@@ -115,6 +130,7 @@ export const FillGapsInput: FC<TProps> = ({
     [changeData, data.fields]
   );
 
+  /** Отрисовывает попавер-поля со списком вариантов ответов в каждом пропуске */
   const renderContent = useCallback(() => {
     document
       .querySelectorAll(".contentEditable .answerWrapper")
@@ -139,6 +155,7 @@ export const FillGapsInput: FC<TProps> = ({
       });
   }, [data, onChangeFieldOption, onChangeFieldValue, onAddFieldOption, deleteOption]);
 
+  /** Добавляет новый пропуск в текст на основе выделенного текста */
   const onClickAddSelection = useCallback(
     (addItemState: { selection: string; left?: number; top?: number }) => {
       const id = String(Date.now());
@@ -177,25 +194,15 @@ export const FillGapsInput: FC<TProps> = ({
     [changeData, data]
   );
 
+  /** Перерисовывает содержимое при изменении полей */
   useEffect(() => {
     renderContent();
   }, [renderContent, data.fields]);
 
-    useEffect(() => {
-        if (data.dataText) {
-            document.getElementById("contentEditableWrapper").innerHTML =
-                data.dataText;
-        }
-        renderContent();
-    }, []);
-
+  /** Ссылка на contentEditable элемент для управления фокусом и содержимым */
   const contentEditableRef = useRef<HTMLDivElement>(null);
 
-
-
-
-
-  // Управление contentEditable поведением
+  /** Инициализирует поведение contentEditable элемента (вставка, удаление) */
   useContentEditableBehavior(contentEditableRef, onChangeText);
 
   return (

@@ -1,5 +1,8 @@
 /**
  * Вставляет HTML в позицию курсора в contentEditable элементе
+ * Использует Selection API для получения текущего положения курсора
+ * и Range API для вставки содержимого
+ * @param html - HTML строка для вставки
  */
 export function pasteHtmlAtCaret(html: string) {
   let sel, range;

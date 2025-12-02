@@ -3,8 +3,14 @@ import { FC } from "react";
 import { TitleExInput } from "../../TitleExInput";
 import { TFillGapsInputData } from "../types";
 
+/**
+ * LeftPanel - левая панель редактора (50% ширины)
+ * Содержит поля для редактирования заголовка, подзаголовка и описания упражнения
+ */
 type Props = {
+  /** Основные данные упражнения */
   data: TFillGapsInputData;
+  /** Функция для обновления данных */
   changeData: (key: keyof TFillGapsInputData, value: any) => void;
 };
 

@@ -5,9 +5,16 @@ import { FillGapsInputExView } from "../../../view/FillGapsInputExView";
 import { TFillGapsSelectData } from "../../../editor/FillGapsSelect/types";
 import { TFillGapsInputData } from "../types";
 
+/**
+ * PreviewSection - секция для предпросмотра и сохранения упражнения
+ * Отображает как будет выглядеть упражнение и кнопку сохранения
+ */
 type Props = {
+  /** Данные упражнения для предпросмотра */
   data: TFillGapsInputData;
+  /** Функция для сохранения данных */
   onSave: (data: any) => void;
+  /** Флаг, указывающий на процесс сохранения */
   isLoading: boolean;
 };
 

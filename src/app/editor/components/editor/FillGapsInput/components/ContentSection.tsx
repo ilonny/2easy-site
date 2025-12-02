@@ -7,9 +7,16 @@ import { AddItemCard } from "../../AddItemCard";
 import styles from "../styles.module.css";
 import { CONTENT_EDITABLE_ID } from "../constants";
 
+/**
+ * ContentSection - секция для редактирования текста упражнения
+ * Содержит contentEditable элемент для ввода текста и кнопку для добавления пропусков
+ */
 type Props = {
+  /** Ссылка на contentEditable элемент */
   contentEditableRef: RefObject<HTMLDivElement>;
+  /** Обработчик изменений текста */
   onChangeText: (text: string) => void;
+  /** Обработчик добавления выделенного текста в качестве пропуска */
   onClickAddSelection: (addItemState: { selection: string; left?: number; top?: number }) => void;
 };
 

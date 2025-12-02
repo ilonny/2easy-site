@@ -12,20 +12,35 @@ import Image from "next/image";
 import { TField } from "./types";
 import Close from "@/assets/icons/close.svg";
 
+/**
+ * TProps для компонента PopoverFields
+ */
 type TProps = {
+  /** ID пропуска */
   id: string;
+  /** Объект пропуска с вариантами ответов */
   field: TField;
+  /** Обработчик переключения флага правильности ответа */
   onChangeFieldOption: (id: string, optionIndex: number) => void;
+  /** Обработчик изменения текста варианта ответа */
   onChangeFieldValue: (id: string, optionIndex: number, value: string) => void;
+  /** Обработчик добавления нового варианта ответа */
   onAddFieldOption: (id: string) => void;
+  /** Обработчик удаления варианта ответа */
   deleteOption: (id: string, optionIndex: number) => void;
 };
 
+/**
+ * PopoverInput - входное поле внутри попавера для редактирования варианта ответа
+ * Автоматически сохраняет значение при потере фокуса или нажатии Enter
+ */
 const PopoverInput = ({
   onBlur,
   initialValue,
 }: {
+  /** Обработчик потери фокуса с новым значением */
   onBlur: (val: string) => void;
+  /** Начальное значение поля */
   initialValue: string;
 }) => {
   const [inputValue, setInputValue] = useState("");
@@ -34,6 +49,7 @@ const PopoverInput = ({
     setInputValue(initialValue);
   }, []);
 
+  /** Отправляет значение когда фокус теряется или пользователь выходит */
   useEffect(() => {
     return () => {
       if (!inputValue) {
@@ -47,11 +63,11 @@ const PopoverInput = ({
       value={inputValue}
       onChange={(e) => setInputValue(e.target.value)}
       onBlur={(e) => onBlur(inputValue)}
-      // onChange={(e) => onBlur(inputValue)}
       size="sm"
       variant="underlined"
       color="primary"
       onKeyDown={(e) => {
+        /** Отправляет значение при нажатии Enter */
         if (e.key.toLowerCase() === "enter") {
           onBlur(inputValue);
         }
@@ -60,6 +76,10 @@ const PopoverInput = ({
   );
 };
 
+/**
+ * PopoverFields - компонент попавера для управления вариантами ответов пропуска
+ * Позволяет редактировать, добавлять и удалять варианты ответов
+ */
 export const PopoverFields: FC<TProps> = ({
   id,
   field,
@@ -68,6 +88,7 @@ export const PopoverFields: FC<TProps> = ({
   onAddFieldOption,
   deleteOption,
 }) => {
+  /** Состояние открытости попавера */
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Popover

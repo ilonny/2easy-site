@@ -5,8 +5,14 @@ import Image from "next/image";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import { TFillGapsInputData } from "../types";
 
+/**
+ * RightPanel - правая панель редактора (50% ширины)
+ * Содержит интерфейс для загрузки и управления изображениями упражнения
+ */
 type Props = {
+  /** Список загруженных изображений */
   images: TFillGapsInputData["images"];
+  /** Функция для обновления списка изображений */
   setImages: (images: TFillGapsInputData["images"]) => void;
 };
 
