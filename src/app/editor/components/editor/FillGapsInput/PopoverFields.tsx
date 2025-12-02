@@ -83,7 +83,6 @@ export const PopoverFields: FC<TProps> = ({
           enter: {
             y: 0,
             opacity: 1,
-            duration: 0,
             transition: {
               opacity: {
                 duration: 0,
@@ -93,7 +92,6 @@ export const PopoverFields: FC<TProps> = ({
           exit: {
             y: "10%",
             opacity: 0,
-            duration: 0,
             transition: {
               opacity: {
                 duration: 0,
@@ -140,9 +138,8 @@ export const PopoverFields: FC<TProps> = ({
                       setIsOpen(false);
                       deleteOption(id, optionIndex);
                       setTimeout(() => {
-                        document
-                          .getElementById("popover-wrapper-" + id)
-                          ?.firstChild?.click();
+                        const element = document.getElementById("popover-wrapper-" + id)?.firstChild as HTMLElement | null;
+                        element?.click();
                       }, 100);
                     }}
                     isIconOnly
@@ -169,12 +166,8 @@ export const PopoverFields: FC<TProps> = ({
               setIsOpen(false);
               onAddFieldOption(id);
               setTimeout(() => {
-                const wrapper = document.getElementById(
-                  "popover-wrapper-" + id
-                )?.firstChild;
-                document
-                  .getElementById("popover-wrapper-" + id)
-                  ?.firstChild?.click();
+                const element = document.getElementById("popover-wrapper-" + id)?.firstChild as HTMLElement | null;
+                element?.click();
               }, 50);
             }}
           >
