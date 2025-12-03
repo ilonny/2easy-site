@@ -1,16 +1,20 @@
 "use client";
 import {useExData} from "../hooks/useExData";
-import {TField, TFillGapsSelectData} from "./types";
-import {FC, useCallback, useEffect, useMemo, useRef, useState} from "react";
-import ReactDOM, {createRoot, Root} from "react-dom/client";
-import {PopoverFields} from "./PopoverFields";
+import {TFillGapsSelectData} from "./types";
+import {FC, useCallback, useState} from "react";
 import styles from "./styles.module.css";
 import {defaultValuesStub} from "./constants/defaults";
-import {pasteHtmlAtCaret} from "./helpers/pasteHtmlAtCaret";
 import {Form} from "./components/Form";
 import {EditorArea} from "./components/EditorArea";
 import {Preview} from "./components/Preview";
 import {useUploadFillGapsSelectEx} from "../hooks/useUploadFillGapsSelectEx";
+import {
+    useFieldMutations,
+    usePopoverRender,
+    useContentEditable,
+    useAddSelection,
+    useDataInitialization,
+} from "./hooks";
 
 type TProps = {
     onSuccess: () => void;
@@ -20,11 +24,11 @@ type TProps = {
 };
 
 export const FillGapsSelect: FC<TProps> = ({
-                                               onSuccess,
-                                               defaultValues,
-                                               lastSortIndex,
-                                               currentSortIndexToShift,
-                                           }) => {
+    onSuccess,
+    defaultValues,
+    lastSortIndex,
+    currentSortIndexToShift,
+}) => {
     const {isLoading, saveFillGapsSelectEx, success} =
         useUploadFillGapsSelectEx(lastSortIndex, currentSortIndexToShift);
     const {data, changeData, resetData} = useExData<TFillGapsSelectData>(
@@ -34,59 +38,17 @@ export const FillGapsSelect: FC<TProps> = ({
         defaultValues?.images || []
     );
 
-    useEffect(() => {
-        if (!data?.id) {
-            resetData(defaultValuesStub);
-        }
-    }, [data?.id, resetData]);
+    // Initialize data
+    useDataInitialization(data, images, success, resetData, changeData, onSuccess);
 
-    useEffect(() => {
-        changeData("images", images);
-    }, [images, changeData]);
+    // Field mutations callbacks
+    const {onChangeFieldOption, onChangeFieldValue, onAddFieldOption, deleteOption} =
+        useFieldMutations(data, changeData);
 
-    useEffect(() => {
-        if (success) {
-            onSuccess?.();
-            resetData(defaultValuesStub);
-        }
-    }, [onSuccess, success, resetData]);
+    // Add selection functionality
+    const onClickAddSelection = useAddSelection(data, changeData);
 
-
-    const onClickAddSelection = useCallback(
-        (addItemState: { selection: string }) => {
-            const id = new Date().getTime();
-            pasteHtmlAtCaret(
-                `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
-            );
-            const contentEditableWrapper = document.getElementById(
-                "contentEditableWrapper"
-            );
-            const selection = window.getSelection();
-            if (selection) {
-                selection.removeAllRanges();
-            }
-
-            const field = {
-                id,
-                options: [
-                    {
-                        isCorrect: true,
-                        value: addItemState.selection,
-                    },
-                ],
-                originalWord: addItemState.selection,
-            } as TField;
-
-            const dataFields = [...data.fields];
-            dataFields.push(field);
-
-            changeData("fields", [...dataFields]);
-            changeData("dataText", contentEditableWrapper?.innerHTML);
-            contentEditableWrapper?.blur();
-        },
-        [changeData, data]
-    );
-
+    // Change text callback
     const onChangeText = useCallback(
         (text: string) => {
             changeData("dataText", text);
@@ -94,175 +56,16 @@ export const FillGapsSelect: FC<TProps> = ({
         [changeData]
     );
 
-    const fieldMutationHandlers = useMemo(
-        () => ({
-            toggleOption: (fieldId: number, optionIndex: number) => {
-                const dataFields = [...data.fields];
-                const field = dataFields.find((f) => f.id === fieldId);
-                if (!field) return;
-                field.options[optionIndex].isCorrect = !field.options[optionIndex].isCorrect;
-                changeData("fields", dataFields);
-            },
-            updateOptionValue: (fieldId: number, optionIndex: number, value: string) => {
-                const dataFields = [...data.fields];
-                const field = dataFields.find((f) => f.id === fieldId);
-                if (!field) return;
-                field.options[optionIndex].value = value;
-                changeData("fields", dataFields);
-            },
-            addOption: (fieldId: number) => {
-                const dataFields = [...data.fields];
-                const field = dataFields.find((f) => f.id === fieldId);
-                if (!field) return;
-                field.options.push({value: "", isCorrect: false});
-                changeData("fields", dataFields);
-            },
-            removeOption: (fieldId: number, optionIndex: number) => {
-                const dataFields = [...data.fields];
-                const field = dataFields.find((f) => f.id === fieldId);
-                if (!field) return;
-                field.options = field.options.filter((_o, i) => i !== optionIndex);
-                changeData("fields", dataFields);
-            },
-        }),
-        [data.fields, changeData]
-    );
+    // Render popover roots
+    const rootsRef = usePopoverRender(data, {
+        onChangeFieldOption,
+        onChangeFieldValue,
+        onAddFieldOption,
+        deleteOption,
+    });
 
-    const onChangeFieldOption = useCallback(
-        (fieldId: number, optionIndex: number) => fieldMutationHandlers.toggleOption(fieldId, optionIndex),
-        [fieldMutationHandlers]
-    );
-
-    const onChangeFieldValue = useCallback(
-        (fieldId: number, optionIndex: number, value: string) =>
-            fieldMutationHandlers.updateOptionValue(fieldId, optionIndex, value),
-        [fieldMutationHandlers]
-    );
-
-    const onAddFieldOption = useCallback(
-        (fieldId: number) => fieldMutationHandlers.addOption(fieldId),
-        [fieldMutationHandlers]
-    );
-
-    const deleteOption = useCallback(
-        (fieldId: number, optionIndex: number) => fieldMutationHandlers.removeOption(fieldId, optionIndex),
-        [fieldMutationHandlers]
-    );
-
-    const rootsRef = useRef<Map<number, Root>>(new Map());
-
-    const renderContent = useCallback(() => {
-        document
-            .querySelectorAll(".contentEditable .answerWrapper")
-            .forEach((el) => {
-                const elId = el.id;
-                const field = data.fields.find((f) => String(f.id) === elId);
-                if (!field) return;
-                el.setAttribute("index", String(field.id));
-                const root = ReactDOM.createRoot(el as HTMLElement);
-                root.render(
-                    <div className="popover-wrapper" id={"popover-wrapper-" + field.id}>
-                        <PopoverFields
-                            id={field.id}
-                            field={field}
-                            onChangeFieldOption={onChangeFieldOption}
-                            onChangeFieldValue={onChangeFieldValue}
-                            onAddFieldOption={onAddFieldOption}
-                            deleteOption={deleteOption}
-                        />
-                    </div>
-                );
-            });
-    }, [data, onChangeFieldOption, onChangeFieldValue, onAddFieldOption, deleteOption]);
-
-    useEffect(() => {
-        renderContent();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data.fields,]);
-
-    useEffect(() => {
-        const wrapperEl = document.getElementById("contentEditableWrapper");
-        if (data.dataText && wrapperEl) {
-            wrapperEl.innerHTML = data.dataText;
-        }
-        renderContent();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const contentEditableRef = useRef<HTMLElement | null>(null);
-
-    useEffect(() => {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === "childList") {
-                    mutation.removedNodes.forEach((removedNode) => {
-                        const removedEl = removedNode as HTMLElement;
-                        if (removedEl.classList?.contains("answerWrapper")) {
-                            const removedId = Number(removedEl.id);
-                            const mounted = rootsRef.current.get(removedId);
-                            if (mounted) {
-                                try {
-                                    mounted.unmount();
-                                } catch {
-                                    // ignore
-                                }
-                                rootsRef.current.delete(removedId);
-                            }
-
-                            const prev = mutation.previousSibling as Node | null;
-                            if (prev && prev.nodeValue !== null) {
-                                prev.nodeValue =
-                                    prev.nodeValue +
-                                    " " +
-                                    (removedEl.getAttribute("answer") || "")
-                                        .replace("[", "")
-                                        .replace("]", "") +
-                                    " ";
-                            }
-                            onChangeText(contentEditableRef.current?.innerHTML || "");
-                        }
-                    });
-                }
-            });
-        });
-
-        const currentRef = contentEditableRef.current;
-        if (currentRef) {
-            observer.observe(currentRef, {
-                childList: true,
-                subtree: true,
-                characterData: false,
-            });
-        }
-
-        const mountedRoots = rootsRef.current;
-        return () => {
-            observer.disconnect();
-            mountedRoots.forEach((r) => {
-                try {
-                    r.unmount();
-                } catch {
-                    // ignore
-                }
-            });
-            mountedRoots.clear();
-        };
-    }, [onChangeText]);
-
-    useEffect(() => {
-        const pasteListener = (e: ClipboardEvent) => {
-            e.preventDefault();
-            const text = e.clipboardData?.getData("text/plain") || "";
-            document.execCommand("insertHTML", false, text);
-        };
-
-        const wrapper = document.getElementById("contentEditableWrapper");
-        wrapper?.addEventListener("paste", pasteListener);
-
-        return () => {
-            wrapper?.removeEventListener("paste", pasteListener);
-        };
-    }, []);
+    // ContentEditable management
+    const contentEditableRef = useContentEditable(onChangeText, rootsRef);
 
     return (
         <div>
