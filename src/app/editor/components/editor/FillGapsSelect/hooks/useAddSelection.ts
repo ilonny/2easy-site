@@ -1,5 +1,5 @@
 import {useCallback} from "react";
-import {pasteHtmlAtCaret} from "../helpers/pasteHtmlAtCaret";
+import {pasteHtmlAtCaret} from "@/app/editor/components/editor/FillGapsSelect/utils/pasteHtmlAtCaret";
 import {TField, TFillGapsSelectData} from "../types";
 
 /**
