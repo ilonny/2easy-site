@@ -94,8 +94,10 @@ export const FillGapsSelect: FC<TProps> = ({
 
     return (
         <div>
+            {/* Форма для редактирования метаданных: название, подзаголовок, описание, изображения */}
             <Form data={data} changeData={changeData} images={images} setImages={setImages} />
             <div className="h-10" />
+            {/* Редактор текста с поддержкой создания пропусков */}
             <EditorArea
                 onClickAddSelection={onClickAddSelection}
                 onChangeText={onChangeText}
@@ -103,6 +105,7 @@ export const FillGapsSelect: FC<TProps> = ({
                 styles={styles}
             />
             <div className="h-10" />
+            {/* Превью упражнения и кнопка сохранения */}
             <Preview data={data} isLoading={isLoading} saveFillGapsSelectEx={saveFillGapsSelectEx} />
             <div className="h-10" />
         </div>
