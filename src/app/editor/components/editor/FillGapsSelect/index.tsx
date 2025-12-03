@@ -1,8 +1,8 @@
 "use client";
 import {useExData} from "../hooks/useExData";
 import {TField, TFillGapsSelectData} from "./types";
-import {FC, useCallback, useEffect, useRef, useState} from "react";
-import ReactDOM from "react-dom/client";
+import {FC, useCallback, useEffect, useMemo, useRef, useState} from "react";
+import ReactDOM, {createRoot, Root} from "react-dom/client";
 import {PopoverFields} from "./PopoverFields";
 import styles from "./styles.module.css";
 import {defaultValuesStub} from "./constants/defaults";
@@ -35,8 +35,10 @@ export const FillGapsSelect: FC<TProps> = ({
     );
 
     useEffect(() => {
-        !data?.id && resetData(defaultValuesStub);
-    }, [resetData]);
+        if (!data?.id) {
+            resetData(defaultValuesStub);
+        }
+    }, [data?.id, resetData]);
 
     useEffect(() => {
         changeData("images", images);
@@ -92,49 +94,62 @@ export const FillGapsSelect: FC<TProps> = ({
         [changeData]
     );
 
-    const onChangeFieldOption = useCallback(
-        (fieldId: number, optionIndex: number) => {
-            const dataFields = [...data.fields];
-            const field = dataFields.find((f) => f.id === fieldId);
-            if (!field) return;
-            field.options[optionIndex].isCorrect = !field.options[optionIndex].isCorrect;
-            changeData("fields", dataFields);
-        },
+    const fieldMutationHandlers = useMemo(
+        () => ({
+            toggleOption: (fieldId: number, optionIndex: number) => {
+                const dataFields = [...data.fields];
+                const field = dataFields.find((f) => f.id === fieldId);
+                if (!field) return;
+                field.options[optionIndex].isCorrect = !field.options[optionIndex].isCorrect;
+                changeData("fields", dataFields);
+            },
+            updateOptionValue: (fieldId: number, optionIndex: number, value: string) => {
+                const dataFields = [...data.fields];
+                const field = dataFields.find((f) => f.id === fieldId);
+                if (!field) return;
+                field.options[optionIndex].value = value;
+                changeData("fields", dataFields);
+            },
+            addOption: (fieldId: number) => {
+                const dataFields = [...data.fields];
+                const field = dataFields.find((f) => f.id === fieldId);
+                if (!field) return;
+                field.options.push({value: "", isCorrect: false});
+                changeData("fields", dataFields);
+            },
+            removeOption: (fieldId: number, optionIndex: number) => {
+                const dataFields = [...data.fields];
+                const field = dataFields.find((f) => f.id === fieldId);
+                if (!field) return;
+                field.options = field.options.filter((_o, i) => i !== optionIndex);
+                changeData("fields", dataFields);
+            },
+        }),
         [data.fields, changeData]
+    );
+
+    const onChangeFieldOption = useCallback(
+        (fieldId: number, optionIndex: number) => fieldMutationHandlers.toggleOption(fieldId, optionIndex),
+        [fieldMutationHandlers]
     );
 
     const onChangeFieldValue = useCallback(
-        (fieldId: number, optionIndex: number, value: string) => {
-            const dataFields = [...data.fields];
-            const field = dataFields.find((f) => f.id === fieldId);
-            if (!field) return;
-            field.options[optionIndex].value = value;
-            changeData("fields", dataFields);
-        },
-        [data.fields, changeData]
+        (fieldId: number, optionIndex: number, value: string) =>
+            fieldMutationHandlers.updateOptionValue(fieldId, optionIndex, value),
+        [fieldMutationHandlers]
     );
 
     const onAddFieldOption = useCallback(
-        (fieldId: number) => {
-            const dataFields = [...data.fields];
-            const field = dataFields.find((f) => f.id === fieldId);
-            if (!field) return;
-            field.options.push({value: "", isCorrect: false});
-            changeData("fields", dataFields);
-        },
-        [data.fields, changeData]
+        (fieldId: number) => fieldMutationHandlers.addOption(fieldId),
+        [fieldMutationHandlers]
     );
 
     const deleteOption = useCallback(
-        (fieldId: number, optionIndex: number) => {
-            const dataFields = [...data.fields];
-            const field = dataFields.find((f) => f.id === fieldId);
-            if (!field) return;
-            field.options = field.options.filter((_o, i) => i !== optionIndex);
-            changeData("fields", dataFields);
-        },
-        [changeData, data.fields]
+        (fieldId: number, optionIndex: number) => fieldMutationHandlers.removeOption(fieldId, optionIndex),
+        [fieldMutationHandlers]
     );
+
+    const rootsRef = useRef<Map<number, Root>>(new Map());
 
     const renderContent = useCallback(() => {
         document
@@ -166,9 +181,9 @@ export const FillGapsSelect: FC<TProps> = ({
     }, [data.fields,]);
 
     useEffect(() => {
-        if (data.dataText) {
-            document.getElementById("contentEditableWrapper").innerHTML =
-                data.dataText;
+        const wrapperEl = document.getElementById("contentEditableWrapper");
+        if (data.dataText && wrapperEl) {
+            wrapperEl.innerHTML = data.dataText;
         }
         renderContent();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -182,10 +197,18 @@ export const FillGapsSelect: FC<TProps> = ({
                 if (mutation.type === "childList") {
                     mutation.removedNodes.forEach((removedNode) => {
                         const removedEl = removedNode as HTMLElement;
-                        if (
-                            removedEl.classList &&
-                            removedEl.classList.contains("answerWrapper")
-                        ) {
+                        if (removedEl.classList?.contains("answerWrapper")) {
+                            const removedId = Number(removedEl.id);
+                            const mounted = rootsRef.current.get(removedId);
+                            if (mounted) {
+                                try {
+                                    mounted.unmount();
+                                } catch {
+                                    // ignore
+                                }
+                                rootsRef.current.delete(removedId);
+                            }
+
                             const prev = mutation.previousSibling as Node | null;
                             if (prev && prev.nodeValue !== null) {
                                 prev.nodeValue =
@@ -204,7 +227,6 @@ export const FillGapsSelect: FC<TProps> = ({
         });
 
         const currentRef = contentEditableRef.current;
-
         if (currentRef) {
             observer.observe(currentRef, {
                 childList: true,
@@ -213,8 +235,17 @@ export const FillGapsSelect: FC<TProps> = ({
             });
         }
 
+        const mountedRoots = rootsRef.current;
         return () => {
             observer.disconnect();
+            mountedRoots.forEach((r) => {
+                try {
+                    r.unmount();
+                } catch {
+                    // ignore
+                }
+            });
+            mountedRoots.clear();
         };
     }, [onChangeText]);
 
@@ -224,42 +255,28 @@ export const FillGapsSelect: FC<TProps> = ({
             const text = e.clipboardData?.getData("text/plain") || "";
             document.execCommand("insertHTML", false, text);
         };
-        document
-            .getElementById("contentEditableWrapper")
-            ?.addEventListener("paste", pasteListener);
-        return () =>
-            document
-                .getElementById("contentEditableWrapper")
-                ?.removeEventListener("paste", pasteListener);
+
+        const wrapper = document.getElementById("contentEditableWrapper");
+        wrapper?.addEventListener("paste", pasteListener);
+
+        return () => {
+            wrapper?.removeEventListener("paste", pasteListener);
+        };
     }, []);
 
     return (
         <div>
-            <Form
-                data={data}
-                changeData={changeData}
-                images={images}
-                setImages={setImages}
-            />
-
-            <div className="h-10"/>
-
+            <Form data={data} changeData={changeData} images={images} setImages={setImages} />
+            <div className="h-10" />
             <EditorArea
                 onClickAddSelection={onClickAddSelection}
                 onChangeText={onChangeText}
                 contentEditableRef={contentEditableRef}
                 styles={styles}
             />
-
-            <div className="h-10"/>
-
-            <Preview
-                data={data}
-                isLoading={isLoading}
-                saveFillGapsSelectEx={saveFillGapsSelectEx}
-            />
-
-            <div className="h-10"/>
+            <div className="h-10" />
+            <Preview data={data} isLoading={isLoading} saveFillGapsSelectEx={saveFillGapsSelectEx} />
+            <div className="h-10" />
         </div>
     );
 };
