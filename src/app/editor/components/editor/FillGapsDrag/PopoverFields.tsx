@@ -14,7 +14,7 @@ import { TField } from "./types";
 import Close from "@/assets/icons/close.svg";
 
 type TProps = {
-  id: number;
+  id: string;
   field: TField;
 };
 
