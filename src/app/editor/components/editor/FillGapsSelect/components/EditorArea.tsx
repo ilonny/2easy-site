@@ -5,10 +5,37 @@ import Image from "next/image";
 import InfoIcon from "@/assets/icons/info.svg";
 import { Tooltip } from "@nextui-org/react";
 
+/**
+ * Компонент EditorArea
+ *
+ * Основной редактор текста для создания пропусков.
+ *
+ * Функциональность:
+ * - contentEditable div для редактирования текста
+ * - Пользователь выделяет слово и нажимает на кнопку "Добавить пропуск"
+ * - Каждый пропуск отображается как answerWrapper элемент внутри contentEditable
+ * - AddItemCard компонент позволяет добавлять выделенный текст как новый пропуск
+ *
+ * Структура:
+ * 1. Заголовок с подсказкой (tooltip)
+ * 2. ContentEditable контейнер для редактирования текста
+ * 3. AddItemCard для выбора и добавления пропусков
+ *
+ * Взаимодействие:
+ * - Пользователь выделяет текст в contentEditable
+ * - Нажимает стрелку в AddItemCard
+ * - Выделенный текст превращается в пропуск (answerWrapper div)
+ * - Срабатывает callback onClickAddSelection
+ * - Изменения текста отслеживаются через onChangeText
+ */
 type TProps = {
+  /** Callback при добавлении нового пропуска */
   onClickAddSelection: (s: any) => void;
+  /** Callback при изменении текста в редакторе */
   onChangeText: (t: string) => void;
+  /** Ref на contentEditable элемент */
   contentEditableRef: any;
+  /** CSS модуль для стилизации */
   styles: any;
 };
 

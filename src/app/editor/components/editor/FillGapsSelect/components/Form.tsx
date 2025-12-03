@@ -6,10 +6,31 @@ import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
 import { TFillGapsSelectData } from "../types";
 
+/**
+ * Компонент Form
+ *
+ * Отвечает за редактирование метаданных упражнения:
+ * - Название (title) - главный заголовок упражнения
+ * - Подзаголовок (subtitle) - дополнительный заголовок
+ * - Описание (description) - полное описание задания
+ * - Изображения (images) - загрузка и управление изображениями
+ *
+ * Использует компоненты:
+ * - TitleExInput: input для текстовых полей с опциональным picker цвета для заголовка
+ * - ImageUpload: компонент для загрузки и управления изображениями
+ *
+ * Структура:
+ * - Левая колонка (50%): текстовые поля (название, подзаголовок, описание)
+ * - Правая колонка (50%): загрузка изображений
+ */
 type TProps = {
+  /** Объект с данными упражнения */
   data: TFillGapsSelectData;
+  /** Функция для обновления конкретного поля в data */
   changeData: (k: keyof TFillGapsSelectData, v: any) => void;
+  /** Массив загруженных изображений */
   images: TFillGapsSelectData["images"];
+  /** Функция для обновления массива изображений */
   setImages: (imgs: TFillGapsSelectData["images"]) => void;
 };
 

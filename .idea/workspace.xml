@@ -6,7 +6,19 @@
   <component name="ChangeListManager">
     <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment="fillgapsselect refac">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/PopoverFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/PopoverFields.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/components/EditorArea.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/components/EditorArea.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/components/Form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/components/Form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/components/Preview.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/components/Preview.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/constants/defaults.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/constants/defaults.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/helpers/pasteHtmlAtCaret.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/helpers/pasteHtmlAtCaret.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/useAddSelection.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/useAddSelection.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/useContentEditable.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/useContentEditable.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/useDataInitialization.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/useDataInitialization.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/useFieldMutations.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/useFieldMutations.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/usePopoverRender.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/usePopoverRender.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -207,7 +219,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764784652728</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="fillgapsselect refac">
+      <option name="closed" value="true" />
+      <created>1764785583128</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1764785583128</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

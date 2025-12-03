@@ -1,3 +1,19 @@
+/**
+ * Hook для рендеринга React компонентов в поповеры пропусков
+ *
+ * Управляет жизненным циклом React корней, которые отображаются внутри каждого пропуска:
+ * - Создает React root для каждого пропуска
+ * - Рендерит компонент PopoverFields (поповер с опциями)
+ * - Правильно очищает roots при демонтировании компонента или удалении пропуска
+ * - Обновляет поповеры при изменении данных полей
+ *
+ * Оптимизация: Перед созданием нового root проверяет, не существует ли уже такой,
+ * и если существует, корректно размонтирует его.
+ *
+ * @param {TFillGapsSelectData} data - Объект с данными упражнения
+ * @param {FieldCallbacks} callbacks - Объект с callback-функциями для работы с опциями
+ * @returns {React.MutableRefObject<Map<number, Root>>} Ref с Map'ой смонтированных roots
+ */
 import {useCallback, useEffect, useRef} from "react";
 import ReactDOM, {Root} from "react-dom/client";
 import {TFillGapsSelectData} from "../types";
@@ -18,6 +34,16 @@ export const usePopoverRender = (
 
 
     const renderContent = useCallback(() => {
+        /**
+         * Рендерит или обновляет поповеры для всех пропусков на странице
+         *
+         * Процесс:
+         * 1. Находит все элементы с классом .answerWrapper (пропуски)
+         * 2. Для каждого пропуска ищет соответствующее поле в данных
+         * 3. Если уже существует React root для этого пропуска, размонтирует его
+         * 4. Создает новый root и рендерит компонент PopoverFields
+         * 5. Сохраняет root в Map для последующего управления
+         */
         document
             .querySelectorAll(".contentEditable .answerWrapper")
             .forEach((el) => {

@@ -12,15 +12,49 @@ import Image from "next/image";
 import { TField } from "./types";
 import Close from "@/assets/icons/close.svg";
 
+/**
+ * Компонент PopoverFields
+ *
+ * Отображает поповер с опциями (вариантами ответов) для каждого пропуска.
+ * Появляется при клике на элемент пропуска в редакторе.
+ *
+ * Функциональность:
+ * - Отображение всех вариантов ответов для пропуска
+ * - Для каждого варианта: checkbox (отмечить как правильный) и input (редактировать текст)
+ * - Возможность добавления нового варианта ответа
+ * - Возможность удаления варианта ответа
+ *
+ * Компоненты:
+ * - PopoverInput: input для редактирования текста варианта ответа
+ * - Для каждого варианта: Checkbox (правильный/неправильный) и кнопка удаления
+ *
+ * Триггер поповера: кнопка с иконкой chevron (стрелка вниз)
+ */
 type TProps = {
+  /** Уникальный ID пропуска */
   id: number;
+  /** Объект пропуска с его опциями */
   field: TField;
+  /** Callback для переключения флага isCorrect опции */
   onChangeFieldOption: (id: number, optionIndex: number) => void;
+  /** Callback для изменения текста опции */
   onChangeFieldValue: (id: number, optionIndex: number, value: string) => void;
+  /** Callback для добавления новой опции */
   onAddFieldOption: (id: number) => void;
+  /** Callback для удаления опции */
   deleteOption: (id: number, optionIndex: number) => void;
 };
 
+/**
+ * Компонент PopoverInput
+ *
+ * Input для редактирования текста варианта ответа внутри поповера.
+ *
+ * Особенности:
+ * - Инициализируется с начальным значением при первой загрузке
+ * - При потере фокуса (onBlur) вызывает callback с новым значением
+ * - Сохраняет стояние в локальном state для корректной работы
+ */
 const PopoverInput = ({
   onBlur,
   initialValue,
@@ -34,6 +68,7 @@ const PopoverInput = ({
     setInputValue(initialValue);
   }, []);
 
+  // При размонтировании компонента сохраняем новое значение через onBlur
   useEffect(() => {
     return () => {
       if (!inputValue) {
@@ -70,6 +105,7 @@ export const PopoverFields: FC<TProps> = ({
   deleteOption,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  
   return (
     <Popover
       placement="bottom"
@@ -104,6 +140,7 @@ export const PopoverFields: FC<TProps> = ({
         },
       }}
     >
+      {/* Триггер - кнопка с иконкой стрелка для открытия поповера */}
       <PopoverTrigger>
         <Button
           size="sm"
@@ -119,22 +156,28 @@ export const PopoverFields: FC<TProps> = ({
         >
           <span style={{ color: "#3F28C6 important!" }}>______</span>
         </Button>
-        {/* <Select variant="bordered" size="sm" fullWidth={false} className="min-w-[100px]" /> */}
       </PopoverTrigger>
+      
+      {/* Содержимое поповера - список вариантов ответов */}
       <PopoverContent>
         <div className="px-1 py-2">
           <div className="text-small font-bold">Варианты для пропуска:</div>
+          
+          {/* Список всех вариантов ответов для этого пропуска */}
           {field?.options?.map((option, optionIndex) => {
             return (
               <div
                 className="flex items-center gap-1"
                 key={optionIndex.toString() + option.isCorrect}
               >
+                {/* Checkbox для отметки правильного ответа */}
                 <Checkbox
                   isSelected={option.isCorrect}
                   onValueChange={() => {
+                    // Закрываем поповер и переключаем флаг правильности
                     setIsOpen(false);
                     onChangeFieldOption(id, optionIndex);
+                    // Переоткрываем поповер через небольшую задержку для обновления
                     setTimeout(() => {
                       document
                         .getElementById("popover-wrapper-" + id)
@@ -142,18 +185,24 @@ export const PopoverFields: FC<TProps> = ({
                     }, 50);
                   }}
                 >
-                  {/* {option.value} */}
+                  {/* Label для checkbox */}
                 </Checkbox>
+                
+                {/* Input для редактирования текста варианта ответа */}
                 <PopoverInput
                   initialValue={option.value}
                   onBlur={(val) => {
+                    // Обновляем текст варианта ответа
                     onChangeFieldValue(id, optionIndex, val);
                   }}
                 />
+                
+                {/* Кнопка удаления варианта (видна только если вариантов больше 1) */}
                 {field?.options.length > 1 && (
                   <Button
                     onClick={() => {
                       setIsOpen(false);
+                      // Удаляем вариант ответа
                       deleteOption(id, optionIndex);
                       setTimeout(() => {
                         document
@@ -172,6 +221,8 @@ export const PopoverFields: FC<TProps> = ({
               </div>
             );
           })}
+          
+          {/* Кнопка добавления нового варианта ответа */}
           <Button
             style={{
               padding: 10,
@@ -180,6 +231,7 @@ export const PopoverFields: FC<TProps> = ({
             }}
             onClick={(e) => {
               setIsOpen(false);
+              // Добавляем новый вариант ответа
               onAddFieldOption(id);
               setTimeout(() => {
                 const wrapper = document.getElementById(
