@@ -162,6 +162,7 @@ export const FillGapsSelect: FC<TProps> = ({
 
     useEffect(() => {
         renderContent();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data.fields,]);
 
     useEffect(() => {
@@ -170,6 +171,7 @@ export const FillGapsSelect: FC<TProps> = ({
                 data.dataText;
         }
         renderContent();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const contentEditableRef = useRef<HTMLElement | null>(null);
