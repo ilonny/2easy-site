@@ -66,7 +66,11 @@ export default function StartRegistrationPage() {
             variant="underlined"
             color="primary"
           >
-            <Tab key="lessons" title="Уроки" className="uppercase font-bold" />
+            <Tab
+              key="lessons"
+              title="Уроки и курсы"
+              className="uppercase font-bold"
+            />
             <Tab
               key="students"
               title="Ученики"
