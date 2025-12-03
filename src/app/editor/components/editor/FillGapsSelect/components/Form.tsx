@@ -8,7 +8,7 @@ import { TFillGapsSelectData } from "../types";
 
 type TProps = {
   data: TFillGapsSelectData;
-  changeData: (k: string, v: any) => void;
+  changeData: (k: keyof TFillGapsSelectData, v: any) => void;
   images: TFillGapsSelectData["images"];
   setImages: (imgs: TFillGapsSelectData["images"]) => void;
 };

@@ -4,8 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment="fillgapsinput refac">
+    <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment="fillgapsselect refac">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/components/Form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/components/Form.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/types.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +111,7 @@
       <workItem from="1764679258204" duration="6701000" />
       <workItem from="1764696379082" duration="17108000" />
       <workItem from="1764748697806" duration="684000" />
-      <workItem from="1764781043517" duration="1176000" />
+      <workItem from="1764781043517" duration="1995000" />
     </task>
     <task id="LOCAL-00001" summary="fillgapsinput">
       <option name="closed" value="true" />
@@ -190,7 +193,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764714754477</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="fillgapsselect refac">
+      <option name="closed" value="true" />
+      <created>1764782307658</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1764782307658</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -210,6 +221,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fillgapsinput" />
     <MESSAGE value="fillgapsinput refac" />
-    <option name="LAST_COMMIT_MESSAGE" value="fillgapsinput refac" />
+    <MESSAGE value="fillgapsselect refac" />
+    <option name="LAST_COMMIT_MESSAGE" value="fillgapsselect refac" />
   </component>
 </project>

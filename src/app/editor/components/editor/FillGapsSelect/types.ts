@@ -1,22 +1,23 @@
+export type TOption = {
+  value: string;
+  isCorrect: boolean;
+};
+
 export type TField = {
-  startPosition: number;
-  id: string;
-  options: [
-    {
-      value: string;
-      isCorrect: boolean;
-    }
-  ];
+  startPosition?: number;
+  id: number;
+  options: TOption[];
   originalWord: string;
 };
 
 export type TFillGapsSelectData = {
+  id?: number;
   title: string;
-  titleColor: "#3F28C6";
+  titleColor: string;
   subtitle: string;
   description: string;
   images: Array<Record<string, string>>;
   sortIndex?: number;
   dataText: string;
-  fields: Array<TField>;
+  fields: TField[];
 };

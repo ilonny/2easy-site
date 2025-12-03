@@ -1,20 +1,20 @@
 "use client";
-import { useExData } from "../hooks/useExData";
-import { TField, TFillGapsSelectData } from "./types";
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import {useExData} from "../hooks/useExData";
+import {TField, TFillGapsSelectData} from "./types";
+import {FC, useCallback, useEffect, useRef, useState} from "react";
 import ReactDOM from "react-dom/client";
-import { PopoverFields } from "./PopoverFields";
+import {PopoverFields} from "./PopoverFields";
 import styles from "./styles.module.css";
-import { defaultValuesStub } from "./constants/defaults";
-import { pasteHtmlAtCaret } from "./helpers/pasteHtmlAtCaret";
-import { Form } from "./components/Form";
-import { EditorArea } from "./components/EditorArea";
-import { Preview } from "./components/Preview";
-import { useUploadFillGapsSelectEx } from "../hooks/useUploadFillGapsSelectEx";
+import {defaultValuesStub} from "./constants/defaults";
+import {pasteHtmlAtCaret} from "./helpers/pasteHtmlAtCaret";
+import {Form} from "./components/Form";
+import {EditorArea} from "./components/EditorArea";
+import {Preview} from "./components/Preview";
+import {useUploadFillGapsSelectEx} from "../hooks/useUploadFillGapsSelectEx";
 
 type TProps = {
     onSuccess: () => void;
-    defaultValues?: any;
+    defaultValues?: Partial<TFillGapsSelectData>;
     lastSortIndex: number;
     currentSortIndexToShift?: boolean;
 };
@@ -25,10 +25,10 @@ export const FillGapsSelect: FC<TProps> = ({
                                                lastSortIndex,
                                                currentSortIndexToShift,
                                            }) => {
-    const { isLoading, saveFillGapsSelectEx, success } =
+    const {isLoading, saveFillGapsSelectEx, success} =
         useUploadFillGapsSelectEx(lastSortIndex, currentSortIndexToShift);
-    const { data, changeData, resetData } = useExData<TFillGapsSelectData>(
-        defaultValues || defaultValuesStub
+    const {data, changeData, resetData} = useExData<TFillGapsSelectData>(
+        defaultValues ? (defaultValues as TFillGapsSelectData) : defaultValuesStub
     );
     const [images, setImages] = useState<TFillGapsSelectData["images"]>(
         defaultValues?.images || []
@@ -49,31 +49,9 @@ export const FillGapsSelect: FC<TProps> = ({
         }
     }, [onSuccess, success, resetData]);
 
-    const renderContent = useCallback(() => {
-        document
-            .querySelectorAll(".contentEditable .answerWrapper")
-            .forEach((el, index) => {
-                const id = el.id;
-                const field = data.fields.find((f) => f.id == id);
-                el.setAttribute("index", field?.id?.toString());
-                const root = ReactDOM.createRoot(el);
-                root.render(
-                    <div className="popover-wrapper" id={"popover-wrapper-" + field?.id}>
-                        <PopoverFields
-                            id={id}
-                            field={field}
-                            onChangeFieldOption={onChangeFieldOption}
-                            onChangeFieldValue={onChangeFieldValue}
-                            onAddFieldOption={onAddFieldOption}
-                            deleteOption={deleteOption}
-                        />
-                    </div>
-                );
-            });
-    }, [data]);
 
     const onClickAddSelection = useCallback(
-        (addItemState: any) => {
+        (addItemState: { selection: string }) => {
             const id = new Date().getTime();
             pasteHtmlAtCaret(
                 `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
@@ -95,7 +73,7 @@ export const FillGapsSelect: FC<TProps> = ({
                     },
                 ],
                 originalWord: addItemState.selection,
-            } as unknown as TField;
+            } as TField;
 
             const dataFields = [...data.fields];
             dataFields.push(field);
@@ -117,9 +95,9 @@ export const FillGapsSelect: FC<TProps> = ({
     const onChangeFieldOption = useCallback(
         (fieldId: number, optionIndex: number) => {
             const dataFields = [...data.fields];
-            const field = dataFields.find((f) => f.id == fieldId);
-            field.options[optionIndex].isCorrect =
-                !field.options[optionIndex].isCorrect;
+            const field = dataFields.find((f) => f.id === fieldId);
+            if (!field) return;
+            field.options[optionIndex].isCorrect = !field.options[optionIndex].isCorrect;
             changeData("fields", dataFields);
         },
         [data.fields, changeData]
@@ -128,7 +106,8 @@ export const FillGapsSelect: FC<TProps> = ({
     const onChangeFieldValue = useCallback(
         (fieldId: number, optionIndex: number, value: string) => {
             const dataFields = [...data.fields];
-            const field = dataFields.find((f) => f.id == fieldId);
+            const field = dataFields.find((f) => f.id === fieldId);
+            if (!field) return;
             field.options[optionIndex].value = value;
             changeData("fields", dataFields);
         },
@@ -138,8 +117,9 @@ export const FillGapsSelect: FC<TProps> = ({
     const onAddFieldOption = useCallback(
         (fieldId: number) => {
             const dataFields = [...data.fields];
-            const field = dataFields.find((f) => f.id == fieldId);
-            field.options.push({ value: "", isCorrect: false });
+            const field = dataFields.find((f) => f.id === fieldId);
+            if (!field) return;
+            field.options.push({value: "", isCorrect: false});
             changeData("fields", dataFields);
         },
         [data.fields, changeData]
@@ -148,16 +128,41 @@ export const FillGapsSelect: FC<TProps> = ({
     const deleteOption = useCallback(
         (fieldId: number, optionIndex: number) => {
             const dataFields = [...data.fields];
-            const field = dataFields.find((f) => f.id == fieldId);
+            const field = dataFields.find((f) => f.id === fieldId);
+            if (!field) return;
             field.options = field.options.filter((_o, i) => i !== optionIndex);
             changeData("fields", dataFields);
         },
         [changeData, data.fields]
     );
 
+    const renderContent = useCallback(() => {
+        document
+            .querySelectorAll(".contentEditable .answerWrapper")
+            .forEach((el) => {
+                const elId = el.id;
+                const field = data.fields.find((f) => String(f.id) === elId);
+                if (!field) return;
+                el.setAttribute("index", String(field.id));
+                const root = ReactDOM.createRoot(el as HTMLElement);
+                root.render(
+                    <div className="popover-wrapper" id={"popover-wrapper-" + field.id}>
+                        <PopoverFields
+                            id={field.id}
+                            field={field}
+                            onChangeFieldOption={onChangeFieldOption}
+                            onChangeFieldValue={onChangeFieldValue}
+                            onAddFieldOption={onAddFieldOption}
+                            deleteOption={deleteOption}
+                        />
+                    </div>
+                );
+            });
+    }, [data, onChangeFieldOption, onChangeFieldValue, onAddFieldOption, deleteOption]);
+
     useEffect(() => {
         renderContent();
-    }, [data.fields]);
+    }, [data.fields,]);
 
     useEffect(() => {
         if (data.dataText) {
@@ -167,25 +172,28 @@ export const FillGapsSelect: FC<TProps> = ({
         renderContent();
     }, []);
 
-    const contentEditableRef = useRef(null);
+    const contentEditableRef = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type === "childList") {
                     mutation.removedNodes.forEach((removedNode) => {
+                        const removedEl = removedNode as HTMLElement;
                         if (
-                            removedNode.classList &&
-                            removedNode.classList.contains("answerWrapper")
+                            removedEl.classList &&
+                            removedEl.classList.contains("answerWrapper")
                         ) {
-                            mutation.previousSibling.nodeValue =
-                                mutation.previousSibling?.nodeValue +
-                                " " +
-                                removedNode
-                                    ?.getAttribute("answer")
-                                    .replace("[", "")
-                                    .replace("]", "") +
-                                " ";
+                            const prev = mutation.previousSibling as Node | null;
+                            if (prev && prev.nodeValue !== null) {
+                                prev.nodeValue =
+                                    prev.nodeValue +
+                                    " " +
+                                    (removedEl.getAttribute("answer") || "")
+                                        .replace("[", "")
+                                        .replace("]", "") +
+                                    " ";
+                            }
                             onChangeText(contentEditableRef.current?.innerHTML || "");
                         }
                     });
@@ -209,9 +217,9 @@ export const FillGapsSelect: FC<TProps> = ({
     }, [onChangeText]);
 
     useEffect(() => {
-        const pasteListener = (e) => {
+        const pasteListener = (e: ClipboardEvent) => {
             e.preventDefault();
-            const text = (e.originalEvent || e).clipboardData.getData("text/plain");
+            const text = e.clipboardData?.getData("text/plain") || "";
             document.execCommand("insertHTML", false, text);
         };
         document
@@ -232,7 +240,7 @@ export const FillGapsSelect: FC<TProps> = ({
                 setImages={setImages}
             />
 
-            <div className="h-10" />
+            <div className="h-10"/>
 
             <EditorArea
                 onClickAddSelection={onClickAddSelection}
@@ -241,7 +249,7 @@ export const FillGapsSelect: FC<TProps> = ({
                 styles={styles}
             />
 
-            <div className="h-10" />
+            <div className="h-10"/>
 
             <Preview
                 data={data}
@@ -249,7 +257,7 @@ export const FillGapsSelect: FC<TProps> = ({
                 saveFillGapsSelectEx={saveFillGapsSelectEx}
             />
 
-            <div className="h-10" />
+            <div className="h-10"/>
         </div>
     );
 };
