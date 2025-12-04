@@ -25,18 +25,20 @@ export const useCourses = () => {
   const [coursesIsLoading, setCoursesIsLoading] = useState(false);
   const [courses, setCourses] = useState<TCourse[]>([]);
 
-  const getCourses = useCallback(async () => {
+  const getCourses = useCallback(async (student_id?: number) => {
     setCoursesIsLoading(true);
 
     const res = await fetchGet({
-      path: "/course/list",
+      path: student_id
+        ? `/course/list?student_id=${student_id}`
+        : "/course/list",
       isSecure: true,
     });
 
     const data = await res?.json();
     if (data) {
       setCourses(
-        data?.courses.map((course) => {
+        data?.courses?.map((course) => {
           return {
             ...course,
             lesson_ids: course?.lesson_ids ? JSON.parse(course.lesson_ids) : [],

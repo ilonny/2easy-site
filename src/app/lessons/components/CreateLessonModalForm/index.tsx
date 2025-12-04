@@ -1,4 +1,5 @@
 import { checkResponse, fetchPostJson } from "@/api";
+import { TCourse } from "@/app/course/hooks/useCourses";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import {
@@ -20,6 +21,7 @@ type TProps = {
   isVisible: boolean;
   setIsVisible: (val: boolean) => void;
   onSuccess: (createdLessonId: number) => void;
+  currentCourse?: TCourse;
 };
 
 type TFieldList = {
@@ -33,6 +35,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
   isVisible,
   setIsVisible,
   onSuccess,
+  currentCourse,
 }) => {
   const {
     control,
@@ -67,6 +70,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
             ..._data,
             // tags: tagsArr?.join?.(",") || "",
             image_id: attachments?.attachments?.[0]?.id,
+            course_id: currentCourse?.id
           },
         });
         const lesson = await lessonRes.json();

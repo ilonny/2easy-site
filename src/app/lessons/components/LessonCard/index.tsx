@@ -27,6 +27,7 @@ import HeartImage from "@/assets/images/3d-glassy-fuzzy-pink-heart-with-a-happy-
 import { SubscribeTariffs } from "@/subscribe";
 import { RegistrationForm } from "@/app/registration";
 import Link from "next/link";
+import { TCourse } from "@/app/course/hooks/useCourses";
 
 type TProps = {
   lesson: TLesson;
@@ -45,6 +46,8 @@ type TProps = {
   copyLesson?: (lesson_id: number) => Promise<void>;
   isClosed?: boolean;
   isCourses?: boolean;
+  currentCourse?: TCourse;
+  hideContextMenu?: boolean;
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -64,6 +67,8 @@ export const LessonCard: FC<TProps> = ({
   isClosed,
   isCourses,
   onPressAttachToCourse,
+  currentCourse,
+  hideContextMenu,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -81,21 +86,32 @@ export const LessonCard: FC<TProps> = ({
     if (isDisabled || disableClick) {
       return;
     }
-    if (isStudent) {
-      router.push("/lessons/" + lesson?.id);
-      return;
-    }
-    if (isClosed || (profile?.name && !hasSubscription)) {
-      setLockedModalOpen(true);
-      // router.push("/subscription");
-      return;
-    }
+
     if (
       !profile?.name &&
       (lesson?.created_from_2easy || lesson?.user_id === 1)
     ) {
       // try now modal
       setTryNowModal(true);
+      // router.push("/subscription");
+      return;
+    }
+
+    if (isCourses) {
+      if (isStudent) {
+        router.push("/student-account/course/" + lesson?.id);
+        return;
+      }
+      router.push("/course/" + lesson?.id);
+      return;
+    }
+
+    if (isStudent) {
+      router.push("/lessons/" + lesson?.id);
+      return;
+    }
+    if (isClosed || (profile?.name && !hasSubscription)) {
+      setLockedModalOpen(true);
       // router.push("/subscription");
       return;
     }
@@ -112,6 +128,7 @@ export const LessonCard: FC<TProps> = ({
     lesson?.user_id,
     lesson?.id,
     router,
+    isCourses,
   ]);
 
   const tags = useMemo(() => {
@@ -170,7 +187,7 @@ export const LessonCard: FC<TProps> = ({
           }}
         />
         <div className={styles["shadow"]} />
-        {!isStudent && !disableClick && (
+        {!isStudent && !disableClick && !hideContextMenu && (
           <div className={styles["btn-wrapper"]}>
             <Popover
               color="foreground"
@@ -204,11 +221,14 @@ export const LessonCard: FC<TProps> = ({
                 {!!showChangeStatusButton && (
                   <>
                     <div className="py-1 px-2">
-                      <p className="mb-2">Статус урока:</p>
+                      <p className="mb-2">
+                        Статус {isCourses ? "курса" : "урока"}:
+                      </p>
                       <RadioGroup
                         value={lesson?.["lesson_relations.status"]}
                         onValueChange={(val) => {
                           if (changeLessonStatus) {
+                            console.log("lol???");
                             changeLessonStatus(
                               lesson?.["lesson_relations.id"],
                               val
@@ -223,9 +243,11 @@ export const LessonCard: FC<TProps> = ({
                         <Radio size="sm" value="close">
                           Закрыт
                         </Radio>
-                        <Radio size="sm" value="complete">
-                          Пройден
-                        </Radio>
+                        {!isCourses && (
+                          <Radio size="sm" value="complete">
+                            Пройден
+                          </Radio>
+                        )}
                       </RadioGroup>
                     </div>
                     <Button
@@ -245,7 +267,7 @@ export const LessonCard: FC<TProps> = ({
                     </Button>
                   </>
                 )}
-                {!!onPressAttach && !hideAttachButton && (
+                {!currentCourse && !!onPressAttach && !hideAttachButton && (
                   <Button
                     size="sm"
                     variant="light"
@@ -259,7 +281,7 @@ export const LessonCard: FC<TProps> = ({
                     Прикрепить к ученику
                   </Button>
                 )}
-                {!isCourses && !!onPressAttachToCourse && (
+                {!isCourses && !currentCourse && !!onPressAttachToCourse && (
                   <Button
                     size="sm"
                     variant="light"
@@ -344,7 +366,10 @@ export const LessonCard: FC<TProps> = ({
         <div className="h-2" />
         {!!lesson?.["lesson_relations.status"] && (
           <>
-            <LessonStatus status={lesson?.["lesson_relations.status"]} />
+            <LessonStatus
+              status={lesson?.["lesson_relations.status"]}
+              isCourses={isCourses}
+            />
             <div className="h-2" />
           </>
         )}
@@ -364,6 +389,16 @@ export const LessonCard: FC<TProps> = ({
               size="md"
               isDisabled={isDisabled}
               onClick={() => {
+                if (isCourses) {
+                  if (isStudent) {
+                    router.push(`/student-account/course/${lesson.id}`);
+                    return;
+                  }
+
+                  router.push(`/course/${lesson.id}`);
+                  return;
+                }
+
                 if (!isStudent && checkSubscription()) {
                   router.push(`/lessons/${lesson.id}`);
 
@@ -378,7 +413,7 @@ export const LessonCard: FC<TProps> = ({
                 }
               }}
             >
-              {isStudent ? "Открыть" : "Начать урок"}
+              {isStudent || isCourses ? "Открыть" : "Начать урок"}
             </Button>
           </>
         )}

@@ -13,7 +13,15 @@ import {
   Textarea,
   Image,
 } from "@nextui-org/react";
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Controller, useForm } from "react-hook-form";
 import { TLesson } from "../../types";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
@@ -23,6 +31,7 @@ import { arrayMoveImmutable } from "array-move";
 import SortIcon from "@/assets/icons/sort.svg";
 import { TCourse } from "@/app/course/hooks/useCourses";
 import { useLessons } from "../../hooks/useLessons";
+import { AuthContext } from "@/auth";
 
 type TProps = {
   isVisible: boolean;
@@ -48,6 +57,9 @@ export const CreateCourseModalForm: FC<TProps> = ({
   onSuccess,
   chosenCourse,
 }) => {
+  const { profile, authIsLoading } = useContext(AuthContext);
+  const isAdmin = profile?.role_id === 1;
+  console.log('profile?', profile)
   const {
     control,
     handleSubmit,
@@ -76,9 +88,13 @@ export const CreateCourseModalForm: FC<TProps> = ({
   }, [getAllLessons, isVisible, chosenCourse?.id]);
 
   const filteredLessons = useMemo(() => {
-    return (allLessons || []).filter((l) => l.user_id !== 1);
-  }, [allLessons]);
+    return (allLessons || []).filter((l) =>
+      isAdmin ? l.user_id === 1 : l.user_id !== 1
+    );
+  }, [allLessons, isAdmin]);
 
+  console.log('isAdmin?', isAdmin)
+  
   const [images, setImages] = useState(
     chosenCourse?.image_path
       ? [
@@ -96,7 +112,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
   const [lessonsSearchString, setLessonsSearchString] = useState("");
 
   useEffect(() => {
-    setChosenLessonIds(courseLessons.map((c) => c.created_from_id));
+    setChosenLessonIds(courseLessons.map((c) => c.created_from_id || c.id));
   }, [courseLessons]);
 
   const modalContentRef = useRef(null);
@@ -180,6 +196,8 @@ export const CreateCourseModalForm: FC<TProps> = ({
               borderRadius: 70,
               overflow: "hidden",
               flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -210,15 +228,13 @@ export const CreateCourseModalForm: FC<TProps> = ({
       return (
         filteredLessons.find((l) => l.id === lessonId) ||
         courseLessons?.find(
-          (courseLesson) => courseLesson.created_from_id == lessonId
+          (courseLesson) =>
+            courseLesson.created_from_id == lessonId ||
+            courseLesson.id == lessonId
         )
       );
     }, []) || []) as TLesson[];
   }, [chosenLessonIds, filteredLessons, courseLessons]);
-
-  console.log("courseLessons", courseLessons);
-  console.log("sortedLessons", sortedLessons);
-  console.log("chosenLessonIds", chosenLessonIds);
 
   return (
     <Modal
@@ -359,6 +375,8 @@ export const CreateCourseModalForm: FC<TProps> = ({
                               borderRadius: 70,
                               overflow: "hidden",
                               flexShrink: 0,
+                              display: "flex",
+                              alignItems: "center",
                             }}
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
