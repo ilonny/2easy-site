@@ -22,7 +22,7 @@ jobs:
       - run: echo "${{ secrets.key }}" > "$HOME/.ssh/key"
       - run: chmod 600 "$HOME/.ssh/key"
       # Build
-      - run: cd ./ && npm ci && npm run build
+      - run: cd ./ && npm ci --force && npm run build
       # - run: cd ./frontend && npm ci --legacy-peer-deps && npm run build
       # - run: cd ./site && yarn && npm run build
       # Deploy
