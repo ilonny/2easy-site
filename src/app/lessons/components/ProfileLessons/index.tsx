@@ -16,6 +16,7 @@ import { TLesson } from "../../types";
 import { SibscribeContext } from "@/subscribe/context";
 import { CreateCourseModalForm } from "../CreateCourseModalForm";
 import { useCourses } from "@/app/course/hooks/useCourses";
+import { AttachLessonCourseModalForm } from "../AttachLessonCourseModalForm";
 
 type TProps = {
   canCreateLesson?: boolean;
@@ -353,6 +354,7 @@ export const ProfileLessons = (props: TProps) => {
           isStudent={isStudent}
           isFreeTariff={isFreeTariff}
           isCourses={tabIndex === "userCourses" || tabIndex === "2easyCourses"}
+          openCourseModal={() => setCreateCourseModalIsVisible(true)}
         />
       )}
       <CreateLessonModalForm
