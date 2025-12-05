@@ -10,7 +10,6 @@ export const useLessons = (
   const [lessons, setLessons] = useState<TLesson[]>([]);
   const [lesson, setLesson] = useState<TLesson | undefined>();
   const [lessonsListIslLoading, setLessonsListIslLoading] = useState(false);
-  const [courseLessons, setCourseLessons] = useState<TLesson[]>([]);
 
   const getMainPageLessons = useCallback(async () => {
     setLessonsListIslLoading(true);
@@ -113,17 +112,6 @@ export const useLessons = (
     );
   }, [searchString, lessons]);
 
-  const getCourseLessons = useCallback(async (course_id: number) => {
-    const res = await fetchGet({
-      path: `/lessons/course?course_id=${course_id}`,
-      isSecure: true,
-    });
-    const data = await res?.json();
-    setCourseLessons(data?.lessons);
-    checkResponse(data);
-    return data;
-  }, []);
-
   return {
     lessons: filteredLessons,
     getLessons,
@@ -134,7 +122,5 @@ export const useLessons = (
     deleteLessonRelation,
     getMainPageLessons,
     setLesson,
-    courseLessons,
-    getCourseLessons,
   };
 };

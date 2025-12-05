@@ -59,21 +59,13 @@ export const CreateCourseModalForm: FC<TProps> = ({
     },
   });
 
-  const {
-    lessons: allLessons,
-    getLessons: getAllLessons,
-    courseLessons,
-    getCourseLessons,
-  } = useLessons();
+  const { lessons: allLessons, getLessons: getAllLessons } = useLessons();
 
   useEffect(() => {
     if (isVisible) {
       getAllLessons();
-      if (chosenCourse?.id) {
-        getCourseLessons(chosenCourse.id);
-      }
     }
-  }, [getAllLessons, isVisible, chosenCourse?.id]);
+  }, [getAllLessons, isVisible]);
 
   const filteredLessons = useMemo(() => {
     return (allLessons || []).filter((l) => l.user_id !== 1);
@@ -92,12 +84,10 @@ export const CreateCourseModalForm: FC<TProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const [step, setStep] = useState(0);
-  const [chosenLessonIds, setChosenLessonIds] = useState<number[]>([]);
+  const [chosenLessonIds, setChosenLessonIds] = useState<number[]>(
+    chosenCourse?.lesson_ids || []
+  );
   const [lessonsSearchString, setLessonsSearchString] = useState("");
-
-  useEffect(() => {
-    setChosenLessonIds(courseLessons.map((c) => c.created_from_id));
-  }, [courseLessons]);
 
   const modalContentRef = useRef(null);
 
@@ -207,18 +197,9 @@ export const CreateCourseModalForm: FC<TProps> = ({
 
   const sortedLessons: TLesson[] = useMemo(() => {
     return (chosenLessonIds.map((lessonId) => {
-      return (
-        filteredLessons.find((l) => l.id === lessonId) ||
-        courseLessons?.find(
-          (courseLesson) => courseLesson.created_from_id == lessonId
-        )
-      );
+      return filteredLessons.find((l) => l.id === lessonId);
     }, []) || []) as TLesson[];
-  }, [chosenLessonIds, filteredLessons, courseLessons]);
-
-  console.log("courseLessons", courseLessons);
-  console.log("sortedLessons", sortedLessons);
-  console.log("chosenLessonIds", chosenLessonIds);
+  }, [chosenLessonIds, filteredLessons]);
 
   return (
     <Modal
@@ -330,7 +311,6 @@ export const CreateCourseModalForm: FC<TProps> = ({
                 <div style={{ maxHeight: 400, overflow: "auto" }}>
                   <div className="h-5" />
                   {searchedLessons.map((lesson: TLesson) => {
-                    const isSelected = chosenLessonIds.includes(lesson?.id);
                     return (
                       <div
                         key={lesson?.id}
@@ -349,7 +329,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                           shadow="none"
                         >
                           <Checkbox
-                            isSelected={isSelected}
+                            isSelected={chosenLessonIds.includes(lesson?.id)}
                             style={{ pointerEvents: "none" }}
                           />
                           <div

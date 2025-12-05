@@ -21,7 +21,6 @@ type TProps = {
   skipChoseStatus?: boolean;
   title?: string;
   hideToast?: boolean;
-  isCourses?: boolean;
 };
 
 export const AttachLessonModalForm: FC<TProps> = ({
@@ -32,7 +31,6 @@ export const AttachLessonModalForm: FC<TProps> = ({
   skipChoseStatus,
   title,
   hideToast,
-  isCourses,
 }) => {
   const [chosenIds, setChosenIds] = useState<number[]>([]);
   const [step, setStep] = useState(0);
@@ -44,9 +42,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
     const allRes = await Promise.all(
       chosenIds.map(async (student_id) => {
         const res = await fetchPostJson({
-          path: isCourses
-            ? "/course-relation/create"
-            : "/lesson-relation/create",
+          path: "/lesson-relation/create",
           isSecure: true,
           data: {
             lesson_id: lesson.id,
@@ -70,7 +66,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
       );
       onSuccess();
     } catch (err) {}
-  }, [chosenIds, lesson.id, onSuccess, status, isCourses]);
+  }, [chosenIds, lesson.id, onSuccess, status]);
 
   const onClickStudent = useCallback(
     (id: number) => {
@@ -102,12 +98,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
         <ModalHeader>
           <p>
             {step === 0
-              ? title ||
-                (isCourses
-                  ? "Выберите учеников, чтобы прикрепить курс"
-                  : "Выберите учеников, чтобы прикрепить урок")
-              : isCourses
-              ? "Укажите статус курса"
+              ? title || "Выберите учеников, чтобы прикрепить урок"
               : "Укажите статус урока"}
           </p>
         </ModalHeader>
@@ -152,22 +143,15 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 description={
                   status === "open"
                     ? "Доступен ученику"
-                    : isCourses
-                    ? "Ученик видит курс, но не может открыть"
                     : "Ученик видит урок, но не может открыть"
                 }
                 placeholder="Выберите статус урока"
                 onChange={(e) => {
-                  console.log("e.target.value?", e.target.value);
                   setStatus(e.target.value);
                 }}
               >
-                <SelectItem key="open">
-                  {`${isCourses ? "Курс" : "Урок"} открыт`}
-                </SelectItem>
-                <SelectItem key="close">
-                  {`${isCourses ? "Курс" : "Урок"} закрыт`}
-                </SelectItem>
+                <SelectItem key="open">Урок открыт</SelectItem>
+                <SelectItem key="close">Урок закрыт</SelectItem>
               </Select>
               <div className="h-4"></div>
               <Button
