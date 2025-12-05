@@ -6,5 +6,4 @@ export type TProfile = {
   role_id?: number;
   isStudent?: boolean;
   studentId?: number;
-  id?: number;
 };

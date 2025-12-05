@@ -186,6 +186,8 @@ export default function EditorPage() {
     setEditIsVisible(true);
   }, []);
 
+  console.log("lesson:", lesson, profile);
+
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>

@@ -13,7 +13,7 @@ export const SibscribeContextProvider = ({
 }) => {
   const [subscription, setSubscription] = useState(undefined);
   const pathname = usePathname();
-  const { profile, setProfile } = useContext(AuthContext);
+  const profile = useContext(AuthContext)?.profile;
 
   const getSubscribe = async () => {
     const res = await fetchGet({
@@ -23,7 +23,6 @@ export const SibscribeContextProvider = ({
     const data = await res?.json();
     if (data) {
       setSubscription(data);
-      setProfile?.(data?.profile);
     }
 
     if (!!profile?.name && !profile.studentId) {

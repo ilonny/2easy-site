@@ -5,10 +5,8 @@ import { Image } from "@nextui-org/react";
 
 export const LessonStatus = ({
   status,
-  isCourses,
 }: {
   status: "open" | "close" | "complete";
-  isCourses?: boolean;
 }) => {
   switch (status) {
     case "open":
@@ -20,7 +18,7 @@ export const LessonStatus = ({
             style={{ borderRadius: 0 }}
           />
           <p className="text-[#3F28C6]" style={{ fontSize: 14 }}>
-            {isCourses ? "Курс открыт" : "Урок открыт"}
+            Урок открыт
           </p>
         </div>
       );
@@ -38,7 +36,7 @@ export const LessonStatus = ({
         <div className="flex items-center gap-2">
           <Image src={LessonCloseIcon.src} alt="checked icon" />
           <p className="text-[#C4C4C4]" style={{ fontSize: 14 }}>
-            {isCourses ? "Курс закрыт" : "Урок закрыт"}
+            Урок закрыт
           </p>
         </div>
       );
