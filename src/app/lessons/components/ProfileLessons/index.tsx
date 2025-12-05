@@ -14,8 +14,6 @@ import { tabs } from "../LessonsFilters/tabs";
 import Loupe from "@/assets/icons/loupe.svg";
 import { TLesson } from "../../types";
 import { SibscribeContext } from "@/subscribe/context";
-import { CreateCourseModalForm } from "../CreateCourseModalForm";
-import { useCourses } from "@/app/course/hooks/useCourses";
 
 type TProps = {
   canCreateLesson?: boolean;
@@ -44,8 +42,6 @@ export const ProfileLessons = (props: TProps) => {
   const router = useRouter();
   const { profile, createLessonModalIsVisible, setCreateLessonModalIsVisible } =
     useContext(AuthContext);
-  const [createCourseModalIsVisible, setCreateCourseModalIsVisible] =
-    useState(false);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const { subscription } = useContext(SibscribeContext);
   const [activeFilterTab, setActiveFilterTab] = useState("");
@@ -54,9 +50,9 @@ export const ProfileLessons = (props: TProps) => {
     return subscription?.subscribe_type_id === 1;
   }, [subscription]);
 
-  const [tabIndex, setTabIndex] = useState<
-    "userLessons" | "savedLessons" | "userCourses" | "2easyCourses"
-  >("userLessons");
+  const [tabIndex, setTabIndex] = useState<"userLessons" | "savedLessons">(
+    "userLessons"
+  );
 
   const {
     lessons,
@@ -65,8 +61,6 @@ export const ProfileLessons = (props: TProps) => {
     changeLessonStatus,
     deleteLessonRelation,
   } = useLessons(studentId, searchString, !!profile?.name);
-
-  const { courses, coursesIsLoading, getCourses } = useCourses();
 
   const data = useMemo(() => {
     const title =
@@ -92,22 +86,12 @@ export const ProfileLessons = (props: TProps) => {
       getLessons();
       router.push("/editor/" + lessonId);
     },
-    [getLessons, router, setCreateLessonModalIsVisible]
+    [getLessons, router]
   );
-
-  const onCreateCourse = useCallback(() => {
-    setCreateCourseModalIsVisible(false);
-    setTabIndex("userCourses");
-    getCourses();
-  }, [getCourses]);
 
   useEffect(() => {
     getLessons();
   }, [getLessons]);
-
-  useEffect(() => {
-    getCourses();
-  }, [getCourses]);
 
   const { checkSubscription } = useCheckSubscription();
 
@@ -160,14 +144,6 @@ export const ProfileLessons = (props: TProps) => {
   }, [tabsToRender, tabIndex]);
 
   const filteredLessons = useMemo(() => {
-    if (tabIndex === "userCourses") {
-      console.log("userCourses??", courses);
-      return courses.filter((c) => c.user_id !== 1);
-    }
-    if (tabIndex === "2easyCourses") {
-      return courses.filter((c) => c.user_id === 1);
-    }
-
     let res = lessonsToRender;
     if (activeFilterTab !== "All lessons") {
       res = res.filter((lesson: TLesson) => {
@@ -226,14 +202,7 @@ export const ProfileLessons = (props: TProps) => {
       });
     }
     return res;
-  }, [
-    tabIndex,
-    lessonsToRender,
-    activeFilterTab,
-    filterSearchString,
-    isFreeTariff,
-    courses,
-  ]);
+  }, [activeFilterTab, filterSearchString, lessonsToRender, isFreeTariff]);
 
   return (
     <>
@@ -253,32 +222,16 @@ export const ProfileLessons = (props: TProps) => {
                 <Button
                   radius="full"
                   color="primary"
-                  variant={tabIndex === "userCourses" ? "solid" : "faded"}
-                  onClick={() => setTabIndex("userCourses")}
-                >
-                  Мои курсы
-                </Button>
-                <Button
-                  radius="full"
-                  color="primary"
                   variant={tabIndex === "savedLessons" ? "solid" : "faded"}
                   onClick={() => setTabIndex("savedLessons")}
                 >
                   Уроки 2EASY
                 </Button>
-                <Button
-                  radius="full"
-                  color="primary"
-                  variant={tabIndex === "2easyCourses" ? "solid" : "faded"}
-                  onClick={() => setTabIndex("2easyCourses")}
-                >
-                  Курсы 2EASY
-                </Button>
               </div>
               <div className="h-6"></div>
             </>
           )}
-          {tabIndex === "savedLessons" && tabsToRender?.length >= 2 && (
+          {tabsToRender?.length >= 2 && (
             <>
               <Tabs
                 color="primary"
@@ -335,15 +288,9 @@ export const ProfileLessons = (props: TProps) => {
               setCreateLessonModalIsVisible(true);
             }
           }}
-          onPressCreateCourse={() => {
-            if (checkSubscription()) {
-              setCreateCourseModalIsVisible(true);
-            }
-          }}
           canCreateLesson={canCreateLesson}
           lessons={filteredLessons}
           getLessons={getLessons}
-          getCourses={getCourses}
           hideAttachButton={hideAttachButton}
           showChangeStatusButton={showChangeStatusButton}
           changeLessonStatus={changeLessonStatus}
@@ -352,18 +299,12 @@ export const ProfileLessons = (props: TProps) => {
           showStartLessonButton={showStartLessonButton}
           isStudent={isStudent}
           isFreeTariff={isFreeTariff}
-          isCourses={tabIndex === "userCourses" || tabIndex === "2easyCourses"}
         />
       )}
       <CreateLessonModalForm
         isVisible={createLessonModalIsVisible}
         setIsVisible={setCreateLessonModalIsVisible}
         onSuccess={onCreateLesson}
-      />
-      <CreateCourseModalForm
-        isVisible={createCourseModalIsVisible}
-        setIsVisible={setCreateCourseModalIsVisible}
-        onSuccess={onCreateCourse}
       />
     </>
   );

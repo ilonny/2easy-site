@@ -21,7 +21,6 @@ type TProps = {
   setIsVisible: (val: boolean) => void;
   onSuccess: () => void;
   lesson: TLesson;
-  isCourses?: boolean;
 };
 
 export const DeleteLessonModalForm: FC<TProps> = ({
@@ -29,11 +28,10 @@ export const DeleteLessonModalForm: FC<TProps> = ({
   setIsVisible,
   onSuccess,
   lesson,
-  isCourses,
 }) => {
   const onSubmit = useCallback(async () => {
     const lessonRes = await fetchPostJson({
-      path: isCourses ? "/course/delete" : "/lesson/delete-lesson",
+      path: "/lesson/delete-lesson",
       isSecure: true,
       data: {
         id: lesson.id,
@@ -44,13 +42,13 @@ export const DeleteLessonModalForm: FC<TProps> = ({
       onSuccess();
     }
     checkResponse(lessonResJson);
-  }, [isCourses, lesson.id, onSuccess]);
+  }, [onSuccess, lesson]);
 
   return (
     <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
       <ModalContent>
         <ModalHeader>
-          <p>{`Удалить ${isCourses ? "курс" : "урок"} ${lesson.title} ?`}</p>
+          <p>{"Удалить урок " + lesson.title + "?"}</p>
         </ModalHeader>
         <ModalBody>
           <Button color="danger" variant="light" onClick={onSubmit}>
