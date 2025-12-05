@@ -33,6 +33,7 @@ type TProps = {
   onPressEdit?: (lesson: TLesson) => void;
   onPressDelete?: (lesson: TLesson) => void;
   onPressAttach?: (lesson: TLesson) => void;
+  onPressAttachToCourse?: (lesson: TLesson) => void;
   hideAttachButton?: boolean;
   showChangeStatusButton?: boolean;
   changeLessonStatus?: (relation_id?: number, status?: string) => void;
@@ -43,6 +44,7 @@ type TProps = {
   disableClick?: boolean;
   copyLesson?: (lesson_id: number) => Promise<void>;
   isClosed?: boolean;
+  isCourses?: boolean;
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -60,6 +62,8 @@ export const LessonCard: FC<TProps> = ({
   disableClick,
   copyLesson,
   isClosed,
+  isCourses,
+  onPressAttachToCourse,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -255,7 +259,21 @@ export const LessonCard: FC<TProps> = ({
                     Прикрепить к ученику
                   </Button>
                 )}
-                {!!copyLesson && !showChangeStatusButton && (
+                {!isCourses && !!onPressAttachToCourse && (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
+                    style={{ fontSize: 14 }}
+                    onClick={() => {
+                      setPopoverIsOpen(false);
+                      onPressAttachToCourse(lesson);
+                    }}
+                  >
+                    Добавить в курс
+                  </Button>
+                )}
+                {!isCourses && !!copyLesson && !showChangeStatusButton && (
                   <Button
                     size="sm"
                     variant="light"
