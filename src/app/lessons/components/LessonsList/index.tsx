@@ -7,6 +7,8 @@ import { EditLessonModalForm } from "../EditLessonModalForm";
 import { DeleteLessonModalForm } from "../DeleteLessonModalForm";
 import { AttachLessonModalForm } from "../AttachLessonModalForm";
 import { checkResponse, fetchPostJson } from "@/api";
+import { CreateCourseModalForm } from "../CreateCourseModalForm";
+import { useLessons } from "../../hooks/useLessons";
 
 type TProps = {
   lessons: TLesson[];
@@ -14,6 +16,7 @@ type TProps = {
   canAttachLesson?: boolean;
   onPressCreate?: () => void;
   getLessons: () => void;
+  getCourses: () => void;
   hideAttachButton?: boolean;
   showChangeStatusButton?: boolean;
   changeLessonStatus?: (relation_id?: number, status?: string) => void;
@@ -22,6 +25,8 @@ type TProps = {
   showStartLessonButton?: boolean;
   isStudent?: boolean;
   isFreeTariff?: boolean;
+  onPressCreateCourse?: () => void;
+  isCourses?: boolean;
 };
 
 export const LessonsList: FC<TProps> = ({
@@ -37,6 +42,9 @@ export const LessonsList: FC<TProps> = ({
   showStartLessonButton,
   isStudent,
   isFreeTariff,
+  onPressCreateCourse,
+  isCourses,
+  getCourses,
 }) => {
   const [editIsVisible, setEditIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
@@ -55,8 +63,9 @@ export const LessonsList: FC<TProps> = ({
   const onSuccessEdit = useCallback(() => {
     setEditIsVisible(false);
     getLessons();
+    getCourses();
     setChosenLesson(null);
-  }, [getLessons]);
+  }, [getLessons, getCourses]);
 
   const onAttachLesson = useCallback((lesson: TLesson) => {
     setChosenLesson(lesson);
@@ -111,9 +120,9 @@ export const LessonsList: FC<TProps> = ({
             />
           </div>
           <div
-            className="p-4 bg-white flex items-center justify-center"
+            className="p-4 bg-white flex items-center justify-center flex-col gap-2"
             style={{
-              height: 135,
+              height: 140,
               borderBottomLeftRadius: 4,
               borderBottomRightRadius: 4,
             }}
@@ -125,6 +134,16 @@ export const LessonsList: FC<TProps> = ({
               onClick={onPressCreate}
             >
               Создать урок
+            </Button>
+            <Button
+              color="secondary"
+              variant="flat"
+              style={{ outline: "none" }}
+              className="btn-secondary-bg w-full"
+              size="lg"
+              onClick={onPressCreateCourse}
+            >
+              <span style={{ color: "#3F28C6" }}>Создать курс</span>
             </Button>
           </div>
         </div>
@@ -158,19 +177,29 @@ export const LessonsList: FC<TProps> = ({
 
       {!!chosenLesson && (
         <>
-          <EditLessonModalForm
-            isVisible={editIsVisible}
-            setIsVisible={setEditIsVisible}
-            lesson={chosenLesson}
-            key={chosenLesson?.id}
-            onSuccess={onSuccessEdit}
-          />
+          {isCourses ? (
+            <CreateCourseModalForm
+              isVisible={editIsVisible}
+              setIsVisible={setEditIsVisible}
+              onSuccess={onSuccessEdit}
+              chosenCourse={chosenLesson}
+            />
+          ) : (
+            <EditLessonModalForm
+              isVisible={editIsVisible}
+              setIsVisible={setEditIsVisible}
+              lesson={chosenLesson}
+              key={chosenLesson?.id}
+              onSuccess={onSuccessEdit}
+            />
+          )}
           <DeleteLessonModalForm
             isVisible={deleteIsVisible}
             setIsVisible={setDeleteIsVisible}
             lesson={chosenLesson}
             key={chosenLesson?.id}
             onSuccess={onSuccessEdit}
+            isCourses={isCourses}
           />
           <AttachLessonModalForm
             isVisible={attachLessonModal}

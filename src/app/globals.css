@@ -289,6 +289,10 @@ ol, ul {
   background: #EBE9FE !important;
 }
 
+.btn-secondary-bg {
+  background: #EEEBFF !important;
+}
+
 .header-secondary-btn-text {
   color: #4031C3;
 }
