@@ -12,7 +12,9 @@ export const BodyContainer: FC<any> = ({ children }) => {
       profile?.isStudent &&
       !window?.location?.pathname?.includes("/lessons/") &&
       !window?.location?.pathname?.includes("/login") &&
-      !window?.location?.pathname?.includes("/taboo")
+      !window?.location?.pathname?.includes("/taboo") &&
+      !window?.location?.pathname?.includes("course") &&
+      !window?.location?.pathname?.includes("student-account")
     ) {
       router.push(`/student-account/${profile.studentId}`);
     }

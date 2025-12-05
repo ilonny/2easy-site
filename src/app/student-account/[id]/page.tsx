@@ -26,7 +26,7 @@ export default function StartRegistrationPage() {
   const [searchString, setSearchString] = useState("");
   const router = useRouter();
   const studentId = useParams().id;
-
+  
   const { subscription } = useContext(SibscribeContext);
   const { profile, authIsLoading } = useContext(AuthContext);
 

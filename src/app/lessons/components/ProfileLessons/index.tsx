@@ -15,8 +15,9 @@ import Loupe from "@/assets/icons/loupe.svg";
 import { TLesson } from "../../types";
 import { SibscribeContext } from "@/subscribe/context";
 import { CreateCourseModalForm } from "../CreateCourseModalForm";
-import { useCourses } from "@/app/course/hooks/useCourses";
+import { TCourse, useCourses } from "@/app/course/hooks/useCourses";
 import { AttachLessonCourseModalForm } from "../AttachLessonCourseModalForm";
+import Link from "next/link";
 
 type TProps = {
   canCreateLesson?: boolean;
@@ -28,6 +29,7 @@ type TProps = {
   searchString?: string;
   showStartLessonButton?: boolean;
   isStudent?: boolean;
+  currentCourse?: TCourse;
 };
 
 export const ProfileLessons = (props: TProps) => {
@@ -41,6 +43,7 @@ export const ProfileLessons = (props: TProps) => {
     searchString,
     showStartLessonButton,
     isStudent,
+    currentCourse,
   } = props;
   const router = useRouter();
   const { profile, createLessonModalIsVisible, setCreateLessonModalIsVisible } =
@@ -57,7 +60,13 @@ export const ProfileLessons = (props: TProps) => {
 
   const [tabIndex, setTabIndex] = useState<
     "userLessons" | "savedLessons" | "userCourses" | "2easyCourses"
-  >("userLessons");
+  >(currentCourse ? "userCourses" : "userLessons");
+
+  const [studentTabIndex, setStudentTabIndex] = useState<"lessons" | "courses">(
+    "lessons"
+  );
+
+  const { courses, coursesIsLoading, getCourses } = useCourses();
 
   const {
     lessons,
@@ -65,9 +74,11 @@ export const ProfileLessons = (props: TProps) => {
     lessonsListIslLoading,
     changeLessonStatus,
     deleteLessonRelation,
+    courseLessons,
+    getCourseLessons,
+    changeCourseStatus,
+    deleteCourseRelation,
   } = useLessons(studentId, searchString, !!profile?.name);
-
-  const { courses, coursesIsLoading, getCourses } = useCourses();
 
   const data = useMemo(() => {
     const title =
@@ -99,16 +110,20 @@ export const ProfileLessons = (props: TProps) => {
   const onCreateCourse = useCallback(() => {
     setCreateCourseModalIsVisible(false);
     setTabIndex("userCourses");
-    getCourses();
+    getCourses(Number(studentId));
   }, [getCourses]);
 
   useEffect(() => {
-    getLessons();
-  }, [getLessons]);
+    if (currentCourse) {
+      getCourseLessons(currentCourse.id);
+    } else {
+      getLessons();
+    }
+  }, [getLessons, currentCourse]);
 
   useEffect(() => {
-    getCourses();
-  }, [getCourses]);
+    getCourses(Number(studentId));
+  }, [getCourses, studentId]);
 
   const { checkSubscription } = useCheckSubscription();
 
@@ -128,15 +143,49 @@ export const ProfileLessons = (props: TProps) => {
   const [filterSearchString, setFilterSearchString] = useState("");
 
   const lessonsToRender = useMemo(() => {
+    // 1. Приоритетный режим: просмотр конкретного курса
+    if (currentCourse) {
+      return courseLessons;
+    }
+
+    // 2. Режим для не-учителя или для студента (если studentId указан)
+    // Это условие означает, что мы находимся в "студенческом" представлении,
+    // либо пользователь не является учителем
     if (!isTeacher || studentId) {
-      return lessons;
+      // console.log('lol?', studentTabIndex, lessons); // Для отладки, если нужно
+      if (studentTabIndex === "lessons") {
+        return lessons; // Если студент смотрит список всех уроков
+      }
+      return courses; // Если студент смотрит список всех курсов
     }
-    if (tabIndex === "userLessons" && !studentId) {
-      return lessons.filter((l) => l.user_id !== 1);
+
+    // 3. Режим для учителя (isTeacher === true && studentId === false/undefined/null)
+    // Здесь мы обрабатываем tabIndex для учителя
+    switch (tabIndex) {
+      case "userCourses":
+        return courses.filter((c) => c.user_id !== 1); // Курсы пользователя (кроме user_id=1)
+      case "2easyCourses":
+        return courses.filter((c) => c.user_id === 1); // Курсы 2easy (user_id=1)
+      case "userLessons":
+        return lessons.filter((l) => l.user_id !== 1); // Уроки пользователя (кроме user_id=1)
+      default:
+        // Это условие соответствует закомментированному 'return lessons;'
+        // и вашей последней строке 'return lessons.filter((l) => l.user_id === 1);'
+        // Я предполагаю, что в этом случае вы хотите показывать уроки 2easy.
+        return lessons.filter((l) => l.user_id === 1); // Уроки 2easy (user_id=1)
     }
-    // return lessons;
-    return lessons.filter((l) => l.user_id === 1);
-  }, [isTeacher, lessons, tabIndex, studentId]);
+  }, [
+    isTeacher,
+    lessons,
+    tabIndex,
+    studentId,
+    currentCourse,
+    courseLessons,
+    courses,
+    studentTabIndex,
+  ]);
+
+  console.log("lessonsToRender", lessonsToRender);
 
   const tabsToRender = useMemo(() => {
     if (tabIndex === "savedLessons" || !profile?.name) {
@@ -161,14 +210,6 @@ export const ProfileLessons = (props: TProps) => {
   }, [tabsToRender, tabIndex]);
 
   const filteredLessons = useMemo(() => {
-    if (tabIndex === "userCourses") {
-      console.log("userCourses??", courses);
-      return courses.filter((c) => c.user_id !== 1);
-    }
-    if (tabIndex === "2easyCourses") {
-      return courses.filter((c) => c.user_id === 1);
-    }
-
     let res = lessonsToRender;
     if (activeFilterTab !== "All lessons") {
       res = res.filter((lesson: TLesson) => {
@@ -234,7 +275,18 @@ export const ProfileLessons = (props: TProps) => {
     filterSearchString,
     isFreeTariff,
     courses,
+    currentCourse,
+    courseLessons,
   ]);
+
+  // useEffect(() => {
+  //   if (
+  //     (tabIndex === "savedLessons" || tabIndex === "userLessons") &&
+  //     currentCourse
+  //   ) {
+  //     router.replace("/lesson_plans");
+  //   }
+  // }, [currentCourse, tabIndex]);
 
   return (
     <>
@@ -247,34 +299,50 @@ export const ProfileLessons = (props: TProps) => {
                   radius="full"
                   color="primary"
                   variant={tabIndex === "userLessons" ? "solid" : "faded"}
-                  onClick={() => setTabIndex("userLessons")}
+                  onClick={() => {
+                    setTabIndex("userLessons");
+                    router.push("/lesson_plans");
+                  }}
                 >
                   Мои уроки
                 </Button>
-                <Button
-                  radius="full"
-                  color="primary"
-                  variant={tabIndex === "userCourses" ? "solid" : "faded"}
-                  onClick={() => setTabIndex("userCourses")}
-                >
-                  Мои курсы
-                </Button>
+                {!!courses.some((c) => c.user_id !== 1) && (
+                  <Button
+                    radius="full"
+                    color="primary"
+                    variant={tabIndex === "userCourses" ? "solid" : "faded"}
+                    onClick={() => {
+                      setTabIndex("userCourses");
+                      router.push("/lesson_plans");
+                    }}
+                  >
+                    Мои курсы
+                  </Button>
+                )}
                 <Button
                   radius="full"
                   color="primary"
                   variant={tabIndex === "savedLessons" ? "solid" : "faded"}
-                  onClick={() => setTabIndex("savedLessons")}
+                  onClick={() => {
+                    setTabIndex("savedLessons");
+                    router.push("/lesson_plans");
+                  }}
                 >
                   Уроки 2EASY
                 </Button>
-                <Button
-                  radius="full"
-                  color="primary"
-                  variant={tabIndex === "2easyCourses" ? "solid" : "faded"}
-                  onClick={() => setTabIndex("2easyCourses")}
-                >
-                  Курсы 2EASY
-                </Button>
+                {courses.some((c) => c.user_id === 1) && (
+                  <Button
+                    radius="full"
+                    color="primary"
+                    variant={tabIndex === "2easyCourses" ? "solid" : "faded"}
+                    onClick={() => {
+                      setTabIndex("2easyCourses");
+                      router.push("/lesson_plans");
+                    }}
+                  >
+                    Курсы 2EASY
+                  </Button>
+                )}
               </div>
               <div className="h-6"></div>
             </>
@@ -315,13 +383,51 @@ export const ProfileLessons = (props: TProps) => {
           </div>
         </>
       )}
+      {studentId && (
+        <>
+          <div className="h-10" />
+          <div className="flex gap-5 justify-center">
+            <Button
+              radius="full"
+              color="primary"
+              variant={studentTabIndex === "lessons" ? "solid" : "faded"}
+              onClick={() => setStudentTabIndex("lessons")}
+            >
+              Уроки
+            </Button>
+            <Button
+              radius="full"
+              color="primary"
+              variant={studentTabIndex === "courses" ? "solid" : "faded"}
+              onClick={() => setStudentTabIndex("courses")}
+            >
+              Курсы
+            </Button>
+          </div>
+        </>
+      )}
       <div className="h-10" />
+      {currentCourse && (
+        <>
+          <div className="flex flex-row justify-center gap-4 items-baseline">
+            <Link href="/lesson_plans" style={{ color: "#3F28C6" }}>
+              ← все курсы
+            </Link>
+            <h2 style={{ fontWeight: "500", fontSize: 28 }}>
+              {currentCourse.title}
+            </h2>
+          </div>
+          <div className="h-4" />
+          <p>{currentCourse.description}</p>
+          <div className="h-10" />
+        </>
+      )}
       {lessonsListIslLoading && (
         <div className="w-full h-[500px] flex justify-center items-center ">
           <Image src={Dino.src} alt="dino animated" width={150} height={150} />
         </div>
       )}
-      {!lessons.length && (
+      {!currentCourse && !lessons.length && (
         <ProfileEmptyLessons
           title={studentId ? "Пока нет уроков." : data.title}
           hideButton={!!studentId}
@@ -329,7 +435,7 @@ export const ProfileLessons = (props: TProps) => {
           onButtonPress={data.onButtonPress}
         />
       )}
-      {!!lessons?.length && (
+      {(!!currentCourse || !!lessons?.length) && (
         <LessonsList
           onPressCreate={() => {
             if (checkSubscription()) {
@@ -343,24 +449,52 @@ export const ProfileLessons = (props: TProps) => {
           }}
           canCreateLesson={canCreateLesson}
           lessons={filteredLessons}
-          getLessons={getLessons}
-          getCourses={getCourses}
+          getLessons={
+            currentCourse
+              ? () => getCourseLessons(currentCourse.id)
+              : getLessons
+          }
+          getCourses={() => getCourses(Number(studentId))}
           hideAttachButton={hideAttachButton}
+          hideContextMenu={tabIndex === "2easyCourses"}
           showChangeStatusButton={showChangeStatusButton}
-          changeLessonStatus={changeLessonStatus}
+          changeLessonStatus={
+            studentTabIndex === "courses"
+              ? (relation_id, status) => {
+                  changeCourseStatus(relation_id, status).then(() =>
+                    getCourses(Number(studentId))
+                  );
+                }
+              : changeLessonStatus
+          }
           hideDeleteLessonButton={hideDeleteLessonButton}
-          deleteLessonRelation={deleteLessonRelation}
+          deleteLessonRelation={
+            studentTabIndex === "courses"
+              ? (relation_id) => {
+                  deleteCourseRelation(relation_id).then(() =>
+                    getCourses(Number(studentId))
+                  );
+                }
+              : deleteLessonRelation
+          }
           showStartLessonButton={showStartLessonButton}
           isStudent={isStudent}
           isFreeTariff={isFreeTariff}
-          isCourses={tabIndex === "userCourses" || tabIndex === "2easyCourses"}
+          isCourses={
+            !currentCourse &&
+            (tabIndex === "userCourses" ||
+              tabIndex === "2easyCourses" ||
+              studentTabIndex === "courses")
+          }
           openCourseModal={() => setCreateCourseModalIsVisible(true)}
+          currentCourse={currentCourse}
         />
       )}
       <CreateLessonModalForm
         isVisible={createLessonModalIsVisible}
         setIsVisible={setCreateLessonModalIsVisible}
         onSuccess={onCreateLesson}
+        currentCourse={currentCourse}
       />
       <CreateCourseModalForm
         isVisible={createCourseModalIsVisible}

@@ -100,6 +100,47 @@ export const useLessons = (
     [getLessons]
   );
 
+  const changeCourseStatus = useCallback(
+    async (relation_id?: number, status?: string) => {
+      setLessonsListIslLoading(true);
+      const res = await fetchPostJson({
+        path: `/course-relation/edit`,
+        data: {
+          relation_id,
+          status,
+        },
+        isSecure: true,
+      });
+      const data = await res?.json();
+      setLesson(data?.lesson);
+      setLessonsListIslLoading(false);
+      checkResponse(data);
+      getLessons();
+      return data;
+    },
+    [getLessons]
+  );
+
+  const deleteCourseRelation = useCallback(
+    async (relation_id?: number) => {
+      setLessonsListIslLoading(true);
+      const res = await fetchPostJson({
+        path: `/course-relation/delete`,
+        data: {
+          relation_id,
+        },
+        isSecure: true,
+      });
+      const data = await res?.json();
+      setLesson(data?.lesson);
+      setLessonsListIslLoading(false);
+      checkResponse(data);
+      getLessons();
+      return data;
+    },
+    [getLessons]
+  );
+
   // useEffect(() => {
   //   getLessons();
   // }, [getLessons]);
@@ -136,5 +177,7 @@ export const useLessons = (
     setLesson,
     courseLessons,
     getCourseLessons,
+    changeCourseStatus,
+    deleteCourseRelation,
   };
 };
