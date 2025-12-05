@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 export const withLogin = () => {
   const { authIsLoading, profile } = useContext(AuthContext);
   const router = useRouter();
+
   useEffect(() => {
     if (!authIsLoading && !profile?.login && !profile?.studentId) {
       toast("Ошибка авторизации", {
@@ -13,5 +14,5 @@ export const withLogin = () => {
       });
       router.push("/login");
     }
-  }, [authIsLoading, profile]);
+  }, [authIsLoading, profile, router]);
 };

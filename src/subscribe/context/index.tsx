@@ -23,10 +23,12 @@ export const SibscribeContextProvider = ({
     const data = await res?.json();
     if (data) {
       setSubscription(data);
-      setProfile?.(data?.profile);
+      if (data?.profile) {
+        setProfile?.(data?.profile);
+      }
     }
 
-    if (!!profile?.name && !profile.studentId) {
+    if (!!profile?.name && !profile?.studentId) {
       checkResponse(data, true);
     }
     return data;

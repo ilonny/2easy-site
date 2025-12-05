@@ -59,7 +59,7 @@ export const Header = () => {
             <a
               href={
                 profile?.studentId
-                  ? `/student-account/${profile.studentId}`
+                  ? `/student-account/${profile?.studentId}`
                   : "/"
               }
             >
