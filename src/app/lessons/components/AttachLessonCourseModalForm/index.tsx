@@ -92,7 +92,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [useUploadImage, onSuccess, chosenCourseIds]
+    [chosenCourseIds, lessonId, onSuccess]
   );
 
   return (
@@ -185,7 +185,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
                     size="lg"
                     isLoading={isLoading}
                   >
-                    submit
+                    Добавить
                   </Button>
                 ) : (
                   <Button
