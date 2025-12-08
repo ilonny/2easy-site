@@ -187,7 +187,7 @@ export const LessonsList: FC<TProps> = ({
                   size="lg"
                   onClick={copyCourse}
                 >
-                  Скопировать курс к себе
+                  Добавить в "Мои курсы"
                 </Button>
               )}
             {(!currentCourse ||
