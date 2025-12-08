@@ -268,16 +268,7 @@ export const ProfileLessons = (props: TProps) => {
       });
     }
     return res;
-  }, [
-    tabIndex,
-    lessonsToRender,
-    activeFilterTab,
-    filterSearchString,
-    isFreeTariff,
-    courses,
-    currentCourse,
-    courseLessons,
-  ]);
+  }, [lessonsToRender, activeFilterTab, filterSearchString, isFreeTariff]);
 
   // useEffect(() => {
   //   if (
@@ -288,6 +279,13 @@ export const ProfileLessons = (props: TProps) => {
   //   }
   // }, [currentCourse, tabIndex]);
 
+  const isCourse =
+    !currentCourse &&
+    ((!studentId && tabIndex === "userCourses") ||
+      tabIndex === "2easyCourses" ||
+      studentTabIndex === "courses");
+
+  console.log("isCourse?", isCourse, tabIndex, isStudent, studentId);
   return (
     <>
       {!hideTabs && (
@@ -480,12 +478,7 @@ export const ProfileLessons = (props: TProps) => {
           showStartLessonButton={showStartLessonButton}
           isStudent={isStudent}
           isFreeTariff={isFreeTariff}
-          isCourses={
-            !currentCourse &&
-            (tabIndex === "userCourses" ||
-              tabIndex === "2easyCourses" ||
-              studentTabIndex === "courses")
-          }
+          isCourses={isCourse}
           openCourseModal={() => setCreateCourseModalIsVisible(true)}
           currentCourse={currentCourse}
         />
