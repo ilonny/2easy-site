@@ -59,7 +59,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
 }) => {
   const { profile, authIsLoading } = useContext(AuthContext);
   const isAdmin = profile?.role_id === 1;
-  console.log('profile?', profile)
+  console.log("profile?", profile);
   const {
     control,
     handleSubmit,
@@ -93,8 +93,8 @@ export const CreateCourseModalForm: FC<TProps> = ({
     );
   }, [allLessons, isAdmin]);
 
-  console.log('isAdmin?', isAdmin)
-  
+  console.log("isAdmin?", isAdmin);
+
   const [images, setImages] = useState(
     chosenCourse?.image_path
       ? [
@@ -235,6 +235,12 @@ export const CreateCourseModalForm: FC<TProps> = ({
       );
     }, []) || []) as TLesson[];
   }, [chosenLessonIds, filteredLessons, courseLessons]);
+
+  useEffect(() => {
+    if (!isVisible) {
+      setStep(0);
+    }
+  }, [isVisible]);
 
   return (
     <Modal
