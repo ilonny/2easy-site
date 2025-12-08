@@ -79,33 +79,18 @@ export default function StartRegistrationPage() {
           <Breadcrumbs>
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
             <BreadcrumbItem href="/lesson_plans">Lesson plans</BreadcrumbItem>
-            <BreadcrumbItem>Course</BreadcrumbItem>
+            <BreadcrumbItem>{currentCourse?.title}</BreadcrumbItem>
           </Breadcrumbs>
         </div>
         <div className="h-10" />
-        <div className="h-10" />
-        <h1
-          color="primary"
-          style={{
-            fontSize: 44,
-            textAlign: "center",
-            color: "#3f28c6",
-            fontWeight: 700,
-          }}
-        >
-          COURSE
-        </h1>
-        <p
-          className="max-w-[745px] text-center m-auto"
-          style={{ fontSize: 20, fontWeight: 500, lineHeight: "26px" }}
-        >
-          Ready-to-use lessons on current topics with juicy vocabulary,
-          authentic videos and stories, complemented by grammar topics,
-          exercises and quizzes.
-        </p>
-        <div className="h-10" />
-        <div className="h-10" />
-        {!!currentCourse && <ProfileLessons currentCourse={currentCourse} />}
+        {!!currentCourse && (
+          <ProfileLessons
+            currentCourse={currentCourse}
+            showChangeStatusButton
+            hideAttachButton
+            hideTabs
+          />
+        )}
         <div className="h-10" />
         <div className="h-10" />
       </ContentWrapper>
