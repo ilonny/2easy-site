@@ -24,7 +24,7 @@ export const SibscribeContextProvider = ({
     if (data) {
       setSubscription(data);
       if (data?.profile?.login) {
-        setProfile?.(data?.profile?.login);
+        setProfile?.(data?.profile);
       }
     }
 
