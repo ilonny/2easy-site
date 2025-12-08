@@ -23,8 +23,8 @@ export const SibscribeContextProvider = ({
     const data = await res?.json();
     if (data) {
       setSubscription(data);
-      if (data?.profile) {
-        setProfile?.(data?.profile);
+      if (data?.profile?.login) {
+        setProfile?.(data?.profile?.login);
       }
     }
 
