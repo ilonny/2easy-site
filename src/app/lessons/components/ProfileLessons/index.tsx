@@ -68,7 +68,6 @@ export const ProfileLessons = (props: TProps) => {
       : "userLessons"
   );
 
-
   const [studentTabIndex, setStudentTabIndex] = useState<"lessons" | "courses">(
     "lessons"
   );
@@ -158,8 +157,8 @@ export const ProfileLessons = (props: TProps) => {
     // 2. Режим для не-учителя или для студента (если studentId указан)
     // Это условие означает, что мы находимся в "студенческом" представлении,
     // либо пользователь не является учителем
-    if (!isTeacher || studentId) {
-      // console.log('lol?', studentTabIndex, lessons); // Для отладки, если нужно
+    if (!isTeacher && studentId) {
+      console.log("lol?", studentTabIndex, lessons, studentId); // Для отладки, если нужно
       if (studentTabIndex === "lessons") {
         return lessons; // Если студент смотрит список всех уроков
       }
@@ -168,6 +167,7 @@ export const ProfileLessons = (props: TProps) => {
 
     // 3. Режим для учителя (isTeacher === true && studentId === false/undefined/null)
     // Здесь мы обрабатываем tabIndex для учителя
+    console.log("switch TABINDEX", tabIndex);
     switch (tabIndex) {
       case "userCourses":
         return courses.filter((c) => c.user_id !== 1); // Курсы пользователя (кроме user_id=1)
