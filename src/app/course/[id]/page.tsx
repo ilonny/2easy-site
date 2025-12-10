@@ -86,7 +86,7 @@ export default function StartRegistrationPage() {
         {!!currentCourse && (
           <ProfileLessons
             currentCourse={currentCourse}
-            showChangeStatusButton
+            // showChangeStatusButton
             hideAttachButton
             hideTabs
           />
