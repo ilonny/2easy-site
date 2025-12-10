@@ -60,7 +60,14 @@ export const ProfileLessons = (props: TProps) => {
 
   const [tabIndex, setTabIndex] = useState<
     "userLessons" | "savedLessons" | "userCourses" | "2easyCourses"
-  >(currentCourse ? "userCourses" : "userLessons");
+  >(
+    currentCourse
+      ? "userCourses"
+      : !profile?.name
+      ? "savedLessons"
+      : "userLessons"
+  );
+
 
   const [studentTabIndex, setStudentTabIndex] = useState<"lessons" | "courses">(
     "lessons"
@@ -290,7 +297,7 @@ export const ProfileLessons = (props: TProps) => {
     <>
       {!hideTabs && (
         <>
-          {!!profile?.name && (
+          {!!profile?.name ? (
             <>
               <div className="flex gap-5 justify-center">
                 <Button
@@ -317,6 +324,36 @@ export const ProfileLessons = (props: TProps) => {
                     Мои курсы
                   </Button>
                 )}
+                <Button
+                  radius="full"
+                  color="primary"
+                  variant={tabIndex === "savedLessons" ? "solid" : "faded"}
+                  onClick={() => {
+                    setTabIndex("savedLessons");
+                    router.push("/lesson_plans");
+                  }}
+                >
+                  Уроки 2EASY
+                </Button>
+                {courses.some((c) => c.user_id === 1) && (
+                  <Button
+                    radius="full"
+                    color="primary"
+                    variant={tabIndex === "2easyCourses" ? "solid" : "faded"}
+                    onClick={() => {
+                      setTabIndex("2easyCourses");
+                      router.push("/lesson_plans");
+                    }}
+                  >
+                    Курсы 2EASY
+                  </Button>
+                )}
+              </div>
+              <div className="h-6"></div>
+            </>
+          ) : (
+            <>
+              <div className="flex gap-5 justify-center">
                 <Button
                   radius="full"
                   color="primary"
