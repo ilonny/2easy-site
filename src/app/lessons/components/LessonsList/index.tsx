@@ -64,6 +64,7 @@ export const LessonsList: FC<TProps> = ({
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
   const [chosenLesson, setChosenLesson] = useState<TLesson | null>(null);
   const [attachLessonModal, setAttachLessonModal] = useState(false);
+  const [copyIsLoading, setCopyIsLoading] = useState(false);
 
   const [coursePageEditVisible, setCoursePageEditVisible] = useState(false);
   const [coursePageAttachLessonModal, setCoursePageAttachLessonModal] =
@@ -131,6 +132,8 @@ export const LessonsList: FC<TProps> = ({
       return;
     }
 
+    setCopyIsLoading(true);
+
     const res = await fetchPostJson({
       path: "/course/copy",
       isSecure: true,
@@ -139,9 +142,11 @@ export const LessonsList: FC<TProps> = ({
       },
     });
     const data = await res.json();
+
+    setCopyIsLoading(false);
     checkResponse(data);
     router.push(`/course/${data.id}`);
-  }, [currentCourse]);
+  }, [checkSubscription, currentCourse.id, router]);
 
   return (
     <div className="flex items-start justify-start w-full flex-wrap">
@@ -186,6 +191,7 @@ export const LessonsList: FC<TProps> = ({
                   className="w-full"
                   size="lg"
                   onClick={copyCourse}
+                  isLoading={copyIsLoading}
                 >
                   Добавить в "Мои курсы"
                 </Button>
