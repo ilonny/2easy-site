@@ -57,7 +57,7 @@ export const LessonsList: FC<TProps> = ({
   currentCourse,
   hideContextMenu,
 }) => {
-  const { checkSubscription } = useCheckSubscription();
+  const { checkSubscription, subscription } = useCheckSubscription();
   const router = useRouter();
   const { profile } = useContext(AuthContext);
   const [editIsVisible, setEditIsVisible] = useState(false);
@@ -180,7 +180,8 @@ export const LessonsList: FC<TProps> = ({
             }}
           >
             {(profile?.role_id === 1 || profile?.role_id === 2) &&
-              currentCourse?.user_id === 1 && (
+              currentCourse?.user_id === 1 &&
+              subscription?.subscribe_type_id !== 1 && (
                 <Button
                   color="primary"
                   className="w-full"
