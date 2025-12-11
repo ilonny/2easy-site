@@ -54,7 +54,6 @@ import { CopyLessonLink } from "../../lessons/components/CopyLessonLink";
 import { useCourses } from "../hooks/useCourses";
 
 export default function StartRegistrationPage() {
-  withLogin();
   const router = useRouter();
   const params = useParams();
   const { subscription } = useContext(SibscribeContext);
