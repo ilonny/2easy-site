@@ -37,7 +37,12 @@ type TProps = {
   onPressAttachToCourse?: (lesson: TLesson) => void;
   hideAttachButton?: boolean;
   showChangeStatusButton?: boolean;
-  changeLessonStatus?: (relation_id?: number, status?: string) => void;
+  changeLessonStatus?: (
+    relation_id?: number,
+    status?: string,
+    lesson_id?: number,
+    student_id?: number
+  ) => void;
   deleteLessonRelation?: (relation?: number) => void;
   hideDeleteLessonButton?: boolean;
   showStartLessonButton?: boolean;
@@ -89,7 +94,8 @@ export const LessonCard: FC<TProps> = ({
 
     if (
       !profile?.name &&
-      (lesson?.created_from_2easy || lesson?.user_id === 1)
+      (lesson?.created_from_2easy || lesson?.user_id === 1) &&
+      !isCourses
     ) {
       // try now modal
       setTryNowModal(true);
@@ -231,7 +237,9 @@ export const LessonCard: FC<TProps> = ({
                             console.log("lol???");
                             changeLessonStatus(
                               lesson?.["lesson_relations.id"],
-                              val
+                              val,
+                              lesson?.id,
+                              studentId
                             );
                           }
                         }}
