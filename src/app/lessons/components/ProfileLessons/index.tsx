@@ -117,7 +117,7 @@ export const ProfileLessons = (props: TProps) => {
     setCreateCourseModalIsVisible(false);
     setTabIndex("userCourses");
     getCourses(Number(studentId));
-  }, [getCourses]);
+  }, [getCourses, studentId]);
 
   useEffect(() => {
     if (currentCourse) {
@@ -125,7 +125,7 @@ export const ProfileLessons = (props: TProps) => {
     } else {
       getLessons();
     }
-  }, [getLessons, currentCourse]);
+  }, [getLessons, currentCourse, getCourseLessons]);
 
   useEffect(() => {
     getCourses(Number(studentId));
@@ -135,12 +135,17 @@ export const ProfileLessons = (props: TProps) => {
 
   useEffect(() => {
     const index = readFromLocalStorage("saved_lessons_tab");
+    console.log("EFFECT?", studentId);
+    if (studentId) {
+      return;
+    }
+
     if (index) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       setTabIndex(index);
     }
-  }, []);
+  }, [studentId]);
 
   useEffect(() => {
     writeToLocalStorage("saved_lessons_tab", tabIndex);
@@ -157,6 +162,13 @@ export const ProfileLessons = (props: TProps) => {
     // 2. Режим для не-учителя или для студента (если studentId указан)
     // Это условие означает, что мы находимся в "студенческом" представлении,
     // либо пользователь не является учителем
+    if (isTeacher && studentId) {
+      console.log("isTeacher && studentId", tabIndex, studentTabIndex);
+      if (studentTabIndex === "lessons") {
+        return lessons; // Если студент смотрит список всех уроков
+      }
+      return courses; // Если студент смотрит список всех курсов
+    }
     if (!isTeacher && studentId) {
       console.log("lol?", studentTabIndex, lessons, studentId); // Для отладки, если нужно
       if (studentTabIndex === "lessons") {
