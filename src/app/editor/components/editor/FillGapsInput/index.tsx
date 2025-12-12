@@ -11,10 +11,7 @@ import {ContentSection} from "./components/ContentSection";
 import {PreviewSection} from "./components/PreviewSection";
 import {useContentEditableBehavior} from "./hooks/useContentEditableBehavior";
 import {pasteHtmlAtCaret, findFieldById} from "./utils";
-import {DEFAULT_VALUES_STUB} from "./constants";
-
-/** Значения по умолчанию для создания нового упражнения */
-const defaultValuesStub: TFillGapsInputData = DEFAULT_VALUES_STUB as unknown as TFillGapsInputData;
+import {DEFAULT_VALUES_STUB,} from "./constants";
 
 type TProps = {
     onSuccess: () => void;
@@ -22,6 +19,9 @@ type TProps = {
     lastSortIndex: number;
     currentSortIndexToShift?: number;
 };
+
+/** Значения по умолчанию для создания нового упражнения */
+const defaultValuesStub: TFillGapsInputData = DEFAULT_VALUES_STUB as unknown as TFillGapsInputData;
 
 /**
  * FillGapsInput - основной компонент редактора для упражнения на заполнение пропусков
@@ -46,33 +46,8 @@ export const FillGapsInput: FC<TProps> = ({
         defaultValues?.images || []
     );
 
-    /** Инициализирует значения по умолчанию при первой загрузке компонента */
-    useEffect(() => {
-        if (!data?.id) {
-            resetData({
-                title: "Let's practice!",
-                titleColor: "#3F28C6",
-                subtitle: "Fill in the gaps with the correct words",
-                description: "Answer the questions below",
-                images: [],
-                dataText: "",
-                fields: [],
-            });
-        }
-    }, [resetData, data?.id]);
-
-    /** Синхронизирует локальное состояние изображений с основными данными */
-    useEffect(() => {
-        changeData("images", images);
-    }, [images, changeData]);
-
-    /** Обрабатывает успешное сохранение данных - вызывает колбэк и очищает форму */
-    useEffect(() => {
-        if (success) {
-            onSuccess?.();
-            resetData(defaultValuesStub);
-        }
-    }, [onSuccess, success, resetData]);
+    /** Ссылка на contentEditable элемент для управления фокусом и содержимым */
+    const contentEditableRef = useRef<HTMLDivElement>(null);
 
     /** Обновляет текст упражнения при изменении contentEditable элемента */
     const onChangeText = useCallback(
@@ -153,7 +128,7 @@ export const FillGapsInput: FC<TProps> = ({
                     </div>
                 );
             });
-    }, [data, onChangeFieldOption, onChangeFieldValue, onAddFieldOption, deleteOption]);
+    }, [data.fields, onChangeFieldOption, onChangeFieldValue, onAddFieldOption, deleteOption]);
 
     /** Добавляет новый пропуск в текст на основе выделенного текста */
     const onClickAddSelection = useCallback(
@@ -194,26 +169,44 @@ export const FillGapsInput: FC<TProps> = ({
         [changeData, data]
     );
 
+    /** Инициализирует поведение contentEditable элемента (вставка, удаление) */
+    useContentEditableBehavior(contentEditableRef, onChangeText);
+
+    /** Инициализирует значения по умолчанию при первой загрузке компонента */
+    useEffect(() => {
+        if (!data?.id) {
+            resetData(defaultValuesStub);
+        }
+    }, [data?.id, resetData]);
+
+    /** Синхронизирует contentEditable содержимое с состоянием */
+    useEffect(() => {
+                if (data.dataText) {
+                    document.getElementById("contentEditableWrapper")!.innerHTML =
+                        data.dataText;
+                }
+                renderContent();
+                // eslint-disable-next-line react-hooks/exhaustive-deps
+            }, []);
+
+
+    /** Синхронизирует изображения с основными данными */
+    useEffect(() => {
+        changeData("images", images);
+    }, [images, changeData]);
+
     /** Перерисовывает содержимое при изменении полей */
     useEffect(() => {
         renderContent();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data.fields]);
+    }, [data.fields, ]);
 
+    /** Обрабатывает успешное сохранение данных */
     useEffect(() => {
-        if (data.dataText) {
-            document.getElementById("contentEditableWrapper")!.innerHTML =
-                data.dataText;
+        if (success) {
+            onSuccess?.();
+            resetData(defaultValuesStub);
         }
-        renderContent();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    /** Ссылка на contentEditable элемент для управления фокусом и содержимым */
-    const contentEditableRef = useRef<HTMLDivElement>(null);
-
-    /** Инициализирует поведение contentEditable элемента (вставка, удаление) */
-    useContentEditableBehavior(contentEditableRef, onChangeText);
+    }, [onSuccess, success, resetData]);
 
     return (
         <div>
