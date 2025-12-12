@@ -54,7 +54,7 @@ export const FillGapsInput: FC<TProps> = ({
         (text: string) => {
             changeData("dataText", text);
         },
-        [changeData]
+        []
     );
 
     /** Переключает флаг правильности ответа для выбранного варианта */
@@ -66,7 +66,7 @@ export const FillGapsInput: FC<TProps> = ({
             field.options[optionIndex].isCorrect = !field.options[optionIndex].isCorrect;
             changeData("fields", dataFields);
         },
-        [data.fields, changeData]
+        [data.fields,]
     );
 
     /** Обновляет текстовое значение варианта ответа */
@@ -78,7 +78,7 @@ export const FillGapsInput: FC<TProps> = ({
             field.options[optionIndex].value = value;
             changeData("fields", dataFields);
         },
-        [data.fields, changeData]
+        [data.fields,]
     );
 
     /** Добавляет новый вариант ответа к пропуску */
@@ -90,7 +90,7 @@ export const FillGapsInput: FC<TProps> = ({
             field.options.push({isCorrect: true, value: ""});
             changeData("fields", dataFields);
         },
-        [data.fields, changeData]
+        [data.fields,]
     );
 
     /** Удаляет вариант ответа из пропуска */
@@ -102,7 +102,7 @@ export const FillGapsInput: FC<TProps> = ({
             field.options = field.options.filter((_o, i) => i !== optionIndex);
             changeData("fields", dataFields);
         },
-        [changeData, data.fields]
+        [data.fields]
     );
 
     /** Отрисовывает попавер-поля со списком вариантов ответов в каждом пропуске */
@@ -128,7 +128,7 @@ export const FillGapsInput: FC<TProps> = ({
                     </div>
                 );
             });
-    }, [data.fields, onChangeFieldOption, onChangeFieldValue, onAddFieldOption, deleteOption]);
+    }, [data.fields,]);
 
     /** Добавляет новый пропуск в текст на основе выделенного текста */
     const onClickAddSelection = useCallback(
@@ -166,7 +166,7 @@ export const FillGapsInput: FC<TProps> = ({
             //   renderContent();
             // }, 100);
         },
-        [changeData, data]
+        [data]
     );
 
     /** Инициализирует поведение contentEditable элемента (вставка, удаление) */
@@ -177,28 +177,28 @@ export const FillGapsInput: FC<TProps> = ({
         if (!data?.id) {
             resetData(defaultValuesStub);
         }
-    }, [data?.id, resetData]);
+    }, [data?.id,]);
 
     /** Синхронизирует contentEditable содержимое с состоянием */
     useEffect(() => {
-                if (data.dataText) {
-                    document.getElementById("contentEditableWrapper")!.innerHTML =
-                        data.dataText;
-                }
-                renderContent();
-                // eslint-disable-next-line react-hooks/exhaustive-deps
-            }, []);
+        if (data.dataText) {
+            document.getElementById("contentEditableWrapper")!.innerHTML =
+                data.dataText;
+        }
+        renderContent();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
 
     /** Синхронизирует изображения с основными данными */
     useEffect(() => {
         changeData("images", images);
-    }, [images, changeData]);
+    }, [images,]);
 
     /** Перерисовывает содержимое при изменении полей */
     useEffect(() => {
         renderContent();
-    }, [data.fields, ]);
+    }, [data.fields,]);
 
     /** Обрабатывает успешное сохранение данных */
     useEffect(() => {
@@ -206,7 +206,7 @@ export const FillGapsInput: FC<TProps> = ({
             onSuccess?.();
             resetData(defaultValuesStub);
         }
-    }, [onSuccess, success, resetData]);
+    }, [success,]);
 
     return (
         <div>

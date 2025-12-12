@@ -5,9 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment="fillgapsdrag refac">
-      <change beforePath="$PROJECT_DIR$/.idea/prettier.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/prettier.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/constants/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/constants/index.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/index.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -115,7 +114,7 @@
       <workItem from="1765286302883" duration="97000" />
       <workItem from="1765353817672" duration="20000" />
       <workItem from="1765444868815" duration="3522000" />
-      <workItem from="1765526976600" duration="2445000" />
+      <workItem from="1765526976600" duration="3475000" />
     </task>
     <task id="LOCAL-00001" summary="fillgapsinput">
       <option name="closed" value="true" />
@@ -245,7 +244,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764787790511</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="fillgapsdrag refac">
+      <option name="closed" value="true" />
+      <created>1765537132345</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1765537132345</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -266,6 +273,7 @@
     <MESSAGE value="fillgapsinput" />
     <MESSAGE value="fillgapsinput refac" />
     <MESSAGE value="fillgapsselect refac" />
-    <option name="LAST_COMMIT_MESSAGE" value="fillgapsselect refac" />
+    <MESSAGE value="fillgapsdrag refac" />
+    <option name="LAST_COMMIT_MESSAGE" value="fillgapsdrag refac" />
   </component>
 </project>
