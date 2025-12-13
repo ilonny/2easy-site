@@ -14,6 +14,13 @@ import {
 import { TField, TFillGapsSelectData } from "../../editor/FillGapsSelect/types";
 import { Card, Input, Select, SelectItem, Tooltip } from "@nextui-org/react";
 import ReactDOM from "react-dom/client";
+import { RENDER_DELAY } from "./constants";
+import {
+  getAnswerWrapperSelector,
+  getMaxOptionLength,
+  computeMaxWidth,
+  getToolTipContent,
+} from "./helpers";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
 import Zoom from "react-medium-image-zoom";
@@ -143,56 +150,42 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
   const ex_id = data?.id;
 
   const renderContent = useCallback(() => {
-    document
-      .querySelectorAll(
-        `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`
-      )
-      .forEach((el, index) => {
-        const id = el.id;
-        const field = data.fields.find((f) => f.id == id);
-        const maxOptionLength = Math?.max(
-          ...(field?.options?.map((o) => o.value.length) || [])
-        );
-        el.setAttribute("index", field?.id?.toString());
-        const root = ReactDOM.createRoot(el);
-        const toolTipContent = field?.options
-          .filter((o) => o.isCorrect)
-          .map((o) => o.value)
-          .join(", ");
-        root.render(
-          <div
-            className="answer-wrapper mx-2 !bg-transparent"
-            id={"answer-wrapper-" + field?.id}
-            style={{
-              display: "inline-block",
-              maxWidth: maxOptionLength * (maxOptionLength < 5 ? 30 : 15),
-              lineHeight: "initial",
-            }}
-          >
-            <Tooltip
-              isDisabled={!isTeacher || rest?.isPresentationMode}
-              content={toolTipContent}
-            >
-              <div className="">
-                <AnswerField
-                  field={field}
-                  key={field?.id}
-                  isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
-                  localAnswers={localAnswers}
-                  setLocalAnswers={setLocalAnswers}
-                  isPresentationMode={rest?.isPresentationMode}
-                  ex_id={ex_id}
-                  lesson_id={lesson_id}
-                  student_id={student_id}
-                  activeStudentId={rest?.activeStudentId}
-                  // localAnswers={localAnswers}
-                  // setLocalAnswers={setLocalAnswers}
-                />
-              </div>
-            </Tooltip>
-          </div>
-        );
-      });
+    document.querySelectorAll(getAnswerWrapperSelector(data?.id)).forEach((el) => {
+      const id = el.id;
+      const field = data.fields.find((f) => f.id == id);
+      const maxOptionLength = getMaxOptionLength(field);
+      el.setAttribute("index", field?.id?.toString());
+      const root = ReactDOM.createRoot(el);
+      const toolTipContent = getToolTipContent(field);
+      root.render(
+        <div
+          className="answer-wrapper mx-2 !bg-transparent"
+          id={"answer-wrapper-" + field?.id}
+          style={{
+            display: "inline-block",
+            maxWidth: computeMaxWidth(maxOptionLength),
+            lineHeight: "initial",
+          }}
+        >
+          <Tooltip isDisabled={!isTeacher || rest?.isPresentationMode} content={toolTipContent}>
+            <div className="">
+              <AnswerField
+                field={field}
+                key={field?.id}
+                isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
+                localAnswers={localAnswers}
+                setLocalAnswers={setLocalAnswers}
+                isPresentationMode={rest?.isPresentationMode}
+                ex_id={ex_id}
+                lesson_id={lesson_id}
+                student_id={student_id}
+                activeStudentId={rest?.activeStudentId}
+              />
+            </div>
+          </Tooltip>
+        </div>
+      );
+    });
   }, [
     data?.id,
     data.fields,
@@ -209,7 +202,7 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
   useEffect(() => {
     setTimeout(() => {
       renderContent();
-    }, 300);
+    }, RENDER_DELAY);
   }, [renderContent]);
 
   const textHtml = useMemo(() => {
