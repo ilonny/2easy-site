@@ -15,7 +15,7 @@ type TProps = {
 
 const IntExViewComp: FC<TProps> = ({ data, isPreview = false }) => {
   const image = data?.images?.[0];
-  console.log("data", data);
+  // console.log("data", data);
   return (
     <>
       <div className={`pt-8 w-[100%] max-w-[766px] m-auto`}>

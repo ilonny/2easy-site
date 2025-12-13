@@ -135,7 +135,7 @@ export const PaymentForm = (props: TProps) => {
       };
 
       cp.start(intentData).then((startResult) => {
-        console.log("startResult", startResult);
+        // console.log("startResult", startResult);
         if (startResult?.status === "success") {
           window?.ym(103955671, "reachGoal", "buy-subscribe-success");
         }
@@ -345,7 +345,7 @@ export const PaymentForm = (props: TProps) => {
               if (isValid) {
                 handleSubmit(onSubmit)();
               } else {
-                console.log("Validation failed. Please fix the errors.");
+                // console.log("Validation failed. Please fix the errors.");
               }
             }}
           >
@@ -385,7 +385,7 @@ export const PaymentForm = (props: TProps) => {
                 if (isValid) {
                   handleSubmit(onSubmit)();
                 } else {
-                  console.log("Validation failed. Please fix the errors.");
+                  // console.log("Validation failed. Please fix the errors.");
                 }
               }, 300);
             }}

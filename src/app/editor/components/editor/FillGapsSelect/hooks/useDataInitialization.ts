@@ -30,7 +30,7 @@ import {defaultValuesStub} from "../constants/defaults";
  *
  * @example
  * useDataInitialization(data, images, success, resetData, changeData, () => {
- *   console.log('Упражнение сохранено!');
+ *   // console.log('Упражнение сохранено!');
  * });
  */
 export const useDataInitialization = (

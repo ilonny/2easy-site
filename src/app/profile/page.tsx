@@ -34,7 +34,7 @@ export default function StartRegistrationPage() {
   }, []);
 
   // useEffect(() => {
-  //   console.log('')
+  //   // console.log('')
   //   if (!authIsLoading && !profile?.id) {
   //     toast("Ошибка авторизации", {
   //       type: "success",

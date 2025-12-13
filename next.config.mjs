@@ -8,7 +8,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   compiler: {
-    removeConsole: true,
+    // removeConsole: true,
   },
   env: {
     BASE_URL: process.env.BASE_URL,

@@ -12,6 +12,7 @@ export const useContentEditableBehavior = (
 ) => {
   // MutationObserver для отслеживания удаления элементов пропусков
   useEffect(() => {
+    console.log('MutationObserver')
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === "childList") {
@@ -47,6 +48,7 @@ export const useContentEditableBehavior = (
 
   // Paste listener для вставки только текста
   useEffect(() => {
+    console.log('pasteListener',)
     const pasteListener = (e: Event) => {
       const evt = e as ClipboardEvent;
       evt.preventDefault?.();

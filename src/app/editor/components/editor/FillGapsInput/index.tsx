@@ -52,6 +52,7 @@ export const FillGapsInput: FC<TProps> = ({
     /** Обновляет текст упражнения при изменении contentEditable элемента */
     const onChangeText = useCallback(
         (text: string) => {
+            console.log('onChangeText')
             changeData("dataText", text);
         },
         []
@@ -60,6 +61,7 @@ export const FillGapsInput: FC<TProps> = ({
     /** Переключает флаг правильности ответа для выбранного варианта */
     const onChangeFieldOption = useCallback(
         (fieldId: string, optionIndex: number) => {
+            console.log('onChangeFieldOption')
             const dataFields = [...data.fields];
             const field = findFieldById(dataFields, fieldId);
             if (!field) return;
@@ -72,6 +74,7 @@ export const FillGapsInput: FC<TProps> = ({
     /** Обновляет текстовое значение варианта ответа */
     const onChangeFieldValue = useCallback(
         (fieldId: string, optionIndex: number, value: string) => {
+            console.log('onChangeFieldValue')
             const dataFields = [...data.fields];
             const field = findFieldById(dataFields, fieldId);
             if (!field) return;
@@ -84,6 +87,7 @@ export const FillGapsInput: FC<TProps> = ({
     /** Добавляет новый вариант ответа к пропуску */
     const onAddFieldOption = useCallback(
         (fieldId: string) => {
+            console.log('onAddFieldOption')
             const dataFields = [...data.fields];
             const field = findFieldById(dataFields, fieldId);
             if (!field) return;
@@ -96,6 +100,7 @@ export const FillGapsInput: FC<TProps> = ({
     /** Удаляет вариант ответа из пропуска */
     const deleteOption = useCallback(
         (fieldId: string, optionIndex: number) => {
+            console.log('deleteOption')
             const dataFields = [...data.fields];
             const field = findFieldById(dataFields, fieldId);
             if (!field) return;
@@ -107,6 +112,7 @@ export const FillGapsInput: FC<TProps> = ({
 
     /** Отрисовывает попавер-поля со списком вариантов ответов в каждом пропуске */
     const renderContent = useCallback(() => {
+        console.log('callback renderContent')
         document
             .querySelectorAll(".contentEditable .answerWrapper")
             .forEach((el) => {
@@ -133,6 +139,8 @@ export const FillGapsInput: FC<TProps> = ({
     /** Добавляет новый пропуск в текст на основе выделенного текста */
     const onClickAddSelection = useCallback(
         (addItemState: { selection: string; left?: number; top?: number }) => {
+            console.log('onClickAddSelection')
+
             const id = String(Date.now());
             pasteHtmlAtCaret(
                 `<div class="inline-block answerWrapper" contenteditable="false" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
@@ -174,6 +182,7 @@ export const FillGapsInput: FC<TProps> = ({
 
     /** Инициализирует значения по умолчанию при первой загрузке компонента */
     useEffect(() => {
+        console.log('useEffect start resetData')
         if (!data?.id) {
             resetData(defaultValuesStub);
         }
@@ -181,6 +190,7 @@ export const FillGapsInput: FC<TProps> = ({
 
     /** Синхронизирует contentEditable содержимое с состоянием */
     useEffect(() => {
+        console.log('useEffect contentEditable with renderContent')
         if (data.dataText) {
             document.getElementById("contentEditableWrapper")!.innerHTML =
                 data.dataText;
@@ -192,21 +202,26 @@ export const FillGapsInput: FC<TProps> = ({
 
     /** Синхронизирует изображения с основными данными */
     useEffect(() => {
+        console.log('useEffect changeData("images", images)')
         changeData("images", images);
     }, [images,]);
 
     /** Перерисовывает содержимое при изменении полей */
     useEffect(() => {
+        console.log('useEffect renderContent')
         renderContent();
     }, [data.fields,]);
 
     /** Обрабатывает успешное сохранение данных */
     useEffect(() => {
+        console.log('useEffect success')
         if (success) {
             onSuccess?.();
             resetData(defaultValuesStub);
         }
     }, [success,]);
+
+    console.log('data', data)
 
     return (
         <div>

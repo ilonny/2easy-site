@@ -80,7 +80,7 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
       </Button>
     );
   }
-  console.log("chat: ", students);
+  // console.log("chat: ", students);
   return (
     <div style={{ position: "relative", height: "500px", minWidth: 300 }}>
       <MainContainer>
