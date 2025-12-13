@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment="fillgapsdrag refac" />
+    <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment="FillGapsInputExViewComp refac">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/index.tsx" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -111,6 +114,7 @@
       <workItem from="1765353817672" duration="20000" />
       <workItem from="1765444868815" duration="3522000" />
       <workItem from="1765526976600" duration="3475000" />
+      <workItem from="1765659876442" duration="1182000" />
     </task>
     <task id="LOCAL-00001" summary="fillgapsinput">
       <option name="closed" value="true" />
@@ -248,7 +252,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765537132345</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="FillGapsInputExViewComp refac">
+      <option name="closed" value="true" />
+      <created>1765660079211</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1765660079211</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -270,6 +282,7 @@
     <MESSAGE value="fillgapsinput refac" />
     <MESSAGE value="fillgapsselect refac" />
     <MESSAGE value="fillgapsdrag refac" />
-    <option name="LAST_COMMIT_MESSAGE" value="fillgapsdrag refac" />
+    <MESSAGE value="FillGapsInputExViewComp refac" />
+    <option name="LAST_COMMIT_MESSAGE" value="FillGapsInputExViewComp refac" />
   </component>
 </project>
