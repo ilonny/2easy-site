@@ -85,9 +85,13 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
   ]);
 
   useEffect(() => {
-    setTimeout(() => {
+      const timerId = setTimeout(() => {
       renderContent();
     }, RENDER_DELAY);
+
+      return ()=> {
+          clearTimeout(timerId)
+      }
   }, [renderContent]);
 
   const textHtml = useMemo(() => {

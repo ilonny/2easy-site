@@ -90,6 +90,7 @@ export const PopoverFields: FC<TProps> = ({
 }) => {
   /** Состояние открытости попавера */
   const [isOpen, setIsOpen] = useState(false);
+
   return (
     <Popover
       placement="bottom"
