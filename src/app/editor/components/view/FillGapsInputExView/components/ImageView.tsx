@@ -10,7 +10,7 @@ const ImageView: FC<{ image?: TImage }> = ({ image }) => {
   if (!image) return null;
   return (
     <Zoom>
-      <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} alt="" />
+      <img src={image.dataURL} className="max-h-[400px] mx-auto" alt="" />
     </Zoom>
   );
 };

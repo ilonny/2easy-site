@@ -51,13 +51,9 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
       const toolTipContent = getToolTipContent(field);
       root.render(
         <div
-          className="answer-wrapper mx-2 !bg-transparent"
+          className="answer-wrapper mx-2 !bg-transparent inline-block"
           id={"answer-wrapper-" + field?.id}
-          style={{
-            display: "inline-block",
-            maxWidth: computeMaxWidth(maxOptionLength),
-            lineHeight: "initial",
-          }}
+          style={{ maxWidth: computeMaxWidth(maxOptionLength) }}
         >
           <Tooltip isDisabled={!isTeacher || isPresentationMode} content={toolTipContent}>
             <div className="">

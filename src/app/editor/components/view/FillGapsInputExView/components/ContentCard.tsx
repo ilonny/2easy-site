@@ -3,11 +3,9 @@ import { Card } from "@nextui-org/react";
 
 const ContentCard: FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
-      <Card className={`p-10 px-10 `}>
-        <div style={{ margin: "0 auto", lineHeight: "230%" }} className="flex flex-col gap-10">
-          {children}
-        </div>
+    <div className="py-8 w-full max-w-[886px] mx-auto">
+      <Card className="p-10 px-10">
+        <div className="mx-auto leading-[230%] flex flex-col gap-10">{children}</div>
       </Card>
     </div>
   );

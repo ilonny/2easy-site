@@ -5,7 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment="FillGapsInputExViewComp refac">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/components/ContentCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/components/ContentCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/components/Header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/components/Header.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/components/ImageView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/components/ImageView.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/index.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -56,6 +58,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/components" />
+    </key>
+  </component>
   <component name="RunManager" selected="npm.dev">
     <configuration name="dev" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/package.json" />
@@ -114,7 +121,7 @@
       <workItem from="1765353817672" duration="20000" />
       <workItem from="1765444868815" duration="3522000" />
       <workItem from="1765526976600" duration="3475000" />
-      <workItem from="1765659876442" duration="1182000" />
+      <workItem from="1765659876442" duration="2059000" />
     </task>
     <task id="LOCAL-00001" summary="fillgapsinput">
       <option name="closed" value="true" />
@@ -260,7 +267,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765660079211</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="FillGapsInputExViewComp refac">
+      <option name="closed" value="true" />
+      <created>1765661212425</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1765661212425</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

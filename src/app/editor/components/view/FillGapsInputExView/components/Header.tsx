@@ -9,38 +9,16 @@ type Props = {
 
 const Header: FC<Props> = ({ title, subtitle, description, titleColor }) => {
   return (
-    <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
+    <div className="py-8 w-full max-w-[766px] mx-auto">
       <p
-        style={{
-          color: titleColor,
-          fontSize: 38,
-          textAlign: "center",
-          fontWeight: 700,
-          textTransform: "uppercase",
-        }}
+        className="text-[38px] text-center font-extrabold uppercase"
+        style={titleColor ? { color: titleColor } : undefined}
       >
         {title}
       </p>
-      <p
-        style={{
-          fontSize: 24,
-          textAlign: "center",
-          fontWeight: 700,
-          textTransform: "uppercase",
-        }}
-      >
-        {subtitle}
-      </p>
+      <p className="text-2xl text-center font-extrabold uppercase">{subtitle}</p>
       {!!description && (
-        <p
-          style={{
-            fontSize: 20,
-            textAlign: "center",
-            whiteSpace: "pre-line",
-          }}
-        >
-          {description}
-        </p>
+        <p className="text-xl text-center whitespace-pre-line">{description}</p>
       )}
     </div>
   );
