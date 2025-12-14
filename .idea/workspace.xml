@@ -6,9 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment="FillGapsInputExViewComp refac">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/PopoverFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/PopoverFields.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/index.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

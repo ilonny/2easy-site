@@ -208,7 +208,7 @@ export const FillGapsInput: FC<TProps> = ({
             resetData(defaultValuesStub);
         }
     }, [success]);
-console.log('data',data)
+
     return (
         <div>
             <div className="flex flex-wrap">
