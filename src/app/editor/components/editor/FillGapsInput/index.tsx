@@ -20,14 +20,7 @@ type TProps = {
     currentSortIndexToShift?: number;
 };
 
-/** Значения по умолчанию для создания нового упражнения */
-const defaultValuesStub: TFillGapsInputData = DEFAULT_VALUES_STUB as unknown as TFillGapsInputData;
 
-/**
- * FillGapsInput - основной компонент редактора для упражнения на заполнение пропусков
- * Управляет всем процессом создания упражнения: редактированием текста, добавлением пропусков,
- * редактированием вариантов ответов и сохранением данных
- */
 export const FillGapsInput: FC<TProps> = ({
                                               onSuccess,
                                               defaultValues,
@@ -39,17 +32,14 @@ export const FillGapsInput: FC<TProps> = ({
         currentSortIndexToShift
     );
     const {data, changeData, resetData} = useExData<TFillGapsInputData>(
-        (defaultValues as TFillGapsInputData) || defaultValuesStub
+        (defaultValues as TFillGapsInputData) || (DEFAULT_VALUES_STUB)
     );
-    /** Хранилище загруженных изображений для задания */
     const [images, setImages] = useState<TFillGapsInputData["images"]>(
         defaultValues?.images || []
     );
 
-    /** Ссылка на contentEditable элемент для управления фокусом и содержимым */
     const contentEditableRef = useRef<HTMLDivElement>(null);
 
-    /** Обновляет текст упражнения при изменении contentEditable элемента */
     const onChangeText = useCallback(
         (text: string) => {
             changeData("dataText", text);
@@ -57,76 +47,71 @@ export const FillGapsInput: FC<TProps> = ({
         []
     );
 
-    const fieldsObj = useMemo(() => {
-        if (data.fields?.length) {
-            return Object.fromEntries(
-                data.fields.map(item => [item.id, item])
-            );
-        }
-        return {}
-    }, [data.fields])
+    // const fieldsObj = useMemo(() => {
+    //     if (data.fields?.length) {
+    //         return Object.fromEntries(
+    //             data.fields.map(item => [item.id, item])
+    //         );
+    //     }
+    //     return {}
+    // }, [data.fields])
 
-    /** Обновляет текстовое значение варианта ответа */
-    const onChangeFieldValue = useCallback(
-        (fieldId: string, optionIndex: number, value: string) => {
-            const field = fieldsObj[fieldId]
-            if (!field || !field.options[optionIndex]) return;
-            field.options[optionIndex].value = value;
-            changeData("fields", [...data.fields]);
-        },
-        [data.fields, fieldsObj]
-    );
-
-    /** Добавляет новый вариант ответа к пропуску */
-    const onAddFieldOption = useCallback(
-        (fieldId: string) => {
-            const field = fieldsObj[fieldId]
-            if (!field) return;
-            field.options.push({isCorrect: true, value: ""});
-            changeData("fields", [...data.fields]);
-        },
-        [data.fields, fieldsObj]
-    );
-
-    /** Удаляет вариант ответа из пропуска */
-    const deleteOption = useCallback(
-        (fieldId: string, optionIndex: number) => {
-            const field = fieldsObj[fieldId]
-            if (!field) return;
-            field.options = field.options.filter((_o, i) => i !== optionIndex);
-            changeData("fields", [...data.fields]);
-        },
-        [data.fields, fieldsObj]
-    );
+    // const onChangeFieldValue = useCallback(
+    //     (fieldId: string, optionIndex: number, value: string) => {
+    //         const field = fieldsObj[fieldId]
+    //         if (!field || !field.options[optionIndex]) return;
+    //         field.options[optionIndex].value = value;
+    //         changeData("fields", [...data.fields]);
+    //     },
+    //     [data.fields, fieldsObj]
+    // );
+    //
+    // const onAddFieldOption = useCallback(
+    //     (fieldId: string) => {
+    //         const field = fieldsObj[fieldId]
+    //         if (!field) return;
+    //         field.options.push({isCorrect: true, value: ""});
+    //         changeData("fields", [...data.fields]);
+    //     },
+    //     [data.fields, fieldsObj]
+    // );
+    //
+    // const deleteOption = useCallback(
+    //     (fieldId: string, optionIndex: number) => {
+    //         const field = fieldsObj[fieldId]
+    //         if (!field) return;
+    //         field.options = field.options.filter((_o, i) => i !== optionIndex);
+    //         changeData("fields", [...data.fields]);
+    //     },
+    //     [data.fields, fieldsObj]
+    // );
 
 
-    /** Отрисовывает попавер-поля со списком вариантов ответов в каждом пропуске */
-    const renderContent = useCallback(() => {
+    // const renderContent = useCallback(() => {
+    //
+    //     document
+    //         .querySelectorAll(".contentEditable .answerWrapper")
+    //         .forEach((el) => {
+    //             const field = fieldsObj[el.id]
+    //             if (!field) return;
+    //             el.setAttribute("index", field.id);
+    //             const root = ReactDOM.createRoot(el);
+    //
+    //             root.render(
+    //                 <div className="popover-wrapper" id={"popover-wrapper-" + field.id}>
+    //                     <PopoverFields
+    //                         id={field.id}
+    //                         field={field}
+    //                         onChangeFieldValue={onChangeFieldValue}
+    //                         onAddFieldOption={onAddFieldOption}
+    //                         deleteOption={deleteOption}
+    //                     />
+    //                 </div>
+    //             );
+    //
+    //         });
+    // }, [data.fields, fieldsObj, open]);
 
-        document
-            .querySelectorAll(".contentEditable .answerWrapper")
-            .forEach((el) => {
-                const field = fieldsObj[el.id]
-                if (!field) return;
-                el.setAttribute("index", field.id);
-                const root = ReactDOM.createRoot(el);
-
-                root.render(
-                    <div className="popover-wrapper" id={"popover-wrapper-" + field.id}>
-                        <PopoverFields
-                            id={field.id}
-                            field={field}
-                            onChangeFieldValue={onChangeFieldValue}
-                            onAddFieldOption={onAddFieldOption}
-                            deleteOption={deleteOption}
-                        />
-                    </div>
-                );
-
-            });
-    }, [data.fields, fieldsObj, open]);
-
-    /** Добавляет новый пропуск в текст на основе выделенного текста */
     const onClickAddSelection = useCallback(
         (addItemState: { selection: string; left?: number; top?: number }) => {
 
@@ -160,44 +145,39 @@ export const FillGapsInput: FC<TProps> = ({
         [data]
     );
 
-    /** Инициализирует поведение contentEditable элемента (вставка, удаление) */
     useContentEditableBehavior(contentEditableRef, onChangeText);
 
-    /** Инициализирует значения по умолчанию при первой загрузке компонента */
     useEffect(() => {
         if (!data?.id) {
-            resetData(defaultValuesStub);
+            resetData(DEFAULT_VALUES_STUB);
         }
     }, [data?.id,]);
 
-    /** Синхронизирует contentEditable содержимое с состоянием */
-    useEffect(() => {
-        if (data.dataText) {
-            document.getElementById("contentEditableWrapper")!.innerHTML =
-                data.dataText;
-        }
-        renderContent();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    // useEffect(() => {
+    //     if (data.dataText) {
+    //         document.getElementById("contentEditableWrapper")!.innerHTML =
+    //             data.dataText;
+    //     }
+    //     renderContent();
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, []);
 
 
-    /** Синхронизирует изображения с основными данными */
     useEffect(() => {
         changeData("images", images);
     }, [images,]);
 
-    /** Перерисовывает содержимое при изменении полей */
-    useEffect(() => {
-        renderContent();
-    }, [renderContent]);
+    // useEffect(() => {
+    //     renderContent();
+    // }, [renderContent]);
 
-    /** Обрабатывает успешное сохранение данных */
     useEffect(() => {
         if (success) {
             onSuccess?.();
-            resetData(defaultValuesStub);
+            resetData(DEFAULT_VALUES_STUB);
         }
     }, [success]);
+
 
     return (
         <div>

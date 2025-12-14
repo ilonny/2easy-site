@@ -49,6 +49,9 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
       el.setAttribute("index", field?.id?.toString());
       const root = createRoot(el);
       const toolTipContent = getToolTipContent(field);
+      if(field?.id){
+        return
+      }
       root.render(
         <div
           className="answer-wrapper mx-2 !bg-transparent inline-block"

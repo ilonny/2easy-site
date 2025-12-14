@@ -66,7 +66,7 @@ const AnswerField: FC<AnswerFieldProps> = ({
     if (selectedValue) {
       writeAnswer(field.id, selectedValue);
     }
-  }, [field.id, isTeacher, selectedValue, writeAnswer]);
+  }, [field?.id, isTeacher, selectedValue, writeAnswer]);
 
   useEffect(() => {
     if (!isTeacher || isPresentationMode) {

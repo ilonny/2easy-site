@@ -1,5 +1,5 @@
-import { Button, Card, Select } from "@nextui-org/react";
-import { FC, useEffect, useRef, useState } from "react";
+import { Button, Card,  } from "@nextui-org/react";
+import {FC, MouseEvent, useCallback, useEffect,  useState} from "react";
 
 type TProps = {
   onClickAddSelection: (
@@ -23,25 +23,9 @@ export const AddItemCard: FC<TProps> = ({ onClickAddSelection }) => {
   }>({ selection: "", left: 0, top: 0, baseOffset: 0, focusOffset: 0 });
 
   const [addItemIsVisible, setAddItemIsVisible] = useState(false);
-  // const [pointerEvents, setPointerEvents] = useState<"auto" | "none">("auto");
-  const selectionRef = useRef(null);
-  const rangeRef = useRef(null);
-
-  // useEffect(() => {
-  //   if (!addItemIsVisible) {
-  //     setTimeout(() => {
-  //       setPointerEvents("none");
-  //     }, 300);
-  //   }
-  //   if (addItemIsVisible) {
-  //     setTimeout(() => {
-  //       setPointerEvents("auto");
-  //     }, 300);
-  //   }
-  // }, [addItemIsVisible]);
 
   useEffect(() => {
-    const handleSelectionChange = (e) => {
+    const handleSelectionChange = () => {
       const parent = window?.getSelection()?.anchorNode?.parentNode;
       const parentParent = parent?.parentNode;
       const parentParentParent = parentParent?.parentNode;
@@ -66,7 +50,6 @@ export const AddItemCard: FC<TProps> = ({ onClickAddSelection }) => {
       }
 
       const range = selection.getRangeAt(0);
-      // range.deleteContents();
       const bound = range.getBoundingClientRect();
       setAddItemState({
         selection: selection.toString(),
@@ -74,7 +57,6 @@ export const AddItemCard: FC<TProps> = ({ onClickAddSelection }) => {
         top: bound.top - bounds.top + 20,
         baseOffset: selection.anchorOffset,
         focusOffset: selection.focusOffset,
-        // range: range.cloneContents(),
       });
       setAddItemIsVisible(true);
     };
@@ -85,6 +67,15 @@ export const AddItemCard: FC<TProps> = ({ onClickAddSelection }) => {
       document.removeEventListener("selectionchange", handleSelectionChange);
     };
   }, []);
+
+  const handleOnAdd=useCallback(
+      (e: MouseEvent<HTMLElement, MouseEvent>) => {
+      e.stopPropagation();
+      onClickAddSelection(addItemState);
+      setTimeout(() => {
+        setAddItemIsVisible(false);
+      }, 100);
+  },[addItemState, onClickAddSelection])
 
   return (
     <Card
@@ -97,10 +88,6 @@ export const AddItemCard: FC<TProps> = ({ onClickAddSelection }) => {
         opacity: addItemIsVisible ? 1 : 0,
         pointerEvents: addItemIsVisible ? "auto" : "none",
         zIndex: 10,
-        // zIndex: addItemIsVisible ? 1 : -1,
-        // maxWidth: addItemIsVisible ? "initial" : 10,
-        // maxHeight: addItemIsVisible ? "initial" : 10,
-        // pointerEvents: addItemIsVisible ? "auto" : "none",
       }}
     >
       <Button
@@ -109,13 +96,7 @@ export const AddItemCard: FC<TProps> = ({ onClickAddSelection }) => {
           background: "#fff",
           cursor: "pointer",
         }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClickAddSelection(addItemState);
-          setTimeout(() => {
-            setAddItemIsVisible(false);
-          }, 100);
-        }}
+        onClick={handleOnAdd}
       >
         <p style={{ color: "#3F28C6" }}>+ пропустить</p>
       </Button>
