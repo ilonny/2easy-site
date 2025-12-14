@@ -27,7 +27,6 @@ type TProps = {
 
 export const FillGapsInputExViewComp: FC<TProps> = ({
   data,
-  isPreview = false,
   isPresentationMode,
   activeStudentId,
 }) => {
@@ -49,9 +48,7 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
       el.setAttribute("index", field?.id?.toString());
       const root = createRoot(el);
       const toolTipContent = getToolTipContent(field);
-      if(field?.id){
-        return
-      }
+
       root.render(
         <div
           className="answer-wrapper mx-2 !bg-transparent inline-block"
@@ -95,7 +92,7 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
       return ()=> {
           clearTimeout(timerId)
       }
-  }, [renderContent]);
+  }, [data.fields]);
 
   const textHtml = useMemo(() => {
     return data.dataText;

@@ -3,15 +3,13 @@ import {useExData} from "../hooks/useExData";
 import {TField, TFillGapsInputData} from "./types";
 import {FC, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useUploadFillGapsInputEx} from "../hooks/useUploadFillGapsInputEx";
-import ReactDOM from "react-dom/client";
-import {PopoverFields} from "./PopoverFields";
 import {LeftPanel} from "./components/LeftPanel";
 import {RightPanel} from "./components/RightPanel";
 import {ContentSection} from "./components/ContentSection";
 import {PreviewSection} from "./components/PreviewSection";
 import {useContentEditableBehavior} from "./hooks/useContentEditableBehavior";
-import {pasteHtmlAtCaret,} from "./utils";
 import {DEFAULT_VALUES_STUB,} from "./constants";
+import {pasteReactAtCaretUpdate} from "@/app/editor/components/editor/FillGapsInput/utils";
 
 type TProps = {
     onSuccess: () => void;
@@ -19,6 +17,8 @@ type TProps = {
     lastSortIndex: number;
     currentSortIndexToShift?: number;
 };
+
+
 
 
 export const FillGapsInput: FC<TProps> = ({
@@ -47,44 +47,44 @@ export const FillGapsInput: FC<TProps> = ({
         []
     );
 
-    // const fieldsObj = useMemo(() => {
-    //     if (data.fields?.length) {
-    //         return Object.fromEntries(
-    //             data.fields.map(item => [item.id, item])
-    //         );
-    //     }
-    //     return {}
-    // }, [data.fields])
+    const fieldsObj = useMemo(() => {
+        if (data.fields?.length) {
+            return Object.fromEntries(
+                data.fields.map(item => [item.id, item])
+            );
+        }
+        return {}
+    }, [data.fields])
 
-    // const onChangeFieldValue = useCallback(
-    //     (fieldId: string, optionIndex: number, value: string) => {
-    //         const field = fieldsObj[fieldId]
-    //         if (!field || !field.options[optionIndex]) return;
-    //         field.options[optionIndex].value = value;
-    //         changeData("fields", [...data.fields]);
-    //     },
-    //     [data.fields, fieldsObj]
-    // );
-    //
-    // const onAddFieldOption = useCallback(
-    //     (fieldId: string) => {
-    //         const field = fieldsObj[fieldId]
-    //         if (!field) return;
-    //         field.options.push({isCorrect: true, value: ""});
-    //         changeData("fields", [...data.fields]);
-    //     },
-    //     [data.fields, fieldsObj]
-    // );
-    //
-    // const deleteOption = useCallback(
-    //     (fieldId: string, optionIndex: number) => {
-    //         const field = fieldsObj[fieldId]
-    //         if (!field) return;
-    //         field.options = field.options.filter((_o, i) => i !== optionIndex);
-    //         changeData("fields", [...data.fields]);
-    //     },
-    //     [data.fields, fieldsObj]
-    // );
+    const onChangeFieldValue = useCallback(
+        (fieldId: string, optionIndex: number, value: string) => {
+            const field = fieldsObj[fieldId]
+            if (!field || !field.options[optionIndex]) return;
+            field.options[optionIndex].value = value;
+            changeData("fields", [...data.fields]);
+        },
+        [data.fields, fieldsObj]
+    );
+
+    const onAddFieldOption = useCallback(
+        (fieldId: string) => {
+            const field = fieldsObj[fieldId]
+            if (!field) return;
+            field.options.push({isCorrect: true, value: ""});
+            changeData("fields", [...data.fields]);
+        },
+        [data.fields, fieldsObj]
+    );
+
+    const deleteOption = useCallback(
+        (fieldId: string, optionIndex: number) => {
+            const field = fieldsObj[fieldId]
+            if (!field) return;
+            field.options = field.options.filter((_o, i) => i !== optionIndex);
+            changeData("fields", [...data.fields]);
+        },
+        [data.fields, fieldsObj]
+    );
 
 
     // const renderContent = useCallback(() => {
@@ -114,18 +114,7 @@ export const FillGapsInput: FC<TProps> = ({
 
     const onClickAddSelection = useCallback(
         (addItemState: { selection: string; left?: number; top?: number }) => {
-
             const id = String(Date.now());
-            pasteHtmlAtCaret(
-                `<div class="inline-block answerWrapper" contenteditable="false" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
-            );
-            const contentEditableWrapper = document.getElementById(
-                "contentEditableWrapper"
-            );
-            const selection = window.getSelection();
-            if (selection) {
-                selection.removeAllRanges();
-            }
 
             const field: TField = {
                 id,
@@ -138,11 +127,29 @@ export const FillGapsInput: FC<TProps> = ({
                 ],
             };
 
+            pasteReactAtCaretUpdate(
+                id,
+                field,
+                addItemState,
+                onChangeFieldValue,
+                onAddFieldOption,
+                deleteOption,
+            )
+
+
+            const selection = window.getSelection();
+            if (selection) {
+                selection.removeAllRanges();
+            }
+
+            const contentEditableWrapper = document.getElementById(
+                "contentEditableWrapper"
+            );
             changeData("fields", [...data.fields, field]);
             changeData("dataText", contentEditableWrapper?.innerHTML);
             contentEditableWrapper?.blur();
         },
-        [data]
+        [data.fields]
     );
 
     useContentEditableBehavior(contentEditableRef, onChangeText);
@@ -178,6 +185,10 @@ export const FillGapsInput: FC<TProps> = ({
         }
     }, [success]);
 
+    useEffect(() => {
+        changeData("fields", data.fields);
+        console.log('data.fields')
+    }, [data.fields])
 
     return (
         <div>

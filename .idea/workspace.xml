@@ -4,16 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment="перед переписыванием">
+    <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment=" переписывание">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/AddItemCard/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/AddItemCard/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/components/ContentSection.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/components/ContentSection.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/constants/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/constants/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/hooks/useContentEditableBehavior.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/hooks/useContentEditableBehavior.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/PopoverFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/PopoverFields.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/utils/findFieldById.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/utils/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/utils/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/components/AnswerField.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/components/AnswerField.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/utils/pasteHtmlAtCaret.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/utils/pasteHtmlAtCaret.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/constants.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/view/FillGapsInputExView/index.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -297,7 +293,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765716258855</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary=" переписывание">
+      <option name="closed" value="true" />
+      <created>1765717974353</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1765717974353</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -321,6 +325,19 @@
     <MESSAGE value="fillgapsdrag refac" />
     <MESSAGE value="FillGapsInputExViewComp refac" />
     <MESSAGE value="перед переписыванием" />
-    <option name="LAST_COMMIT_MESSAGE" value="перед переписыванием" />
+    <MESSAGE value=" переписывание" />
+    <option name="LAST_COMMIT_MESSAGE" value=" переписывание" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/PopoverFields.tsx</url>
+          <line>79</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
