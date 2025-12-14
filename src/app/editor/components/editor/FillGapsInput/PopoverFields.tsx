@@ -1,6 +1,5 @@
 import {
   Button,
-  Checkbox,
   Input,
   Popover,
   PopoverContent,
@@ -20,8 +19,6 @@ type TProps = {
   id: string;
   /** Объект пропуска с вариантами ответов */
   field: TField;
-  /** Обработчик переключения флага правильности ответа */
-  onChangeFieldOption: (id: string, optionIndex: number) => void;
   /** Обработчик изменения текста варианта ответа */
   onChangeFieldValue: (id: string, optionIndex: number, value: string) => void;
   /** Обработчик добавления нового варианта ответа */
@@ -83,7 +80,6 @@ const PopoverInput = ({
 export const PopoverFields: FC<TProps> = ({
   id,
   field,
-  onChangeFieldOption,
   onChangeFieldValue,
   onAddFieldOption,
   deleteOption,

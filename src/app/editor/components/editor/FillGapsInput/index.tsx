@@ -1,7 +1,7 @@
 "use client";
 import {useExData} from "../hooks/useExData";
 import {TField, TFillGapsInputData} from "./types";
-import {FC, useCallback, useEffect, useRef, useState} from "react";
+import {FC, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useUploadFillGapsInputEx} from "../hooks/useUploadFillGapsInputEx";
 import ReactDOM from "react-dom/client";
 import {PopoverFields} from "./PopoverFields";
@@ -10,7 +10,7 @@ import {RightPanel} from "./components/RightPanel";
 import {ContentSection} from "./components/ContentSection";
 import {PreviewSection} from "./components/PreviewSection";
 import {useContentEditableBehavior} from "./hooks/useContentEditableBehavior";
-import {pasteHtmlAtCaret, findFieldById} from "./utils";
+import {pasteHtmlAtCaret,} from "./utils";
 import {DEFAULT_VALUES_STUB,} from "./constants";
 
 type TProps = {
@@ -57,78 +57,74 @@ export const FillGapsInput: FC<TProps> = ({
         []
     );
 
-    /** Переключает флаг правильности ответа для выбранного варианта */
-    const onChangeFieldOption = useCallback(
-        (fieldId: string, optionIndex: number) => {
-            const dataFields = [...data.fields];
-            const field = findFieldById(dataFields, fieldId);
-            if (!field || !field.options[optionIndex]) return;
-            field.options[optionIndex].isCorrect = !field.options[optionIndex].isCorrect;
-            changeData("fields", dataFields);
-        },
-        [data.fields,]
-    );
+    const fieldsObj = useMemo(() => {
+        if (data.fields?.length) {
+            return Object.fromEntries(
+                data.fields.map(item => [item.id, item])
+            );
+        }
+        return {}
+    }, [data.fields])
 
     /** Обновляет текстовое значение варианта ответа */
     const onChangeFieldValue = useCallback(
         (fieldId: string, optionIndex: number, value: string) => {
-            const dataFields = [...data.fields];
-            const field = findFieldById(dataFields, fieldId);
+            const field = fieldsObj[fieldId]
             if (!field || !field.options[optionIndex]) return;
             field.options[optionIndex].value = value;
-            changeData("fields", dataFields);
+            changeData("fields", [...data.fields]);
         },
-        [data.fields,]
+        [data.fields, fieldsObj]
     );
 
     /** Добавляет новый вариант ответа к пропуску */
     const onAddFieldOption = useCallback(
         (fieldId: string) => {
-            const dataFields = [...data.fields];
-            const field = findFieldById(dataFields, fieldId);
+            const field = fieldsObj[fieldId]
             if (!field) return;
             field.options.push({isCorrect: true, value: ""});
-            changeData("fields", dataFields);
+            changeData("fields", [...data.fields]);
         },
-        [data.fields,]
+        [data.fields, fieldsObj]
     );
 
     /** Удаляет вариант ответа из пропуска */
     const deleteOption = useCallback(
         (fieldId: string, optionIndex: number) => {
-            const dataFields = [...data.fields];
-            const field = findFieldById(dataFields, fieldId);
+            const field = fieldsObj[fieldId]
             if (!field) return;
             field.options = field.options.filter((_o, i) => i !== optionIndex);
-            changeData("fields", dataFields);
+            changeData("fields", [...data.fields]);
         },
-        [data.fields]
+        [data.fields, fieldsObj]
     );
+
 
     /** Отрисовывает попавер-поля со списком вариантов ответов в каждом пропуске */
     const renderContent = useCallback(() => {
+
         document
             .querySelectorAll(".contentEditable .answerWrapper")
             .forEach((el) => {
-                const id = el.id;
-                const field = data.fields.find((f) => f.id === id);
+                const field = fieldsObj[el.id]
                 if (!field) return;
                 el.setAttribute("index", field.id);
                 const root = ReactDOM.createRoot(el);
+
                 root.render(
                     <div className="popover-wrapper" id={"popover-wrapper-" + field.id}>
                         <PopoverFields
                             id={field.id}
                             field={field}
-                            onChangeFieldOption={onChangeFieldOption}
                             onChangeFieldValue={onChangeFieldValue}
                             onAddFieldOption={onAddFieldOption}
                             deleteOption={deleteOption}
                         />
                     </div>
                 );
+
             });
-    }, [data.fields,]);
+    }, [data.fields, fieldsObj, open]);
 
     /** Добавляет новый пропуск в текст на основе выделенного текста */
     const onClickAddSelection = useCallback(
@@ -157,15 +153,9 @@ export const FillGapsInput: FC<TProps> = ({
                 ],
             };
 
-            const dataFields = [...data.fields];
-            dataFields.push(field);
-
-            changeData("fields", [...dataFields]);
+            changeData("fields", [...data.fields, field]);
             changeData("dataText", contentEditableWrapper?.innerHTML);
             contentEditableWrapper?.blur();
-            // setTimeout(() => {
-            //   renderContent();
-            // }, 100);
         },
         [data]
     );
@@ -199,7 +189,7 @@ export const FillGapsInput: FC<TProps> = ({
     /** Перерисовывает содержимое при изменении полей */
     useEffect(() => {
         renderContent();
-    }, [data.fields,]);
+    }, [renderContent]);
 
     /** Обрабатывает успешное сохранение данных */
     useEffect(() => {
