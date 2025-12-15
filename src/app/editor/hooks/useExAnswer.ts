@@ -106,10 +106,10 @@ export const useExAnswer = (params: TParams) => {
             if (activeStudentId) {
               getAnswers();
             }
-            // // console.log(`Элемент ex-${ex_id} появился в поле зрения`);
+            // console.log(`Элемент ex-${ex_id} появился в поле зрения`);
           } else {
             idRef = 0;
-            // // console.log(`Элемент ex-${ex_id} исчез из поля зрения`);
+            // console.log(`Элемент ex-${ex_id} исчез из поля зрения`);
           }
         });
       },

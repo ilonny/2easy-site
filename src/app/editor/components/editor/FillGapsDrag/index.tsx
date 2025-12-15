@@ -63,12 +63,12 @@ export const FillGapsDrag: FC<TProps> = ({
 
     const checkFields = useCallback(() => {
         // const fields = [...data.fields];
-        // // console.log('checkFields', data.fields)
+        // console.log('checkFields', data.fields)
         // changeData(
         //   "fields",
         //   fields.filter((field) => {
         //     const el = document.getElementById("popover-wrapper-" + field.id);
-        //     // console.log("el??", el);
+        //     console.log("el??", el);
         //     return !!el;
         //   })
         // );

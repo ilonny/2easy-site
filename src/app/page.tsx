@@ -56,8 +56,8 @@ export default function Home() {
   }, []);
 
   const buttonsContent = useMemo(() => {
-    // console.log("profile?.name", profile?.name);
-    // console.log("hasSubscription", hasSubscription);
+    console.log("profile?.name", profile?.name);
+    console.log("hasSubscription", hasSubscription);
     if (!profile?.name) {
       return (
         <>

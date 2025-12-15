@@ -4,10 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment="добавление поповера">
+    <list default="true" id="a3215657-088c-4028-99ad-5e7b81593d1f" name="Changes" comment="рабочий вариант">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/next.config.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/api/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/[id]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/[id]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsDrag/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsDrag/index.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/PopoverFields.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/PopoverFields.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/useDataInitialization.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/editor/FillGapsSelect/hooks/useDataInitialization.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/view/IntExView/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/view/IntExView/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/components/view/MatchWordImageExView/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/components/view/MatchWordImageExView/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/editor/hooks/useExAnswer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/editor/hooks/useExAnswer.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/profile/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/profile/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Chat/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Chat/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/payment/components/PaymentForm/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/payment/components/PaymentForm/index.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -312,7 +324,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765721333749</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="рабочий вариант">
+      <option name="closed" value="true" />
+      <created>1765816564917</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1765816564917</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -338,15 +358,17 @@
     <MESSAGE value="перед переписыванием" />
     <MESSAGE value=" переписывание" />
     <MESSAGE value="добавление поповера" />
-    <option name="LAST_COMMIT_MESSAGE" value="добавление поповера" />
+    <MESSAGE value="рабочий вариант" />
+    <option name="LAST_COMMIT_MESSAGE" value="рабочий вариант" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/src/app/editor/components/editor/FillGapsInput/PopoverFields.tsx</url>
-          <line>121</line>
-          <option name="timeStamp" value="1" />
+          <line>79</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

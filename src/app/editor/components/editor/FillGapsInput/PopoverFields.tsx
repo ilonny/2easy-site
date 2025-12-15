@@ -5,10 +5,10 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@nextui-org/react";
-import {FC, useEffect, useState} from "react";
+import {FC, useEffect, useMemo, useState} from "react";
 import ChevronIconDown from "@/assets/icons/chevron_down.svg";
 import Image from "next/image";
-import {TField} from "./types";
+import {TField,} from "./types";
 import Close from "@/assets/icons/close.svg";
 
 
@@ -46,6 +46,7 @@ const PopoverInput = ({
             onBlur(inputValue);
         };
     }, [inputValue]);
+
     return (
         <Input
             value={inputValue}
@@ -78,6 +79,7 @@ export const PopoverFields: FC<TProps> = ({
                                           }) => {
     const [isOpen, setIsOpen] = useState(openPopover[id]);
 
+
     const onOpenChange = (open: boolean) => {
         if (open) {
             onOpen(id)
@@ -88,10 +90,11 @@ export const PopoverFields: FC<TProps> = ({
     }
 
     const onDeleteOption = (optionIndex: number) => {
+        deleteOption(id, optionIndex);
+
         onClose(id);
         setIsOpen(false)
 
-        deleteOption(id, optionIndex);
         setTimeout(() => {
             const element = document.getElementById("popover-wrapper-" + id)?.firstChild as HTMLElement | null;
             element?.click();
@@ -99,14 +102,15 @@ export const PopoverFields: FC<TProps> = ({
     }
 
     const onAddOption = () => {
+        onAddFieldOption(id);
+
         onClose(id);
         setIsOpen(false)
 
-        onAddFieldOption(id);
         setTimeout(() => {
             const element = document.getElementById("popover-wrapper-" + id)?.firstChild as HTMLElement | null;
             element?.click();
-        }, 50);
+        }, 100);
     }
 
     return (
@@ -160,7 +164,7 @@ export const PopoverFields: FC<TProps> = ({
                 <PopoverContent>
                     <div className="px-1 py-2">
                         <div className="text-small font-bold">Варианты для пропуска:</div>
-                        {field?.options?.map((option, optionIndex) => {
+                        {field.options?.map((option, optionIndex) => {
                             return (
                                 <div
                                     className="flex items-center gap-1"

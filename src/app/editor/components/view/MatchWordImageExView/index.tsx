@@ -196,7 +196,7 @@ const InputItem = (props: {
 
   // useEffect(() => {
   //   if (isTeacher) {
-  //     // console.log('effect teacher?')
+  //     console.log('effect teacher?')
   //     if (isIncorrectWord && !isCorrect) {
   //       setInputValue(isIncorrectWord);
   //       return;
@@ -327,8 +327,8 @@ export const MatchWordImageExView: FC<TProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [correctIds?.length, writeAnswer, incorrectIdsMap]);
 
-  // // console.log('data', data)
-  // // console.log("correctIds", correctIds);
+  // console.log('data', data)
+  // console.log("correctIds", correctIds);
   return (
     <div className={`py-8 w-[100%] max-w-[766px] m-auto match-word-image`}>
       <p

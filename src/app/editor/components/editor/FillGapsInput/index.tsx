@@ -43,15 +43,11 @@ export const FillGapsInput: FC<TProps> = ({
 
     const [openPopover, setOpenPopover] = useState<{ [key: string]: boolean }>({})
 
-    const fieldsKey = useMemo(() => {
-        return Object.keys(openPopover)?.[0] || ''
-    }, [openPopover])
-
+    const fieldsKey = useMemo(() => Object.keys(openPopover)?.[0] || '', [openPopover])
 
     const handleOpen = useCallback((id: string) => {
         setOpenPopover(prev => ({...prev, [id]: true}))
     }, [])
-
 
     const handleClose = useCallback((id: string) => {
         setOpenPopover(prev => {
@@ -59,7 +55,6 @@ export const FillGapsInput: FC<TProps> = ({
             return prev
         })
     }, [])
-
 
     const contentEditableRef = useRef<HTMLDivElement>(null);
 
@@ -69,7 +64,6 @@ export const FillGapsInput: FC<TProps> = ({
         },
         [changeData]
     );
-
 
     const onChangeFieldValue = useCallback(
         (fieldId: string, optionIndex: number, value: string) => {
@@ -87,7 +81,7 @@ export const FillGapsInput: FC<TProps> = ({
             const dataFields = [...data.fields];
             const field = findFieldById(dataFields, fieldId)
             if (!field) return;
-            field.options.push({isCorrect: true, value: ""});
+            field.options = [...field.options, {isCorrect: true, value: ""}];
             changeData("fields", [...dataFields]);
         },
         [changeData, data.fields,]
@@ -103,7 +97,6 @@ export const FillGapsInput: FC<TProps> = ({
         },
         [changeData, data.fields]
     );
-
 
     const renderPopover = useCallback((id?: string, create?: { element: HTMLElement, field?: TField }) => {
         if (!id) return;
@@ -125,7 +118,6 @@ export const FillGapsInput: FC<TProps> = ({
 
         if (!field) return
 
-
         root.render(
             <PopoverFields
                 openPopover={openPopover}
@@ -138,8 +130,7 @@ export const FillGapsInput: FC<TProps> = ({
                 deleteOption={deleteOption}
             />
         );
-    }, [roots, data.fields, deleteOption, handleClose, handleOpen, onAddFieldOption, onChangeFieldValue, openPopover])
-
+    }, [data.fields, deleteOption, handleClose, handleOpen, onAddFieldOption, onChangeFieldValue, openPopover])
 
     const onClickAddSelection = useCallback(
         (addItemState: { selection: string; left?: number; top?: number }) => {
@@ -155,7 +146,6 @@ export const FillGapsInput: FC<TProps> = ({
                     },
                 ],
             };
-
 
             const element = pasteReactAtCaretUpdate(
                 id,
@@ -188,7 +178,7 @@ export const FillGapsInput: FC<TProps> = ({
         if (!data?.id) {
             resetData(DEFAULT_VALUES_STUB);
         }
-    }, [data?.id]);
+    }, []);
 
     useEffect(() => {
         if (data.dataText) {
@@ -197,6 +187,12 @@ export const FillGapsInput: FC<TProps> = ({
 
             contentEditableWrapper!.querySelectorAll('.answerWrapper').forEach(el => {
                 renderPopover(el.id, {element: el as HTMLElement, field: findFieldById(data.fields, el.id)})
+            })
+        }
+        return () => {
+            Array.from(roots).forEach(([key, value]) => {
+                value.unmount()
+                roots.delete(key)
             })
         }
     }, []);
@@ -208,7 +204,6 @@ export const FillGapsInput: FC<TProps> = ({
     useEffect(() => {
         changeData("images", images);
     }, [images,]);
-
 
     useEffect(() => {
         if (success) {
@@ -238,7 +233,7 @@ export const FillGapsInput: FC<TProps> = ({
 
             <div className="h-10"/>
 
-            {/*<PreviewSection data={data} onSave={saveFillGapsInputEx} isLoading={isLoading}/>*/}
+            <PreviewSection data={data} onSave={saveFillGapsInputEx} isLoading={isLoading}/>
 
             <div className="h-10"/>
         </div>
