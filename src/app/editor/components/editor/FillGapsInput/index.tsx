@@ -9,7 +9,9 @@ import {ContentSection} from "./components/ContentSection";
 import {PreviewSection} from "./components/PreviewSection";
 import {useContentEditableBehavior} from "./hooks/useContentEditableBehavior";
 import {DEFAULT_VALUES_STUB,} from "./constants";
-import {pasteReactAtCaretUpdate} from "@/app/editor/components/editor/FillGapsInput/utils";
+import {findFieldById, pasteReactAtCaretUpdate} from "@/app/editor/components/editor/FillGapsInput/utils";
+import ReactDOM from "react-dom/client";
+import {PopoverFields} from "@/app/editor/components/editor/FillGapsInput/PopoverFields";
 
 type TProps = {
     onSuccess: () => void;
@@ -19,7 +21,7 @@ type TProps = {
 };
 
 
-
+const roots = new Map<string, ReactDOM.Root>();
 
 export const FillGapsInput: FC<TProps> = ({
                                               onSuccess,
@@ -44,48 +46,102 @@ export const FillGapsInput: FC<TProps> = ({
         (text: string) => {
             changeData("dataText", text);
         },
-        []
+        [changeData]
     );
 
-    const fieldsObj = useMemo(() => {
-        if (data.fields?.length) {
-            return Object.fromEntries(
-                data.fields.map(item => [item.id, item])
-            );
-        }
-        return {}
-    }, [data.fields])
 
     const onChangeFieldValue = useCallback(
         (fieldId: string, optionIndex: number, value: string) => {
-            const field = fieldsObj[fieldId]
+            const dataFields = [...data.fields];
+            const field = findFieldById(dataFields, fieldId)
             if (!field || !field.options[optionIndex]) return;
             field.options[optionIndex].value = value;
             changeData("fields", [...data.fields]);
         },
-        [data.fields, fieldsObj]
+        [changeData, data.fields,]
     );
 
     const onAddFieldOption = useCallback(
         (fieldId: string) => {
-            const field = fieldsObj[fieldId]
+            const dataFields = [...data.fields];
+            const field = findFieldById(dataFields, fieldId)
             if (!field) return;
             field.options.push({isCorrect: true, value: ""});
             changeData("fields", [...data.fields]);
         },
-        [data.fields, fieldsObj]
+        [changeData, data.fields,]
     );
 
     const deleteOption = useCallback(
         (fieldId: string, optionIndex: number) => {
-            const field = fieldsObj[fieldId]
+            const dataFields = [...data.fields];
+            const field = findFieldById(dataFields, fieldId)
             if (!field) return;
             field.options = field.options.filter((_o, i) => i !== optionIndex);
             changeData("fields", [...data.fields]);
         },
-        [data.fields, fieldsObj]
+        [changeData, data.fields]
     );
 
+
+    const [openPopover, setOpenPopover] = useState<{ [key: string]: boolean }>({})
+
+    const fieldsKey = useMemo(() => {
+        return Object.keys(openPopover)?.[0] || ''
+    }, [openPopover])
+
+
+    const handleOpen = (id: string) => {
+        console.log('handleOpen', id)
+        setOpenPopover(prev => ({...prev, [id]: true}))
+    }
+
+
+    const handleClose = (id: string) => {
+        console.log('handleClose', id)
+        setOpenPopover(prev => {
+            delete prev[id]
+            console.log('handleClose prev', prev)
+            return prev
+        })
+    }
+
+
+    const renderPopover = useCallback((id: string, ) => {
+        if (!id) return;
+
+        const field = findFieldById(data.fields, id)
+
+        if (!field) return
+
+        const root = roots.get(id);
+
+        console.log({roots, root})
+
+        if (!root) {
+           return
+        }
+
+        root.render(
+            <PopoverFields
+                openPopover={openPopover}
+                onOpen={handleOpen}
+                onClose={handleClose}
+                id={id}
+                field={field}
+                onChangeFieldValue={onChangeFieldValue}
+                onAddFieldOption={onAddFieldOption}
+                deleteOption={deleteOption}
+            />
+        );
+    }, [data.fields, deleteOption, onAddFieldOption, onChangeFieldValue, openPopover])
+
+
+    useEffect(() => {
+        console.log('openPopover', openPopover)
+        console.log('fieldsKey',fieldsKey)
+        renderPopover(fieldsKey)
+    }, [openPopover, fieldsKey, renderPopover])
 
     // const renderContent = useCallback(() => {
     //
@@ -127,15 +183,34 @@ export const FillGapsInput: FC<TProps> = ({
                 ],
             };
 
-            pasteReactAtCaretUpdate(
+
+            const element = pasteReactAtCaretUpdate(
                 id,
                 field,
                 addItemState,
-                onChangeFieldValue,
-                onAddFieldOption,
-                deleteOption,
             )
 
+            if (!element) return;
+
+            let root = roots.get(field.id);
+
+            if (!root) {
+                root = ReactDOM.createRoot(element);
+                roots.set(field.id, root);
+            }
+
+            root.render(
+                <PopoverFields
+                    openPopover={openPopover}
+                    onOpen={handleOpen}
+                    onClose={handleClose}
+                    id={field.id}
+                    field={field}
+                    onChangeFieldValue={onChangeFieldValue}
+                    onAddFieldOption={onAddFieldOption}
+                    deleteOption={deleteOption}
+                />
+            );
 
             const selection = window.getSelection();
             if (selection) {
@@ -149,7 +224,7 @@ export const FillGapsInput: FC<TProps> = ({
             changeData("dataText", contentEditableWrapper?.innerHTML);
             contentEditableWrapper?.blur();
         },
-        [data.fields]
+        [changeData, data.fields, deleteOption, onAddFieldOption, onChangeFieldValue, openPopover]
     );
 
     useContentEditableBehavior(contentEditableRef, onChangeText);
@@ -158,7 +233,7 @@ export const FillGapsInput: FC<TProps> = ({
         if (!data?.id) {
             resetData(DEFAULT_VALUES_STUB);
         }
-    }, [data?.id,]);
+    }, [data?.id]);
 
     // useEffect(() => {
     //     if (data.dataText) {
@@ -187,8 +262,7 @@ export const FillGapsInput: FC<TProps> = ({
 
     useEffect(() => {
         changeData("fields", data.fields);
-        console.log('data.fields')
-    }, [data.fields])
+    }, [changeData, data.fields])
 
     return (
         <div>

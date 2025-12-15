@@ -18,6 +18,11 @@ type TProps = {
     onChangeFieldValue: (id: string, optionIndex: number, value: string) => void;
     onAddFieldOption: (id: string) => void;
     deleteOption: (id: string, optionIndex: number) => void;
+
+
+    openPopover: { [key: string]: boolean };
+    onOpen: (id: string) => void;
+    onClose: (id: string) => void;
 };
 
 const PopoverInput = ({
@@ -59,14 +64,20 @@ const PopoverInput = ({
 };
 
 export const PopoverFields: FC<TProps> = ({
+
+
+                                              openPopover,
+                                              onOpen,
+                                              onClose,
+
                                               id,
                                               field,
                                               onChangeFieldValue,
                                               onAddFieldOption,
                                               deleteOption,
                                           }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    console.log({id, isOpen})
+    const [isOpen, setIsOpen] = useState(openPopover[id]);
+    console.log({id, openPopover, isExist: Boolean(openPopover[id])})
     return (
         <div className="popover-wrapper" id={"popover-wrapper-" + field.id}>
             <Popover
@@ -76,7 +87,15 @@ export const PopoverFields: FC<TProps> = ({
                 data-index={id}
                 key={id}
                 isOpen={isOpen}
-                onOpenChange={(open) => setIsOpen(open)}
+                onOpenChange={(open) => {
+                    console.log('open', open)
+                    if (open) {
+                        onOpen(id)
+                    } else {
+                        onClose(id)
+                    }
+                    return setIsOpen(open)
+                }}
                 motionProps={{
                     variants: {
                         enter: {
@@ -133,7 +152,9 @@ export const PopoverFields: FC<TProps> = ({
                                     {field.options.length > 1 && (
                                         <Button
                                             onClick={() => {
-                                                setIsOpen(false);
+                                                onClose(id);
+                                                setIsOpen(false)
+
                                                 deleteOption(id, optionIndex);
                                                 setTimeout(() => {
                                                     const element = document.getElementById("popover-wrapper-" + id)?.firstChild as HTMLElement | null;
@@ -155,7 +176,9 @@ export const PopoverFields: FC<TProps> = ({
                         <Button
                             className="p-2.5 bg-white cursor-pointer hover:bg-gray-100"
                             onClick={() => {
-                                setIsOpen(false);
+                                onClose(id);
+                                setIsOpen(false)
+
                                 onAddFieldOption(id);
                                 setTimeout(() => {
                                     const element = document.getElementById("popover-wrapper-" + id)?.firstChild as HTMLElement | null;

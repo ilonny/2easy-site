@@ -31,12 +31,9 @@ export function pasteHtmlAtCaret(html: string) {
 
 
 export function pasteReactAtCaretUpdate(
-    addItemState: { selection: string; left?: number; top?: number },
     id: string,
     field: TField,
-    onChangeFieldValue: (id: string, optionIndex: number, value: string) => void,
-    onAddFieldOption: (id: string) => void,
-    deleteOption: (id: string, optionIndex: number) => void,
+    addItemState: { selection: string; left?: number; top?: number },
 ) {
   const sel = window.getSelection();
   if (!sel || !sel.rangeCount) return;
@@ -54,17 +51,8 @@ export function pasteReactAtCaretUpdate(
   range.insertNode(wrapper);
   range.collapse(false);
 
-  const root = ReactDOM.createRoot(wrapper);
-  root.render(
-      <PopoverFields
-          id={field.id}
-          field={field}
-          onChangeFieldValue={onChangeFieldValue}
-          onAddFieldOption={onAddFieldOption}
-          deleteOption={deleteOption}
-      />
-  );
-
   const space = document.createTextNode("\u00A0");
   wrapper.after(space);
+
+  return wrapper
 }
