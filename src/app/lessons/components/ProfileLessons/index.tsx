@@ -474,7 +474,7 @@ export const ProfileLessons = (props: TProps) => {
           <Image src={Dino.src} alt="dino animated" width={150} height={150} />
         </div>
       )}
-      {!currentCourse && !lessons.length && (
+      {!currentCourse && !filteredLessons.length && (
         <ProfileEmptyLessons
           title={studentId ? "Пока нет уроков." : data.title}
           hideButton={!!studentId}
@@ -482,7 +482,7 @@ export const ProfileLessons = (props: TProps) => {
           onButtonPress={data.onButtonPress}
         />
       )}
-      {(!!currentCourse || !!lessons?.length) && (
+      {(!!currentCourse || !!filteredLessons?.length) && (
         <LessonsList
           onPressCreate={() => {
             if (checkSubscription()) {
