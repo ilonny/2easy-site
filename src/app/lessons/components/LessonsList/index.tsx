@@ -35,6 +35,7 @@ type TProps = {
   openCourseModal?: () => void;
   currentCourse?: TCourse;
   hideContextMenu?: boolean;
+  studentId?: string | number;
 };
 
 export const LessonsList: FC<TProps> = ({
@@ -56,6 +57,7 @@ export const LessonsList: FC<TProps> = ({
   openCourseModal,
   currentCourse,
   hideContextMenu,
+  studentId,
 }) => {
   const { checkSubscription, subscription } = useCheckSubscription();
   const router = useRouter();
@@ -246,6 +248,7 @@ export const LessonsList: FC<TProps> = ({
       {lessons?.map((lesson) => {
         return (
           <LessonCard
+            studentId={studentId}
             key={
               lesson.id.toString() + lesson?.["lesson_relations.status"] || 0
             }

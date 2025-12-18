@@ -53,6 +53,7 @@ type TProps = {
   isCourses?: boolean;
   currentCourse?: TCourse;
   hideContextMenu?: boolean;
+  studentId?: number | string;
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -74,6 +75,7 @@ export const LessonCard: FC<TProps> = ({
   onPressAttachToCourse,
   currentCourse,
   hideContextMenu,
+  studentId,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -239,7 +241,7 @@ export const LessonCard: FC<TProps> = ({
                               lesson?.["lesson_relations.id"],
                               val,
                               lesson?.id,
-                              studentId
+                              Number(studentId || 0)
                             );
                           }
                         }}

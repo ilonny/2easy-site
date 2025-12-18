@@ -530,6 +530,7 @@ export const ProfileLessons = (props: TProps) => {
           isCourses={isCourse}
           openCourseModal={() => setCreateCourseModalIsVisible(true)}
           currentCourse={currentCourse}
+          studentId={studentId}
         />
       )}
       <CreateLessonModalForm
