@@ -80,8 +80,8 @@ export const HeaderProfile = (props: TProps) => {
         </DropdownMenu>
       ) : (
         <DropdownMenu aria-label="Profile Actions">
-          <DropdownItem key="lessons" href="/profile?lessons">
-            <p>Мои уроки</p>
+          <DropdownItem key="lessons" href="/lesson_plans">
+            <p>Уроки и курсы</p>
           </DropdownItem>
           <DropdownItem key="students" href="/profile?students">
             <p>Мои ученики</p>
