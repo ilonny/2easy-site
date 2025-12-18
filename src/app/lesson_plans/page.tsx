@@ -41,14 +41,6 @@ export default function GrammarPage() {
         >
           LESSON PLANS
         </h1>
-        <p
-          className="max-w-[745px] text-center m-auto"
-          style={{ fontSize: 20, fontWeight: 500, lineHeight: "26px" }}
-        >
-          Ready-to-use lessons on current topics with juicy vocabulary,
-          authentic videos and stories, complemented by grammar topics,
-          exercises and quizzes.
-        </p>
         <div className="h-10" />
         <div className="h-10" />
         <ProfileLessons />
