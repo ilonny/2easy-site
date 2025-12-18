@@ -63,7 +63,7 @@ const AnswerField: FC<{
   }, [selectedValue, field?.options]);
 
   const onChangeSelection = useCallback((val: string) => {
-    setSelectedValue(val);
+    setSelectedValue(val?.trim());
     return;
   }, []);
 
