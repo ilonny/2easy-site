@@ -58,12 +58,12 @@ const AnswerField: FC<{
 
   const isCorrect = useMemo(() => {
     return !!field?.options?.find(
-      (o) => o.value.toLowerCase() === selectedValue.toLowerCase()
+      (o) => o.value.toLowerCase() === selectedValue.toLowerCase()?.trim()
     )?.isCorrect;
   }, [selectedValue, field?.options]);
 
   const onChangeSelection = useCallback((val: string) => {
-    setSelectedValue(val?.trim());
+    setSelectedValue(val);
     return;
   }, []);
 
