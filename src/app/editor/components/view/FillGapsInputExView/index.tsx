@@ -57,9 +57,14 @@ const AnswerField: FC<{
   const [isIncorrect, setIsIncorrect] = useState(false);
 
   const isCorrect = useMemo(() => {
-    return !!field?.options?.find(
-      (o) => o.value.toLowerCase() === selectedValue.toLowerCase()?.trim()
-    )?.isCorrect;
+    return !!field?.options?.find((o) => {
+      const mappedValue = o.value.toLowerCase()?.trim()?.replaceAll("’", "'");
+      const mappedSelectedValue = selectedValue
+        .toLowerCase()
+        ?.trim()
+        ?.replaceAll("’", "'");
+      return mappedValue === mappedSelectedValue;
+    })?.isCorrect;
   }, [selectedValue, field?.options]);
 
   const onChangeSelection = useCallback((val: string) => {
