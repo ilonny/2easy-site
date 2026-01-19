@@ -208,6 +208,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                   ? BASE_URL + "/" + lesson?.image_path
                   : Bg.src
               }
+              style={{ maxWidth: "initial", maxHeight: "100%" }}
             />
           </div>
           <p
@@ -393,6 +394,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                                   ? BASE_URL + "/" + lesson?.image_path
                                   : Bg.src
                               }
+                              style={{ maxWidth: "initial", maxHeight: "100%" }}
                             />
                           </div>
                           <p

@@ -71,6 +71,8 @@ export const LessonsList: FC<TProps> = ({
   const [coursePageAttachLessonModal, setCoursePageAttachLessonModal] =
     useState(false);
 
+  const [copyCourseIsLoading, setCopyCourseIsLoading] = useState(false);
+
   const [
     attachLessonCourseModalIsVisible,
     setAttachLessonCourseModalIsVisible,
@@ -132,7 +134,7 @@ export const LessonsList: FC<TProps> = ({
       router.push("/subscription");
       return;
     }
-
+    setCopyCourseIsLoading(true);
     const res = await fetchPostJson({
       path: "/course/copy",
       isSecure: true,
@@ -142,8 +144,9 @@ export const LessonsList: FC<TProps> = ({
     });
     const data = await res.json();
     checkResponse(data);
+    setCopyCourseIsLoading(false);
     router.push(`/course/${data.id}`);
-  }, [currentCourse]);
+  }, [checkSubscription, currentCourse?.id, router]);
 
   return (
     <div className="flex items-start justify-start w-full flex-wrap">
@@ -189,6 +192,7 @@ export const LessonsList: FC<TProps> = ({
                   className="w-full"
                   size="lg"
                   onClick={copyCourse}
+                  isLoading={copyCourseIsLoading}
                 >
                   Добавить в "Мои курсы"
                 </Button>

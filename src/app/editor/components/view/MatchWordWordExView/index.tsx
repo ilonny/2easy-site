@@ -89,10 +89,10 @@ export const MatchWordWordExView: FC<TProps> = ({
 
   const onClickAnswer = useCallback(
     (id: number) => {
-      const m = sortedMatches.find((m) => m.correctId === id);
-      const selectedM = sortedMatches.find((m) => m.id === selectedMatchId);
+      const m = sortedMatches.find((m) => m?.correctId === id);
+      const selectedM = sortedMatches.find((m) => m?.id === selectedMatchId);
 
-      const isCorrect = selectedM.id === id;
+      const isCorrect = selectedM?.id === id;
 
       if (isCorrect) {
         setCorrectIds((ids) => ids.concat(id));
@@ -257,19 +257,19 @@ export const MatchWordWordExView: FC<TProps> = ({
                 className="flex items-start gap-4 w-[100%] mb-4 relative"
                 key={m.id}
               >
-                <div
-                  className="line"
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    background: "fdd0df",
-                    height: 2,
-                    width: 100,
-                    marginLeft: -30,
-                  }}
-                ></div>
-                <div className=" w-[50%] radius-10">
+                <div className=" w-[50%] radius-10 relative">
+                  <div
+                    className="line"
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      right: "0%",
+                      background: "rgb(33, 159, 89)",
+                      height: 2,
+                      width: 100,
+                      marginRight: -30,
+                    }}
+                  ></div>
                   <Card
                     shadow="sm"
                     radius="sm"
@@ -308,19 +308,19 @@ export const MatchWordWordExView: FC<TProps> = ({
                 className="flex items-start gap-4 w-[100%] mb-4 relative"
                 key={m.id}
               >
-                <div
-                  className="line"
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    background: "rgb(33, 159, 89)",
-                    height: 2,
-                    width: 100,
-                    marginLeft: -30,
-                  }}
-                ></div>
-                <div className=" w-[50%] radius-10">
+                <div className=" w-[50%] radius-10 relative">
+                  <div
+                    className="line"
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      right: "0%",
+                      background: "rgb(33, 159, 89)",
+                      height: 2,
+                      width: 100,
+                      marginRight: -30,
+                    }}
+                  ></div>
                   <Card
                     shadow="sm"
                     radius="sm"

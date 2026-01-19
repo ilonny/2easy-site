@@ -465,7 +465,7 @@ export const ProfileLessons = (props: TProps) => {
             </h2>
           </div>
           <div className="h-4" />
-          <p>{currentCourse.description}</p>
+          <p className="text-center">{currentCourse.description}</p>
           <div className="h-10" />
         </>
       )}
