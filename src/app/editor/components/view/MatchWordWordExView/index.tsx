@@ -97,6 +97,9 @@ export const MatchWordWordExView: FC<TProps> = ({
       if (isCorrect) {
         setCorrectIds((ids) => ids.concat(id));
       } else {
+        if (!selectedM) {
+          return
+        }
         setIncorrectId(m.id);
         setTimeout(() => {
           setIncorrectId(0);
