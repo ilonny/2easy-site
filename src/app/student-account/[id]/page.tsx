@@ -144,7 +144,8 @@ export default function StartRegistrationPage() {
             showChangeStatusButton
             hideDeleteLessonButton
             showStartLessonButton
-            isStudent={true}
+            isStudent={isStudent}
+            alwaysOpenLessonMode={true}
           />
         )}
       </ContentWrapper>

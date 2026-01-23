@@ -36,6 +36,7 @@ type TProps = {
   currentCourse?: TCourse;
   hideContextMenu?: boolean;
   studentId?: string | number;
+  alwaysOpenLessonMode?: boolean;
 };
 
 export const LessonsList: FC<TProps> = ({
@@ -58,6 +59,7 @@ export const LessonsList: FC<TProps> = ({
   currentCourse,
   hideContextMenu,
   studentId,
+  alwaysOpenLessonMode,
 }) => {
   const { checkSubscription, subscription } = useCheckSubscription();
   const router = useRouter();
@@ -277,6 +279,7 @@ export const LessonsList: FC<TProps> = ({
               (lesson.user_id === 1 || lesson.created_from_2easy)
             }
             currentCourse={currentCourse}
+            alwaysOpenLessonMode={alwaysOpenLessonMode}
           />
         );
       })}

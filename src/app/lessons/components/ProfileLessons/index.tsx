@@ -30,6 +30,7 @@ type TProps = {
   showStartLessonButton?: boolean;
   isStudent?: boolean;
   currentCourse?: TCourse;
+  alwaysOpenLessonMode?: boolean;
 };
 
 export const ProfileLessons = (props: TProps) => {
@@ -44,6 +45,7 @@ export const ProfileLessons = (props: TProps) => {
     showStartLessonButton,
     isStudent,
     currentCourse,
+    alwaysOpenLessonMode,
   } = props;
   const router = useRouter();
   const { profile, createLessonModalIsVisible, setCreateLessonModalIsVisible } =
@@ -531,6 +533,7 @@ export const ProfileLessons = (props: TProps) => {
           openCourseModal={() => setCreateCourseModalIsVisible(true)}
           currentCourse={currentCourse}
           studentId={studentId}
+          alwaysOpenLessonMode={alwaysOpenLessonMode}
         />
       )}
       <CreateLessonModalForm

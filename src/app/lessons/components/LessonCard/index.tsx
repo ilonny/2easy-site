@@ -54,6 +54,7 @@ type TProps = {
   currentCourse?: TCourse;
   hideContextMenu?: boolean;
   studentId?: number | string;
+  alwaysOpenLessonMode?: boolean;
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -76,6 +77,7 @@ export const LessonCard: FC<TProps> = ({
   currentCourse,
   hideContextMenu,
   studentId,
+  alwaysOpenLessonMode,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -114,7 +116,7 @@ export const LessonCard: FC<TProps> = ({
       return;
     }
 
-    if (isStudent) {
+    if (isStudent || alwaysOpenLessonMode) {
       router.push("/lessons/" + lesson?.id);
       return;
     }
@@ -137,6 +139,7 @@ export const LessonCard: FC<TProps> = ({
     lesson?.id,
     router,
     isCourses,
+    alwaysOpenLessonMode,
   ]);
 
   const tags = useMemo(() => {
