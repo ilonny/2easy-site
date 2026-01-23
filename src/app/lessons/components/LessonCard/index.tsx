@@ -41,7 +41,7 @@ type TProps = {
     relation_id?: number,
     status?: string,
     lesson_id?: number,
-    student_id?: number
+    student_id?: number,
   ) => void;
   deleteLessonRelation?: (relation?: number) => void;
   hideDeleteLessonButton?: boolean;
@@ -112,7 +112,10 @@ export const LessonCard: FC<TProps> = ({
         router.push("/student-account/course/" + lesson?.id);
         return;
       }
-      router.push("/course/" + lesson?.id);
+      const url =
+        "/course/" + lesson?.id + (studentId ? "?student_id=" + studentId : "");
+      console.log("lol?", url);
+      router.push(url);
       return;
     }
 
@@ -130,16 +133,17 @@ export const LessonCard: FC<TProps> = ({
   }, [
     isDisabled,
     disableClick,
-    isStudent,
-    isClosed,
-    hasSubscription,
     profile?.name,
     lesson?.created_from_2easy,
     lesson?.user_id,
     lesson?.id,
-    router,
     isCourses,
+    isStudent,
     alwaysOpenLessonMode,
+    isClosed,
+    hasSubscription,
+    router,
+    studentId,
   ]);
 
   const tags = useMemo(() => {
@@ -244,7 +248,7 @@ export const LessonCard: FC<TProps> = ({
                               lesson?.["lesson_relations.id"],
                               val,
                               lesson?.id,
-                              Number(studentId || 0)
+                              Number(studentId || 0),
                             );
                           }
                         }}
@@ -263,21 +267,25 @@ export const LessonCard: FC<TProps> = ({
                         )}
                       </RadioGroup>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="light"
-                      className="w-full text-default-foreground py-1 px-2 justify-start"
-                      style={{ fontSize: 14 }}
-                      endContent={<Image src={DeleteIcon} alt="icon" />}
-                      onClick={() => {
-                        setPopoverIsOpen(false);
-                        if (deleteLessonRelation) {
-                          deleteLessonRelation(lesson?.["lesson_relations.id"]);
-                        }
-                      }}
-                    >
-                      Удалить у ученика
-                    </Button>
+                    {!currentCourse && (
+                      <Button
+                        size="sm"
+                        variant="light"
+                        className="w-full text-default-foreground py-1 px-2 justify-start"
+                        style={{ fontSize: 14 }}
+                        endContent={<Image src={DeleteIcon} alt="icon" />}
+                        onClick={() => {
+                          setPopoverIsOpen(false);
+                          if (deleteLessonRelation) {
+                            deleteLessonRelation(
+                              lesson?.["lesson_relations.id"],
+                            );
+                          }
+                        }}
+                      >
+                        Удалить у ученика
+                      </Button>
+                    )}
                   </>
                 )}
                 {!currentCourse && !!onPressAttach && !hideAttachButton && (
@@ -417,7 +425,7 @@ export const LessonCard: FC<TProps> = ({
 
                   writeToLocalStorage(
                     "start_lesson_selected_ids",
-                    JSON.stringify([params.id])
+                    JSON.stringify([params.id]),
                   );
                   return;
                 }

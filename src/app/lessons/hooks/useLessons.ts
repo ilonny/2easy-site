@@ -5,7 +5,7 @@ import { TLesson } from "../types";
 export const useLessons = (
   studentId?: string,
   searchString?: string,
-  isAuth?: boolean = true
+  isAuth?: boolean = true,
 ) => {
   const [lessons, setLessons] = useState<TLesson[]>([]);
   const [lesson, setLesson] = useState<TLesson | undefined>();
@@ -77,7 +77,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons]
+    [getLessons],
   );
 
   const deleteLessonRelation = useCallback(
@@ -97,7 +97,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons]
+    [getLessons],
   );
 
   const changeCourseStatus = useCallback(
@@ -118,7 +118,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons]
+    [getLessons],
   );
 
   const deleteCourseRelation = useCallback(
@@ -138,7 +138,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons]
+    [getLessons],
   );
 
   // useEffect(() => {
@@ -150,20 +150,23 @@ export const useLessons = (
       return lessons;
     }
     return lessons.filter((les) =>
-      les?.title?.toLowerCase()?.includes(searchString?.toLowerCase())
+      les?.title?.toLowerCase()?.includes(searchString?.toLowerCase()),
     );
   }, [searchString, lessons]);
 
-  const getCourseLessons = useCallback(async (course_id: number) => {
-    const res = await fetchGet({
-      path: `/lessons/course?course_id=${course_id}`,
-      isSecure: true,
-    });
-    const data = await res?.json();
-    setCourseLessons(data?.lessons);
-    checkResponse(data);
-    return data;
-  }, []);
+  const getCourseLessons = useCallback(
+    async (course_id: number, student_id: any) => {
+      const res = await fetchGet({
+        path: `/lessons/course?course_id=${course_id}&student_id=${student_id}`,
+        isSecure: true,
+      });
+      const data = await res?.json();
+      setCourseLessons(data?.lessons);
+      checkResponse(data);
+      return data;
+    },
+    [],
+  );
 
   return {
     lessons: filteredLessons,

@@ -66,12 +66,12 @@ export const ProfileLessons = (props: TProps) => {
     currentCourse
       ? "userCourses"
       : !profile?.name
-      ? "savedLessons"
-      : "userLessons"
+        ? "savedLessons"
+        : "userLessons",
   );
 
   const [studentTabIndex, setStudentTabIndex] = useState<"lessons" | "courses">(
-    "lessons"
+    "lessons",
   );
 
   const { courses, coursesIsLoading, getCourses } = useCourses();
@@ -112,7 +112,7 @@ export const ProfileLessons = (props: TProps) => {
       getLessons();
       router.push("/editor/" + lessonId);
     },
-    [getLessons, router, setCreateLessonModalIsVisible]
+    [getLessons, router, setCreateLessonModalIsVisible],
   );
 
   const onCreateCourse = useCallback(() => {
@@ -123,11 +123,11 @@ export const ProfileLessons = (props: TProps) => {
 
   useEffect(() => {
     if (currentCourse) {
-      getCourseLessons(currentCourse.id);
+      getCourseLessons(currentCourse.id, studentId);
     } else {
       getLessons();
     }
-  }, [getLessons, currentCourse, getCourseLessons]);
+  }, [getLessons, currentCourse, getCourseLessons, studentId]);
 
   useEffect(() => {
     getCourses(Number(studentId));
@@ -219,7 +219,7 @@ export const ProfileLessons = (props: TProps) => {
       .flat();
 
     return ["All lessons"].concat(
-      Array.from(new Set(lessonsTags)).filter(Boolean)
+      Array.from(new Set(lessonsTags)).filter(Boolean),
     );
   }, [lessonsToRender, tabIndex, profile?.name]);
 
@@ -459,9 +459,18 @@ export const ProfileLessons = (props: TProps) => {
       {currentCourse && (
         <>
           <div className="flex flex-row justify-center gap-4 items-baseline">
-            <Link href="/lesson_plans" style={{ color: "#3F28C6" }}>
-              ← все курсы
-            </Link>
+            {studentId ? (
+              <Link
+                href={"/student-account/" + studentId}
+                style={{ color: "#3F28C6" }}
+              >
+                ← в личный кабинет ученика
+              </Link>
+            ) : (
+              <Link href="/lesson_plans" style={{ color: "#3F28C6" }}>
+                ← все курсы
+              </Link>
+            )}
             <h2 style={{ fontWeight: "500", fontSize: 28 }}>
               {currentCourse.title}
             </h2>
@@ -500,7 +509,7 @@ export const ProfileLessons = (props: TProps) => {
           lessons={filteredLessons}
           getLessons={
             currentCourse
-              ? () => getCourseLessons(currentCourse.id)
+              ? () => getCourseLessons(currentCourse.id, studentId)
               : getLessons
           }
           getCourses={() => getCourses(Number(studentId))}
@@ -510,18 +519,23 @@ export const ProfileLessons = (props: TProps) => {
           changeLessonStatus={
             studentTabIndex === "courses"
               ? (relation_id, status) => {
-                  changeCourseStatus(relation_id, status).then(() =>
-                    getCourses(Number(studentId))
-                  );
+                  changeCourseStatus(relation_id, status).then(() => {
+                    getCourses(Number(studentId));
+                    getCourseLessons(currentCourse.id, studentId);
+                  });
                 }
-              : changeLessonStatus
+              : (relation_id, status) => {
+                  changeLessonStatus(relation_id, status).then(() => {
+                    getCourseLessons(currentCourse.id, studentId);
+                  });
+                }
           }
           hideDeleteLessonButton={hideDeleteLessonButton}
           deleteLessonRelation={
             studentTabIndex === "courses"
               ? (relation_id) => {
                   deleteCourseRelation(relation_id).then(() =>
-                    getCourses(Number(studentId))
+                    getCourses(Number(studentId)),
                   );
                 }
               : deleteLessonRelation

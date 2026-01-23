@@ -3,10 +3,11 @@
 "use client";
 import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
-import { useEffect, useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 import { useCourses } from "../hooks/useCourses";
+import { AuthContext } from "@/auth";
 
 export default function StartRegistrationPage() {
   const params = useParams();
@@ -19,6 +20,14 @@ export default function StartRegistrationPage() {
   const currentCourse = useMemo(() => {
     return courses.find((c) => c.id == params.id);
   }, [courses, params.id]);
+
+  const { profile } = useContext(AuthContext);
+  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
+
+  const student_id =
+    (isTeacher &&
+      new URL(window.location.href).searchParams?.get("student_id")) ||
+    "";
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
@@ -35,9 +44,10 @@ export default function StartRegistrationPage() {
         {!!currentCourse && (
           <ProfileLessons
             currentCourse={currentCourse}
-            // showChangeStatusButton
+            showChangeStatusButton={!!student_id}
             hideAttachButton
             hideTabs
+            studentId={student_id}
           />
         )}
         <div className="h-10" />
