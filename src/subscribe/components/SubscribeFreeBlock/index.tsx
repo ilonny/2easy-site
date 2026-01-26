@@ -14,9 +14,11 @@ import {
 import { RegistrationForm } from "@/app/registration";
 import SubscribeGreenImage from "@/assets/images/subscribe_green.png";
 import CardIcon from "@/assets/icons/card.svg";
+import { useRouter } from "next/navigation";
 
 export const SubscribeFreeBlock = () => {
   const [modalIsOpen, setModalIsOpened] = useState(false);
+  const router = useRouter();
   return (
     <>
       <div
@@ -47,9 +49,9 @@ export const SubscribeFreeBlock = () => {
           <div style={{ maxWidth: 570 }}>
             <p>Начните с бесплатного пробного периода.</p>
             <p className="mt-2">
-              У вас будет 7 дней доступа к конструктору уроков и части материалов
-              -- это позволит познакомиться с платформой перед оформлением
-              подписки.
+              У вас будет 7 дней доступа к конструктору уроков и части
+              материалов -- это позволит познакомиться с платформой перед
+              оформлением подписки.
             </p>
           </div>
         </div>
@@ -68,7 +70,7 @@ export const SubscribeFreeBlock = () => {
             </div>
           </div>
           <Button
-            onClick={() => setModalIsOpened(true)}
+            onClick={() => router.push("/registration")}
             style={{ backgroundColor: "#D2FF88" }}
             className="uppercase"
             size="lg"
