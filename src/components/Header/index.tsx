@@ -83,7 +83,7 @@ export const Header = () => {
                       <>
                         <div className="flex items-center gap-4">
                           <Link
-                            href="/start-registration"
+                            href="/registration"
                             className="hidden lg:block"
                           >
                             <Button variant="light">
@@ -111,7 +111,7 @@ export const Header = () => {
           </div>
         </div>
         <div className="lg:hidden h-[80px]"></div>
-        {!profile?.isStudent && (
+        {!profile?.isStudent && profile?.name && (
           // desktop links
           <div className="hidden lg:block">
             <HeaderMenuList />

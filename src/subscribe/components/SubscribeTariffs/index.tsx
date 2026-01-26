@@ -146,7 +146,7 @@ export const SubscribeTariffs: FC<TProps> = ({
               <div className="flex gap-2 mb-2">
                 <img src={tariff_checked_2.src} />
                 <p className="text-white">
-                  конструктор для создания интерактивных уроков
+                  конструктор для создания интерактивных уроков и курсов
                 </p>
               </div>
               <div className="flex gap-2 mb-2">

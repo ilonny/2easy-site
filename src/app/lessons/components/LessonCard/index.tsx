@@ -519,7 +519,7 @@ export const LessonCard: FC<TProps> = ({
                 Начните с бесплатного пробного периода.
               </p>
               <p style={{ fontWeight: "400", textAlign: "center" }}>
-                У вас будет 3 дня доступа к конструктору уроков и части
+                У вас будет 7 дней доступа к конструктору уроков и части
                 материалов -- это позволит познакомиться с платформой перед
                 оформлением подписки.
               </p>
@@ -542,8 +542,7 @@ export const LessonCard: FC<TProps> = ({
                 fullWidth
                 className="mb-4"
                 onClick={() => {
-                  setTryNowModal(false);
-                  setRegModal(true);
+                  router.push("/registration");
                 }}
               >
                 Начать бесплатно

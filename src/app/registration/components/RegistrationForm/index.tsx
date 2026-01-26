@@ -188,24 +188,9 @@ export const RegistrationForm = () => {
     <form key={1} onSubmit={handleSubmit(onSubmit)}>
       <h3 className="text-center font-extrabold text-2xl mb-2">Регистрация</h3>
       <p className="text-center mb-7 font-medium">
-        После создания личного кабинета начнется бесплатный пробный период (3
-        дня)
+        После создания личного кабинета начнется бесплатный пробный период (7
+        дней)
       </p>
-      <Controller
-        name="name"
-        control={control}
-        rules={{ required: "Имя обязательное поле" }}
-        render={({ field }) => (
-          <Input
-            {...field}
-            label="Имя"
-            className="mb-5"
-            radius="sm"
-            errorMessage={errors?.name?.message}
-            isInvalid={!!errors.name?.message}
-          />
-        )}
-      />
       <Controller
         name="login"
         control={control}
@@ -220,7 +205,7 @@ export const RegistrationForm = () => {
           <Input
             {...field}
             radius="sm"
-            label="E-mail"
+            label="E-mail *"
             className="mb-5"
             errorMessage={errors?.login?.message}
             isInvalid={!!errors.login?.message}
@@ -228,11 +213,23 @@ export const RegistrationForm = () => {
         )}
       />
       <Controller
+        name="name"
+        control={control}
+        rules={{ required: "Имя обязательное поле" }}
+        render={({ field }) => (
+          <Input
+            {...field}
+            label="Имя *"
+            className="mb-5"
+            radius="sm"
+            errorMessage={errors?.name?.message}
+            isInvalid={!!errors.name?.message}
+          />
+        )}
+      />
+      <Controller
         name="phone"
         control={control}
-        rules={{
-          required: "Номер телефона обязательное поле",
-        }}
         render={({ field }) => (
           <ReactInputMask
             mask="+9 (999) 999-99-999999"

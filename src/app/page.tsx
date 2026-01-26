@@ -15,7 +15,7 @@ import {
 } from "@/components/MainPageGamesSlider/data";
 import Link from "next/link";
 import { SubscribeTariffs } from "@/subscribe";
-import { Button } from "@nextui-org/react";
+import { Button, Chip } from "@nextui-org/react";
 import ArrowRightIcon from "@/assets/icons/arrow_right.svg";
 import ArrowRightIconBlack from "@/assets/icons/arrow_right_black.svg";
 import MainBg from "@/assets/images/main_page_bg.png";
@@ -28,7 +28,7 @@ export default function Home() {
   const router = useRouter();
 
   const onPressRegistration = useCallback(() => {
-    router.push("/start-registration");
+    router.push("/registration");
   }, [router]);
 
   const onPressLogin = useCallback(() => {
@@ -61,21 +61,22 @@ export default function Home() {
         <>
           <div className="h-6 lg:h-14"></div>
           <div className="flex justify-center flex-wrap items-center gap-4">
-            <Button
-              color="primary"
-              className={`min-h-[58px] lg:min-h-[68px] w-[100%] lg:w-[306px] pr-[8px] ${
-                profile?.name && "hidden"
-              }`}
-              style={{ borderRadius: 100 }}
-              size="lg"
-              onClick={onPressRegistration}
-              endContent={
-                <div
-                  style={{
-                    borderRadius: 52,
-                    backgroundColor: "#9A84F0",
-                  }}
-                  className="
+            <div className="relative">
+              <Button
+                color="primary"
+                className={`min-h-[58px] lg:min-h-[68px] w-[100%] lg:w-[306px] pr-[8px] ${
+                  profile?.name && "hidden"
+                }`}
+                style={{ borderRadius: 100 }}
+                size="lg"
+                onClick={onPressRegistration}
+                endContent={
+                  <div
+                    style={{
+                      borderRadius: 52,
+                      backgroundColor: "#9A84F0",
+                    }}
+                    className="
                   shrink-0
               flex
               justify-center
@@ -85,18 +86,29 @@ export default function Home() {
               h-[42px]
               lg:h-[52px]
               "
-                >
-                  <Image src={ArrowRightIcon} alt="arrow" />
-                </div>
-              }
-            >
-              <p
-                style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
-                className="w-[100%] text-center"
+                  >
+                    <Image src={ArrowRightIcon} alt="arrow" />
+                  </div>
+                }
               >
-                НАЧАТЬ БЕСПЛАТНО
-              </p>
-            </Button>
+                <div>
+                  <p
+                    style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
+                    className="w-[100%] text-center"
+                  >
+                    НАЧАТЬ БЕСПЛАТНО
+                  </p>
+                </div>
+              </Button>
+              <Chip
+                color="success"
+                variant="shadow"
+                className="absolute left-[0%] top-[0%] mt-[-14px] ml-[-30px]"
+                style={{ transform: "rotate(-6deg)", pointerEvents: "none" }}
+              >
+                <span className="text-white">7 дней бесплатно</span>
+              </Chip>
+            </div>
             <Button
               color="primary"
               variant={"flat"}
@@ -258,7 +270,7 @@ export default function Home() {
             <MainPageInfoBlock
               sides={[
                 {
-                  title: "Создавай уроки в удобном конструкторе",
+                  title: "Создавай уроки и курсы в удобном конструкторе",
                   description:
                     "интерактивные задания, тексты, видео и многое другое -- в простом конструкторе 2easy",
                 },
@@ -295,6 +307,44 @@ export default function Home() {
               ]}
             />
             <div className="h-6 lg:h-14"></div>
+            <div className="flex justify-center">
+              <Button
+                color="primary"
+                className={`min-h-[48px] lg:min-h-[58px] w-[100%] lg:w-[306px] pr-[8px] ${
+                  profile?.name && "hidden"
+                }`}
+                style={{ borderRadius: 100 }}
+                size="lg"
+                onClick={onPressRegistration}
+                endContent={
+                  <div
+                    style={{
+                      borderRadius: 52,
+                      backgroundColor: "#9A84F0",
+                    }}
+                    className="
+                  shrink-0
+              flex
+              justify-center
+              items-center
+              w-[32px]
+              lg:w-[42px]
+              h-[32px]
+              lg:h-[42px]
+              "
+                  >
+                    <Image src={ArrowRightIcon} alt="arrow" />
+                  </div>
+                }
+              >
+                <p
+                  style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
+                  className="w-[100%] text-center"
+                >
+                  НАЧАТЬ БЕСПЛАТНО
+                </p>
+              </Button>
+            </div>
             <div className="h-6 lg:h-14"></div>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
               Lesson plans
@@ -305,21 +355,16 @@ export default function Home() {
               видео и статьями, дополненные грамматикой, упражнениями и квизами
             </p>
             <div className="h-6 lg:h-14"></div>
-            <Link href="/lesson_plans">
-              <div className="flex relative">
-                <div className="flex overflow-scroll w-[100%]">
-                  {lessons.map((lesson) => {
-                    return (
-                      <LessonCard
-                        lesson={lesson}
-                        key={lesson.id}
-                        disableClick
-                      />
-                    );
-                  })}
-                </div>
-                <div
-                  className={`
+            <div className="flex relative">
+              <div className="flex overflow-scroll w-[100%]">
+                {lessons.map((lesson) => {
+                  return (
+                    <LessonCard lesson={lesson} key={lesson.id} disableClick />
+                  );
+                })}
+              </div>
+              <div
+                className={`
                 absolute
                 bottom-0
                 right-0
@@ -329,12 +374,11 @@ export default function Home() {
                   handIconIsVisible ? "opacity-100" : "opacity-0"
                 }
                 `}
-                  style={{ pointerEvents: "none" }}
-                >
-                  <Image src={HandIcon} alt="hand icon" />
-                </div>
+                style={{ pointerEvents: "none" }}
+              >
+                <Image src={HandIcon} alt="hand icon" />
               </div>
-            </Link>
+            </div>
             <div className="h-6 lg:h-14"></div>
             <div className="h-6 lg:h-14"></div>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
@@ -361,6 +405,44 @@ export default function Home() {
             <div className="h-6 lg:h-14"></div>
             <MainPageGamesSlider data={discussionCards} />
             <div className="h-6 lg:h-14"></div>
+            <div className="flex justify-center">
+              <Button
+                color="primary"
+                className={`min-h-[48px] lg:min-h-[58px] w-[100%] lg:w-[306px] pr-[8px] ${
+                  profile?.name && "hidden"
+                }`}
+                style={{ borderRadius: 100 }}
+                size="lg"
+                onClick={onPressRegistration}
+                endContent={
+                  <div
+                    style={{
+                      borderRadius: 52,
+                      backgroundColor: "#9A84F0",
+                    }}
+                    className="
+                  shrink-0
+              flex
+              justify-center
+              items-center
+              w-[32px]
+              lg:w-[42px]
+              h-[32px]
+              lg:h-[42px]
+              "
+                  >
+                    <Image src={ArrowRightIcon} alt="arrow" />
+                  </div>
+                }
+              >
+                <p
+                  style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
+                  className="w-[100%] text-center"
+                >
+                  НАЧАТЬ БЕСПЛАТНО
+                </p>
+              </Button>
+            </div>
             <div className="h-6 lg:h-14"></div>
             <SubscribeTariffs />
 

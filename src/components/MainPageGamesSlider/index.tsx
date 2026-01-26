@@ -1,14 +1,16 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { TProps } from "./types";
 import Link from "next/link";
 import HandIcon from "@/assets/icons/hand.png";
 import Image from "next/image";
+import { AuthContext } from "@/auth";
 
 export const MainPageGamesSlider: FC<TProps> = ({ data }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const activeEl = data[activeIndex];
 
   const [handIconIsVisible, setHandIconIsVisible] = useState(true);
+  const { profile, authIsLoading } = useContext(AuthContext);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -63,14 +65,16 @@ export const MainPageGamesSlider: FC<TProps> = ({ data }) => {
               {activeEl.description}
             </p>
             <div className="h-4"></div>
-            <Link href={activeEl.link}>
-              <p
-                style={{ color: "#5837dc" }}
-                className="uppercase font-semibold"
-              >
-                открыть →
-              </p>
-            </Link>
+            {!!profile?.name && (
+              <Link href={activeEl.link}>
+                <p
+                  style={{ color: "#5837dc" }}
+                  className="uppercase font-semibold"
+                >
+                  открыть →
+                </p>
+              </Link>
+            )}
           </div>
         </div>
       </div>

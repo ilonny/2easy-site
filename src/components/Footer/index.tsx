@@ -43,7 +43,7 @@ export const Footer = () => {
             />
           </div>
           <div className="text-center flex flex-col">
-            <p className="mt-2 lg:mt-0">© 2023 – 2025 2EASY</p>
+            <p className="mt-2 lg:mt-0">© 2023 – 2026 2EASY</p>
             <br />
             <Link
               href="/privacy_policy"
