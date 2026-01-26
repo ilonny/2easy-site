@@ -515,8 +515,8 @@ export default function GrammarPage() {
               }}
             >
               1.6.1. Клиенту предоставляется право один раз воспользоваться
-              бесплатным пробным периодом продолжительностью 3 (три) календарных
-              дня. Для активации пробного периода Клиент указывает адрес
+              бесплатным пробным периодом продолжительностью 7 (семь) календарных
+              дней. Для активации пробного периода Клиент указывает адрес
               электронной почты, на который направляется временный логин и
               пароль для доступа к Платформе. В течение пробного периода Клиент
               получает полный доступ к Материалам и функционалу Платформы.
@@ -2771,32 +2771,6 @@ export default function GrammarPage() {
               }}
             >
               электронную почту: double2easy@gmail.com
-            </span>
-          </p>
-          <p
-            className="ConsPlusNormal"
-            style={{
-              marginLeft: "62.95pt",
-              textAlign: "justify",
-              textIndent: "-.25in",
-            }}
-          >
-            <span
-              lang="RU"
-              style={{ fontSize: "12.0pt", fontFamily: "Symbol" }}
-            >
-              -
-              <span style={{ font: '7.0pt "Times New Roman"' }}>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              </span>
-            </span>
-            <span
-              lang="RU"
-              style={{
-                fontSize: "12.0pt",
-              }}
-            >
-              WhatsApp: +7 911 189-86-37
             </span>
           </p>
           <p

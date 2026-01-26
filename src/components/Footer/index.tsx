@@ -62,7 +62,7 @@ export const Footer = () => {
           </div>
           <div
             className="
-            w-[140px]
+            w-[30px]
             flex
             items-center
             gap-4
@@ -73,13 +73,6 @@ export const Footer = () => {
             lg:justify-start
             "
           >
-            <Link
-              href="https://wa.me/+79111898637"
-              target="_blank"
-              className="text-primary underline hover:opacity-[0.8]"
-            >
-              <Image src={WaIcon} alt="whatsapp" />
-            </Link>
             <Link
               href="mailto:double2easy@gmail.com"
               target="_blank"
