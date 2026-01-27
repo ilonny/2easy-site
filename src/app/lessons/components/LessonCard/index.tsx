@@ -121,6 +121,12 @@ export const LessonCard: FC<TProps> = ({
 
     if (isStudent || alwaysOpenLessonMode) {
       router.push("/lessons/" + lesson?.id);
+      if (params.id) {
+        writeToLocalStorage(
+          "start_lesson_selected_ids",
+          JSON.stringify([params.id]),
+        );
+      }
       return;
     }
     if (isClosed || (profile?.name && !hasSubscription)) {
@@ -144,6 +150,7 @@ export const LessonCard: FC<TProps> = ({
     hasSubscription,
     router,
     studentId,
+    params.id,
   ]);
 
   const tags = useMemo(() => {
