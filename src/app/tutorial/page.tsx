@@ -19,6 +19,7 @@ import { Zoom } from "react-toastify";
 import { ExList } from "../editor/components/view/ExList";
 import { BASE_URL } from "@/api";
 import Dino from "@/assets/images/dino.gif";
+import { getImageUrl } from "../editor/helpers";
 
 export default function GrammarPage() {
   const [activeLessonId, setActiveLessonId] = useState<number | undefined>();
@@ -156,7 +157,7 @@ export default function GrammarPage() {
                     <div className="h-8"></div>
                     {!!lesson?.image_path && (
                       <img
-                        src={BASE_URL + "/" + lesson.image_path}
+                        src={getImageUrl(lesson.image_path)}
                         style={{
                           maxHeight: 400,
                           margin: "auto",

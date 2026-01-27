@@ -44,6 +44,7 @@ import HeartImage from "@/assets/images/3d-glassy-fuzzy-pink-heart-with-a-happy-
 import { toast } from "react-toastify";
 import { Chat } from "@/components/Chat";
 import { CopyLessonLink } from "../components/CopyLessonLink";
+import { getImageUrl } from "@/app/editor/helpers";
 
 export default function StartRegistrationPage() {
   withLogin();
@@ -56,7 +57,7 @@ export default function StartRegistrationPage() {
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const { exList, getExList, setExList } = useExList(
     params.id,
-    isPresentationMode
+    isPresentationMode,
   );
   const { lesson, getLesson } = useLessons();
   const [tutorialOpen, setTutorialOpen] = useState(false);
@@ -81,7 +82,7 @@ export default function StartRegistrationPage() {
     )?.json();
     try {
       const selectedIds = JSON.parse(
-        readFromLocalStorage("start_lesson_selected_ids") || ""
+        readFromLocalStorage("start_lesson_selected_ids") || "",
       )?.map((el) => Number(el));
       const filteredIds = selectedIds?.length
         ? list?.studentList?.filter((s) => {
@@ -228,7 +229,7 @@ export default function StartRegistrationPage() {
               {!!lesson?.image_path && (
                 <Zoom>
                   <img
-                    src={BASE_URL + "/" + lesson.image_path}
+                    src={getImageUrl(lesson.image_path)}
                     style={{ maxHeight: 400, margin: "auto", marginBottom: 60 }}
                     alt="image lesson"
                   />

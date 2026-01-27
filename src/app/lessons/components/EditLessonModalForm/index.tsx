@@ -16,6 +16,7 @@ import { Tag, TagInput } from "emblor";
 import { FC, useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { TLesson } from "../../types";
+import { getImageUrl } from "@/app/editor/helpers";
 
 type TProps = {
   isVisible: boolean;
@@ -53,10 +54,10 @@ export const EditLessonModalForm: FC<TProps> = ({
     lesson?.image_path
       ? [
           {
-            dataURL: BASE_URL + "/" + lesson?.image_path,
+            dataURL: getImageUrl(lesson?.image_path),
           },
         ]
-      : []
+      : [],
   );
   const { uploadImages } = useUploadImage();
 
@@ -88,7 +89,7 @@ export const EditLessonModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [images, uploadImages, onSuccess]
+    [images, uploadImages, onSuccess],
   );
 
   const title = watch("title");

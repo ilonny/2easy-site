@@ -28,6 +28,7 @@ import { SubscribeTariffs } from "@/subscribe";
 import { RegistrationForm } from "@/app/registration";
 import Link from "next/link";
 import { TCourse } from "@/app/course/hooks/useCourses";
+import { getImageUrl } from "@/app/editor/helpers";
 
 type TProps = {
   lesson: TLesson;
@@ -201,7 +202,7 @@ export const LessonCard: FC<TProps> = ({
             width: "100%",
             height: "100%",
             background: `url(${
-              lesson.image_path ? BASE_URL + "/" + lesson.image_path : Bg.src
+              lesson.image_path ? getImageUrl(lesson.image_path) : Bg.src
             })`,
             // backgroundPosition: "center",
             transition: "all 500ms ease",

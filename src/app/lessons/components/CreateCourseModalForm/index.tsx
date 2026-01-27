@@ -32,6 +32,7 @@ import SortIcon from "@/assets/icons/sort.svg";
 import { TCourse } from "@/app/course/hooks/useCourses";
 import { useLessons } from "../../hooks/useLessons";
 import { AuthContext } from "@/auth";
+import { getImageUrl } from "@/app/editor/helpers";
 
 type TProps = {
   isVisible: boolean;
@@ -89,7 +90,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
 
   const filteredLessons = useMemo(() => {
     return (allLessons || []).filter((l) =>
-      isAdmin ? l.user_id === 1 : l.user_id !== 1
+      isAdmin ? l.user_id === 1 : l.user_id !== 1,
     );
   }, [allLessons, isAdmin]);
 
@@ -99,10 +100,10 @@ export const CreateCourseModalForm: FC<TProps> = ({
     chosenCourse?.image_path
       ? [
           {
-            dataURL: BASE_URL + "/" + chosenCourse?.image_path,
+            dataURL: getImageUrl(chosenCourse?.image_path),
           },
         ]
-      : []
+      : [],
   );
   const { uploadImages } = useUploadImage();
   const [isLoading, setIsLoading] = useState(false);
@@ -169,7 +170,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [step, chosenLessonIds, images, uploadImages, chosenCourse?.id, onSuccess]
+    [step, chosenLessonIds, images, uploadImages, chosenCourse?.id, onSuccess],
   );
 
   const title = watch("title");
@@ -204,9 +205,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
             <img
               alt={lesson?.title}
               src={
-                lesson?.image_path
-                  ? BASE_URL + "/" + lesson?.image_path
-                  : Bg.src
+                lesson?.image_path ? getImageUrl(lesson?.image_path) : Bg.src
               }
               style={{ maxWidth: "initial", maxHeight: "100%" }}
             />
@@ -231,7 +230,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
         courseLessons?.find(
           (courseLesson) =>
             courseLesson.created_from_id == lessonId ||
-            courseLesson.id == lessonId
+            courseLesson.id == lessonId,
         )
       );
     }, []) || []) as TLesson[];
@@ -391,7 +390,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                               alt={lesson?.title}
                               src={
                                 lesson?.image_path
-                                  ? BASE_URL + "/" + lesson?.image_path
+                                  ? getImageUrl(lesson?.image_path)
                                   : Bg.src
                               }
                               style={{ maxWidth: "initial", maxHeight: "100%" }}
@@ -476,7 +475,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     helperContainer={modalContentRef.current}
                     onSortEnd={({ oldIndex, newIndex }) => {
                       setChosenLessonIds((ids) =>
-                        arrayMoveImmutable(ids, oldIndex, newIndex)
+                        arrayMoveImmutable(ids, oldIndex, newIndex),
                       );
                     }}
                   >

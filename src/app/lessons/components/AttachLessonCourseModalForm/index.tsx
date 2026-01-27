@@ -22,6 +22,7 @@ import { arrayMoveImmutable } from "array-move";
 import SortIcon from "@/assets/icons/sort.svg";
 import { TCourse, useCourses } from "@/app/course/hooks/useCourses";
 import { useLessons } from "../../hooks/useLessons";
+import { getImageUrl } from "@/app/editor/helpers";
 
 type TProps = {
   isVisible: boolean;
@@ -92,7 +93,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [chosenCourseIds, lessonId, onSuccess]
+    [chosenCourseIds, lessonId, onSuccess],
   );
 
   return (
@@ -153,7 +154,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
                               alt={lesson?.title}
                               src={
                                 lesson?.image_path
-                                  ? BASE_URL + "/" + lesson?.image_path
+                                  ? getImageUrl(lesson.image_path)
                                   : Bg.src
                               }
                             />

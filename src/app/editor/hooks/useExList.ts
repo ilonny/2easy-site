@@ -1,5 +1,6 @@
-import { BASE_URL, fetchGet, fetchPostJson } from "@/api";
+import { fetchGet, fetchPostJson } from "@/api";
 import { useCallback, useState } from "react";
+import { getImageUrl } from "../helpers";
 
 const mapImageExData = (data: string) => {
   const parsedData = data ? JSON.parse(data) : {};
@@ -7,7 +8,7 @@ const mapImageExData = (data: string) => {
     parsedData.images = parsedData.attachments?.map((a) => {
       return {
         ...a,
-        dataURL: BASE_URL + "/" + a?.path,
+        dataURL: getImageUrl(a.path),
       };
     });
   }
@@ -21,7 +22,7 @@ const mapTextDefaultExData = (data: string) => {
     parsedData.images = parsedData.bgAttachments?.map((a) => {
       return {
         ...a,
-        dataURL: BASE_URL + "/" + a?.path,
+        dataURL: getImageUrl(a.path),
       };
     });
   }
@@ -29,7 +30,7 @@ const mapTextDefaultExData = (data: string) => {
     parsedData.editorImages = parsedData.editorAttachments?.map((a) => {
       return {
         ...a,
-        dataURL: BASE_URL + "/" + a?.path,
+        dataURL: getImageUrl(a.path),
       };
     });
   }
@@ -43,7 +44,7 @@ const mapText2ColExData = (data: string) => {
     parsedData.images = parsedData.bgAttachments?.map((a) => {
       return {
         ...a,
-        dataURL: BASE_URL + "/" + a?.path,
+        dataURL: getImageUrl(a.path),
       };
     });
   }
@@ -51,7 +52,7 @@ const mapText2ColExData = (data: string) => {
     parsedData.editorImages = parsedData.editorAttachments?.map((a) => {
       return {
         ...a,
-        dataURL: BASE_URL + "/" + a?.path,
+        dataURL: getImageUrl(a.path),
       };
     });
   }
@@ -61,9 +62,9 @@ const mapText2ColExData = (data: string) => {
       (a) => {
         return {
           ...a,
-          dataURL: BASE_URL + "/" + a?.path,
+          dataURL: getImageUrl(a.path),
         };
-      }
+      },
     );
   }
   return parsedData;
@@ -76,7 +77,7 @@ const mapTextStickerExData = (data: string) => {
     parsedData.images = parsedData.bgAttachments?.map((a) => {
       return {
         ...a,
-        dataURL: BASE_URL + "/" + a?.path,
+        dataURL: getImageUrl(a.path),
       };
     });
   }
@@ -91,7 +92,7 @@ const mapAudioExData = (data: string) => {
     parsedData.images = parsedData.bgAttachments?.map((a) => {
       return {
         ...a,
-        dataURL: BASE_URL + "/" + a?.path,
+        dataURL: getImageUrl(a.path),
       };
     });
   }
@@ -99,7 +100,7 @@ const mapAudioExData = (data: string) => {
     parsedData.editorImages = parsedData.editorAttachments?.map((a) => {
       return {
         ...a,
-        dataURL: BASE_URL + "/" + a?.path,
+        dataURL: getImageUrl(a.path),
       };
     });
   }
@@ -119,7 +120,7 @@ const mapFillGapsSelectEx = (data: string) => {
     parsedData.images = parsedData.bgAttachments?.map((a) => {
       return {
         ...a,
-        dataURL: BASE_URL + "/" + a?.path,
+        dataURL: getImageUrl(a.path),
       };
     });
   }
@@ -196,13 +197,13 @@ export const useExList = (lesson_id?: number, isPresentationMode?: boolean) => {
       if (isPresentationMode) {
         mappedList = mappedList.filter(
           (l) =>
-            l.is_visible === null || l.is_visible === "1" || l.is_visible === 1
+            l.is_visible === null || l.is_visible === "1" || l.is_visible === 1,
         );
       }
       setExList(mappedList || []);
       setExListIsLoading(false);
     },
-    [isPresentationMode, lesson_id]
+    [isPresentationMode, lesson_id],
   );
 
   const changeSortIndex = useCallback(
@@ -216,7 +217,7 @@ export const useExList = (lesson_id?: number, isPresentationMode?: boolean) => {
         },
       });
     },
-    []
+    [],
   );
 
   const deleteEx = useCallback(async (exId: number) => {

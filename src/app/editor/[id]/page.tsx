@@ -39,6 +39,7 @@ import EditIcon from "@/assets/icons/edit_blue.svg";
 import Image from "next/image";
 import { EditLessonModalForm } from "@/app/lessons/components/EditLessonModalForm";
 import styles from "../components/view/ExList/style.module.css";
+import { getImageUrl } from "../helpers";
 
 export default function EditorPage() {
   withLogin();
@@ -109,7 +110,7 @@ export default function EditorPage() {
         setChosenExToEdit(null);
       }
     },
-    [checkSubscription]
+    [checkSubscription],
   );
 
   const onSuccessCreate = useCallback(
@@ -120,7 +121,7 @@ export default function EditorPage() {
       setScrollToExId(ex_id);
       getExList();
     },
-    [getExList, setScrollToExId]
+    [getExList, setScrollToExId],
   );
 
   const onPressEditEx = useCallback(
@@ -137,7 +138,7 @@ export default function EditorPage() {
         setEditorModal(true);
       }
     },
-    [checkSubscription]
+    [checkSubscription],
   );
 
   const onChangeSort = useCallback(
@@ -147,7 +148,7 @@ export default function EditorPage() {
         getExList();
       }
     },
-    [changeSortIndex, getExList, checkSubscription]
+    [changeSortIndex, getExList, checkSubscription],
   );
 
   const onPressDelete = useCallback(
@@ -157,7 +158,7 @@ export default function EditorPage() {
         setDeleteModal(true);
       }
     },
-    [checkSubscription]
+    [checkSubscription],
   );
 
   const onChangeIsVisible = useCallback(() => {
@@ -243,7 +244,7 @@ export default function EditorPage() {
             {!!lesson?.image_path && (
               <Zoom>
                 <img
-                  src={BASE_URL + "/" + lesson.image_path}
+                  src={getImageUrl(lesson.image_path)}
                   style={{ maxHeight: 400, margin: "auto", marginBottom: 60 }}
                 />
               </Zoom>
