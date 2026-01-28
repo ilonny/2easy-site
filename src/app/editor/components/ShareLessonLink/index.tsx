@@ -73,7 +73,7 @@ export const ShareLessonLink = () => {
           endContent={<img src={LinkIcon.src} alt="icon" />}
           variant="light"
         >
-          Поделиться уроком
+          Поделиться уроком с другим тичером
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-4 bg-white items-start cursor-pointer">
