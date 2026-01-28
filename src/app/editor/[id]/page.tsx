@@ -40,6 +40,7 @@ import Image from "next/image";
 import { EditLessonModalForm } from "@/app/lessons/components/EditLessonModalForm";
 import styles from "../components/view/ExList/style.module.css";
 import { getImageUrl } from "../helpers";
+import { ShareLessonLink } from "../components/ShareLessonLink";
 
 export default function EditorPage() {
   withLogin();
@@ -192,11 +193,14 @@ export default function EditorPage() {
       <ContentWrapper>
         <div className="">
           <div className="h-14" />
-          <Breadcrumbs>
-            <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/profile?lessons">Мои уроки</BreadcrumbItem>
-            <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
-          </Breadcrumbs>
+          <div className="flex flex-wrap items-center justify-between">
+            <Breadcrumbs>
+              <BreadcrumbItem href="/">Главная</BreadcrumbItem>
+              <BreadcrumbItem href="/profile?lessons">Мои уроки</BreadcrumbItem>
+              <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
+            </Breadcrumbs>
+            {lesson?.user_id === profile?.id && <ShareLessonLink />}
+          </div>
         </div>
         <div className="h-10" />
         <div className="h-10" />

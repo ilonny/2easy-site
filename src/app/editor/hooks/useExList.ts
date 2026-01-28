@@ -170,10 +170,10 @@ export const useExList = (lesson_id?: number, isPresentationMode?: boolean) => {
   const [exList, setExList] = useState([]);
 
   const getExList = useCallback(
-    async (_lesson_id?: number) => {
+    async (_lesson_id?: number, hash?: string) => {
       setExListIsLoading(true);
       const listRes = await fetchGet({
-        path: `/ex/list?lesson_id=${_lesson_id || lesson_id}`,
+        path: `/ex/list?lesson_id=${_lesson_id || lesson_id}&hash=${hash || ""}`,
         isSecure: true,
       });
       const list = await listRes?.json();

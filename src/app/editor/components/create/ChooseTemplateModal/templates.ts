@@ -61,7 +61,7 @@ export const templates: TTemplate[] = [
   {
     type: "image",
     title: "Изображения",
-    description: "jpg, png, svg, gif, webp",
+    description: "jpg, png, gif, webp",
     bgImage: ImageBg,
   },
   {
