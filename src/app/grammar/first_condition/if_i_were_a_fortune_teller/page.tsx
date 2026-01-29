@@ -35,7 +35,7 @@ export default function GrammarPage() {
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
             <BreadcrumbItem href="/grammar">Grammar</BreadcrumbItem>
             <BreadcrumbItem href="/grammar/first_condition">
-              First Condition
+              First Conditional
             </BreadcrumbItem>
             <BreadcrumbItem href="/grammar/first_condition/if_i_were_a_fortune_teller">
               If i were a fortune teller

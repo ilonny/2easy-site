@@ -26,7 +26,7 @@ export default function GrammarPage() {
             <BreadcrumbItem href="/">Главная</BreadcrumbItem>
             <BreadcrumbItem href="/grammar">Grammar</BreadcrumbItem>
             <BreadcrumbItem href="/grammar/first_condition">
-              First Condition
+              First Conditional
             </BreadcrumbItem>
           </Breadcrumbs>
         </div>
@@ -41,7 +41,7 @@ export default function GrammarPage() {
             fontWeight: 700,
           }}
         >
-          FIRST CONDITION
+          FIRST CONDITIONAL
         </h1>
         <div className="h-10" />
         <SquareList data={data} />
