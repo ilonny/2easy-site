@@ -32,7 +32,7 @@ export const ImageUpload: FC<TProps> = ({
   maxNumber = 12,
   isButton,
   title,
-  acceptType = ["jpg", "png", "jpeg", "gif", "webp"],
+  acceptType = ["jpg", "png", "jpeg", "gif", "webp", "svg"],
   fullWidth,
   whiteBg,
 }) => {
