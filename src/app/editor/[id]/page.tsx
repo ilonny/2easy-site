@@ -176,11 +176,18 @@ export default function EditorPage() {
   const isAdmin = profile?.role_id === 1;
 
   const showCreateExBtn = useMemo(() => {
+    if (
+      profile.id !== 18 &&
+      lesson?.user_id === 18 &&
+      lesson?.course_id === "92"
+    ) {
+      return false;
+    }
     if (is2easy) {
       return isAdmin;
     }
     return true;
-  }, [is2easy, isAdmin]);
+  }, [is2easy, isAdmin, lesson?.course_id, lesson?.user_id, profile.id]);
 
   const [editIsVisible, setEditIsVisible] = useState(false);
 

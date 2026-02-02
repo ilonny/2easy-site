@@ -1,11 +1,15 @@
 import { checkResponse, fetchPostJson } from "@/api";
+import {
+  filterExBgAttachments,
+  filterImagesToUpload,
+} from "@/app/editor/helpers";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 
 export const useUploadMatchWordImage = (
   lastSortIndex: number,
-  currentSortIndexToShift?: number
+  currentSortIndexToShift?: number,
 ) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -15,10 +19,14 @@ export const useUploadMatchWordImage = (
     async (data: any) => {
       setIsLoading(true);
       const exAttachments: any[] =
-        (!!data?.images?.length && data?.images?.filter((i) => !i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterExBgAttachments)) ||
+        [];
 
       const imagesToUpload =
-        (!!data?.images?.length && data?.images?.filter((i) => !!i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterImagesToUpload)) ||
+        [];
 
       const savedAttachments = imagesToUpload?.length
         ? await uploadImages(
@@ -26,7 +34,7 @@ export const useUploadMatchWordImage = (
               return {
                 ...i,
               };
-            })
+            }),
           )
         : [];
       if (savedAttachments?.attachments?.length) {
@@ -68,7 +76,7 @@ export const useUploadMatchWordImage = (
         setIsLoading(false);
       }
     },
-    [currentSortIndexToShift, lastSortIndex, params.id, uploadImages]
+    [currentSortIndexToShift, lastSortIndex, params.id, uploadImages],
   );
 
   return { isLoading, saveMatchWordImageEx, success };

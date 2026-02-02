@@ -3,10 +3,14 @@ import { useUploadImage } from "@/hooks/useUploadImage";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { TMatchWordWordData } from "../MatchWordWord/types";
+import {
+  filterExBgAttachments,
+  filterImagesToUpload,
+} from "@/app/editor/helpers";
 
 export const useUploadMatchWordWordEx = (
   lastSortIndex: number,
-  currentSortIndexToShift?: number
+  currentSortIndexToShift?: number,
 ) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -17,9 +21,13 @@ export const useUploadMatchWordWordEx = (
       setIsLoading(true);
 
       const exBgAttachments: any[] =
-        (!!data?.images?.length && data?.images?.filter((i) => !i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterExBgAttachments)) ||
+        [];
       const bgImagesToUpload =
-        (!!data?.images?.length && data?.images?.filter((i) => !!i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterImagesToUpload)) ||
+        [];
 
       const savedBgAttachments = bgImagesToUpload?.length
         ? await uploadImages(
@@ -27,7 +35,7 @@ export const useUploadMatchWordWordEx = (
               return {
                 ...i,
               };
-            })
+            }),
           )
         : [];
 
@@ -72,7 +80,7 @@ export const useUploadMatchWordWordEx = (
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift]
+    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift],
   );
 
   return { isLoading, saveMathWordWordEx, success };

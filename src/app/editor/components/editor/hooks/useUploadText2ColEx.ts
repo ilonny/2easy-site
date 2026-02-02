@@ -1,3 +1,7 @@
+import {
+  filterExBgAttachments,
+  filterImagesToUpload,
+} from "@/app/editor/helpers";
 import { TText2ColData } from "./../Text2Col/types";
 import { checkResponse, fetchPostJson } from "@/api";
 import { useUploadImage } from "@/hooks/useUploadImage";
@@ -6,7 +10,7 @@ import { useCallback, useState } from "react";
 
 export const useUploadText2ColEx = (
   lastSortIndex: number,
-  currentSortIndexToShift?: number
+  currentSortIndexToShift?: number,
 ) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -17,26 +21,30 @@ export const useUploadText2ColEx = (
       setIsLoading(true);
 
       const exBgAttachments: any[] =
-        (!!data?.images?.length && data?.images?.filter((i) => !i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterExBgAttachments)) ||
+        [];
       const bgImagesToUpload =
-        (!!data?.images?.length && data?.images?.filter((i) => !!i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterImagesToUpload)) ||
+        [];
 
       const exEditorAttachments: any[] =
         (!!data?.editorImages?.length &&
-          data?.editorImages?.filter((i) => !i.file)) ||
+          data?.editorImages?.filter(filterExBgAttachments)) ||
         [];
       const editorImagesToUpload =
         (!!data?.editorImages?.length &&
-          data?.editorImages?.filter((i) => !!i.file)) ||
+          data?.editorImages?.filter(filterImagesToUpload)) ||
         [];
 
       const exSecondEditorAttachments: any[] =
         (!!data?.secondEditorImages?.length &&
-          data?.secondEditorImages?.filter((i) => !i.file)) ||
+          data?.secondEditorImages?.filter(filterExBgAttachments)) ||
         [];
       const secondEditorImagesToUpload =
         (!!data?.secondEditorImages?.length &&
-          data?.secondEditorImages?.filter((i) => !!i.file)) ||
+          data?.secondEditorImages?.filter(filterImagesToUpload)) ||
         [];
 
       const savedBgAttachments = bgImagesToUpload?.length
@@ -45,7 +53,7 @@ export const useUploadText2ColEx = (
               return {
                 ...i,
               };
-            })
+            }),
           )
         : [];
 
@@ -64,7 +72,7 @@ export const useUploadText2ColEx = (
               return {
                 ...i,
               };
-            })
+            }),
           )
         : [];
 
@@ -74,7 +82,7 @@ export const useUploadText2ColEx = (
               return {
                 ...i,
               };
-            })
+            }),
           )
         : [];
 
@@ -133,7 +141,7 @@ export const useUploadText2ColEx = (
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift]
+    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift],
   );
 
   return { isLoading, saveText2ColEx, success };

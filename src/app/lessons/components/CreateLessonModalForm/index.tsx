@@ -70,7 +70,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
             ..._data,
             // tags: tagsArr?.join?.(",") || "",
             image_id: attachments?.attachments?.[0]?.id,
-            course_id: currentCourse?.id
+            course_id: currentCourse?.id,
           },
         });
         const lesson = await lessonRes.json();
@@ -85,7 +85,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [images, uploadImages, onSuccess]
+    [images, uploadImages, currentCourse?.id, onSuccess],
   );
 
   const title = watch("title");
@@ -171,11 +171,13 @@ export const CreateLessonModalForm: FC<TProps> = ({
               )}
             />
             <div className="h-5" />
-            <div className="flex gap-5 items-end">
+            <div className="flex gap-5 items-end w-full">
               <ImageUpload
                 label="Обложка урока"
                 images={images}
                 setImages={setImages}
+                withInternetSearch
+                fullWidth
               />
             </div>
             <div className="h-5" />

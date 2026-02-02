@@ -15,4 +15,5 @@ export type TLesson = {
   created_from_2easy?: number;
   is_free?: string;
   is_my_lesson?: boolean;
+  course_id?: string;
 };

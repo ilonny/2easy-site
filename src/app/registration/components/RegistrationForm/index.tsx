@@ -5,14 +5,14 @@ import {
   EyeSlashFilledIcon,
 } from "@/app/login/components/EyeIcon";
 import { AuthContext } from "@/auth";
-import { writeToLocalStorage } from "@/auth/utils";
+import { readFromLocalStorage, writeToLocalStorage } from "@/auth/utils";
 import { Button } from "@/ui";
 import { Checkbox, Input } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import ReactInputMask from "react-input-mask";
 
@@ -104,6 +104,7 @@ export const RegistrationForm = () => {
         if (res.token) {
           writeToLocalStorage("token", res.token);
           writeToLocalStorage("profile", JSON.stringify(res));
+          writeToLocalStorage("success_registration_completed", "1");
           setProfile(res);
           window?.ym(103955671, "reachGoal", "register-success");
           router.replace("/");
@@ -111,6 +112,40 @@ export const RegistrationForm = () => {
       });
     },
   });
+
+  const [canRegister, setCanRegister] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      const alreadyRegistered = readFromLocalStorage(
+        "success_registration_completed",
+      );
+      setCanRegister(!alreadyRegistered);
+    }, 500);
+  }, []);
+
+  if (!canRegister) {
+    return (
+      <div>
+        <div className="relative mb-16">
+          <h3 className="text-center font-extrabold text-2xl mb-2">
+            У вас уже есть аккаунт
+          </h3>
+        </div>
+        <p className="text-center mb-7 font-medium">
+          Количество регистраций аккаунтов ограничено, пожалуйста, войдите под
+          своим существующим аккаунтом, или напишите в поддержку
+        </p>
+        <div className="mb-10">
+          <div className="flex justify-center items-center gap-2 font-medium text-small">
+            <Link href="/login" className="text-[#3F28C6] underline">
+              Войти
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (step === 1) {
     return (

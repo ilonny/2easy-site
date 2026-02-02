@@ -1,11 +1,15 @@
 import { checkResponse, fetchPostJson } from "@/api";
+import {
+  filterExBgAttachments,
+  filterImagesToUpload,
+} from "@/app/editor/helpers";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 
 export const useUploadImageEx = (
   lastSortIndex: number,
-  currentSortIndexToShift?: number
+  currentSortIndexToShift?: number,
 ) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -14,11 +18,16 @@ export const useUploadImageEx = (
   const saveImageEx = useCallback(
     async (data: any) => {
       setIsLoading(true);
+      console.log('data?.images???', data?.images)
       const exAttachments: any[] =
-        (!!data?.images?.length && data?.images?.filter((i) => !i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterExBgAttachments)) ||
+        [];
 
       const imagesToUpload =
-        (!!data?.images?.length && data?.images?.filter((i) => !!i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterImagesToUpload)) ||
+        [];
 
       const savedAttachments = imagesToUpload?.length
         ? await uploadImages(
@@ -26,9 +35,12 @@ export const useUploadImageEx = (
               return {
                 ...i,
               };
-            })
+            }),
           )
         : [];
+
+      console.log("savedAttachments", savedAttachments);
+
       if (savedAttachments?.attachments?.length) {
         savedAttachments?.attachments?.forEach((att, attIndex) => {
           exAttachments.push({
@@ -68,7 +80,7 @@ export const useUploadImageEx = (
         setIsLoading(false);
       }
     },
-    [currentSortIndexToShift, lastSortIndex, params.id, uploadImages]
+    [currentSortIndexToShift, lastSortIndex, params.id, uploadImages],
   );
 
   return { isLoading, saveImageEx, success };

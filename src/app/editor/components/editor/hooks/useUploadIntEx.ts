@@ -1,3 +1,7 @@
+import {
+  filterExBgAttachments,
+  filterImagesToUpload,
+} from "@/app/editor/helpers";
 import { TIntData } from "./../Int/types";
 import { checkResponse, fetchPostJson } from "@/api";
 import { useUploadImage } from "@/hooks/useUploadImage";
@@ -6,7 +10,7 @@ import { useCallback, useState } from "react";
 
 export const useUploadIntEx = (
   lastSortIndex: number,
-  currentSortIndexToShift?: number
+  currentSortIndexToShift?: number,
 ) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -17,9 +21,13 @@ export const useUploadIntEx = (
       setIsLoading(true);
 
       const exBgAttachments: any[] =
-        (!!data?.images?.length && data?.images?.filter((i) => !i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterExBgAttachments)) ||
+        [];
       const bgImagesToUpload =
-        (!!data?.images?.length && data?.images?.filter((i) => !!i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterImagesToUpload)) ||
+        [];
 
       const savedBgAttachments = bgImagesToUpload?.length
         ? await uploadImages(
@@ -27,7 +35,7 @@ export const useUploadIntEx = (
               return {
                 ...i,
               };
-            })
+            }),
           )
         : [];
 
@@ -72,7 +80,7 @@ export const useUploadIntEx = (
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift]
+    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift],
   );
 
   return { isLoading, saveIntEx, success };

@@ -19,3 +19,17 @@ export const getImageUrl = (path?: string) => {
   }
   return BASE_URL + "/" + path;
 };
+
+export const filterExBgAttachments = (i) => {
+  return (
+    !i.file &&
+    i.dataURL.includes("608dfa18-3eae-4574-a997-0a7441c16d33.selstorage.ru")
+  );
+};
+
+export const filterImagesToUpload = (i) => {
+  return (
+    !!i.file ||
+    !i.dataURL.includes("608dfa18-3eae-4574-a997-0a7441c16d33.selstorage.ru")
+  );
+};

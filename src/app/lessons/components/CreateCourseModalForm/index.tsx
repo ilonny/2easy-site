@@ -142,7 +142,13 @@ export const CreateCourseModalForm: FC<TProps> = ({
 
       setIsLoading(true);
 
-      const imagesToUpload = images.filter((image) => !!image?.file);
+      const imagesToUpload = images.filter(
+        (image) =>
+          !!image?.file ||
+          !image.dataURL.includes(
+            "608dfa18-3eae-4574-a997-0a7441c16d33.selstorage.ru",
+          ),
+      );
       let attachments;
       if (imagesToUpload?.length) {
         attachments = await uploadImages(imagesToUpload);

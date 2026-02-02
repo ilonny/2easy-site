@@ -11,6 +11,7 @@ import { Button, Skeleton } from "@nextui-org/react";
 import { HeaderMenuList } from "../HeaderMenuList";
 import MenuIcon from "@/assets/icons/menu.svg";
 import { SideBar } from "../SIdeBar";
+import { fetchPostJson } from "@/api";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -119,6 +120,15 @@ export const Header = () => {
           // mobile links
         )}
         <SideBar isOpened={sidebarIsOpened} />
+        {/* <Button onClick={async () => {
+          await fetchPostJson({
+            path: '/search-images/search',
+            isSecure: true,
+            data: {
+              query: 'cats'
+            }
+          })
+        }}>test</Button> */}
       </ContentWrapper>
     </div>
   );

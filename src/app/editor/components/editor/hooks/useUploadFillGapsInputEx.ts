@@ -1,3 +1,7 @@
+import {
+  filterExBgAttachments,
+  filterImagesToUpload,
+} from "@/app/editor/helpers";
 import { TVideoData } from "./../Video/types";
 import { checkResponse, fetchPostJson } from "@/api";
 import { useUploadImage } from "@/hooks/useUploadImage";
@@ -6,7 +10,7 @@ import { useCallback, useState } from "react";
 
 export const useUploadFillGapsInputEx = (
   lastSortIndex: number,
-  currentSortIndexToShift?: number
+  currentSortIndexToShift?: number,
 ) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -17,9 +21,13 @@ export const useUploadFillGapsInputEx = (
       setIsLoading(true);
 
       const exBgAttachments: any[] =
-        (!!data?.images?.length && data?.images?.filter((i) => !i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterExBgAttachments)) ||
+        [];
       const bgImagesToUpload =
-        (!!data?.images?.length && data?.images?.filter((i) => !!i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterImagesToUpload)) ||
+        [];
 
       const savedBgAttachments = bgImagesToUpload?.length
         ? await uploadImages(
@@ -27,7 +35,7 @@ export const useUploadFillGapsInputEx = (
               return {
                 ...i,
               };
-            })
+            }),
           )
         : [];
 
@@ -72,7 +80,7 @@ export const useUploadFillGapsInputEx = (
         setIsLoading(false);
       }
     },
-    [currentSortIndexToShift, lastSortIndex, params.id, uploadImages]
+    [currentSortIndexToShift, lastSortIndex, params.id, uploadImages],
   );
 
   return { isLoading, saveFillGapsInputEx, success };

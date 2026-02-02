@@ -3,10 +3,14 @@ import { useUploadImage } from "@/hooks/useUploadImage";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { TAudioData } from "../Audio/types";
+import {
+  filterExBgAttachments,
+  filterImagesToUpload,
+} from "@/app/editor/helpers";
 
 export const useUploadAudioEx = (
   lastSortIndex: number,
-  currentSortIndexToShift?: number
+  currentSortIndexToShift?: number,
 ) => {
   const params = useParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -16,17 +20,21 @@ export const useUploadAudioEx = (
     async (data: TAudioData) => {
       setIsLoading(true);
       const exBgAttachments: any[] =
-        (!!data?.images?.length && data?.images?.filter((i) => !i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterExBgAttachments)) ||
+        [];
       const bgImagesToUpload =
-        (!!data?.images?.length && data?.images?.filter((i) => !!i.file)) || [];
+        (!!data?.images?.length &&
+          data?.images?.filter(filterImagesToUpload)) ||
+        [];
 
       const exEditorAttachments: any[] =
         (!!data?.editorImages?.length &&
-          data?.editorImages?.filter((i) => !i.file)) ||
+          data?.editorImages?.filter(filterExBgAttachments)) ||
         [];
       const editorImagesToUpload =
         (!!data?.editorImages?.length &&
-          data?.editorImages?.filter((i) => !!i.file)) ||
+          data?.editorImages?.filter(filterImagesToUpload)) ||
         [];
 
       const savedBgAttachments = bgImagesToUpload?.length
@@ -35,7 +43,7 @@ export const useUploadAudioEx = (
               return {
                 ...i,
               };
-            })
+            }),
           )
         : [];
 
@@ -55,7 +63,7 @@ export const useUploadAudioEx = (
               return {
                 ...i,
               };
-            })
+            }),
           )
         : [];
 
@@ -102,7 +110,7 @@ export const useUploadAudioEx = (
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift]
+    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift],
   );
 
   return { isLoading, saveAudioEx, success };

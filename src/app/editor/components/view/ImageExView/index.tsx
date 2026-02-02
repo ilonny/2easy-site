@@ -39,6 +39,7 @@ const settings = {
 };
 
 export const ImageExView: FC<TProps> = ({ data, isPreview = false }) => {
+  console.log('ImageExView data: ', data)
   return (
     <div className={`py-8 w-[100%] max-w-[866px] m-auto`}>
       <p
