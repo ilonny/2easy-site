@@ -5,7 +5,7 @@ import { ImageListType } from "react-images-uploading";
 export const useUploadImage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const uploadImages = useCallback(async (images: ImageListType) => {
-    if (images.some((i) => i.dataURL)) {
+    if (images.some((i) => i.dataURL?.includes('https://'))) {
       const res = await fetchPostJson({
         path: "/upload-photos-by-url",
         data: images,
