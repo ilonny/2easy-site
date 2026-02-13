@@ -277,10 +277,6 @@ export const data = [
     bgImage: grammar_23,
   },
   {
-    id: 23,
-    bgImage: grammar_23,
-  },
-  {
     id: 24,
     bgImage: grammar_24,
   },
@@ -397,10 +393,6 @@ export const data = [
     bgImage: grammar_52,
   },
   {
-    id: 52,
-    bgImage: grammar_52,
-  },
-  {
     id: 53,
     bgImage: grammar_53,
   },
@@ -449,10 +441,6 @@ export const data = [
     bgImage: grammar_64,
   },
   {
-    id: 64,
-    bgImage: grammar_64,
-  },
-  {
     id: 65,
     bgImage: grammar_65,
   },
@@ -463,10 +451,6 @@ export const data = [
   {
     id: 67,
     bgImage: grammar_67,
-  },
-  {
-    id: 68,
-    bgImage: grammar_68,
   },
   {
     id: 68,
