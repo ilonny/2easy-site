@@ -14,6 +14,7 @@ import { TCourse } from "@/app/course/hooks/useCourses";
 import { AuthContext } from "@/auth";
 import { useRouter } from "next/navigation";
 import { useCheckSubscription } from "@/app/subscription/helpers";
+import { getImageUrl } from "@/app/editor/helpers";
 
 type TProps = {
   lessons: TLesson[];
@@ -128,7 +129,7 @@ export const LessonsList: FC<TProps> = ({
       checkResponse(data);
       getLessons();
     },
-    [getLessons]
+    [getLessons],
   );
 
   const copyCourse = useCallback(async () => {
@@ -171,7 +172,7 @@ export const LessonsList: FC<TProps> = ({
                 height: "104%",
                 background: `url(${
                   currentCourse?.image_path
-                    ? `${BASE_URL}/${currentCourse.image_path}`
+                    ? getImageUrl(currentCourse?.image_path)
                     : Bg.src
                 }) center center no-repeat #fff`,
                 backgroundSize: "cover",
