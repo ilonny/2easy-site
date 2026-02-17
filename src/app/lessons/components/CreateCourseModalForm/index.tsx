@@ -452,7 +452,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
               </ModalHeader>
               <ModalBody>
                 <div className="w-[100%] lg:w-[525px] m-auto">
-                  <Input
+                  {/* <Input
                     value={lessonsSearchString}
                     onValueChange={setLessonsSearchString}
                     placeholder="Поиск уроков"
@@ -465,7 +465,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                         style={{ borderRadius: 0 }}
                       />
                     }
-                  />
+                  /> */}
                 </div>
                 <div
                   style={{
