@@ -31,6 +31,7 @@ type TProps = {
   isStudent?: boolean;
   currentCourse?: TCourse;
   alwaysOpenLessonMode?: boolean;
+  showCourseSearch?: boolean;
 };
 
 export const ProfileLessons = (props: TProps) => {
@@ -46,6 +47,7 @@ export const ProfileLessons = (props: TProps) => {
     isStudent,
     currentCourse,
     alwaysOpenLessonMode,
+    showCourseSearch,
   } = props;
   const router = useRouter();
   const { profile, createLessonModalIsVisible, setCreateLessonModalIsVisible } =
@@ -494,61 +496,85 @@ export const ProfileLessons = (props: TProps) => {
         />
       )}
       {(!!currentCourse || !!filteredLessons?.length) && (
-        <LessonsList
-          onPressCreate={() => {
-            if (checkSubscription()) {
-              setCreateLessonModalIsVisible(true);
+        <>
+          {showCourseSearch && (
+            <>
+              <div className="h-6"></div>
+              <div className="w-[100%] lg:w-[525px] m-auto">
+                <Input
+                  value={filterSearchString}
+                  onValueChange={setFilterSearchString}
+                  placeholder="Поиск уроков"
+                  size="lg"
+                  classNames={{ inputWrapper: "bg-white hove" }}
+                  startContent={
+                    <Image
+                      src={Loupe.src}
+                      alt="search"
+                      style={{ borderRadius: 0 }}
+                    />
+                  }
+                />
+              </div>
+              <div className="h-10"></div>
+            </>
+          )}
+          <LessonsList
+            onPressCreate={() => {
+              if (checkSubscription()) {
+                setCreateLessonModalIsVisible(true);
+              }
+            }}
+            onPressCreateCourse={() => {
+              if (checkSubscription()) {
+                setCreateCourseModalIsVisible(true);
+              }
+            }}
+            canCreateLesson={canCreateLesson}
+            lessons={filteredLessons}
+            getLessons={
+              currentCourse
+                ? () => getCourseLessons(currentCourse.id, studentId)
+                : getLessons
             }
-          }}
-          onPressCreateCourse={() => {
-            if (checkSubscription()) {
-              setCreateCourseModalIsVisible(true);
+            getCourses={() => getCourses(Number(studentId))}
+            hideAttachButton={hideAttachButton}
+            hideContextMenu={tabIndex === "2easyCourses"}
+            showChangeStatusButton={showChangeStatusButton}
+            changeLessonStatus={
+              studentTabIndex === "courses"
+                ? (relation_id, status) => {
+                    changeCourseStatus(relation_id, status).then(() => {
+                      getCourses(Number(studentId));
+                      getCourseLessons(currentCourse.id, studentId);
+                    });
+                  }
+                : (relation_id, status) => {
+                    changeLessonStatus(relation_id, status).then(() => {
+                      getCourseLessons(currentCourse.id, studentId);
+                    });
+                  }
             }
-          }}
-          canCreateLesson={canCreateLesson}
-          lessons={filteredLessons}
-          getLessons={
-            currentCourse
-              ? () => getCourseLessons(currentCourse.id, studentId)
-              : getLessons
-          }
-          getCourses={() => getCourses(Number(studentId))}
-          hideAttachButton={hideAttachButton}
-          hideContextMenu={tabIndex === "2easyCourses"}
-          showChangeStatusButton={showChangeStatusButton}
-          changeLessonStatus={
-            studentTabIndex === "courses"
-              ? (relation_id, status) => {
-                  changeCourseStatus(relation_id, status).then(() => {
-                    getCourses(Number(studentId));
-                    getCourseLessons(currentCourse.id, studentId);
-                  });
-                }
-              : (relation_id, status) => {
-                  changeLessonStatus(relation_id, status).then(() => {
-                    getCourseLessons(currentCourse.id, studentId);
-                  });
-                }
-          }
-          hideDeleteLessonButton={hideDeleteLessonButton}
-          deleteLessonRelation={
-            studentTabIndex === "courses"
-              ? (relation_id) => {
-                  deleteCourseRelation(relation_id).then(() =>
-                    getCourses(Number(studentId)),
-                  );
-                }
-              : deleteLessonRelation
-          }
-          showStartLessonButton={showStartLessonButton}
-          isStudent={isStudent}
-          isFreeTariff={isFreeTariff}
-          isCourses={isCourse}
-          openCourseModal={() => setCreateCourseModalIsVisible(true)}
-          currentCourse={currentCourse}
-          studentId={studentId}
-          alwaysOpenLessonMode={alwaysOpenLessonMode}
-        />
+            hideDeleteLessonButton={hideDeleteLessonButton}
+            deleteLessonRelation={
+              studentTabIndex === "courses"
+                ? (relation_id) => {
+                    deleteCourseRelation(relation_id).then(() =>
+                      getCourses(Number(studentId)),
+                    );
+                  }
+                : deleteLessonRelation
+            }
+            showStartLessonButton={showStartLessonButton}
+            isStudent={isStudent}
+            isFreeTariff={isFreeTariff}
+            isCourses={isCourse}
+            openCourseModal={() => setCreateCourseModalIsVisible(true)}
+            currentCourse={currentCourse}
+            studentId={studentId}
+            alwaysOpenLessonMode={alwaysOpenLessonMode}
+          />
+        </>
       )}
       <CreateLessonModalForm
         isVisible={createLessonModalIsVisible}

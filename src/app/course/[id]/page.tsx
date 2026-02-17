@@ -48,6 +48,7 @@ export default function StartRegistrationPage() {
             hideAttachButton
             hideTabs
             studentId={student_id}
+            showCourseSearch={true}
           />
         )}
         <div className="h-10" />
