@@ -2,13 +2,14 @@
 
 import { fetchGet } from "@/api";
 import { ContentWrapper } from "@/components";
-import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
-import { useCallback, useEffect, useState } from "react";
+import { BreadcrumbItem, Breadcrumbs, Input, Image } from "@nextui-org/react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCheckSubscription } from "../subscription/helpers";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+
 import Dino from "@/assets/images/dino.gif";
 import { LessonsList } from "../lessons/components/LessonsList";
+import Loupe from "@/assets/icons/loupe.svg";
 
 export default function GrammarPage() {
   const { checkSubscription, hasSubscription } = useCheckSubscription();
@@ -43,6 +44,18 @@ export default function GrammarPage() {
       getLessons();
     }
   }, [hasSubscription, getLessons]);
+
+  const [lessonsSearchString, setLessonsSearchString] = useState("");
+
+  const searchedLessons = useMemo(() => {
+    if (!lessonsSearchString) {
+      return lessons;
+    }
+
+    return lessons.filter((f) => {
+      return f?.title.toLowerCase().includes(lessonsSearchString.toLowerCase());
+    });
+  }, [lessonsSearchString, lessons]);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
@@ -87,16 +100,28 @@ export default function GrammarPage() {
             />
           </div>
         )}
+        <div className="w-[100%] lg:w-[525px] m-auto">
+          <Input
+            value={lessonsSearchString}
+            onValueChange={setLessonsSearchString}
+            placeholder="Поиск уроков"
+            size="lg"
+            classNames={{ inputWrapper: "bg-white hove" }}
+            startContent={
+              <Image src={Loupe.src} alt="search" style={{ borderRadius: 0 }} />
+            }
+          />
+        </div>
+        <div className="h-10" />
         <LessonsList
           canCreateLesson={false}
-          lessons={lessons}
+          lessons={searchedLessons}
           getLessons={getLessons}
           hideAttachButton={true}
           hideContextMenu={false}
           showChangeStatusButton={false}
           hideDeleteLessonButton={true}
           isStudent={false}
-          
         />
         <div className="h-10" />
         <div className="h-10" />
