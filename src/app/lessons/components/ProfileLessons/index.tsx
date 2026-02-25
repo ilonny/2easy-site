@@ -1,4 +1,4 @@
-import { Button, Input, Tab, Tabs, Image } from "@nextui-org/react";
+import { Button, Input, Tab, Tabs, Image, Chip } from "@nextui-org/react";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLessons } from "../../hooks/useLessons";
 import { ProfileEmptyLessons } from "../ProfileEmptyLessons";
@@ -352,17 +352,31 @@ export const ProfileLessons = (props: TProps) => {
                   Уроки 2EASY
                 </Button>
                 {courses.some((c) => c.user_id === 1) && (
-                  <Button
-                    radius="full"
-                    color="primary"
-                    variant={tabIndex === "2easyCourses" ? "solid" : "faded"}
-                    onClick={() => {
-                      setTabIndex("2easyCourses");
-                      router.push("/lesson_plans");
-                    }}
-                  >
-                    Курсы 2EASY
-                  </Button>
+                  <div className="relative">
+                    <Button
+                      radius="full"
+                      color="primary"
+                      variant={tabIndex === "2easyCourses" ? "solid" : "faded"}
+                      onClick={() => {
+                        setTabIndex("2easyCourses");
+                        router.push("/lesson_plans");
+                      }}
+                    >
+                      Курсы 2EASY
+                    </Button>
+                    <Chip
+                      color="success"
+                      variant="shadow"
+                      className="absolute right-[0%] top-[0%] mt-[-14px] mr-[-10px]"
+                      size="sm"
+                      style={{
+                        transform: "rotate(6deg)",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <span className="text-white">NEW</span>
+                    </Chip>
+                  </div>
                 )}
               </div>
               <div className="h-6"></div>
