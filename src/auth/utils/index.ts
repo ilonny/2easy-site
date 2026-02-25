@@ -1,7 +1,25 @@
-export const getTokenFromLocalStorage = () => localStorage.getItem("token");
-export const setTokenToLocalStorage = (token: string) =>
-  localStorage.setItem("token", token);
+export const getTokenFromLocalStorage = () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("token");
+  }
+  return null;
+};
 
-export const readFromLocalStorage = (key: string) => localStorage.getItem(key);
-export const writeToLocalStorage = (key: string, value: string) =>
-  localStorage.setItem(key, value);
+export const setTokenToLocalStorage = (token: string) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("token", token);
+  }
+};
+
+export const readFromLocalStorage = (key: string) => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem(key);
+  }
+  return null;
+};
+
+export const writeToLocalStorage = (key: string, value: string) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(key, value);
+  }
+};
