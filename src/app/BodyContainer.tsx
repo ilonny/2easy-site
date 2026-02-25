@@ -23,23 +23,18 @@ export const BodyContainer: FC<any> = ({ children }) => {
     }
 
     // Вставка скрипта WebAsk при условии subscription?.subscribe_type_id !== 1
-    if (subscription && subscription?.subscribe_type_id !== 1) {
+    if (subscription?.subscribe_type_id !== 1) {
       // Проверяем, не загружен ли скрипт уже
       if (!window.WebAsk) {
         (function (s, u, r, v, e, y) {
           s[u] = s[u] || r;
           s[u].b.push({
             id: ["a46253", "8j5h7hbg4"],
-            type: "widget",
-            mode: "bottom",
-            position: "left",
-            preventReopenOnClose: true,
-            closeOnSubmit: true,
-            panelWidth: 360,
-            panelHeight: 360,
-            buttonText: "Открыть опрос",
-            buttonColor: "rgba(39, 116, 248, 1)",
-            buttonTextColor: "rgba(255, 255, 255, 1)",
+            type: "popup",
+            overlay: "rgba(24, 24, 36, 1)",
+            event: "timeout",
+            pending: 10,
+            period: "month",
             flags: ["stopLead", "stopMobile"],
           });
           v.async = true;
