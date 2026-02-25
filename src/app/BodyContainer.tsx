@@ -23,7 +23,7 @@ export const BodyContainer: FC<any> = ({ children }) => {
     }
 
     // Вставка скрипта WebAsk при условии subscription?.subscribe_type_id !== 1
-    if (subscription?.subscribe_type_id !== 1) {
+    if (subscription && subscription?.subscribe_type_id !== 1) {
       // Проверяем, не загружен ли скрипт уже
       if (!window.WebAsk) {
         (function (s, u, r, v, e, y) {
