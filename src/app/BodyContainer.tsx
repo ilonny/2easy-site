@@ -30,11 +30,19 @@ export const BodyContainer: FC<any> = ({ children }) => {
           s[u] = s[u] || r;
           s[u].b.push({
             id: ["a46253", "8j5h7hbg4"],
-            type: "popup",
-            overlay: "rgba(24, 24, 36, 1)",
-            event: "timeout",
-            pending: 10,
-            period: "month",
+            type: "widget",
+            mode: "bottom",
+            position: "left",
+            customLaunch: true,
+            launchEvent: "onload",
+            launchDelay: 0,
+            preventReopenOnClose: true,
+            closeOnSubmit: true,
+            panelWidth: 360,
+            panelHeight: 567,
+            buttonText: "Поделитесь своим мнением",
+            buttonColor: "rgba(39, 116, 248, 1)",
+            buttonTextColor: "rgba(255, 255, 255, 1)",
             flags: ["stopLead", "stopMobile"],
           });
           v.async = true;
