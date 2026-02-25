@@ -55,7 +55,7 @@ export const BodyContainer: FC<any> = ({ children }) => {
           }}
         >
           <Button onClick={() => setSurveyModal(true)} color="primary">
-            Поделитесь вашим мнением
+            Поделитесь мнением
           </Button>
           <Image
             onClick={(e) => {
