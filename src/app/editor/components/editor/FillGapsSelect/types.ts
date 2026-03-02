@@ -1,12 +1,12 @@
+export type TFieldOption = {
+  value: string;
+  isCorrect: boolean;
+};
+
 export type TField = {
-  startPosition: number;
+  startPosition?: number;
   id: string;
-  options: [
-    {
-      value: string;
-      isCorrect: boolean;
-    }
-  ];
+  options: TFieldOption[];
   originalWord: string;
 };
 

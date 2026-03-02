@@ -1,4 +1,5 @@
 "use client";
+
 import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
@@ -10,7 +11,9 @@ import { Button, Tooltip } from "@nextui-org/react";
 import { useUploadFillGapsSelectEx } from "../hooks/useUploadFillGapsSelectEx";
 import { AddItemCard } from "../AddItemCard";
 import ReactDOM from "react-dom/client";
-import { PopoverFields } from "./PopoverFields";
+import { arrayMoveImmutable } from "array-move";
+import { GapFieldTrigger } from "./GapFieldTrigger";
+import { FieldOptionsModal } from "./FieldOptionsModal";
 import styles from "./styles.module.css";
 import { FillGapsSelectExView } from "../../view/FillGapsSelectExView";
 import InfoIcon from "@/assets/icons/info.svg";
@@ -27,7 +30,7 @@ const defaultValuesStub: TFillGapsSelectData = {
 
 type TProps = {
   onSuccess: () => void;
-  defaultValues?: any;
+  defaultValues?: TFillGapsSelectData;
   lastSortIndex: number;
   currentSortIndexToShift?: boolean;
 };
@@ -46,9 +49,16 @@ export const FillGapsSelect: FC<TProps> = ({
   const [images, setImages] = useState<TFillGapsSelectData["images"]>(
     defaultValues?.images || []
   );
+  const [activeFieldId, setActiveFieldId] = useState<number | string | null>(
+    null
+  );
+  const rootsMapRef = useRef(new Map<Element, ReturnType<typeof ReactDOM.createRoot>>());
+  const contentEditableRef = useRef<HTMLDivElement>(null);
+
+  const activeField = data.fields.find((f) => f.id == activeFieldId);
 
   useEffect(() => {
-    !data?.id &&
+    if (!data?.id) {
       resetData({
         title: "Let's practice!",
         titleColor: "#3F28C6",
@@ -58,7 +68,8 @@ export const FillGapsSelect: FC<TProps> = ({
         dataText: "",
         fields: [],
       });
-  }, [resetData]);
+    }
+  }, [data?.id, resetData]);
 
   useEffect(() => {
     changeData("images", images);
@@ -71,31 +82,30 @@ export const FillGapsSelect: FC<TProps> = ({
     }
   }, [onSuccess, success, resetData]);
 
-  const renderContent = useCallback(() => {
-    document
-      .querySelectorAll(".contentEditable .answerWrapper")
-      .forEach((el, index) => {
-        const id = el.id;
-        const field = data.fields.find((f) => f.id == id);
-        el.setAttribute("index", field?.id?.toString());
-        const root = ReactDOM.createRoot(el);
-        root.render(
-          <div className="popover-wrapper" id={"popover-wrapper-" + field?.id}>
-            <PopoverFields
-              id={id}
-              field={field}
-              onChangeFieldOption={onChangeFieldOption}
-              onChangeFieldValue={onChangeFieldValue}
-              onAddFieldOption={onAddFieldOption}
-              deleteOption={deleteOption}
-            />
-          </div>
-        );
-      });
-  }, [data]);
+  const renderGapTriggers = useCallback(() => {
+    const wrappers = document.querySelectorAll(".contentEditable .answerWrapper");
+    wrappers.forEach((el) => {
+      const id = el.id;
+      const field = data.fields.find((f) => f.id == id);
+      if (!field) return;
+
+      el.setAttribute("index", String(field.id));
+      let root = rootsMapRef.current.get(el);
+      if (!root) {
+        root = ReactDOM.createRoot(el);
+        rootsMapRef.current.set(el, root);
+      }
+      root.render(
+        <GapFieldTrigger
+          fieldId={id}
+          onOpenOptions={(fieldId) => setActiveFieldId(fieldId)}
+        />
+      );
+    });
+  }, [data.fields]);
 
   const onClickAddSelection = useCallback(
-    (addItemState: any) => {
+    (addItemState: { selection: string }) => {
       const id = new Date().getTime();
       pasteHtmlAtCaret(
         `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
@@ -104,150 +114,93 @@ export const FillGapsSelect: FC<TProps> = ({
         "contentEditableWrapper"
       );
       const selection = window.getSelection();
-      if (selection) {
-        selection.removeAllRanges();
-      }
+      if (selection) selection.removeAllRanges();
 
-      const field = {
-        id,
-        options: [
-          {
-            isCorrect: true,
-            value: addItemState.selection,
-          },
-        ],
+      const field: TField = {
+        id: String(id),
+        options: [{ value: addItemState.selection, isCorrect: true }],
         originalWord: addItemState.selection,
-      } as unknown as TField;
+      } as TField;
 
-      const dataFields = [...data.fields];
-      dataFields.push(field);
-
-      changeData("fields", [...dataFields]);
-      changeData("dataText", contentEditableWrapper?.innerHTML);
+      const dataFields = [...data.fields, field];
+      changeData("fields", dataFields);
+      changeData("dataText", contentEditableWrapper?.innerHTML ?? "");
       contentEditableWrapper?.blur();
-      // setTimeout(() => {
-      //   renderContent();
-      // }, 100);
-    },
-    [changeData, data]
-  );
-
-  const onChangeText = useCallback(
-    (text: string) => {
-      changeData("dataText", text);
-    },
-    [changeData]
-  );
-
-  const onChangeFieldOption = useCallback(
-    (fieldId: number, optionIndex: number) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options[optionIndex].isCorrect =
-        !field.options[optionIndex].isCorrect;
-      changeData("fields", dataFields);
-    },
-    [data.fields, changeData]
-  );
-
-  const onChangeFieldValue = useCallback(
-    (fieldId: number, optionIndex: number, value: string) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options[optionIndex].value = value;
-      changeData("fields", dataFields);
-    },
-    [data.fields, changeData]
-  );
-
-  const onAddFieldOption = useCallback(
-    (fieldId: number) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options.push({ value: "", isCorrect: false });
-      changeData("fields", dataFields);
-    },
-    [data.fields, changeData]
-  );
-
-  const deleteOption = useCallback(
-    (fieldId: number, optionIndex: number) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options = field.options.filter((_o, i) => i !== optionIndex);
-      changeData("fields", dataFields);
+      setActiveFieldId(id);
     },
     [changeData, data.fields]
   );
 
-  useEffect(() => {
-    renderContent();
-  }, [data.fields]);
+  const onChangeText = useCallback(
+    (text: string) => changeData("dataText", text),
+    [changeData]
+  );
+
+  const onSaveOptions = useCallback(
+    (fieldId: number | string, options: TFieldOption[]) => {
+      const dataFields = data.fields.map((f) =>
+        f.id == fieldId ? { ...f, options } : f
+      );
+      changeData("fields", dataFields);
+    },
+    [data.fields, changeData]
+  );
 
   useEffect(() => {
-    if (data.dataText) {
-      document.getElementById("contentEditableWrapper").innerHTML =
-        data.dataText;
+    renderGapTriggers();
+  }, [data.fields, renderGapTriggers]);
+
+  useEffect(() => {
+    const wrapper = document.getElementById("contentEditableWrapper");
+    if (data.dataText && wrapper) {
+      wrapper.innerHTML = data.dataText;
     }
-    renderContent();
+    renderGapTriggers();
   }, []);
 
-  const contentEditableRef = useRef(null);
-
   useEffect(() => {
+    const wrapper = contentEditableRef.current;
+    if (!wrapper) return;
+
     const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === "childList") {
-          mutation.removedNodes.forEach((removedNode) => {
-            if (
-              removedNode.classList &&
-              removedNode.classList.contains("answerWrapper")
-            ) {
-              mutation.previousSibling.nodeValue =
-                mutation.previousSibling?.nodeValue +
-                " " +
-                removedNode
-                  ?.getAttribute("answer")
-                  .replace("[", "")
-                  .replace("]", "") +
-                " ";
-              onChangeText(contentEditableRef.current?.innerHTML || "");
+      for (const mutation of mutations) {
+        if (mutation.type !== "childList") continue;
+        for (const node of Array.from(mutation.removedNodes)) {
+          if (
+            node instanceof HTMLElement &&
+            node.classList?.contains("answerWrapper")
+          ) {
+            const prev = mutation.previousSibling;
+            const attr = node.getAttribute("answer");
+            const word = attr?.replace("[", "").replace("]", "") ?? "";
+            if (prev && prev.nodeType === Node.TEXT_NODE && word) {
+              prev.nodeValue = (prev.nodeValue ?? "") + " " + word + " ";
             }
-          });
+            onChangeText(wrapper.innerHTML);
+            break;
+          }
         }
-      });
+      }
     });
 
-    const currentRef = contentEditableRef.current;
-
-    if (currentRef) {
-      observer.observe(currentRef, {
-        childList: true,
-        subtree: true,
-        characterData: false,
-      });
-    }
-
-    return () => {
-      observer.disconnect();
-    };
+    observer.observe(wrapper, {
+      childList: true,
+      subtree: true,
+    });
+    return () => observer.disconnect();
   }, [onChangeText]);
 
   useEffect(() => {
-    const pasteListener = (e) => {
+    const wrapper = document.getElementById("contentEditableWrapper");
+    if (!wrapper) return;
+
+    const onPaste = (e: ClipboardEvent) => {
       e.preventDefault();
-      // get text representation of clipboard
-      const text = (e.originalEvent || e).clipboardData.getData("text/plain");
-      // insert text manually
+      const text = e.clipboardData?.getData("text/plain") ?? "";
       document.execCommand("insertHTML", false, text);
     };
-    document
-      .getElementById("contentEditableWrapper")
-      ?.addEventListener("paste", pasteListener);
-    return () =>
-      document
-        .getElementById("contentEditableWrapper")
-        ?.removeEventListener("paste", pasteListener);
+    wrapper.addEventListener("paste", onPaste);
+    return () => wrapper.removeEventListener("paste", onPaste);
   }, []);
 
   return (
@@ -308,10 +261,7 @@ export const FillGapsSelect: FC<TProps> = ({
         <Tooltip
           content="Выделите в тексте слово, которое хотите пропустить. Нажмите на стрелку, чтобы добавить другие варианты."
           classNames={{
-            base: [
-              // arrow color
-              "before:bg-neutral-400 dark:before:bg-white",
-            ],
+            base: ["before:bg-neutral-400 dark:before:bg-white"],
             content: [
               "py-2 px-4 shadow-xl",
               "text-black bg-white max-w-[255px]",
@@ -332,7 +282,7 @@ export const FillGapsSelect: FC<TProps> = ({
           style={{ borderRadius: 20, background: "#fff" }}
           onBlur={(e) => onChangeText(e.currentTarget.innerHTML || "")}
           ref={contentEditableRef}
-        ></div>
+        />
         <AddItemCard onClickAddSelection={onClickAddSelection} />
       </div>
       <div className="h-10" />
@@ -360,34 +310,30 @@ export const FillGapsSelect: FC<TProps> = ({
           </Button>
         </div>
       </div>
-      <div className="h-10" />
+
+      <FieldOptionsModal
+        field={activeField}
+        isOpen={activeFieldId !== null}
+        onClose={() => setActiveFieldId(null)}
+        onSaveOptions={onSaveOptions}
+      />
     </div>
   );
 };
 
 function pasteHtmlAtCaret(html: string) {
-  let sel, range;
-  if (window.getSelection) {
-    // IE9 and non-IE
-    sel = window.getSelection();
-    if (!sel) {
-      return;
-    }
-    if (sel.getRangeAt && sel.rangeCount) {
-      range = sel.getRangeAt(0);
-      range.deleteContents();
+  const sel = window.getSelection();
+  if (!sel?.rangeCount) return;
 
-      // Range.createContextualFragment() would be useful here but is
-      // non-standard and not supported in all browsers (IE9, for one)
-      const el = document.createElement("div");
-      el.innerHTML = html;
-      let frag = document.createDocumentFragment(),
-        node,
-        lastNode;
-      while ((node = el.firstChild)) {
-        lastNode = frag.appendChild(node);
-      }
-      range.insertNode(frag);
-    }
+  const range = sel.getRangeAt(0);
+  range.deleteContents();
+
+  const el = document.createElement("div");
+  el.innerHTML = html;
+  const frag = document.createDocumentFragment();
+  let node: ChildNode | null;
+  while ((node = el.firstChild)) {
+    frag.appendChild(node);
   }
+  range.insertNode(frag);
 }

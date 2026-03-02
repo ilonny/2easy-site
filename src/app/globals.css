@@ -296,3 +296,14 @@ ol, ul {
 .header-secondary-btn-text {
   color: #4031C3;
 }
+
+/* Helper для перетаскивания в react-sortable-hoc (FillGapsSelect) */
+.fill-gaps-sortable-helper {
+  z-index: 999999 !important;
+  background: #fff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}

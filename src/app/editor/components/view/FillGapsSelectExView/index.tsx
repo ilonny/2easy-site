@@ -5,7 +5,9 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { TField, TFillGapsSelectData } from "../../editor/FillGapsSelect/types";
@@ -39,8 +41,9 @@ const AnswerField: FC<{
   const [isDisabled, setIsDisabled] = useState(false);
 
   const localAnswer = useMemo(() => {
+    if (!field?.id) return undefined;
     return localAnswers.findLast((a) => a.id === field.id);
-  }, [localAnswers, field.id]);
+  }, [localAnswers, field?.id]);
   useEffect(() => {
     if (localAnswer) {
       setSelectedValue(localAnswer?.word || "");
@@ -48,11 +51,13 @@ const AnswerField: FC<{
   }, [localAnswer]);
 
   const isCorrect = useMemo(() => {
-    if (isDisabled) {
+    if (isDisabled || !field) {
       return false;
     }
     return !!field.options?.find((o) => o.value === selectedValue)?.isCorrect;
-  }, [selectedValue, field?.options, isDisabled]);
+  }, [selectedValue, field?.options, isDisabled, field]);
+
+  if (!field) return null;
 
   const onChangeSelection = useCallback(
     (val: string) => {
@@ -85,7 +90,7 @@ const AnswerField: FC<{
   // }, [field.id, isCorrect]);
 
   useEffect(() => {
-    if (field.options.length === 1) {
+    if (!field?.options?.length || field.options.length === 1) {
       return;
     }
     if (count >= field.options.length - 1 && !isCorrect) {
@@ -154,11 +159,15 @@ export const FillGapsSelectExView: FC<TProps> = ({
 
   const [localAnswers, setLocalAnswers] = useState<
     {
-      id: number;
+      id: number | string;
       word: string;
       isCorrect: boolean;
     }[]
   >([]);
+
+  const rootsMapRef = useRef(new Map<Element, ReturnType<typeof ReactDOM.createRoot>>());
+  const wrapperId = useId().replace(/:/g, "") || "fill-gaps-preview";
+  const areaClass = "answerWrapperArea-" + (data?.id ?? wrapperId);
 
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
@@ -204,18 +213,21 @@ export const FillGapsSelectExView: FC<TProps> = ({
   }, [localAnswers, writeAnswer]);
 
   const renderContent = useCallback(() => {
-    document
-      .querySelectorAll(
-        `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`
-      )
-      .forEach((el, index) => {
-        const id = el.id;
-        const field = data.fields.find((f) => f.id == id);
-        const maxOptionLength = Math?.max(
-          ...(field?.options?.map((o) => o.value.length) || [])
-        );
-        el.setAttribute("index", field?.id?.toString());
-        const root = ReactDOM.createRoot(el);
+    const areaClassCurrent = "answerWrapperArea-" + (data?.id ?? wrapperId);
+    const wrappers = document.querySelectorAll(`.${areaClassCurrent} .answerWrapper`);
+    wrappers.forEach((el) => {
+      const id = el.id;
+      const field = data.fields?.find((f) => f.id == id);
+      if (!field) return;
+      const maxOptionLength = Math?.max(
+        ...(field?.options?.map((o) => o.value.length) || [1])
+      );
+      el.setAttribute("index", field?.id?.toString());
+      let root = rootsMapRef.current.get(el);
+      if (!root) {
+        root = ReactDOM.createRoot(el);
+        rootsMapRef.current.set(el, root);
+      }
         // if (field?.options.length === 1) {
         //   return root.render(<span>{field?.options[0].value}</span>);
         // }
@@ -261,31 +273,31 @@ export const FillGapsSelectExView: FC<TProps> = ({
             />
           </div>
         );
-      });
+    });
   }, [
     data.fields,
     data?.id,
+    wrapperId,
     profile?.role_id,
-    answers.length,
     localAnswers,
     rest?.isPresentationMode,
-    // rest.activeStudentId,
   ]);
 
   useEffect(() => {
-    renderContent();
+    const timer = requestAnimationFrame(() => {
+      renderContent();
+    });
+    return () => cancelAnimationFrame(timer);
   }, [renderContent]);
 
   const content = useMemo(() => {
     return (
       <div
-        className={
-          "answerWrapperArea answerWrapperArea-" + (data?.id || 0).toString()
-        }
-        dangerouslySetInnerHTML={{ __html: data.dataText }}
-      ></div>
+        className={`answerWrapperArea ${areaClass}`}
+        dangerouslySetInnerHTML={{ __html: data.dataText || "" }}
+      />
     );
-  }, [data.dataText, data?.id]);
+  }, [data.dataText, areaClass]);
 
   return (
     <>
