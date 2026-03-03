@@ -320,7 +320,6 @@ export const FillGapsSelect: FC<TProps> = ({
     </div>
   );
 };
-
 function pasteHtmlAtCaret(html: string) {
   const sel = window.getSelection();
   if (!sel?.rangeCount) return;
@@ -337,3 +336,4 @@ function pasteHtmlAtCaret(html: string) {
   }
   range.insertNode(frag);
 }
+

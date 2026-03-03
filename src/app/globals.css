@@ -307,3 +307,13 @@ ol, ul {
   opacity: 1 !important;
   visibility: visible !important;
 }
+
+/* Helper для перетаскивания фотографий в ImageEx */
+.image-ex-sortable-helper {
+  z-index: 999999 !important;
+  background: #fff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  opacity: 1 !important;
+}

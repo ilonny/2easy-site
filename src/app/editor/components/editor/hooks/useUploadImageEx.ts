@@ -18,11 +18,6 @@ export const useUploadImageEx = (
   const saveImageEx = useCallback(
     async (data: any) => {
       setIsLoading(true);
-      console.log('data?.images???', data?.images)
-      const exAttachments: any[] =
-        (!!data?.images?.length &&
-          data?.images?.filter(filterExBgAttachments)) ||
-        [];
 
       const imagesToUpload =
         (!!data?.images?.length &&
@@ -31,25 +26,29 @@ export const useUploadImageEx = (
 
       const savedAttachments = imagesToUpload?.length
         ? await uploadImages(
-            imagesToUpload?.map((i) => {
-              return {
-                ...i,
-              };
-            }),
+            imagesToUpload?.map((i) => ({
+              ...i,
+            })),
           )
         : [];
 
-      console.log("savedAttachments", savedAttachments);
-
-      if (savedAttachments?.attachments?.length) {
-        savedAttachments?.attachments?.forEach((att, attIndex) => {
-          exAttachments.push({
-            id: att?.id,
-            path: att?.path,
-            text: data?.images?.[attIndex]?.text || "",
-          });
-        });
-      }
+      let newUploadIndex = 0;
+      const exAttachments: any[] = (data?.images || []).map((img: any) => {
+        if (filterExBgAttachments(img)) {
+          return {
+            id: img.id,
+            path: img.path,
+            text: img.text || "",
+          };
+        }
+        const saved = savedAttachments?.attachments?.[newUploadIndex];
+        newUploadIndex++;
+        return {
+          id: saved?.id,
+          path: saved?.path,
+          text: img.text || "",
+        };
+      });
 
       const exData = {
         ...data,
