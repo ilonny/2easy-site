@@ -14,7 +14,7 @@ import {
 import { FC, useEffect, useState } from "react";
 import { TField, TFieldOption } from "./types";
 import DeleteIcon from "@/assets/icons/delete.svg";
-import SortIcon from "@/assets/icons/sort.svg";
+import DragHandleIcon from "@/assets/icons/drag_handle.svg";
 import {
   sortableContainer,
   sortableElement,
@@ -31,13 +31,19 @@ type TProps = {
 
 const DragHandle = sortableHandle(() => (
   <span
-    style={{ display: "flex", cursor: "grab", padding: "2px 0" }}
+    style={{
+      display: "flex",
+      cursor: "grab",
+      padding: 6,
+      background: "#f4f4f5",
+      borderRadius: 8,
+    }}
     title="Перетащите для изменения порядка"
   >
     <Image
-      src={SortIcon.src}
-      alt="sort"
-      style={{ flexShrink: 0, width: 18, height: 18, opacity: 0.6 }}
+      src={DragHandleIcon.src}
+      alt="перетащить"
+      style={{ flexShrink: 0, width: 18, height: 18 }}
     />
   </span>
 ));

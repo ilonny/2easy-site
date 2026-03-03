@@ -19,7 +19,6 @@ import { TLesson } from "../../types";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
 import Loupe from "@/assets/icons/loupe.svg";
 import { arrayMoveImmutable } from "array-move";
-import SortIcon from "@/assets/icons/sort.svg";
 import { TCourse, useCourses } from "@/app/course/hooks/useCourses";
 import { useLessons } from "../../hooks/useLessons";
 import { getImageUrl } from "@/app/editor/helpers";

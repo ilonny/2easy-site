@@ -8,7 +8,7 @@ import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
 import { Button, Input, Radio, RadioGroup } from "@nextui-org/react";
 import Close from "@/assets/icons/close.svg";
-import SortIcon from "@/assets/icons/sort.svg";
+import DragHandleIcon from "@/assets/icons/drag_handle.svg";
 import { useUploadImageEx } from "../hooks/useUploadImageEx";
 import {
   sortableContainer,
@@ -19,13 +19,19 @@ import { arrayMoveImmutable } from "array-move";
 
 const DragHandle = sortableHandle(() => (
   <span
-    style={{ display: "flex", cursor: "grab", padding: 4 }}
+    style={{
+      display: "flex",
+      cursor: "grab",
+      padding: 6,
+      background: "#f4f4f5",
+      borderRadius: 8,
+    }}
     title="Перетащите для изменения порядка"
   >
     <Image
-      src={SortIcon}
-      alt="sort"
-      style={{ width: 20, height: 20, opacity: 0.7 }}
+      src={DragHandleIcon}
+      alt="перетащить"
+      style={{ width: 20, height: 20 }}
     />
   </span>
 ));

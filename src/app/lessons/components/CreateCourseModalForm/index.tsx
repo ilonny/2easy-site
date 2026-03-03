@@ -28,7 +28,7 @@ import Bg from "@/assets/images/create_lesson_bg_card.png";
 import Loupe from "@/assets/icons/loupe.svg";
 import { sortableContainer, sortableElement } from "react-sortable-hoc";
 import { arrayMoveImmutable } from "array-move";
-import SortIcon from "@/assets/icons/sort.svg";
+import DragHandleIcon from "@/assets/icons/drag_handle.svg";
 import { TCourse } from "@/app/course/hooks/useCourses";
 import { useLessons } from "../../hooks/useLessons";
 import { AuthContext } from "@/auth";
@@ -187,11 +187,20 @@ export const CreateCourseModalForm: FC<TProps> = ({
         style={{ cursor: "grab", userSelect: "none" }}
         className="flex gap-4 items-center"
       >
-        <Image
-          src={SortIcon.src}
-          alt="sort"
-          style={{ flexShrink: 0, width: 25, height: 25 }}
-        />
+        <span
+          style={{
+            display: "flex",
+            padding: 6,
+            background: "#f4f4f5",
+            borderRadius: 8,
+          }}
+        >
+          <Image
+            src={DragHandleIcon.src}
+            alt="перетащить"
+            style={{ flexShrink: 0, width: 20, height: 20 }}
+          />
+        </span>
         <Card
           className="p-6 flex-row items-center gap-4 mb-4 flex-1"
           shadow="none"

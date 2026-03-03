@@ -7,8 +7,89 @@ import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
 import { Button, Input, Radio, RadioGroup } from "@nextui-org/react";
 import Close from "@/assets/icons/close.svg";
+import DragHandleIcon from "@/assets/icons/drag_handle.svg";
 import { useUploadMatchWordImage } from "../hooks/useUploadMatchWordImage";
 import { MatchWordImageExView } from "../../view/MatchWordImageExView";
+import {
+  sortableContainer,
+  sortableElement,
+  sortableHandle,
+} from "react-sortable-hoc";
+import { arrayMoveImmutable } from "array-move";
+
+const DragHandle = sortableHandle(() => (
+  <span
+    style={{
+      display: "flex",
+      cursor: "grab",
+      padding: 6,
+      background: "#f4f4f5",
+      borderRadius: 8,
+    }}
+    title="Перетащите для изменения порядка"
+  >
+    <Image
+      src={DragHandleIcon}
+      alt="перетащить"
+      style={{ width: 20, height: 20 }}
+    />
+  </span>
+));
+
+const SortableImageItem = sortableElement(
+  ({
+    image,
+    index,
+    itemIndex,
+    onRemove,
+    onChangeDescription,
+    value,
+  }: {
+    image: Record<string, string>;
+    index: number;
+    itemIndex: number;
+    onRemove: (index: number) => void;
+    onChangeDescription: (text: string, index: number) => void;
+    value: string;
+  }) => {
+    const idx = itemIndex ?? index;
+    return (
+      <div className="w-[25%] p-2 mb-4">
+        <div className="image-item relative w-full h-full flex items-center justify-center">
+          <div className="absolute top-0 left-0 z-10">
+            <DragHandle />
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image.dataURL} style={{ width: "100%" }} alt="" />
+          <div className="image-item__btn-wrapper top-0 right-0 absolute">
+            <Button
+              isIconOnly
+              onClick={() => onRemove(idx)}
+              variant="light"
+              className="hover:!bg-transparent"
+            >
+              <Image priority={false} src={Close} alt="close" />
+            </Button>
+          </div>
+        </div>
+        <Input
+          onChange={(e) => onChangeDescription(e.target.value, idx)}
+          value={value}
+          placeholder="Введите правильный ответ"
+          size="sm"
+          variant="flat"
+          style={{ zIndex: 2, position: "relative" }}
+        />
+      </div>
+    );
+  }
+);
+
+const SortableImagesList = sortableContainer(
+  ({ children }: { children: React.ReactNode }) => (
+    <div className="flex flex-wrap">{children}</div>
+  )
+);
 
 const defaultValuesStub: TMatchWordImageData = {
   title: "Warm up",
@@ -44,7 +125,13 @@ export const MatchWordImage: FC<TProps> = ({
   );
 
   useEffect(() => {
-    !data?.id &&
+    if (defaultValues?.images) {
+      setImages(defaultValues.images);
+    }
+  }, [defaultValues?.id]);
+
+  useEffect(() => {
+    !(data as { id?: number })?.id &&
       resetData({
         title: "Warm up",
         titleColor: "#3F28C6",
@@ -61,10 +148,24 @@ export const MatchWordImage: FC<TProps> = ({
 
   const changeImageDescription = useCallback((text: string, index: number) => {
     setImages((i) => {
-      i[index].text = text;
-      return [...i];
+      const next = [...i];
+      next[index] = { ...next[index], text };
+      return next;
     });
   }, []);
+
+  const handleRemoveImage = useCallback((index: number) => {
+    setImages((imgs) => imgs.filter((_, i) => i !== index));
+  }, []);
+
+  const handleSortEnd = useCallback(
+    ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
+      if (oldIndex !== newIndex) {
+        setImages((imgs) => arrayMoveImmutable(imgs, oldIndex, newIndex));
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     if (success) {
@@ -101,6 +202,7 @@ export const MatchWordImage: FC<TProps> = ({
         <div className="w-[50%] pl-2">
           <p className="font-light mb-2">Загрузите изображения (до 12 шт)</p>
           <ImageUpload
+            key={`img-upload-${images.length}`}
             isMultiple
             images={images}
             setImages={setImages}
@@ -145,41 +247,24 @@ export const MatchWordImage: FC<TProps> = ({
       </div>
       <div className="h-5" />
       {!!images?.length && (
-        <div className="flex flex-wrap">
-          {images?.map((image, index) => {
-            return (
-              <div key={index} className="w-[25%] p-2 mb-4">
-                <div className="image-item relative w-full h-full flex items-center justify-center">
-                  <img src={image.dataURL} style={{ width: "100%" }} />
-                  <div className="image-item__btn-wrapper top-0 right-0 absolute">
-                    <Button
-                      isIconOnly
-                      onClick={() =>
-                        setImages((imgs) =>
-                          imgs.filter((_img, i) => i !== index)
-                        )
-                      }
-                      variant="light"
-                      className="hover:!bg-transparent"
-                    >
-                      <Image priority={false} src={Close} alt="close" />
-                    </Button>
-                  </div>
-                </div>
-                <Input
-                  onChange={(e) =>
-                    changeImageDescription(e.target.value, index)
-                  }
-                  value={images[index]?.text || ""}
-                  placeholder="Введите правильный ответ"
-                  size="sm"
-                  variant="flat"
-                  style={{ zIndex: 2, position: "relative" }}
-                />
-              </div>
-            );
-          })}
-        </div>
+        <SortableImagesList
+          axis="xy"
+          useDragHandle
+          helperClass="image-ex-sortable-helper"
+          onSortEnd={handleSortEnd}
+        >
+          {images.map((image, index) => (
+            <SortableImageItem
+              key={image.path || image.id || image.dataURL || index}
+              index={index}
+              itemIndex={index}
+              image={image}
+              onRemove={handleRemoveImage}
+              onChangeDescription={changeImageDescription}
+              value={image?.text || ""}
+            />
+          ))}
+        </SortableImagesList>
       )}
       <div className="h-10" />
       <div>
