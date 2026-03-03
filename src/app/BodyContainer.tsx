@@ -19,11 +19,11 @@ export const BodyContainer: FC<any> = ({ children }) => {
   const router = useRouter();
   const { checkSubscription, subscription } = useCheckSubscription();
   const [isShowSurvey, setSurvey] = useState(
-    !readFromLocalStorage("isSurveyShowed"),
+    !readFromLocalStorage("isSurveyShowed2"),
   );
 
   const closeSurvey = useCallback(() => {
-    writeToLocalStorage("isSurveyShowed", "1");
+    writeToLocalStorage("isSurveyShowed2", "1");
     setSurvey(false);
   }, []);
 
