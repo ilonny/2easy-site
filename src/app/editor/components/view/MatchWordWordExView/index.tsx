@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Card } from "@nextui-org/react";
@@ -42,36 +43,57 @@ export const MatchWordWordExView: FC<TProps> = ({
     isPresentationMode: rest?.isPresentationMode,
   });
 
-  const [selectedMatchId, setSelectedMatchId] = useState<number | undefined>(0);
+  const [selectedMatchId, setSelectedMatchId] = useState<string | undefined>(
+    undefined
+  );
 
-  const [incorrectId, setIncorrectId] = useState(0);
+  const [incorrectId, setIncorrectId] = useState<string | undefined>(undefined);
   const [correctIds, setCorrectIds] = useState<number[]>([]);
   const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
+
+  const sortOrderRef = useRef<{
+    leftOrder: string[];
+    rightOrder: string[];
+    exerciseKey: string;
+  } | null>(null);
 
   const sortedMatches = useMemo(() => {
     const initialArr = [...data.matches];
     const restMatches = initialArr.filter((r) => !correctIds.includes(r.id));
-    const randomKeys = restMatches
-      .sort(() => 0.5 - Math.random())
-      .map((m) => {
-        return {
-          id: m.id,
-          value: m.value,
-          answer: m.correctValue,
-        };
-      });
-    const randomValues = restMatches
-      .sort(() => 0.5 - Math.random())
-      .map((m) => m.correctValue);
+    const exerciseKey = `${data.id}-${initialArr.map((m) => m.id).join(",")}`;
 
-    return randomKeys.map((r, i) => {
+    if (
+      !sortOrderRef.current ||
+      sortOrderRef.current.exerciseKey !== exerciseKey
+    ) {
+      const ids = initialArr.map((m) => m.id);
+      const leftOrder = [...ids].sort(() => 0.5 - Math.random());
+      const rightOrder = [...ids].sort(() => 0.5 - Math.random());
+      sortOrderRef.current = { leftOrder, rightOrder, exerciseKey };
+    }
+
+    const { leftOrder, rightOrder } = sortOrderRef.current;
+    const restIdsSet = new Set(restMatches.map((m) => m.id));
+    const matchesById = Object.fromEntries(
+      initialArr.map((m) => [m.id, m])
+    );
+
+    const restLeft = leftOrder.filter((id) => restIdsSet.has(id));
+    const restRight = rightOrder.filter((id) => restIdsSet.has(id));
+
+    return restLeft.map((leftId, i) => {
+      const rightId = restRight[i];
+      const leftMatch = matchesById[leftId];
+      const rightMatch = matchesById[rightId];
       return {
-        ...r,
-        correctValue: randomValues[i],
-        correctId: randomKeys?.find((r) => r.answer === randomValues[i])?.id,
+        id: leftMatch.id,
+        value: leftMatch.value,
+        answer: leftMatch.correctValue,
+        correctValue: rightMatch.correctValue,
+        correctId: rightMatch.id,
       };
     });
-  }, [data.matches, correctIds.length]);
+  }, [data.matches, data.id, correctIds]);
 
   const correctedMatches = useMemo(() => {
     const initialArr = [...data.matches];
@@ -88,7 +110,7 @@ export const MatchWordWordExView: FC<TProps> = ({
   }, [data.matches, correctIds, incorrectIdsMap]);
 
   const onClickAnswer = useCallback(
-    (id: number) => {
+    (id: string) => {
       const m = sortedMatches.find((m) => m?.correctId === id);
       const selectedM = sortedMatches.find((m) => m?.id === selectedMatchId);
 
@@ -100,9 +122,9 @@ export const MatchWordWordExView: FC<TProps> = ({
         if (!selectedM) {
           return
         }
-        setIncorrectId(m.id);
+        setIncorrectId(m?.id);
         setTimeout(() => {
-          setIncorrectId(0);
+          setIncorrectId(undefined);
         }, 2000);
         setIncorrectIdsMap((incorrectIds) => {
           return {
