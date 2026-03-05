@@ -210,9 +210,24 @@ export const ProfileLessons = (props: TProps) => {
 
   console.log("lessonsToRender", lessonsToRender);
 
+  const HOMEWORK_TAG = "Homework";
+
+  const hasHomeworkTag = useCallback((lesson: TLesson) => {
+    if (!lesson?.tags) return false;
+    const tags = (lesson.tags || "")
+      .split(/[,]/)
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+    return tags.some((t) => t === "homework");
+  }, []);
+
   const tabsToRender = useMemo(() => {
     if (tabIndex === "savedLessons" || !profile?.name) {
       return tabs;
+    }
+    if (tabIndex === "userLessons") {
+      const hasHomeworkLessons = lessonsToRender.some(hasHomeworkTag);
+      return hasHomeworkLessons ? ["All lessons", HOMEWORK_TAG] : ["All lessons"];
     }
     const lessonsTags = lessonsToRender
       .map((l) => {
@@ -223,7 +238,7 @@ export const ProfileLessons = (props: TProps) => {
     return ["All lessons"].concat(
       Array.from(new Set(lessonsTags)).filter(Boolean),
     );
-  }, [lessonsToRender, tabIndex, profile?.name]);
+  }, [lessonsToRender, tabIndex, profile?.name, hasHomeworkTag]);
 
   useEffect(() => {
     if (tabsToRender.length) {
@@ -236,6 +251,9 @@ export const ProfileLessons = (props: TProps) => {
     let res = lessonsToRender;
     if (activeFilterTab !== "All lessons") {
       res = res.filter((lesson: TLesson) => {
+        if (activeFilterTab === HOMEWORK_TAG) {
+          return hasHomeworkTag(lesson);
+        }
         const tagsFilterTabArray = activeFilterTab
           .replace(/\s+/g, "")
           .replace("+", "")
@@ -291,7 +309,13 @@ export const ProfileLessons = (props: TProps) => {
       });
     }
     return res;
-  }, [lessonsToRender, activeFilterTab, filterSearchString, isFreeTariff]);
+  }, [
+    lessonsToRender,
+    activeFilterTab,
+    filterSearchString,
+    isFreeTariff,
+    hasHomeworkTag,
+  ]);
 
   // useEffect(() => {
   //   if (
@@ -412,7 +436,8 @@ export const ProfileLessons = (props: TProps) => {
               <div className="h-6"></div>
             </>
           )}
-          {tabIndex === "savedLessons" && tabsToRender?.length >= 2 && (
+          {(tabIndex === "savedLessons" || tabIndex === "userLessons") &&
+            tabsToRender?.length >= 2 && (
             <>
               <Tabs
                 color="primary"
