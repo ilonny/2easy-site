@@ -321,7 +321,7 @@ export default function StartRegistrationPage() {
           <div className="fixed right-0 bottom-0" style={{ zIndex: 10 }}>
             <Chat
               students={students}
-              lesson_id={lesson?.id || 0}
+              lesson_id={Number(params.id) || lesson?.id || 0}
               isTeacher={isTeacher}
             />
           </div>
