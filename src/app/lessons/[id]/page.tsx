@@ -43,6 +43,7 @@ import Tutor3 from "@/assets/images/tutor_3.png";
 import HeartImage from "@/assets/images/3d-glassy-fuzzy-pink-heart-with-a-happy-face.png";
 import { toast } from "react-toastify";
 import { Chat } from "@/components/Chat";
+import { VideoCall } from "@/components/VideoCall";
 import { CopyLessonLink } from "../components/CopyLessonLink";
 import { getImageUrl } from "@/app/editor/helpers";
 
@@ -378,7 +379,11 @@ export default function StartRegistrationPage() {
           )}
         </div>
         <div className="relative">
-          <div className="fixed right-0 bottom-0" style={{ zIndex: 10 }}>
+          <div
+            className="fixed right-4 bottom-4 flex flex-col items-end gap-2"
+            style={{ zIndex: 10 }}
+          >
+            <VideoCall lessonId={params.id as string} />
             <Chat
               students={students}
               lesson_id={Number(params.id) || lesson?.id || 0}
