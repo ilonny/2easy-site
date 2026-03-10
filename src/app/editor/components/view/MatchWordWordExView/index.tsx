@@ -16,6 +16,17 @@ import "react-medium-image-zoom/dist/styles.css";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
 import { useParams } from "next/navigation";
 
+/** Детерминированная перестановка: одинаковый seed даёт одинаковый порядок */
+function shuffleWithSeed<T>(array: T[], seed: number): T[] {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const x = Math.sin(seed + i) * 10000;
+    const j = Math.floor((x - Math.floor(x)) * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
 type TProps = {
   data: TMatchWordWordData;
   isPreview?: boolean;
@@ -60,15 +71,26 @@ export const MatchWordWordExView: FC<TProps> = ({
   const sortedMatches = useMemo(() => {
     const initialArr = [...data.matches];
     const restMatches = initialArr.filter((r) => !correctIds.includes(r.id));
-    const exerciseKey = `${data.id}-${initialArr.map((m) => m.id).join(",")}`;
+    const isLessonMode =
+      rest.isView && lesson_id && Number(lesson_id) > 0;
+    const exerciseKey = `${data.id}-${initialArr.map((m) => m.id).join(",")}-${isLessonMode}`;
 
     if (
       !sortOrderRef.current ||
       sortOrderRef.current.exerciseKey !== exerciseKey
     ) {
       const ids = initialArr.map((m) => m.id);
-      const leftOrder = [...ids].sort(() => 0.5 - Math.random());
-      const rightOrder = [...ids].sort(() => 0.5 - Math.random());
+      let leftOrder: string[];
+      let rightOrder: string[];
+
+      if (isLessonMode) {
+        const seed = Number(lesson_id) * 10000 + Number(ex_id || 0);
+        leftOrder = shuffleWithSeed(ids, seed);
+        rightOrder = shuffleWithSeed(ids, seed + 1);
+      } else {
+        leftOrder = [...ids].sort(() => 0.5 - Math.random());
+        rightOrder = [...ids].sort(() => 0.5 - Math.random());
+      }
       sortOrderRef.current = { leftOrder, rightOrder, exerciseKey };
     }
 
@@ -93,7 +115,7 @@ export const MatchWordWordExView: FC<TProps> = ({
         correctId: rightMatch.id,
       };
     });
-  }, [data.matches, data.id, correctIds]);
+  }, [data.matches, data.id, correctIds, lesson_id, ex_id, rest.isView]);
 
   const correctedMatches = useMemo(() => {
     const initialArr = [...data.matches];
