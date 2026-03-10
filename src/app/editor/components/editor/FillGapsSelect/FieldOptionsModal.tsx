@@ -14,7 +14,7 @@ import {
 import { FC, useEffect, useState } from "react";
 import { TField, TFieldOption } from "./types";
 import DeleteIcon from "@/assets/icons/delete.svg";
-import DragHandleIcon from "@/assets/icons/drag_handle.svg";
+import DragHandleVerticalIcon from "@/assets/icons/drag_handle_vertical.svg";
 import {
   sortableContainer,
   sortableElement,
@@ -41,7 +41,7 @@ const DragHandle = sortableHandle(() => (
     title="Перетащите для изменения порядка"
   >
     <Image
-      src={DragHandleIcon.src}
+      src={DragHandleVerticalIcon.src}
       alt="перетащить"
       style={{ flexShrink: 0, width: 18, height: 18 }}
     />
