@@ -172,7 +172,7 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
                   isSelected={createFromScratch}
                   onValueChange={setCreateFromScratch}
                 >
-                  Создать с нуля (без копирования заданий)
+                  Создать с нуля
                 </Checkbox>
               </div>
               {!createFromScratch && sortedExList.length > 0 && (

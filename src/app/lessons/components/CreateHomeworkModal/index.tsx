@@ -53,7 +53,12 @@ type TProps = {
   isVisible: boolean;
   setIsVisible: (val: boolean) => void;
   lesson: TLesson;
-  exList: Array<{ id: number; type: string; data?: string; sortIndex?: number }>;
+  exList: Array<{
+    id: number;
+    type: string;
+    data?: string;
+    sortIndex?: number;
+  }>;
   onSuccess?: () => void;
 };
 
@@ -72,12 +77,12 @@ export const CreateHomeworkModal: FC<TProps> = ({
 
   const onClickEx = useCallback((id: number) => {
     setChosenExIds((ids) =>
-      ids.includes(id) ? ids.filter((i) => i !== id) : ids.concat(id)
+      ids.includes(id) ? ids.filter((i) => i !== id) : ids.concat(id),
     );
   }, []);
 
   const sortedExList = [...exList].sort(
-    (a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0)
+    (a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0),
   );
 
   const onSubmit = useCallback(async () => {
@@ -103,7 +108,14 @@ export const CreateHomeworkModal: FC<TProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [chosenExIds, createFromScratch, lesson.id, onSuccess, router, setIsVisible]);
+  }, [
+    chosenExIds,
+    createFromScratch,
+    lesson.id,
+    onSuccess,
+    router,
+    setIsVisible,
+  ]);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -156,74 +168,75 @@ export const CreateHomeworkModal: FC<TProps> = ({
             </div>
           )}
           {!isChecking && (
-          <>
-          <p className="text-small text-default-500 mb-2">
-            Скопируйте задания из урока или создайте Homework с нуля. Homework
-            будет общей для всех учеников.
-          </p>
-          <div className="flex items-center gap-2 mb-4">
-            <Checkbox
-              isSelected={createFromScratch}
-              onValueChange={setCreateFromScratch}
-            >
-              Создать с нуля (без копирования заданий)
-            </Checkbox>
-          </div>
-          {!createFromScratch && sortedExList.length > 0 && (
-            <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto mb-4">
-              {sortedExList
-                .filter((ex) => ex.type !== "note")
-                .map((ex) => {
-                  const { typeLabel, title, description } =
-                    getExDisplayInfo(ex);
-                  const isChosen = chosenExIds.includes(ex.id);
-                  return (
-                    <div
-                      key={ex.id}
-                      onClick={() => onClickEx(ex.id)}
-                      className="p-3 rounded-lg border cursor-pointer hover:bg-default-100"
-                      style={{
-                        borderColor: isChosen ? "#3f28c6" : "#e4e4e7",
-                        backgroundColor: isChosen ? "#eeebff" : undefined,
-                      }}
-                    >
-                      <div className="flex items-start gap-3">
-                        <Checkbox isSelected={isChosen} />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-small text-default-600">
-                            {typeLabel}
-                          </p>
-                          {title && (
-                            <p className="font-semibold truncate">{title}</p>
-                          )}
-                          {description && (
-                            <p className="text-small text-default-500 line-clamp-2">
-                              {description}
-                            </p>
-                          )}
+            <>
+              <p className="text-small text-default-500 mb-2">
+                Скопируйте задания из урока или создайте Homework с нуля.
+              </p>
+              <div className="flex items-center gap-2 mb-4">
+                <Checkbox
+                  isSelected={createFromScratch}
+                  onValueChange={setCreateFromScratch}
+                >
+                  Создать с нуля
+                </Checkbox>
+              </div>
+              {!createFromScratch && sortedExList.length > 0 && (
+                <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto mb-4">
+                  {sortedExList
+                    .filter((ex) => ex.type !== "note")
+                    .map((ex) => {
+                      const { typeLabel, title, description } =
+                        getExDisplayInfo(ex);
+                      const isChosen = chosenExIds.includes(ex.id);
+                      return (
+                        <div
+                          key={ex.id}
+                          onClick={() => onClickEx(ex.id)}
+                          className="p-3 rounded-lg border cursor-pointer hover:bg-default-100"
+                          style={{
+                            borderColor: isChosen ? "#3f28c6" : "#e4e4e7",
+                            backgroundColor: isChosen ? "#eeebff" : undefined,
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <Checkbox isSelected={isChosen} />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-small text-default-600">
+                                {typeLabel}
+                              </p>
+                              {title && (
+                                <p className="font-semibold truncate">
+                                  {title}
+                                </p>
+                              )}
+                              {description && (
+                                <p className="text-small text-default-500 line-clamp-2">
+                                  {description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          )}
-          {!createFromScratch && exList.length === 0 && (
-            <p className="text-default-500 mb-4">
-              В уроке нет заданий для копирования. Будет создана пустая
-              Homework.
-            </p>
-          )}
-          <Button
-            color="primary"
-            className="w-full"
-            isLoading={isLoading}
-            disabled={!canSubmit}
-            onClick={onSubmit}
-          >
-            Создать Homework
-          </Button>
-          </>
+                      );
+                    })}
+                </div>
+              )}
+              {!createFromScratch && exList.length === 0 && (
+                <p className="text-default-500 mb-4">
+                  В уроке нет заданий для копирования. Будет создана пустая
+                  Homework.
+                </p>
+              )}
+              <Button
+                color="primary"
+                className="w-full"
+                isLoading={isLoading}
+                disabled={!canSubmit}
+                onClick={onSubmit}
+              >
+                Создать Homework
+              </Button>
+            </>
           )}
           <div className="h-4" />
         </ModalBody>
