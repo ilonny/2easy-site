@@ -39,8 +39,10 @@ import EditIcon from "@/assets/icons/edit_blue.svg";
 import Image from "next/image";
 import { EditLessonModalForm } from "@/app/lessons/components/EditLessonModalForm";
 import styles from "../components/view/ExList/style.module.css";
+import createExStyles from "../components/create/CreateExButton/styles.module.css";
 import { getImageUrl } from "../helpers";
 import { ShareLessonLink } from "../components/ShareLessonLink";
+import { CreateHomeworkModal } from "@/app/lessons/components/CreateHomeworkModal";
 
 export default function EditorPage() {
   withLogin();
@@ -190,6 +192,7 @@ export default function EditorPage() {
   }, [is2easy, isAdmin, lesson?.course_id, lesson?.user_id, profile.id]);
 
   const [editIsVisible, setEditIsVisible] = useState(false);
+  const [homeworkModalVisible, setHomeworkModalVisible] = useState(false);
 
   const onPressEdit = useCallback(() => {
     setEditIsVisible(true);
@@ -206,7 +209,9 @@ export default function EditorPage() {
               <BreadcrumbItem href="/profile?lessons">Мои уроки</BreadcrumbItem>
               <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
             </Breadcrumbs>
-            {lesson?.user_id === profile?.id && <ShareLessonLink />}
+            {lesson?.user_id === profile?.id && !lesson?.lesson_id_homework && (
+              <ShareLessonLink />
+            )}
           </div>
         </div>
         <div className="h-10" />
@@ -219,7 +224,7 @@ export default function EditorPage() {
             borderRadius: 10,
           }}
         >
-          <StartLessonButton lesson={lesson} />
+          {!lesson?.lesson_id_homework && <StartLessonButton lesson={lesson} />}
           <div
             className={`${styles["wrapper"]} relative pt-[55px] lg:pt-0 common_info relative group`}
           >
@@ -306,6 +311,24 @@ export default function EditorPage() {
                   }
                 />
               </Card>
+              {lesson?.user_id === profile?.id &&
+                !lesson?.lesson_id_homework && (
+                  <Card
+                    radius="lg"
+                    shadow="none"
+                    className={`${createExStyles.wrapper} p-5 h-[180px] items-center justify-center mt-4`}
+                  >
+                    <Button
+                      size="lg"
+                      variant="bordered"
+                      color="primary"
+                      className="min-w-[310px]"
+                      onClick={() => setHomeworkModalVisible(true)}
+                    >
+                      Homework
+                    </Button>
+                  </Card>
+                )}
               <div className="h-10" />
               <div className="h-10" />
             </>
@@ -419,6 +442,18 @@ export default function EditorPage() {
           </ModalBody>
         </ModalContent>
       </Modal>
+      {!!lesson && (
+        <CreateHomeworkModal
+          isVisible={homeworkModalVisible}
+          setIsVisible={setHomeworkModalVisible}
+          lesson={lesson}
+          exList={exList}
+          onSuccess={() => {
+            getExList();
+            getLesson(params.id);
+          }}
+        />
+      )}
       {!!lesson && (
         <EditLessonModalForm
           isVisible={editIsVisible}

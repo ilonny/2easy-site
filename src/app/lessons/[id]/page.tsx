@@ -68,10 +68,15 @@ export default function StartRegistrationPage() {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
 
   useEffect(() => {
-    //@ts-ignore
-    getLesson(params.id);
+    const studentIdForLesson =
+      isStudent && profile?.studentId
+        ? Number(profile.studentId)
+        : !isStudent && students?.length === 1
+          ? students[0]?.student_id
+          : undefined;
+    getLesson(params.id as string, studentIdForLesson);
     getExList();
-  }, [getExList, getLesson, params.id]);
+  }, [getExList, getLesson, params.id, isStudent, students, profile?.studentId]);
 
   const fetchStudents = useCallback(async () => {
     const list = await (
@@ -247,6 +252,61 @@ export default function StartRegistrationPage() {
                   isPresentationMode={isPresentationMode}
                 />
               </div>
+              {!!lesson?.homework_lesson_id &&
+                !lesson?.lesson_id_homework && (
+                  <div className="mt-8 flex justify-center">
+                    <Button
+                      color="primary"
+                      size="lg"
+                      onClick={async () => {
+                        if (
+                          !isStudent &&
+                          students?.length === 1 &&
+                          students[0]?.student_id
+                        ) {
+                          const res = await fetchPostJson({
+                            path: "/lessons/homework/get-or-create-for-student",
+                            isSecure: true,
+                            data: {
+                              lesson_id: params.id,
+                              student_id: students[0].student_id,
+                            },
+                          });
+                          const data = await res?.json();
+                          if (data?.homework_lesson_id) {
+                            router.push(
+                              `/lessons/${data.homework_lesson_id}`
+                            );
+                            return;
+                          }
+                        }
+                        if (isStudent && profile?.studentId) {
+                          const res = await fetchPostJson({
+                            path: "/lessons/homework/create-my",
+                            isSecure: true,
+                            data: {
+                              lesson_id: params.id,
+                              student_id: profile.studentId,
+                            },
+                          });
+                          const data = await res?.json();
+                          checkResponse(data);
+                          if (data?.homework_lesson_id) {
+                            router.push(
+                              `/lessons/${data.homework_lesson_id}`
+                            );
+                            return;
+                          }
+                        }
+                        router.push(
+                          `/lessons/${lesson.homework_lesson_id}`
+                        );
+                      }}
+                    >
+                      Homework
+                    </Button>
+                  </div>
+                )}
             </div>
           </div>
           {!isStudent && !!students?.length && (

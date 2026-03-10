@@ -281,6 +281,7 @@ export const LessonsList: FC<TProps> = ({
             }
             currentCourse={currentCourse}
             alwaysOpenLessonMode={alwaysOpenLessonMode}
+            onHomeworkCreated={getLessons}
           />
         );
       })}

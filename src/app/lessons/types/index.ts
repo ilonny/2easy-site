@@ -16,4 +16,7 @@ export type TLesson = {
   is_free?: string;
   is_my_lesson?: boolean;
   course_id?: string;
+  lesson_id_homework?: number;
+  homework_lesson_id?: number;
+  has_individual_homework?: boolean;
 };

@@ -46,18 +46,24 @@ export const useLessons = (
     return data;
   }, [isAuth, studentId]);
 
-  const getLesson = useCallback(async (id: string) => {
-    setLessonsListIslLoading(true);
-    const res = await fetchGet({
-      path: `/lesson?id=${id}`,
-      isSecure: true,
-    });
-    const data = await res?.json();
-    setLesson(data?.lesson);
-    setLessonsListIslLoading(false);
-    checkResponse(data);
-    return data;
-  }, []);
+  const getLesson = useCallback(
+    async (id: string, studentIdParam?: number) => {
+      setLessonsListIslLoading(true);
+      const url = studentIdParam
+        ? `/lesson?id=${id}&student_id=${studentIdParam}`
+        : `/lesson?id=${id}`;
+      const res = await fetchGet({
+        path: url,
+        isSecure: true,
+      });
+      const data = await res?.json();
+      setLesson(data?.lesson);
+      setLessonsListIslLoading(false);
+      checkResponse(data);
+      return data;
+    },
+    []
+  );
 
   const changeLessonStatus = useCallback(
     async (relation_id?: number, status?: string) => {
