@@ -48,6 +48,7 @@ type TTestStepProps = {
   writeAnswer: any;
   answers: any; //ref maps in json format
   isPresentationMode?: boolean;
+  onAnswerSubmitted?: (questionId: string, wasCorrect: boolean) => void;
 };
 
 export const TestStep = (props: TTestStepProps) => {
@@ -58,6 +59,7 @@ export const TestStep = (props: TTestStepProps) => {
     writeAnswer,
     answers,
     isPresentationMode,
+    onAnswerSubmitted,
   } = props;
   const { profile } = useContext(AuthContext);
 
@@ -103,10 +105,12 @@ export const TestStep = (props: TTestStepProps) => {
       })
     );
     setIsSubmitted(true);
-    if (!Object.keys(errorMap.current).length) {
+    const wasCorrect = !Object.keys(errorMap.current).length;
+    if (wasCorrect) {
       setScore((s) => s + 1);
     }
-  }, [question?.id, question?.options, setScore, writeAnswer]);
+    onAnswerSubmitted?.(question?.id, wasCorrect);
+  }, [question?.id, question?.options, setScore, writeAnswer, onAnswerSubmitted]);
 
   useEffect(() => {
     Array.from(
@@ -369,6 +373,7 @@ export const TestExView: FC<TProps> = ({
   const image = data?.images?.[0];
   const [activeIndex, setActiveIndex] = useState(0);
   const [score, setScore] = useState(0);
+  const sessionAnswersRef = useRef<Record<string, boolean>>({});
   const activeQuestion = data.questions?.[activeIndex];
   const currentStep = activeIndex + 1;
   const totalSteps = data?.questions?.length;
@@ -408,11 +413,36 @@ export const TestExView: FC<TProps> = ({
     setScore(0);
     setActiveIndex(0);
     setIsFinished(false);
+    sessionAnswersRef.current = {};
   }, []);
 
+  const onAnswerSubmitted = useCallback(
+    (questionId: string, wasCorrect: boolean) => {
+      sessionAnswersRef.current[questionId] = wasCorrect;
+    },
+    []
+  );
+
   const onGoBack = useCallback(() => {
+    const prevIndex = activeIndex - 1;
+    if (prevIndex >= 0) {
+      const prevQuestion = data.questions?.[prevIndex];
+      if (prevQuestion) {
+        const wasCorrect = sessionAnswersRef.current[prevQuestion.id];
+        if (wasCorrect === true) {
+          setScore((s) => Math.max(0, s - 1));
+        }
+        delete sessionAnswersRef.current[prevQuestion.id];
+        writeAnswer(prevQuestion.id, "");
+        setAnswers((prev: Record<string, unknown>) => {
+          const next = { ...prev };
+          delete next[prevQuestion.id];
+          return next;
+        });
+      }
+    }
     setActiveIndex((i) => (i - 1 < 0 ? 0 : i - 1));
-  }, []);
+  }, [activeIndex, data.questions, writeAnswer, setAnswers]);
 
   useEffect(() => {
     writeAnswer("step", activeIndex.toString());
@@ -520,6 +550,7 @@ export const TestExView: FC<TProps> = ({
               writeAnswer={writeAnswer}
               answers={questionStepAnswers}
               isPresentationMode={rest?.isPresentationMode}
+              onAnswerSubmitted={onAnswerSubmitted}
             />
           )}
           {!isFinished && (
