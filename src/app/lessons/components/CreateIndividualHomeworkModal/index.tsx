@@ -167,13 +167,23 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
               <p className="text-small text-default-500 mb-2">
                 Выберите задания из урока или создайте Homework с нуля.
               </p>
-              <div className="flex items-center gap-2 mb-4">
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setCreateFromScratch(!createFromScratch)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setCreateFromScratch(!createFromScratch);
+                  }
+                }}
+                className="flex items-center gap-2 mb-4 cursor-pointer select-none w-fit"
+              >
                 <Checkbox
                   isSelected={createFromScratch}
-                  onValueChange={setCreateFromScratch}
-                >
-                  Создать с нуля
-                </Checkbox>
+                  classNames={{ base: "pointer-events-none" }}
+                />
+                <span>Создать с нуля</span>
               </div>
               {!createFromScratch && sortedExList.length > 0 && (
                 <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto mb-4">
@@ -186,15 +196,26 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
                       return (
                         <div
                           key={ex.id}
+                          role="button"
+                          tabIndex={0}
                           onClick={() => onClickEx(ex.id)}
-                          className="p-3 rounded-lg border cursor-pointer hover:bg-default-100"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              onClickEx(ex.id);
+                            }
+                          }}
+                          className="p-3 rounded-lg border cursor-pointer hover:bg-default-100 select-none"
                           style={{
                             borderColor: isChosen ? "#3f28c6" : "#e4e4e7",
                             backgroundColor: isChosen ? "#eeebff" : undefined,
                           }}
                         >
                           <div className="flex items-start gap-3">
-                            <Checkbox isSelected={isChosen} />
+                            <Checkbox
+                              isSelected={isChosen}
+                              classNames={{ base: "pointer-events-none shrink-0" }}
+                            />
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-small text-default-600">
                                 {typeLabel}
