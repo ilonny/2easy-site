@@ -212,7 +212,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
     >
       <div
         style={{
-          pointerEvents: "auto",
+          pointerEvents: "none",
           width: "100%",
           height: "100%",
         }}
@@ -234,6 +234,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
               boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
               display: "flex",
               flexDirection: "column",
+              pointerEvents: "auto",
             }}
           >
             <div
