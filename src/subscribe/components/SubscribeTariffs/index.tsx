@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
+
+import { useTranslation } from "react-i18next";
 import { RegistrationForm } from "@/app/registration";
 import { AuthContext } from "@/auth";
 import { PaymentForm } from "@/payment";
@@ -35,6 +37,7 @@ export const SubscribeTariffs: FC<TProps> = ({
   hideTariffsTitle = false,
   fullWidth = false,
 }) => {
+  const { t } = useTranslation();
   const { profile } = useContext(AuthContext);
   const { subscription } = useContext(SibscribeContext);
 
@@ -67,12 +70,11 @@ export const SubscribeTariffs: FC<TProps> = ({
       {!hideTitle && (
         <>
           <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-            Подписка 2easy
+            {t("subscription.title")}
           </h1>
           <div className="h-4"></div>
           <p className="max-w-[650px] m-auto text-center font-normal text-[18px]">
-            Доступ к материалам, платформе для создания уроков и личному
-            кабинету с учениками для проведения уроков в real-time
+            {t("subscription.description")}
           </p>
           <div className="h-4"></div>
         </>
@@ -116,7 +118,7 @@ export const SubscribeTariffs: FC<TProps> = ({
                 fontSize: 14,
               }}
             >
-              Подписка 2EASY
+              {t("subscription.subscriptionBadge")}
             </div>
             <div className="h-4"></div>
             <p
@@ -130,8 +132,7 @@ export const SubscribeTariffs: FC<TProps> = ({
                 lineHeight: "120%",
               }}
             >
-              Каждый тариф включает в себя полный доступ ко всему, что есть на
-              сайте, а именно:
+              {t("subscription.tariffIncludes")}
             </p>
             <div className="h-4"></div>
             <div
@@ -146,28 +147,27 @@ export const SubscribeTariffs: FC<TProps> = ({
               <div className="flex gap-2 mb-2">
                 <img src={tariff_checked_2.src} />
                 <p className="text-white">
-                  конструктор для создания интерактивных уроков и курсов
+                  {t("subscription.constructorAccess")}
                 </p>
               </div>
               <div className="flex gap-2 mb-2">
                 <img src={tariff_checked_2.src} />
-                <p className="text-white">все lesson plans 2EASY (80+)</p>
+                <p className="text-white">{t("subscription.allLessonPlans")}</p>
               </div>
               <div className="flex gap-2 mb-2">
                 <img src={tariff_checked_2.src} />
                 <p className="text-white">
-                  все speaking games (Taboo, Would you rather, etc) и duscussion
-                  cards (150+)
+                  {t("subscription.allGames")}
                 </p>
               </div>
               <div className="flex gap-2 mb-2">
                 <img src={tariff_checked_2.src} />
-                <p className="text-white">новые материалы каждую неделю</p>
+                <p className="text-white">{t("subscription.newMaterials")}</p>
               </div>
               <div className="flex gap-2 mb-2">
                 <img src={tariff_checked_2.src} />
                 <p className="text-white">
-                  раздел «grammar» с разговорными упражнениями
+                  {t("subscription.grammarSection")}
                 </p>
               </div>
             </div>
@@ -188,7 +188,7 @@ export const SubscribeTariffs: FC<TProps> = ({
         {!hideTariffsTitle && (
           <>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-              {hasTariff ? "Ваш тариф" : "Тарифы"}
+              {hasTariff ? t("subscription.yourTariff") : t("subscription.tariffs")}
             </h1>
             <div className="h-4" />
           </>
@@ -229,7 +229,11 @@ export const SubscribeTariffs: FC<TProps> = ({
                         zIndex: 2,
                       }}
                     >
-                      {tariff.title}
+                      {tariff.type === "month"
+                        ? t("subscription.tariffMonth")
+                        : tariff.type === "3month"
+                          ? t("subscription.tariff3Months")
+                          : t("subscription.tariffYear")}
                     </span>
                   </p>
                 </div>
@@ -266,7 +270,11 @@ export const SubscribeTariffs: FC<TProps> = ({
                         color: "#292929",
                       }}
                     >
-                      {tariff.desc}
+                      {tariff.type === "month"
+                        ? t("subscription.perMonth")
+                        : tariff.type === "3month"
+                          ? t("subscription.per3Months")
+                          : t("subscription.perYear")}
                     </span>
                   )}
                 </div>
@@ -290,7 +298,7 @@ export const SubscribeTariffs: FC<TProps> = ({
                           textTransform: "uppercase",
                         }}
                       >
-                        Подписаться
+                        {t("subscription.subscribe")}
                       </span>
                     </Button>
                   </>

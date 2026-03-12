@@ -1,8 +1,8 @@
-
 export type TCard = {
   title: string;
   subTitle: string;
   description: string;
+  descriptionKey: string;
   videoSrc: string;
   link: string;
   imageSrc?: object;

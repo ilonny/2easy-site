@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@nextui-org/react";
 import Link from "next/link";
 
@@ -16,11 +18,6 @@ export const HeaderMenuList = () => {
       lg:pb-6
     "
     >
-      {/* <Link href="/about_us">
-        <Button variant="light" className="font-bold">
-          ABOUT US
-        </Button>
-      </Link> */}
       <Link href="/lesson_plans">
         <Button variant="light" className="font-bold">
           LESSON PLANS
@@ -36,7 +33,6 @@ export const HeaderMenuList = () => {
           DISCUSSION CARDS
         </Button>
       </Link>
-
       <Link href="/grammar">
         <Button variant="light" className="font-bold">
           GRAMMAR
@@ -44,12 +40,12 @@ export const HeaderMenuList = () => {
       </Link>
       <Link href="/subscription">
         <Button variant="light" className="font-bold">
-          ПОДПИСКА
+          SUBSCRIPTION
         </Button>
       </Link>
       <Link href="/tutorial">
         <Button variant="light" className="font-bold">
-          ТУТОРИАЛ ✨
+          TUTORIAL ✨
         </Button>
       </Link>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { TLesson } from "../../types";
 import {
@@ -13,31 +14,34 @@ import {
 import { FC, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const EX_TYPE_LABELS: Record<string, string> = {
-  "text-default": "Текст",
-  "text-2-col": "Текст в 2 колонки",
-  "text-sticker": "Текст на стикерах",
-  "text-checklist": "Чек-лист",
-  image: "Изображения",
-  video: "Видео",
-  audio: "Аудио",
-  note: "Заметка",
-  "fill-gaps-drag": "Перетащить слово",
-  "fill-gaps-select": "Выбрать вариант",
-  "fill-gaps-input": "Вписать слово",
-  "match-word-word": "Match слова с определением",
-  "match-word-image": "Match слова с изображением",
-  "match-word-column": "Расставить по колонкам",
-  test: "Тест",
-  "free-input-form": "Поле для ввода",
-  int: "Интеграции",
+const EX_TYPE_TO_TEMPLATE_KEY: Record<string, string> = {
+  "text-default": "templates.text",
+  "text-2-col": "templates.text2Col",
+  "text-sticker": "templates.textSticker",
+  "text-checklist": "templates.textChecklist",
+  image: "templates.images",
+  video: "templates.video",
+  audio: "templates.audio",
+  note: "templates.note",
+  "fill-gaps-drag": "templates.fillGapsDrag",
+  "fill-gaps-select": "templates.fillGapsSelect",
+  "fill-gaps-input": "templates.fillGapsInput",
+  "match-word-word": "templates.matchWordWord",
+  "match-word-image": "templates.matchWordImage",
+  "match-word-column": "templates.matchWordColumn",
+  test: "templates.test",
+  "free-input-form": "templates.freeInput",
+  int: "templates.integrations",
 };
 
-const getExDisplayInfo = (ex: {
+const getExDisplayInfo = (
+  t: (key: string) => string,
+  ex: {
   type: string;
   data?: string | Record<string, unknown>;
 }) => {
-  const typeLabel = EX_TYPE_LABELS[ex.type] || ex.type;
+  const templateKey = EX_TYPE_TO_TEMPLATE_KEY[ex.type];
+  const typeLabel = templateKey ? t(templateKey) : ex.type;
   let title = "";
   let description = "";
   try {
@@ -64,6 +68,7 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
   studentId,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const [chosenExIds, setChosenExIds] = useState<number[]>([]);
   const [createFromScratch, setCreateFromScratch] = useState(false);
@@ -152,27 +157,27 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
     >
       <ModalContent>
         <ModalHeader>
-          <p>Создать личную Homework для ученика</p>
+          <p>{t("lessons.createPersonalHomework")}</p>
         </ModalHeader>
         <ModalBody>
           {exListLoading && (
             <div className="flex justify-center py-8">
               <Button isLoading color="primary" variant="flat">
-                Загрузка заданий...
+                {t("modals.homeworkLoadingTasks")}
               </Button>
             </div>
           )}
           {!exListLoading && (
             <>
               <p className="text-small text-default-500 mb-2">
-                Выберите задания из урока или создайте Homework с нуля.
+                {t("modals.homeworkIndividualHint")}
               </p>
               <div className="flex items-center gap-2 mb-4">
                 <Checkbox
                   isSelected={createFromScratch}
                   onValueChange={setCreateFromScratch}
                 >
-                  Создать с нуля
+                  {t("lessons.createFromScratch")}
                 </Checkbox>
               </div>
               {!createFromScratch && sortedExList.length > 0 && (
@@ -181,7 +186,7 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
                     .filter((ex) => ex.type !== "note")
                     .map((ex) => {
                       const { typeLabel, title, description } =
-                        getExDisplayInfo(ex);
+                        getExDisplayInfo(t, ex);
                       const isChosen = chosenExIds.includes(ex.id);
                       return (
                         <div
@@ -216,8 +221,7 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
               )}
               {!createFromScratch && exList.length === 0 && (
                 <p className="text-default-500 mb-4">
-                  В уроке нет заданий для копирования. Будет создана пустая
-                  Homework.
+                  {t("modals.homeworkNoTasksHint")}
                 </p>
               )}
               <Button
@@ -227,7 +231,7 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
                 disabled={!canSubmit}
                 onClick={onSubmit}
               >
-                Создать Homework
+                {t("lessons.createHomework")}
               </Button>
             </>
           )}

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { SubscribeCounter } from "@/subscribe/components";
 import { HeaderProfile as HeaderProfileShort } from "@/profile/components";
 import { Button } from "@nextui-org/react";
@@ -13,6 +14,7 @@ type TProps = {
 };
 
 export const HeaderProfile = (props: TProps) => {
+  const { t } = useTranslation();
   const { isStudent } = props;
   const { createLessonModalIsVisible, setCreateLessonModalIsVisible } =
     useContext(AuthContext);
@@ -34,7 +36,7 @@ export const HeaderProfile = (props: TProps) => {
                 router.push("/lesson_plans");
               }}
             >
-              Создать урок
+              {t("lessons.createLesson")}
             </Button>
             {/* <SubscribeCounter /> */}
           </>

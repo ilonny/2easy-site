@@ -9,36 +9,35 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { FC, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { checkResponse, fetchPostJson } from "@/api";
 
-const CANCEL_REASONS = [
-  { value: "other_platforms", label: "использую другие платформы для работы" },
-  {
-    value: "few_materials",
-    label: "мало новых уроков и материалов",
-  },
-  {
-    value: "inconvenient",
-    label: "неудобно проводить уроки на платформе",
-  },
-  {
-    value: "quality",
-    label: "не нравится качество материалов",
-  },
-  {
-    value: "expensive",
-    label: "слишком дорогая подписка",
-  },
-  { value: "other", label: "другая причина" },
+const CANCEL_REASON_KEYS = [
+  "other_platforms",
+  "few_materials",
+  "inconvenient",
+  "quality",
+  "expensive",
+  "other",
 ] as const;
 
 type TProps = {
   disableUppercase?: boolean;
 };
 
+const REASON_KEY_MAP: Record<(typeof CANCEL_REASON_KEYS)[number], string> = {
+  other_platforms: "subscriptionCancel.reasonOtherPlatforms",
+  few_materials: "subscriptionCancel.reasonFewMaterials",
+  inconvenient: "subscriptionCancel.reasonInconvenient",
+  quality: "subscriptionCancel.reasonQuality",
+  expensive: "subscriptionCancel.reasonExpensive",
+  other: "subscriptionCancel.reasonOther",
+};
+
 export const SubscribeCancel: FC<TProps> = ({
   disableUppercase = false,
 }) => {
+  const { t } = useTranslation();
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string>("");
@@ -56,12 +55,13 @@ export const SubscribeCancel: FC<TProps> = ({
 
   const cancelSub = useCallback(async () => {
     setLoading(true);
-    const reasonLabel =
-      CANCEL_REASONS.find((r) => r.value === selectedReason)?.label || selectedReason;
+    const reasonLabel = REASON_KEY_MAP[selectedReason as (typeof CANCEL_REASON_KEYS)[number]]
+      ? t(REASON_KEY_MAP[selectedReason as (typeof CANCEL_REASON_KEYS)[number]])
+      : selectedReason;
     const reasonText =
       selectedReason === "other"
         ? `${reasonLabel}${otherReasonText ? `: ${otherReasonText}` : ""}`
-        : reasonLabel || "не указана";
+        : reasonLabel || t("subscriptionCancel.reasonNotSpecified");
 
     const cancelRes = await fetchPostJson({
       path: "/subscription/cancel",
@@ -74,7 +74,7 @@ export const SubscribeCancel: FC<TProps> = ({
     setLoading(false);
     checkResponse(cancel);
     closeModal();
-  }, [selectedReason, otherReasonText, closeModal]);
+  }, [selectedReason, otherReasonText, closeModal, t]);
 
   return (
     <>
@@ -90,7 +90,7 @@ export const SubscribeCancel: FC<TProps> = ({
         }}
         onClick={() => setModalIsOpen(true)}
       >
-        Отменить подписку
+        {t("subscriptionCancel.cancelButton")}
       </Button>
       <Modal
         size="xl"
@@ -106,13 +106,13 @@ export const SubscribeCancel: FC<TProps> = ({
               className="text-center text-xl font-medium"
               style={{ fontWeight: 500, fontSize: 22 }}
             >
-              Поделитесь, почему вы решили отменить подписку
+              {t("subscriptionCancel.shareWhyTitle")}
             </p>
             <p
               className="text-center text-default-500"
               style={{ fontSize: 14, marginTop: 4 }}
             >
-              It&apos;s very valuable to us.
+              {t("subscriptionCancel.itsValuable")}
             </p>
           </ModalHeader>
           <ModalBody className="pb-6">
@@ -121,23 +121,23 @@ export const SubscribeCancel: FC<TProps> = ({
               onValueChange={setSelectedReason}
               classNames={{ wrapper: "gap-2" }}
             >
-              {CANCEL_REASONS.map((reason) => (
+              {CANCEL_REASON_KEYS.map((key) => (
                 <Radio
-                  key={reason.value}
-                  value={reason.value}
+                  key={key}
+                  value={key}
                   classNames={{
                     base: "m-0 p-3 rounded-lg border border-default-200 data-[selected=true]:border-primary data-[selected=true]:bg-primary-50",
                     label: "font-medium",
                   }}
                 >
-                  {reason.label}
+                  {t(REASON_KEY_MAP[key])}
                 </Radio>
               ))}
             </RadioGroup>
 
             {selectedReason === "other" && (
               <Textarea
-                placeholder="Расскажете о ней подробнее?"
+                placeholder={t("subscriptionCancel.placeholderOther")}
                 value={otherReasonText}
                 onValueChange={setOtherReasonText}
                 minRows={3}
@@ -159,14 +159,14 @@ export const SubscribeCancel: FC<TProps> = ({
                   color: "white",
                 }}
               >
-                Отменить подписку
+                {t("subscriptionCancel.cancelButton")}
               </Button>
               <Button
                 color="primary"
                 onClick={closeModal}
                 className="flex-1"
               >
-                Остаться с 2EASY
+                {t("subscriptionCancel.stayWith2Easy")}
               </Button>
             </div>
           </ModalBody>

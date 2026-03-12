@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 
@@ -31,6 +32,7 @@ export const DeleteLessonModalForm: FC<TProps> = ({
   lesson,
   isCourses,
 }) => {
+  const { t } = useTranslation();
   const onSubmit = useCallback(async () => {
     const lessonRes = await fetchPostJson({
       path: isCourses ? "/course/delete" : "/lesson/delete-lesson",
@@ -50,18 +52,18 @@ export const DeleteLessonModalForm: FC<TProps> = ({
     <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
       <ModalContent>
         <ModalHeader>
-          <p>{`Удалить ${isCourses ? "курс" : "урок"} ${lesson.title} ?`}</p>
+          <p>{t("lessons.deleteLessonConfirm", { type: isCourses ? t("lessons.course") : t("lessons.lesson"), title: lesson.title })}</p>
         </ModalHeader>
         <ModalBody>
           <Button color="danger" variant="light" onClick={onSubmit}>
-            Да, удалить
+            {t("editor.confirmDelete")}
           </Button>
           <Button
             color="primary"
             className="w-full"
             onClick={() => setIsVisible(false)}
           >
-            Отменить
+            {t("common.cancel")}
           </Button>
         </ModalBody>
       </ModalContent>

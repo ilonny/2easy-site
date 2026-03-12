@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import Logo from "@/assets/icons/logo.svg";
 import WaIcon from "@/assets/icons/wa.svg";
 import EmailIcon from "@/assets/icons/email.svg";
@@ -11,6 +12,7 @@ import { usePathname } from "next/navigation";
 
 export const Footer = () => {
   const pathname = usePathname();
+  const { t } = useTranslation();
   if (pathname !== "/") {
     return null;
   }
@@ -43,21 +45,21 @@ export const Footer = () => {
             />
           </div>
           <div className="text-center flex flex-col">
-            <p className="mt-2 lg:mt-0">© 2023 – 2026 2EASY</p>
+            <p className="mt-2 lg:mt-0">{t("footer.copyright")}</p>
             <br />
             <Link
               href="/privacy_policy"
               target="_blank"
               className="text-primary underline decoration-1 hover:decoration-0"
             >
-              Политика конфиденциальности
+              {t("footer.privacyPolicy")}
             </Link>
             <Link
               href="/public_offer"
               target="_blank"
               className="text-primary underline decoration-1 hover:decoration-0"
             >
-              Публичная оферта
+              {t("footer.publicOffer")}
             </Link>
           </div>
           <div

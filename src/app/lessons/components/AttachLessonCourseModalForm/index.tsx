@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "react-i18next";
 import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
@@ -47,6 +49,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
   chosenLesson,
   openCourseModal,
 }) => {
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -108,8 +111,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
           <>
             <ModalHeader>
               <p>
-                Выберите курс, в который хотите добавить урок{" "}
-                {chosenLesson?.title}
+                {t("modals.selectCourseForLesson")} {chosenLesson?.title}
               </p>
             </ModalHeader>
             <ModalBody>
@@ -171,7 +173,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
                     );
                   })
                 ) : (
-                  <p className="text-center">У вас пока нет курсов</p>
+                  <p className="text-center">{t("lessons.noCourses")}</p>
                 )}
                 <div className="h-5" />
               </div>
@@ -199,7 +201,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
                       openCourseModal?.();
                     }}
                   >
-                    Создать курс
+                    {t("lessons.createCourse")}
                   </Button>
                 )}
               </div>

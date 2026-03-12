@@ -11,12 +11,14 @@ import { Button, Skeleton } from "@nextui-org/react";
 import { HeaderMenuList } from "../HeaderMenuList";
 import MenuIcon from "@/assets/icons/menu.svg";
 import { SideBar } from "../SIdeBar";
-import { fetchPostJson } from "@/api";
+import { LanguageSwitcher } from "../LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 export const Header = () => {
   const pathname = usePathname();
   const { profile, authIsLoading } = useContext(AuthContext);
   const [sidebarIsOpened, setSidebarIsOpened] = useState(false);
+  const { t } = useTranslation();
   if (
     [
       "/login",
@@ -77,19 +79,19 @@ export const Header = () => {
                     <Skeleton className="w-10 h-10 rounded-full" />
                   </div>
                 ) : (
-                  <>
+                  <div className="flex items-center gap-4">
+                    <LanguageSwitcher />
                     {profile?.name ? (
                       <HeaderProfile isStudent={profile?.isStudent} />
                     ) : (
                       <>
-                        <div className="flex items-center gap-4">
                           <Link
                             href="/registration"
                             className="hidden lg:block"
                           >
                             <Button variant="light">
                               <span className="underline">
-                                Зарегистрироваться
+                                {t("header.register")}
                               </span>
                             </Button>
                           </Link>
@@ -99,13 +101,12 @@ export const Header = () => {
                               color="primary"
                               className="sm:px-0 lg:px-10"
                             >
-                              Войти
+                              {t("header.login")}
                             </Button>
                           </Link>
-                        </div>
-                      </>
+                        </>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
             </div>

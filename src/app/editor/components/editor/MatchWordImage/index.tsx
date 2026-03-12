@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
@@ -17,7 +18,9 @@ import {
 } from "react-sortable-hoc";
 import { arrayMoveImmutable } from "array-move";
 
-const DragHandle = sortableHandle(() => (
+const DragHandle = sortableHandle(() => {
+  const { t } = useTranslation();
+  return (
   <span
     style={{
       display: "flex",
@@ -26,15 +29,16 @@ const DragHandle = sortableHandle(() => (
       background: "#f4f4f5",
       borderRadius: 8,
     }}
-    title="Перетащите для изменения порядка"
+    title={t("editor.dragToReorder")}
   >
     <Image
       src={DragHandleIcon}
-      alt="перетащить"
+      alt={t("editor.dragHint")}
       style={{ width: 20, height: 20 }}
     />
   </span>
-));
+  );
+});
 
 const SortableImageItem = sortableElement(
   ({
@@ -52,6 +56,7 @@ const SortableImageItem = sortableElement(
     onChangeDescription: (text: string, index: number) => void;
     value: string;
   }) => {
+    const { t } = useTranslation();
     const idx = itemIndex ?? index;
     return (
       <div className="w-[25%] p-2 mb-4">
@@ -75,7 +80,7 @@ const SortableImageItem = sortableElement(
         <Input
           onChange={(e) => onChangeDescription(e.target.value, idx)}
           value={value}
-          placeholder="Введите правильный ответ"
+          placeholder={t("editor.enterCorrectAnswer")}
           size="sm"
           variant="flat"
           style={{ zIndex: 2, position: "relative" }}
@@ -113,6 +118,7 @@ export const MatchWordImage: FC<TProps> = ({
   lastSortIndex,
   currentSortIndexToShift,
 }) => {
+  const { t } = useTranslation();
   const { isLoading, saveMatchWordImageEx, success } = useUploadMatchWordImage(
     lastSortIndex,
     currentSortIndexToShift
@@ -179,7 +185,7 @@ export const MatchWordImage: FC<TProps> = ({
       <div className="flex flex-wrap">
         <div className="w-[50%] pr-2">
           <TitleExInput
-            label="Заголовок задания"
+            label={t("editor.taskTitle")}
             value={data.title}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}
@@ -187,20 +193,20 @@ export const MatchWordImage: FC<TProps> = ({
           />
           <div className="h-4" />
           <TitleExInput
-            label="Подзаголовок задания"
+            label={t("editor.taskSubtitle")}
             value={data.subtitle}
             setValue={(val) => changeData("subtitle", val)}
           />
           <div className="h-4" />
           <TitleExInput
             isTextarea
-            label="Описание"
+            label={t("editor.description")}
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
         </div>
         <div className="w-[50%] pl-2">
-          <p className="font-light mb-2">Загрузите изображения (до 12 шт)</p>
+          <p className="font-light mb-2">{t("editor.uploadImagesUpTo12")}</p>
           <ImageUpload
             key={`img-upload-${images.length}`}
             isMultiple
@@ -235,11 +241,11 @@ export const MatchWordImage: FC<TProps> = ({
             >
               <label className="flex gap-2 items-center">
                 <Radio color="primary" value={"drag"} />
-                <p className="font-light ">перенести слово к картинке</p>
+                <p className="font-light ">{t("editor.matchWordToImage")}</p>
               </label>
               <label className="flex gap-2 items-center">
                 <Radio color="primary" value={"input"} />
-                <p className="font-light ">вписать слово</p>
+                <p className="font-light ">{t("editor.typeWord")}</p>
               </label>
             </RadioGroup>
           </div>
@@ -268,7 +274,7 @@ export const MatchWordImage: FC<TProps> = ({
       )}
       <div className="h-10" />
       <div>
-        <p className="font-light mb-2">Превью</p>
+        <p className="font-light mb-2">{t("editor.preview")}</p>
         <div
           style={{
             border: "1px solid #3F28C6",

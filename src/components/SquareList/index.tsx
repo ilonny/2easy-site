@@ -1,4 +1,6 @@
+"use client";
 /* eslint-disable @next/next/no-img-element */
+import { useTranslation } from "react-i18next";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
@@ -60,6 +62,7 @@ const settings = {
 };
 
 export const SquareList = (props: TProps) => {
+  const { t } = useTranslation();
   const {
     data,
     squareWidth,
@@ -295,7 +298,7 @@ export const SquareList = (props: TProps) => {
                   className="flex gap-2 justify-end"
                   style={{ color: "#3f28c6" }}
                 >
-                  <p>Открыть</p>
+                  <p>{t("lessons.open")}</p>
                   <Image
                     src={LinkArrow}
                     alt="arrow"

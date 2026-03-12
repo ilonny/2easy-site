@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { fetchGet } from "@/api";
 import { ContentWrapper } from "@/components";
 import { BreadcrumbItem, Breadcrumbs, Input, Image } from "@nextui-org/react";
@@ -12,6 +13,7 @@ import { LessonsList } from "../lessons/components/LessonsList";
 import Loupe from "@/assets/icons/loupe.svg";
 
 export default function GrammarPage() {
+  const { t } = useTranslation();
   const { checkSubscription, hasSubscription } = useCheckSubscription();
   const router = useRouter();
 
@@ -63,7 +65,7 @@ export default function GrammarPage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">Главная</BreadcrumbItem>
+            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
             <BreadcrumbItem href="/grammar">Grammar</BreadcrumbItem>
           </Breadcrumbs>
         </div>
@@ -104,7 +106,7 @@ export default function GrammarPage() {
           <Input
             value={lessonsSearchString}
             onValueChange={setLessonsSearchString}
-            placeholder="Поиск уроков"
+            placeholder={t("lessons.searchLessons")}
             size="lg"
             classNames={{ inputWrapper: "bg-white hove" }}
             startContent={

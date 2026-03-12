@@ -1,4 +1,6 @@
+"use client";
 import { FC, useCallback, useContext, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { TLesson } from "../../types";
 import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
 import styles from "./styles.module.css";
@@ -83,6 +85,7 @@ export const LessonCard: FC<TProps> = ({
   alwaysOpenLessonMode,
   onHomeworkCreated,
 }) => {
+  const { t } = useTranslation();
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
   const params = useParams();
@@ -243,14 +246,14 @@ export const LessonCard: FC<TProps> = ({
                       onPressEdit(lesson);
                     }}
                   >
-                    Редактировать
+                    {t("lessons.edit")}
                   </Button>
                 )}
                 {!!showChangeStatusButton && (
                   <>
                     <div className="py-1 px-2">
                       <p className="mb-2">
-                        Статус {isCourses ? "курса" : "урока"}:
+                        {isCourses ? t("lessons.lessonStatusCourse") : t("lessons.lessonStatusLesson")}
                       </p>
                       <RadioGroup
                         value={lesson?.["lesson_relations.status"]}
@@ -268,14 +271,14 @@ export const LessonCard: FC<TProps> = ({
                         color="default"
                       >
                         <Radio size="sm" value="open">
-                          Открыт
+                          {t("lessons.statusOpen")}
                         </Radio>
                         <Radio size="sm" value="close">
-                          Закрыт
+                          {t("lessons.statusClosed")}
                         </Radio>
                         {!isCourses && (
                           <Radio size="sm" value="complete">
-                            Пройден
+                            {t("lessons.statusComplete")}
                           </Radio>
                         )}
                       </RadioGroup>
@@ -296,7 +299,7 @@ export const LessonCard: FC<TProps> = ({
                           }
                         }}
                       >
-                        Удалить у ученика
+                        {t("lessons.deleteFromStudent")}
                       </Button>
                     )}
                   </>
@@ -312,7 +315,7 @@ export const LessonCard: FC<TProps> = ({
                       onPressAttach(lesson);
                     }}
                   >
-                    Прикрепить к ученику
+                    {t("lessons.attachToStudent")}
                   </Button>
                 )}
                 {!isCourses && !currentCourse && !!onPressAttachToCourse && (
@@ -326,7 +329,7 @@ export const LessonCard: FC<TProps> = ({
                       onPressAttachToCourse(lesson);
                     }}
                   >
-                    Добавить в курс
+                    {t("lessons.addToCourse")}
                   </Button>
                 )}
                 {!isCourses && !!copyLesson && !showChangeStatusButton && (
@@ -341,8 +344,8 @@ export const LessonCard: FC<TProps> = ({
                     }}
                   >
                     {lesson?.user_id === 1
-                      ? 'Добавить в "Мои уроки"'
-                      : "Копировать урок"}
+                      ? t("lessons.addToMyLessons")
+                      : t("lessons.copyLesson")}
                   </Button>
                 )}
                 {!!onPressDelete &&
@@ -359,7 +362,7 @@ export const LessonCard: FC<TProps> = ({
                         onPressDelete(lesson);
                       }}
                     >
-                      Удалить
+                      {t("common.delete")}
                     </Button>
                   )}
               </PopoverContent>
@@ -459,7 +462,7 @@ export const LessonCard: FC<TProps> = ({
                     setCreateHomeworkModalVisible(true);
                   }}
                 >
-                  Создать homework
+                  {t("lessons.createHomework")}
                 </Button>
               )}
             </>
@@ -529,7 +532,7 @@ export const LessonCard: FC<TProps> = ({
                 }
               }}
             >
-              {isStudent || isCourses ? "Открыть" : "Начать урок"}
+              {isStudent || isCourses ? t("lessons.open") : t("lessons.startLesson")}
             </Button>
           </>
         )}
@@ -543,7 +546,7 @@ export const LessonCard: FC<TProps> = ({
               isDisabled={isDisabled}
               onClick={onPressLesson}
             >
-              {"Открыть по подписке"}
+              {t("lessons.openWithSubscription")}
             </Button>
           </>
         )}
@@ -562,17 +565,13 @@ export const LessonCard: FC<TProps> = ({
               style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
               className="mb-4"
             >
-              Выберите тариф, чтобы открыть доступ
-              <br />
-              ко всему, что есть на 2EASY
+              {t("lessons.chooseTariffToOpenFull")}
             </p>
             <p
               style={{ fontWeight: "400", textAlign: "center" }}
-              className="mb-4"
+              className="mb-4 whitespace-pre-line"
             >
-              Тарифы различаются только по сроку действия подписки.
-              <br />
-              Чем дольше – тем выгоднее.
+              {t("lessons.tariffsDifferByPeriod")}
             </p>
 
             <SubscribeTariffs

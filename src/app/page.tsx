@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/auth";
 import { ContentWrapper } from "@/components";
 import { MainPageInfoBlock } from "@/components/MainPageInfoBlock";
@@ -23,6 +24,7 @@ import MainImage from "@/assets/images/main_image.png";
 import { useCheckSubscription } from "./subscription/helpers";
 
 export default function Home() {
+  const { t } = useTranslation();
   const { profile, authIsLoading } = useContext(AuthContext);
   const { checkSubscription, hasSubscription } = useCheckSubscription();
   const router = useRouter();
@@ -96,7 +98,7 @@ export default function Home() {
                     style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
                     className="w-[100%] text-center"
                   >
-                    НАЧАТЬ БЕСПЛАТНО
+                    {t("home.startFree")}
                   </p>
                 </div>
               </Button>
@@ -106,7 +108,7 @@ export default function Home() {
                 className="absolute left-[0%] top-[0%] mt-[-14px] ml-[-30px]"
                 style={{ transform: "rotate(-6deg)", pointerEvents: "none" }}
               >
-                <span className="text-white">7 дней бесплатно</span>
+                <span className="text-white">{t("home.sevenDaysFree")}</span>
               </Chip>
             </div>
             <Button
@@ -148,7 +150,7 @@ export default function Home() {
                 }}
                 className="w-[100%] text-center"
               >
-                ВОЙТИ В ЛИЧНЫЙ КАБИНЕТ
+                {t("home.loginToAccount")}
               </p>
             </Button>
           </div>
@@ -191,7 +193,7 @@ export default function Home() {
                 style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
                 className="text-center w-[100%]"
               >
-                ТАРИФЫ
+                {t("home.tariffs")}
               </p>
             </Button>
           </div>
@@ -205,6 +207,7 @@ export default function Home() {
     onPressRegistration,
     onPressLogin,
     router,
+    t,
   ]);
 
   return (
@@ -230,13 +233,13 @@ export default function Home() {
         <ContentWrapper>
           <div className="h-6 lg:h-14"></div>
           <p className="text-center text-primary font-semibold uppercase">
-            ⚡ 2000+ тичеров уже присоединились к 2EASY
+            {t("home.teachersJoined")}
           </p>
           <div className="h-5"></div>
           <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-            2EASY -- интерактивная платформа с готовыми материалами для{" "}
-            <span style={{ color: "#3E1BC9" }}>создания и проведения</span>{" "}
-            языковых уроков
+            {t("home.mainTitle")}{" "}
+            <span style={{ color: "#3E1BC9" }}>{t("home.mainTitleHighlight")}</span>{" "}
+            {t("home.mainTitleEnd")}
           </h1>
           {buttonsContent}
           <div className="h-6 lg:h-14"></div>
@@ -264,15 +267,14 @@ export default function Home() {
             <div className="h-6 lg:h-14"></div>
             <div className="h-6 lg:h-14"></div>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-              2EASY -- это легко
+              {t("home.easyTitle")}
             </h1>
             <div className="h-6 lg:h-14"></div>
             <MainPageInfoBlock
               sides={[
                 {
-                  title: "Создавай уроки и курсы в удобном конструкторе",
-                  description:
-                    "интерактивные задания, тексты, видео и многое другое -- в простом конструкторе 2easy",
+                  title: t("home.createLessonsTitle"),
+                  description: t("home.createLessonsDesc"),
                 },
                 {
                   videoSrc: "/video/area23.mp4",
@@ -287,9 +289,8 @@ export default function Home() {
                   videoSrc: "/video/Area22222.mp4",
                 },
                 {
-                  title: "Используй готовые lesson plans",
-                  description:
-                    "готовые уроки -- гордость 2easy. нативные материалы, бережно адаптированные под разные уровни учеников",
+                  title: t("home.lessonPlansTitle"),
+                  description: t("home.lessonPlansDesc"),
                 },
               ]}
             />
@@ -297,9 +298,8 @@ export default function Home() {
             <MainPageInfoBlock
               sides={[
                 {
-                  title: "Создавай личные кабинеты учеников",
-                  description:
-                    "добавляй учеников и проводи уроки в режиме real-time",
+                  title: t("home.studentAccountsTitle"),
+                  description: t("home.studentAccountsDesc"),
                 },
                 {
                   videoSrc: "/video/Area333.mp4",
@@ -341,18 +341,17 @@ export default function Home() {
                   style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
                   className="w-[100%] text-center"
                 >
-                  НАЧАТЬ БЕСПЛАТНО
+                  {t("home.startFree")}
                 </p>
               </Button>
             </div>
             <div className="h-6 lg:h-14"></div>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-              Lesson plans
+              {t("home.lessonPlansSection")}
             </h1>
             <div className="h-2"></div>
             <p className="max-w-[650px] m-auto text-center font-normal text-[18px]">
-              Готовые уроки по актуальным темам с juicy-лексикой, аутентичными
-              видео и статьями, дополненные грамматикой, упражнениями и квизами
+              {t("home.lessonPlansSectionDesc")}
             </p>
             <div className="h-6 lg:h-14"></div>
             <div className="flex relative">
@@ -382,25 +381,22 @@ export default function Home() {
             <div className="h-6 lg:h-14"></div>
             <div className="h-6 lg:h-14"></div>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-              Speaking games
+              {t("home.speakingGamesSection")}
             </h1>
             <div className="h-2"></div>
             <p className="max-w-[650px] m-auto text-center font-normal text-[18px]">
-              Игры, которые отлично подходят для warm up и вообще любой части
-              урока: такие штуки действительно классно разогревают перед
-              занятием и поднимают настроение
+              {t("home.speakingGamesSectionDesc")}
             </p>
             <div className="h-6 lg:h-14"></div>
             <MainPageGamesSlider data={speakingGames} />
             <div className="h-6 lg:h-14"></div>
             <div className="h-6 lg:h-14"></div>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-              Discussion cards
+              {t("home.discussionCardsSection")}
             </h1>
             <div className="h-2"></div>
             <p className="max-w-[650px] m-auto text-center font-normal text-[18px]">
-              Нетривиальные вопросы на актуальные темы: психология, отношения,
-              бизнес, феминизм и многое другое
+              {t("home.discussionCardsSectionDesc")}
             </p>
             <div className="h-6 lg:h-14"></div>
             <MainPageGamesSlider data={discussionCards} />
@@ -439,7 +435,7 @@ export default function Home() {
                   style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
                   className="w-[100%] text-center"
                 >
-                  НАЧАТЬ БЕСПЛАТНО
+                  {t("home.startFree")}
                 </p>
               </Button>
             </div>

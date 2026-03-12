@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { SibscribeContext } from "@/subscribe/context";
 // import { Button } from "@/ui/Button";
 import {
@@ -15,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 
 export const ProfileSubscribeInformer = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const { subscription } = useContext(SibscribeContext);
@@ -30,7 +32,7 @@ export const ProfileSubscribeInformer = () => {
       return (
         <>
           <p className="mb-1">
-            Пробный период до{" "}
+            {t("subscriptionStatus.trialUntil")}{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
           <Link
@@ -39,7 +41,7 @@ export const ProfileSubscribeInformer = () => {
             className="underline"
             size="sm"
           >
-            Выбрать тариф
+            {t("lessons.chooseTariff")}
           </Link>
         </>
       );
@@ -48,7 +50,7 @@ export const ProfileSubscribeInformer = () => {
       return (
         <>
           <p className="mb-1">
-            Подписка активна до{" "}
+            {t("subscriptionStatus.activeUntil")}{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
         </>
@@ -58,7 +60,7 @@ export const ProfileSubscribeInformer = () => {
       return (
         <>
           <p className="mb-1">
-            Подписка активна до{" "}
+            {t("subscriptionStatus.activeUntil")}{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
         </>
@@ -68,7 +70,7 @@ export const ProfileSubscribeInformer = () => {
       return (
         <>
           <p className="mb-1">
-            Подписка активна до{" "}
+            {t("subscriptionStatus.activeUntil")}{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
         </>
@@ -76,10 +78,10 @@ export const ProfileSubscribeInformer = () => {
     }
     return (
       <div>
-        <p className="font-medium">Нет активных подписок</p>
+        <p className="font-medium">{t("subscriptionStatus.noActiveSubscription")}</p>
         <div className="h-1" />
         <p className="text-small">
-          Оформите подписку, чтобы продолжить пользоваться сайтом
+          {t("subscriptionStatus.subscribeToContinue")}
         </p>
         <div className="h-3" />
         <Button
@@ -91,11 +93,11 @@ export const ProfileSubscribeInformer = () => {
           }}
           //   size="sm"
         >
-          Выбрать тариф
+          {t("lessons.chooseTariff")}
         </Button>
       </div>
     );
-  }, [router, subscription?.dateEnd, subscription?.subscribe_type_id]);
+  }, [router, subscription?.dateEnd, subscription?.subscribe_type_id, t]);
 
   return (
     <div>

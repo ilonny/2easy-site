@@ -15,6 +15,7 @@ import { Footer } from "@/components/Footer";
 import Script from "next/script";
 import { EditorContextProvider } from "./editor/context";
 import { JivoSite } from "@/components/JivoSite";
+import { I18nProvider } from "@/i18n/I18nProvider";
 import Head from "next/head";
 
 export const metadata: Metadata = {
@@ -47,16 +48,18 @@ export default function RootLayout({
       <body className={`${manrope.className} antialiased`}>
         <ApiProvider>
           <NextUIProvider>
-            <AuthContextProvider>
-              <SibscribeContextProvider>
-                <EditorContextProvider>
-                  <Header />
-                  <BodyContainer>{children}</BodyContainer>
-                  <Footer />
-                  <ToastWrapper />
-                </EditorContextProvider>
-              </SibscribeContextProvider>
-            </AuthContextProvider>
+            <I18nProvider>
+              <AuthContextProvider>
+                <SibscribeContextProvider>
+                  <EditorContextProvider>
+                    <Header />
+                    <BodyContainer>{children}</BodyContainer>
+                    <Footer />
+                    <ToastWrapper />
+                  </EditorContextProvider>
+                </SibscribeContextProvider>
+              </AuthContextProvider>
+            </I18nProvider>
           </NextUIProvider>
         </ApiProvider>
         <Script id="metrica-script">

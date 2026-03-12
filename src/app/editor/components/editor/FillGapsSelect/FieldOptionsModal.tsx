@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import {
   Button,
   Checkbox,
@@ -11,7 +12,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { TField, TFieldOption } from "./types";
 import DeleteIcon from "@/assets/icons/delete.svg";
 import DragHandleVerticalIcon from "@/assets/icons/drag_handle_vertical.svg";
@@ -29,81 +30,88 @@ type TProps = {
   onSaveOptions: (fieldId: number | string, options: TFieldOption[]) => void;
 };
 
-const DragHandle = sortableHandle(() => (
-  <span
-    style={{
-      display: "flex",
-      cursor: "grab",
-      padding: 6,
-      background: "#f4f4f5",
-      borderRadius: 8,
-    }}
-    title="Перетащите для изменения порядка"
-  >
-    <Image
-      src={DragHandleVerticalIcon.src}
-      alt="перетащить"
-      style={{ flexShrink: 0, width: 18, height: 18 }}
-    />
-  </span>
-));
+const createDragHandle = (dragTitle: string, dragAlt: string) =>
+  sortableHandle(() => (
+    <span
+      style={{
+        display: "flex",
+        cursor: "grab",
+        padding: 6,
+        background: "#f4f4f5",
+        borderRadius: 8,
+      }}
+      title={dragTitle}
+    >
+      <Image
+        src={DragHandleVerticalIcon.src}
+        alt={dragAlt}
+        style={{ flexShrink: 0, width: 18, height: 18 }}
+      />
+    </span>
+  ));
 
-const SortableOptionItem = sortableElement(
-  ({
-    option,
-    optionIndex,
-    optionsLength,
-    onLocalOptionChange,
-    onLocalDelete,
-  }: {
-    option: TFieldOption;
-    optionIndex: number;
-    optionsLength: number;
-    onLocalOptionChange: (index: number, updater: (opt: TFieldOption) => TFieldOption) => void;
-    onLocalDelete: (index: number) => void;
-  }) => (
-    <div className="flex items-center gap-2 py-1">
-      <DragHandle />
-      <Checkbox
-        isSelected={option.isCorrect}
-        onValueChange={() =>
-          onLocalOptionChange(optionIndex, (opt) => ({
-            ...opt,
-            isCorrect: !opt.isCorrect,
-          }))
-        }
-      />
-      <Input
-        size="sm"
-        variant="underlined"
-        color="primary"
-        value={option.value}
-        onValueChange={(val) =>
-          onLocalOptionChange(optionIndex, (opt) => ({ ...opt, value: val }))
-        }
-        className="flex-1"
-        autoComplete="off"
-      />
-      {optionsLength > 1 && (
-        <Button
-          onClick={() => onLocalDelete(optionIndex)}
-          isIconOnly
+const createSortableOptionItem = (
+  deleteTitle: string,
+  deleteAlt: string
+) =>
+  sortableElement(
+    ({
+      option,
+      optionIndex,
+      optionsLength,
+      onLocalOptionChange,
+      onLocalDelete,
+      DragHandle,
+    }: {
+      option: TFieldOption;
+      optionIndex: number;
+      optionsLength: number;
+      onLocalOptionChange: (index: number, updater: (opt: TFieldOption) => TFieldOption) => void;
+      onLocalDelete: (index: number) => void;
+      DragHandle: React.ComponentType;
+    }) => (
+      <div className="flex items-center gap-2 py-1">
+        <DragHandle />
+        <Checkbox
+          isSelected={option.isCorrect}
+          onValueChange={() =>
+            onLocalOptionChange(optionIndex, (opt) => ({
+              ...opt,
+              isCorrect: !opt.isCorrect,
+            }))
+          }
+        />
+        <Input
           size="sm"
-          variant="bordered"
-          className="shrink-0 min-w-8 border-default-200 text-default-500 hover:text-danger hover:border-danger/50"
-          title="Удалить вариант"
-        >
-          <Image
-            src={DeleteIcon.src}
-            alt="Удалить"
-            width={14}
-            height={14}
-          />
-        </Button>
-      )}
-    </div>
-  )
-);
+          variant="underlined"
+          color="primary"
+          value={option.value}
+          onValueChange={(val) =>
+            onLocalOptionChange(optionIndex, (opt) => ({ ...opt, value: val }))
+          }
+          className="flex-1"
+          autoComplete="off"
+        />
+        {optionsLength > 1 && (
+          <Button
+            onClick={() => onLocalDelete(optionIndex)}
+            isIconOnly
+            size="sm"
+            variant="bordered"
+            className="shrink-0 min-w-8 border-default-200 text-default-500 hover:text-danger hover:border-danger/50"
+            title={deleteTitle}
+          >
+            <Image
+              src={DeleteIcon.src}
+              alt={deleteAlt}
+              width={14}
+              height={14}
+            />
+          </Button>
+        )}
+      </div>
+    )
+  );
 
 const SortableOptionsList = sortableContainer(
   ({ children }: { children: React.ReactNode }) => (
@@ -117,7 +125,18 @@ export const FieldOptionsModal: FC<TProps> = ({
   onClose,
   onSaveOptions,
 }) => {
+  const { t, i18n } = useTranslation();
   const [localOptions, setLocalOptions] = useState<TFieldOption[]>([]);
+
+  const DragHandle = useMemo(
+    () => createDragHandle(t("editor.dragToReorder"), t("editor.dragHint")),
+    [t, i18n.language]
+  );
+  const SortableOptionItem = useMemo(
+    () =>
+      createSortableOptionItem(t("editor.deleteOption"), t("common.delete")),
+    [t, i18n.language]
+  );
 
   useEffect(() => {
     if (isOpen && field) {
@@ -162,7 +181,7 @@ export const FieldOptionsModal: FC<TProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="md">
       <ModalContent>
-        <ModalHeader>Варианты для пропуска</ModalHeader>
+        <ModalHeader>{t("editor.optionsForGap")}</ModalHeader>
         <ModalBody>
           <div className="flex flex-col gap-4">
             {localOptions.length > 0 ? (
@@ -184,21 +203,22 @@ export const FieldOptionsModal: FC<TProps> = ({
                     optionsLength={localOptions.length}
                     onLocalOptionChange={handleLocalOptionChange}
                     onLocalDelete={handleLocalDelete}
+                    DragHandle={DragHandle}
                   />
                 ))}
               </SortableOptionsList>
             ) : null}
             <Button variant="flat" color="primary" onPress={handleLocalAdd}>
-              + добавить вариант
+              {t("editor.addOption")}
             </Button>
           </div>
         </ModalBody>
         <ModalFooter>
           <Button variant="light" onPress={onClose}>
-            Отмена
+            {t("common.cancel")}
           </Button>
           <Button color="primary" onPress={handleSave}>
-            Сохранить
+            {t("common.save")}
           </Button>
         </ModalFooter>
       </ModalContent>

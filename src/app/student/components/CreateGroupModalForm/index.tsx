@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "react-i18next";
 import { checkResponse, fetchPostJson } from "@/api";
 import {
   Button,
@@ -26,6 +28,7 @@ export const CreateGroupModalForm: FC<TProps> = ({
   setIsVisible,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -57,18 +60,18 @@ export const CreateGroupModalForm: FC<TProps> = ({
     <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
       <ModalContent>
         <ModalHeader>
-          <p>{title ? title : "Новая группа"}</p>
+          <p>{title ? title : t("modals.newGroup")}</p>
         </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Controller
               name="name"
               control={control}
-              rules={{ required: "Название обязательное поле" }}
+              rules={{ required: t("profile.titleRequired") }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Название*"
+                  label={t("editor.titleLabel")}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -83,7 +86,7 @@ export const CreateGroupModalForm: FC<TProps> = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Описание"
+                  label={t("editor.description")}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -94,7 +97,7 @@ export const CreateGroupModalForm: FC<TProps> = ({
             />
             <div className="h-5" />
             <Button color="primary" type="submit" className="w-full" size="lg">
-              Создать группу
+              {t("lessons.createGroup")}
             </Button>
             <div className="h-10" />
           </form>

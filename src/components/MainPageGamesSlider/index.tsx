@@ -1,4 +1,7 @@
-import { FC, useContext, useEffect, useMemo, useState } from "react";
+"use client";
+
+import { FC, useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { TProps } from "./types";
 import Link from "next/link";
 import HandIcon from "@/assets/icons/hand.png";
@@ -6,6 +9,7 @@ import Image from "next/image";
 import { AuthContext } from "@/auth";
 
 export const MainPageGamesSlider: FC<TProps> = ({ data }) => {
+  const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState(0);
   const activeEl = data[activeIndex];
 
@@ -62,7 +66,7 @@ export const MainPageGamesSlider: FC<TProps> = ({ data }) => {
             </p>
             <div className="h-4"></div>
             <p className="text-[14px] text-[#ACACAC] leading-[120%] uppercase max-w-[600px] font-semibold">
-              {activeEl.description}
+              {t(activeEl.descriptionKey)}
             </p>
             <div className="h-4"></div>
             {!!profile?.name && (
@@ -71,7 +75,7 @@ export const MainPageGamesSlider: FC<TProps> = ({ data }) => {
                   style={{ color: "#5837dc" }}
                   className="uppercase font-semibold"
                 >
-                  открыть →
+                  {t("games.open")} →
                 </p>
               </Link>
             )}
@@ -97,7 +101,7 @@ export const MainPageGamesSlider: FC<TProps> = ({ data }) => {
                   </p>
                   <div className="h-4"></div>
                   <p className="text-[14px] text-[#ACACAC] leading-[120%] uppercase max-w-[600px] font-semibold">
-                    {activeEl.description}
+                    {t(activeEl.descriptionKey)}
                   </p>
                   <div className="h-4"></div>
                   <Link href={activeEl.link}>
@@ -105,7 +109,7 @@ export const MainPageGamesSlider: FC<TProps> = ({ data }) => {
                       style={{ color: "#5837dc" }}
                       className="uppercase font-semibold"
                     >
-                      открыть →
+                      {t("games.open")} →
                     </p>
                   </Link>
                 </div>

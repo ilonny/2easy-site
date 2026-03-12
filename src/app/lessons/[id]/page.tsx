@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import { useTranslation } from "react-i18next";
 import {
   BreadcrumbItem,
   Breadcrumbs,
@@ -47,8 +48,9 @@ import { VideoCall } from "@/components/VideoCall";
 import { CopyLessonLink } from "../components/CopyLessonLink";
 import { getImageUrl } from "@/app/editor/helpers";
 
-export default function StartRegistrationPage() {
+export default function LessonPage() {
   withLogin();
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
   const { subscription } = useContext(SibscribeContext);
@@ -157,14 +159,14 @@ export default function StartRegistrationPage() {
           {isTeacher && (
             <div className="flex items-start justify-between flex-wrap">
               <Link href={`/editor/${params.id}`} className="text-secondary">
-                <Button variant="light">← Вернуться к редактированию</Button>
+                <Button variant="light">{t("lessons.backToEdit")}</Button>
               </Link>
               <div className="flex items-center flex-wrap">
                 <div
                   className="switcher flex items-center cursor-pointer"
                   onClick={onChangePresentationMode}
                 >
-                  <p className="text-small mr-2">Режим демонстрации экрана</p>
+                  <p className="text-small mr-2">{t("lessons.screenDemoMode")}</p>
                   <Switch
                     size="sm"
                     isSelected={isPresentationMode}
@@ -185,7 +187,7 @@ export default function StartRegistrationPage() {
                   variant="light"
                   onClick={() => setTutorialOpen(true)}
                 >
-                  Как работает режим урока?
+                  {t("lessons.howLessonModeWorks")}
                 </Button>
                 <CopyLessonLink />
               </div>
@@ -440,7 +442,7 @@ export default function StartRegistrationPage() {
                   size="lg"
                   onClick={() => setTutorialStep(2)}
                 >
-                  <p>Листать →</p>
+                  <p>{t("lessons.flipNext")}</p>
                 </Button>
                 <div
                   style={{
@@ -481,7 +483,7 @@ export default function StartRegistrationPage() {
                     <div className="shrink-0 pt-[3px]">
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
-                    <p>отправить ученику прямую ссылку на урок</p>
+                    <p>{t("lessons.sendLessonLink")}</p>
                   </div>
                   <div className="h-8"></div>
                   <div className="flex justify-end">
@@ -497,7 +499,7 @@ export default function StartRegistrationPage() {
                   size="lg"
                   onClick={() => setTutorialStep(3)}
                 >
-                  <p>Дальше →</p>
+                  <p>{t("lessons.next")}</p>
                 </Button>
               </>
             )}
@@ -516,7 +518,7 @@ export default function StartRegistrationPage() {
                     <div className="shrink-0 pt-[3px]">
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
-                    <p>видеть его ответы в режиме real-time</p>
+                    <p>{t("lessons.seeRealtimeAnswers")}</p>
                   </div>
                   <div className="flex items-start gap-2 mb-2">
                     <div className="shrink-0 pt-[3px]">
@@ -556,7 +558,7 @@ export default function StartRegistrationPage() {
                   size="lg"
                   onClick={() => setTutorialStep(4)}
                 >
-                  <p>Дальше →</p>
+                  <p>{t("lessons.next")}</p>
                 </Button>
               </>
             )}
@@ -593,7 +595,7 @@ export default function StartRegistrationPage() {
                   size="lg"
                   onClick={() => setTutorialStep(5)}
                 >
-                  <p>Дальше →</p>
+                  <p>{t("lessons.next")}</p>
                 </Button>
               </>
             )}
@@ -645,7 +647,7 @@ export default function StartRegistrationPage() {
                     size="lg"
                     onClick={() => setTutorialStep(6)}
                   >
-                    <p>Дальше →</p>
+                    <p>{t("lessons.next")}</p>
                   </Button>
                 </div>
 
@@ -689,7 +691,7 @@ export default function StartRegistrationPage() {
                     size="lg"
                     onClick={() => setTutorialOpen(false)}
                   >
-                    <p>За работу!</p>
+                    <p>{t("lessons.letsWork")}</p>
                   </Button>
                 </div>
 

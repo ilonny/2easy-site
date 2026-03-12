@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { ContentWrapper } from "@/components";
 import { SquareList } from "@/components/SquareList";
 import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
@@ -9,7 +10,8 @@ import { useEffect, useState } from "react";
 import { PageLeftBlock } from "@/components/PageLeftBlock";
 import { data, summerData } from "./data";
 
-export default function GrammarPage() {
+export default function NeverHaveIEverPage() {
+  const { t } = useTranslation();
   const { checkSubscription } = useCheckSubscription();
   const router = useRouter();
   useEffect(() => {
@@ -26,7 +28,7 @@ export default function GrammarPage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">Главная</BreadcrumbItem>
+            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
             <BreadcrumbItem href="/speaking_games">
               Speaking games
             </BreadcrumbItem>

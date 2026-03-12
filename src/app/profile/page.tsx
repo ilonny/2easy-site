@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
@@ -10,8 +11,9 @@ import { ProfileLessons } from "../lessons/components/ProfileLessons";
 import { ProfileStudents } from "../student/components/ProfileStudents";
 import { withLogin } from "@/auth/hooks/withLogin";
 
-export default function StartRegistrationPage() {
+export default function ProfilePage() {
   withLogin();
+  const { t } = useTranslation();
   const { authIsLoading } = useContext(AuthContext);
   const { subscription } = useContext(SibscribeContext);
   const hasTariff =
@@ -49,15 +51,15 @@ export default function StartRegistrationPage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem>Профиль</BreadcrumbItem>
+            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
+            <BreadcrumbItem>{t("profile.profileLabel")}</BreadcrumbItem>
           </Breadcrumbs>
         </div>
         <div className="h-10" />
         <div className="h-10" />
         <div className="flex flex-col items-center">
           <h1 className={"text-primary font-bold text-3xl uppercase"}>
-            личный кабинет
+            {t("profile.personalCabinet")}
           </h1>
           <div className="h-5" />
           <Tabs
@@ -68,17 +70,17 @@ export default function StartRegistrationPage() {
           >
             <Tab
               key="lessons"
-              title="Уроки и курсы"
+              title={t("profile.lessonsAndCourses")}
               className="uppercase font-bold"
             />
             <Tab
               key="students"
-              title="Ученики"
+              title={t("profile.studentsTab")}
               className="uppercase font-bold"
             />
             <Tab
               key="profile"
-              title="Профиль"
+              title={t("profile.profileLabel")}
               className="uppercase font-bold"
             />
           </Tabs>

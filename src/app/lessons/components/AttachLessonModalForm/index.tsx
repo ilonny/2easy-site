@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { checkResponse, fetchPostJson } from "@/api";
 import {
   Button,
@@ -34,6 +35,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
   hideToast,
   isCourses,
 }) => {
+  const { t } = useTranslation();
   const [chosenIds, setChosenIds] = useState<number[]>([]);
   const [step, setStep] = useState(0);
   const [status, setStatus] = useState<"open" | "close">("open");
@@ -104,11 +106,11 @@ export const AttachLessonModalForm: FC<TProps> = ({
             {step === 0
               ? title ||
                 (isCourses
-                  ? "Выберите учеников, чтобы прикрепить курс"
-                  : "Выберите учеников, чтобы прикрепить урок")
+                  ? t("modals.attachSelectStudentsCourse")
+                  : t("modals.attachSelectStudentsLesson"))
               : isCourses
-              ? "Укажите статус курса"
-              : "Укажите статус урока"}
+              ? t("modals.attachStatusCourse")
+              : t("modals.attachStatusLesson")}
           </p>
         </ModalHeader>
         <ModalBody>
@@ -140,7 +142,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
                   }
                 }}
               >
-                {skipChoseStatus ? "Начать урок" : "Дальше"}
+                {skipChoseStatus ? t("lessons.startLesson") : t("modals.next")}
               </Button>
             </>
           )}
@@ -151,22 +153,22 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 size="lg"
                 description={
                   status === "open"
-                    ? "Доступен ученику"
+                    ? t("modals.availableToStudent")
                     : isCourses
-                    ? "Ученик видит курс, но не может открыть"
-                    : "Ученик видит урок, но не может открыть"
+                    ? t("lessons.studentSeesCourseCannotOpen")
+                    : t("lessons.studentSeesLessonCannotOpen")
                 }
-                placeholder="Выберите статус урока"
+                placeholder={isCourses ? t("modals.selectCourseStatus") : t("modals.selectLessonStatus")}
                 onChange={(e) => {
                   console.log("e.target.value?", e.target.value);
                   setStatus(e.target.value);
                 }}
               >
                 <SelectItem key="open">
-                  {`${isCourses ? "Курс" : "Урок"} открыт`}
+                  {isCourses ? t("lessons.courseOpen") : t("lessons.lessonOpen")}
                 </SelectItem>
                 <SelectItem key="close">
-                  {`${isCourses ? "Курс" : "Урок"} закрыт`}
+                  {isCourses ? t("lessons.courseClosed") : t("lessons.lessonClosed")}
                 </SelectItem>
               </Select>
               <div className="h-4"></div>
@@ -176,7 +178,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 className="w-full"
                 onClick={onSubmit}
               >
-                Прикрепить
+                {t("modals.attachButton")}
               </Button>
               <Button
                 isLoading={isLoading}
@@ -186,7 +188,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 className="w-full"
                 onClick={() => setStep(0)}
               >
-                Назад
+                {t("common.back")}
               </Button>
             </>
           )}

@@ -1,4 +1,6 @@
+"use client";
 import { FC, useCallback, useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { TLesson } from "../../types";
 import { LessonCard } from "../LessonCard";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
@@ -62,6 +64,7 @@ export const LessonsList: FC<TProps> = ({
   studentId,
   alwaysOpenLessonMode,
 }) => {
+  const { t } = useTranslation();
   const { checkSubscription, subscription } = useCheckSubscription();
   const router = useRouter();
   const { profile } = useContext(AuthContext);
@@ -197,7 +200,7 @@ export const LessonsList: FC<TProps> = ({
                   onClick={copyCourse}
                   isLoading={copyCourseIsLoading}
                 >
-                  Добавить в "Мои курсы"
+                  {t("lessons.addToMyCourses")}
                 </Button>
               )}
             {(!currentCourse ||
@@ -208,7 +211,7 @@ export const LessonsList: FC<TProps> = ({
                 size="lg"
                 onClick={onPressCreate}
               >
-                {currentCourse ? "Создать урок для курса" : "Создать урок"}
+                {currentCourse ? t("lessons.createLessonForCourse") : t("lessons.createLesson")}
               </Button>
             )}
             {currentCourse && currentCourse?.user_id === profile?.id && (
@@ -222,7 +225,7 @@ export const LessonsList: FC<TProps> = ({
                   setCoursePageEditVisible(true);
                 }}
               >
-                <span style={{ color: "#3F28C6" }}>Редактировать курс</span>
+                <span style={{ color: "#3F28C6" }}>{t("lessons.editCourse")}</span>
               </Button>
             )}
             {currentCourse && currentCourse?.user_id === profile?.id && (
@@ -234,7 +237,7 @@ export const LessonsList: FC<TProps> = ({
                 size="lg"
                 onClick={() => setCoursePageAttachLessonModal(true)}
               >
-                <span style={{ color: "#3F28C6" }}>Прикрепить учеников</span>
+                <span style={{ color: "#3F28C6" }}>{t("lessons.attachStudents")}</span>
               </Button>
             )}
             {!currentCourse && (
@@ -246,7 +249,7 @@ export const LessonsList: FC<TProps> = ({
                 size="lg"
                 onClick={onPressCreateCourse}
               >
-                <span style={{ color: "#3F28C6" }}>Создать курс</span>
+                <span style={{ color: "#3F28C6" }}>{t("lessons.createCourse")}</span>
               </Button>
             )}
           </div>

@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import { useTranslation } from "react-i18next";
 import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { useContext, useEffect, useMemo } from "react";
@@ -9,7 +10,8 @@ import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 import { useCourses } from "../hooks/useCourses";
 import { AuthContext } from "@/auth";
 
-export default function StartRegistrationPage() {
+export default function CoursePage() {
+  const { t } = useTranslation();
   const params = useParams();
   const { getCourses, courses } = useCourses();
 
@@ -35,7 +37,7 @@ export default function StartRegistrationPage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">Главная</BreadcrumbItem>
+            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
             <BreadcrumbItem href="/lesson_plans">Lesson plans</BreadcrumbItem>
             <BreadcrumbItem>{currentCourse?.title}</BreadcrumbItem>
           </Breadcrumbs>

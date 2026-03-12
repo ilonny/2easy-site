@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@nextui-org/react";
 import Image from "next/image";
 import Draggable from "react-draggable";
@@ -46,6 +47,7 @@ const ResizeIcon = () => (
 );
 
 export const VideoCall: FC<TProps> = ({ lessonId }) => {
+  const { t } = useTranslation();
   const { profile } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -60,7 +62,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
   const roomId = Array.isArray(lessonId) ? lessonId[0] : lessonId;
   const roomName = `2easy-lesson-${roomId}`;
   const displayName =
-    [profile?.name, profile?.surname].filter(Boolean).join(" ") || profile?.login || "Участник";
+    [profile?.name, profile?.surname].filter(Boolean).join(" ") || profile?.login || t("profile.participant");
 
   const loadScript = useCallback((): Promise<void> => {
     if (typeof window === "undefined") return Promise.reject(new Error("no_window"));
@@ -91,10 +93,10 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
     loadScript()
       .then(() => setIsReady(true))
       .catch(() => {
-        toast.error("Не удалось загрузить видеосвязь");
+        toast.error(t("videoCall.loadError"));
         setIsOpen(false);
       });
-  }, [isOpen, loadScript]);
+  }, [isOpen, loadScript, t]);
 
   useEffect(() => {
     if (!isReady || !containerRef.current || !window.JitsiMeetExternalAPI) return;
@@ -193,7 +195,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
         size="lg"
         style={{ minWidth: 300 }}
       >
-        Видеосвязь
+        {t("videoCall.title")}
       </Button>
     );
   }
@@ -248,7 +250,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
             >
               <div
                 onMouseDown={onResizeStart}
-                title="Изменить размер"
+                title={t("videoCall.resize")}
                 style={{
                   flexShrink: 0,
                   width: 24,
@@ -272,12 +274,12 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
                   minWidth: 0,
                 }}
               >
-                <span style={{ color: "#fff", fontSize: 13, fontWeight: 500 }}>Видеосвязь</span>
+                <span style={{ color: "#fff", fontSize: 13, fontWeight: 500 }}>{t("videoCall.title")}</span>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                title="Закрыть"
+                title={t("videoCall.close")}
                 style={{
                   flexShrink: 0,
                   background: "rgba(255,255,255,0.08)",
@@ -291,7 +293,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
                   justifyContent: "center",
                 }}
               >
-                <Image src={CloseIcon} alt="Закрыть" width={16} height={16} />
+                <Image src={CloseIcon} alt={t("videoCall.close")} width={16} height={16} />
               </button>
             </div>
             <div
@@ -324,7 +326,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
                       fontSize: 14,
                     }}
                   >
-                    Загрузка...
+                    {t("videoCall.loading")}
                   </span>
                 )}
               </div>

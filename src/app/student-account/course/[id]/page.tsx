@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
+import { useTranslation } from "react-i18next";
 import {
   BreadcrumbItem,
   Breadcrumbs,
@@ -54,8 +55,9 @@ import { CopyLessonLink } from "../../../lessons/components/CopyLessonLink";
 import { useCourses } from "@/app/course/hooks/useCourses";
 import { LessonsList } from "@/app/lessons/components/LessonsList";
 
-export default function StartRegistrationPage() {
+export default function StudentCoursePage() {
   withLogin();
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
   const { subscription } = useContext(SibscribeContext);
@@ -96,7 +98,7 @@ export default function StartRegistrationPage() {
           <>
             <div className="flex flex-row justify-center gap-4 items-baseline">
               <Link href="/" style={{ color: "#3F28C6" }}>
-                ← все курсы
+                {t("lessons.allCourses")}
               </Link>
               <h2 style={{ fontWeight: "500", fontSize: 28 }}>
                 {currentCourse.title}

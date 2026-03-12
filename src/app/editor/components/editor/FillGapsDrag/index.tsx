@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
@@ -38,6 +39,7 @@ export const FillGapsDrag: FC<TProps> = ({
   lastSortIndex,
   currentSortIndexToShift,
 }) => {
+  const { t } = useTranslation();
   const { isLoading, saveFillGapsDragEx, success } = useUploadFillGapsDragEx(
     lastSortIndex,
     currentSortIndexToShift
@@ -237,7 +239,7 @@ export const FillGapsDrag: FC<TProps> = ({
       <div className="flex flex-wrap">
         <div className="w-[50%] pr-2">
           <TitleExInput
-            label="Заголовок задания"
+            label={t("editor.taskTitle")}
             value={data.title}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}
@@ -245,20 +247,20 @@ export const FillGapsDrag: FC<TProps> = ({
           />
           <div className="h-4" />
           <TitleExInput
-            label="Подзаголовок задания"
+            label={t("editor.taskSubtitle")}
             value={data.subtitle}
             setValue={(val) => changeData("subtitle", val)}
           />
           <div className="h-4" />
           <TitleExInput
             isTextarea
-            label="Описание"
+            label={t("editor.description")}
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
         </div>
         <div className="w-[50%] pl-2">
-          <p className="font-light mb-2">Изображение для задания</p>
+          <p className="font-light mb-2">{t("editor.imageForTask")}</p>
           <ImageUpload
             images={images}
             setImages={setImages}
@@ -286,9 +288,9 @@ export const FillGapsDrag: FC<TProps> = ({
       </div>
       <div className="h-10" />
       <div className="flex items-center gap-2 mb-2">
-        <p className="font-light">Введите текст задания</p>
+        <p className="font-light">{t("editor.enterTaskText")}</p>
         <Tooltip
-          content="Выделите в тексте слово, которое хотите пропустить. Список из пропущенных слов автоматически появится над текстом."
+          content={t("editor.fillGapsHintDrag")}
           classNames={{
             base: [
               // arrow color
@@ -319,7 +321,7 @@ export const FillGapsDrag: FC<TProps> = ({
       </div>
       <div className="h-10" />
       <div>
-        <p className="font-light mb-2">Превью</p>
+        <p className="font-light mb-2">{t("editor.preview")}</p>
         <div
           style={{
             border: "1px solid #3F28C6",

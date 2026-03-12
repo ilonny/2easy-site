@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { fetchPostJson } from "@/api";
 import { Button, Input } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
@@ -12,6 +13,7 @@ type TFieldList = {
 };
 
 export const ChangePasswordForm = () => {
+  const { t } = useTranslation();
   const [errorText, setErrorText] = useState("");
   const [responseError, setResponseError] = useState("");
   const router = useRouter();
@@ -51,7 +53,7 @@ export const ChangePasswordForm = () => {
       setErrorText("");
       setResponseError("");
       if (data.new_password !== data.new_password_repeat) {
-        setErrorText("Пароли должны совпадать");
+        setErrorText(t("auth.passwordsMustMatch"));
         return;
       }
       mutation.mutate(data);
@@ -62,18 +64,18 @@ export const ChangePasswordForm = () => {
   return (
     <>
       <h3 className="text-center font-extrabold text-2xl mb-2">
-        Изменить пароль
+        {t("profile.changePassword")}
       </h3>
       <p className="text-center mb-7 font-medium"></p>
       <form key={1} onSubmit={handleSubmit(onSubmit)}>
         <Controller
           name="old_password"
           control={control}
-          rules={{ required: "Введите старый пароль" }}
+          rules={{ required: t("auth.enterOldPassword") }}
           render={({ field }) => (
             <Input
               {...field}
-              label="Старый пароль"
+              label={t("auth.oldPassword")}
               className="mb-5"
               radius="sm"
               errorMessage={errors?.old_password?.message}
@@ -86,11 +88,11 @@ export const ChangePasswordForm = () => {
         <Controller
           name="new_password"
           control={control}
-          rules={{ required: "Введите новый пароль" }}
+          rules={{ required: t("auth.enterNewPassword") }}
           render={({ field }) => (
             <Input
               {...field}
-              label="Новый пароль"
+              label={t("auth.newPassword")}
               className="mb-5"
               radius="sm"
               errorMessage={errors?.new_password?.message}
@@ -103,11 +105,11 @@ export const ChangePasswordForm = () => {
         <Controller
           name="new_password_repeat"
           control={control}
-          rules={{ required: "Повторите новый пароль" }}
+          rules={{ required: t("auth.repeatNewPassword") }}
           render={({ field }) => (
             <Input
               {...field}
-              label="Новый пароль"
+              label={t("auth.repeatNewPassword")}
               className="mb-5"
               radius="sm"
               errorMessage={errors?.new_password_repeat?.message || errorText}
@@ -124,7 +126,7 @@ export const ChangePasswordForm = () => {
             isLoading={mutation.isPending}
             size="lg"
           >
-            Подтвердить
+            {t("common.confirm")}
           </Button>
         </div>
         {responseError && (

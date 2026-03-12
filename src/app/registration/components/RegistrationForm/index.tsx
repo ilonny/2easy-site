@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { fetchPostJson } from "@/api";
 import {
   EyeFilledIcon,
@@ -29,6 +30,7 @@ type TConfirmInputs = {
 };
 
 export const RegistrationForm = () => {
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -129,17 +131,16 @@ export const RegistrationForm = () => {
       <div>
         <div className="relative mb-16">
           <h3 className="text-center font-extrabold text-2xl mb-2">
-            У вас уже есть аккаунт
+            {t("auth.alreadyHaveAccount")}
           </h3>
         </div>
         <p className="text-center mb-7 font-medium">
-          Количество регистраций аккаунтов ограничено, пожалуйста, войдите под
-          своим существующим аккаунтом, или напишите в поддержку
+          {t("auth.registrationLimited")}
         </p>
         <div className="mb-10">
           <div className="flex justify-center items-center gap-2 font-medium text-small">
             <Link href="/login" className="text-[#3F28C6] underline">
-              Войти
+              {t("common.login")}
             </Link>
           </div>
         </div>
@@ -152,29 +153,29 @@ export const RegistrationForm = () => {
       <form key={2} onSubmit={confirmSubmit(onSubmitConfirm)}>
         <div className="relative mb-16">
           <h3 className="text-center font-extrabold text-2xl mb-2">
-            Регистрация
+            {t("auth.registration")}
           </h3>
           <button
             type="button"
             onClick={() => setStep(0)}
             className="text-[#787878] absolute left-0 top-1"
           >
-            {"<-"} Назад
+            {"<-"} {t("common.back")}
           </button>
         </div>
         <p className="text-center mb-7 font-medium">
-          Введите пароль, отправленный на почту {getValues()?.login}
+          {t("auth.enterPasswordSent")} {getValues()?.login}
         </p>
         <Controller
           name="password"
           control={confirmControl}
           rules={{
-            required: "Пароль обязательное поле",
+            required: t("auth.passwordRequired"),
           }}
           render={({ field }) => (
             <Input
               {...field}
-              label="Пароль"
+              label={t("auth.password")}
               type={isVisible ? "text" : "password"}
               className="mb-8"
               radius="sm"
@@ -201,7 +202,7 @@ export const RegistrationForm = () => {
           <Button
             isLoading={loginMutation.isPending}
             type="submit"
-            text="Войти"
+            text={t("common.login")}
             fullWidth
             mediumHeight
           />
@@ -210,9 +211,9 @@ export const RegistrationForm = () => {
           )}
         </div>
         <div className="flex justify-center items-center gap-2 font-medium text-small">
-          <p>Уже есть подписка?</p>
+          <p>{t("auth.alreadyHaveSubscription")}</p>
           <Link href="/login" className="text-[#3F28C6] underline">
-            Войти
+            {t("common.login")}
           </Link>
         </div>
       </form>
@@ -221,26 +222,25 @@ export const RegistrationForm = () => {
 
   return (
     <form key={1} onSubmit={handleSubmit(onSubmit)}>
-      <h3 className="text-center font-extrabold text-2xl mb-2">Регистрация</h3>
+      <h3 className="text-center font-extrabold text-2xl mb-2">{t("auth.registration")}</h3>
       <p className="text-center mb-7 font-medium">
-        После создания личного кабинета начнется бесплатный пробный период (7
-        дней)
+        {t("auth.afterRegistration")}
       </p>
       <Controller
         name="login"
         control={control}
         rules={{
-          required: "E-mail обязательное поле",
+          required: t("auth.emailRequired"),
           pattern: {
             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            message: "Некорректный e-mail",
+            message: t("auth.invalidEmail"),
           },
         }}
         render={({ field }) => (
           <Input
             {...field}
             radius="sm"
-            label="E-mail *"
+            label={t("auth.emailLabel")}
             className="mb-5"
             errorMessage={errors?.login?.message}
             isInvalid={!!errors.login?.message}
@@ -250,11 +250,11 @@ export const RegistrationForm = () => {
       <Controller
         name="name"
         control={control}
-        rules={{ required: "Имя обязательное поле" }}
+        rules={{ required: t("auth.nameRequired") }}
         render={({ field }) => (
           <Input
             {...field}
-            label="Имя *"
+            label={t("auth.nameLabel")}
             className="mb-5"
             radius="sm"
             errorMessage={errors?.name?.message}
@@ -278,7 +278,7 @@ export const RegistrationForm = () => {
                 {...inputProps}
                 // {...field}
                 radius="sm"
-                label="Номер телефона"
+                label={t("auth.phoneLabel")}
                 className="mb-5"
                 errorMessage={errors?.phone?.message}
                 isInvalid={!!errors.phone?.message}
@@ -291,7 +291,7 @@ export const RegistrationForm = () => {
         name="privacy"
         control={control}
         rules={{
-          required: "Обязательное поле",
+          required: t("auth.requiredField"),
         }}
         render={({ field }) => (
           <Checkbox
@@ -302,25 +302,25 @@ export const RegistrationForm = () => {
             isInvalid={!!errors.privacy?.message}
           >
             <p className="text-small">
-              Я принимаю условия{" "}
+              {t("auth.acceptTerms")}{" "}
               <a className="text-primary" href="/public_offer" target="_blank">
-                публичной оферты
+                {t("auth.publicOffer")}
               </a>{" "}
-              и{" "}
+              {t("auth.and")}{" "}
               <a
                 className="text-primary"
                 href="/privacy_policy"
                 target="_blank"
               >
-                политики конфиденциальности
+                {t("auth.privacyPolicy")}
               </a>{" "}
-              и даю свое{" "}
+              {t("auth.and")}{" "}
               <a
                 className="text-primary"
                 href="/personal_agreement"
                 target="_blank"
               >
-                согласие на обработку персональных данных
+                {t("auth.personalDataConsent")}
               </a>
             </p>
           </Checkbox>
@@ -340,7 +340,7 @@ export const RegistrationForm = () => {
             isSelected={!!field.value}
           >
             <p className="text-small">
-              Я хочу получать новости о скидках, конкурсах и новых материалах
+              {t("auth.newsConsent")}
             </p>
           </Checkbox>
         )}
@@ -349,7 +349,7 @@ export const RegistrationForm = () => {
         <Button
           isLoading={mutation.isPending}
           type="submit"
-          text="Получить пароль"
+          text={t("auth.getPassword")}
           fullWidth
           mediumHeight
         />
@@ -358,9 +358,9 @@ export const RegistrationForm = () => {
         )}
       </div>
       <div className="flex justify-center items-center gap-2 font-medium text-small">
-        <p>Уже есть подписка?</p>
+        <p>{t("auth.alreadyHaveSubscription")}</p>
         <Link href="/login" className="text-[#3F28C6] underline">
-          Войти
+          {t("common.login")}
         </Link>
       </div>
     </form>

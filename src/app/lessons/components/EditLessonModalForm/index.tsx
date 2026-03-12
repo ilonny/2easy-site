@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "react-i18next";
 import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
@@ -38,6 +40,7 @@ export const EditLessonModalForm: FC<TProps> = ({
   onSuccess,
   lesson,
 }) => {
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -104,18 +107,18 @@ export const EditLessonModalForm: FC<TProps> = ({
     <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
       <ModalContent>
         <ModalHeader>
-          <p>{title ? title : "Новый урок"}</p>
+          <p>{title ? title : t("modals.editLesson")}</p>
         </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Controller
               name="title"
               control={control}
-              rules={{ required: "Название обязательное поле" }}
+              rules={{ required: t("profile.titleRequired") }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Название*"
+                  label={t("editor.titleLabel")}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -131,7 +134,7 @@ export const EditLessonModalForm: FC<TProps> = ({
                 <Textarea
                   {...field}
                   minRows={3}
-                  label="Описание"
+                  label={t("editor.description")}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -146,7 +149,7 @@ export const EditLessonModalForm: FC<TProps> = ({
               render={({ field }) => (
                 <Select
                   {...field}
-                  label="Добавить урок в группу / ученику:"
+                  label={t("modals.addLessonToGroup")}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -163,7 +166,7 @@ export const EditLessonModalForm: FC<TProps> = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Уровень"
+                  label={t("editor.level")}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -176,7 +179,7 @@ export const EditLessonModalForm: FC<TProps> = ({
             <div className="flex gap-5 items-end">
               <ImageUpload
                 // initialImages=[]
-                label="Обложка урока"
+                label={t("editor.lessonCover")}
                 images={images}
                 setImages={setImages}
               />
@@ -189,7 +192,7 @@ export const EditLessonModalForm: FC<TProps> = ({
               size="lg"
               isLoading={isLoading}
             >
-              Подтвердить
+              {t("common.confirm")}
             </Button>
             <div className="h-10" />
           </form>

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { checkResponse, fetchPostJson } from "@/api";
 import {
   Button,
@@ -29,6 +30,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
   onSuccess,
   chosenStudent,
 }) => {
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -63,18 +65,18 @@ export const CreateStudentModalForm: FC<TProps> = ({
     <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
       <ModalContent>
         <ModalHeader>
-          <p>{title ? title : "Новый ученик"}</p>
+          <p>{title ? title : t("students.newStudent")}</p>
         </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Controller
               name="name"
               control={control}
-              rules={{ required: "Название обязательное поле" }}
+              rules={{ required: t("students.nameRequired") }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="ФИО*"
+                  label={t("students.fullName")}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -86,7 +88,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
             <Controller
               name="email"
               control={control}
-              rules={{ required: "E-mail обязательное поле" }}
+              rules={{ required: t("auth.emailRequired") }}
               render={({ field }) => (
                 <Input
                   {...field}
@@ -96,7 +98,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
                   size="lg"
                   errorMessage={errors?.email?.message}
                   isInvalid={!!errors.email?.message}
-                  description="На указанный e-mail придут данные для входа в личный кабинет"
+                  description={t("students.emailHint")}
                 />
               )}
             />
@@ -106,7 +108,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Заметка (например, уровень подготовки)"
+                  label={t("students.noteLabel")}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -117,7 +119,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
             />
             <div className="h-5" />
             <Button color="primary" type="submit" className="w-full" size="lg">
-              {chosenStudent?.id ? "Сохранить" : "Добавить ученика"}
+              {chosenStudent?.id ? t("common.save") : t("students.addStudent")}
             </Button>
             <div className="h-10" />
           </form>

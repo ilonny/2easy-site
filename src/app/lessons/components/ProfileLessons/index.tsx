@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "react-i18next";
 import { Button, Input, Tab, Tabs, Image, Chip } from "@nextui-org/react";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLessons } from "../../hooks/useLessons";
@@ -90,13 +92,14 @@ export const ProfileLessons = (props: TProps) => {
     deleteCourseRelation,
   } = useLessons(studentId, searchString, !!profile?.name);
 
+  const { t } = useTranslation();
   const data = useMemo(() => {
     const title =
       tabIndex === "userLessons"
-        ? "У вас пока нет уроков.\nСоздайте свой первый урок с конструктором 2EASY"
-        : "У вас нет сохраненных уроков.";
+        ? t("lessons.noLessons")
+        : t("lessons.noSavedLessons");
     const buttonTitle =
-      tabIndex === "userLessons" ? "Cоздать урок" : "Выбрать урок 2EASY";
+      tabIndex === "userLessons" ? t("lessons.createLesson") : t("lessons.chooseLesson");
 
     const onButtonPress = () => {
       if (tabIndex === "userLessons") {
@@ -106,7 +109,7 @@ export const ProfileLessons = (props: TProps) => {
     };
 
     return { title, buttonTitle, onButtonPress };
-  }, [tabIndex]);
+  }, [tabIndex, t]);
 
   const onCreateLesson = useCallback(
     (lessonId: number) => {
@@ -349,7 +352,7 @@ export const ProfileLessons = (props: TProps) => {
                     router.push("/lesson_plans");
                   }}
                 >
-                  Мои уроки
+                  {t("lessons.myLessons")}
                 </Button>
                 {!!courses.some((c) => c.user_id !== 1) && (
                   <Button
@@ -361,7 +364,7 @@ export const ProfileLessons = (props: TProps) => {
                       router.push("/lesson_plans");
                     }}
                   >
-                    Мои курсы
+                    {t("lessons.myCourses")}
                   </Button>
                 )}
                 <Button
@@ -373,7 +376,7 @@ export const ProfileLessons = (props: TProps) => {
                     router.push("/lesson_plans");
                   }}
                 >
-                  Уроки 2EASY
+                  {t("lessons.lessons2Easy")}
                 </Button>
                 {courses.some((c) => c.user_id === 1) && (
                   <div className="relative">
@@ -386,7 +389,7 @@ export const ProfileLessons = (props: TProps) => {
                         router.push("/lesson_plans");
                       }}
                     >
-                      Курсы 2EASY
+                      {t("lessons.courses2Easy")}
                     </Button>
                     <Chip
                       color="success"
@@ -417,7 +420,7 @@ export const ProfileLessons = (props: TProps) => {
                     router.push("/lesson_plans");
                   }}
                 >
-                  Уроки 2EASY
+                  {t("lessons.lessons2Easy")}
                 </Button>
                 {courses.some((c) => c.user_id === 1) && (
                   <Button
@@ -429,7 +432,7 @@ export const ProfileLessons = (props: TProps) => {
                       router.push("/lesson_plans");
                     }}
                   >
-                    Курсы 2EASY
+                    {t("lessons.courses2Easy")}
                   </Button>
                 )}
               </div>
@@ -459,7 +462,7 @@ export const ProfileLessons = (props: TProps) => {
             <Input
               value={filterSearchString}
               onValueChange={setFilterSearchString}
-              placeholder="Поиск уроков"
+              placeholder={t("lessons.searchLessons")}
               size="lg"
               classNames={{ inputWrapper: "bg-white hove" }}
               startContent={
@@ -483,7 +486,7 @@ export const ProfileLessons = (props: TProps) => {
               variant={studentTabIndex === "lessons" ? "solid" : "faded"}
               onClick={() => setStudentTabIndex("lessons")}
             >
-              Уроки
+              {t("lessons.lessonsTab")}
             </Button>
             <Button
               radius="full"
@@ -491,7 +494,7 @@ export const ProfileLessons = (props: TProps) => {
               variant={studentTabIndex === "courses" ? "solid" : "faded"}
               onClick={() => setStudentTabIndex("courses")}
             >
-              Курсы
+              {t("lessons.coursesTab")}
             </Button>
           </div>
         </>
@@ -505,11 +508,11 @@ export const ProfileLessons = (props: TProps) => {
                 href={"/student-account/" + studentId}
                 style={{ color: "#3F28C6" }}
               >
-                ← в личный кабинет ученика
+                {t("lessons.backToStudentAccount")}
               </Link>
             ) : (
               <Link href="/lesson_plans" style={{ color: "#3F28C6" }}>
-                ← все курсы
+                {t("lessons.allCourses")}
               </Link>
             )}
             <h2 style={{ fontWeight: "500", fontSize: 28 }}>
@@ -528,7 +531,7 @@ export const ProfileLessons = (props: TProps) => {
       )}
       {!currentCourse && !filteredLessons.length && (
         <ProfileEmptyLessons
-          title={studentId ? "Пока нет уроков." : data.title}
+          title={studentId ? t("lessons.noLessonsShort") : data.title}
           hideButton={!!studentId}
           buttonTitle={data.buttonTitle}
           onButtonPress={data.onButtonPress}
@@ -543,7 +546,7 @@ export const ProfileLessons = (props: TProps) => {
                 <Input
                   value={filterSearchString}
                   onValueChange={setFilterSearchString}
-                  placeholder="Поиск уроков"
+                  placeholder={t("lessons.searchLessons")}
                   size="lg"
                   classNames={{ inputWrapper: "bg-white hove" }}
                   startContent={

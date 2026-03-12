@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "react-i18next";
 import React, {
   FC,
   useCallback,
@@ -215,6 +217,7 @@ export const ExListComp: FC<TProps> = (props) => {
     isPresentationMode,
   } = props;
 
+  const { t } = useTranslation();
   const [copyData, setCopyData] = useState("");
 
   useEffect(() => {
@@ -274,7 +277,7 @@ export const ExListComp: FC<TProps> = (props) => {
                 onClick={async () => {
                   if (!canEditEye) {
                     toast(
-                      "Добавьте урок к себе, чтобы менять видимость заданий",
+                      t("lessons.addLessonToSelfHint"),
                       {
                         type: "error",
                       }
@@ -311,11 +314,11 @@ export const ExListComp: FC<TProps> = (props) => {
                 >
                   {isVisible
                     ? ex.type === "note"
-                      ? "заметка видна ученику"
-                      : "задание видно ученику"
+                      ? t("lessons.noteVisibleToStudent")
+                      : t("lessons.taskVisibleToStudent")
                     : ex.type === "note"
-                    ? "заметка не видна ученику"
-                    : "задание не видно ученику"}
+                    ? t("lessons.noteHiddenFromStudent")
+                    : t("lessons.taskHiddenFromStudent")}
                 </p>
               </div>
             </div>
@@ -418,7 +421,7 @@ export const ExListComp: FC<TProps> = (props) => {
                               closePopover(ex.id);
                             }}
                           >
-                            <p>Редактировать задание</p>
+                            <p>{t("editor.editTask")}</p>
                             <Image src={EditIcon} alt="arrow icon" />
                           </div>
                           <Divider className="my-2" />
@@ -436,14 +439,14 @@ export const ExListComp: FC<TProps> = (props) => {
                             writeToLocalStorage("exCopy", dataJson);
                             setCopyData(dataJson);
                             window.location.hash = `ex-${ex.id}`;
-                            toast("Задание скопировано в буфер обмена", {
+                            toast(t("lessons.taskCopiedToClipboard"), {
                               type: "success",
                             });
                             closePopover(ex.id);
                           }
                         }}
                       >
-                        <p>Копировать задание</p>
+                        <p>{t("lessons.copyTask")}</p>
                         <Image src={CopyIcon} alt="arrow icon" />
                       </div>
                       {!ex.isDisabledEx && (
@@ -456,7 +459,7 @@ export const ExListComp: FC<TProps> = (props) => {
                               closePopover(ex.id);
                             }}
                           >
-                            <p style={{ color: "#A42929" }}>Удалить задание</p>
+                            <p style={{ color: "#A42929" }}>{t("lessons.deleteTask")}</p>
                             <Image src={DeleteIcon} alt="arrow icon" />
                           </div>
                         </>
@@ -474,7 +477,7 @@ export const ExListComp: FC<TProps> = (props) => {
             className={`ex-add-button mt-8 relative flex justify-center gap-4`}
           >
             <div className={`${styles.dashed}`}></div>
-            <Tooltip content="Создать новое задание">
+            <Tooltip content={t("lessons.createNewTask")}>
               <Image
                 onClick={() => onPressCreate(ex.sortIndex)}
                 src={PlusIcon}
@@ -506,10 +509,10 @@ export const ExListComp: FC<TProps> = (props) => {
                   window.location.hash = `ex-${data.id}`;
                 }}
               >
-                <Tooltip content="Вставить задание">
+                <Tooltip content={t("lessons.pasteTask")}>
                   <Image
                     src={CopyExIcon}
-                    alt="Вставить задание"
+                    alt={t("lessons.pasteTask")}
                     className="m-auto relative z-index-[2] cursor-pointer hover:opacity-[0.8]"
                   />
                 </Tooltip>

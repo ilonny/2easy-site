@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import Image from "next/image";
 import { FC, useMemo, useState } from "react";
 import ReactImageUploading, { ImageListType } from "react-images-uploading";
@@ -51,6 +52,7 @@ export const ImageUpload: FC<TProps> = ({
   whiteBg,
   withInternetSearch = true,
 }) => {
+  const { t } = useTranslation();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
@@ -205,7 +207,7 @@ export const ImageUpload: FC<TProps> = ({
                             {firstImage
                               ? firstImage.file?.name ||
                                 getImageNameFromPath(firstImage?.path)
-                              : title || "Добавить картинку"}
+                              : title || t("editor.addImage")}
                           </p>
                           <div
                             className="shrink-0"
@@ -281,12 +283,12 @@ export const ImageUpload: FC<TProps> = ({
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                Поиск фотографий
+                {t("editor.searchPhotos")}
               </ModalHeader>
               <ModalBody>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Что ищем? (например: cats)"
+                    placeholder={t("editor.searchPlaceholder")}
                     value={searchQuery}
                     onKeyDown={(e) =>
                       e.key === "Enter" && handleInternetSearch()
@@ -298,7 +300,7 @@ export const ImageUpload: FC<TProps> = ({
                     onClick={handleInternetSearch}
                     isLoading={isSearching}
                   >
-                    Найти
+                    {t("editor.find")}
                   </Button>
                 </div>
 

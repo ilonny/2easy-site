@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { useTranslation } from "react-i18next";
 import {
   Popover,
   PopoverTrigger,
@@ -13,6 +14,7 @@ import { useParams } from "next/navigation";
 import { fetchPostJson } from "@/api";
 
 export const ShareLessonLink = () => {
+  const { t } = useTranslation();
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const lessonId = useParams()?.id;
 
@@ -73,15 +75,12 @@ export const ShareLessonLink = () => {
           endContent={<img src={LinkIcon.src} alt="icon" />}
           variant="light"
         >
-          Поделиться уроком с другим тичером
+          {t("lessons.shareLessonWithTeacher")}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-4 bg-white items-start cursor-pointer">
-        <p>
-          Вы можете поделиться этим уроком с другими пользователями 2EASY,
-          <br />
-          они смогут просматривать и копировать его к себе, просто поделитесь
-          ссылкой ниже:
+        <p style={{ whiteSpace: "pre-line" }}>
+          {t("lessons.shareLessonHint")}
         </p>
         <br />
         <div
@@ -89,7 +88,7 @@ export const ShareLessonLink = () => {
           onClick={() => {
             navigator.clipboard.writeText(link).then(() => {
               toast.success(
-                "Ссылка на урок скопирована в буфер обмена. Вы можете поделиться ей с любым пользователем 2EASY",
+                t("lessons.lessonLinkCopied"),
               );
               setPopoverIsOpen(false);
             });

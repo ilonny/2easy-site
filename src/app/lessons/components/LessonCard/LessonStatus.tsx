@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import CheckedIcon from "@/assets/icons/checked.svg";
 import LessonOpenIcon from "@/assets/icons/lesson_open.svg";
 import LessonCloseIcon from "@/assets/icons/lesson_close.svg";
@@ -10,6 +11,7 @@ export const LessonStatus = ({
   status: "open" | "close" | "complete";
   isCourses?: boolean;
 }) => {
+  const { t } = useTranslation();
   switch (status) {
     case "open":
       return (
@@ -20,7 +22,7 @@ export const LessonStatus = ({
             style={{ borderRadius: 0 }}
           />
           <p className="text-[#3F28C6]" style={{ fontSize: 14 }}>
-            {isCourses ? "Курс открыт" : "Урок открыт"}
+            {isCourses ? t("lessons.courseOpen") : t("lessons.lessonOpen")}
           </p>
         </div>
       );
@@ -29,7 +31,7 @@ export const LessonStatus = ({
         <div className="flex items-center gap-2">
           <Image src={CheckedIcon.src} alt="checked icon" />
           <p className="text-[#219F59]" style={{ fontSize: 14 }}>
-            Урок пройден
+            {t("lessons.lessonComplete")}
           </p>
         </div>
       );
@@ -38,7 +40,7 @@ export const LessonStatus = ({
         <div className="flex items-center gap-2">
           <Image src={LessonCloseIcon.src} alt="checked icon" />
           <p className="text-[#C4C4C4]" style={{ fontSize: 14 }}>
-            {isCourses ? "Курс закрыт" : "Урок закрыт"}
+            {isCourses ? t("lessons.courseClosed") : t("lessons.lessonClosed")}
           </p>
         </div>
       );

@@ -1,4 +1,9 @@
+"use client";
+
+import { useTranslation } from "react-i18next";
+
 export default function Custom404() {
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -22,13 +27,13 @@ export default function Custom404() {
         404
       </h1>
       <h2 className="text-center">
-        Этой страницы не существует.
+        {t("404.title")}
         <br />
-        Вернитесь{" "}
+        {t("404.returnTo")}{" "}
         <a style={{ color: "#3f28c6", textDecoration: "underline" }} href="/">
-          на главную
+          {t("404.goHome")}
         </a>{" "}
-        – там много интересного
+        {t("404.moreInteresting")}
       </h2>
     </div>
   );

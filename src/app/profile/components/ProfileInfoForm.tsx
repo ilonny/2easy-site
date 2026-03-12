@@ -1,4 +1,5 @@
 import { useCallback, useContext, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ProfileImagePicker } from "./ProfileImagePicker";
 import { AuthContext } from "@/auth";
 import { Controller, useForm } from "react-hook-form";
@@ -22,6 +23,7 @@ type TFieldList = {
 };
 
 export const ProfileInfoForm = () => {
+  const { t } = useTranslation();
   const { profile } = useContext(AuthContext);
   const [changePasswordIsVisible, setChangePasswordIsVisible] = useState(false);
   const {
@@ -52,11 +54,11 @@ export const ProfileInfoForm = () => {
           <Controller
             name="name"
             control={control}
-            rules={{ required: "Имя обязательное поле" }}
+            rules={{ required: t("profile.nameRequired") }}
             render={({ field }) => (
               <Input
                 {...field}
-                label="Имя"
+                label={t("profile.name")}
                 className="mb-5"
                 radius="sm"
                 size="lg"
@@ -96,7 +98,7 @@ export const ProfileInfoForm = () => {
                 <Input
                   {...field}
                   isDisabled
-                  label="Пароль"
+                  label={t("auth.password")}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -114,7 +116,7 @@ export const ProfileInfoForm = () => {
               className="text-small bg-black text-white"
               onClick={() => setChangePasswordIsVisible(true)}
             >
-              Изменить
+              {t("profile.change")}
             </Button>
             <Modal
               size="lg"

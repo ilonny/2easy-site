@@ -1,5 +1,6 @@
 "use client";
 import { useContext, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
 import {
@@ -22,6 +23,7 @@ type TProps = {
 };
 
 export const HeaderProfile = (props: TProps) => {
+  const { t } = useTranslation();
   const { isStudent } = props;
   const { profile, setProfile } = useContext(AuthContext);
   const router = useRouter();
@@ -51,13 +53,13 @@ export const HeaderProfile = (props: TProps) => {
             className="hidden md:block lg:block header-secondary-btn-text"
             style={{ color: "#4031C3 !important" }}
           >
-            {profile.name || "Профиль"}
+            {profile.name || t("profile.profileLabel")}
           </p>
           <p
             className="block md:hidden lg:hidden header-secondary-btn-text"
             style={{ color: "#4031C3 !important" }}
           >
-            {profile.name?.[0] || "Профиль"}
+            {profile.name?.[0] || t("profile.profileLabel")}
           </p>
           <Image src={ChevronDown} alt="profile icon" width={14} />
           {/* <p className={styles.title}>{profile.name?.[0] || "A"}</p> */}
@@ -75,22 +77,22 @@ export const HeaderProfile = (props: TProps) => {
             </Link>
           </DropdownItem>
           <DropdownItem onClick={logout} key="logout">
-            Выйти
+            {t("auth.logout")}
           </DropdownItem>
         </DropdownMenu>
       ) : (
         <DropdownMenu aria-label="Profile Actions">
           <DropdownItem key="lessons" href="/lesson_plans">
-            <p>Уроки и курсы</p>
+            <p>{t("profile.lessonsAndCourses")}</p>
           </DropdownItem>
           <DropdownItem key="students" href="/profile?students">
-            <p>Мои ученики</p>
+            <p>{t("profile.myStudents")}</p>
           </DropdownItem>
           <DropdownItem key="profile" href="/profile?profile">
-            <p>Личные данные</p>
+            <p>{t("profile.personalData")}</p>
           </DropdownItem>
           <DropdownItem onClick={logout} key="logout">
-            Выйти
+            {t("auth.logout")}
           </DropdownItem>
         </DropdownMenu>
       )}

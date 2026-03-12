@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ProfileEmptyLessons } from "@/app/lessons/components/ProfileEmptyLessons";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -35,6 +36,7 @@ type TProps = {
 };
 
 export const StudentList = (props: TProps) => {
+  const { t } = useTranslation();
   const {
     hideAddButton,
     hidePopoverButton,
@@ -91,8 +93,8 @@ export const StudentList = (props: TProps) => {
     <>
       {!students?.length && (
         <ProfileEmptyLessons
-          title="У вас пока нет учеников"
-          buttonTitle="Добавить"
+          title={t("students.noStudents")}
+          buttonTitle={t("students.add")}
           onButtonPress={onPressCreateGroup}
         />
       )}
@@ -185,7 +187,7 @@ export const StudentList = (props: TProps) => {
                                     );
                                   }}
                                 >
-                                  В кабинет ученика →
+                                  {t("students.toStudentCabinet")}
                                 </Button>
                                 <div className="h-2" />
                               </>
@@ -202,7 +204,7 @@ export const StudentList = (props: TProps) => {
                                 }
                               }}
                             >
-                              Редактировать
+                              {t("lessons.edit")}
                             </Button>
                             <div className="h-2" />
                             <Button
@@ -215,7 +217,7 @@ export const StudentList = (props: TProps) => {
                                 }
                               }}
                             >
-                              Удалить
+                              {t("common.delete")}
                             </Button>
                           </PopoverContent>
                         </Popover>
@@ -239,7 +241,7 @@ export const StudentList = (props: TProps) => {
               }}
               size="lg"
             >
-              Добавить нового ученика
+              {t("students.addNewStudent")}
             </Button>
           )}
         </div>
@@ -259,7 +261,7 @@ export const StudentList = (props: TProps) => {
       >
         <ModalContent>
           <ModalHeader>
-            <p>{"Удалить ученика" + " " + chosenStudent?.name + "?"}</p>
+            <p>{t("students.deleteStudentConfirm", { name: chosenStudent?.name || "" })}</p>
           </ModalHeader>
           <ModalBody>
             <Button
@@ -275,7 +277,7 @@ export const StudentList = (props: TProps) => {
                 });
               }}
             >
-              Да, удалить
+              {t("editor.confirmDelete")}
             </Button>
           </ModalBody>
         </ModalContent>

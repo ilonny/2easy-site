@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { fetchPostJson } from "@/api";
 import { AuthContext } from "@/auth";
 import { writeToLocalStorage } from "@/auth/utils";
@@ -18,6 +19,7 @@ type TLoginInputs = {
 };
 
 export const LoginForm = () => {
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -65,16 +67,16 @@ export const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <h3 className="text-center font-bold text-2xl mb-8">Вход</h3>
+      <h3 className="text-center font-bold text-2xl mb-8">{t("auth.loginTitle")}</h3>
       <Controller
         name="login"
         control={control}
-        rules={{ required: "E-mail обязательное поле" }}
+        rules={{ required: t("auth.emailRequired") }}
         render={({ field }) => (
           <Input
             {...field}
             radius="sm"
-            label="E-mail"
+            label={t("auth.email")}
             className="mb-5"
             errorMessage={errors?.login?.message}
             isInvalid={!!errors.login?.message}
@@ -85,12 +87,12 @@ export const LoginForm = () => {
         name="password"
         control={control}
         rules={{
-          required: "Пароль обязательное поле",
+          required: t("auth.passwordRequired"),
         }}
         render={({ field }) => (
           <Input
             {...field}
-            label="Пароль"
+            label={t("auth.password")}
             type={isVisible ? "text" : "password"}
             className="mb-8"
             radius="sm"
@@ -121,7 +123,7 @@ export const LoginForm = () => {
           href="/restore-password"
           className="text-[#3F28C6] underline text-sm"
         >
-          Забыли пароль?
+          {t("auth.forgotPassword")}
         </Link>
       </div>
       <div className="mb-10">
@@ -133,16 +135,16 @@ export const LoginForm = () => {
           size="lg"
           radius="sm"
         >
-          Войти
+          {t("common.login")}
         </Button>
         {!!responseError && (
           <p className="text-tiny text-danger">{responseError}</p>
         )}
       </div>
       <div className="flex justify-center items-center gap-2  font-medium text-small">
-        <p>Нет аккаунта?</p>
+        <p>{t("auth.noAccount")}</p>
         <Link href="/registration" className="text-[#3F28C6] underline">
-          Зарегистрироваться
+          {t("header.register")}
         </Link>
       </div>
     </form>

@@ -1,4 +1,6 @@
 "use client";
+
+import { useTranslation } from "react-i18next";
 import { Panel } from "@/ui";
 import Bg from "@/assets/images/start_registration_bg.png";
 import CheckedIcon from "@/assets/icons/checked.svg";
@@ -17,6 +19,7 @@ import CardIcon from "@/assets/icons/card.svg";
 import { useRouter } from "next/navigation";
 
 export const SubscribeFreeBlock = () => {
+  const { t } = useTranslation();
   const [modalIsOpen, setModalIsOpened] = useState(false);
   const router = useRouter();
   return (
@@ -43,15 +46,13 @@ export const SubscribeFreeBlock = () => {
               color: "#292929",
             }}
           >
-            Еще не пользовались 2easy?
+            {t("subscription.notUsedYet")}
           </p>
           <div className="h-4" />
           <div style={{ maxWidth: 570 }}>
-            <p>Начните с бесплатного пробного периода.</p>
+            <p>{t("subscription.startFreeTrial")}</p>
             <p className="mt-2">
-              У вас будет 7 дней доступа к конструктору уроков и части
-              материалов -- это позволит познакомиться с платформой перед
-              оформлением подписки.
+              {t("subscription.freeTrialDesc")}
             </p>
           </div>
         </div>
@@ -66,7 +67,7 @@ export const SubscribeFreeBlock = () => {
               }}
             >
               <Image src={CardIcon} alt="card icon" />
-              <p>Не нужно вводить данные карты</p>
+              <p>{t("subscription.noCardRequired")}</p>
             </div>
           </div>
           <Button
@@ -83,7 +84,7 @@ export const SubscribeFreeBlock = () => {
                 letterSpacing: 1,
               }}
             >
-              Начать бесплатно
+              {t("subscription.startFree")}
             </span>
           </Button>
         </div>

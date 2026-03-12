@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "react-i18next";
 import { ProfileEmptyLessons } from "@/app/lessons/components/ProfileEmptyLessons";
 import { useCallback, useEffect, useState } from "react";
 import { CreateGroupModalForm } from "../CreateGroupModalForm";
@@ -5,6 +7,7 @@ import { useGroupList } from "../../hooks/useGroupList";
 import { Button, Card } from "@nextui-org/react";
 
 export const GroupList = () => {
+  const { t } = useTranslation();
   const [createIsVisible, setCreateIsVisible] = useState(false);
   const { groups, getGroups } = useGroupList();
 
@@ -24,8 +27,8 @@ export const GroupList = () => {
     <>
       {!groups.length && (
         <ProfileEmptyLessons
-          title="У вас пока нет групп"
-          buttonTitle="Создать группу"
+          title={t("lessons.noGroups")}
+          buttonTitle={t("lessons.createGroup")}
           onButtonPress={onPressCreateGroup}
         />
       )}
@@ -36,7 +39,7 @@ export const GroupList = () => {
               <Card key={group.id} radius="md" className="p-2">
                 <div className="flex justify-between items-center">
                   <p className="font-bold">{group.name}</p>
-                  <Button color="secondary">Изменить</Button>
+                  <Button color="secondary">{t("profile.change")}</Button>
                 </div>
                 {!!group.tag && <p>{group.tag}</p>}
               </Card>
@@ -45,7 +48,7 @@ export const GroupList = () => {
       </div>
       <div className="h-10" />
       <Button color="primary" className="px-10" onClick={onPressCreateGroup}>
-        Создать группу
+        {t("lessons.createGroup")}
       </Button>
       <CreateGroupModalForm
         isVisible={createIsVisible}

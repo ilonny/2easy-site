@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { checkResponse, fetchPostJson } from "@/api";
 import { ExList } from "@/app/editor/components/view/ExList";
 import { getImageUrl } from "@/app/editor/helpers";
@@ -14,7 +15,8 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 
-export default function GrammarPage() {
+export default function SharedLessonPage() {
+  const { t } = useTranslation();
   const { checkSubscription, hasSubscription } = useCheckSubscription();
   const { profile } = useContext(AuthContext);
   const router = useRouter();
@@ -100,13 +102,11 @@ export default function GrammarPage() {
           className="max-w-[600px] text-center m-auto"
           style={{ fontSize: 20, fontWeight: 500, lineHeight: "26px" }}
         >
-          С вами поделились уроком, а это всегда приятно!
-          <br />
-          Ознакомьтесь с ним и добавьте в{" "}
+          {t("lessons.sharedLessonIntro")}{" "}
           <Link href="/lesson_plans" className="hover:underline text-primary">
-            "Мои уроки"
+            &quot;{t("editor.myLessons")}&quot;
           </Link>{" "}
-          для редактирования в личном кабинете.
+          {t("lessons.sharedLessonIntroEnd")}
         </p>
         <div className="h-10" />
         <div className="h-10" />
@@ -185,7 +185,7 @@ export default function GrammarPage() {
                       window.location.pathname = `/editor/${data.id}`;
                     }}
                   >
-                    {'Добавить в "Мои уроки"'}
+                    {t("lessons.addToMyLessons")}
                   </Button>
                 </div>
               )}

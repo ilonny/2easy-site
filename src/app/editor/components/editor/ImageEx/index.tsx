@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ImageUpload } from "@/components/ImageUpload";
 import { ImageExView } from "../../view/ImageExView";
 import { useExData } from "../hooks/useExData";
@@ -17,24 +18,27 @@ import {
 } from "react-sortable-hoc";
 import { arrayMoveImmutable } from "array-move";
 
-const DragHandle = sortableHandle(() => (
-  <span
-    style={{
-      display: "flex",
-      cursor: "grab",
-      padding: 6,
-      background: "#f4f4f5",
-      borderRadius: 8,
-    }}
-    title="Перетащите для изменения порядка"
-  >
-    <Image
-      src={DragHandleIcon}
-      alt="перетащить"
+const DragHandle = sortableHandle(() => {
+  const { t } = useTranslation();
+  return (
+    <span
+      style={{
+        display: "flex",
+        cursor: "grab",
+        padding: 6,
+        background: "#f4f4f5",
+        borderRadius: 8,
+      }}
+      title={t("editor.dragToReorder")}
+    >
+      <Image
+        src={DragHandleIcon}
+        alt={t("editor.dragHint")}
       style={{ width: 20, height: 20 }}
-    />
-  </span>
-));
+      />
+    </span>
+  );
+});
 
 const SortableImageItem = sortableElement(
   ({
@@ -44,6 +48,7 @@ const SortableImageItem = sortableElement(
     onRemove,
     onChangeDescription,
     value,
+    placeholder,
   }: {
     image: Record<string, string>;
     index: number;
@@ -51,6 +56,7 @@ const SortableImageItem = sortableElement(
     onRemove: (index: number) => void;
     onChangeDescription: (text: string, index: number) => void;
     value: string;
+    placeholder: string;
   }) => {
     const idx = itemIndex ?? index;
     return (
@@ -79,7 +85,7 @@ const SortableImageItem = sortableElement(
         <Input
           onChange={(e) => onChangeDescription(e.target.value, idx)}
           value={value}
-          placeholder="Подпись к изображению"
+          placeholder={placeholder}
           size="sm"
           variant="flat"
           style={{ zIndex: 2, position: "relative" }}
@@ -117,6 +123,7 @@ export const ImageEx: FC<TProps> = ({
   lastSortIndex,
   currentSortIndexToShift,
 }) => {
+  const { t } = useTranslation();
   const { isLoading, saveImageEx, success } = useUploadImageEx(
     lastSortIndex,
     currentSortIndexToShift
@@ -190,7 +197,7 @@ export const ImageEx: FC<TProps> = ({
       <div className="flex flex-wrap">
         <div className="w-[50%] pr-2">
           <TitleExInput
-            label="Заголовок задания"
+            label={t("editor.taskTitle")}
             value={data.title}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}
@@ -198,20 +205,20 @@ export const ImageEx: FC<TProps> = ({
           />
           <div className="h-4" />
           <TitleExInput
-            label="Подзаголовок задания"
+            label={t("editor.taskSubtitle")}
             value={data.subtitle}
             setValue={(val) => changeData("subtitle", val)}
           />
           <div className="h-4" />
           <TitleExInput
             isTextarea
-            label="Описание"
+            label={t("editor.description")}
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
         </div>
         <div className="w-[50%] pl-2">
-          <p className="font-light mb-2">Загрузите изображения (до 12 шт)</p>
+          <p className="font-light mb-2">{t("editor.uploadImagesUpTo12")}</p>
           <ImageUpload
             key={`img-upload-${images.length}`}
             isMultiple
@@ -233,7 +240,7 @@ export const ImageEx: FC<TProps> = ({
                   className="text-small text-center max-w-[250px]"
                   style={{ color: "#B7B7B7" }}
                 >
-                  Нажмите на этот блок или перетащите сюда изображения
+                  {t("editor.clickOrDragImages")}
                 </p>
               </div>
             }
@@ -246,15 +253,15 @@ export const ImageEx: FC<TProps> = ({
             >
               <label className="flex gap-2 items-center">
                 <Radio color="primary" value={"carousel"} />
-                <p className="font-light ">карусель</p>
+                <p className="font-light ">{t("editor.carousel")}</p>
               </label>
               <label className="flex gap-2 items-center">
                 <Radio color="primary" value={"2-col"} />
-                <p className="font-light ">две колонки</p>
+                <p className="font-light ">{t("editor.twoColumns")}</p>
               </label>
               <label className="flex gap-2 items-center">
                 <Radio color="primary" value={"3-col"} />
-                <p className="font-light ">три колонки</p>
+                <p className="font-light ">{t("editor.threeColumns")}</p>
               </label>
             </RadioGroup>
           </div>
@@ -277,13 +284,14 @@ export const ImageEx: FC<TProps> = ({
               onRemove={handleRemoveImage}
               onChangeDescription={changeImageDescription}
               value={image?.text || ""}
+              placeholder={t("editor.imageCaption")}
             />
           ))}
         </SortableImagesList>
       )}
       <div className="h-10" />
       <div>
-        <p className="font-light mb-2">Превью</p>
+        <p className="font-light mb-2">{t("editor.preview")}</p>
         <div
           style={{
             border: "1px solid #3F28C6",

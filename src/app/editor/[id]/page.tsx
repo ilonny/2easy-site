@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useLessons } from "@/app/lessons/hooks/useLessons";
 import { ContentWrapper } from "@/components";
 import {
@@ -46,6 +47,7 @@ import { CreateHomeworkModal } from "@/app/lessons/components/CreateHomeworkModa
 
 export default function EditorPage() {
   withLogin();
+  const { t } = useTranslation();
   const params = useParams();
   const { profile } = useContext(AuthContext);
   const { lesson, getLesson } = useLessons();
@@ -205,8 +207,8 @@ export default function EditorPage() {
           <div className="h-14" />
           <div className="flex flex-wrap items-center justify-between">
             <Breadcrumbs>
-              <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-              <BreadcrumbItem href="/profile?lessons">Мои уроки</BreadcrumbItem>
+              <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
+              <BreadcrumbItem href="/profile?lessons">{t("editor.myLessons")}</BreadcrumbItem>
               <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
             </Breadcrumbs>
             {lesson?.user_id === profile?.id && !lesson?.lesson_id_homework && (
@@ -279,7 +281,7 @@ export default function EditorPage() {
                     textAlign: "center",
                   }}
                 >
-                  ред.
+                  {t("editor.editShort")}
                 </p>
               </div>
             )}
@@ -325,7 +327,7 @@ export default function EditorPage() {
                       className="min-w-[310px]"
                       onClick={() => setHomeworkModalVisible(true)}
                     >
-                      Homework
+                      {t("lessons.createHomework")}
                     </Button>
                   </Card>
                 )}
@@ -350,7 +352,7 @@ export default function EditorPage() {
                   window.location.pathname = `/editor/${data.id}`;
                 }}
               >
-                {'Добавить в "Мои уроки"'}
+                {t("lessons.addToMyLessons")}
               </Button>
             </div>
           )}
@@ -363,7 +365,7 @@ export default function EditorPage() {
               size="lg"
               color="primary"
               onClick={async () => {
-                if (!window?.confirm("Точно выложить урок?)")) {
+                if (!window?.confirm(t("lessons.confirmPublishLesson"))) {
                   return;
                 }
                 const res = await fetchPostJson({
@@ -378,7 +380,7 @@ export default function EditorPage() {
                 window.location.pathname = `/`;
               }}
             >
-              {"Перенести урок в уроки 2EASY"}
+              {t("lessons.moveTo2EasyLessons")}
             </Button>
           </div>
         )}
@@ -412,9 +414,7 @@ export default function EditorPage() {
         <ModalContent>
           <ModalHeader className="justify-center">
             <p style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}>
-              Вы уверены, что хотите удалить
-              <br />
-              задание?
+              {t("editor.confirmDeleteEx")}
             </p>
           </ModalHeader>
           <ModalBody>
@@ -429,7 +429,7 @@ export default function EditorPage() {
                 getExList();
               }}
             >
-              <p style={{ color: "#A42929" }}>Да, удалить</p>
+              <p style={{ color: "#A42929" }}>{t("editor.confirmDelete")}</p>
             </Button>
             <Button
               color="primary"
@@ -437,7 +437,7 @@ export default function EditorPage() {
               size="lg"
               onClick={() => setDeleteModal(false)}
             >
-              Отмена
+              {t("common.cancel")}
             </Button>
           </ModalBody>
         </ModalContent>

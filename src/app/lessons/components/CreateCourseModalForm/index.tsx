@@ -1,3 +1,5 @@
+"use client";
+import { useTranslation } from "react-i18next";
 import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
@@ -58,6 +60,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
   onSuccess,
   chosenCourse,
 }) => {
+  const { t } = useTranslation();
   const { profile, authIsLoading } = useContext(AuthContext);
   const isAdmin = profile?.role_id === 1;
   console.log("profile?", profile);
@@ -197,7 +200,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
         >
           <Image
             src={DragHandleIcon.src}
-            alt="перетащить"
+            alt={t("editor.dragHint")}
             style={{ flexShrink: 0, width: 20, height: 20 }}
           />
         </span>
@@ -270,17 +273,17 @@ export const CreateCourseModalForm: FC<TProps> = ({
           {step === 0 && (
             <>
               <ModalHeader>
-                <p>{title ? title : "Новый курс"}</p>
+                <p>{title ? title : t("modals.newCourse")}</p>
               </ModalHeader>
               <ModalBody>
                 <Controller
                   name="title"
                   control={control}
-                  rules={{ required: "Название обязательное поле" }}
+                  rules={{ required: t("profile.titleRequired") }}
                   render={({ field }) => (
                     <Input
                       {...field}
-                      label="Название*"
+                      label={t("editor.titleLabel")}
                       className="mb-5"
                       radius="sm"
                       size="lg"
@@ -295,7 +298,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                   render={({ field }) => (
                     <Textarea
                       {...field}
-                      label="Описание"
+                      label={t("editor.description")}
                       minRows={3}
                       className="mb-5"
                       radius="sm"
@@ -311,7 +314,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                   render={({ field }) => (
                     <Input
                       {...field}
-                      label="Уровень"
+                      label={t("editor.level")}
                       className="mb-5"
                       radius="sm"
                       size="lg"
@@ -323,7 +326,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                 <div className="h-5" />
                 <div className="flex gap-5 items-end">
                   <ImageUpload
-                    label="Обложка курса"
+                    label={t("editor.courseCover")}
                     images={images}
                     setImages={setImages}
                   />
@@ -345,14 +348,14 @@ export const CreateCourseModalForm: FC<TProps> = ({
           {step === 1 && (
             <>
               <ModalHeader>
-                <p>{`Выберите уроки, которые хотите добавить в курс «${title}»`}</p>
+                <p>{t("modals.selectLessonsForCourse", { title })}</p>
               </ModalHeader>
               <ModalBody>
                 <div className="w-[100%] lg:w-[525px] m-auto">
                   <Input
                     value={lessonsSearchString}
                     onValueChange={setLessonsSearchString}
-                    placeholder="Поиск уроков"
+                    placeholder={t("lessons.searchLessons")}
                     size="lg"
                     classNames={{ inputWrapper: "bg-white hove" }}
                     startContent={
@@ -435,8 +438,8 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     isLoading={isLoading}
                   >
                     {chosenLessonIds.length
-                      ? "Дальше"
-                      : "Пропустить выбор уроков"}
+                      ? t("modals.next")
+                      : t("modals.skipLessonChoice")}
                   </Button>
                   <Button
                     color="secondary"
@@ -446,7 +449,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     size="lg"
                     onClick={() => setStep((s) => s - 1)}
                   >
-                    Назад
+                    {t("common.back")}
                   </Button>
                 </div>
                 <div className="h-10" />
@@ -456,15 +459,14 @@ export const CreateCourseModalForm: FC<TProps> = ({
           {step === 2 && (
             <>
               <ModalHeader>
-                <p>{`Чтобы изменить очередность уроков
-в курсе, расставьте их в нужном порядке`}</p>
+                <p className="whitespace-pre-line">{t("modals.reorderLessonsHint")}</p>
               </ModalHeader>
               <ModalBody>
                 <div className="w-[100%] lg:w-[525px] m-auto">
                   {/* <Input
                     value={lessonsSearchString}
                     onValueChange={setLessonsSearchString}
-                    placeholder="Поиск уроков"
+                    placeholder={t("lessons.searchLessons")}
                     size="lg"
                     classNames={{ inputWrapper: "bg-white hove" }}
                     startContent={
@@ -516,8 +518,8 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     isLoading={isLoading}
                   >
                     {chosenLessonIds.length
-                      ? "Дальше"
-                      : "Пропустить выбор уроков"}
+                      ? t("modals.next")
+                      : t("modals.skipLessonChoice")}
                   </Button>
                   <Button
                     color="secondary"
@@ -527,7 +529,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     size="lg"
                     onClick={() => setStep((s) => s - 1)}
                   >
-                    Назад
+                    {t("common.back")}
                   </Button>
                 </div>
                 <div className="h-10" />

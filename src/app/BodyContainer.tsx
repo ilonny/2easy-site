@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/auth";
 import { useRouter } from "next/navigation";
 import { FC, useCallback, useContext, useEffect, useState } from "react";
@@ -15,6 +16,7 @@ import Close from "@/assets/icons/close.svg";
 import Image from "next/image";
 
 export const BodyContainer: FC<any> = ({ children }) => {
+  const { t } = useTranslation();
   const { profile } = useContext(AuthContext);
   const router = useRouter();
   const { checkSubscription, subscription } = useCheckSubscription();
@@ -55,7 +57,7 @@ export const BodyContainer: FC<any> = ({ children }) => {
           }}
         >
           <Button onClick={() => setSurveyModal(true)} color="primary">
-            Поделитесь мнением
+            {t("body.shareOpinion")}
           </Button>
           <Image
             onClick={(e) => {
@@ -86,7 +88,7 @@ export const BodyContainer: FC<any> = ({ children }) => {
       >
         <ModalContent>
           <ModalHeader className="justify-center">
-            <p className="text-center">Поделитесь вашим мнением</p>
+            <p className="text-center">{t("body.shareOpinionModal")}</p>
           </ModalHeader>
           <ModalBody>
             <div className="flex flex-wrap justify-start">

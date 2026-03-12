@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import {
   BreadcrumbItem,
   Breadcrumbs,
@@ -21,8 +22,9 @@ import Loupe from "@/assets/icons/loupe.svg";
 import { useLessons } from "@/app/lessons/hooks/useLessons";
 import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 
-export default function StartRegistrationPage() {
+export default function StudentAccountPage() {
   withLogin();
+  const { t } = useTranslation();
   const [searchString, setSearchString] = useState("");
   const router = useRouter();
   const studentId = useParams()?.id;
@@ -62,9 +64,9 @@ export default function StartRegistrationPage() {
           <div className="h-14" />
           {isTeacher && (
             <Breadcrumbs>
-              <BreadcrumbItem href="/">Главная</BreadcrumbItem>
+              <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
               <BreadcrumbItem href="/profile?students">
-                Мои ученики
+                {t("profile.myStudents")}
               </BreadcrumbItem>
               {!!studentInfo && (
                 <BreadcrumbItem>{studentInfo.name}</BreadcrumbItem>
@@ -76,14 +78,14 @@ export default function StartRegistrationPage() {
         <div className="h-10" />
         <div className="flex items-end justify-center gap-6">
           {isTeacher ? (
-            <Link href="/profile?students">← все ученики</Link>
+            <Link href="/profile?students">{t("students.allStudents")}</Link>
           ) : (
             <div className="w-[112px]"></div>
           )}
           <h1
             className={"text-primary text-center font-bold text-3xl uppercase"}
           >
-            Кабинет ученика
+            {t("students.studentCabinet")}
           </h1>
           <div className="w-[112px]"></div>
         </div>
@@ -120,7 +122,7 @@ export default function StartRegistrationPage() {
             <Input
               value={searchString}
               onValueChange={setSearchString}
-              placeholder="Поиск уроков"
+              placeholder={t("lessons.searchLessons")}
               size="lg"
               classNames={{ inputWrapper: "bg-white hove" }}
               startContent={
