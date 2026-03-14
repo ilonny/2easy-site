@@ -6,6 +6,7 @@ export const useLessons = (
   studentId?: string,
   searchString?: string,
   isAuth?: boolean = true,
+  includeCourseLessons?: boolean,
 ) => {
   const [lessons, setLessons] = useState<TLesson[]>([]);
   const [lesson, setLesson] = useState<TLesson | undefined>();
@@ -33,8 +34,11 @@ export const useLessons = (
         path: "/main-page-lessons?disable_limit=1",
       });
     } else {
+      const params = new URLSearchParams();
+      if (studentId) params.set("student_id", studentId);
+      if (includeCourseLessons) params.set("include_course_lessons", "1");
       res = await fetchGet({
-        path: studentId ? `/lessons?student_id=${studentId}` : "/lessons",
+        path: params.toString() ? `/lessons?${params.toString()}` : "/lessons",
         isSecure: true,
       });
     }
@@ -44,7 +48,7 @@ export const useLessons = (
     }
     setLessonsListIslLoading(false);
     return data;
-  }, [isAuth, studentId]);
+  }, [isAuth, studentId, includeCourseLessons]);
 
   const getLesson = useCallback(
     async (id: string, studentIdParam?: number) => {
