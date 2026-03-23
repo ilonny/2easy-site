@@ -12,6 +12,7 @@ import {
 } from "@nextui-org/react";
 import { FC, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { writeToLocalStorage } from "@/auth/utils";
 
 const EX_TYPE_LABELS: Record<string, string> = {
   "text-default": "Текст",
@@ -100,6 +101,10 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
       setIsVisible(false);
       onSuccess?.();
       if (data?.homework_lesson_id) {
+        writeToLocalStorage(
+          "start_lesson_selected_ids",
+          JSON.stringify([Number(studentId)])
+        );
         router.push(`/lessons/${data.homework_lesson_id}`);
       }
     } catch (e) {
