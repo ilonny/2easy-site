@@ -71,7 +71,6 @@ export default function LessonPage() {
   const [tutorialStep, setTutorialStep] = useState(1);
   const [students, setStudents] = useState<any[]>([]);
   const [activeStudentId, setActiveStudentId] = useState(0);
-  const [teacherFocusExId, setTeacherFocusExId] = useState<number>(0);
   const lastStudentFocusUpdatedAtRef = useRef<number>(0);
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
@@ -144,23 +143,7 @@ export default function LessonPage() {
   }, [fetchStudents]);
 
   useEffect(() => {
-    if (!isTeacher) return;
-    let active = true;
-    const interval = setInterval(() => {
-      if (!active) return;
-      const id = getCurrentExerciseIdInView();
-      if (id) {
-        setTeacherFocusExId(id);
-      }
-    }, 500);
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
-  }, [isTeacher, getCurrentExerciseIdInView]);
-
-  useEffect(() => {
-    if (!isStudent) return;
+    if (!isStudent || isTeacher) return;
     let active = true;
     const lessonId = Number(params.id) || 0;
     if (!lessonId) return;
@@ -189,7 +172,7 @@ export default function LessonPage() {
       active = false;
       clearInterval(interval);
     };
-  }, [isStudent, params.id]);
+  }, [isStudent, isTeacher, params.id]);
 
   useEffect(() => {
     if (!isStudent) {
@@ -493,7 +476,7 @@ export default function LessonPage() {
                     }}
                     onClick={async () => {
                       const lessonId = Number(params.id) || 0;
-                      const exId = teacherFocusExId || getCurrentExerciseIdInView();
+                      const exId = getCurrentExerciseIdInView();
                       if (!lessonId || !exId) {
                         toast(t("lessons.focusScroll.cantDetectCurrentTask"), {
                           type: "error",
