@@ -49,13 +49,18 @@ export const Header = () => {
               profile?.isStudent ? "0" : "1"
             }px] border-[#D9D9D9] py-4 lg:py-8 min-h-[80px] lg:min-h-[115px]`}
           >
-            <div className="left">
+            <div className="left flex items-center gap-3">
               {!profile?.isStudent && (
                 <div
                   className="lg:hidden"
                   onClick={() => setSidebarIsOpened((o) => !o)}
                 >
                   <Image src={MenuIcon} alt="menu" className="w-[40px]" />
+                </div>
+              )}
+              {profile?.id === 18 && (
+                <div className="hidden lg:block">
+                  <LanguageSwitcher />
                 </div>
               )}
             </div>
@@ -80,7 +85,6 @@ export const Header = () => {
                   </div>
                 ) : (
                   <div className="flex items-center gap-4">
-                    <LanguageSwitcher />
                     {profile?.name ? (
                       <HeaderProfile isStudent={profile?.isStudent} />
                     ) : (

@@ -1,6 +1,7 @@
 "use client";
 
 import { ContentWrapper } from "@/components";
+import { useTranslation } from "react-i18next";
 import {
   BreadcrumbItem,
   Breadcrumbs,
@@ -21,7 +22,8 @@ import { BASE_URL } from "@/api";
 import Dino from "@/assets/images/dino.gif";
 import { getImageUrl } from "../editor/helpers";
 
-export default function GrammarPage() {
+export default function TutorialPage() {
+  const { t } = useTranslation();
   const [activeLessonId, setActiveLessonId] = useState<number | undefined>();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -47,14 +49,14 @@ export default function GrammarPage() {
         <div className="h-10" />
         <div className="h-10" />
         <h1 style={{ fontWeight: "600", fontSize: 38, textAlign: "center" }}>
-          Hi!
-          <br />Я – туториал ✨
+          {t("tutorial.hero.titleLine1")}
+          <br />
+          {t("tutorial.hero.titleLine2")}
         </h1>
         <p className="text-center mt-6" style={{ fontSize: 18 }}>
-          За 5 минут объясню, как создавать уроки, добавлять учеников и
-          проводить
+          {t("tutorial.hero.subtitleLine1")}
           <br />
-          уроки в real-time
+          {t("tutorial.hero.subtitleLine2")}
         </p>
         <div className="h-10" />
         <div className="h-10" />
@@ -87,9 +89,11 @@ export default function GrammarPage() {
                         ...(block.titleStyle ? { ...block.titleStyle } : {}), // Spread outside
                       }}
                     >
-                      {block.title}
+                      {t((block as any).titleKey)}
                     </p>
-                    <p style={{ marginTop: -12, padding: 20 }}>{block.desc}</p>
+                    <p style={{ marginTop: -12, padding: 20 }}>
+                      {t((block as any).descKey)}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -175,6 +179,12 @@ export default function GrammarPage() {
                         is2easy={true}
                         isAdmin={false}
                         isPresentationMode={true}
+                        onPressCreate={() => {}}
+                        onSuccessCreate={() => {}}
+                        onPressDelete={() => {}}
+                        onPressEdit={() => {}}
+                        changeSortIndex={async () => {}}
+                        onChangeIsVisible={() => {}}
                       />
                       <Button
                         variant="flat"
@@ -184,7 +194,7 @@ export default function GrammarPage() {
                           setIsVisible(false);
                         }}
                       >
-                        Закрыть
+                        {t("common.close")}
                       </Button>
                     </div>
                   </div>

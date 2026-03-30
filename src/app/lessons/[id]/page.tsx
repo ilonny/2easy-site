@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
+// @ts-expect-error - types are provided by project deps during build
 import { useTranslation } from "react-i18next";
 import {
   BreadcrumbItem,
@@ -55,20 +56,20 @@ export default function LessonPage() {
   withLogin();
   const { t } = useTranslation();
   const router = useRouter();
-  const params = useParams();
-  const { subscription } = useContext(SibscribeContext);
+  const params = useParams() as { id: string };
+  const { subscription } = (useContext(SibscribeContext as any) as any) || {};
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const { exList, getExList, setExList } = useExList(
-    params.id,
+    Number(params.id),
     isPresentationMode,
   );
   const { lesson, getLesson } = useLessons();
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(1);
-  const [students, setStudents] = useState([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [activeStudentId, setActiveStudentId] = useState(0);
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
@@ -94,9 +95,9 @@ export default function LessonPage() {
     try {
       const selectedIds = JSON.parse(
         readFromLocalStorage("start_lesson_selected_ids") || "",
-      )?.map((el) => Number(el));
+      )?.map((el: any) => Number(el));
       const filteredIds = selectedIds?.length
-        ? list?.studentList?.filter((s) => {
+        ? list?.studentList?.filter((s: any) => {
             return selectedIds.includes(s.student_id);
           })
         : [];
@@ -136,7 +137,9 @@ export default function LessonPage() {
       return list;
     };
     getList();
-    return () => (canGetList = false);
+    return () => {
+      canGetList = false;
+    };
     // const interval = setInterval(() => {
     //   getExList();
     // }, 1000);
@@ -149,7 +152,7 @@ export default function LessonPage() {
     }
   }, [tutorialOpen]);
 
-  const onChangePresentationMode = useCallback((e) => {
+  const onChangePresentationMode = useCallback((e: any) => {
     e.stopPropagation();
     setIsPresentationMode((s) => !s);
   }, []);
@@ -256,6 +259,12 @@ export default function LessonPage() {
                   is2easy={lesson?.user_id === 1}
                   isAdmin={profile?.role_id === 1}
                   isPresentationMode={isPresentationMode}
+                  onPressCreate={() => {}}
+                  onSuccessCreate={() => {}}
+                  onPressDelete={() => {}}
+                  onPressEdit={() => {}}
+                  changeSortIndex={async () => {}}
+                  onChangeIsVisible={() => {}}
                 />
               </div>
               {!!lesson?.homework_lesson_id &&
@@ -404,7 +413,7 @@ export default function LessonPage() {
           >
             <VideoCall lessonId={params.id as string} />
             <Chat
-              students={students}
+              students={students as any}
               lesson_id={Number(params.id) || lesson?.id || 0}
               isTeacher={isTeacher}
             />

@@ -2,8 +2,10 @@
 
 import { Button } from "@nextui-org/react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 export const HeaderMenuList = () => {
+  const { t } = useTranslation();
   return (
     <div
       className="
@@ -45,7 +47,7 @@ export const HeaderMenuList = () => {
       </Link>
       <Link href="/tutorial">
         <Button variant="light" className="font-bold">
-          TUTORIAL ✨
+          {t("header.tutorial")}
         </Button>
       </Link>
     </div>

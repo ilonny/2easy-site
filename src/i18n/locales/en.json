@@ -88,6 +88,51 @@
     "passwordsMustMatch": "Passwords must match",
     "authError": "Authentication error"
   },
+  "tutorial": {
+    "hero": {
+      "titleLine1": "Hi!",
+      "titleLine2": "I’m your ✨ tutorial ✨",
+      "subtitleLine1": "In 5 minutes, I’ll show you how to create lessons, add students, and teach",
+      "subtitleLine2": "in real time."
+    },
+    "cards": {
+      "lessonBuilder": {
+        "title": "Lesson Builder",
+        "desc": "How to create a lesson using ready-made templates"
+      },
+      "studentAccounts": {
+        "title": "Students’ Personal Accounts",
+        "desc": "How to add a student and assign lessons"
+      },
+      "howToStartLesson": {
+        "title": "How to Start a Lesson",
+        "desc": "How to share a lesson with a student and see their answers"
+      },
+      "lessonMode": {
+        "title": "Lesson Mode",
+        "desc": "Teaching in real time, screen sharing, task visibility, and lesson chat"
+      },
+      "edit2easyLessons": {
+        "title": "Editing 2EASY Lessons",
+        "desc": "How to modify ready-made lessons"
+      },
+      "homework": {
+        "title": "Homework",
+        "desc": "How to assign and check homework for your students"
+      }
+    },
+    "text": {
+      "greeting": "Hi!",
+      "imYour": "I’m your ✨ tutorial ✨",
+      "inFiveMinutes": "In 5 minutes, I’ll show you how to create lessons, add students, and teach in real time.",
+      "section1Title": "Lesson Builder",
+      "section1Desc": "How to create a lesson using ready-made templates",
+      "section2Title": "Students’ Personal Accounts",
+      "section2Desc": "How to add a student and assign lessons",
+      "section3Title": "How to Start a Lesson",
+      "section3Desc": "How to share a lesson with a student and see their answers"
+    }
+  },
   "subscription": {
     "title": "2easy Subscription",
     "description": "Access to materials, lesson creation platform and student dashboard for conducting real-time lessons",
