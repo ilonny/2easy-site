@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "react-i18next";
 import { fetchPostJson } from "@/api";
 import { Button } from "@/ui";
 import { Input } from "@nextui-org/react";
@@ -15,6 +16,7 @@ type TLoginInputs = {
 };
 
 export const RestoreForm = () => {
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -51,28 +53,28 @@ export const RestoreForm = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <h3 className="text-center font-bold text-2xl mb-2">
-        Восстановление пароля
+        {t("auth.restorePasswordTitle")}
       </h3>
       <p className="text-center mb-7 font-medium">
-        Введите E-mail при регистрации,
+        {t("auth.restorePasswordLine1")}
         <br />
-        пришлем на него пароль
+        {t("auth.restorePasswordLine2")}
       </p>
       <Controller
         name="login"
         control={control}
         rules={{
-          required: "E-mail обязательное поле",
+          required: t("auth.emailRequired"),
           pattern: {
             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            message: "Некорректный e-mail",
+            message: t("auth.invalidEmail"),
           },
         }}
         render={({ field }) => (
           <Input
             {...field}
             radius="sm"
-            label="E-mail"
+            label={t("auth.email")}
             className="mb-5"
             errorMessage={errors?.login?.message}
             isInvalid={!!errors.login?.message}
@@ -83,7 +85,7 @@ export const RestoreForm = () => {
         <Button
           isLoading={mutation.isPending}
           type="submit"
-          text="Восстановить пароль"
+          text={t("auth.restorePasswordSubmit")}
           fullWidth
           mediumHeight
         />
@@ -92,9 +94,9 @@ export const RestoreForm = () => {
         )}
       </div>
       <div className="flex justify-center items-center gap-2  font-medium text-small">
-        <p>Вспомнили пароль?</p>
+        <p>{t("auth.rememberPassword")}</p>
         <Link href="/login" className="text-[#3F28C6] underline">
-          Войти
+          {t("common.login")}
         </Link>
       </div>
     </form>

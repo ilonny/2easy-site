@@ -92,7 +92,15 @@
     "enterOldPassword": "Enter old password",
     "enterNewPassword": "Enter new password",
     "passwordsMustMatch": "Passwords must match",
-    "authError": "Authentication error"
+    "authError": "Authentication error",
+    "restorePasswordTitle": "Reset password",
+    "restorePasswordLine1": "Enter the email you used to register,",
+    "restorePasswordLine2": "we will send a new password to it",
+    "restorePasswordSubmit": "Send new password",
+    "rememberPassword": "Remembered your password?",
+    "startRegistrationPrefix": "Start with",
+    "startRegistrationHighlight": "a free trial",
+    "noCardUntilSubscribe": "No card details required until you choose to subscribe"
   },
   "tutorial": {
     "hero": {

@@ -93,7 +93,15 @@
     "enterOldPassword": "Введите старый пароль",
     "enterNewPassword": "Введите новый пароль",
     "passwordsMustMatch": "Пароли должны совпадать",
-    "authError": "Ошибка авторизации"
+    "authError": "Ошибка авторизации",
+    "restorePasswordTitle": "Восстановление пароля",
+    "restorePasswordLine1": "Введите E-mail при регистрации,",
+    "restorePasswordLine2": "пришлем на него пароль",
+    "restorePasswordSubmit": "Восстановить пароль",
+    "rememberPassword": "Вспомнили пароль?",
+    "startRegistrationPrefix": "Начните с",
+    "startRegistrationHighlight": "бесплатного пробного периода",
+    "noCardUntilSubscribe": "Не нужно вводить данные карты, пока сами не захотите оформить подписку"
   },
   "tutorial": {
     "hero": {
