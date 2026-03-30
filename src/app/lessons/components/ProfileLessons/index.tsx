@@ -34,6 +34,7 @@ type TProps = {
   currentCourse?: TCourse;
   alwaysOpenLessonMode?: boolean;
   showCourseSearch?: boolean;
+  includeCourseLessons?: boolean;
 };
 
 export const ProfileLessons = (props: TProps) => {
@@ -50,6 +51,7 @@ export const ProfileLessons = (props: TProps) => {
     currentCourse,
     alwaysOpenLessonMode,
     showCourseSearch,
+    includeCourseLessons,
   } = props;
   const router = useRouter();
   const { profile, createLessonModalIsVisible, setCreateLessonModalIsVisible } =
@@ -90,7 +92,7 @@ export const ProfileLessons = (props: TProps) => {
     getCourseLessons,
     changeCourseStatus,
     deleteCourseRelation,
-  } = useLessons(studentId, searchString, !!profile?.name);
+  } = useLessons(studentId, searchString, !!profile?.name, includeCourseLessons);
 
   const { t } = useTranslation();
   const data = useMemo(() => {

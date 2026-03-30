@@ -430,8 +430,15 @@ export const LessonCard: FC<TProps> = ({
                   size="md"
                   onClick={async (e) => {
                     e.stopPropagation();
+                    const saveSelectedAndNavigate = (hwId: number) => {
+                      writeToLocalStorage(
+                        "start_lesson_selected_ids",
+                        JSON.stringify([studentId])
+                      );
+                      router.push(`/lessons/${hwId}`);
+                    };
                     if (lesson.has_individual_homework) {
-                      router.push(`/lessons/${lesson.homework_lesson_id}`);
+                      saveSelectedAndNavigate(lesson.homework_lesson_id);
                     } else {
                       const res = await fetchPostJson({
                         path: "/lessons/homework/get-or-create-for-student",
@@ -444,7 +451,7 @@ export const LessonCard: FC<TProps> = ({
                       const data = await res?.json();
                       checkResponse(data);
                       if (data?.homework_lesson_id) {
-                        router.push(`/lessons/${data.homework_lesson_id}`);
+                        saveSelectedAndNavigate(data.homework_lesson_id);
                       }
                     }
                   }}
@@ -476,21 +483,31 @@ export const LessonCard: FC<TProps> = ({
                 size="md"
                 onClick={async (e) => {
                   e.stopPropagation();
+                  const sid = studentId || profile?.studentId;
+                  const saveSelectedAndNavigate = (hwId: number) => {
+                    if (sid) {
+                      writeToLocalStorage(
+                        "start_lesson_selected_ids",
+                        JSON.stringify([sid])
+                      );
+                    }
+                    router.push(`/lessons/${hwId}`);
+                  };
                   if (lesson.has_individual_homework) {
-                    router.push(`/lessons/${lesson.homework_lesson_id}`);
+                    saveSelectedAndNavigate(lesson.homework_lesson_id);
                   } else {
                     const res = await fetchPostJson({
                       path: "/lessons/homework/create-my",
                       isSecure: true,
                       data: {
                         lesson_id: lesson.id,
-                        student_id: studentId || profile?.studentId,
+                        student_id: sid,
                       },
                     });
                     const data = await res?.json();
                     checkResponse(data);
                     if (data?.homework_lesson_id) {
-                      router.push(`/lessons/${data.homework_lesson_id}`);
+                      saveSelectedAndNavigate(data.homework_lesson_id);
                     }
                   }
                 }}

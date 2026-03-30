@@ -34,7 +34,10 @@ import { ExList } from "@/app/editor/components/view/ExList";
 import { useExList } from "@/app/editor/hooks/useExList";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
-import { readFromLocalStorage } from "@/auth/utils";
+import {
+  readFromLocalStorage,
+  writeToLocalStorage,
+} from "@/auth/utils";
 import EyeIcon from "@/assets/icons/eye_enable.svg";
 import InfoIcon from "@/assets/icons/info.svg";
 import CheckedYellow from "@/assets/icons/checked_yellow.svg";
@@ -277,6 +280,10 @@ export default function LessonPage() {
                           });
                           const data = await res?.json();
                           if (data?.homework_lesson_id) {
+                            writeToLocalStorage(
+                              "start_lesson_selected_ids",
+                              JSON.stringify([students[0].student_id])
+                            );
                             router.push(
                               `/lessons/${data.homework_lesson_id}`
                             );
@@ -295,11 +302,21 @@ export default function LessonPage() {
                           const data = await res?.json();
                           checkResponse(data);
                           if (data?.homework_lesson_id) {
+                            writeToLocalStorage(
+                              "start_lesson_selected_ids",
+                              JSON.stringify([profile.studentId])
+                            );
                             router.push(
                               `/lessons/${data.homework_lesson_id}`
                             );
                             return;
                           }
+                        }
+                        if (isStudent && profile?.studentId) {
+                          writeToLocalStorage(
+                            "start_lesson_selected_ids",
+                            JSON.stringify([profile.studentId])
+                          );
                         }
                         router.push(
                           `/lessons/${lesson.homework_lesson_id}`

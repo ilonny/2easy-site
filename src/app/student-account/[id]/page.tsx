@@ -148,6 +148,7 @@ export default function StudentAccountPage() {
             showStartLessonButton
             isStudent={isStudent}
             alwaysOpenLessonMode={true}
+            includeCourseLessons
           />
         )}
       </ContentWrapper>

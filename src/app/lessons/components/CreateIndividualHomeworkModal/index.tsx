@@ -13,6 +13,7 @@ import {
 } from "@nextui-org/react";
 import { FC, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { writeToLocalStorage } from "@/auth/utils";
 
 const EX_TYPE_TO_TEMPLATE_KEY: Record<string, string> = {
   "text-default": "templates.text",
@@ -37,9 +38,10 @@ const EX_TYPE_TO_TEMPLATE_KEY: Record<string, string> = {
 const getExDisplayInfo = (
   t: (key: string) => string,
   ex: {
-  type: string;
-  data?: string | Record<string, unknown>;
-}) => {
+    type: string;
+    data?: string | Record<string, unknown>;
+  },
+) => {
   const templateKey = EX_TYPE_TO_TEMPLATE_KEY[ex.type];
   const typeLabel = templateKey ? t(templateKey) : ex.type;
   let title = "";
@@ -80,12 +82,12 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
 
   const onClickEx = useCallback((id: number) => {
     setChosenExIds((ids) =>
-      ids.includes(id) ? ids.filter((i) => i !== id) : ids.concat(id)
+      ids.includes(id) ? ids.filter((i) => i !== id) : ids.concat(id),
     );
   }, []);
 
   const sortedExList = [...exList].sort(
-    (a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0)
+    (a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0),
   );
 
   const onSubmit = useCallback(async () => {
@@ -105,6 +107,10 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
       setIsVisible(false);
       onSuccess?.();
       if (data?.homework_lesson_id) {
+        writeToLocalStorage(
+          "start_lesson_selected_ids",
+          JSON.stringify([Number(studentId)]),
+        );
         router.push(`/lessons/${data.homework_lesson_id}`);
       }
     } catch (e) {
@@ -172,10 +178,22 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
               <p className="text-small text-default-500 mb-2">
                 {t("modals.homeworkIndividualHint")}
               </p>
-              <div className="flex items-center gap-2 mb-4">
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setCreateFromScratch(!createFromScratch)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setCreateFromScratch(!createFromScratch);
+                  }
+                }}
+                className="flex items-center gap-2 mb-4 cursor-pointer select-none w-fit"
+              >
                 <Checkbox
                   isSelected={createFromScratch}
                   onValueChange={setCreateFromScratch}
+                  classNames={{ base: "pointer-events-none" }}
                 >
                   {t("lessons.createFromScratch")}
                 </Checkbox>
@@ -191,21 +209,36 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
                       return (
                         <div
                           key={ex.id}
+                          role="button"
+                          tabIndex={0}
                           onClick={() => onClickEx(ex.id)}
-                          className="p-3 rounded-lg border cursor-pointer hover:bg-default-100"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              onClickEx(ex.id);
+                            }
+                          }}
+                          className="p-3 rounded-lg border cursor-pointer hover:bg-default-100 select-none"
                           style={{
                             borderColor: isChosen ? "#3f28c6" : "#e4e4e7",
                             backgroundColor: isChosen ? "#eeebff" : undefined,
                           }}
                         >
                           <div className="flex items-start gap-3">
-                            <Checkbox isSelected={isChosen} />
+                            <Checkbox
+                              isSelected={isChosen}
+                              classNames={{
+                                base: "pointer-events-none shrink-0",
+                              }}
+                            />
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-small text-default-600">
                                 {typeLabel}
                               </p>
                               {title && (
-                                <p className="font-semibold truncate">{title}</p>
+                                <p className="font-semibold truncate">
+                                  {title}
+                                </p>
                               )}
                               {description && (
                                 <p className="text-small text-default-500 line-clamp-2">
