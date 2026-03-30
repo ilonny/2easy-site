@@ -25,7 +25,7 @@ type TProps = {
   lessonId: string | string[];
 };
 
-const JITSI_DOMAIN = "meet.ffmuc.net";
+const JITSI_DOMAIN = "calls.disroot.org";
 const MIN_W = 280;
 const MIN_H = 200;
 const MAX_W = 600;
