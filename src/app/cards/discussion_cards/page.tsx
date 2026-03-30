@@ -8,8 +8,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { data, shuffledData, tabs } from "./data";
 import { PageLeftBlock } from "@/components/PageLeftBlock";
+import { useTranslation } from "react-i18next";
 
 export default function GrammarPage() {
+  const { t } = useTranslation();
   const { checkSubscription } = useCheckSubscription();
   const router = useRouter();
   useEffect(() => {
@@ -35,10 +37,10 @@ export default function GrammarPage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/cards">Discussion cards</BreadcrumbItem>
+            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
+            <BreadcrumbItem href="/cards">{t("header.discussionCards")}</BreadcrumbItem>
             <BreadcrumbItem href="/cards/discussion_cards">
-              Discussion cards
+              {t("header.discussionCards")}
             </BreadcrumbItem>
           </Breadcrumbs>
         </div>

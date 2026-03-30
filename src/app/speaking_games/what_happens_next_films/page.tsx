@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import { data } from "./data";
 import { PageLeftBlock } from "@/components/PageLeftBlock";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 type TVideoComponentProps = {
   video: {
@@ -57,6 +58,7 @@ const VideoComponent = (props: TVideoComponentProps) => {
 };
 
 export default function GrammarPage() {
+  const { t } = useTranslation();
   const { checkSubscription } = useCheckSubscription();
   const router = useRouter();
   useEffect(() => {
@@ -73,9 +75,9 @@ export default function GrammarPage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">Главная</BreadcrumbItem>
+            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
             <BreadcrumbItem href="/speaking_games">
-              Speaking games
+              {t("header.speakingGames")}
             </BreadcrumbItem>
             <BreadcrumbItem href="/speaking_games/what_happens_next">
               What happens next films & series

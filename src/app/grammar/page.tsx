@@ -66,7 +66,7 @@ export default function GrammarPage() {
           <div className="h-14" />
           <Breadcrumbs>
             <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
-            <BreadcrumbItem href="/grammar">Grammar</BreadcrumbItem>
+            <BreadcrumbItem href="/grammar">{t("grammarPage.breadcrumb")}</BreadcrumbItem>
           </Breadcrumbs>
         </div>
         <div className="h-10" />
@@ -80,15 +80,13 @@ export default function GrammarPage() {
             fontWeight: 700,
           }}
         >
-          GRAMMAR
+          {t("grammarPage.title")}
         </h1>
         <p
           className="max-w-[600px] text-center m-auto"
           style={{ fontSize: 20, fontWeight: 500, lineHeight: "26px" }}
         >
-          В этом разделе нет теории, правил и заданий на раскрытие скобок. Мы
-          собрали здесь только разговорные упражнения и игры, чтобы после
-          прохождения грамматической темы ученик сразу мог отработать ее в речи
+          {t("grammarPage.subtitle")}
         </p>
         <div className="h-10" />
         <div className="h-10" />

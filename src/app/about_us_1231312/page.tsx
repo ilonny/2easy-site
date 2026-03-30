@@ -11,8 +11,10 @@ import Link from "next/link";
 import { SibscribeContext } from "@/subscribe/context";
 import { SubscribeTariffs } from "@/subscribe";
 import bg from "@/assets/images/feedback_bg.svg";
+import { useTranslation } from "react-i18next";
 
 export default function GrammarPage() {
+  const { t } = useTranslation();
   const { subscription } = useContext(SibscribeContext);
 
   const hasTariff =
@@ -24,8 +26,8 @@ export default function GrammarPage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/about_us">About us</BreadcrumbItem>
+            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
+            <BreadcrumbItem href="/about_us">{t("header.aboutUs")}</BreadcrumbItem>
           </Breadcrumbs>
         </div>
         <div className="h-10" />

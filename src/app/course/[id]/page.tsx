@@ -38,7 +38,7 @@ export default function CoursePage() {
           <div className="h-14" />
           <Breadcrumbs>
             <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
-            <BreadcrumbItem href="/lesson_plans">Lesson plans</BreadcrumbItem>
+            <BreadcrumbItem href="/lesson_plans">{t("header.lessonPlans")}</BreadcrumbItem>
             <BreadcrumbItem>{currentCourse?.title}</BreadcrumbItem>
           </Breadcrumbs>
         </div>

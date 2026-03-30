@@ -88,8 +88,10 @@ export default function StudentCoursePage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href={`/`}>Личный кабинет</BreadcrumbItem>
-            <BreadcrumbItem href="/course">Курс</BreadcrumbItem>
+            <BreadcrumbItem href={`/`}>
+              {t("profile.personalCabinetBreadcrumb")}
+            </BreadcrumbItem>
+            <BreadcrumbItem href="/course">{t("lessons.course")}</BreadcrumbItem>
           </Breadcrumbs>
         </div>
         <div className="h-10" />

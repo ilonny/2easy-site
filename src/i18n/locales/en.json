@@ -16,6 +16,7 @@
   "header": {
     "register": "Register",
     "login": "Log in",
+    "aboutUs": "ABOUT US",
     "lessonPlans": "LESSON PLANS",
     "speakingGames": "SPEAKING GAMES",
     "discussionCards": "DISCUSSION CARDS",
@@ -50,6 +51,11 @@
     "speakingGamesSectionDesc": "Games that work great for warm up and any part of the lesson: they really warm up before class and boost the mood",
     "discussionCardsSection": "Discussion cards",
     "discussionCardsSectionDesc": "Non-trivial questions on relevant topics: psychology, relationships, business, feminism and more"
+  },
+  "grammarPage": {
+    "breadcrumb": "Grammar",
+    "title": "GRAMMAR",
+    "subtitle": "No theory, rules, or fill-in-the-blank drills here. We’ve collected only speaking-focused exercises and games, so after learning a grammar topic, your student can immediately practice it in speech."
   },
   "auth": {
     "loginTitle": "Log in",
@@ -135,6 +141,11 @@
   },
   "subscription": {
     "title": "2easy Subscription",
+    "page": {
+      "subtitle": "Access to materials and the lesson builder platform",
+      "description1": "A subscription gives you access to materials and updates released during your subscription period, the lesson builder platform, and your student dashboard for teaching in real time.",
+      "description2": "Your subscription renews automatically. You can cancel anytime in your account or via"
+    },
     "description": "Access to materials, lesson creation platform and student dashboard for conducting real-time lessons",
     "subscriptionBadge": "2EASY Subscription",
     "tariffIncludes": "Each plan includes full access to everything on the site:",

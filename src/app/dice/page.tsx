@@ -2,16 +2,18 @@
 
 import { ContentWrapper } from "@/components";
 import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
+import { useTranslation } from "react-i18next";
 
 export default function GrammarPage() {
+  const { t } = useTranslation();
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/grammar">Grammar</BreadcrumbItem>
+            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
+            <BreadcrumbItem href="/grammar">{t("header.grammar")}</BreadcrumbItem>
             <BreadcrumbItem href="/grammar/be_going_to">
               Be going to
             </BreadcrumbItem>

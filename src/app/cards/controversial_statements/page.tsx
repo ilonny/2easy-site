@@ -16,8 +16,10 @@ import { PageLeftBlock } from "@/components/PageLeftBlock";
 import Link from "next/link";
 import { data } from "./data";
 import { GalleryList } from "@/components/GalleryList";
+import { useTranslation } from "react-i18next";
 
 export default function GrammarPage() {
+  const { t } = useTranslation();
   const { checkSubscription } = useCheckSubscription();
   const router = useRouter();
   useEffect(() => {
@@ -32,8 +34,8 @@ export default function GrammarPage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">Главная</BreadcrumbItem>
-            <BreadcrumbItem href="/cards">Discussion cards</BreadcrumbItem>
+            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
+            <BreadcrumbItem href="/cards">{t("header.discussionCards")}</BreadcrumbItem>
             <BreadcrumbItem href="/cards/controversial_statements">
               Controversial Statements
             </BreadcrumbItem>

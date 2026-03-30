@@ -44,7 +44,7 @@ export default function TabooPage() {
           <Breadcrumbs>
             <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
             <BreadcrumbItem href="/speaking_games">
-              Speaking games
+              {t("header.speakingGames")}
             </BreadcrumbItem>
             <BreadcrumbItem href="/speaking_games/taboo">Taboo</BreadcrumbItem>
           </Breadcrumbs>

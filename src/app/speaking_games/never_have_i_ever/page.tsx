@@ -30,7 +30,7 @@ export default function NeverHaveIEverPage() {
           <Breadcrumbs>
             <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
             <BreadcrumbItem href="/speaking_games">
-              Speaking games
+              {t("header.speakingGames")}
             </BreadcrumbItem>
             <BreadcrumbItem href="/speaking_games/never_have_i_ever">
               Never have i ever
