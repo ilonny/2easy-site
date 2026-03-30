@@ -14,6 +14,7 @@ import CloseIcon from "@/assets/icons/close.svg";
 import Image from "next/image";
 import { fetchPostJson } from "@/api";
 import { sleep } from "@/app/editor/hooks/useExAnswer";
+import { useTranslation } from "react-i18next";
 
 type TProps = {
   lesson_id: number;
@@ -22,6 +23,7 @@ type TProps = {
 };
 
 export const Chat: FC<TProps> = ({ lesson_id, students }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messageList, setMessageList] = useState([]);
 
@@ -76,7 +78,7 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
         size="lg"
         style={{ minWidth: 300 }}
       >
-        Чат урока
+        {t("lessons.lessonChat")}
       </Button>
     );
   }
@@ -88,7 +90,7 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
           <ConversationHeader>
             <ConversationHeader.Content
             // info="Active 10 mins ago"
-            // userName="Чат урока"
+            // userName={t("lessons.lessonChat")}
             />
             <ConversationHeader.Actions>
               <Button
@@ -97,7 +99,7 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
                 variant="light"
                 onClick={() => setIsOpen(false)}
               >
-                Закрыть
+                {t("common.close")}
               </Button>
             </ConversationHeader.Actions>
           </ConversationHeader>
@@ -111,7 +113,7 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
             })}
           </MessageList>
           <MessageInput
-            placeholder="Type message here"
+            placeholder={t("lessons.typeMessage")}
             attachButton={false}
             onSend={sendMessage}
           />

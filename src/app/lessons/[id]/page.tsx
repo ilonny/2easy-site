@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
-// @ts-expect-error - types are provided by project deps during build
 import { useTranslation } from "react-i18next";
 import {
   BreadcrumbItem,
@@ -19,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
   Switch,
+  Tooltip,
 } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
@@ -71,8 +71,39 @@ export default function LessonPage() {
   const [tutorialStep, setTutorialStep] = useState(1);
   const [students, setStudents] = useState<any[]>([]);
   const [activeStudentId, setActiveStudentId] = useState(0);
+  const [teacherFocusExId, setTeacherFocusExId] = useState<number>(0);
+  const lastStudentFocusUpdatedAtRef = useRef<number>(0);
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+
+  const getCurrentExerciseIdInView = useCallback(() => {
+    if (typeof document === "undefined" || typeof window === "undefined") {
+      return 0;
+    }
+    const nodes = Array.from(document.querySelectorAll<HTMLElement>('[id^="ex-"]'));
+    if (!nodes.length) return 0;
+
+    const vh = window.innerHeight || 0;
+    let bestId = 0;
+    let bestScore = Number.POSITIVE_INFINITY;
+
+    for (const el of nodes) {
+      const rect = el.getBoundingClientRect();
+      const visible = rect.bottom > 0 && rect.top < vh;
+      if (!visible) continue;
+
+      const score = Math.abs(rect.top);
+      if (score < bestScore) {
+        const idRaw = (el.id || "").replace("ex-", "");
+        const idNum = Number(idRaw);
+        if (Number.isFinite(idNum) && idNum > 0) {
+          bestId = idNum;
+          bestScore = score;
+        }
+      }
+    }
+    return bestId;
+  }, []);
 
   useEffect(() => {
     const studentIdForLesson =
@@ -111,6 +142,54 @@ export default function LessonPage() {
   useEffect(() => {
     fetchStudents();
   }, [fetchStudents]);
+
+  useEffect(() => {
+    if (!isTeacher) return;
+    let active = true;
+    const interval = setInterval(() => {
+      if (!active) return;
+      const id = getCurrentExerciseIdInView();
+      if (id) {
+        setTeacherFocusExId(id);
+      }
+    }, 500);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [isTeacher, getCurrentExerciseIdInView]);
+
+  useEffect(() => {
+    if (!isStudent) return;
+    let active = true;
+    const lessonId = Number(params.id) || 0;
+    if (!lessonId) return;
+
+    const interval = setInterval(async () => {
+      if (!active) return;
+      try {
+        const res = await fetchGet({
+          path: `/lesson-focus?lesson_id=${lessonId}`,
+          isSecure: true,
+        });
+        const data = await res?.json();
+        const focus = data?.focus;
+        const updatedAt = Number(focus?.updated_at_ms || 0);
+        const exId = Number(focus?.ex_id || 0);
+        if (!updatedAt || !exId) return;
+        if (updatedAt === lastStudentFocusUpdatedAtRef.current) return;
+
+        lastStudentFocusUpdatedAtRef.current = updatedAt;
+        const el = document.getElementById(`ex-${exId}`);
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (err) {}
+    }, 1000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [isStudent, params.id]);
 
   useEffect(() => {
     if (!isStudent) {
@@ -392,6 +471,89 @@ export default function LessonPage() {
                   </div>
                 );
               })}
+              {isTeacher && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="flat"
+                    color="default"
+                    className="flex-1"
+                    size="md"
+                    style={{
+                      justifyContent: "center",
+                      whiteSpace: "normal",
+                      height: "auto",
+                      minHeight: 44,
+                      paddingTop: 10,
+                      paddingBottom: 10,
+                      lineHeight: "120%",
+                      textAlign: "center",
+                      backgroundColor: "#F3F4F6",
+                      color: "#111827",
+                      border: "1px solid rgba(17,24,39,0.12)",
+                    }}
+                    onClick={async () => {
+                      const lessonId = Number(params.id) || 0;
+                      const exId = teacherFocusExId || getCurrentExerciseIdInView();
+                      if (!lessonId || !exId) {
+                        toast(t("lessons.focusScroll.cantDetectCurrentTask"), {
+                          type: "error",
+                        });
+                        return;
+                      }
+                      try {
+                        const res = await fetchPostJson({
+                          path: "/lesson-focus",
+                          isSecure: true,
+                          data: { lesson_id: lessonId, ex_id: exId },
+                        });
+                        const data = await res?.json();
+                        checkResponse(data, true);
+                      } catch (err) {}
+                    }}
+                  >
+                    {t("lessons.focusScroll.button")}
+                  </Button>
+                  <Tooltip
+                    content={
+                      <div style={{ maxWidth: 320, whiteSpace: "normal", lineHeight: "140%" }}>
+                        {t("lessons.focusScroll.tooltip")}
+                      </div>
+                    }
+                    placement="left"
+                    closeDelay={0}
+                  >
+                    <div
+                      role="button"
+                      aria-label="help"
+                      tabIndex={0}
+                      className="shrink-0"
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: 999,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "rgba(63,40,198,0.06)",
+                        border: "1px solid rgba(63,40,198,0.14)",
+                        cursor: "pointer",
+                        userSelect: "none",
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      <img
+                        src={InfoIcon.src}
+                        alt="info"
+                        style={{ width: 16, height: 16, opacity: 0.9 }}
+                      />
+                    </div>
+                  </Tooltip>
+                </div>
+              )}
               {/* пока скрываем */}
               {/* {!!activeStudentId && (
                 <Button
@@ -564,7 +726,7 @@ export default function LessonPage() {
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
                     <p>
-                      делать заметки или записывать новые слова в чате урока
+                      {t("lessons.lessonChatNotes")}
                     </p>
                   </div>
                   <div className="flex items-start gap-2 mb-2">
@@ -572,8 +734,7 @@ export default function LessonPage() {
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
                     <p style={{ color: "#ACACAC", fontSize: 12 }}>
-                      *История чата сохраняется: если ученик снова зайдет в
-                      урок, он будет видеть все сообщения
+                      {t("lessons.lessonChatHistory")}
                     </p>
                   </div>
                 </div>

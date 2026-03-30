@@ -246,6 +246,10 @@
     "courseClosed": "Course closed",
     "lessonClosed": "Lesson closed",
     "lessonLinkCopied": "Lesson link copied to clipboard. You can share it with any 2EASY user",
+    "lessonChat": "Lesson chat",
+    "lessonChatNotes": "make notes or write down new words in the lesson chat",
+    "lessonChatHistory": "*Chat history is saved: if the student enters the lesson again, they will see all messages",
+    "typeMessage": "Type a message",
     "shareLessonWithTeacher": "Share lesson with another teacher",
     "shareLessonHint": "You can share this lesson with other 2EASY users, they will be able to view and copy it, just share the link below:",
     "edit": "Edit",
@@ -273,7 +277,12 @@
     "noCourses": "You don't have any courses yet",
     "deleteLessonConfirm": "Delete {{type}} {{title}}?",
     "course": "Course",
-    "lesson": "lesson"
+    "lesson": "lesson",
+    "focusScroll": {
+      "button": "To my task",
+      "tooltip": "Use this if students got lost during the lesson. When you click the button, all students in the lesson will be moved to the current task you’re looking at.",
+      "cantDetectCurrentTask": "Couldn't detect the current task on the screen"
+    }
   },
   "editor": {
     "home": "Home",
