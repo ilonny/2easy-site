@@ -25,7 +25,7 @@ type TProps = {
   lessonId: string | string[];
 };
 
-const JITSI_DOMAIN = "calls.disroot.org";
+const JITSI_DOMAIN = "meet.greenhost.net";
 const MIN_W = 280;
 const MIN_H = 200;
 const MAX_W = 600;
