@@ -201,7 +201,13 @@ export const CreateCourseModalForm: FC<TProps> = ({
           <Image
             src={DragHandleIcon.src}
             alt={t("editor.dragHint")}
-            style={{ flexShrink: 0, width: 20, height: 20 }}
+            style={{
+              flexShrink: 0,
+              width: 20,
+              height: 20,
+              transform: "rotate(90deg)",
+              transformOrigin: "center",
+            }}
           />
         </span>
         <Card
