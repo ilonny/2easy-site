@@ -32,6 +32,20 @@ const MAX_W = 600;
 const MAX_H = 500;
 const DEFAULT_W = 360;
 const DEFAULT_H = 380;
+/** Окно компактнее на телефонах */
+const MOBILE_BREAKPOINT = 640;
+const DEFAULT_W_MOBILE = 280;
+const DEFAULT_H_MOBILE = 240;
+
+function getDefaultVideoSize(): { w: number; h: number } {
+  if (typeof window === "undefined") return { w: DEFAULT_W, h: DEFAULT_H };
+  if (window.innerWidth > MOBILE_BREAKPOINT) {
+    return { w: DEFAULT_W, h: DEFAULT_H };
+  }
+  const w = Math.min(DEFAULT_W_MOBILE, Math.max(MIN_W, window.innerWidth - 24));
+  const h = Math.min(DEFAULT_H_MOBILE, Math.max(MIN_H, Math.floor(window.innerHeight * 0.32)));
+  return { w, h };
+}
 
 const VideoIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -80,11 +94,12 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
 
   const onOpen = useCallback(() => {
     if (!roomId) return;
+    const { w, h } = getDefaultVideoSize();
     setPosition({
-      x: typeof window !== "undefined" ? Math.max(0, window.innerWidth - DEFAULT_W - 40) : 100,
-      y: typeof window !== "undefined" ? Math.max(0, window.innerHeight - DEFAULT_H - 120) : 100,
+      x: typeof window !== "undefined" ? Math.max(0, window.innerWidth - w - 16) : 100,
+      y: typeof window !== "undefined" ? Math.max(0, window.innerHeight - h - 100) : 100,
     });
-    setSize({ w: DEFAULT_W, h: DEFAULT_H });
+    setSize({ w, h });
     setIsOpen(true);
   }, [roomId]);
 
@@ -160,10 +175,13 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
   useEffect(() => {
     if (!isResizing) return;
     const onMove = (e: MouseEvent) => {
+      const isMobile = typeof window !== "undefined" && window.innerWidth <= MOBILE_BREAKPOINT;
+      const capW = isMobile ? Math.min(MAX_W, window.innerWidth - 8) : MAX_W;
+      const capH = isMobile ? Math.min(MAX_H, window.innerHeight - 48) : MAX_H;
       const dx = e.clientX - resizeStartRef.current.x;
       const dy = e.clientY - resizeStartRef.current.y;
-      const newW = Math.min(MAX_W, Math.max(MIN_W, resizeStartRef.current.w - dx));
-      const newH = Math.min(MAX_H, Math.max(MIN_H, resizeStartRef.current.h - dy));
+      const newW = Math.min(capW, Math.max(MIN_W, resizeStartRef.current.w - dx));
+      const newH = Math.min(capH, Math.max(MIN_H, resizeStartRef.current.h - dy));
       const actualDx = resizeStartRef.current.w - newW;
       const actualDy = resizeStartRef.current.h - newH;
       setSize({ w: newW, h: newH });
