@@ -14,6 +14,11 @@ export function LanguageSwitcher() {
   const currentLang = i18n.language?.startsWith("ru") ? "ru" : "en";
 
   const handleChange = (lang: string) => {
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("i18nextLng", lang);
+      }
+    } catch {}
     i18n.changeLanguage(lang);
   };
 

@@ -94,7 +94,7 @@ export const ProfileLessons = (props: TProps) => {
     deleteCourseRelation,
   } = useLessons(studentId, searchString, !!profile?.name, includeCourseLessons);
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const data = useMemo(() => {
     const title =
       tabIndex === "userLessons"
@@ -250,16 +250,22 @@ export const ProfileLessons = (props: TProps) => {
       setActiveFilterTab(tabsToRender?.[0] || "");
     }
     setFilterSearchString("");
-  }, [tabsToRender, tabIndex]);
+  }, [tabsToRender, tabIndex, i18n.language]);
 
   const filteredLessons = useMemo(() => {
     let res = lessonsToRender;
-    if (activeFilterTab !== "All lessons") {
+    const effectiveFilterTab =
+      i18n.language === "en" &&
+      activeFilterTab.trim().toLowerCase() === "tutorial"
+        ? "tutorial-en"
+        : activeFilterTab;
+
+    if (effectiveFilterTab !== "All lessons") {
       res = res.filter((lesson: TLesson) => {
-        if (activeFilterTab === HOMEWORK_TAG) {
+        if (effectiveFilterTab === HOMEWORK_TAG) {
           return hasHomeworkTag(lesson);
         }
-        const tagsFilterTabArray = activeFilterTab
+        const tagsFilterTabArray = effectiveFilterTab
           .replace(/\s+/g, "")
           .replace("+", "")
           .split("-")
@@ -320,6 +326,7 @@ export const ProfileLessons = (props: TProps) => {
     filterSearchString,
     isFreeTariff,
     hasHomeworkTag,
+    i18n.language,
   ]);
 
   // useEffect(() => {
