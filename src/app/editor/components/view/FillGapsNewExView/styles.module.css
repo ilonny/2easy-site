@@ -1,0 +1,87 @@
+.root {
+  padding: 28px 0;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card {
+  padding: 22px;
+  border-radius: 16px;
+  box-shadow: 0px 8px 24px 0px #908ba826;
+}
+
+.title {
+  font-weight: 700;
+  color: #3f28c6;
+  margin-bottom: 14px;
+}
+
+.pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+  background: #f7f7ff;
+  border: 1px solid #e7e5ff;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.draggableChip {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.dragGhost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: translate3d(var(--x), var(--y), 0);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.gapDrop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #eeebff;
+  border: 1px dashed #3f28c6;
+  font-weight: 700;
+  color: #3f28c6;
+}
+
+.gapDropFilled {
+  background: #a7f3d0;
+  border: 1px solid rgba(22, 163, 74, 0.95);
+  color: #3f2a1d !important;
+}
+
+.gapDropIncorrect {
+  background: #ffe5e5;
+  border: 1px solid rgba(220, 38, 38, 0.5);
+  color: #7f1d1d;
+}
+
+.gapInput {
+  min-width: 180px;
+}
+
+.gapSelect {
+  min-width: 180px;
+}
+
+/* Draft.js in some cases makes the readOnly surface non-interactive.
+   We still need pointer events for embedded Inputs/Selects inside GAP entities. */
+.root :global(.DraftEditor-root),
+.root :global(.DraftEditor-editorContainer),
+.root :global(.public-DraftEditor-content) {
+  pointer-events: auto;
+}
+

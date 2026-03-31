@@ -53,6 +53,10 @@
     "react-sortable-hoc": "^2.0.0",
     "react-toastify": "^11.0.5",
     "sass": "^1.85.1",
+    "slate": "^0.124.0",
+    "slate-dom": "^0.124.0",
+    "slate-history": "^0.113.1",
+    "slate-react": "^0.124.0",
     "slick-carousel": "^1.8.1",
     "use-debounce": "^10.0.4",
     "use-file-picker": "^2.1.2"

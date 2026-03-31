@@ -164,6 +164,7 @@ export default function LessonPage() {
 
         lastStudentFocusUpdatedAtRef.current = updatedAt;
         const el = document.getElementById(`ex-${exId}`);
+        console.log('focus????')
         el?.scrollIntoView({ behavior: "smooth", block: "start" });
       } catch (err) {}
     }, 1000);

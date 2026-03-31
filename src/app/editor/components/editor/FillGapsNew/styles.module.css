@@ -1,0 +1,167 @@
+.editorCard {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0px 8px 24px 0px #908ba826;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.question {
+  font-weight: 700;
+  font-size: 16px;
+  color: #111827;
+}
+
+.hint {
+  font-size: 13px;
+  color: rgba(17, 24, 39, 0.6);
+  margin-top: 4px;
+}
+
+.howto {
+  margin-top: 8px;
+  font-size: 13px;
+  color: rgba(17, 24, 39, 0.75);
+  background: rgba(63, 40, 198, 0.06);
+  border: 1px solid rgba(63, 40, 198, 0.12);
+  padding: 10px 12px;
+  border-radius: 12px;
+  line-height: 1.35;
+}
+
+.modeRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.modeCard {
+  text-align: left;
+  border-radius: 14px;
+  padding: 12px 12px;
+  background: #ffffff;
+  border: 1px solid rgba(63, 40, 198, 0.18);
+  box-shadow: 0px 8px 24px 0px #908ba812;
+  transition: transform 120ms ease, border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.modeCard:hover {
+  border-color: rgba(63, 40, 198, 0.35);
+}
+
+.modeCardActive {
+  border-color: #3f28c6;
+  box-shadow: 0px 10px 30px 0px #3f28c61f;
+}
+
+.modeTitle {
+  font-weight: 800;
+  color: #3f28c6;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+}
+
+.modeDesc {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(17, 24, 39, 0.65);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.toolbarButton {
+  height: 36px;
+  min-width: 36px;
+}
+
+.iconBold {
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.iconItalic {
+  font-style: italic;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.iconUnderline {
+  text-decoration: underline;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.colorSwatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.draftWrapper {
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.draftArea {
+  min-height: 180px;
+  padding: 12px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.gapPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #eeebff;
+  border: 1px dashed #3f28c6;
+  color: #3f28c6;
+  font-weight: 700;
+}
+
+.draftArea :global([contenteditable="true"]) {
+  outline: none;
+  -webkit-user-select: text;
+  user-select: text;
+  touch-action: manipulation;
+}
+
+@media (max-width: 768px) {
+  .modeRow {
+    grid-template-columns: 1fr;
+  }
+  .toolbar {
+    gap: 6px;
+  }
+  .toolbarButton {
+    height: 34px;
+    min-width: 34px;
+  }
+  .draftArea {
+    font-size: 16px;
+    padding: 10px;
+  }
+}
+

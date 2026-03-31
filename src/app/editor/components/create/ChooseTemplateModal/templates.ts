@@ -59,6 +59,12 @@ export const templates: TTemplate[] = [
     ],
   },
   {
+    type: "FILL_GAPS_NEW",
+    title: "Заполнить пропуски (NEW)",
+    description: "Создание задания на основе произвольного текста",
+    bgImage: FillGapsBg,
+  },
+  {
     type: "image",
     title: "Изображения",
     description: "jpg, png, gif, webp",

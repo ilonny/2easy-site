@@ -27,6 +27,8 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return "Вписать слово в пропуск";
     case "fill-gaps-drag":
       return "Перетащить слово из списка";
+    case "FILL_GAPS_NEW":
+      return "Заполнить пропуски (NEW)";
     case "match-word-word":
       return "Match слова с определением";
     case "match-word-image":

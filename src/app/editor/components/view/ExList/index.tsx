@@ -33,6 +33,7 @@ import { NoteExView } from "../NoteExView";
 import { FillGapsSelectExView } from "../FillGapsSelectExView";
 import { FillGapsInputExView } from "../FillGapsInputExView";
 import { FillGapsDragExView } from "../FillGapsDragExView";
+import { FillGapsNewExView } from "../FillGapsNewExView";
 import { MatchWordWordExView } from "../MatchWordWordExView";
 import { MatchWordImageExView } from "../MatchWordImageExView";
 import { MatchWordColumnExView } from "../MatchWordColumnExView";
@@ -127,6 +128,16 @@ const mapComponent = (type: string, outerProps: never) => {
     case "fill-gaps-drag":
       return (props) => (
         <FillGapsDragExView
+          {...props}
+          data={{
+            ...props.data,
+            id: outerProps.id,
+          }}
+        />
+      );
+    case "FILL_GAPS_NEW":
+      return (props) => (
+        <FillGapsNewExView
           {...props}
           data={{
             ...props.data,
@@ -525,12 +536,38 @@ export const ExListComp: FC<TProps> = (props) => {
   };
 
   useEffect(() => {
-    if (window.location.hash) {
-      const id = window.location.hash.replace("#", "");
+    const scrollToHashOnce = () => {
+      const hash = window.location.hash || "";
+      if (!hash) return;
+      // store on window to persist across remounts
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const w = window as any;
+      w.__lastScrolledHash = w.__lastScrolledHash || "";
+      if (w.__lastScrolledHash === hash) {
+        return;
+      }
+      w.__lastScrolledHash = hash;
+
+      const id = hash.replace("#", "");
       const el = document.getElementById(id);
       el?.scrollIntoView();
-    }
-  }, [list]);
+
+      try {
+        window.history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.search,
+        );
+      } catch (e) {}
+    };
+
+    // run once on mount, and on explicit hash changes only
+    scrollToHashOnce();
+    window.addEventListener("hashchange", scrollToHashOnce);
+    return () => {
+      window.removeEventListener("hashchange", scrollToHashOnce);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col gap-10">

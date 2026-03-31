@@ -1,5 +1,5 @@
 import { fetchGet, fetchPostJson } from "@/api";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { getImageUrl } from "../helpers";
 
 const mapImageExData = (data: string) => {
@@ -128,6 +128,55 @@ const mapFillGapsSelectEx = (data: string) => {
   return parsedData;
 };
 
+const mapFillGapsNewExData = (data: string) => {
+  const parsedData = data ? JSON.parse(data) : {};
+  if (typeof parsedData?.title !== "string") {
+    parsedData.title = "Let's practice!";
+  }
+  if (typeof parsedData?.titleColor !== "string") {
+    parsedData.titleColor = "#3F28C6";
+  }
+  if (typeof parsedData?.subtitle !== "string") {
+    parsedData.subtitle = "Fill in the gaps with the correct words";
+  }
+  if (typeof parsedData?.description !== "string") {
+    parsedData.description = "";
+  }
+  if (!Array.isArray(parsedData?.images)) {
+    // keep backward compat with other tasks that store attachments under bgAttachments
+    if (Array.isArray(parsedData?.bgAttachments)) {
+      parsedData.images = parsedData.bgAttachments?.map((a) => {
+        return {
+          ...a,
+          dataURL: getImageUrl(a.path),
+        };
+      });
+    } else {
+      parsedData.images = [];
+    }
+  }
+  // Ensure image objects have dataURL for rendering (viewer uses it)
+  if (Array.isArray(parsedData?.images)) {
+    parsedData.images = parsedData.images.map((img) => {
+      if (img?.dataURL) return img;
+      if (img?.path) {
+        return { ...img, dataURL: getImageUrl(img.path) };
+      }
+      return img;
+    });
+  }
+  if (typeof parsedData?.mode !== "string") {
+    parsedData.mode = "input";
+  }
+  if (!Array.isArray(parsedData?.content)) {
+    parsedData.content = [];
+  }
+  if (!Array.isArray(parsedData?.gaps)) {
+    parsedData.gaps = [];
+  }
+  return parsedData;
+};
+
 const getDataMapper = (type: string) => {
   switch (type) {
     case "image":
@@ -152,6 +201,8 @@ const getDataMapper = (type: string) => {
       return mapFillGapsSelectEx;
     case "fill-gaps-drag":
       return mapFillGapsSelectEx;
+    case "FILL_GAPS_NEW":
+      return mapFillGapsNewExData;
     case "match-word-word":
       return mapFillGapsSelectEx;
     case "match-word-column":
@@ -168,40 +219,70 @@ const getDataMapper = (type: string) => {
 export const useExList = (lesson_id?: number, isPresentationMode?: boolean) => {
   const [exListIsLoading, setExListIsLoading] = useState(false);
   const [exList, setExList] = useState([]);
+  const inFlightRef = useRef<Promise<any> | null>(null);
+  const inFlightKeyRef = useRef<string>("");
 
   const getExList = useCallback(
     async (_lesson_id?: number, hash?: string) => {
+      const key = `${_lesson_id || lesson_id || ""}|${hash || ""}|${
+        isPresentationMode ? "1" : "0"
+      }`;
+
+      // If the exact same request is already running, reuse it.
+      if (inFlightRef.current && inFlightKeyRef.current === key) {
+        return await inFlightRef.current;
+      }
+
       setExListIsLoading(true);
-      const listRes = await fetchGet({
-        path: `/ex/list?lesson_id=${_lesson_id || lesson_id}&hash=${hash || ""}`,
-        isSecure: true,
-      });
-      const list = await listRes?.json();
-      if (!list?.map) {
-        return;
-      }
-      let mappedList = list
-        ?.map((l, index) => {
-          const dataMapper = getDataMapper(l.type);
-          return {
-            ...l,
-            data: dataMapper(l.data),
-            sortIndex: l.sortIndex,
-          };
-        })
-        ?.sort((a, b) => {
-          if (a.sortIndex < b.sortIndex) return -1;
-          if (a.sortIndex > b.sortIndex) return 1;
-          return 0;
-        });
-      if (isPresentationMode) {
-        mappedList = mappedList.filter(
-          (l) =>
-            l.is_visible === null || l.is_visible === "1" || l.is_visible === 1,
-        );
-      }
-      setExList(mappedList || []);
-      setExListIsLoading(false);
+      inFlightKeyRef.current = key;
+      const p = (async () => {
+        try {
+          const listRes = await fetchGet({
+            path: `/ex/list?lesson_id=${
+              _lesson_id || lesson_id
+            }&hash=${hash || ""}`,
+            isSecure: true,
+          });
+          const list = await listRes?.json();
+          if (!list?.map) {
+            setExList([]);
+            return list;
+          }
+          let mappedList = list
+            ?.map((l) => {
+              const dataMapper = getDataMapper(l.type);
+              return {
+                ...l,
+                data: dataMapper(l.data),
+                sortIndex: l.sortIndex,
+              };
+            })
+            ?.sort((a, b) => {
+              if (a.sortIndex < b.sortIndex) return -1;
+              if (a.sortIndex > b.sortIndex) return 1;
+              return 0;
+            });
+          if (isPresentationMode) {
+            mappedList = mappedList.filter(
+              (l) =>
+                l.is_visible === null ||
+                l.is_visible === "1" ||
+                l.is_visible === 1,
+            );
+          }
+          setExList(mappedList || []);
+          return list;
+        } finally {
+          // Only clear if this is still the latest request key
+          if (inFlightKeyRef.current === key) {
+            inFlightRef.current = null;
+          }
+          setExListIsLoading(false);
+        }
+      })();
+
+      inFlightRef.current = p;
+      return await p;
     },
     [isPresentationMode, lesson_id],
   );
