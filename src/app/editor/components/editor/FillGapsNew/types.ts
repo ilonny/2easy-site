@@ -1,3 +1,5 @@
+"use client";
+
 export type TFillGapsNewMode = "input" | "select" | "drag";
 
 export type TSlateText = {
@@ -11,7 +13,7 @@ export type TSlateText = {
 export type TSlateGapElement = {
   type: "gap";
   gapId: string;
-  children: TSlateText[]; // required by Slate even for void
+  children: TSlateText[];
 };
 
 export type TSlateParagraphElement = {

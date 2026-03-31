@@ -1,3 +1,5 @@
+"use client";
+
 import { checkResponse, fetchPostJson } from "@/api";
 import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";

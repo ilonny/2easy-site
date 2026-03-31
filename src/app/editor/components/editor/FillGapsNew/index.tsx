@@ -17,12 +17,18 @@ import {
   TFillGapsNewGap,
   TFillGapsNewMode,
   TSlateGapElement,
-  TSlateParagraphElement,
   TSlateText,
 } from "./types";
 import styles from "./styles.module.css";
-import { createEditor, Editor, Element as SlateElement, Transforms } from "slate";
-import { ReactEditor, Slate, Editable, withReact, RenderElementProps, RenderLeafProps } from "slate-react";
+import { createEditor, Editor, Transforms } from "slate";
+import {
+  Editable,
+  ReactEditor,
+  RenderElementProps,
+  RenderLeafProps,
+  Slate,
+  withReact,
+} from "slate-react";
 import { withHistory } from "slate-history";
 
 const COLORS = ["#3F28C6", "#111827", "#16A34A", "#DC2626", "#2563EB", "#F59E0B"];
@@ -77,9 +83,18 @@ export const FillGapsNew: FC<TProps> = ({
     changeData("images", images || []);
   }, [changeData, images]);
 
+  useEffect(() => {
+    if (success) {
+      onSuccess?.((data as any)?.id || 0);
+      resetData(defaultValuesStub);
+    }
+  }, [data, onSuccess, resetData, success]);
+
   const [gapModalOpen, setGapModalOpen] = useState(false);
   const [activeGapId, setActiveGapId] = useState<string | null>(null);
-  const [initialCorrectText, setInitialCorrectText] = useState<string | undefined>(undefined);
+  const [initialCorrectText, setInitialCorrectText] = useState<string | undefined>(
+    undefined,
+  );
   const [slateMountKey, setSlateMountKey] = useState(0);
 
   const editor = useMemo(() => {
@@ -95,21 +110,12 @@ export const FillGapsNew: FC<TProps> = ({
   }, [slateMountKey]);
 
   useEffect(() => {
-    // When switching between exercises / loading external data, remount Slate
-    // to avoid stale node references that crash slate-dom findPath on iOS.
     setSlateMountKey((k) => k + 1);
     if (!Array.isArray(data.content) || data.content.length === 0) {
       changeData("content", defaultValuesStub.content);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.id]);
-
-  useEffect(() => {
-    if (success) {
-      onSuccess?.((data as any)?.id || 0);
-      resetData(defaultValuesStub);
-    }
-  }, [data, onSuccess, resetData, success]);
 
   const modes = useMemo(
     () =>
@@ -120,10 +126,6 @@ export const FillGapsNew: FC<TProps> = ({
       ] as const,
     [],
   );
-
-  const customStyleMap = useMemo(() => {
-    return {};
-  }, []);
 
   const toggleMark = useCallback(
     (mark: "bold" | "italic" | "underline") => {
@@ -145,14 +147,11 @@ export const FillGapsNew: FC<TProps> = ({
     [editor],
   );
 
-  const openGapModalFor = useCallback(
-    (gapId: string, correctText?: string) => {
-      setActiveGapId(gapId);
-      setInitialCorrectText(correctText);
-      setGapModalOpen(true);
-    },
-    [],
-  );
+  const openGapModalFor = useCallback((gapId: string, correctText?: string) => {
+    setActiveGapId(gapId);
+    setInitialCorrectText(correctText);
+    setGapModalOpen(true);
+  }, []);
 
   const makeGap = useCallback(() => {
     const selection = editor.selection;
@@ -166,10 +165,8 @@ export const FillGapsNew: FC<TProps> = ({
       gapId,
       children: [{ text: "" }],
     };
-    // Replace selection with gap element
     Transforms.delete(editor, { at: selection });
     Transforms.insertNodes(editor, gapEl);
-    // Move cursor after gap
     Transforms.move(editor);
 
     const gap: TFillGapsNewGap = { id: gapId, options: [] };
@@ -226,7 +223,7 @@ export const FillGapsNew: FC<TProps> = ({
 
   const renderLeaf = useCallback((props: RenderLeafProps) => {
     const leaf = props.leaf as any as TSlateText;
-    let style: any = {};
+    const style: any = {};
     if (leaf.bold) style.fontWeight = 700;
     if (leaf.italic) style.fontStyle = "italic";
     if (leaf.underline) style.textDecoration = "underline";
@@ -301,9 +298,8 @@ export const FillGapsNew: FC<TProps> = ({
               Выберите режим выполнения. Его можно менять в любой момент.
             </div>
             <div className={styles.howto}>
-              1) Напишите текст задания. 2) Выделите фрагмент, который должен
-              стать пропуском. 3) Нажмите «Сделать пропуск» и добавьте варианты
-              ответа.
+              1) Напишите текст задания. 2) Выделите фрагмент, который должен стать
+              пропуском. 3) Нажмите «Сделать пропуск» и добавьте варианты ответа.
             </div>
           </div>
         </div>
@@ -315,9 +311,7 @@ export const FillGapsNew: FC<TProps> = ({
               <button
                 key={m.id}
                 type="button"
-                className={`${styles.modeCard} ${
-                  isActive ? styles.modeCardActive : ""
-                }`}
+                className={`${styles.modeCard} ${isActive ? styles.modeCardActive : ""}`}
                 onClick={() => changeData("mode", m.id as TFillGapsNewMode)}
               >
                 <div className={styles.modeTitle}>{m.title}</div>
@@ -392,68 +386,54 @@ export const FillGapsNew: FC<TProps> = ({
       <div className="h-4" />
 
       <div className={styles.editorCard}>
-        <div className={styles.draftWrapper}>
-          <div className={styles.draftArea}>
-            <Slate
-              key={`fg-new-editor-${data?.id || "new"}-${slateMountKey}`}
-              editor={editor as any}
-              initialValue={initialValue as any}
-              onChange={(val: any) => {
-                changeData("content", val as TFillGapsNewContent);
-              }}
-            >
-              <Editable
-                renderElement={renderElement}
-                renderLeaf={renderLeaf}
-                placeholder="Начните писать..."
-                spellCheck
-                onPointerDown={() => {
-                  try {
-                    ReactEditor.focus(editor as any);
-                  } catch (e) {}
-                }}
-                onTouchStart={() => {
-                  try {
-                    ReactEditor.focus(editor as any);
-                  } catch (e) {}
-                }}
-                onKeyDown={(event) => {
-                  if (!event.ctrlKey && !event.metaKey) return;
-                  if (event.key.toLowerCase() === "b") {
-                    event.preventDefault();
-                    toggleMark("bold");
-                  }
-                  if (event.key.toLowerCase() === "i") {
-                    event.preventDefault();
-                    toggleMark("italic");
-                  }
-                  if (event.key.toLowerCase() === "u") {
-                    event.preventDefault();
-                    toggleMark("underline");
-                  }
-                }}
-              />
-            </Slate>
-          </div>
-        </div>
+        <Slate
+          key={`fg-new-editor-${data?.id || "new"}-${slateMountKey}`}
+          editor={editor as any}
+          initialValue={initialValue as any}
+          onChange={(val: any) => {
+            changeData("content", val as TFillGapsNewContent);
+          }}
+        >
+          <Editable
+            renderElement={renderElement}
+            renderLeaf={renderLeaf}
+            placeholder="Начните писать..."
+            spellCheck
+            onPointerDown={() => {
+              try {
+                ReactEditor.focus(editor as any);
+              } catch {}
+            }}
+            onTouchStart={() => {
+              try {
+                ReactEditor.focus(editor as any);
+              } catch {}
+            }}
+            onKeyDown={(event) => {
+              if (!event.ctrlKey && !event.metaKey) return;
+              if (event.key.toLowerCase() === "b") {
+                event.preventDefault();
+                toggleMark("bold");
+              }
+              if (event.key.toLowerCase() === "i") {
+                event.preventDefault();
+                toggleMark("italic");
+              }
+              if (event.key.toLowerCase() === "u") {
+                event.preventDefault();
+                toggleMark("underline");
+              }
+            }}
+          />
+        </Slate>
       </div>
 
       <div className="h-10" />
 
       <div>
         <p className="font-light mb-2">Превью</p>
-        <div
-          style={{
-            border: "1px solid #3F28C6",
-            borderRadius: 4,
-            background: "#fff",
-          }}
-        >
-          <FillGapsNewExView
-            key={`fg-new-preview-${data.mode}`}
-            data={data}
-            isPreview
-          />
+        <div style={{ border: "1px solid #3F28C6", borderRadius: 4, background: "#fff" }}>
+          <FillGapsNewExView key={`fg-new-preview-${data.mode}`} data={data} isPreview />
         </div>
         <div className="h-5" />
         <div className="flex justify-center">

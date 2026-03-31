@@ -536,38 +536,12 @@ export const ExListComp: FC<TProps> = (props) => {
   };
 
   useEffect(() => {
-    const scrollToHashOnce = () => {
-      const hash = window.location.hash || "";
-      if (!hash) return;
-      // store on window to persist across remounts
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const w = window as any;
-      w.__lastScrolledHash = w.__lastScrolledHash || "";
-      if (w.__lastScrolledHash === hash) {
-        return;
-      }
-      w.__lastScrolledHash = hash;
-
-      const id = hash.replace("#", "");
+    if (window.location.hash) {
+      const id = window.location.hash.replace("#", "");
       const el = document.getElementById(id);
       el?.scrollIntoView();
-
-      try {
-        window.history.replaceState(
-          null,
-          "",
-          window.location.pathname + window.location.search,
-        );
-      } catch (e) {}
-    };
-
-    // run once on mount, and on explicit hash changes only
-    scrollToHashOnce();
-    window.addEventListener("hashchange", scrollToHashOnce);
-    return () => {
-      window.removeEventListener("hashchange", scrollToHashOnce);
-    };
-  }, []);
+    }
+  }, [list]);
 
   return (
     <div className="flex flex-col gap-10">

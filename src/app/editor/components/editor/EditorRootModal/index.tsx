@@ -1,5 +1,6 @@
-import { FC, useEffect, useMemo, useRef } from "react";
+import { FC, useContext, useMemo } from "react";
 import { TTemplate } from "../../create/ChooseTemplateModal/templates";
+import { AuthContext } from "@/auth/context";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@nextui-org/react";
 import { mapTypeToTitle } from "../mappers";
 import { ImageEx } from "../ImageEx";
@@ -13,13 +14,16 @@ import { Note } from "../Note";
 import { FillGapsSelect } from "../FillGapsSelect";
 import { FillGapsInput } from "../FillGapsInput";
 import { FillGapsDrag } from "../FillGapsDrag";
-import { FillGapsNew } from "../FillGapsNew";
 import { MatchWordWord } from "../MatchWordWord";
 import { MatchWordImage } from "../MatchWordImage";
 import { MatchWordColumn } from "../MatchWordColumn";
 import { TestEx } from "../TestEx";
 import { FreeInputFormEx } from "../FreeInputFormEx";
 import { IntEx } from "../Int";
+import { FillGapsNew } from "../FillGapsNew";
+
+const canEditFillGapsNew = (profileId: number | undefined) =>
+  profileId != null && (Number(profileId) === 15 || Number(profileId) === 18);
 
 type TProps = {
   isVisible: boolean;
@@ -44,58 +48,7 @@ export const EditorRootModal: FC<TProps> = ({
   lastSortIndex,
   currentSortIndexToShift,
 }) => {
-  const scrollYRef = useRef<number>(0);
-  const isIOS =
-    typeof navigator !== "undefined" &&
-    /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-    // @ts-ignore
-    !(window as any)?.MSStream;
-
-  useEffect(() => {
-    if (!isVisible) return;
-    if (!isIOS) return;
-
-    // iOS Safari can "jump" the window scroll when focusing inputs inside fixed modals.
-    // The most robust fix is to lock the document scroll while this modal is open.
-    scrollYRef.current = window.scrollY || 0;
-
-    const body = document.body;
-    const html = document.documentElement;
-    const prev = {
-      bodyPosition: body.style.position,
-      bodyTop: body.style.top,
-      bodyLeft: body.style.left,
-      bodyRight: body.style.right,
-      bodyWidth: body.style.width,
-      bodyOverflow: body.style.overflow,
-      htmlOverflow: html.style.overflow,
-      htmlOverscrollBehavior: (html.style as any).overscrollBehavior,
-    };
-
-    html.style.overflow = "hidden";
-    (html.style as any).overscrollBehavior = "none";
-    body.style.overflow = "hidden";
-    body.style.position = "fixed";
-    body.style.top = `-${scrollYRef.current}px`;
-    body.style.left = "0";
-    body.style.right = "0";
-    body.style.width = "100%";
-
-    return () => {
-      html.style.overflow = prev.htmlOverflow;
-      (html.style as any).overscrollBehavior = prev.htmlOverscrollBehavior;
-      body.style.position = prev.bodyPosition;
-      body.style.top = prev.bodyTop;
-      body.style.left = prev.bodyLeft;
-      body.style.right = prev.bodyRight;
-      body.style.width = prev.bodyWidth;
-      body.style.overflow = prev.bodyOverflow;
-
-      // Restore scroll position
-      const y = scrollYRef.current || 0;
-      window.scrollTo(0, y);
-    };
-  }, [isIOS, isVisible]);
+  const { profile } = useContext(AuthContext);
 
   const EditorComponent = useMemo(() => {
     const exType = type || chosenExToEdit?.type;
@@ -122,8 +75,6 @@ export const EditorRootModal: FC<TProps> = ({
         return FillGapsInput;
       case "fill-gaps-drag":
         return FillGapsDrag;
-      case "FILL_GAPS_NEW":
-        return FillGapsNew;
       case "match-word-word":
         return MatchWordWord;
       case "match-word-image":
@@ -136,9 +87,11 @@ export const EditorRootModal: FC<TProps> = ({
         return FreeInputFormEx;
       case "int":
         return IntEx;
+      case "FILL_GAPS_NEW":
+        return canEditFillGapsNew(profile?.id) ? FillGapsNew : undefined;
       default:
     }
-  }, [type, chosenExToEdit]);
+  }, [type, chosenExToEdit, profile?.id]);
 
   return (
     <Modal
@@ -146,12 +99,8 @@ export const EditorRootModal: FC<TProps> = ({
       size="5xl"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
-      placement="center"
       style={{ background: "#F9F9F9", overflow: "hidden" }}
-      scrollBehavior="inside"
-      classNames={{
-        base: "max-h-[92dvh]",
-      }}
+      scrollBehavior="outside"
     >
       <ModalContent>
         <ModalHeader className="justify-center">
@@ -166,7 +115,7 @@ export const EditorRootModal: FC<TProps> = ({
             </div>
           )}
         </ModalHeader>
-        <ModalBody className="overflow-y-auto">
+        <ModalBody>
           {!!EditorComponent && (
             <EditorComponent
               onSuccess={onSuccess}

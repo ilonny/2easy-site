@@ -5,8 +5,9 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { templates, TTemplate } from "./templates";
+import { AuthContext } from "@/auth/context";
 
 type TProps = {
   isVisible: boolean;
@@ -14,14 +15,34 @@ type TProps = {
   onChooseTemplate: (t: TTemplate) => void;
 };
 
+const FILL_GAPS_NEW_ALLOWED_IDS = new Set([15, 18]);
+
+function canSeeFillGapsNewTemplate(profileId: number | undefined): boolean {
+  if (profileId === undefined || profileId === null) {
+    return false;
+  }
+  return FILL_GAPS_NEW_ALLOWED_IDS.has(Number(profileId));
+}
+
 export const ChooseTemplateModal: FC<TProps> = ({
   isVisible,
   setIsVisible,
   onChooseTemplate,
 }) => {
+  const { profile } = useContext(AuthContext);
+
+  const rootTemplates = useMemo(() => {
+    return templates.filter((t) => {
+      if (t.type === "FILL_GAPS_NEW") {
+        return canSeeFillGapsNewTemplate(profile?.id);
+      }
+      return true;
+    });
+  }, [profile?.id]);
+
   const [isSubViews, setIsSubViews] = useState(false);
 
-  const [templatesToShow, setTemplatesToShow] = useState(templates);
+  const [templatesToShow, setTemplatesToShow] = useState(rootTemplates);
 
   const onClickTemplate = useCallback(
     (t: TTemplate) => {
@@ -36,15 +57,16 @@ export const ChooseTemplateModal: FC<TProps> = ({
   );
 
   const onBack = useCallback(() => {
-    setTemplatesToShow(templates);
+    setTemplatesToShow(rootTemplates);
     setIsSubViews(false);
-  }, []);
+  }, [rootTemplates]);
 
   useEffect(() => {
     if (isVisible) {
-      setTemplatesToShow(templates);
+      setTemplatesToShow(rootTemplates);
+      setIsSubViews(false);
     }
-  }, [isVisible]);
+  }, [isVisible, rootTemplates]);
 
   return (
     <Modal

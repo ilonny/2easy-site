@@ -1,6 +1,6 @@
 import { Button, Card, Divider } from "@nextui-org/react";
 import styles from "./styles.module.css";
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { readFromLocalStorage, writeToLocalStorage } from "@/auth/utils";
 import Image from "next/image";
 import PasteIcon from "@/assets/icons/paste.svg";
@@ -21,28 +21,13 @@ export const CreateExButton: FC<TProps> = ({
 }) => {
   const [copyData, setCopyData] = useState("");
 
-  const syncCopyData = useCallback(() => {
-    const exCopyData = readFromLocalStorage("exCopy");
-    setCopyData(exCopyData || "");
-  }, []);
-
   useEffect(() => {
-    syncCopyData();
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "exCopy") {
-        syncCopyData();
-      }
-    };
-    window.addEventListener("storage", onStorage);
-    // also refresh when returning to the tab
-    window.addEventListener("focus", syncCopyData);
-    document.addEventListener("visibilitychange", syncCopyData);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("focus", syncCopyData);
-      document.removeEventListener("visibilitychange", syncCopyData);
-    };
-  }, [syncCopyData]);
+    const interval = setInterval(() => {
+      const exCopyData = readFromLocalStorage("exCopy");
+      setCopyData(exCopyData || "");
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <Card

@@ -11,12 +11,6 @@
   box-shadow: 0px 8px 24px 0px #908ba826;
 }
 
-.title {
-  font-weight: 700;
-  color: #3f28c6;
-  margin-bottom: 14px;
-}
-
 .pool {
   display: flex;
   flex-wrap: wrap;
@@ -39,7 +33,6 @@
   position: fixed;
   left: 0;
   top: 0;
-  transform: translate3d(var(--x), var(--y), 0);
   z-index: 9999;
   pointer-events: none;
 }
@@ -64,9 +57,9 @@
 }
 
 .gapDropIncorrect {
-  background: #ffe5e5;
-  border: 1px solid rgba(220, 38, 38, 0.5);
-  color: #7f1d1d;
+  background: #fee2e2;
+  border: 1px solid rgba(220, 38, 38, 0.75);
+  color: #991b1b;
 }
 
 .gapInput {
@@ -75,13 +68,5 @@
 
 .gapSelect {
   min-width: 180px;
-}
-
-/* Draft.js in some cases makes the readOnly surface non-interactive.
-   We still need pointer events for embedded Inputs/Selects inside GAP entities. */
-.root :global(.DraftEditor-root),
-.root :global(.DraftEditor-editorContainer),
-.root :global(.public-DraftEditor-content) {
-  pointer-events: auto;
 }
 
