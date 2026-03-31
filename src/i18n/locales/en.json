@@ -377,7 +377,9 @@
     "resize": "Resize",
     "close": "Close",
     "loadError": "Failed to load video call",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "iosHint": "In Safari, camera and microphone work in a separate tab — this is more reliable. Return here after the call.",
+    "iosOpenAgain": "Open video call again"
   },
   "games": {
     "open": "open",

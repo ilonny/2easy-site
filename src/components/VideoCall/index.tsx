@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 type JitsiApi = {
   dispose: () => void;
   executeCommand?: (cmd: string) => void;
+  getIFrame?: () => HTMLIFrameElement;
 };
 
 declare global {
@@ -32,18 +33,17 @@ const MAX_W = 600;
 const MAX_H = 500;
 const DEFAULT_W = 360;
 const DEFAULT_H = 380;
-/** Окно компактнее на телефонах */
 const MOBILE_BREAKPOINT = 640;
-const DEFAULT_W_MOBILE = 280;
-const DEFAULT_H_MOBILE = 240;
+const DEFAULT_W_MOBILE = 320;
+const DEFAULT_H_MOBILE = 300;
 
 function getDefaultVideoSize(): { w: number; h: number } {
   if (typeof window === "undefined") return { w: DEFAULT_W, h: DEFAULT_H };
   if (window.innerWidth > MOBILE_BREAKPOINT) {
     return { w: DEFAULT_W, h: DEFAULT_H };
   }
-  const w = Math.min(DEFAULT_W_MOBILE, Math.max(MIN_W, window.innerWidth - 24));
-  const h = Math.min(DEFAULT_H_MOBILE, Math.max(MIN_H, Math.floor(window.innerHeight * 0.32)));
+  const w = Math.min(DEFAULT_W_MOBILE, Math.max(MIN_W, window.innerWidth - 16));
+  const h = Math.min(DEFAULT_H_MOBILE, Math.max(MIN_H, Math.floor(window.innerHeight * 0.42)));
   return { w, h };
 }
 
@@ -100,6 +100,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
       y: typeof window !== "undefined" ? Math.max(0, window.innerHeight - h - 100) : 100,
     });
     setSize({ w, h });
+    setIsReady(false);
     setIsOpen(true);
   }, [roomId]);
 
@@ -127,11 +128,25 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
         startWithVideoMuted: false,
         prejoinPageEnabled: false,
         enableLobby: false,
+        disableDeepLinking: true,
+        p2p: { enabled: false },
       },
       interfaceConfigOverwrite: {
         SHOW_JITSI_WATERMARK: false,
         SHOW_WATERMARK_FOR_GUESTS: false,
         TOOLBAR_ALWAYS_VISIBLE: false,
+        MOBILE_APP_PROMO: false,
+      },
+      onApiReady: (api: JitsiApi) => {
+        const iframe = api.getIFrame?.();
+        if (iframe) {
+          iframe.setAttribute("allow", "camera; microphone; fullscreen; display-capture");
+          iframe.setAttribute("allowfullscreen", "true");
+          iframe.setAttribute("webkitallowfullscreen", "true");
+          iframe.setAttribute("playsinline", "true");
+          iframe.style.width = "100%";
+          iframe.style.height = "100%";
+        }
       },
     };
 
@@ -155,14 +170,12 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
     setIsReady(false);
   }, []);
 
-  const onResizeStart = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+  const beginResize = useCallback(
+    (clientX: number, clientY: number) => {
       setIsResizing(true);
       resizeStartRef.current = {
-        x: e.clientX,
-        y: e.clientY,
+        x: clientX,
+        y: clientY,
         w: size.w,
         h: size.h,
         posX: position.x,
@@ -172,14 +185,27 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
     [size, position]
   );
 
+  const onResizeStart = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if ("touches" in e && e.touches.length > 0) {
+        beginResize(e.touches[0].clientX, e.touches[0].clientY);
+      } else if ("clientX" in e) {
+        beginResize(e.clientX, e.clientY);
+      }
+    },
+    [beginResize]
+  );
+
   useEffect(() => {
     if (!isResizing) return;
-    const onMove = (e: MouseEvent) => {
+    const applyMove = (clientX: number, clientY: number) => {
       const isMobile = typeof window !== "undefined" && window.innerWidth <= MOBILE_BREAKPOINT;
       const capW = isMobile ? Math.min(MAX_W, window.innerWidth - 8) : MAX_W;
       const capH = isMobile ? Math.min(MAX_H, window.innerHeight - 48) : MAX_H;
-      const dx = e.clientX - resizeStartRef.current.x;
-      const dy = e.clientY - resizeStartRef.current.y;
+      const dx = clientX - resizeStartRef.current.x;
+      const dy = clientY - resizeStartRef.current.y;
       const newW = Math.min(capW, Math.max(MIN_W, resizeStartRef.current.w - dx));
       const newH = Math.min(capH, Math.max(MIN_H, resizeStartRef.current.h - dy));
       const actualDx = resizeStartRef.current.w - newW;
@@ -190,14 +216,25 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
         y: resizeStartRef.current.posY + actualDy,
       });
     };
+    const onMouseMove = (e: MouseEvent) => applyMove(e.clientX, e.clientY);
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        e.preventDefault();
+        applyMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
     const onUp = () => setIsResizing(false);
-    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onUp);
+    document.addEventListener("touchmove", onTouchMove, { passive: false });
+    document.addEventListener("touchend", onUp);
     document.body.style.cursor = "nw-resize";
     document.body.style.userSelect = "none";
     return () => {
-      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onUp);
+      document.removeEventListener("touchmove", onTouchMove);
+      document.removeEventListener("touchend", onUp);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
     };
@@ -269,12 +306,14 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
             >
               <div
                 onMouseDown={onResizeStart}
+                onTouchStart={onResizeStart}
                 title={t("videoCall.resize")}
                 style={{
                   flexShrink: 0,
-                  width: 24,
-                  height: 24,
+                  width: 28,
+                  height: 28,
                   cursor: "nw-resize",
+                  touchAction: "none",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -291,6 +330,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
                   flex: 1,
                   cursor: "grab",
                   minWidth: 0,
+                  touchAction: "none",
                 }}
               >
                 <span style={{ color: "#fff", fontSize: 13, fontWeight: 500 }}>{t("videoCall.title")}</span>
