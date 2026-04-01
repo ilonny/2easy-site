@@ -45,6 +45,18 @@ function shufflePoolItems(items: TPoolItem[]): TPoolItem[] {
   return copy;
 }
 
+/** TouchEvent has no clientX; read from touches / changedTouches */
+function getClientXY(e: any): { x: number; y: number } {
+  if (typeof e?.clientX === "number" && typeof e?.clientY === "number") {
+    return { x: e.clientX, y: e.clientY };
+  }
+  const t = e?.changedTouches?.[0] ?? e?.touches?.[0];
+  if (t && typeof t.clientX === "number" && typeof t.clientY === "number") {
+    return { x: t.clientX, y: t.clientY };
+  }
+  return { x: 0, y: 0 };
+}
+
 const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }> = ({
   data,
   isPreview = false,
@@ -239,12 +251,18 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
       try {
         if (e?.cancelable) e.preventDefault();
       } catch {}
+      const { x, y } = getClientXY(e);
+      try {
+        if (typeof e?.pointerId === "number" && (e.currentTarget as HTMLElement)?.setPointerCapture) {
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        }
+      } catch {}
       setDragItemId(item.id);
       dragValueRef.current = item.value;
-      setDragXY({ x: e.clientX, y: e.clientY });
+      setDragXY({ x, y });
       try {
         const rect = (e.currentTarget as HTMLElement)?.getBoundingClientRect?.();
-        if (rect) grabOffsetRef.current = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+        if (rect) grabOffsetRef.current = { dx: x - rect.left, dy: y - rect.top };
       } catch {}
     },
     [canInteract, mode],
@@ -252,14 +270,19 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
 
   useEffect(() => {
     if (!dragItemId) return;
+    let ended = false;
     const move = (e: any) => {
       try {
         if (e?.cancelable) e.preventDefault();
       } catch {}
-      setDragXY({ x: e.clientX, y: e.clientY });
+      const { x, y } = getClientXY(e);
+      setDragXY({ x, y });
     };
-    const up = (e: any) => {
-      const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+    const finish = (e: any) => {
+      if (ended) return;
+      ended = true;
+      const { x, y } = getClientXY(e);
+      const el = document.elementFromPoint(x, y) as HTMLElement | null;
       const drop = el?.closest?.("[data-gap-drop='1']") as HTMLElement | null;
       const gapId = drop?.dataset?.gapId;
       if (gapId) {
@@ -274,14 +297,18 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
       setDragItemId(null);
     };
     window.addEventListener("pointermove", move, { passive: false } as any);
-    window.addEventListener("pointerup", up, { passive: true } as any);
-    window.addEventListener("pointercancel", up, { passive: true } as any);
+    window.addEventListener("pointerup", finish, { passive: true } as any);
+    window.addEventListener("pointercancel", finish, { passive: true } as any);
     window.addEventListener("touchmove", move as any, { passive: false } as any);
+    window.addEventListener("touchend", finish as any, { passive: false } as any);
+    window.addEventListener("touchcancel", finish as any, { passive: false } as any);
     return () => {
       window.removeEventListener("pointermove", move as any);
-      window.removeEventListener("pointerup", up as any);
-      window.removeEventListener("pointercancel", up as any);
+      window.removeEventListener("pointerup", finish as any);
+      window.removeEventListener("pointercancel", finish as any);
       window.removeEventListener("touchmove", move as any);
+      window.removeEventListener("touchend", finish as any);
+      window.removeEventListener("touchcancel", finish as any);
     };
   }, [dragItemId, gapsById, setAnswer]);
 
