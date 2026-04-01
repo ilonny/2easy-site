@@ -10,6 +10,7 @@ import {
   SelectItem,
   Tooltip,
 } from "@nextui-org/react";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import { FC, memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Zoom from "react-medium-image-zoom";
@@ -447,7 +448,7 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
       }
 
       return (
-        <Tooltip isDisabled={!isTeacher || isPresentationMode || !tooltipContent} content={<div>{tooltipContent}</div>}>
+        <ResponsiveTooltip isDisabled={!isTeacher || isPresentationMode || !tooltipContent} content={<div>{tooltipContent}</div>}>
           <span
             data-gap-drop="1"
             data-gap-id={gapId}
@@ -457,7 +458,7 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
           >
             <span>{current || "\u00A0"}</span>
           </span>
-        </Tooltip>
+        </ResponsiveTooltip>
       );
     },
     [answersVersion, canInteract, gapsById, isCorrectForGap, isPresentationMode, isTeacher, mode, setAnswer, statusByGap],

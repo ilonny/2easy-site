@@ -8,7 +8,8 @@ import { TField, TFillGapsSelectData } from "./types";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button, Tooltip } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import { useUploadFillGapsSelectEx } from "../hooks/useUploadFillGapsSelectEx";
 import { AddItemCard } from "../AddItemCard";
 import ReactDOM from "react-dom/client";
@@ -260,7 +261,7 @@ export const FillGapsSelect: FC<TProps> = ({
       <div className="h-10" />
       <div className="flex items-center gap-2 mb-2">
         <p className="font-light">{t("editor.enterTaskText")}</p>
-        <Tooltip
+        <ResponsiveTooltip
           content={t("editor.fillGapsHintSelect")}
           classNames={{
             base: ["before:bg-neutral-400 dark:before:bg-white"],
@@ -273,7 +274,7 @@ export const FillGapsSelect: FC<TProps> = ({
           color="foreground"
         >
           <Image src={InfoIcon} alt="InfoIcon" />
-        </Tooltip>
+        </ResponsiveTooltip>
       </div>
       <div className="relative">
         <div

@@ -14,6 +14,7 @@ import {
 import Image from "next/image";
 import { TMatchWordImageData } from "../../editor/MatchWordImage/types";
 import { Card, Chip, Input, Tooltip } from "@nextui-org/react";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import Draggable from "react-draggable";
 import { AuthContext } from "@/auth";
 import Zoom from "react-medium-image-zoom";
@@ -433,7 +434,7 @@ export const MatchWordImageExView: FC<TProps> = ({
                     </Zoom>
                   </div>
                   {data.viewType === "drag" && (
-                    <Tooltip
+                    <ResponsiveTooltip
                       isDisabled={!isTeacher || rest?.isPresentationMode}
                       content={
                         isTeacher && (
@@ -462,7 +463,7 @@ export const MatchWordImageExView: FC<TProps> = ({
                         {isCorrect && image.text}
                         {isIncorrectWord && isIncorrectWord}
                       </Card>
-                    </Tooltip>
+                    </ResponsiveTooltip>
                   )}
                   {data.viewType === "input" && (
                     <Card

@@ -20,8 +20,8 @@ import {
   Input,
   Select,
   SelectItem,
-  Tooltip,
 } from "@nextui-org/react";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
@@ -54,7 +54,7 @@ const AnswerField: FC<{
     isTeacher && !!incorrectIdsMap?.[field.id];
 
   return (
-    <Tooltip
+    <ResponsiveTooltip
       isDisabled={!isTeacher || isPresentationMode}
       content={
         isTeacher && <div className="teacher-placeholer">{field.value}</div>
@@ -91,7 +91,7 @@ const AnswerField: FC<{
           </div>
         </div>
       </div>
-    </Tooltip>
+    </ResponsiveTooltip>
   );
 };
 

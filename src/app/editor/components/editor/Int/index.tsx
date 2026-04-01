@@ -7,7 +7,8 @@ import { TIntData } from "./types";
 import { FC, useCallback, useEffect, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button, Input, Textarea, Tooltip } from "@nextui-org/react";
+import { Button, Input, Textarea } from "@nextui-org/react";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import Close from "@/assets/icons/close.svg";
 import InfoIcon from "@/assets/icons/info.svg";
 import { IntExView } from "../../view/IntExView";
@@ -136,7 +137,7 @@ export const IntEx: FC<TProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <p>{t("editor.embedCode")}</p>
-              <Tooltip
+              <ResponsiveTooltip
                 content="Пожалуйста, используйте специальную ссылку для встраивания (embed link / embed code). Её можно найти в разделе 'Поделиться' (Share) на исходном сервисе (должна начинаться с <iframe ...>). Прямая ссылка из браузера может работать некорректно или не отображаться."
                 classNames={{
                   base: [
@@ -152,7 +153,7 @@ export const IntEx: FC<TProps> = ({
                 color="foreground"
               >
                 <Image src={InfoIcon} alt="InfoIcon" />
-              </Tooltip>
+              </ResponsiveTooltip>
             </div>
           </div>
           <div className="flex my-2 gap-4">

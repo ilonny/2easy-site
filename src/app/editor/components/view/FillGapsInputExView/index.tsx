@@ -12,7 +12,8 @@ import {
   useState,
 } from "react";
 import { TField, TFillGapsSelectData } from "../../editor/FillGapsSelect/types";
-import { Card, Input, Select, SelectItem, Tooltip } from "@nextui-org/react";
+import { Card, Input, Select, SelectItem } from "@nextui-org/react";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
@@ -174,7 +175,7 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
               lineHeight: "initial",
             }}
           >
-            <Tooltip
+            <ResponsiveTooltip
               isDisabled={!isTeacher || rest?.isPresentationMode}
               content={toolTipContent}
             >
@@ -194,7 +195,7 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
                   // setLocalAnswers={setLocalAnswers}
                 />
               </div>
-            </Tooltip>
+            </ResponsiveTooltip>
           </div>
         );
       });

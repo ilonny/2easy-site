@@ -7,7 +7,8 @@ import { TField, TFillGapsDragData } from "./types";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button, Tooltip } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import { useUploadFillGapsDragEx } from "../hooks/useUploadFillGapsDragEx";
 import { AddItemCard } from "../AddItemCard";
 import ReactDOM from "react-dom/client";
@@ -289,7 +290,7 @@ export const FillGapsDrag: FC<TProps> = ({
       <div className="h-10" />
       <div className="flex items-center gap-2 mb-2">
         <p className="font-light">{t("editor.enterTaskText")}</p>
-        <Tooltip
+        <ResponsiveTooltip
           content={t("editor.fillGapsHintDrag")}
           classNames={{
             base: [
@@ -305,7 +306,7 @@ export const FillGapsDrag: FC<TProps> = ({
           color="foreground"
         >
           <Image src={InfoIcon} alt="InfoIcon" />
-        </Tooltip>
+        </ResponsiveTooltip>
       </div>
       <div className="relative">
         <div

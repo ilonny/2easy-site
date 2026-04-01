@@ -18,8 +18,8 @@ import {
   PopoverContent,
   PopoverTrigger,
   Switch,
-  Tooltip,
 } from "@nextui-org/react";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -497,7 +497,7 @@ export default function LessonPage() {
                   >
                     {t("lessons.focusScroll.button")}
                   </Button>
-                  <Tooltip
+                  <ResponsiveTooltip
                     content={
                       <div style={{ maxWidth: 320, whiteSpace: "normal", lineHeight: "140%" }}>
                         {t("lessons.focusScroll.tooltip")}
@@ -535,7 +535,7 @@ export default function LessonPage() {
                         style={{ width: 16, height: 16, opacity: 0.9 }}
                       />
                     </div>
-                  </Tooltip>
+                  </ResponsiveTooltip>
                 </div>
               )}
               {/* пока скрываем */}

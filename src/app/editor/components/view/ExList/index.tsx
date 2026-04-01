@@ -21,8 +21,8 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Tooltip,
 } from "@nextui-org/react";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import { TextDefaultExView } from "../TextDefaultExView";
 import { Text2ColExView } from "../Text2ColExView";
 import { TextStickerExView } from "../TextStickerExView";
@@ -488,14 +488,14 @@ export const ExListComp: FC<TProps> = (props) => {
             className={`ex-add-button mt-8 relative flex justify-center gap-4`}
           >
             <div className={`${styles.dashed}`}></div>
-            <Tooltip content={t("lessons.createNewTask")}>
+            <ResponsiveTooltip content={t("lessons.createNewTask")}>
               <Image
                 onClick={() => onPressCreate(ex.sortIndex)}
                 src={PlusIcon}
                 alt="plus icon"
                 className=" relative z-index-[2] cursor-pointer hover:opacity-[0.8]"
               />
-            </Tooltip>
+            </ResponsiveTooltip>
             {!!copyData && !ex.isDisabledEx && (
               <div
                 className=""
@@ -520,13 +520,13 @@ export const ExListComp: FC<TProps> = (props) => {
                   window.location.hash = `ex-${data.id}`;
                 }}
               >
-                <Tooltip content={t("lessons.pasteTask")}>
+                <ResponsiveTooltip content={t("lessons.pasteTask")}>
                   <Image
                     src={CopyExIcon}
                     alt={t("lessons.pasteTask")}
                     className="m-auto relative z-index-[2] cursor-pointer hover:opacity-[0.8]"
                   />
-                </Tooltip>
+                </ResponsiveTooltip>
               </div>
             )}
           </div>

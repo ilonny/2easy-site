@@ -6,7 +6,7 @@ import { TAudioData } from "./types";
 import { FC, useCallback, useEffect, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button, Input, Tooltip } from "@nextui-org/react";
+import { Button, Input } from "@nextui-org/react";
 import Close from "@/assets/icons/close.svg";
 import { useUploadAudioEx } from "../hooks/useUploadAudioEx";
 import { useFilePicker } from "use-file-picker";
