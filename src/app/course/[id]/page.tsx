@@ -4,16 +4,19 @@
 import { useTranslation } from "react-i18next";
 import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
-import { useContext, useEffect, useMemo } from "react";
-import { useParams } from "next/navigation";
+import { Suspense, useContext, useEffect, useMemo } from "react";
+import { useParams, useSearchParams } from "next/navigation";
 import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 import { useCourses } from "../hooks/useCourses";
 import { AuthContext } from "@/auth";
 
-export default function CoursePage() {
+function CoursePageContent() {
   const { t } = useTranslation();
   const params = useParams();
+  const searchParams = useSearchParams();
   const { getCourses, courses } = useCourses();
+
+  const studentIdFromQuery = (searchParams.get("student_id") ?? "").trim();
 
   useEffect(() => {
     getCourses();
@@ -24,12 +27,11 @@ export default function CoursePage() {
   }, [courses, params.id]);
 
   const { profile } = useContext(AuthContext);
-  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
+  const roleId = Number(profile?.role_id);
+  const isTeacher = roleId === 2 || roleId === 1;
 
-  const student_id =
-    (isTeacher &&
-      new URL(window.location.href).searchParams?.get("student_id")) ||
-    "";
+  const studentIdForApi = studentIdFromQuery;
+  const teacherStudentMode = !!studentIdFromQuery && isTeacher;
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
@@ -46,16 +48,28 @@ export default function CoursePage() {
         {!!currentCourse && (
           <ProfileLessons
             currentCourse={currentCourse}
-            showChangeStatusButton={!!student_id}
+            showChangeStatusButton={teacherStudentMode}
             hideAttachButton
             hideTabs
-            studentId={student_id}
+            studentId={studentIdForApi}
             showCourseSearch={true}
+            showStartLessonButton={isTeacher}
+            isStudent={false}
+            includeCourseLessons={!!studentIdFromQuery && isTeacher}
+            alwaysOpenLessonMode
           />
         )}
         <div className="h-10" />
         <div className="h-10" />
       </ContentWrapper>
     </main>
+  );
+}
+
+export default function CoursePage() {
+  return (
+    <Suspense fallback={null}>
+      <CoursePageContent />
+    </Suspense>
   );
 }

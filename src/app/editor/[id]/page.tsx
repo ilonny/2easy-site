@@ -325,9 +325,17 @@ export default function EditorPage() {
                       variant="bordered"
                       color="primary"
                       className="min-w-[310px]"
-                      onClick={() => setHomeworkModalVisible(true)}
+                      onClick={() => {
+                        if (lesson?.homework_lesson_id) {
+                          window.location.pathname = `/editor/${lesson.homework_lesson_id}`;
+                          return;
+                        }
+                        setHomeworkModalVisible(true);
+                      }}
                     >
-                      {t("lessons.createHomework")}
+                      {lesson?.homework_lesson_id
+                        ? "Homework"
+                        : t("lessons.createHomework")}
                     </Button>
                   </Card>
                 )}

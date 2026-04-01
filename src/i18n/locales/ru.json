@@ -219,6 +219,7 @@
     "chooseTariffToOpenFull": "Выберите тариф, чтобы открыть доступ\nко всему, что есть на 2EASY",
     "tariffsDifferByPeriod": "Тарифы различаются только по сроку действия подписки.\nЧем дольше – тем выгоднее.",
     "createHomework": "Создать homework",
+    "homeworkLabel": "Homework",
     "createFromScratch": "Создать с нуля",
     "createPersonalHomework": "Создать личную Homework для ученика",
     "createGroup": "Создать группу",

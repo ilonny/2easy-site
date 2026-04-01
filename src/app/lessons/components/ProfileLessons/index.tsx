@@ -1,12 +1,19 @@
 "use client";
 import { useTranslation } from "react-i18next";
 import { Button, Input, Tab, Tabs, Image, Chip } from "@nextui-org/react";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useLessons } from "../../hooks/useLessons";
 import { ProfileEmptyLessons } from "../ProfileEmptyLessons";
 import { CreateLessonModalForm } from "../CreateLessonModalForm";
 import { LessonsList } from "../LessonsList";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Dino from "@/assets/images/dino.gif";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { AuthContext } from "@/auth";
@@ -20,6 +27,27 @@ import { CreateCourseModalForm } from "../CreateCourseModalForm";
 import { TCourse, useCourses } from "@/app/course/hooks/useCourses";
 import { AttachLessonCourseModalForm } from "../AttachLessonCourseModalForm";
 import Link from "next/link";
+
+const StudentCabinetTabSync = ({
+  studentId,
+  setStudentTabIndex,
+}: {
+  studentId: string;
+  setStudentTabIndex: (v: "lessons" | "courses") => void;
+}) => {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (!studentId) return;
+    if (pathname?.includes("/course/")) {
+      setStudentTabIndex("courses");
+      return;
+    }
+    const tab = searchParams.get("tab");
+    setStudentTabIndex(tab === "courses" ? "courses" : "lessons");
+  }, [pathname, searchParams, studentId, setStudentTabIndex]);
+  return null;
+};
 
 type TProps = {
   canCreateLesson?: boolean;
@@ -347,6 +375,14 @@ export const ProfileLessons = (props: TProps) => {
   console.log("isCourse?", isCourse, tabIndex, isStudent, studentId);
   return (
     <>
+      {!!studentId && (
+        <Suspense fallback={null}>
+          <StudentCabinetTabSync
+            studentId={studentId}
+            setStudentTabIndex={setStudentTabIndex}
+          />
+        </Suspense>
+      )}
       {!hideTabs && (
         <>
           {!!profile?.name ? (
@@ -493,7 +529,10 @@ export const ProfileLessons = (props: TProps) => {
               radius="full"
               color="primary"
               variant={studentTabIndex === "lessons" ? "solid" : "faded"}
-              onClick={() => setStudentTabIndex("lessons")}
+              onClick={() => {
+                setStudentTabIndex("lessons");
+                router.push(`/student-account/${studentId}`);
+              }}
             >
               {t("lessons.lessonsTab")}
             </Button>
@@ -501,7 +540,10 @@ export const ProfileLessons = (props: TProps) => {
               radius="full"
               color="primary"
               variant={studentTabIndex === "courses" ? "solid" : "faded"}
-              onClick={() => setStudentTabIndex("courses")}
+              onClick={() => {
+                setStudentTabIndex("courses");
+                router.push(`/student-account/${studentId}?tab=courses`);
+              }}
             >
               {t("lessons.coursesTab")}
             </Button>

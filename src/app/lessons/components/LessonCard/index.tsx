@@ -1,8 +1,15 @@
 "use client";
-import { FC, useCallback, useContext, useMemo, useState } from "react";
+import {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { TLesson } from "../../types";
-import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
+import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import styles from "./styles.module.css";
 import {
   Button,
@@ -31,6 +38,7 @@ import { RegistrationForm } from "@/app/registration";
 import Link from "next/link";
 import { TCourse } from "@/app/course/hooks/useCourses";
 import { getImageUrl } from "@/app/editor/helpers";
+import { CreateHomeworkModal } from "../CreateHomeworkModal";
 import { CreateIndividualHomeworkModal } from "../CreateIndividualHomeworkModal";
 
 type TProps = {
@@ -90,13 +98,184 @@ export const LessonCard: FC<TProps> = ({
   const router = useRouter();
   const params = useParams();
   const { profile } = useContext(AuthContext);
-  const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
+  const isTeacher =
+    Number(profile?.role_id) === 2 || Number(profile?.role_id) === 1;
   const { checkSubscription, hasSubscription } = useCheckSubscription();
   const [lockedModalOpen, setLockedModalOpen] = useState(false);
   const [tryNowModal, setTryNowModal] = useState(false);
   const [regModal, setRegModal] = useState(false);
   const [createHomeworkModalVisible, setCreateHomeworkModalVisible] =
     useState(false);
+  const [courseHomeworkModalVisible, setCourseHomeworkModalVisible] =
+    useState(false);
+  const [courseHomeworkExList, setCourseHomeworkExList] = useState<
+    Array<{ id: number; type: string; data?: string; sortIndex?: number }>
+  >([]);
+  const [courseHomeworkCheck, setCourseHomeworkCheck] = useState<{
+    loaded: boolean;
+    exists: boolean;
+    homeworkId?: number;
+  }>({ loaded: false, exists: false });
+  const [resolvedHw, setResolvedHw] = useState<{
+    homework_lesson_id?: number;
+    has_individual_homework?: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    if (
+      !isTeacher ||
+      !studentId ||
+      !showStartLessonButton ||
+      isCourses ||
+      !lesson?.id
+    ) {
+      setResolvedHw(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const res = await fetchPostJson({
+        path: "/lessons/homework/resolve-for-student",
+        isSecure: true,
+        data: {
+          lesson_id: lesson.id,
+          student_id: Number(studentId),
+        },
+      });
+      const data = await res?.json();
+      if (cancelled) {
+        return;
+      }
+      if (data?.success) {
+        setResolvedHw({
+          homework_lesson_id: data.homework_lesson_id,
+          has_individual_homework: !!data.has_individual_homework,
+        });
+      } else {
+        setResolvedHw(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    isTeacher,
+    studentId,
+    showStartLessonButton,
+    isCourses,
+    lesson?.id,
+  ]);
+
+  useEffect(() => {
+    if (
+      !isTeacher ||
+      studentId ||
+      !currentCourse ||
+      !lesson?.id ||
+      !showStartLessonButton ||
+      isCourses
+    ) {
+      setCourseHomeworkCheck({ loaded: false, exists: false });
+      return;
+    }
+    let cancelled = false;
+    fetchPostJson({
+      path: "/lessons/homework/check",
+      isSecure: true,
+      data: { lesson_id: lesson.id },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) {
+          return;
+        }
+        setCourseHomeworkCheck({
+          loaded: true,
+          exists: !!data?.exists,
+          homeworkId: data?.first_homework_id,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCourseHomeworkCheck({ loaded: true, exists: false });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    isTeacher,
+    studentId,
+    currentCourse,
+    lesson?.id,
+    showStartLessonButton,
+    isCourses,
+  ]);
+
+  useEffect(() => {
+    if (!courseHomeworkModalVisible || !lesson?.id) {
+      return;
+    }
+    fetchGet({
+      path: `/ex/list?lesson_id=${lesson.id}`,
+      isSecure: true,
+    })
+      .then((r) => r.json())
+      .then((list) => {
+        setCourseHomeworkExList(Array.isArray(list) ? list : []);
+      })
+      .catch(() => setCourseHomeworkExList([]));
+  }, [courseHomeworkModalVisible, lesson?.id]);
+
+  const lessonHomeworkExists = useMemo(() => {
+    const raw = lesson?.homework_lesson_id;
+    if (raw != null && raw !== "") {
+      const n = Number(raw);
+      if (!Number.isNaN(n) && n > 0) {
+        return true;
+      }
+    }
+    return !!lesson?.has_individual_homework;
+  }, [lesson?.homework_lesson_id, lesson?.has_individual_homework]);
+
+  const homeworkAlreadyExists = useMemo(() => {
+    if (resolvedHw === null) {
+      return lessonHomeworkExists;
+    }
+    const rid = resolvedHw.homework_lesson_id;
+    if (rid != null && Number(rid) > 0) {
+      return true;
+    }
+    if (resolvedHw.has_individual_homework) {
+      return true;
+    }
+    return lessonHomeworkExists;
+  }, [resolvedHw, lessonHomeworkExists]);
+
+  const effectiveHomeworkLessonId = useMemo(() => {
+    const fromResolved =
+      resolvedHw !== null &&
+      resolvedHw.homework_lesson_id != null &&
+      Number(resolvedHw.homework_lesson_id) > 0
+        ? Number(resolvedHw.homework_lesson_id)
+        : undefined;
+    const raw = lesson?.homework_lesson_id;
+    const fromLesson =
+      raw != null && raw !== ""
+        ? (() => {
+            const n = Number(raw);
+            return !Number.isNaN(n) && n > 0 ? n : undefined;
+          })()
+        : undefined;
+    return fromResolved ?? fromLesson;
+  }, [resolvedHw, lesson?.homework_lesson_id]);
+
+  const effectiveHasIndividualHomework = useMemo(() => {
+    if (resolvedHw !== null && resolvedHw.has_individual_homework) {
+      return true;
+    }
+    return !!lesson?.has_individual_homework;
+  }, [resolvedHw, lesson?.has_individual_homework]);
 
   const isDisabled =
     isStudent && lesson?.["lesson_relations.status"] === "close";
@@ -128,12 +307,22 @@ export const LessonCard: FC<TProps> = ({
       return;
     }
 
+    if (
+      alwaysOpenLessonMode &&
+      isTeacher &&
+      String(studentId ?? "").trim() === ""
+    ) {
+      router.push("/editor/" + lesson?.id);
+      return;
+    }
+
     if (isStudent || alwaysOpenLessonMode) {
       router.push("/lessons/" + lesson?.id);
-      if (params.id) {
+      const sid = studentId ?? profile?.studentId ?? params.id;
+      if (sid != null && String(sid) !== "") {
         writeToLocalStorage(
           "start_lesson_selected_ids",
-          JSON.stringify([params.id]),
+          JSON.stringify([sid]),
         );
       }
       return;
@@ -154,11 +343,13 @@ export const LessonCard: FC<TProps> = ({
     lesson?.id,
     isCourses,
     isStudent,
+    isTeacher,
     alwaysOpenLessonMode,
     isClosed,
     hasSubscription,
     router,
     studentId,
+    profile?.studentId,
     params.id,
   ]);
 
@@ -422,7 +613,7 @@ export const LessonCard: FC<TProps> = ({
           (isTeacher && studentId ? (
             <>
               <div className="h-4"></div>
-              {lesson?.homework_lesson_id ? (
+              {homeworkAlreadyExists ? (
                 <Button
                   color="secondary"
                   variant="bordered"
@@ -437,8 +628,11 @@ export const LessonCard: FC<TProps> = ({
                       );
                       router.push(`/lessons/${hwId}`);
                     };
-                    if (lesson.has_individual_homework) {
-                      saveSelectedAndNavigate(lesson.homework_lesson_id);
+                    if (
+                      effectiveHasIndividualHomework &&
+                      effectiveHomeworkLessonId
+                    ) {
+                      saveSelectedAndNavigate(effectiveHomeworkLessonId);
                     } else {
                       const res = await fetchPostJson({
                         path: "/lessons/homework/get-or-create-for-student",
@@ -456,7 +650,7 @@ export const LessonCard: FC<TProps> = ({
                     }
                   }}
                 >
-                  Homework
+                  {t("lessons.homeworkLabel")}
                 </Button>
               ) : (
                 <Button
@@ -473,7 +667,40 @@ export const LessonCard: FC<TProps> = ({
                 </Button>
               )}
             </>
-          ) : isStudent && lesson?.homework_lesson_id ? (
+          ) : isTeacher && !studentId && currentCourse ? (
+            <>
+              <div className="h-4"></div>
+              {courseHomeworkCheck.loaded &&
+              courseHomeworkCheck.exists &&
+              courseHomeworkCheck.homeworkId ? (
+                <Button
+                  color="secondary"
+                  variant="bordered"
+                  className="w-full"
+                  size="md"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/editor/${courseHomeworkCheck.homeworkId}`);
+                  }}
+                >
+                  {t("lessons.homeworkLabel")}
+                </Button>
+              ) : (
+                <Button
+                  color="secondary"
+                  variant="bordered"
+                  className="w-full"
+                  size="md"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCourseHomeworkModalVisible(true);
+                  }}
+                >
+                  {t("lessons.createHomework")}
+                </Button>
+              )}
+            </>
+          ) : isStudent && homeworkAlreadyExists ? (
             <>
               <div className="h-4"></div>
               <Button
@@ -493,8 +720,8 @@ export const LessonCard: FC<TProps> = ({
                     }
                     router.push(`/lessons/${hwId}`);
                   };
-                  if (lesson.has_individual_homework) {
-                    saveSelectedAndNavigate(lesson.homework_lesson_id);
+                  if (lesson.has_individual_homework && lesson.homework_lesson_id) {
+                    saveSelectedAndNavigate(Number(lesson.homework_lesson_id));
                   } else {
                     const res = await fetchPostJson({
                       path: "/lessons/homework/create-my",
@@ -512,7 +739,7 @@ export const LessonCard: FC<TProps> = ({
                   }
                 }}
               >
-                Homework
+                {t("lessons.homeworkLabel")}
               </Button>
             </>
           ) : null)}
@@ -536,16 +763,35 @@ export const LessonCard: FC<TProps> = ({
                 }
 
                 if (!isStudent && checkSubscription()) {
+                  const noStudentForTeacher =
+                    isTeacher &&
+                    alwaysOpenLessonMode &&
+                    String(studentId ?? "").trim() === "";
+                  if (noStudentForTeacher) {
+                    router.push(`/editor/${lesson.id}`);
+                    return;
+                  }
                   router.push(`/lessons/${lesson.id}`);
 
+                  const selectedStudentId =
+                    studentId != null && String(studentId) !== ""
+                      ? studentId
+                      : params.id;
                   writeToLocalStorage(
                     "start_lesson_selected_ids",
-                    JSON.stringify([params.id]),
+                    JSON.stringify([selectedStudentId]),
                   );
                   return;
                 }
                 if (isStudent) {
                   router.push(`/lessons/${lesson.id}`);
+                  const sid = studentId ?? profile?.studentId;
+                  if (sid != null && String(sid) !== "") {
+                    writeToLocalStorage(
+                      "start_lesson_selected_ids",
+                      JSON.stringify([sid]),
+                    );
+                  }
                 }
               }}
             >
@@ -689,6 +935,31 @@ export const LessonCard: FC<TProps> = ({
           lesson={lesson}
           studentId={studentId}
           onSuccess={onHomeworkCreated}
+        />
+      )}
+      {isTeacher && !studentId && currentCourse && (
+        <CreateHomeworkModal
+          isVisible={courseHomeworkModalVisible}
+          setIsVisible={setCourseHomeworkModalVisible}
+          lesson={lesson}
+          exList={courseHomeworkExList}
+          onSuccess={() => {
+            onHomeworkCreated?.();
+            fetchPostJson({
+              path: "/lessons/homework/check",
+              isSecure: true,
+              data: { lesson_id: lesson.id },
+            })
+              .then((r) => r.json())
+              .then((data) => {
+                setCourseHomeworkCheck({
+                  loaded: true,
+                  exists: !!data?.exists,
+                  homeworkId: data?.first_homework_id,
+                });
+              })
+              .catch(() => {});
+          }}
         />
       )}
     </div>
