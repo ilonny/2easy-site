@@ -15,7 +15,7 @@ import {
   Textarea,
   Image,
 } from "@nextui-org/react";
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { TLesson } from "../../types";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
