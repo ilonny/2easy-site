@@ -100,6 +100,16 @@ export const LessonCard: FC<TProps> = ({
   const { profile } = useContext(AuthContext);
   const isTeacher =
     Number(profile?.role_id) === 2 || Number(profile?.role_id) === 1;
+  const is2easyCourse = Number(currentCourse?.user_id) === 1;
+  const showLessonBottomActions =
+    !!showStartLessonButton && !is2easyCourse;
+  /** Свой курс в /course/:id без ?student_id — «Начать урок» не показываем. */
+  const hideStartLessonForMyCourseWithoutStudent =
+    !!currentCourse &&
+    !is2easyCourse &&
+    String(studentId ?? "").trim() === "";
+  const showPrimaryStartLessonButton =
+    showLessonBottomActions && !hideStartLessonForMyCourseWithoutStudent;
   const { checkSubscription, hasSubscription } = useCheckSubscription();
   const [lockedModalOpen, setLockedModalOpen] = useState(false);
   const [tryNowModal, setTryNowModal] = useState(false);
@@ -125,7 +135,7 @@ export const LessonCard: FC<TProps> = ({
     if (
       !isTeacher ||
       !studentId ||
-      !showStartLessonButton ||
+      !showLessonBottomActions ||
       isCourses ||
       !lesson?.id
     ) {
@@ -161,7 +171,7 @@ export const LessonCard: FC<TProps> = ({
   }, [
     isTeacher,
     studentId,
-    showStartLessonButton,
+    showLessonBottomActions,
     isCourses,
     lesson?.id,
   ]);
@@ -172,7 +182,7 @@ export const LessonCard: FC<TProps> = ({
       studentId ||
       !currentCourse ||
       !lesson?.id ||
-      !showStartLessonButton ||
+      !showLessonBottomActions ||
       isCourses
     ) {
       setCourseHomeworkCheck({ loaded: false, exists: false });
@@ -208,7 +218,7 @@ export const LessonCard: FC<TProps> = ({
     studentId,
     currentCourse,
     lesson?.id,
-    showStartLessonButton,
+    showLessonBottomActions,
     isCourses,
   ]);
 
@@ -608,7 +618,7 @@ export const LessonCard: FC<TProps> = ({
               : lesson.description}
           </div>
         )}
-        {!!showStartLessonButton &&
+        {!!showLessonBottomActions &&
           !isCourses &&
           (isTeacher && studentId ? (
             <>
@@ -743,7 +753,7 @@ export const LessonCard: FC<TProps> = ({
               </Button>
             </>
           ) : null)}
-        {!!showStartLessonButton && (
+        {!!showPrimaryStartLessonButton && (
           <>
             <div className="h-4"></div>
             <Button
@@ -928,7 +938,7 @@ export const LessonCard: FC<TProps> = ({
           </ModalBody>
         </ModalContent>
       </Modal>
-      {isTeacher && studentId && (
+      {isTeacher && studentId && !is2easyCourse && (
         <CreateIndividualHomeworkModal
           isVisible={createHomeworkModalVisible}
           setIsVisible={setCreateHomeworkModalVisible}
@@ -937,7 +947,7 @@ export const LessonCard: FC<TProps> = ({
           onSuccess={onHomeworkCreated}
         />
       )}
-      {isTeacher && !studentId && currentCourse && (
+      {isTeacher && !studentId && currentCourse && !is2easyCourse && (
         <CreateHomeworkModal
           isVisible={courseHomeworkModalVisible}
           setIsVisible={setCourseHomeworkModalVisible}
