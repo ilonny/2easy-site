@@ -40,7 +40,7 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
     case "int":
       return "Интеграции";
     case "FILL_GAPS_NEW":
-      return "ЗАПОЛНИТЬ ПРОПУСКИ NEW";
+      return "ЗАПОЛНИТЬ ПРОПУСКИ";
     default:
       return type;
   }

@@ -1,6 +1,5 @@
-import { FC, useContext, useEffect, useMemo, useRef } from "react";
+import { FC, useEffect, useMemo, useRef } from "react";
 import { TTemplate } from "../../create/ChooseTemplateModal/templates";
-import { AuthContext } from "@/auth/context";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@nextui-org/react";
 import { mapTypeToTitle } from "../mappers";
 import { ImageEx } from "../ImageEx";
@@ -21,9 +20,6 @@ import { TestEx } from "../TestEx";
 import { FreeInputFormEx } from "../FreeInputFormEx";
 import { IntEx } from "../Int";
 import { FillGapsNew } from "../FillGapsNew";
-
-const canEditFillGapsNew = (profileId: number | undefined) =>
-  profileId != null && (Number(profileId) === 15 || Number(profileId) === 18);
 
 type TProps = {
   isVisible: boolean;
@@ -48,7 +44,6 @@ export const EditorRootModal: FC<TProps> = ({
   lastSortIndex,
   currentSortIndexToShift,
 }) => {
-  const { profile } = useContext(AuthContext);
   const restoreStylesRef = useRef<null | (() => void)>(null);
 
   // iOS Safari: prevent window scroll jumps when keyboard opens inside modal
@@ -178,10 +173,10 @@ export const EditorRootModal: FC<TProps> = ({
       case "int":
         return IntEx;
       case "FILL_GAPS_NEW":
-        return canEditFillGapsNew(profile?.id) ? FillGapsNew : undefined;
+        return FillGapsNew;
       default:
     }
-  }, [type, chosenExToEdit, profile?.id]);
+  }, [type, chosenExToEdit]);
 
   return (
     <Modal

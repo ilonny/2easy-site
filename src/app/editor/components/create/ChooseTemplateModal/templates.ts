@@ -2,9 +2,10 @@ import TextDefaultBg from "@/assets/images/text_default_bg.png";
 import Text2ColBg from "@/assets/images/text_2_col_bg.png";
 import TextStickerBg from "@/assets/images/text_sticker_bg.png";
 import TextChecklistBg from "@/assets/images/text_checklist_bg.png";
-import FillGapsDragBg from "@/assets/images/fill_gaps_drag_bg.png";
-import FillGapsSelectBg from "@/assets/images/fill_gaps_select_bg.png";
-import FillGapsInputBg from "@/assets/images/fill_gaps_input_bg.png";
+// Старое «Заполнить пропуски» (подтипы) — временно отключено
+// import FillGapsDragBg from "@/assets/images/fill_gaps_drag_bg.png";
+// import FillGapsSelectBg from "@/assets/images/fill_gaps_select_bg.png";
+// import FillGapsInputBg from "@/assets/images/fill_gaps_input_bg.png";
 import MatchWordWordBg from "@/assets/images/match_word_word_bg.png";
 import MatchWordImageBg from "@/assets/images/match_word_image_bg.png";
 import MatchWordColumnBg from "@/assets/images/match_word_column_bg.png";
@@ -82,32 +83,33 @@ export const templates: TTemplate[] = [
     description: "for teachers only",
     bgImage: NoteBg,
   },
-  {
-    type: "fill_gaps",
-    title: "Заполнить пропуски",
-    description: "Перетащить, вписать или выбрать правильное слово",
-    bgImage: FillGapsBg,
-    subItems: [
-      {
-        type: "fill-gaps-drag",
-        title: "Перетащить слово из списка",
-        bgImage: FillGapsDragBg,
-      },
-      {
-        type: "fill-gaps-select",
-        title: "Выбрать вариант из списка",
-        bgImage: FillGapsSelectBg,
-      },
-      {
-        type: "fill-gaps-input",
-        title: "Вписать слово в пропуск",
-        bgImage: FillGapsInputBg,
-      },
-    ],
-  },
+  // Старое упражнение «Заполнить пропуски» (drag/select/input) — временно скрыто из конструктора
+  // {
+  //   type: "fill_gaps",
+  //   title: "Заполнить пропуски",
+  //   description: "Перетащить, вписать или выбрать правильное слово",
+  //   bgImage: FillGapsBg,
+  //   subItems: [
+  //     {
+  //       type: "fill-gaps-drag",
+  //       title: "Перетащить слово из списка",
+  //       bgImage: FillGapsDragBg,
+  //     },
+  //     {
+  //       type: "fill-gaps-select",
+  //       title: "Выбрать вариант из списка",
+  //       bgImage: FillGapsSelectBg,
+  //     },
+  //     {
+  //       type: "fill-gaps-input",
+  //       title: "Вписать слово в пропуск",
+  //       bgImage: FillGapsInputBg,
+  //     },
+  //   ],
+  // },
   {
     type: "FILL_GAPS_NEW",
-    title: "ЗАПОЛНИТЬ ПРОПУСКИ NEW",
+    title: "ЗАПОЛНИТЬ ПРОПУСКИ",
     description: "Пропуски с вариантами ответов, форматированием и тремя режимами",
     bgImage: FillGapsBg,
   },

@@ -32,6 +32,18 @@ type TAnswersMap = Record<string, { value?: string; status?: TAnswerStatus }>;
 
 type TPoolItem = { id: string; value: string; used: boolean };
 
+/** Fisher–Yates; called once per stable drag-pool key, not on every render */
+function shufflePoolItems(items: TPoolItem[]): TPoolItem[] {
+  const copy = items.map((x) => ({ ...x }));
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = copy[i];
+    copy[i] = copy[j];
+    copy[j] = t;
+  }
+  return copy;
+}
+
 const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }> = ({
   data,
   isPreview = false,
@@ -197,8 +209,28 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
     });
     return items;
   }, [data.gaps]);
-  const [pool, setPool] = useState(poolItems);
-  useEffect(() => setPool(poolItems), [poolItems, data.id]);
+
+  const dragPoolKey = useMemo(() => {
+    const ex = data.id ?? "new";
+    const gapPart = (data.gaps || [])
+      .map((g) => `${g.id}:${(g.options || []).map((o) => `${o.id}:${(o.value || "").trim()}`).join("|")}`)
+      .join(";");
+    return `${ex}|${gapPart}`;
+  }, [data.gaps, data.id]);
+
+  const dragPoolStableRef = useRef<{ key: string; pool: TPoolItem[] } | null>(null);
+  const [pool, setPool] = useState<TPoolItem[]>([]);
+
+  useEffect(() => {
+    if (mode !== "drag") return;
+    const prev = dragPoolStableRef.current;
+    if (prev?.key === dragPoolKey) {
+      return;
+    }
+    const shuffled = shufflePoolItems(poolItems);
+    dragPoolStableRef.current = { key: dragPoolKey, pool: shuffled };
+    setPool(shuffled);
+  }, [mode, dragPoolKey, poolItems]);
 
   const onPointerDownChip = useCallback(
     (e: any, item: TPoolItem) => {
@@ -400,7 +432,7 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
                     <span
                       style={
                         highlightCorrectInDropdown && o.isCorrect
-                          ? { color: "#166534", fontWeight: 700 }
+                          ? { color: "#059669", fontWeight: 800 }
                           : undefined
                       }
                     >
