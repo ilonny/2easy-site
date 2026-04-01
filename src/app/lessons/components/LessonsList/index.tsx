@@ -8,15 +8,16 @@ import { Button } from "@nextui-org/react";
 import { EditLessonModalForm } from "../EditLessonModalForm";
 import { DeleteLessonModalForm } from "../DeleteLessonModalForm";
 import { AttachLessonModalForm } from "../AttachLessonModalForm";
-import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
+import { checkResponse, fetchPostJson } from "@/api";
 import { CreateCourseModalForm } from "../CreateCourseModalForm";
-import { useLessons } from "../../hooks/useLessons";
 import { AttachLessonCourseModalForm } from "../AttachLessonCourseModalForm";
 import { TCourse } from "@/app/course/hooks/useCourses";
 import { AuthContext } from "@/auth";
 import { useRouter } from "next/navigation";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { getImageUrl } from "@/app/editor/helpers";
+import { CopyLessonToModal } from "../CopyLessonToModal";
+import { useCourses } from "@/app/course/hooks/useCourses";
 
 type TProps = {
   lessons: TLesson[];
@@ -68,6 +69,7 @@ export const LessonsList: FC<TProps> = ({
   const { checkSubscription, subscription } = useCheckSubscription();
   const router = useRouter();
   const { profile } = useContext(AuthContext);
+  const { courses, getCourses: getMyCourses } = useCourses();
   const [editIsVisible, setEditIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
   const [chosenLesson, setChosenLesson] = useState<TLesson | null>(null);
@@ -78,6 +80,8 @@ export const LessonsList: FC<TProps> = ({
     useState(false);
 
   const [copyCourseIsLoading, setCopyCourseIsLoading] = useState(false);
+  const [copyLessonModalOpen, setCopyLessonModalOpen] = useState(false);
+  const [copyLessonId, setCopyLessonId] = useState<number | null>(null);
 
   const [
     attachLessonCourseModalIsVisible,
@@ -120,19 +124,25 @@ export const LessonsList: FC<TProps> = ({
 
   const copyLesson = useCallback(
     async (lesson_id: number) => {
+      const isOwnCoursePage =
+        !!currentCourse && currentCourse?.user_id === profile?.id;
+      if (isOwnCoursePage) {
+        await getMyCourses();
+        setCopyLessonId(lesson_id);
+        setCopyLessonModalOpen(true);
+        return;
+      }
       const res = await fetchPostJson({
         path: "/lessons/copy",
         isSecure: true,
-        data: {
-          lesson_id,
-        },
+        data: { lesson_id },
       });
       const data = await res.json();
       window?.ym(103955671, "reachGoal", "lesson-copy");
       checkResponse(data);
       getLessons();
     },
-    [getLessons],
+    [currentCourse, getLessons, getMyCourses, profile?.id],
   );
 
   const copyCourse = useCallback(async () => {
@@ -288,6 +298,27 @@ export const LessonsList: FC<TProps> = ({
           />
         );
       })}
+
+      {!!copyLessonId && (
+        <CopyLessonToModal
+          isOpen={copyLessonModalOpen}
+          onClose={() => {
+            setCopyLessonModalOpen(false);
+          }}
+          lessonId={copyLessonId}
+          courseOptions={(courses || [])
+            .filter(
+              (c) =>
+                c?.user_id === profile?.id &&
+                (!currentCourse || c.id !== currentCourse.id),
+            )
+            .map((c) => ({ id: c.id, title: c.title, image_path: c.image_path }))}
+          onAfterCopy={() => {
+            getLessons();
+            getCourses();
+          }}
+        />
+      )}
 
       {currentCourse && (
         <>
