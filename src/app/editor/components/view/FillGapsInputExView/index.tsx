@@ -21,6 +21,7 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { useParams } from "next/navigation";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { maxOptionTextLength, normalizeField } from "@/app/editor/helpers/fillGapsLegacy";
 
 type TProps = {
   data: TFillGapsSelectData;
@@ -155,13 +156,14 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
       )
       .forEach((el, index) => {
         const id = el.id;
-        const field = data.fields.find((f) => f.id == id);
-        const maxOptionLength = Math?.max(
-          ...(field?.options?.map((o) => o.value.length) || [])
-        );
+        const rawField = data.fields.find((f) => f.id == id);
+        const field = normalizeField(rawField);
+        if (!field) return;
+        const maxOptionLength = maxOptionTextLength(field.options);
+        const safeLen = Number.isFinite(maxOptionLength) ? maxOptionLength : 8;
         el.setAttribute("index", field?.id?.toString());
         const root = ReactDOM.createRoot(el);
-        const toolTipContent = field?.options
+        const toolTipContent = field.options
           .filter((o) => o.isCorrect)
           .map((o) => o.value)
           .join(", ");
@@ -171,7 +173,7 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
             id={"answer-wrapper-" + field?.id}
             style={{
               display: "inline-block",
-              maxWidth: maxOptionLength * (maxOptionLength < 5 ? 30 : 15),
+              maxWidth: safeLen * (safeLen < 5 ? 30 : 15),
               lineHeight: "initial",
             }}
           >

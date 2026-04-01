@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 import { TField, TFillGapsSelectData } from "../../editor/FillGapsSelect/types";
-import { Card, Checkbox, Select, SelectItem } from "@nextui-org/react";
+import { Card, Select, SelectItem } from "@nextui-org/react";
 import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
@@ -19,6 +19,11 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
 import { useParams } from "next/navigation";
+import {
+  computeSelectWrapperMinWidth,
+  maxOptionTextLength,
+  normalizeField,
+} from "@/app/editor/helpers/fillGapsLegacy";
 
 type TProps = {
   data: TFillGapsSelectData;
@@ -29,6 +34,12 @@ const AnswerField: FC<{
   field: TField;
   isTeacher: boolean;
   isPresentationMode?: boolean;
+  localAnswers: { id: number | string; word: string; isCorrect: boolean }[];
+  setLocalAnswers: React.Dispatch<
+    React.SetStateAction<
+      { id: number | string; word: string; isCorrect: boolean }[]
+    >
+  >;
 }> = ({
   field,
   isTeacher,
@@ -57,37 +68,22 @@ const AnswerField: FC<{
     return !!field.options?.find((o) => o.value === selectedValue)?.isCorrect;
   }, [selectedValue, field?.options, isDisabled, field]);
 
-  if (!field) return null;
-
   const onChangeSelection = useCallback(
     (val: string) => {
+      if (!field) return;
       setSelectedValue(val);
       setCount((c) => c + 1);
-      // if (!isCorrect) {
-      // }
+      const correct = !!field.options?.find((o) => o.value === val)?.isCorrect;
       setLocalAnswers((a) =>
         a.concat({
           id: field.id,
-          isCorrect,
+          isCorrect: correct,
           word: val,
         })
       );
-      return;
     },
-    [isCorrect]
+    [field, setLocalAnswers]
   );
-
-  // useEffect(() => {
-  //   if (isCorrect) {
-  //     setLocalAnswers((a) =>
-  //       a.concat({
-  //         id: field.id,
-  //         isCorrect: true,
-  //         word: field.options[0].value,
-  //       })
-  //     );
-  //   }
-  // }, [field.id, isCorrect]);
 
   useEffect(() => {
     if (!field?.options?.length || field.options.length === 1) {
@@ -97,33 +93,59 @@ const AnswerField: FC<{
       setIsDisabled(true);
       setSelectedValue(field.options.find((o) => o.isCorrect)?.value || "");
     }
-  }, [count, field?.options, isCorrect, selectedValue]);
+  }, [count, field?.options, isCorrect, selectedValue, field]);
+
+  const selectedKeys = useMemo(() => {
+    if (
+      !field?.options?.length ||
+      !selectedValue ||
+      !field.options.some((o) => o.value === selectedValue)
+    ) {
+      return new Set<string>();
+    }
+    return new Set([selectedValue]);
+  }, [field?.options, selectedValue]);
+
+  if (!field) return null;
+
+  if (!field.options?.length) {
+    return (
+      <span className="inline-block min-h-8 min-w-[72px] rounded-lg bg-default-100 px-2 py-1 text-left text-xs text-default-400">
+        —
+      </span>
+    );
+  }
 
   return (
     <>
       <Select
-        // variant="bordered"
-        // isInvalid={!isCorrect}
-        className={`${styles["answer-wrapper"]} font-normal`}
+        className={`${styles["answer-wrapper"]} font-normal min-w-[72px] w-auto max-w-full`}
+        classNames={{
+          base: "min-w-[72px] w-auto max-w-full data-[focus=true]:z-30",
+          mainWrapper: "min-w-[72px] w-auto",
+          trigger: "min-w-[72px] w-auto max-w-full shrink-0",
+        }}
         style={{
           backgroundColor:
             field.options.length === 1
               ? "#eeebff"
               : isCorrect
-              ? "#EBFFEE"
-              : selectedValue
-              ? "#FFE5E5"
-              : "#eeebff",
+                ? "#EBFFEE"
+                : selectedValue
+                  ? "#FFE5E5"
+                  : "#eeebff",
           borderRadius: "8px",
         }}
         size="sm"
-        // color={isCorrect ? "success" : selectedValue ? "danger" : "primary"}
-        onChange={(e) => onChangeSelection(e.target.value)}
-        defaultSelectedKeys={[selectedValue]}
-        selectedKeys={[selectedValue]}
+        onSelectionChange={(keys) => {
+          const v = Array.from(keys)[0];
+          if (v != null) onChangeSelection(String(v));
+        }}
+        selectedKeys={selectedKeys}
         isDisabled={isDisabled}
+        popoverProps={{ shouldFlip: true }}
       >
-        {(field?.options || [])?.map((o) => {
+        {field.options.map((o) => {
           return (
             <SelectItem color="default" key={o.value} textValue={o.value}>
               <div
@@ -134,11 +156,6 @@ const AnswerField: FC<{
                   "text-success"
                 }`}
               >
-                {/* {isTeacher && o.isCorrect && (
-                  <div>
-                    <Checkbox isSelected isDisabled />
-                  </div>
-                )} */}
                 {o.value}
               </div>
             </SelectItem>
@@ -217,32 +234,17 @@ export const FillGapsSelectExView: FC<TProps> = ({
     const wrappers = document.querySelectorAll(`.${areaClassCurrent} .answerWrapper`);
     wrappers.forEach((el) => {
       const id = el.id;
-      const field = data.fields?.find((f) => f.id == id);
+      const rawField = data.fields?.find((f) => f.id == id);
+      const field = normalizeField(rawField);
       if (!field) return;
-      const maxOptionLength = Math?.max(
-        ...(field?.options?.map((o) => o.value.length) || [1])
-      );
+      const maxLen = maxOptionTextLength(field.options);
+      const minWidth = computeSelectWrapperMinWidth(maxLen);
       el.setAttribute("index", field?.id?.toString());
       let root = rootsMapRef.current.get(el);
       if (!root) {
         root = ReactDOM.createRoot(el);
         rootsMapRef.current.set(el, root);
       }
-        // if (field?.options.length === 1) {
-        //   return root.render(<span>{field?.options[0].value}</span>);
-        // }
-        let minWidth =
-          maxOptionLength *
-          (maxOptionLength <= 5
-            ? 75
-            : maxOptionLength <= 10
-            ? 20
-            : maxOptionLength >= 20
-            ? 10
-            : 15);
-        if (minWidth < 70) {
-          minWidth = 85;
-        }
         root.render(
           <div
             className="answer-wrapper mx-2 select-answer-wrapper"
@@ -250,19 +252,8 @@ export const FillGapsSelectExView: FC<TProps> = ({
             style={{
               display: "inline-block",
               minWidth,
-              // maxOptionLength *
-              // (maxOptionLength < 10 ? 20 : maxOptionLength > 20 ? 7 : 10),
             }}
           >
-            {/* {localAnswers.find((f) => f.id === field.id && f.isCorrect) ? (
-              <>success</>
-            ) : isTeacher &&
-              localAnswers.findLast(
-                (f) => f.id === field.id && !f.isCorrect
-              ) ? (
-              <>error</>
-            ) : (
-            )} */}
             <AnswerField
               field={field}
               key={field?.id}

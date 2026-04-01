@@ -392,8 +392,8 @@ export const FillGapsNew: FC<TProps> = ({
               Выберите режим выполнения. Его можно менять в любой момент.
             </div>
             <div className={styles.howto}>
-              1) Напишите текст задания. 2) Выделите фрагмент, который должен стать
-              пропуском. 3) Нажмите «Сделать пропуск» и добавьте варианты ответа.
+              1) Напишите текст задания. 2) Выделите фрагмент, который должен стать пропуском. 3)
+              Нажмите «Сделать пропуск» и добавьте варианты ответа.
             </div>
           </div>
         </div>
@@ -463,18 +463,21 @@ export const FillGapsNew: FC<TProps> = ({
               <span className={styles.colorSwatch} style={{ background: c }} />
             </Button>
           ))}
-          <Button
-            size="sm"
-            color="primary"
-            variant="flat"
-            onPointerDown={(e) => {
-              e.preventDefault();
-              makeGap();
-            }}
-          >
-            Сделать пропуск
-          </Button>
         </div>
+      </div>
+
+      <div className={styles.stickyGapActionBar}>
+        <Button
+          size="sm"
+          color="primary"
+          variant="flat"
+          onPointerDown={(e) => {
+            e.preventDefault();
+            makeGap();
+          }}
+        >
+          Сделать пропуск
+        </Button>
       </div>
 
       <div className="h-4" />
