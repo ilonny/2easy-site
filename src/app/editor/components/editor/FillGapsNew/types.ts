@@ -32,6 +32,7 @@ export type TFillGapsNewOption = {
 export type TFillGapsNewGap = {
   id: string;
   options: TFillGapsNewOption[];
+  originalText?: string;
 };
 
 export type TFillGapsNewData = {

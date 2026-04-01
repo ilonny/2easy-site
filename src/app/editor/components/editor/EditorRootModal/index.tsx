@@ -1,4 +1,4 @@
-import { FC, useContext, useMemo } from "react";
+import { FC, useContext, useEffect, useMemo, useRef } from "react";
 import { TTemplate } from "../../create/ChooseTemplateModal/templates";
 import { AuthContext } from "@/auth/context";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@nextui-org/react";
@@ -49,6 +49,96 @@ export const EditorRootModal: FC<TProps> = ({
   currentSortIndexToShift,
 }) => {
   const { profile } = useContext(AuthContext);
+  const restoreStylesRef = useRef<null | (() => void)>(null);
+
+  // iOS Safari: prevent window scroll jumps when keyboard opens inside modal
+  useEffect(() => {
+    const body = document.body;
+    const html = document.documentElement;
+
+    const unlock = () => {
+      // Always ensure we don't leave the page locked.
+      try {
+        if (body.style.overflow === "hidden") body.style.overflow = "";
+        if (html.style.overflow === "hidden") html.style.overflow = "";
+        body.style.removeProperty("overflow");
+        html.style.removeProperty("overflow");
+      } catch {}
+
+      try {
+        const raw = body.dataset?.editorScrollLock;
+        if (!raw) return;
+        const prev = JSON.parse(raw || "{}");
+
+        body.style.position = prev.bodyPosition ?? "";
+        body.style.top = prev.bodyTop ?? "";
+        body.style.left = prev.bodyLeft ?? "";
+        body.style.right = prev.bodyRight ?? "";
+        body.style.width = prev.bodyWidth ?? "";
+        body.style.overflow = prev.bodyOverflow ?? "";
+        html.style.overflow = prev.htmlOverflow ?? "";
+
+        const y = Number(prev.scrollY || 0);
+        window.scrollTo(0, y);
+      } catch {
+        // last resort: never leave page locked
+        body.style.position = "";
+        body.style.top = "";
+        body.style.left = "";
+        body.style.right = "";
+        body.style.width = "";
+        body.style.overflow = "";
+        html.style.overflow = "";
+        try {
+          body.style.removeProperty("overflow");
+          html.style.removeProperty("overflow");
+        } catch {}
+      } finally {
+        try {
+          delete (body.dataset as any).editorScrollLock;
+        } catch {}
+      }
+    };
+
+    // if modal is closed programmatically, always unlock
+    if (!isVisible) {
+      unlock();
+      restoreStylesRef.current = null;
+      return;
+    }
+
+    // don't double-lock
+    if (body.dataset?.editorScrollLock) {
+      restoreStylesRef.current = unlock;
+      return () => unlock();
+    }
+
+    const prev = {
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyLeft: body.style.left,
+      bodyRight: body.style.right,
+      bodyWidth: body.style.width,
+      bodyOverflow: body.style.overflow,
+      htmlOverflow: html.style.overflow,
+      scrollY: window.scrollY,
+    };
+    body.dataset.editorScrollLock = JSON.stringify(prev);
+
+    body.style.position = "fixed";
+    body.style.top = `-${prev.scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+    html.style.overflow = "hidden";
+
+    restoreStylesRef.current = unlock;
+    return () => {
+      unlock();
+      restoreStylesRef.current = null;
+    };
+  }, [isVisible]);
 
   const EditorComponent = useMemo(() => {
     const exType = type || chosenExToEdit?.type;
@@ -98,9 +188,14 @@ export const EditorRootModal: FC<TProps> = ({
       isDismissable={false}
       size="5xl"
       isOpen={isVisible}
-      onClose={() => setIsVisible(false)}
+      onClose={() => {
+        restoreStylesRef.current?.();
+        setIsVisible(false);
+      }}
       style={{ background: "#F9F9F9", overflow: "hidden" }}
-      scrollBehavior="outside"
+      scrollBehavior="inside"
+      placement="center"
+      classNames={{ base: "max-h-[92dvh]" }}
     >
       <ModalContent>
         <ModalHeader className="justify-center">
@@ -115,7 +210,7 @@ export const EditorRootModal: FC<TProps> = ({
             </div>
           )}
         </ModalHeader>
-        <ModalBody>
+        <ModalBody className="overflow-y-auto">
           {!!EditorComponent && (
             <EditorComponent
               onSuccess={onSuccess}

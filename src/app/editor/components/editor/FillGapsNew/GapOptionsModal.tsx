@@ -12,7 +12,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TFillGapsNewGap, TFillGapsNewOption } from "./types";
 
 type TProps = {
@@ -53,11 +53,60 @@ export const GapOptionsModal: FC<TProps> = ({
 
   const [localGap, setLocalGap] = useState<TFillGapsNewGap>(initialGap);
 
+  const dragStateRef = useRef<{
+    pointerId: number;
+    fromIdx: number;
+  } | null>(null);
+
   useEffect(() => {
     if (isOpen) {
       setLocalGap(initialGap);
     }
   }, [initialGap, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onPointerMove = (e: PointerEvent) => {
+      const st = dragStateRef.current;
+      if (!st || e.pointerId !== st.pointerId) return;
+
+      const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+      const target = el?.closest?.("[data-opt-idx]") as HTMLElement | null;
+      if (!target) return;
+
+      const toIdxRaw = target.getAttribute("data-opt-idx");
+      const toIdx = toIdxRaw ? Number(toIdxRaw) : NaN;
+      if (!Number.isFinite(toIdx)) return;
+
+      if (toIdx === st.fromIdx) return;
+
+      setLocalGap((g) => {
+        const options = [...(g.options || [])];
+        if (st.fromIdx < 0 || st.fromIdx >= options.length) return g;
+        if (toIdx < 0 || toIdx >= options.length) return g;
+        const [moved] = options.splice(st.fromIdx, 1);
+        options.splice(toIdx, 0, moved);
+        st.fromIdx = toIdx;
+        return { ...g, options };
+      });
+    };
+
+    const onPointerUpOrCancel = (e: PointerEvent) => {
+      const st = dragStateRef.current;
+      if (!st || e.pointerId !== st.pointerId) return;
+      dragStateRef.current = null;
+    };
+
+    window.addEventListener("pointermove", onPointerMove, { passive: false });
+    window.addEventListener("pointerup", onPointerUpOrCancel);
+    window.addEventListener("pointercancel", onPointerUpOrCancel);
+    return () => {
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUpOrCancel);
+      window.removeEventListener("pointercancel", onPointerUpOrCancel);
+    };
+  }, [isOpen]);
 
   const setOption = useCallback(
     (idx: number, patch: Partial<TFillGapsNewOption>) => {
@@ -69,6 +118,10 @@ export const GapOptionsModal: FC<TProps> = ({
     },
     [],
   );
+
+  const startReorder = useCallback((pointerId: number, fromIdx: number) => {
+    dragStateRef.current = { pointerId, fromIdx };
+  }, []);
 
   const addOption = useCallback(() => {
     setLocalGap((g) => ({
@@ -140,6 +193,7 @@ export const GapOptionsModal: FC<TProps> = ({
             {(localGap.options || []).map((o, idx) => (
               <div
                 key={o.id}
+                data-opt-idx={idx}
                 className="flex items-start gap-3 bg-white rounded-xl p-3"
                 style={{
                   boxShadow: "0px 8px 24px 0px #908BA826",
@@ -148,6 +202,23 @@ export const GapOptionsModal: FC<TProps> = ({
                     : "1px solid rgba(17, 24, 39, 0.08)",
                 }}
               >
+                <div
+                  className="pt-1 select-none"
+                  style={{ cursor: "grab", touchAction: "none" }}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    try {
+                      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                    } catch {
+                      // ignore
+                    }
+                    startReorder(e.pointerId, idx);
+                  }}
+                >
+                  <div className="text-gray-400 leading-none" style={{ fontSize: 18 }}>
+                    ≡
+                  </div>
+                </div>
                 <div className="pt-1">
                   <Checkbox
                     isSelected={o.isCorrect}

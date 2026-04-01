@@ -64,6 +64,7 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
   const answersRef = useRef<TAnswersMap>({});
   const [statusByGap, setStatusByGap] = useState<Record<string, TAnswerStatus>>({});
   const saveTimerRef = useRef<number | null>(null);
+  const inputCheckTimersRef = useRef<Record<string, number>>({});
 
   const { writeAnswer, answers, getAnswers } = useExAnswer({
     student_id,
@@ -139,6 +140,8 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+      Object.values(inputCheckTimersRef.current || {}).forEach((t) => window.clearTimeout(t));
+      inputCheckTimersRef.current = {};
     };
   }, []);
 
@@ -272,15 +275,64 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
               <Input
                 size="sm"
                 className={styles.gapInput}
-                key={gapId + ":" + answersVersion}
+                key={gapId}
                 defaultValue={current}
                 isDisabled={!canInteract}
                 onValueChange={(val) => {
                   if (!canInteract) return;
-                  const v = (val || "").trim();
-                  if (!v) return setAnswer(gapId, "", "neutral");
-                  const ok = isCorrectForGap(gap, v);
-                  if (ok) setAnswer(gapId, val, "correct");
+                  const raw = val || "";
+                  const v = raw.trim();
+                  if (!v) {
+                    if (inputCheckTimersRef.current[gapId]) {
+                      window.clearTimeout(inputCheckTimersRef.current[gapId]);
+                      delete inputCheckTimersRef.current[gapId];
+                    }
+                    return setAnswer(gapId, "", "neutral");
+                  }
+
+                  // optimistic save value, keep current status until debounce fires
+                  answersRef.current[gapId] = {
+                    value: raw,
+                    status: answersRef.current?.[gapId]?.status || "neutral",
+                  };
+                  schedulePersist();
+
+                  // If user finished with space, validate immediately
+                  if (raw.endsWith(" ")) {
+                    if (inputCheckTimersRef.current[gapId]) {
+                      window.clearTimeout(inputCheckTimersRef.current[gapId]);
+                      delete inputCheckTimersRef.current[gapId];
+                    }
+                    const latest = raw.trim();
+                    const ok = isCorrectForGap(gap, latest);
+                    setAnswer(gapId, latest, ok ? "correct" : "incorrect");
+                    return;
+                  }
+
+                  if (inputCheckTimersRef.current[gapId]) {
+                    window.clearTimeout(inputCheckTimersRef.current[gapId]);
+                  }
+                  inputCheckTimersRef.current[gapId] = window.setTimeout(() => {
+                    const latest = (answersRef.current?.[gapId]?.value || "").trim();
+                    if (!latest) return setAnswer(gapId, "", "neutral");
+                    const ok = isCorrectForGap(gap, latest);
+                    setAnswer(gapId, latest, ok ? "correct" : "incorrect");
+                  }, 500);
+                }}
+                onKeyDown={(e) => {
+                  if (!canInteract) return;
+                  if ((e as any)?.key !== "Enter") return;
+                  try {
+                    e.preventDefault();
+                  } catch {}
+                  if (inputCheckTimersRef.current[gapId]) {
+                    window.clearTimeout(inputCheckTimersRef.current[gapId]);
+                    delete inputCheckTimersRef.current[gapId];
+                  }
+                  const latest = ((e.target as any)?.value || "").trim();
+                  if (!latest) return setAnswer(gapId, "", "neutral");
+                  const ok = isCorrectForGap(gap, latest);
+                  setAnswer(gapId, latest, ok ? "correct" : "incorrect");
                 }}
                 onBlur={(e) => {
                   if (!canInteract) return;
@@ -312,6 +364,7 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
             : status === "incorrect"
               ? "bg-[#FEE2E2] border border-[rgba(220,38,38,0.75)]"
               : "bg-[#F7F7FF] border border-[rgba(63,40,198,0.25)]";
+        const highlightCorrectInDropdown = isPreview || (isTeacher && !isPresentationMode);
         return (
           <Tooltip isDisabled={!isTeacher || isPresentationMode || !tooltipContent} content={<div>{tooltipContent}</div>}>
             <span className="inline-flex">
@@ -339,8 +392,20 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
                 }}
               >
                 {(gap.options || []).map((o) => (
-                  <SelectItem key={o.value} value={o.value} textValue={o.value}>
-                    {o.value}
+                  <SelectItem
+                    key={o.value}
+                    value={o.value}
+                    textValue={o.value}
+                  >
+                    <span
+                      style={
+                        highlightCorrectInDropdown && o.isCorrect
+                          ? { color: "#166534", fontWeight: 700 }
+                          : undefined
+                      }
+                    >
+                      {o.value}
+                    </span>
                   </SelectItem>
                 ))}
               </Select>
@@ -358,7 +423,7 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
               status === "incorrect" ? styles.gapDropIncorrect : current ? styles.gapDropFilled : ""
             }`}
           >
-            <span>{current || "Перетащите сюда"}</span>
+            <span>{current || "\u00A0"}</span>
           </span>
         </Tooltip>
       );

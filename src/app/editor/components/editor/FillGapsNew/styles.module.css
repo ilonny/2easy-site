@@ -108,7 +108,22 @@
 }
 
 .draftArea {
-  min-height: 160px;
+  min-height: 260px;
+  padding: 12px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 12px;
+  background: #fff;
+  display: block;
+}
+
+.draftArea :global([data-slate-editor="true"]) {
+  min-height: 260px !important;
+  width: 100%;
+}
+
+.draftArea :global([data-slate-placeholder="true"]) {
+  top: 12px !important;
+  left: 12px !important;
 }
 
 .gapPill {

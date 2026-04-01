@@ -1,5 +1,5 @@
 import { fetchGet, fetchPostJson } from "@/api";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { getImageUrl } from "../helpers";
 
 const mapImageExData = (data: string) => {
@@ -169,39 +169,62 @@ export const useExList = (lesson_id?: number, isPresentationMode?: boolean) => {
   const [exListIsLoading, setExListIsLoading] = useState(false);
   const [exList, setExList] = useState([]);
 
+  const inFlightRef = useRef<Promise<any> | null>(null);
+  const inFlightKeyRef = useRef<string>("");
+
   const getExList = useCallback(
     async (_lesson_id?: number, hash?: string) => {
+      const effectiveLessonId = _lesson_id || lesson_id;
+      if (!effectiveLessonId) return;
+
+      const key = `${effectiveLessonId}:${hash || ""}:${isPresentationMode ? 1 : 0}`;
+      if (inFlightRef.current && inFlightKeyRef.current === key) {
+        return inFlightRef.current;
+      }
+
+      inFlightKeyRef.current = key;
       setExListIsLoading(true);
-      const listRes = await fetchGet({
-        path: `/ex/list?lesson_id=${_lesson_id || lesson_id}&hash=${hash || ""}`,
-        isSecure: true,
-      });
-      const list = await listRes?.json();
-      if (!list?.map) {
-        return;
-      }
-      let mappedList = list
-        ?.map((l, index) => {
-          const dataMapper = getDataMapper(l.type);
-          return {
-            ...l,
-            data: dataMapper(l.data),
-            sortIndex: l.sortIndex,
-          };
-        })
-        ?.sort((a, b) => {
-          if (a.sortIndex < b.sortIndex) return -1;
-          if (a.sortIndex > b.sortIndex) return 1;
-          return 0;
-        });
-      if (isPresentationMode) {
-        mappedList = mappedList.filter(
-          (l) =>
-            l.is_visible === null || l.is_visible === "1" || l.is_visible === 1,
-        );
-      }
-      setExList(mappedList || []);
-      setExListIsLoading(false);
+
+      const p = (async () => {
+        try {
+          const listRes = await fetchGet({
+            path: `/ex/list?lesson_id=${effectiveLessonId}&hash=${hash || ""}`,
+            isSecure: true,
+          });
+          const list = await listRes?.json();
+          if (!list?.map) return;
+          let mappedList = list
+            ?.map((l) => {
+              const dataMapper = getDataMapper(l.type);
+              return {
+                ...l,
+                data: dataMapper(l.data),
+                sortIndex: l.sortIndex,
+              };
+            })
+            ?.sort((a, b) => {
+              if (a.sortIndex < b.sortIndex) return -1;
+              if (a.sortIndex > b.sortIndex) return 1;
+              return 0;
+            });
+          if (isPresentationMode) {
+            mappedList = mappedList.filter(
+              (l) =>
+                l.is_visible === null || l.is_visible === "1" || l.is_visible === 1,
+            );
+          }
+          setExList(mappedList || []);
+        } finally {
+          if (inFlightRef.current === p) {
+            inFlightRef.current = null;
+            inFlightKeyRef.current = "";
+          }
+          setExListIsLoading(false);
+        }
+      })();
+
+      inFlightRef.current = p;
+      return p;
     },
     [isPresentationMode, lesson_id],
   );

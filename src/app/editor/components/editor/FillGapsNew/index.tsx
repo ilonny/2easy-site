@@ -3,7 +3,7 @@
 import { uuidv4 } from "@/app/editor/helpers";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Button } from "@nextui-org/react";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FillGapsNewExView } from "../../view/FillGapsNewExView";
 import { useExData } from "../hooks/useExData";
 import { useUploadFillGapsNewEx } from "../hooks/useUploadFillGapsNewEx";
@@ -30,6 +30,7 @@ import {
   withReact,
 } from "slate-react";
 import { withHistory } from "slate-history";
+import { Path } from "slate";
 
 const COLORS = ["#3F28C6", "#111827", "#16A34A", "#DC2626", "#2563EB", "#F59E0B"];
 
@@ -45,7 +46,7 @@ const defaultValuesStub: TFillGapsNewData = {
       type: "paragraph",
       children: [
         {
-          text: "Введите текст. Выделите фрагмент и нажмите «Сделать пропуск».",
+          text: "",
         },
       ],
     },
@@ -169,10 +170,55 @@ export const FillGapsNew: FC<TProps> = ({
     Transforms.insertNodes(editor, gapEl);
     Transforms.move(editor);
 
-    const gap: TFillGapsNewGap = { id: gapId, options: [] };
+    const normalizedSelected = selectedText.trim();
+    const gap: TFillGapsNewGap = {
+      id: gapId,
+      originalText: normalizedSelected,
+      options: normalizedSelected
+        ? [
+            {
+              id: uuidv4(),
+              value: normalizedSelected,
+              isCorrect: true,
+            },
+          ]
+        : [],
+    };
     changeData("gaps", (data.gaps || []).concat(gap));
-    openGapModalFor(gapId, selectedText.trim());
+    openGapModalFor(gapId, normalizedSelected);
   }, [changeData, data.gaps, editor, openGapModalFor]);
+
+  const restoreGapToOriginalText = useCallback(
+    (gapId: string) => {
+      const gap = (data.gaps || []).find((g) => g.id === gapId);
+      const original =
+        (gap?.originalText || "").trim() ||
+        (gap?.options || []).find((o) => o.isCorrect)?.value?.trim() ||
+        (gap?.options || [])?.[0]?.value?.trim() ||
+        "";
+
+      const entry = Array.from(
+        Editor.nodes(editor, {
+          at: [],
+          match: (n) => (n as any)?.type === "gap" && (n as any)?.gapId === gapId,
+        }),
+      )[0] as any;
+
+      if (!entry) return;
+      const [, path] = entry;
+      try {
+        const insertAt = Editor.before(editor, path) || Editor.start(editor, Path.parent(path));
+        Transforms.removeNodes(editor, { at: path });
+        if (original) Transforms.insertText(editor, original, { at: insertAt });
+      } catch {}
+
+      changeData(
+        "gaps",
+        (data.gaps || []).filter((g) => g.id !== gapId),
+      );
+    },
+    [changeData, data.gaps, editor],
+  );
 
   const onSaveGap = useCallback(
     (gap: TFillGapsNewGap) => {
@@ -234,6 +280,54 @@ export const FillGapsNew: FC<TProps> = ({
       </span>
     );
   }, []);
+
+  const tapFocusRef = useRef<{
+    t: number;
+    x: number;
+    y: number;
+    moved: boolean;
+    scrollY: number;
+    scrollElTop: number;
+    scrollEl?: Element | null;
+  } | null>(null);
+
+  const getScrollParent = useCallback((el: Element | null): Element | null => {
+    let cur: Element | null = el;
+    while (cur) {
+      const style = window.getComputedStyle(cur);
+      const oy = style.overflowY;
+      if ((oy === "auto" || oy === "scroll") && (cur as HTMLElement).scrollHeight > (cur as HTMLElement).clientHeight) {
+        return cur;
+      }
+      cur = cur.parentElement;
+    }
+    return document.scrollingElement || document.documentElement;
+  }, []);
+
+  const tryFocusOnShortTap = useCallback(() => {
+    const st = tapFocusRef.current;
+    tapFocusRef.current = null;
+    if (!st) return;
+    if (st.moved) return; // selection drag
+    if (Date.now() - st.t > 350) return; // long-press selection
+    // If any scrolling happened (modal body / page), don't focus
+    try {
+      const nowScrollY = window.scrollY;
+      const nowTop =
+        st.scrollEl && "scrollTop" in (st.scrollEl as any) ? Number((st.scrollEl as any).scrollTop || 0) : st.scrollElTop;
+      if (nowScrollY !== st.scrollY) return;
+      if (nowTop !== st.scrollElTop) return;
+    } catch {}
+    try {
+      ReactEditor.focus(editor as any);
+      // iOS Safari: sometimes ReactEditor.focus sets outline but no keyboard;
+      // focusing the underlying DOM node helps.
+      try {
+        const dom = ReactEditor.toDOMNode(editor as any, editor as any) as HTMLElement | null;
+        dom?.focus?.();
+      } catch {}
+    } catch {}
+  }, [editor]);
 
   return (
     <div>
@@ -394,37 +488,109 @@ export const FillGapsNew: FC<TProps> = ({
             changeData("content", val as TFillGapsNewContent);
           }}
         >
-          <Editable
-            renderElement={renderElement}
-            renderLeaf={renderLeaf}
-            placeholder="Начните писать..."
-            spellCheck
-            onPointerDown={() => {
-              try {
-                ReactEditor.focus(editor as any);
-              } catch {}
-            }}
-            onTouchStart={() => {
-              try {
-                ReactEditor.focus(editor as any);
-              } catch {}
-            }}
-            onKeyDown={(event) => {
-              if (!event.ctrlKey && !event.metaKey) return;
-              if (event.key.toLowerCase() === "b") {
-                event.preventDefault();
-                toggleMark("bold");
-              }
-              if (event.key.toLowerCase() === "i") {
-                event.preventDefault();
-                toggleMark("italic");
-              }
-              if (event.key.toLowerCase() === "u") {
-                event.preventDefault();
-                toggleMark("underline");
-              }
-            }}
-          />
+          <div className={styles.draftArea}>
+            <Editable
+              renderElement={renderElement}
+              renderLeaf={renderLeaf}
+              placeholder="Начните писать..."
+              spellCheck
+              onPointerDown={(e) => {
+                // iOS Safari: first tap sometimes doesn't focus; focus on "short tap"
+                const se = getScrollParent((e as any).target as Element | null);
+                tapFocusRef.current = {
+                  t: Date.now(),
+                  x: (e as any).clientX ?? 0,
+                  y: (e as any).clientY ?? 0,
+                  moved: false,
+                  scrollY: window.scrollY,
+                  scrollEl: se,
+                  scrollElTop: se && "scrollTop" in (se as any) ? Number((se as any).scrollTop || 0) : 0,
+                };
+              }}
+              onPointerMove={(e) => {
+                const st = tapFocusRef.current;
+                if (!st) return;
+                const x = (e as any).clientX ?? 0;
+                const y = (e as any).clientY ?? 0;
+                if (Math.abs(x - st.x) > 8 || Math.abs(y - st.y) > 8) st.moved = true;
+              }}
+              onPointerUpCapture={tryFocusOnShortTap}
+              onPointerCancel={() => {
+                tapFocusRef.current = null;
+              }}
+              onTouchStart={(e) => {
+                const t = (e as any).touches?.[0];
+                const se = getScrollParent((e as any).target as Element | null);
+                tapFocusRef.current = {
+                  t: Date.now(),
+                  x: t?.clientX ?? 0,
+                  y: t?.clientY ?? 0,
+                  moved: false,
+                  scrollY: window.scrollY,
+                  scrollEl: se,
+                  scrollElTop: se && "scrollTop" in (se as any) ? Number((se as any).scrollTop || 0) : 0,
+                };
+              }}
+              onTouchMove={(e) => {
+                const st = tapFocusRef.current;
+                if (!st) return;
+                const t = (e as any).touches?.[0];
+                const x = t?.clientX ?? 0;
+                const y = t?.clientY ?? 0;
+                if (Math.abs(x - st.x) > 8 || Math.abs(y - st.y) > 8) st.moved = true;
+              }}
+              onTouchEndCapture={tryFocusOnShortTap}
+              onTouchCancel={() => {
+                tapFocusRef.current = null;
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Backspace" || event.key === "Delete") {
+                  const sel = editor.selection;
+                  if (sel) {
+                    const findGapEntryAt = (at: any) =>
+                      Array.from(
+                        Editor.nodes(editor, {
+                          at,
+                          match: (n) => (n as any)?.type === "gap",
+                        }),
+                      )[0] as any;
+
+                    let gapEntry =
+                      findGapEntryAt(sel) ||
+                      (sel.anchor
+                        ? findGapEntryAt(Editor.before(editor, sel.anchor) || sel)
+                        : undefined) ||
+                      (sel.anchor
+                        ? findGapEntryAt(Editor.after(editor, sel.anchor) || sel)
+                        : undefined);
+
+                    if (gapEntry) {
+                      event.preventDefault();
+                      const [node] = gapEntry;
+                      const gid = (node as any)?.gapId as string | undefined;
+                      if (gid) {
+                        restoreGapToOriginalText(gid);
+                        return;
+                      }
+                    }
+                  }
+                }
+                if (!event.ctrlKey && !event.metaKey) return;
+                if (event.key.toLowerCase() === "b") {
+                  event.preventDefault();
+                  toggleMark("bold");
+                }
+                if (event.key.toLowerCase() === "i") {
+                  event.preventDefault();
+                  toggleMark("italic");
+                }
+                if (event.key.toLowerCase() === "u") {
+                  event.preventDefault();
+                  toggleMark("underline");
+                }
+              }}
+            />
+          </div>
         </Slate>
       </div>
 
