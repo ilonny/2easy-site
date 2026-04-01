@@ -366,50 +366,36 @@ export const FillGapsDragExView: FC<TProps> = ({
   const onDrop = useCallback(() => {}, [activeDragId]);
 
   return (
-    <div className="fill-the-gaps-draggable">
-      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
+    <div className="fill-the-gaps-draggable exercise-view-shell max-w-[886px]">
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto exercise-view-head`}>
         <p
+          className="exercise-view-title"
           style={{
             color: data.titleColor,
-            fontSize: 38,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
           }}
         >
           {data.title}
         </p>
-        <p
-          style={{
-            fontSize: 24,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
-          }}
-        >
+        <p className="exercise-view-subtitle">
           {data.subtitle}
         </p>
         {!!data.description && (
-          <p
-            style={{
-              fontSize: 20,
-              textAlign: "center",
-              whiteSpace: "pre-line",
-            }}
-          >
+          <p className="exercise-view-desc">
             {data.description}
           </p>
         )}
       </div>
-      <div className={`pb-8 w-[100%] max-w-[886px] m-auto`}>
+      <div className={`pb-4 sm:pb-6 md:pb-7 lg:pb-8 w-full max-w-[886px] mx-auto`}>
         {!!image && (
-          <Zoom>
-            <img
-              src={image.dataURL}
-              style={{ maxHeight: 400 }}
-              className="m-auto mb-8"
-            />
-          </Zoom>
+          <div className="w-full max-w-full min-w-0 mb-6 sm:mb-8">
+            <Zoom>
+              <img
+                src={image.dataURL}
+                alt=""
+                className="block m-auto max-w-full h-auto max-h-[min(50vh,400px)] object-contain"
+              />
+            </Zoom>
+          </div>
         )}
         <div
           className="
@@ -450,10 +436,10 @@ export const FillGapsDragExView: FC<TProps> = ({
             );
           })}
         </div>
-        <Card className={`p-10 px-10 box relative mt-2`}>
+        <Card className={`p-4 sm:p-6 md:p-8 lg:p-10 box relative mt-2 min-w-0`}>
           <div
             style={{ margin: "0 auto", lineHeight: "230%" }}
-            className="flex flex-col gap-10"
+            className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10"
           >
             {editableContent}
           </div>

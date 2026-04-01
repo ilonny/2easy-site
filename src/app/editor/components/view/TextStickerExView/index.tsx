@@ -17,78 +17,69 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
   const image = data?.images?.[0];
 
   return (
-    <>
-      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
+    <div className="exercise-view-shell max-w-[886px]">
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto exercise-view-head`}>
         <p
+          className="exercise-view-title"
           style={{
             color: data.titleColor,
-            fontSize: 38,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
           }}
         >
           {data.title}
         </p>
-        <p
-          style={{
-            fontSize: 24,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
-          }}
-        >
+        <p className="exercise-view-subtitle">
           {data.subtitle}
         </p>
         {!!data.description && (
-          <p
-            style={{
-              fontSize: 20,
-              textAlign: "center",
-              whiteSpace: "pre-line",
-            }}
-          >
+          <p className="exercise-view-desc">
             {data.description}
           </p>
         )}
       </div>
       {!!image && (
-        <Zoom>
-          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
-        </Zoom>
+        <div className="w-full max-w-full min-w-0">
+          <Zoom>
+            <img
+              src={image.dataURL}
+              alt=""
+              className="block max-w-full h-auto max-h-[min(50vh,400px)] object-contain mx-auto"
+            />
+          </Zoom>
+        </div>
       )}
-      <div className={`py-2 lg:py-8 w-[100%] max-w-[886px] m-auto`}>
-        <div
-          className={` flex items-center justify-center flex-wrap`}
-          style={{ margin: "0 auto" }}
-        >
+      <div className={`py-2 sm:py-4 md:py-6 lg:py-8 w-full max-w-[886px] mx-auto`}>
+        <div className="grid grid-cols-1 min-[820px]:grid-cols-2 items-stretch justify-items-stretch mx-auto w-full min-w-0 gap-2 md:gap-3 lg:gap-4">
           {data.stickers?.map((sticker, index) => {
+            const count = data.stickers?.length ?? 0;
+            const isSingleInRowOnTablet =
+              count > 0 &&
+              count % 2 === 1 &&
+              index === count - 1;
             return (
               <div
-                className={`w-[100%] lg:w-[50%] shrink-0 p-4 ${styles["card-rotate"]} `}
+                className={`min-w-0 p-2 sm:p-3 md:p-4 ${styles["card-rotate"]} ${
+                  isSingleInRowOnTablet
+                    ? "min-[820px]:col-span-2 min-[820px]:justify-self-center min-[820px]:w-full min-[820px]:max-w-[calc(50%-0.375rem)] lg:max-w-[calc(50%-0.5rem)]"
+                    : ""
+                } `}
                 key={index}
               >
                 <Card
-                  className={`p-10 flex justify-center items-center text-center  relative`}
+                  className="p-3 sm:p-4 md:p-6 lg:p-8 xl:p-10 flex justify-center items-center text-center relative min-h-[150px] sm:min-h-[170px] md:min-h-[200px] lg:min-h-[240px] xl:min-h-[260px]"
                   radius="none"
                   style={{
                     overflow: "inherit",
                     backgroundColor: data.stickerBgColor || "#fff",
-                    minHeight: 260,
                   }}
                 >
                   <p
-                    style={{
-                      fontSize: 30,
-                      position: "absolute",
-                      left: 6,
-                      top: -23,
-                    }}
+                    className="absolute text-[22px] sm:text-[26px] md:text-[28px] lg:text-[30px] leading-none left-1 sm:left-1.5 top-[-16px] sm:top-[-18px] md:top-[-21px] lg:top-[-23px]"
+                    aria-hidden
                   >
                     📌
                   </p>
                   <p
-                    className="uppercase"
+                    className="uppercase text-xs sm:text-sm md:text-base lg:text-lg px-0.5 sm:px-1 break-words max-w-full"
                     style={{
                       fontWeight: 500,
                       color: data.stickerTextColor || "#000",
@@ -104,6 +95,6 @@ export const TextStickerExView: FC<TProps> = ({ data, isPreview = false }) => {
           })}
         </div>
       </div>
-    </>
+    </div>
   );
 };

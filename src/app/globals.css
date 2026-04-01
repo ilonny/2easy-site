@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  /* Заголовки блоков заданий (превью): согласованы с уроком, мельче на мобиле */
+  .exercise-view-title {
+    @apply text-center font-bold uppercase text-[22px] leading-tight sm:text-[28px] md:text-[32px] lg:text-[38px] px-2;
+  }
+  .exercise-view-subtitle {
+    @apply text-center font-bold uppercase text-lg sm:text-xl md:text-[22px] lg:text-[24px] px-2;
+  }
+  .exercise-view-desc {
+    @apply text-center text-base sm:text-lg md:text-xl lg:text-[20px] whitespace-pre-line px-2;
+  }
+  .exercise-view-head {
+    @apply flex flex-col gap-2 sm:gap-3;
+  }
+  /* Горизонтальные поля + обрезка по X для контента заданий на телефонах/планшетах */
+  .exercise-view-shell {
+    @apply w-full mx-auto px-3 sm:px-4 box-border overflow-x-hidden;
+  }
+}
+
 :root {
   --primary: #3f28c6;
   --danger: #A42929;
@@ -44,6 +64,23 @@
 .slick-slide img {
   margin: 0 auto;
   max-height: 600px !important;
+}
+
+@media (max-width: 1023px) {
+  .slick-slide img {
+    max-height: min(55vh, 420px) !important;
+  }
+
+  .slick-prev,
+  .slick-next {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .slider-container {
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+  }
 }
 
 .slick-track

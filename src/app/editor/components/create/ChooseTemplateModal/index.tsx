@@ -87,11 +87,10 @@ export const ChooseTemplateModal: FC<TProps> = ({
                     <Card
                       shadow="none"
                       radius="sm"
-                      className="p-5 flex items-center justify-center"
+                      className="p-4 sm:p-5 flex items-center justify-center min-h-[150px] h-[min(38vh,200px)] sm:h-[200px] lg:h-[220px]"
                       style={{
                         backgroundColor: "#e3e3e3",
                         cursor: "pointer",
-                        height: "220px",
                         backgroundImage: template.bgImage
                           ? `url(${template.bgImage?.src})`
                           : "none",
@@ -99,8 +98,7 @@ export const ChooseTemplateModal: FC<TProps> = ({
                       }}
                     >
                       <p
-                        className="font-bold text-white uppercase"
-                        style={{ fontSize: 20 }}
+                        className="font-bold text-white uppercase text-base sm:text-lg lg:text-[20px]"
                       >
                         {template.title}
                       </p>

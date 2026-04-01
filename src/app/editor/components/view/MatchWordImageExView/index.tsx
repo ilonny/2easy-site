@@ -331,36 +331,20 @@ export const MatchWordImageExView: FC<TProps> = ({
   // console.log('data', data)
   // console.log("correctIds", correctIds);
   return (
-    <div className={`py-8 w-[100%] max-w-[766px] m-auto match-word-image`}>
+    <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full exercise-view-shell max-w-[886px] mx-auto exercise-view-head match-word-image`}>
       <p
-        style={{
-          color: data.titleColor,
-          fontSize: 38,
-          textAlign: "center",
-          fontWeight: 700,
-          textTransform: "uppercase",
-        }}
-      >
+          className="exercise-view-title"
+          style={{
+            color: data.titleColor,
+          }}
+        >
         {data.title}
       </p>
-      <p
-        style={{
-          fontSize: 24,
-          textAlign: "center",
-          fontWeight: 700,
-          textTransform: "uppercase",
-        }}
-      >
+      <p className="exercise-view-subtitle">
         {data.subtitle}
       </p>
       {!!data.description && (
-        <p
-          style={{
-            fontSize: 20,
-            textAlign: "center",
-            whiteSpace: "pre-line",
-          }}
-        >
+        <p className="exercise-view-desc">
           {data.description}
         </p>
       )}
@@ -368,7 +352,7 @@ export const MatchWordImageExView: FC<TProps> = ({
       <div style={{ margin: "0 auto" }}>
         {!Boolean(data?.images?.length) && (
           <div
-            className="w-full h-[250px]"
+            className="w-full h-[180px] sm:h-[250px] rounded-lg"
             style={{ backgroundColor: "#D9D9D9" }}
           />
         )}
@@ -413,7 +397,7 @@ export const MatchWordImageExView: FC<TProps> = ({
           </div>
         )}
         {!!data?.images?.length && (
-          <div className="flex flex-wrap justify-center">
+          <div className="flex flex-wrap justify-center gap-y-3 w-full min-w-0">
             {data?.images?.map((image) => {
               const isCorrect =
                 correctIds.includes(image.id) ||
@@ -423,13 +407,16 @@ export const MatchWordImageExView: FC<TProps> = ({
               const isIncorrectWord =
                 isTeacher && !isCorrect && incorrectIdsMap?.[image?.id];
               return (
-                <div key={image.dataURL} className="w-[33.3333333%] p-1 lg:p-4">
-                  <div className="h-[220px] flex items-center justify-center overflow-hidden">
+                <div
+                  key={image.dataURL}
+                  className="w-full min-w-0 sm:w-1/2 lg:w-1/3 p-2 sm:p-3 lg:p-4 box-border"
+                >
+                  <div className="min-h-[160px] sm:h-[220px] flex items-center justify-center overflow-hidden rounded-lg bg-neutral-50">
                     <Zoom>
                       <img
                         src={image.dataURL}
-                        alt="image"
-                        style={{ margin: "0 auto", maxHeight: "100%" }}
+                        alt=""
+                        className="mx-auto max-h-full max-w-full w-auto object-contain"
                       />
                     </Zoom>
                   </div>

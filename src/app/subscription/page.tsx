@@ -20,25 +20,27 @@ export default function StartRegistrationPage() {
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
-        <div className="w-[100%] lg:w-[771px]">
-          <div className="h-14" />
-          <Breadcrumbs>
+        <div className="w-full max-w-[771px] min-w-0">
+          <div className="h-8 md:h-10 lg:h-14" />
+          <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
+            <Breadcrumbs>
             <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
             <BreadcrumbItem>{t("header.subscription")}</BreadcrumbItem>
           </Breadcrumbs>
+          </div>
         </div>
-        <div className="h-10" />
-        <div className="h-10" />
-        <div className="flex flex-col items-center">
-          <h1 className={"text-primary font-bold text-3xl uppercase"}>
+        <div className="h-6 md:h-8 lg:h-10" />
+        <div className="h-6 md:h-8 lg:h-10" />
+        <div className="flex flex-col items-center w-full max-w-full px-0">
+          <h1 className="text-primary font-bold text-xl sm:text-2xl md:text-3xl uppercase text-center px-1">
             {t("subscription.title")}
           </h1>
           <div className="h-3" />
-          <h2 className="font-medium text-lg">
+          <h2 className="font-medium text-base sm:text-lg text-center px-2">
             {t("subscription.page.subtitle")}
           </h2>
           <div className="h-5" />
-          <p className="text-center max-w-[750px]">
+          <p className="text-center max-w-[750px] px-2 text-sm sm:text-base leading-relaxed">
             {t("subscription.page.description1")}
             <br />
             <br />
@@ -48,9 +50,7 @@ export default function StartRegistrationPage() {
           <div className="h-10" />
           <div className="h-10" />
 
-          <ContentWrapper>
-            <SubscribeTariffs hideTitle />
-          </ContentWrapper>
+          <SubscribeTariffs hideTitle />
           <div className="h-10" />
           <div className="h-10" />
           <div className="h-10" />

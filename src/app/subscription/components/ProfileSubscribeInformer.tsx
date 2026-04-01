@@ -100,8 +100,8 @@ export const ProfileSubscribeInformer = () => {
   }, [router, subscription?.dateEnd, subscription?.subscribe_type_id, t]);
 
   return (
-    <div>
-      <Card shadow="none">
+    <div className="w-full max-w-md min-w-0 mx-auto xl:mx-0 shrink-0">
+      <Card shadow="none" className="min-w-0">
         <CardBody>
           <p>{diffText}</p>
         </CardBody>

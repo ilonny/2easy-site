@@ -94,10 +94,9 @@ export const SubscribeTariffs: FC<TProps> = ({
           ></div>
           <div className="h-4" />
           <div
-            className="p-4 lg:p-10"
+            className="p-4 sm:p-6 lg:p-10 min-h-[260px] sm:min-h-[320px] md:min-h-[380px] lg:min-h-[406px]"
             style={{
               width: "100%",
-              minHeight: 406,
               maxWidth: 793,
               background: `url(${SubscribePurpleImage.src}) center center no-repeat`,
               backgroundSize: "cover",

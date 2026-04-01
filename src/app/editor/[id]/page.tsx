@@ -203,23 +203,25 @@ export default function EditorPage() {
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
-        <div className="">
-          <div className="h-14" />
-          <div className="flex flex-wrap items-center justify-between">
+        <div className="w-full min-w-0">
+          <div className="h-8 md:h-10 lg:h-14" />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="overflow-x-auto max-w-full min-w-0 [-webkit-overflow-scrolling:touch] pb-0.5">
             <Breadcrumbs>
               <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
               <BreadcrumbItem href="/profile?lessons">{t("editor.myLessons")}</BreadcrumbItem>
               <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
             </Breadcrumbs>
+            </div>
             {lesson?.user_id === profile?.id && !lesson?.lesson_id_homework && (
               <ShareLessonLink />
             )}
           </div>
         </div>
-        <div className="h-10" />
-        <div className="h-10" />
+        <div className="h-5 md:h-6 lg:h-10" />
+        <div className="h-5 md:h-6 lg:h-10" />
         <div
-          className="p-2 w-[100%] lg:p-10 lg:max-w-[1160px]"
+          className="p-3 sm:p-4 md:p-6 w-[100%] lg:p-10 lg:max-w-[1160px]"
           style={{
             margin: "0 auto",
             backgroundColor: "#fff",
@@ -228,14 +230,14 @@ export default function EditorPage() {
         >
           {!lesson?.lesson_id_homework && <StartLessonButton lesson={lesson} />}
           <div
-            className={`${styles["wrapper"]} relative pt-[55px] lg:pt-0 common_info relative group`}
+            className={`${styles["wrapper"]} relative pt-12 sm:pt-14 md:pt-[52px] lg:pt-0 common_info relative group`}
           >
             {" "}
             {/* Добавляем класс 'group' сюда */}
-            <div className="w-[100%] lg:pl-[90px] text-[38px] lg:text-[44px]">
+            <div className="w-[100%] lg:pl-[90px] text-[22px] sm:text-[28px] md:text-[32px] lg:text-[44px] leading-tight px-1">
               <h1
+                className="text-center"
                 style={{
-                  textAlign: "center",
                   color: "#3f28c6",
                   fontWeight: 700,
                 }}
@@ -245,25 +247,18 @@ export default function EditorPage() {
             </div>
             {!!lesson?.description && (
               <h2
-                style={{
-                  fontSize: 20,
-                  textAlign: "center",
-                  // color: "#3f28c6",
-                  fontWeight: 500,
-                  maxWidth: 800,
-                  margin: "auto",
-                  whiteSpace: "break-spaces",
-                }}
+                className="text-center font-medium max-w-[800px] mx-auto px-2 text-base sm:text-lg md:text-xl lg:text-[20px] [white-space:break-spaces]"
               >
                 {lesson?.description}
               </h2>
             )}
-            <div className="h-8"></div>
+            <div className="h-4 md:h-6 lg:h-8"></div>
             {!!lesson?.image_path && (
               <Zoom>
                 <img
                   src={getImageUrl(lesson.image_path)}
-                  style={{ maxHeight: 400, margin: "auto", marginBottom: 60 }}
+                  className="w-full h-auto max-h-[220px] sm:max-h-[300px] md:max-h-[360px] lg:max-h-[400px] object-contain mx-auto mb-6 sm:mb-6 md:mb-8 lg:mb-[60px]"
+                  alt=""
                 />
               </Zoom>
             )}
@@ -287,7 +282,7 @@ export default function EditorPage() {
             )}
           </div>
 
-          <div className="h-8"></div>
+          <div className="h-4 md:h-6 lg:h-8"></div>
           <ExList
             list={exList}
             onPressEdit={onPressEditEx}
@@ -299,8 +294,8 @@ export default function EditorPage() {
             is2easy={is2easy}
             isAdmin={isAdmin}
           />
-          <div className="h-10" />
-          <div className="h-10" />
+          <div className="h-6 md:h-8 lg:h-10" />
+          <div className="h-6 md:h-8 lg:h-10" />
           {showCreateExBtn ? (
             <>
               <Card radius="none" shadow="none">
@@ -318,13 +313,13 @@ export default function EditorPage() {
                   <Card
                     radius="lg"
                     shadow="none"
-                    className={`${createExStyles.wrapper} p-5 h-[180px] items-center justify-center mt-4`}
+                    className={`${createExStyles.wrapper} p-4 sm:p-5 min-h-[140px] sm:min-h-[160px] lg:h-[180px] items-center justify-center mt-3 sm:mt-4`}
                   >
                     <Button
                       size="lg"
                       variant="bordered"
                       color="primary"
-                      className="min-w-[310px]"
+                      className="w-full max-w-[310px] min-w-0 lg:min-w-[310px]"
                       onClick={() => {
                         if (lesson?.homework_lesson_id) {
                           window.location.pathname = `/editor/${lesson.homework_lesson_id}`;
@@ -339,8 +334,8 @@ export default function EditorPage() {
                     </Button>
                   </Card>
                 )}
-              <div className="h-10" />
-              <div className="h-10" />
+              <div className="h-6 md:h-8 lg:h-10" />
+              <div className="h-6 md:h-8 lg:h-10" />
             </>
           ) : (
             <div className="justify-center flex">
@@ -365,8 +360,8 @@ export default function EditorPage() {
             </div>
           )}
         </div>
-        <div className="h-10" />
-        <div className="h-10" />
+        <div className="h-6 md:h-8 lg:h-10" />
+        <div className="h-6 md:h-8 lg:h-10" />
         {profile?.login === "lessons@2easy.com" && (
           <div className="justify-center flex">
             <Button

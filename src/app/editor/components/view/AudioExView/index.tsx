@@ -25,50 +25,40 @@ export const AudioExView: FC<TProps> = ({ data, isPreview = false }) => {
     audioFile?.name || getImageNameFromPath(audioFile?.path) || "";
   const [scriptIsVisible, setScriptIsVisible] = useState(false);
   return (
-    <>
-      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
+    <div className="exercise-view-shell max-w-[886px]">
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto exercise-view-head`}>
         <p
+          className="exercise-view-title"
           style={{
             color: data.titleColor,
-            fontSize: 38,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
           }}
         >
           {data.title}
         </p>
-        <p
-          style={{
-            fontSize: 24,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
-          }}
-        >
+        <p className="exercise-view-subtitle">
           {data.subtitle}
         </p>
         {!!data.description && (
-          <p
-            style={{
-              fontSize: 20,
-              textAlign: "center",
-              whiteSpace: "pre-line",
-            }}
-          >
+          <p className="exercise-view-desc">
             {data.description}
           </p>
         )}
       </div>
       {!!image && (
-        <Zoom>
-          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
-        </Zoom>
+        <div className="w-full max-w-full min-w-0">
+          <Zoom>
+            <img
+              src={image.dataURL}
+              alt=""
+              className="block max-w-full h-auto max-h-[min(50vh,400px)] object-contain mx-auto"
+            />
+          </Zoom>
+        </div>
       )}
-      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[886px] mx-auto`}>
         {!!audioFileName && (
-          <div style={{ margin: "0 auto" }} className="flex flex-col gap-10">
-            <Card radius="md" className="p-4">
+          <div className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10 mx-auto w-full min-w-0">
+            <Card radius="md" className="p-3 sm:p-4 box-border min-w-0">
               <p
                 className="text-center"
                 style={{ fontWeight: 500, color: "#3F28C6" }}
@@ -117,6 +107,6 @@ export const AudioExView: FC<TProps> = ({ data, isPreview = false }) => {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };

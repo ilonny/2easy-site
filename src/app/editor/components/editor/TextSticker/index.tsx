@@ -96,8 +96,8 @@ export const TextSticker: FC<TProps> = ({
 
   return (
     <div>
-      <div className="flex flex-wrap">
-        <div className="w-[50%] pr-2">
+      <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
+        <div className="w-full md:w-1/2 md:pr-2 min-w-0">
           <TitleExInput
             label="Заголовок задания"
             value={data.title}
@@ -119,7 +119,7 @@ export const TextSticker: FC<TProps> = ({
             setValue={(val) => changeData("description", val)}
           />
         </div>
-        <div className="w-[50%] pl-2">
+        <div className="w-full md:w-1/2 md:pl-2 min-w-0">
           <p className="font-light mb-2">Изображение для задания</p>
           <ImageUpload
             images={images}
@@ -194,10 +194,10 @@ export const TextSticker: FC<TProps> = ({
         </div>
       </div>
       <div className="h-5" />
-      <div className="flex flex-wrap items-start justify-between">
+      <div className="grid grid-cols-1 min-[820px]:grid-cols-2 gap-x-4 gap-y-4 items-start">
         {data.stickers?.map((sticker, index) => {
           return (
-            <div key={index} className="w-[50%] mb-4 odd:pr-4">
+            <div key={index} className="w-full min-w-0">
               <div className="">
                 <div className="flex justify-between items-center">
                   <p>Стикер {index + 1}</p>
@@ -253,7 +253,7 @@ export const TextSticker: FC<TProps> = ({
         <div className="flex justify-center">
           <Button
             color="primary"
-            className="min-w-[310px]"
+            className="w-full max-w-[310px] min-w-0 lg:min-w-[310px]"
             size="lg"
             onClick={() => saveTextStickerEx(data)}
             isLoading={isLoading}

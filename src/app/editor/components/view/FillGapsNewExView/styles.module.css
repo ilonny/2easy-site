@@ -1,14 +1,26 @@
 .root {
-  padding: 28px 0;
+  padding: 20px 0 28px;
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
 }
 
+@media (min-width: 640px) {
+  .root {
+    padding: 28px 0;
+  }
+}
+
 .card {
-  padding: 22px;
+  padding: 14px 12px;
   border-radius: 16px;
   box-shadow: 0px 8px 24px 0px #908ba826;
+}
+
+@media (min-width: 640px) {
+  .card {
+    padding: 22px;
+  }
 }
 
 .pool {
@@ -63,10 +75,12 @@
 }
 
 .gapInput {
-  min-width: 180px;
+  min-width: min(100%, 180px);
+  max-width: 100%;
 }
 
 .gapSelect {
-  min-width: 180px;
+  min-width: min(100%, 180px);
+  max-width: 100%;
 }
 

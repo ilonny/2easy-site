@@ -34,19 +34,21 @@ export default function GrammarPage() {
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
-        <div className="">
-          <div className="h-14" />
-          <Breadcrumbs>
+        <div className="w-full min-w-0">
+          <div className="h-8 md:h-10 lg:h-14" />
+          <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
+            <Breadcrumbs>
             <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
             <BreadcrumbItem href="/cards">{t("header.discussionCards")}</BreadcrumbItem>
             <BreadcrumbItem href="/cards/discussion_cards">
               {t("header.discussionCards")}
             </BreadcrumbItem>
           </Breadcrumbs>
+          </div>
         </div>
-        <div className="h-10" />
-        <div className="h-10" />
-        <div className="flex items-end gap-4">
+        <div className="h-6 md:h-8 lg:h-10" />
+        <div className="h-6 md:h-8 lg:h-10" />
+        <div className="flex flex-col md:flex-row md:items-end gap-4">
           <PageLeftBlock
             title={"Discussion cards"}
             content={
@@ -77,8 +79,9 @@ export default function GrammarPage() {
           // className="w-full wrap flex-wrap flex"
           fullWidth
           classNames={{
-            tabList: "flex flex-wrap wrap justify-center",
-            tab: "w-[100%] lg:max-w-[19%]",
+            tabList:
+              "flex flex-wrap wrap justify-center gap-1 sm:gap-2 w-full max-w-full",
+            tab: "w-full min-w-0 sm:w-[calc(50%-0.25rem)] md:w-[calc(33.333%-0.5rem)] lg:max-w-[19%]",
           }}
         >
           {tabs.map((tab) => {

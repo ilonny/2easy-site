@@ -164,7 +164,6 @@ export default function LessonPage() {
 
         lastStudentFocusUpdatedAtRef.current = updatedAt;
         const el = document.getElementById(`ex-${exId}`);
-        console.log('focus????')
         el?.scrollIntoView({ behavior: "smooth", block: "start" });
       } catch (err) {}
     }, 1000);
@@ -223,14 +222,16 @@ export default function LessonPage() {
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
-        <div className="">
-          <div className="h-14" />
+        <div className="w-full min-w-0">
+          <div className="h-8 sm:h-10 md:h-14" />
           {isTeacher && (
-            <div className="flex items-start justify-between flex-wrap">
-              <Link href={`/editor/${params.id}`} className="text-secondary">
-                <Button variant="light">{t("lessons.backToEdit")}</Button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 w-full min-w-0">
+              <Link href={`/editor/${params.id}`} className="text-secondary shrink-0">
+                <Button variant="light" className="min-w-0">
+                  {t("lessons.backToEdit")}
+                </Button>
               </Link>
-              <div className="flex items-center flex-wrap">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 min-w-0 w-full sm:w-auto sm:justify-end">
                 <div
                   className="switcher flex items-center cursor-pointer"
                   onClick={onChangePresentationMode}
@@ -263,56 +264,38 @@ export default function LessonPage() {
             </div>
           )}
         </div>
-        <div className="h-10" />
-        <div className="h-10" />
-        <div className="flex items-start gap-4">
-          <div className="w-[100%]">
+        <div className="h-6 sm:h-8 md:h-10" />
+        <div className="h-4 sm:h-6 md:h-10" />
+        <div className="flex flex-row items-stretch gap-2 sm:gap-3 md:gap-4 w-full min-w-0">
+          <div className="min-w-0 flex-1">
             <div
-              className="p-2 lg:p-10"
+              className="p-3 sm:p-5 md:p-8 lg:p-10 w-full max-w-[1160px] mx-auto bg-white rounded-[10px] box-border min-w-0"
               style={{
-                width: "100%",
-                maxWidth: 1160,
-                backgroundColor: "#fff",
-                borderRadius: 10,
-                margin: isStudent ? "auto" : "none",
+                marginLeft: isStudent ? "auto" : undefined,
+                marginRight: isStudent ? "auto" : undefined,
               }}
             >
-              <h1
-                style={{
-                  fontSize: 44,
-                  textAlign: "center",
-                  color: "#3f28c6",
-                  fontWeight: 700,
-                }}
-              >
+              <h1 className="text-center text-[26px] sm:text-[32px] md:text-[38px] lg:text-[44px] leading-tight text-primary font-bold px-1 break-words">
                 {lesson?.title}
               </h1>
               {!!lesson?.description && (
-                <h2
-                  style={{
-                    fontSize: 20,
-                    textAlign: "center",
-                    // color: "#3f28c6",
-                    fontWeight: 500,
-                    maxWidth: 800,
-                    margin: "auto",
-                    whiteSpace: "break-spaces",
-                  }}
-                >
+                <h2 className="text-center text-base sm:text-lg md:text-xl font-medium max-w-[800px] mx-auto whitespace-pre-line px-2 mt-3 sm:mt-4">
                   {lesson?.description}
                 </h2>
               )}
-              <div className="h-8"></div>
+              <div className="h-6 sm:h-8" />
               {!!lesson?.image_path && (
-                <Zoom>
-                  <img
-                    src={getImageUrl(lesson.image_path)}
-                    style={{ maxHeight: 400, margin: "auto", marginBottom: 60 }}
-                    alt="image lesson"
-                  />
-                </Zoom>
+                <div className="w-full max-w-full min-w-0 mb-8 sm:mb-12 md:mb-14">
+                  <Zoom>
+                    <img
+                      src={getImageUrl(lesson.image_path)}
+                      className="block max-w-full h-auto max-h-[min(55vh,400px)] object-contain mx-auto"
+                      alt="image lesson"
+                    />
+                  </Zoom>
+                </div>
               )}
-              <div className="h-8"></div>
+              <div className="h-4 sm:h-8" />
               <div key={exList.length}>
                 <ExList
                   list={exList}
@@ -402,160 +385,138 @@ export default function LessonPage() {
             </div>
           </div>
           {!isStudent && !!students?.length && (
-            <div
-              className="w-[200px]"
-              style={{ position: "sticky", top: 40, marginTop: -48 }}
+            <aside
+              className="flex w-[64px] shrink-0 min-w-0 flex-col self-stretch sm:w-[100px] md:w-[180px] lg:w-[200px]"
+              aria-label="Участники урока"
             >
-              <div className="flex">
-                <p
-                  style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: "#231F20",
-                    marginBottom: 27,
-                  }}
+              <div className="sticky top-[88px] w-full lg:top-8">
+                <div
+                  className="max-h-[calc(100dvh-96px)] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] lg:max-h-[calc(100dvh-2rem)]"
                 >
-                  УЧАСТНИКИ
-                </p>
-              </div>
-              {students?.map((s) => {
-                const isActive = s?.student_id === activeStudentId;
-                return (
-                  <div
-                    key={s.id}
-                    onClick={() => setActiveStudentId(s.student_id)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <Card
-                      className="p-4 w-[200px] mb-4"
-                      shadow="none"
-                      style={{ backgroundColor: isActive ? "#EEEBFF" : "#fff" }}
-                    >
-                      <p
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 700,
-                          color: "#231F20",
-                        }}
-                        className="uppercase"
+                <div className="mb-1.5 sm:mb-3 md:mb-7">
+                  <p className="text-center text-[7px] font-bold uppercase leading-tight text-[#231F20] sm:text-[9px] md:text-left md:text-sm">
+                    <span className="md:hidden">Участн.</span>
+                    <span className="hidden md:inline">УЧАСТНИКИ</span>
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1 sm:gap-2 md:gap-3">
+                  {students?.map((s) => {
+                    const isActive = s?.student_id === activeStudentId;
+                    return (
+                      <div
+                        key={s.id}
+                        onClick={() => setActiveStudentId(s.student_id)}
+                        className="cursor-pointer min-w-0"
                       >
-                        {s["student.name"]}
-                      </p>
-                      {!!s["student.email"] && (
-                        <p
+                        <Card
+                          className="w-full min-w-0 p-1 sm:p-2 md:p-4"
+                          shadow="none"
                           style={{
-                            fontSize: 14,
-                            color: "#767676",
+                            backgroundColor: isActive ? "#EEEBFF" : "#fff",
                           }}
                         >
-                          {s["student.email"]}
-                        </p>
-                      )}
-                    </Card>
-                  </div>
-                );
-              })}
-              {isTeacher && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="flat"
-                    color="default"
-                    className="flex-1"
-                    size="md"
-                    style={{
-                      justifyContent: "center",
-                      whiteSpace: "normal",
-                      height: "auto",
-                      minHeight: 44,
-                      paddingTop: 10,
-                      paddingBottom: 10,
-                      lineHeight: "120%",
-                      textAlign: "center",
-                      backgroundColor: "#F3F4F6",
-                      color: "#111827",
-                      border: "1px solid rgba(17,24,39,0.12)",
-                    }}
-                    onClick={async () => {
-                      const lessonId = Number(params.id) || 0;
-                      const exId = getCurrentExerciseIdInView();
-                      if (!lessonId || !exId) {
-                        toast(t("lessons.focusScroll.cantDetectCurrentTask"), {
-                          type: "error",
-                        });
-                        return;
-                      }
-                      try {
-                        const res = await fetchPostJson({
-                          path: "/lesson-focus",
-                          isSecure: true,
-                          data: { lesson_id: lessonId, ex_id: exId },
-                        });
-                        const data = await res?.json();
-                        checkResponse(data, true);
-                      } catch (err) {}
-                    }}
-                  >
-                    {t("lessons.focusScroll.button")}
-                  </Button>
-                  <ResponsiveTooltip
-                    content={
-                      <div style={{ maxWidth: 320, whiteSpace: "normal", lineHeight: "140%" }}>
-                        {t("lessons.focusScroll.tooltip")}
+                          <p className="text-[8px] font-bold uppercase leading-snug text-[#231F20] break-words line-clamp-4 sm:text-[10px] md:text-sm md:line-clamp-none">
+                            {s["student.name"]}
+                          </p>
+                          {!!s["student.email"] && (
+                            <p className="mt-0.5 hidden text-[#767676] break-all md:mt-1 md:block md:text-sm">
+                              {s["student.email"]}
+                            </p>
+                          )}
+                        </Card>
                       </div>
-                    }
-                    placement="left"
-                    closeDelay={0}
-                  >
-                    <div
-                      role="button"
-                      aria-label="help"
-                      tabIndex={0}
-                      className="shrink-0"
+                    );
+                  })}
+                </div>
+                {isTeacher && (
+                  <div className="mt-2 flex flex-col items-stretch gap-1.5 sm:mt-3 sm:flex-row sm:items-center sm:gap-2 md:mt-4">
+                    <Button
+                      variant="flat"
+                      color="default"
+                      className="min-h-0 w-full flex-1 px-0.5 py-1.5 text-[8px] leading-tight sm:min-h-[36px] sm:px-2 sm:py-2 sm:text-[10px] md:min-h-[44px] md:px-3 md:text-xs"
+                      size="sm"
                       style={{
-                        width: 34,
-                        height: 34,
-                        borderRadius: 999,
-                        display: "flex",
-                        alignItems: "center",
                         justifyContent: "center",
-                        background: "rgba(63,40,198,0.06)",
-                        border: "1px solid rgba(63,40,198,0.14)",
-                        cursor: "pointer",
-                        userSelect: "none",
+                        whiteSpace: "normal",
+                        height: "auto",
+                        minHeight: 0,
+                        lineHeight: "120%",
+                        textAlign: "center",
+                        backgroundColor: "#F3F4F6",
+                        color: "#111827",
+                        border: "1px solid rgba(17,24,39,0.12)",
                       }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
+                      onClick={async () => {
+                        const lessonId = Number(params.id) || 0;
+                        const exId = getCurrentExerciseIdInView();
+                        if (!lessonId || !exId) {
+                          toast(t("lessons.focusScroll.cantDetectCurrentTask"), {
+                            type: "error",
+                          });
+                          return;
                         }
+                        try {
+                          const res = await fetchPostJson({
+                            path: "/lesson-focus",
+                            isSecure: true,
+                            data: { lesson_id: lessonId, ex_id: exId },
+                          });
+                          const data = await res?.json();
+                          checkResponse(data, true);
+                        } catch (err) {}
                       }}
                     >
-                      <img
-                        src={InfoIcon.src}
-                        alt="info"
-                        style={{ width: 16, height: 16, opacity: 0.9 }}
-                      />
-                    </div>
-                  </ResponsiveTooltip>
+                      {t("lessons.focusScroll.button")}
+                    </Button>
+                    <ResponsiveTooltip
+                      content={
+                        <div
+                          style={{
+                            maxWidth: 320,
+                            whiteSpace: "normal",
+                            lineHeight: "140%",
+                          }}
+                        >
+                          {t("lessons.focusScroll.tooltip")}
+                        </div>
+                      }
+                      placement="left"
+                      closeDelay={0}
+                    >
+                      <div
+                        role="button"
+                        aria-label="help"
+                        tabIndex={0}
+                        className="shrink-0 mx-auto flex h-7 w-7 items-center justify-center rounded-full sm:mx-0 sm:h-[34px] sm:w-[34px]"
+                        style={{
+                          background: "rgba(63,40,198,0.06)",
+                          border: "1px solid rgba(63,40,198,0.14)",
+                          cursor: "pointer",
+                          userSelect: "none",
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                          }
+                        }}
+                      >
+                        <img
+                          src={InfoIcon.src}
+                          alt="info"
+                          style={{ width: 16, height: 16, opacity: 0.9 }}
+                        />
+                      </div>
+                    </ResponsiveTooltip>
+                  </div>
+                )}
                 </div>
-              )}
-              {/* пока скрываем */}
-              {/* {!!activeStudentId && (
-                <Button
-                  color="primary"
-                  className="w-full uppercase"
-                  size="md"
-                  onClick={() => setActiveStudentId(0)}
-                >
-                  {"<-teacher’s screen"}
-                </Button>
-              )} */}
-            </div>
+              </div>
+            </aside>
           )}
         </div>
         <div className="relative">
           <div
-            className="fixed right-4 bottom-4 flex flex-col items-end gap-2"
-            style={{ zIndex: 10 }}
+            className="fixed right-2 bottom-3 sm:right-4 sm:bottom-4 flex flex-col items-end gap-2 max-w-[calc(100vw-1rem)] z-10"
           >
             <VideoCall lessonId={params.id as string} />
             <Chat

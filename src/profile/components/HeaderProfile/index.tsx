@@ -1,7 +1,6 @@
 "use client";
 import { useContext, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
 import {
   Button,
@@ -13,9 +12,8 @@ import {
 
 import { fetchPostJson } from "@/api";
 import { writeToLocalStorage } from "@/auth/utils";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import ChevronDown from "@/assets/icons/chevron_down.svg";
-import Link from "next/link";
 import Image from "next/image";
 
 type TProps = {
@@ -41,13 +39,13 @@ export const HeaderProfile = (props: TProps) => {
   };
 
   return (
-    <Dropdown>
+    <Dropdown placement="bottom-end" offset={8}>
       <DropdownTrigger>
         <Button
           color="secondary"
           variant="flat"
           style={{ outline: "none" }}
-          className="header-secondary-bg"
+          className="header-secondary-bg touch-manipulation"
         >
           <p
             className="hidden md:block lg:block header-secondary-btn-text"
@@ -66,32 +64,53 @@ export const HeaderProfile = (props: TProps) => {
         </Button>
       </DropdownTrigger>
       {isStudent ? (
-        <DropdownMenu aria-label="Profile Actions">
+        <DropdownMenu aria-label="Profile Actions" itemClasses={{ base: "touch-manipulation" }}>
           <DropdownItem
             key="profile"
-            href={`/student-account/${profile?.studentId}`}
+            className="touch-manipulation"
+            onPress={() => {
+              if (profile?.studentId != null) {
+                router.push(`/student-account/${profile.studentId}`);
+              }
+            }}
+            textValue={profile?.name || "profile"}
           >
-            <Link href={`/student-account/${profile?.studentId}`}>
-              <p className="header-secondary-btn-text">{profile?.name}</p>
-              {!!profile?.email && <p>{profile?.email}</p>}
-            </Link>
+            <span className="header-secondary-btn-text block">{profile?.name}</span>
+            {!!profile?.email && (
+              <span className="block text-sm text-default-500">{profile.email}</span>
+            )}
           </DropdownItem>
-          <DropdownItem onClick={logout} key="logout">
+          <DropdownItem key="logout" className="touch-manipulation" onPress={logout}>
             {t("auth.logout")}
           </DropdownItem>
         </DropdownMenu>
       ) : (
-        <DropdownMenu aria-label="Profile Actions">
-          <DropdownItem key="lessons" href="/lesson_plans">
-            <p>{t("profile.lessonsAndCourses")}</p>
+        <DropdownMenu aria-label="Profile Actions" itemClasses={{ base: "touch-manipulation" }}>
+          <DropdownItem
+            key="lessons"
+            className="touch-manipulation"
+            onPress={() => router.push("/lesson_plans")}
+            textValue={t("profile.lessonsAndCourses")}
+          >
+            {t("profile.lessonsAndCourses")}
           </DropdownItem>
-          <DropdownItem key="students" href="/profile?students">
-            <p>{t("profile.myStudents")}</p>
+          <DropdownItem
+            key="students"
+            className="touch-manipulation"
+            onPress={() => router.push("/profile?students")}
+            textValue={t("profile.myStudents")}
+          >
+            {t("profile.myStudents")}
           </DropdownItem>
-          <DropdownItem key="profile" href="/profile?profile">
-            <p>{t("profile.personalData")}</p>
+          <DropdownItem
+            key="profile"
+            className="touch-manipulation"
+            onPress={() => router.push("/profile?profile")}
+            textValue={t("profile.personalData")}
+          >
+            {t("profile.personalData")}
           </DropdownItem>
-          <DropdownItem onClick={logout} key="logout">
+          <DropdownItem key="logout" className="touch-manipulation" onPress={logout}>
             {t("auth.logout")}
           </DropdownItem>
         </DropdownMenu>

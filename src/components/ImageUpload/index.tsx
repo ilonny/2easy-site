@@ -145,7 +145,7 @@ export const ImageUpload: FC<TProps> = ({
             {!!label && <p className="mb-3">{label}</p>}
 
             {showPlaceholder && (
-              <div className="w-full flex flex-wrap gap-4 flex-row w-[100%]">
+              <div className="w-full flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 min-w-0">
                 {withInternetSearch && !isButton && (
                   <>
                     {/* <Image
@@ -159,23 +159,20 @@ export const ImageUpload: FC<TProps> = ({
                     <div
                       style={{
                         background: "#fff",
-                        // height: 200,
                         borderRadius: 10,
-                        flexShrink: 0,
-                        flex: 1,
                         cursor: "pointer",
+                        minHeight: 160,
                       }}
-                      className="flex items-center justify-center flex-col gap-4 w-[47%]"
+                      className="flex items-center justify-center flex-col gap-3 sm:gap-4 w-full sm:flex-1 sm:min-w-0 px-4 py-5 border border-default-200 shadow-sm"
                       onClick={onOpen}
                     >
                       <Image
                         src={Loupe}
                         alt="GalleryIcon"
-                        className="w-[60px] h-[60px]"
+                        className="w-12 h-12 sm:w-[60px] sm:h-[60px] shrink-0"
                       />
                       <p
-                        className="text-small text-center max-w-[250px]"
-                        style={{ color: "#B7B7B7" }}
+                        className="text-sm text-center text-[#B7B7B7] leading-snug max-w-[280px]"
                       >
                         Найти изображение
                         <br />в интернете
@@ -183,12 +180,13 @@ export const ImageUpload: FC<TProps> = ({
                     </div>
                   </>
                 )}
-                <div style={{ flex: 1 }}>
+                <div className="w-full sm:flex-1 sm:min-w-0 min-w-0">
                   <button
+                    type="button"
+                    className="w-full min-w-0 block"
                     style={isDragging ? { color: "red" } : undefined}
                     onClick={onImageUpload}
                     {...dragProps}
-                    type="button"
                   >
                     {customPlaceHolder ? (
                       customPlaceHolder

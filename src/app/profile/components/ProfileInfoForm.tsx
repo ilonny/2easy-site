@@ -43,13 +43,13 @@ export const ProfileInfoForm = () => {
 
   return (
     <>
-      <div className="flex gap-16">
-        <div className="hidden lg:block">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center lg:items-start w-full max-w-full min-w-0">
+        <div className="flex justify-center w-full lg:w-auto shrink-0">
           <ProfileImagePicker />
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-[100%] lg:min-w-[450px]"
+          className="w-full max-w-full lg:min-w-0 lg:flex-1 lg:max-w-[min(100%,520px)]"
         >
           <Controller
             name="name"
@@ -90,7 +90,7 @@ export const ProfileInfoForm = () => {
             )}
           />
           <div className="h-2" />
-          <div className="flex gap-2 items-baseline">
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-baseline">
             <Controller
               name="password"
               control={control}

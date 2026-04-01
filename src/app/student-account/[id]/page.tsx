@@ -60,41 +60,38 @@ export default function StudentAccountPage() {
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
-        <div className="">
-          <div className="h-14" />
+        <div className="w-full min-w-0">
+          <div className="h-8 sm:h-10 md:h-14" />
           {isTeacher && (
-            <Breadcrumbs>
-              <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
-              <BreadcrumbItem href="/profile?students">
-                {t("profile.myStudents")}
-              </BreadcrumbItem>
-              {!!studentInfo && (
-                <BreadcrumbItem>{studentInfo.name}</BreadcrumbItem>
-              )}
-            </Breadcrumbs>
+            <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
+              <Breadcrumbs>
+                <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
+                <BreadcrumbItem href="/profile?students">
+                  {t("profile.myStudents")}
+                </BreadcrumbItem>
+                {!!studentInfo && (
+                  <BreadcrumbItem>{studentInfo.name}</BreadcrumbItem>
+                )}
+              </Breadcrumbs>
+            </div>
           )}
         </div>
-        <div className="h-10" />
-        <div className="h-10" />
-        <div className="flex items-end justify-center gap-6">
-          {isTeacher ? (
-            <Link href="/profile?students">{t("students.allStudents")}</Link>
-          ) : (
-            <div className="w-[112px]"></div>
-          )}
-          <h1
-            className={"text-primary text-center font-bold text-3xl uppercase"}
-          >
+        <div className="h-6 sm:h-8 md:h-10" />
+        <div className="flex flex-col items-center gap-3 w-full min-w-0 px-1">
+          <h1 className="text-primary text-center font-bold text-xl sm:text-2xl md:text-3xl uppercase px-2 break-words w-full">
             {t("students.studentCabinet")}
           </h1>
-          <div className="w-[112px]"></div>
+          {isTeacher ? (
+            <Link
+              href="/profile?students"
+              className="text-sm sm:text-base text-primary underline-offset-2 hover:underline self-center sm:self-start"
+            >
+              {t("students.allStudents")}
+            </Link>
+          ) : null}
         </div>
-        {isStudent && (
-          <div className="flex items-end justify-center gap-6">
-            <></>
-          </div>
-        )}
-        <div className="h-5" />
+        {isStudent && <div className="h-1" />}
+        <div className="h-4 sm:h-5" />
         {(isLoading || authIsLoading) && (
           <div className="w-full h-[225px] flex justify-center items-center ">
             <Button
@@ -106,8 +103,8 @@ export default function StudentAccountPage() {
             />
           </div>
         )}
-        <div className="flex items-end gap-6 flex-wrap">
-          <div className="w-[100%] lg:w-[415px]">
+        <div className="flex flex-col lg:flex-row items-stretch gap-4 lg:gap-6 w-full min-w-0">
+          <div className="w-full lg:w-[415px] min-w-0 shrink-0">
             {!!studentInfo && isTeacher && (
               <StudentList
                 onSuccessEditCallback={fetchStudentInfo}
@@ -118,13 +115,13 @@ export default function StudentAccountPage() {
               />
             )}
           </div>
-          <div className="w-[100%] lg:w-[525px]">
+          <div className="w-full lg:flex-1 lg:max-w-[525px] min-w-0">
             <Input
               value={searchString}
               onValueChange={setSearchString}
               placeholder={t("lessons.searchLessons")}
               size="lg"
-              classNames={{ inputWrapper: "bg-white hove" }}
+              classNames={{ inputWrapper: "bg-white hove min-w-0" }}
               startContent={
                 <Image
                   src={Loupe.src}

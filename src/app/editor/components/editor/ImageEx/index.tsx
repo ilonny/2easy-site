@@ -60,36 +60,44 @@ const SortableImageItem = sortableElement(
   }) => {
     const idx = itemIndex ?? index;
     return (
-      <div className="w-[25%] p-2 h-[150px] mb-12">
+      <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-2 mb-6 min-w-0">
         <div
-          className="image-item relative w-full h-full flex items-center justify-center bg-white"
-          style={{ borderRadius: 10, overflow: "hidden" }}
+          className="image-item relative w-full flex flex-col bg-white rounded-[10px] border border-default-200 overflow-hidden shadow-sm"
         >
-          <div className="absolute top-0 left-0 z-10">
-            <DragHandle />
+          <div className="relative w-full aspect-[4/3] max-h-[220px] flex items-center justify-center bg-neutral-100">
+            <div className="absolute top-1 left-1 z-10">
+              <DragHandle />
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={image.dataURL}
+              className="max-w-full max-h-full w-auto h-auto object-contain"
+              alt=""
+            />
+            <div className="image-item__btn-wrapper top-1 right-1 absolute z-10">
+              <Button
+                isIconOnly
+                size="sm"
+                onClick={() => onRemove(idx)}
+                variant="flat"
+                className="hover:!bg-default-100 bg-white/90"
+              >
+                <Image priority={false} src={Close} alt="close" width={18} height={18} />
+              </Button>
+            </div>
           </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image.dataURL} style={{ height: "100%" }} alt="" />
-          <div className="image-item__btn-wrapper top-0 right-0 absolute">
-            <Button
-              isIconOnly
-              onClick={() => onRemove(idx)}
-              variant="light"
-              className="hover:!bg-transparent"
-            >
-              <Image priority={false} src={Close} alt="close" />
-            </Button>
+          <div className="p-2 w-full min-w-0">
+            <Input
+              onChange={(e) => onChangeDescription(e.target.value, idx)}
+              value={value}
+              placeholder={placeholder}
+              size="sm"
+              variant="flat"
+              className="w-full min-w-0"
+              classNames={{ inputWrapper: "w-full min-w-0" }}
+            />
           </div>
         </div>
-        <div className="h-2" />
-        <Input
-          onChange={(e) => onChangeDescription(e.target.value, idx)}
-          value={value}
-          placeholder={placeholder}
-          size="sm"
-          variant="flat"
-          style={{ zIndex: 2, position: "relative" }}
-        />
       </div>
     );
   }
@@ -97,7 +105,7 @@ const SortableImageItem = sortableElement(
 
 const SortableImagesList = sortableContainer(
   ({ children }: { children: React.ReactNode }) => (
-    <div className="flex flex-wrap">{children}</div>
+    <div className="flex flex-wrap gap-y-2 -mx-2 w-full min-w-0">{children}</div>
   )
 );
 
@@ -166,14 +174,7 @@ export const ImageEx: FC<TProps> = ({
   }, []);
 
   const handleRemoveImage = useCallback((index: number) => {
-    setImages((imgs) => {
-      const filteredImages = imgs.filter((_, i) => {
-        console.log('i, index', i, index)
-        return i !== index
-      })
-      console.log('filteredImages', filteredImages)
-      return filteredImages
-    });
+    setImages((imgs) => imgs.filter((_, i) => i !== index));
   }, []);
 
   const handleSortEnd = useCallback(
@@ -191,11 +192,10 @@ export const ImageEx: FC<TProps> = ({
       resetData(defaultValuesStub);
     }
   }, [success, resetData, onSuccess]);
-  console.log('images', images)
   return (
-    <div>
-      <div className="flex flex-wrap">
-        <div className="w-[50%] pr-2">
+    <div className="w-full min-w-0 max-w-full">
+      <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
+        <div className="w-full md:w-1/2 md:pr-2 min-w-0">
           <TitleExInput
             label={t("editor.taskTitle")}
             value={data.title}
@@ -217,7 +217,7 @@ export const ImageEx: FC<TProps> = ({
             setValue={(val) => changeData("description", val)}
           />
         </div>
-        <div className="w-[50%] pl-2">
+        <div className="w-full md:w-1/2 md:pl-2 min-w-0">
           <p className="font-light mb-2">{t("editor.uploadImagesUpTo12")}</p>
           <ImageUpload
             key={`img-upload-${images.length}`}
@@ -228,12 +228,11 @@ export const ImageEx: FC<TProps> = ({
             customPlaceHolder={
               <div
                 style={{
-                  width: "100%",
                   background: "#fff",
-                  height: 200,
+                  minHeight: 160,
                   borderRadius: 10,
                 }}
-                className="flex items-center justify-center flex-col gap-4"
+                className="w-full flex items-center justify-center flex-col gap-3 sm:gap-4 px-4 py-5 border border-default-200 shadow-sm"
               >
                 <Image src={GalleryIcon} alt="GalleryIcon" />
                 <p
@@ -290,14 +289,11 @@ export const ImageEx: FC<TProps> = ({
         </SortableImagesList>
       )}
       <div className="h-10" />
-      <div>
+      <div className="w-full min-w-0">
         <p className="font-light mb-2">{t("editor.preview")}</p>
         <div
-          style={{
-            border: "1px solid #3F28C6",
-            borderRadius: 4,
-            background: "#fff",
-          }}
+          className="rounded-md border border-primary bg-white overflow-hidden overflow-x-hidden max-w-full"
+          style={{ borderColor: "#3F28C6" }}
         >
           <ImageExView data={data} isPreview />
         </div>
@@ -305,7 +301,7 @@ export const ImageEx: FC<TProps> = ({
         <div className="flex justify-center">
           <Button
             color="primary"
-            className="min-w-[310px]"
+            className="w-full max-w-[310px] min-w-0 lg:min-w-[310px]"
             size="lg"
             onClick={() => saveImageEx(data)}
             isLoading={isLoading}

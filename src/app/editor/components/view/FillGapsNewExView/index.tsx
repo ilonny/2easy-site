@@ -499,37 +499,38 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
   const image = (data as any)?.images?.[0];
 
   return (
-    <div className={styles.root}>
-      <div className={`py-6 w-[100%] max-w-[900px] m-auto`}>
+    <div className={`${styles.root} exercise-view-shell`}>
+      <div className={`py-4 sm:py-5 md:py-6 w-full max-w-[900px] mx-auto exercise-view-head`}>
         {!!data?.title && (
           <p
+            className="exercise-view-title lg:text-[34px]"
             style={{
               color: (data as any)?.titleColor || "#3F28C6",
-              fontSize: 34,
-              textAlign: "center",
-              fontWeight: 700,
-              textTransform: "uppercase",
             }}
           >
             {data.title}
           </p>
         )}
         {!!data?.subtitle && (
-          <p style={{ fontSize: 22, textAlign: "center", fontWeight: 700, textTransform: "uppercase" }}>
-            {data.subtitle}
-          </p>
+          <p className="exercise-view-subtitle">{data.subtitle}</p>
         )}
         {!!data?.description && (
-          <p style={{ fontSize: 18, textAlign: "center", whiteSpace: "pre-line" }}>
+          <p className="exercise-view-desc text-[17px] lg:text-[18px]">
             {data.description}
           </p>
         )}
       </div>
 
       {!!image?.dataURL && (
-        <Zoom>
-          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
-        </Zoom>
+        <div className="w-full max-w-full min-w-0">
+          <Zoom>
+            <img
+              src={image.dataURL}
+              alt=""
+              className="block max-w-full h-auto max-h-[min(50vh,400px)] object-contain mx-auto"
+            />
+          </Zoom>
+        </div>
       )}
 
       <Card className={styles.card}>
@@ -563,7 +564,7 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
           </div>
         )}
 
-        <div style={{ fontSize: 18, lineHeight: 1.5 }}>
+        <div className="text-[16px] sm:text-[17px] md:text-[18px] leading-relaxed break-words [overflow-wrap:anywhere]">
           {contentToRender.map((p, pIdx) => {
             const children = (p.children || []) as Array<TSlateText | TSlateGapElement>;
             return (

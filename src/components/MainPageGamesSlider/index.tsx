@@ -84,12 +84,15 @@ export const MainPageGamesSlider: FC<TProps> = ({ data }) => {
       </div>
       {/* mobile version */}
       <div className="lg:hidden">
-        <div className="flex relative">
-          <div className="flex overflow-scroll gap-4">
+        <div className="flex relative -mx-1">
+          <div className="flex overflow-x-auto overflow-y-hidden gap-4 pb-2 snap-x snap-mandatory w-full [-webkit-overflow-scrolling:touch]">
             {data.map((activeEl) => {
               return (
-                <div key={activeEl.title} className="w-[100%] flex-shrink-0">
-                  <div className="bg-white min-h-[212px] rounded-[20px]">
+                <div
+                  key={activeEl.title}
+                  className="w-[min(100%,calc(100vw-2.5rem))] sm:w-[min(100%,28rem)] flex-shrink-0 snap-start"
+                >
+                  <div className="bg-white min-h-[180px] md:min-h-[212px] rounded-[20px] overflow-hidden">
                     {!!activeEl.videoSrc && <video src={activeEl.videoSrc} />}
                     {!!activeEl.imageSrc && (
                       <Image alt="image" src={activeEl.imageSrc} />

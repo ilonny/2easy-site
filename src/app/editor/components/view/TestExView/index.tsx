@@ -149,7 +149,7 @@ export const TestStep = (props: TTestStepProps) => {
         setIsHovered(false);
       }}
     >
-      <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 30 }}>
+      <p className="text-lg sm:text-xl font-semibold mb-6 sm:mb-8 break-words">
         {question.value}
       </p>
       {isSingleAnswer && (
@@ -196,11 +196,11 @@ export const TestStep = (props: TTestStepProps) => {
 
             return (
               <label
-                className="flex items-center wrap"
+                className="flex items-start gap-2 sm:items-center"
                 key={option.id}
                 style={{ marginBottom: 30, cursor: "pointer" }}
               >
-                <div className="relative top-[-2px]">
+                <div className="relative top-[-2px] shrink-0">
                   <Radio
                     color={color}
                     value={option.id}
@@ -230,13 +230,8 @@ export const TestStep = (props: TTestStepProps) => {
                     )}
                   </div>
                 </div>
-                <div>
-                  <p
-                    style={{
-                      fontSize: 18,
-                      lineHeight: "24px",
-                    }}
-                  >
+                <div className="min-w-0 flex-1">
+                  <p className="text-base sm:text-[18px] leading-6 break-words">
                     {option.value}
                   </p>
                 </div>
@@ -280,7 +275,7 @@ export const TestStep = (props: TTestStepProps) => {
 
           return (
             <label
-              className="flex items-start wrap"
+              className="flex items-start gap-2"
               key={option.id}
               style={{
                 marginBottom: 30,
@@ -288,7 +283,7 @@ export const TestStep = (props: TTestStepProps) => {
                 position: "relative",
               }}
             >
-              <div className="mr-2">
+              <div className="mr-2 shrink-0">
                 <div className="relative top-[-4px]">
                   <Checkbox
                     color={color}
@@ -328,13 +323,11 @@ export const TestStep = (props: TTestStepProps) => {
                   </div>
                 </div>
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <p
-                  style={{
-                    fontSize: 18,
-                    lineHeight: "24px",
-                    marginTop: isIncorrect ? 2 : 0,
-                  }}
+                  className={`text-base sm:text-[18px] leading-6 break-words ${
+                    isIncorrect ? "mt-0.5" : ""
+                  }`}
                 >
                   {option.value}
                 </p>
@@ -471,65 +464,46 @@ export const TestExView: FC<TProps> = ({
   }, [answers, activeQuestion?.id]);
 
   return (
-    <>
-      <div className={`py-8 w-[100%] max-w-[100%] max-w-[886px] m-auto`}>
+    <div className="exercise-view-shell max-w-[886px]">
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full exercise-view-head`}>
         <p
+          className="exercise-view-title"
           style={{
             color: data.titleColor,
-            fontSize: 38,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
           }}
         >
           {data.title}
         </p>
-        <p
-          style={{
-            fontSize: 24,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
-          }}
-        >
+        <p className="exercise-view-subtitle">
           {data.subtitle}
         </p>
         {!!data.description && (
-          <p
-            style={{
-              fontSize: 20,
-              textAlign: "center",
-              whiteSpace: "pre-line",
-            }}
-          >
+          <p className="exercise-view-desc">
             {data.description}
           </p>
         )}
       </div>
       {!!image && (
-        <Zoom>
-          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
-        </Zoom>
+        <div className="w-full max-w-full min-w-0">
+          <Zoom>
+            <img
+              src={image.dataURL}
+              alt=""
+              className="block max-w-full h-auto max-h-[min(50vh,400px)] object-contain mx-auto"
+            />
+          </Zoom>
+        </div>
       )}
-      <div className={`py-8 w-[100%] max-w-[100%] max-w-[886px] m-auto`}>
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full`}>
         <Card
-          className={`max-w-[540px]`}
-          style={{ margin: "0 auto", padding: 30 }}
+          className="w-full max-w-[540px] min-w-0 mx-auto p-4 sm:p-6 md:p-8"
         >
           {isFinished ? (
             <>
-              <p style={{ fontSize: 28, fontWeight: 600, textAlign: "center" }}>
+              <p className="text-center text-xl sm:text-2xl md:text-[28px] font-semibold">
                 Your score
               </p>
-              <p
-                style={{
-                  fontSize: 54,
-                  fontWeight: 600,
-                  marginTop: 30,
-                  marginBottom: 30,
-                  textAlign: "center",
-                }}
-              >
+              <p className="text-center text-4xl sm:text-5xl md:text-[54px] font-semibold my-6 sm:my-8">
                 {score}/{totalSteps}
               </p>
               <Button
@@ -554,41 +528,27 @@ export const TestExView: FC<TProps> = ({
             />
           )}
           {!isFinished && (
-            <div className="flex justify-between items-center">
-              <div className="w-[100px]">
+            <div className="flex justify-between items-center gap-2 min-w-0">
+              <div className="w-20 sm:w-[100px] min-w-0 shrink-0">
                 {activeIndex !== 0 && (
                   <p
-                    style={{
-                      color: "#B7B7B7",
-                      textAlign: "left",
-                      marginTop: 40,
-                      fontSize: 14,
-                      cursor: "pointer",
-                    }}
-                    className="hover:underline"
+                    className="text-left mt-8 sm:mt-10 text-sm text-[#B7B7B7] cursor-pointer hover:underline"
                     onClick={onGoBack}
                   >
                     Back
                   </p>
                 )}
               </div>
-              <div className="w-[100px]">
-                <p
-                  style={{
-                    color: "#B7B7B7",
-                    textAlign: "center",
-                    marginTop: 40,
-                    fontSize: 14,
-                  }}
-                >
+              <div className="w-20 sm:w-[100px] min-w-0 flex justify-center shrink-0">
+                <p className="text-center mt-8 sm:mt-10 text-sm text-[#B7B7B7]">
                   {currentStep}/{totalSteps}
                 </p>
               </div>
-              <div className="w-[100px]"></div>
+              <div className="w-20 sm:w-[100px] shrink-0" aria-hidden />
             </div>
           )}
         </Card>
       </div>
-    </>
+    </div>
   );
 };

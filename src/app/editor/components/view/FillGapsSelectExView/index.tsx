@@ -300,56 +300,46 @@ export const FillGapsSelectExView: FC<TProps> = ({
   }, [data.dataText, areaClass]);
 
   return (
-    <>
-      <div className={`py-8 w-[100%] max-w-[866px] m-auto`}>
+    <div className="exercise-view-shell max-w-[886px]">
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[866px] mx-auto exercise-view-head`}>
         <p
+          className="exercise-view-title"
           style={{
             color: data.titleColor,
-            fontSize: 38,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
           }}
         >
           {data.title}
         </p>
-        <p
-          style={{
-            fontSize: 24,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
-          }}
-        >
+        <p className="exercise-view-subtitle">
           {data.subtitle}
         </p>
         {!!data.description && (
-          <p
-            style={{
-              fontSize: 20,
-              textAlign: "center",
-              whiteSpace: "pre-line",
-            }}
-          >
+          <p className="exercise-view-desc">
             {data.description}
           </p>
         )}
       </div>
       {!!image && (
-        <Zoom>
-          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
-        </Zoom>
+        <div className="w-full max-w-full min-w-0">
+          <Zoom>
+            <img
+              src={image.dataURL}
+              alt=""
+              className="block max-w-full h-auto max-h-[min(50vh,400px)] object-contain mx-auto"
+            />
+          </Zoom>
+        </div>
       )}
-      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
-        <Card className={`p-10 px-10 `}>
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[886px] mx-auto`}>
+        <Card className={`p-4 sm:p-6 md:p-8 lg:p-10 min-w-0`}>
           <div
             style={{ margin: "0 auto", lineHeight: "230%" }}
-            className="flex flex-col gap-10"
+            className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10"
           >
             {content}
           </div>
         </Card>
       </div>
-    </>
+    </div>
   );
 };

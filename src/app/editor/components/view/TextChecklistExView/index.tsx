@@ -44,53 +44,40 @@ export const TextChecklistExView: FC<TProps> = ({
   }, [student_id]);
 
   return (
-    <>
-      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
+    <div className="exercise-view-shell max-w-[886px]">
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto exercise-view-head`}>
         <p
+          className="exercise-view-title"
           style={{
             color: data.titleColor,
-            fontSize: 38,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
           }}
         >
           {data.title}
         </p>
-        <p
-          style={{
-            fontSize: 24,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
-          }}
-        >
+        <p className="exercise-view-subtitle">
           {data.subtitle}
         </p>
         {!!data.description && (
-          <p
-            style={{
-              fontSize: 20,
-              textAlign: "center",
-              whiteSpace: "pre-line",
-            }}
-          >
+          <p className="exercise-view-desc">
             {data.description}
           </p>
         )}
       </div>
       {!!image && (
-        <Zoom>
-          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
-        </Zoom>
+        <div className="w-full max-w-full min-w-0">
+          <Zoom>
+            <img
+              src={image.dataURL}
+              alt=""
+              className="block max-w-full h-auto max-h-[min(50vh,400px)] object-contain mx-auto"
+            />
+          </Zoom>
+        </div>
       )}
-      <div className={`py-8 w-[100%] max-w-[886px] m-auto`}>
-        <div
-          className={` flex items-stretch justify-center flex-wrap`}
-          style={{ margin: "0 auto" }}
-        >
-          <div className="w-[50%]  shrink-0 p-2 ">
-            <Card className={`w-full p-4 flex-col gap-2 h-full`}>
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[886px] mx-auto`}>
+        <div className="flex flex-col md:flex-row items-stretch justify-center flex-wrap mx-auto w-full min-w-0 gap-3 md:gap-2">
+          <div className="w-full md:w-1/2 min-w-0 shrink-0 p-2">
+            <Card className={`w-full p-3 sm:p-4 flex-col gap-2 h-full min-w-0`}>
               {data.stickers?.map((sticker, index) => {
                 if (!sticker) {
                   return <></>;
@@ -117,19 +104,20 @@ export const TextChecklistExView: FC<TProps> = ({
                     ) : (
                       <Checkbox size="lg" color="primary" />
                     )}
-                    <p style={{ fontSize: 18 }}>{sticker}</p>
+                    <p className="text-base sm:text-lg break-words">{sticker}</p>
                   </label>
                 );
               })}
             </Card>
           </div>
           {!!editorImage && (
-            <div className="w-[50%]  shrink-0 p-2">
-              <Card className={`w-full h-full`}>
+            <div className="w-full md:w-1/2 min-w-0 shrink-0 p-2">
+              <Card className={`w-full h-full min-w-0`}>
                 {!!editorImage && (
                   <img
                     src={editorImage.dataURL}
-                    style={{ margin: "auto", width: "100%" }}
+                    alt=""
+                    className="mx-auto w-full max-w-full h-auto object-contain"
                   />
                 )}
               </Card>
@@ -137,6 +125,6 @@ export const TextChecklistExView: FC<TProps> = ({
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };

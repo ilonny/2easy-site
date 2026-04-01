@@ -127,8 +127,8 @@ export const MatchWordWord: FC<TProps> = ({
 
   return (
     <div>
-      <div className="flex flex-wrap">
-        <div className="w-[50%] pr-2">
+      <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
+        <div className="w-full md:w-1/2 md:pr-2 min-w-0">
           <TitleExInput
             label="Заголовок задания"
             value={data.title}
@@ -150,7 +150,7 @@ export const MatchWordWord: FC<TProps> = ({
             setValue={(val) => changeData("description", val)}
           />
         </div>
-        <div className="w-[50%] pl-2">
+        <div className="w-full md:w-1/2 md:pl-2 min-w-0">
           <p className="font-light mb-2">Изображение для задания</p>
           <ImageUpload
             images={images}
@@ -184,9 +184,9 @@ export const MatchWordWord: FC<TProps> = ({
             <div key={index} className="w-[100%] mb-4">
               <div className="">
                 {index === 0 && (
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="w-[50%]">Слово</p>
-                    <p className="w-[50%]">Определение</p>
+                  <div className="flex flex-row justify-between items-center gap-2 mb-2">
+                    <p className="w-1/2 min-w-0 font-medium">Слово</p>
+                    <p className="w-1/2 min-w-0 font-medium">Определение</p>
                   </div>
                 )}
                 <div className="flex justify-between items-center mb-2">
@@ -203,19 +203,19 @@ export const MatchWordWord: FC<TProps> = ({
                     </Button>
                   )}
                 </div>
-                <div className="flex justify-between items-center">
-                  <div className="w-[50%] odd:pr-4">
+                <div className="flex flex-row justify-between items-start gap-2 sm:gap-3">
+                  <div className="w-1/2 min-w-0 pr-1 sm:pr-2">
                     <Textarea
                       value={sticker.value}
-                      classNames={{ inputWrapper: "bg-white" }}
+                      classNames={{ inputWrapper: "bg-white min-w-0" }}
                       onChange={(e) =>
                         onChangeSticker(e.target.value, index, "value")
                       }
                     />
                   </div>
-                  <div className="w-[50%] odd:pr-4">
+                  <div className="w-1/2 min-w-0 pl-1 sm:pl-2">
                     <Textarea
-                      classNames={{ inputWrapper: "bg-white" }}
+                      classNames={{ inputWrapper: "bg-white min-w-0" }}
                       value={sticker.correctValue}
                       onChange={(e) =>
                         onChangeSticker(e.target.value, index, "correctValue")
@@ -257,7 +257,7 @@ export const MatchWordWord: FC<TProps> = ({
         <div className="flex justify-center">
           <Button
             color="primary"
-            className="min-w-[310px]"
+            className="w-full max-w-[310px] min-w-0 lg:min-w-[310px]"
             size="lg"
             onClick={() => saveMathWordWordEx(data)}
             isLoading={isLoading}

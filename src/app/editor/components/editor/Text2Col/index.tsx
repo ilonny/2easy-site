@@ -125,10 +125,10 @@ export const Text2ColEx: FC<TProps> = ({
           : EditorState.createEmpty()
       );
       setSecondEditorState(
-        data.content
+        data?.secondContent
           ? EditorState.createWithContent(
               ContentState.createFromBlockArray(
-                htmlToDraft(data?.secondContent)
+                htmlToDraft(data.secondContent)
               )
             )
           : EditorState.createEmpty()
@@ -155,9 +155,9 @@ export const Text2ColEx: FC<TProps> = ({
   }
 
   return (
-    <div>
-      <div className="flex flex-wrap">
-        <div className="w-[50%] pr-2">
+    <div className="w-full min-w-0 max-w-full">
+      <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
+        <div className="w-full md:w-1/2 md:pr-2 min-w-0">
           <TitleExInput
             label="Заголовок задания"
             value={data.title}
@@ -179,7 +179,7 @@ export const Text2ColEx: FC<TProps> = ({
             setValue={(val) => changeData("description", val)}
           />
         </div>
-        <div className="w-[50%] pl-2">
+        <div className="w-full md:w-1/2 md:pl-2 min-w-0">
           <p className="font-light mb-2">Изображение для задания</p>
           <ImageUpload
             images={images}
@@ -187,12 +187,11 @@ export const Text2ColEx: FC<TProps> = ({
             customPlaceHolder={
               <div
                 style={{
-                  width: "100%",
                   background: "#fff",
-                  height: 200,
+                  minHeight: 160,
                   borderRadius: 10,
                 }}
-                className="flex items-center justify-center flex-col gap-4"
+                className="w-full flex items-center justify-center flex-col gap-3 sm:gap-4 px-4 py-5 border border-default-200 shadow-sm"
               >
                 <Image src={GalleryIcon} alt="GalleryIcon" />
                 <p
@@ -208,13 +207,12 @@ export const Text2ColEx: FC<TProps> = ({
         </div>
       </div>
       <div className="h-5" />
-      <div className="flex items-start justify-between gap-4">
-        <div style={{ width: "50%" }}>
+      <div className="flex flex-col md:flex-row md:items-start gap-6 md:gap-4 w-full min-w-0">
+        <div className="w-full md:w-1/2 md:min-w-0 min-w-0 flex flex-col">
           <div
+            className="w-full min-w-0 overflow-x-auto rounded-lg bg-white"
             style={{
               background: "#fff",
-              // border: "1px solid #3f28c6",
-              // padding: 10,
             }}
           >
             <Editor
@@ -292,7 +290,7 @@ export const Text2ColEx: FC<TProps> = ({
             />
           </div>
           <div className="h-4" />
-          <div className="flex justify-center">
+          <div className="flex justify-center w-full px-1">
             <ImageUpload
               images={editorImages}
               setImages={setEditorImages}
@@ -303,12 +301,11 @@ export const Text2ColEx: FC<TProps> = ({
             />
           </div>
         </div>
-        <div style={{ width: "50%" }}>
+        <div className="w-full md:w-1/2 md:min-w-0 min-w-0 flex flex-col">
           <div
+            className="w-full min-w-0 overflow-x-auto rounded-lg bg-white"
             style={{
               background: "#fff",
-              // border: "1px solid #3f28c6",
-              // padding: 10,
             }}
           >
             <Editor
@@ -387,7 +384,7 @@ export const Text2ColEx: FC<TProps> = ({
             />
           </div>
           <div className="h-4" />
-          <div className="flex justify-center">
+          <div className="flex justify-center w-full px-1">
             <ImageUpload
               fullWidth
               whiteBg
@@ -400,14 +397,11 @@ export const Text2ColEx: FC<TProps> = ({
         </div>
       </div>
       <div className="h-10" />
-      <div>
+      <div className="w-full min-w-0">
         <p className="font-light mb-2">Превью</p>
         <div
-          style={{
-            border: "1px solid #3F28C6",
-            borderRadius: 4,
-            background: "#fff",
-          }}
+          className="rounded-md border bg-white overflow-hidden overflow-x-hidden max-w-full"
+          style={{ borderColor: "#3F28C6" }}
         >
           <Text2ColExView data={data} isPreview />
         </div>
@@ -415,7 +409,7 @@ export const Text2ColEx: FC<TProps> = ({
         <div className="flex justify-center">
           <Button
             color="primary"
-            className="min-w-[310px]"
+            className="w-full max-w-[310px] min-w-0 lg:min-w-[310px]"
             size="lg"
             onClick={() => saveText2ColEx(data)}
             isLoading={isLoading}

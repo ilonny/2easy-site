@@ -45,40 +45,19 @@ export const NoteExView: FC<TProps> = ({
 
   return (
     <div
-      className="flex items-start justify-between gap-2 py-8"
-      style={{
-        margin: "0 auto",
-        maxWidth: 780,
-      }}
+      className="exercise-view-shell flex items-start justify-between gap-2 py-4 sm:py-6 md:py-7 lg:py-8 max-w-[780px]"
     >
       <div
-        style={{
-          // margin: "0 auto",
-          maxWidth: 630,
-          width: "100%",
-          background: "#EEEBFF",
-          padding: 40,
-          borderRadius: 10,
-        }}
+        className="max-w-[630px] w-full rounded-[10px] bg-[#EEEBFF] p-4 sm:p-5 md:p-8 lg:p-10"
       >
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <Image src={InfoIcon} alt="info icon" className="shrink-0" />
-          <div
-            style={{ flex: 1, fontWeight: 700, fontSize: 22, color: "#8580A1" }}
-          >
+          <div className="flex-1 font-bold text-[#8580A1] text-lg sm:text-xl md:text-[22px]">
             {data.title}
           </div>
         </div>
         {data.description && (
-          <p
-            className="mt-2"
-            style={{
-              fontSize: 18,
-              color: "#8580A1",
-              whiteSpace: "break-spaces",
-              wordBreak: "break-word",
-            }}
-          >
+          <p className="mt-2 text-base sm:text-lg text-[#8580A1] [white-space:break-spaces] break-words">
             {data.description}
           </p>
         )}

@@ -67,61 +67,44 @@ export const FreeInputFormExView: FC<TProps> = ({
   }, [student_id]);
 
   return (
-    <>
-      <div className={`py-8 w-[100%] max-w-[766px] m-auto`}>
+    <div className="exercise-view-shell max-w-[886px]">
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto exercise-view-head`}>
         <p
+          className="exercise-view-title"
           style={{
             color: data.titleColor,
-            fontSize: 38,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
           }}
         >
           {data.title}
         </p>
-        <p
-          style={{
-            fontSize: 24,
-            textAlign: "center",
-            fontWeight: 700,
-            textTransform: "uppercase",
-          }}
-        >
+        <p className="exercise-view-subtitle">
           {data.subtitle}
         </p>
         {!!data.description && (
-          <p
-            style={{
-              fontSize: 20,
-              textAlign: "center",
-              whiteSpace: "pre-line",
-            }}
-          >
+          <p className="exercise-view-desc">
             {data.description}
           </p>
         )}
       </div>
       {!!image && (
-        <Zoom>
-          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
-        </Zoom>
+        <div className="w-full max-w-full min-w-0">
+          <Zoom>
+            <img
+              src={image.dataURL}
+              alt=""
+              className="block max-w-full h-auto max-h-[min(50vh,400px)] object-contain mx-auto"
+            />
+          </Zoom>
+        </div>
       )}
-      <div className={`py-8 w-[100%] max-w-[540px] m-auto`}>
+      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[540px] mx-auto min-w-0`}>
         {data.questions.map((question) => {
           const value = answers[question.id]
             ? answers[question.id].answer
             : undefined;
           return (
-            <div key={question.id} className="mb-6">
-              <p
-                style={{
-                  fontSize: 18,
-                  marginBottom: 20,
-                  fontWeight: 500,
-                  whiteSpace: "pre-line",
-                }}
-              >
+            <div key={question.id} className="mb-6 min-w-0">
+              <p className="text-base sm:text-lg mb-4 sm:mb-5 font-medium whitespace-pre-line break-words">
                 {question.value}
               </p>
               <Card>
@@ -153,6 +136,6 @@ export const FreeInputFormExView: FC<TProps> = ({
           );
         })}
       </div>
-    </>
+    </div>
   );
 };

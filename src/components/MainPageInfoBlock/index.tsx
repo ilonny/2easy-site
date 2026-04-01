@@ -49,23 +49,30 @@ export const MainPageInfoBlock: FC<TProps> = ({ sides, flipMobileOrder }) => {
   }, []);
 
   return (
-    <div className="flex items-center flex-wrap">
+    <div className="flex flex-col md:flex-row md:flex-nowrap md:items-start lg:items-center gap-3 md:gap-4 lg:gap-0">
       {sides.map((side, sideIndex) => {
         const { buttons, videoSrc, title, description } = side;
+        const orderClass = flipMobileOrder
+          ? sideIndex === 0
+            ? "order-2 lg:order-1"
+            : "order-1 lg:order-2"
+          : sideIndex === 0
+            ? "order-1 lg:order-1"
+            : "order-2 lg:order-2";
+
         return (
           <div
-            className={`w-[100%] p-2 ${
+            className={`w-full p-2 md:p-3 ${
               videoSrc
-                ? "lg:w-[70%]"
-                : "lg:w-[30%] flex flex-col items-center justify-center gap-2"
-            } order-${
-              sideIndex === 0 && flipMobileOrder ? "2" : "1"
-            } lg:order-${sideIndex + 1}`}
+                ? "md:w-[58%] lg:w-[70%]"
+                : "md:w-[42%] lg:w-[30%] flex flex-col items-center justify-center gap-2 md:items-start lg:items-center"
+            } ${orderClass}`}
             key={sideIndex}
           >
             {videoSrc && (
-              <div className="min-h-[300px] lg:min-h-[412px] rounded-lg bg-white">
+              <div className="min-h-[200px] md:min-h-[300px] lg:min-h-[412px] rounded-lg bg-white overflow-hidden">
                 <video
+                  className="w-full h-auto max-h-[65vh] object-contain"
                   src={videoSrc}
                   autoPlay
                   loop

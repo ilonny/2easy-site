@@ -190,22 +190,26 @@ export const EditorRootModal: FC<TProps> = ({
       style={{ background: "#F9F9F9", overflow: "hidden" }}
       scrollBehavior="inside"
       placement="center"
-      classNames={{ base: "max-h-[92dvh]" }}
+      classNames={{
+        base: "max-h-[92dvh] max-w-[1280px] w-[min(100%,1280px)] mx-auto my-2 sm:my-4",
+      }}
     >
-      <ModalContent>
-        <ModalHeader className="justify-center">
-          <div>{mapTypeToTitle(type)}</div>
+      <ModalContent className="border-0 shadow-2xl">
+        <ModalHeader className="justify-center px-4 py-4 sm:px-6 sm:py-5 shrink-0 border-b border-default-200">
+          <div className="text-base sm:text-lg font-semibold px-2 text-center max-w-full">
+            {mapTypeToTitle(type)}
+          </div>
           {!chosenExToEdit?.id && (
             <div
               onClick={() => onBack && onBack()}
-              className="font-light absolute left-4 text-small top-5"
+              className="font-light absolute left-3 top-4 sm:left-4 sm:top-5 text-small"
               style={{ cursor: "pointer" }}
             >
               {"<- другие шаблоны"}
             </div>
           )}
         </ModalHeader>
-        <ModalBody className="overflow-y-auto">
+        <ModalBody className="overflow-y-auto overscroll-contain px-4 py-4 sm:px-8 sm:py-6 gap-6 flex flex-col">
           {!!EditorComponent && (
             <EditorComponent
               onSuccess={onSuccess}

@@ -355,7 +355,7 @@ export default function Home() {
             </p>
             <div className="h-6 lg:h-14"></div>
             <div className="flex relative">
-              <div className="flex overflow-scroll w-[100%]">
+              <div className="flex overflow-x-auto overflow-y-hidden w-full gap-3 pb-2 snap-x snap-mandatory [-webkit-overflow-scrolling:touch] -mx-1 px-1">
                 {lessons.map((lesson) => {
                   return (
                     <LessonCard lesson={lesson} key={lesson.id} disableClick />

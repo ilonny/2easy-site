@@ -50,11 +50,7 @@ export const BodyContainer: FC<any> = ({ children }) => {
       {children}
       {subscription && subscription?.subscribe_type_id && isShowSurvey && (
         <div
-          style={{
-            position: "fixed",
-            bottom: 30,
-            left: 30,
-          }}
+          className="fixed bottom-4 left-4 right-auto z-[4] max-w-[calc(100vw-2rem)] sm:bottom-6 sm:left-6 lg:bottom-[30px] lg:left-[30px]"
         >
           <Button onClick={() => setSurveyModal(true)} color="primary">
             {t("body.shareOpinion")}

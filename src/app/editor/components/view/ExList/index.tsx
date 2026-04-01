@@ -276,7 +276,7 @@ export const ExListComp: FC<TProps> = (props) => {
         <div
           className={`${styles["wrapper"]} ${
             isView && styles["is-view"]
-          } relative pt-[55px] lg:pt-0`}
+          } relative pt-12 sm:pt-14 md:pt-[52px] lg:pt-0`}
           style={{ fontSize: 18 }}
           id={`ex-${ex.id}`}
         >
@@ -485,7 +485,7 @@ export const ExListComp: FC<TProps> = (props) => {
         </div>
         {!ex.isDisabledEx && !isView && exIndex !== list.length - 1 && (
           <div
-            className={`ex-add-button mt-8 relative flex justify-center gap-4`}
+            className={`ex-add-button mt-6 md:mt-8 relative flex justify-center gap-4`}
           >
             <div className={`${styles.dashed}`}></div>
             <ResponsiveTooltip content={t("lessons.createNewTask")}>
@@ -544,7 +544,7 @@ export const ExListComp: FC<TProps> = (props) => {
   }, [list]);
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10">
       {list.map((ex, exIndex) => {
         return (
           <ViewerComponent

@@ -239,48 +239,38 @@ export const MatchWordColumnExView: FC<TProps> = ({
 
   return (
     <div
-      className={`py-8 w-[100%] max-w-[766px] m-auto match-word-column`}
+      className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full exercise-view-shell max-w-[886px] mx-auto exercise-view-head match-word-column`}
       id={`ex-${ex_id}`}
     >
       <p
-        style={{
-          color: data.titleColor,
-          fontSize: 38,
-          textAlign: "center",
-          fontWeight: 700,
-          textTransform: "uppercase",
-        }}
-      >
+          className="exercise-view-title"
+          style={{
+            color: data.titleColor,
+          }}
+        >
         {data.title}
       </p>
-      <p
-        style={{
-          fontSize: 24,
-          textAlign: "center",
-          fontWeight: 700,
-          textTransform: "uppercase",
-        }}
-      >
+      <p className="exercise-view-subtitle">
         {data.subtitle}
       </p>
       {!!data.description && (
-        <p
-          style={{
-            fontSize: 20,
-            textAlign: "center",
-            whiteSpace: "pre-line",
-          }}
-        >
+        <p className="exercise-view-desc">
           {data.description}
         </p>
       )}
       <div className="h-10" />
       {!!image && (
-        <Zoom>
-          <img src={image.dataURL} style={{ maxHeight: 400, margin: "auto" }} />
-        </Zoom>
+        <div className="w-full max-w-full min-w-0">
+          <Zoom>
+            <img
+              src={image.dataURL}
+              alt=""
+              className="block max-w-full h-auto max-h-[min(50vh,400px)] object-contain mx-auto"
+            />
+          </Zoom>
+        </div>
       )}
-      <div className={`pb-8 w-[100%] max-w-[886px] m-auto`}>
+      <div className={`pb-4 sm:pb-6 md:pb-7 lg:pb-8 w-full max-w-[886px] mx-auto`}>
         <div
           style={{
             margin: "0 auto",
@@ -323,7 +313,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
             })}
           </div>
           {!!data?.columns?.length && (
-            <div className="flex flex-wrap justify-center gap-4 mt-2">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-2 w-full min-w-0">
               {data?.columns?.map((column) => {
                 const isCorrect =
                   !!correctChips.find((c) => c.word === activeChip?.word) ||
@@ -347,7 +337,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
                 return (
                   <Card
                     key={column.id}
-                    className="w-[100%] lg:w-[47%] p-6 answer-wrapper"
+                    className="w-full md:w-[calc(50%-0.5rem)] lg:w-[47%] min-w-0 p-4 sm:p-6 answer-wrapper"
                     id={"answer-wrapper-" + column.id}
                     onMouseOver={() => {
                       if (isTeacher && !rest?.isPresentationMode) {
@@ -360,10 +350,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
                       }
                     }}
                   >
-                    <p
-                      style={{ fontWeight: 600, fontSize: 20 }}
-                      className="text-center"
-                    >
+                    <p className="text-center font-semibold text-lg sm:text-xl break-words">
                       {column.title}
                     </p>
                     <Card

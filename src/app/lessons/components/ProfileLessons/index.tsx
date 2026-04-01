@@ -372,7 +372,6 @@ export const ProfileLessons = (props: TProps) => {
       tabIndex === "2easyCourses" ||
       studentTabIndex === "courses");
 
-  console.log("isCourse?", isCourse, tabIndex, isStudent, studentId);
   return (
     <>
       {!!studentId && (
@@ -387,7 +386,7 @@ export const ProfileLessons = (props: TProps) => {
         <>
           {!!profile?.name ? (
             <>
-              <div className="flex gap-5 justify-center">
+              <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-5 justify-center px-1">
                 <Button
                   radius="full"
                   color="primary"
@@ -455,7 +454,7 @@ export const ProfileLessons = (props: TProps) => {
             </>
           ) : (
             <>
-              <div className="flex gap-5 justify-center">
+              <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-5 justify-center px-1">
                 <Button
                   radius="full"
                   color="primary"
@@ -503,13 +502,13 @@ export const ProfileLessons = (props: TProps) => {
             </>
           )}
           <div className="h-6"></div>
-          <div className="w-[100%] lg:w-[525px] m-auto">
+          <div className="w-full max-w-[525px] m-auto min-w-0 px-0">
             <Input
               value={filterSearchString}
               onValueChange={setFilterSearchString}
               placeholder={t("lessons.searchLessons")}
               size="lg"
-              classNames={{ inputWrapper: "bg-white hove" }}
+              classNames={{ inputWrapper: "bg-white hove min-w-0" }}
               startContent={
                 <Image
                   src={Loupe.src}
@@ -524,7 +523,7 @@ export const ProfileLessons = (props: TProps) => {
       {studentId && (
         <>
           <div className="h-10" />
-          <div className="flex gap-5 justify-center">
+          <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-5 justify-center px-1">
             <Button
               radius="full"
               color="primary"
@@ -553,20 +552,21 @@ export const ProfileLessons = (props: TProps) => {
       <div className="h-10" />
       {currentCourse && (
         <>
-          <div className="flex flex-row justify-center gap-4 items-baseline">
+          <div className="flex flex-col sm:flex-row sm:justify-center gap-2 sm:gap-4 items-center sm:items-baseline text-center sm:text-left px-1">
             {studentId ? (
               <Link
                 href={"/student-account/" + studentId}
                 style={{ color: "#3F28C6" }}
+                className="shrink-0 text-sm sm:text-base"
               >
                 {t("lessons.backToStudentAccount")}
               </Link>
             ) : (
-              <Link href="/lesson_plans" style={{ color: "#3F28C6" }}>
+              <Link href="/lesson_plans" style={{ color: "#3F28C6" }} className="shrink-0 text-sm sm:text-base">
                 {t("lessons.allCourses")}
               </Link>
             )}
-            <h2 style={{ fontWeight: "500", fontSize: 28 }}>
+            <h2 className="font-medium text-xl sm:text-2xl lg:text-[28px] leading-snug max-w-full break-words">
               {currentCourse.title}
             </h2>
           </div>
@@ -593,13 +593,13 @@ export const ProfileLessons = (props: TProps) => {
           {showCourseSearch && (
             <>
               <div className="h-6"></div>
-              <div className="w-[100%] lg:w-[525px] m-auto">
+              <div className="w-full max-w-[525px] m-auto min-w-0 px-0">
                 <Input
                   value={filterSearchString}
                   onValueChange={setFilterSearchString}
                   placeholder={t("lessons.searchLessons")}
                   size="lg"
-                  classNames={{ inputWrapper: "bg-white hove" }}
+                  classNames={{ inputWrapper: "bg-white hove min-w-0" }}
                   startContent={
                     <Image
                       src={Loupe.src}

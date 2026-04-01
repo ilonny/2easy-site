@@ -31,7 +31,7 @@ export const CreateExButton: FC<TProps> = ({
 
   return (
     <Card
-      className={`${styles["wrapper"]} p-5 h-[180px] items-center justify-center`}
+      className={`${styles["wrapper"]} p-4 sm:p-5 min-h-[140px] sm:min-h-[160px] lg:h-[180px] items-center justify-center`}
       radius="lg"
       shadow="none"
     >
@@ -39,7 +39,7 @@ export const CreateExButton: FC<TProps> = ({
         size="lg"
         onClick={onPress}
         color="primary"
-        className="min-w-[310px]"
+        className="w-full max-w-[310px] min-w-0 lg:min-w-[310px]"
       >
         Добавить задание
       </Button>

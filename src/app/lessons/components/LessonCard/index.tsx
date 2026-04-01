@@ -381,7 +381,7 @@ export const LessonCard: FC<TProps> = ({
 
   return (
     <div
-      className={`p-2 w-[100%] lg:w-[25%] ${styles["lesson-card"]} flex-shrink-0`}
+      className={`p-2 w-[100%] md:w-1/2 lg:w-[25%] snap-start ${styles["lesson-card"]} flex-shrink-0`}
     >
       <div
         onClick={onPressLesson}

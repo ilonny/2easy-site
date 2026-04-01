@@ -33,17 +33,18 @@ export default function StudentCoursePage() {
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
-        <div className="">
-          <div className="h-14" />
-          <Breadcrumbs>
-            <BreadcrumbItem href={`/`}>
-              {t("profile.personalCabinetBreadcrumb")}
-            </BreadcrumbItem>
-            <BreadcrumbItem href="/course">{t("lessons.course")}</BreadcrumbItem>
-          </Breadcrumbs>
+        <div className="w-full min-w-0">
+          <div className="h-8 sm:h-10 md:h-14" />
+          <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
+            <Breadcrumbs>
+              <BreadcrumbItem href={`/`}>
+                {t("profile.personalCabinetBreadcrumb")}
+              </BreadcrumbItem>
+              <BreadcrumbItem href="/course">{t("lessons.course")}</BreadcrumbItem>
+            </Breadcrumbs>
+          </div>
         </div>
-        <div className="h-10" />
-        <div className="h-10" />
+        <div className="h-6 sm:h-8 md:h-10" />
         {!authIsLoading &&
           !!currentCourse &&
           !!studentIdStr && (

@@ -54,8 +54,8 @@ export const Note: FC<TProps> = ({
 
   return (
     <div>
-      <div className="flex flex-wrap">
-        <div className="w-[100%] pr-2">
+      <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
+        <div className="w-full min-w-0">
           <TitleExInput
             label="Заголовок задания"
             value={data.title}
@@ -78,7 +78,7 @@ export const Note: FC<TProps> = ({
       <div className="flex justify-center">
         <Button
           color="primary"
-          className="min-w-[310px]"
+          className="w-full max-w-[310px] min-w-0 lg:min-w-[310px]"
           size="lg"
           onClick={() => saveNoteEx(data)}
           isLoading={isLoading}

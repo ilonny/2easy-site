@@ -13,31 +13,24 @@ export default function GrammarPage() {
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
-        <div className="">
-          <div className="h-14" />
-          <Breadcrumbs>
+        <div className="w-full min-w-0">
+          <div className="h-8 md:h-10 lg:h-14" />
+          <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
+            <Breadcrumbs>
             <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
             <BreadcrumbItem href="/discussion_cards">
               {t("header.discussionCards")}
             </BreadcrumbItem>
           </Breadcrumbs>
+          </div>
         </div>
-        <div className="h-10" />
-        <div className="h-10" />
-        <h1
-          color="primary"
-          style={{
-            fontSize: 44,
-            textAlign: "center",
-            color: "#3f28c6",
-            fontWeight: 700,
-          }}
-        >
+        <div className="h-6 md:h-8 lg:h-10" />
+        <div className="h-6 md:h-8 lg:h-10" />
+        <h1 className="text-center text-[#3f28c6] font-bold text-[26px] leading-tight px-2 sm:text-[32px] md:text-[38px] lg:text-[44px]">
           DISCUSSION CARDS
         </h1>
         <p
-          className="max-w-[675px] text-center m-auto"
-          style={{ fontSize: 20, fontWeight: 500, lineHeight: "26px" }}
+          className="max-w-[675px] text-center m-auto px-3 text-base sm:text-lg md:text-xl font-medium leading-relaxed"
         >
           Non-trivial questions on topical issues include psychology,
           technology, work and business, relationships, and many others
@@ -48,12 +41,12 @@ export default function GrammarPage() {
           {data.map((el) => {
             return (
               <Link
-                className="w-[100%] lg:w-[33.33333%] p-2 mb-4"
+                className="w-full md:w-1/2 lg:w-[33.33333%] p-2 mb-4"
                 key={el.id}
                 href={el.link}
               >
                 <div>
-                  <img src={el.img.src} />
+                  <img src={el.img.src} className="w-full h-auto rounded-t-lg" alt="" />
                   <div
                     className="mt-4 p-4 bg-white"
                     style={{ borderRadius: 12 }}
