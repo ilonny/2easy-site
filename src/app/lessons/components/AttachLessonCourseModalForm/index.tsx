@@ -24,6 +24,7 @@ import { arrayMoveImmutable } from "array-move";
 import { TCourse, useCourses } from "@/app/course/hooks/useCourses";
 import { useLessons } from "../../hooks/useLessons";
 import { getImageUrl } from "@/app/editor/helpers";
+import { AuthContext } from "@/auth";
 
 type TProps = {
   isVisible: boolean;
@@ -50,6 +51,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
   openCourseModal,
 }) => {
   const { t } = useTranslation();
+  const { profile } = useContext(AuthContext);
   const {
     control,
     handleSubmit,
@@ -69,6 +71,12 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
 
   const [isLoading, setIsLoading] = useState(false);
   const [chosenCourseIds, setChosenCourseIds] = useState<number[]>([]);
+
+  const myCourses = useMemo(() => {
+    const pid = profile?.id;
+    if (!pid) return [];
+    return (courses || []).filter((c) => c?.user_id === pid);
+  }, [courses, profile?.id]);
 
   const onSubmit = useCallback(
     async (_data) => {
@@ -117,8 +125,8 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
             <ModalBody>
               <div style={{ maxHeight: 400, overflow: "auto" }}>
                 <div className="h-5" />
-                {courses?.length ? (
-                  courses.map((lesson: TLesson) => {
+                {myCourses?.length ? (
+                  myCourses.map((lesson: TLesson) => {
                     const isSelected = chosenCourseIds.includes(lesson?.id);
                     return (
                       <div
@@ -179,7 +187,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
               </div>
 
               <div className="flex flex-1 flex-col gap-4">
-                {courses.length ? (
+                {myCourses.length ? (
                   <Button
                     color="primary"
                     type="submit"
