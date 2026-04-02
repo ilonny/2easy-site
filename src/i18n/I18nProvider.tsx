@@ -2,21 +2,20 @@
 
 import { useEffect } from "react";
 import { I18nextProvider } from "react-i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
 import i18n from "./config";
 
 function detectAndSetLanguage() {
-  const detector = new LanguageDetector();
-  detector.init(undefined, {
-    order: ["localStorage", "navigator", "htmlTag"],
-    caches: ["localStorage"],
-  });
-  const lng = detector.detect();
-  const raw = Array.isArray(lng) ? lng[0] : lng;
-  const resolved = raw?.toString().startsWith("ru") ? "ru" : "en";
-  if (resolved !== i18n.language) {
-    i18n.changeLanguage(resolved);
-  }
+  // IMPORTANT: RU is the default language regardless of system/browser language.
+  // If user explicitly switched language (stored in localStorage), respect it.
+  let resolved: "ru" | "en" = "ru";
+  try {
+    if (typeof window !== "undefined") {
+      const stored = window.localStorage.getItem("i18nextLng") || "";
+      if (stored.toLowerCase().startsWith("en")) resolved = "en";
+      if (stored.toLowerCase().startsWith("ru")) resolved = "ru";
+    }
+  } catch {}
+  if (resolved !== i18n.language) i18n.changeLanguage(resolved);
 }
 
 function LangAttribute() {
@@ -24,7 +23,9 @@ function LangAttribute() {
     detectAndSetLanguage();
     const updateLang = () => {
       if (typeof document !== "undefined") {
-        document.documentElement.lang = i18n.language?.startsWith("ru") ? "ru" : "en";
+        document.documentElement.lang = i18n.language?.startsWith("ru")
+          ? "ru"
+          : "en";
       }
     };
     updateLang();
