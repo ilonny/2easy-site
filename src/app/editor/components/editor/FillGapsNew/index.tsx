@@ -4,6 +4,7 @@ import { uuidv4 } from "@/app/editor/helpers";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Button } from "@nextui-org/react";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { FillGapsNewExView } from "../../view/FillGapsNewExView";
 import { useExData } from "../hooks/useExData";
 import { useUploadFillGapsNewEx } from "../hooks/useUploadFillGapsNewEx";
@@ -20,7 +21,7 @@ import {
   TSlateText,
 } from "./types";
 import styles from "./styles.module.css";
-import { createEditor, Editor, Transforms } from "slate";
+import { createEditor, Editor, Element, Range, Transforms } from "slate";
 import {
   Editable,
   ReactEditor,
@@ -97,6 +98,12 @@ export const FillGapsNew: FC<TProps> = ({
     undefined,
   );
   const [slateMountKey, setSlateMountKey] = useState(0);
+  const [gapFloatPos, setGapFloatPos] = useState<{ top: number; left: number } | null>(null);
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   const editor = useMemo(() => {
     const e = withHistory(withReact(createEditor()));
@@ -186,7 +193,86 @@ export const FillGapsNew: FC<TProps> = ({
     };
     changeData("gaps", (data.gaps || []).concat(gap));
     openGapModalFor(gapId, normalizedSelected);
+    setGapFloatPos(null);
   }, [changeData, data.gaps, editor, openGapModalFor]);
+
+  const scheduleUpdateGapFloat = useCallback(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        try {
+          const sel = editor.selection;
+          if (!sel || Range.isCollapsed(sel)) {
+            setGapFloatPos(null);
+            return;
+          }
+          const hasGapNode = Array.from(
+            Editor.nodes(editor, {
+              at: sel,
+              match: (n) => Element.isElement(n) && (n as any).type === "gap",
+            }),
+          ).length > 0;
+          if (hasGapNode) {
+            setGapFloatPos(null);
+            return;
+          }
+          const text = Editor.string(editor, sel).trim();
+          if (!text) {
+            setGapFloatPos(null);
+            return;
+          }
+          try {
+            const domEditor = ReactEditor.toDOMNode(editor as any, editor as any);
+            const nativeSel = window.getSelection();
+            if (!nativeSel || nativeSel.rangeCount === 0) {
+              setGapFloatPos(null);
+              return;
+            }
+            if (!domEditor.contains(nativeSel.anchorNode)) {
+              setGapFloatPos(null);
+              return;
+            }
+          } catch {
+            setGapFloatPos(null);
+            return;
+          }
+          const domRange = ReactEditor.toDOMRange(editor as any, sel);
+          const rect = domRange.getBoundingClientRect();
+          if (rect.width < 1 && rect.height < 1) {
+            setGapFloatPos(null);
+            return;
+          }
+          const approxH = 48;
+          const margin = 10;
+          // Сначала над выделением — реже пересекается со строкой ниже и с уже созданными пропусками
+          let top = rect.top - approxH - margin;
+          if (top < 8) {
+            top = rect.bottom + margin;
+          }
+          if (top + approxH > window.innerHeight - 8) {
+            top = Math.max(8, window.innerHeight - approxH - 8);
+          }
+          const left = rect.left + rect.width / 2;
+          const clampedLeft = Math.max(96, Math.min(left, window.innerWidth - 96));
+          setGapFloatPos({ top, left: clampedLeft });
+        } catch {
+          setGapFloatPos(null);
+        }
+      });
+    });
+  }, [editor]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const fn = () => scheduleUpdateGapFloat();
+    window.addEventListener("scroll", fn, true);
+    window.addEventListener("resize", fn);
+    document.addEventListener("selectionchange", fn);
+    return () => {
+      window.removeEventListener("scroll", fn, true);
+      window.removeEventListener("resize", fn);
+      document.removeEventListener("selectionchange", fn);
+    };
+  }, [scheduleUpdateGapFloat]);
 
   const restoreGapToOriginalText = useCallback(
     (gapId: string) => {
@@ -466,20 +552,6 @@ export const FillGapsNew: FC<TProps> = ({
         </div>
       </div>
 
-      <div className={styles.stickyGapActionBar}>
-        <Button
-          size="sm"
-          color="primary"
-          variant="flat"
-          onPointerDown={(e) => {
-            e.preventDefault();
-            makeGap();
-          }}
-        >
-          Сделать пропуск
-        </Button>
-      </div>
-
       <div className="h-4" />
 
       <div className={styles.editorCard}>
@@ -487,8 +559,12 @@ export const FillGapsNew: FC<TProps> = ({
           key={`fg-new-editor-${data?.id || "new"}-${slateMountKey}`}
           editor={editor as any}
           initialValue={initialValue as any}
+          onSelectionChange={() => {
+            scheduleUpdateGapFloat();
+          }}
           onChange={(val: any) => {
             changeData("content", val as TFillGapsNewContent);
+            scheduleUpdateGapFloat();
           }}
         >
           <div className={styles.draftArea}>
@@ -543,6 +619,9 @@ export const FillGapsNew: FC<TProps> = ({
                 if (Math.abs(x - st.x) > 8 || Math.abs(y - st.y) > 8) st.moved = true;
               }}
               onTouchEndCapture={tryFocusOnShortTap}
+              onTouchEnd={() => {
+                scheduleUpdateGapFloat();
+              }}
               onTouchCancel={() => {
                 tapFocusRef.current = null;
               }}
@@ -617,6 +696,31 @@ export const FillGapsNew: FC<TProps> = ({
           </Button>
         </div>
       </div>
+
+      {portalReady &&
+        gapFloatPos &&
+        createPortal(
+          <div
+            className={styles.gapFloatWrap}
+            style={{ top: gapFloatPos.top, left: gapFloatPos.left }}
+          >
+            <div className={styles.gapFloatInner}>
+              <Button
+                size="sm"
+                color="primary"
+                variant="solid"
+                className={styles.gapFloatButton}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  makeGap();
+                }}
+              >
+                Сделать пропуск
+              </Button>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       <GapOptionsModal
         isOpen={gapModalOpen}

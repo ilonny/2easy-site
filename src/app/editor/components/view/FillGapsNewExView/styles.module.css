@@ -5,6 +5,11 @@
   margin: 0 auto;
 }
 
+/* globals: .exercise-view-shell { overflow-x: hidden } — ломает sticky у потомков */
+.root:global(.exercise-view-shell) {
+  overflow: visible !important;
+}
+
 @media (min-width: 640px) {
   .root {
     padding: 28px 0;
@@ -15,6 +20,8 @@
   padding: 14px 12px;
   border-radius: 16px;
   box-shadow: 0px 8px 24px 0px #908ba826;
+  /* NextUI Card по умолчанию overflow:hidden — ломает sticky у .pool */
+  overflow: visible !important;
 }
 
 @media (min-width: 640px) {
@@ -32,7 +39,10 @@
   border: 1px solid #e7e5ff;
   border-radius: 14px;
   margin-bottom: 14px;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.08);
 }
 
 .draggableChip {
