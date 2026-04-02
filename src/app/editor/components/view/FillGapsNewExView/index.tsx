@@ -427,49 +427,43 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
         const highlightCorrectInDropdown = isPreview || (isTeacher && !isPresentationMode);
         return (
           <Tooltip isDisabled={!isTeacher || isPresentationMode || !tooltipContent} content={<div>{tooltipContent}</div>}>
-            <span className="inline-flex">
-              <Select
-                size="sm"
-                className={styles.gapSelect}
-                key={gapId + ":" + answersVersion}
-                defaultSelectedKeys={current ? [current] : []}
-                isDisabled={!canInteract}
-                onChange={(e) => {
-                  if (!canInteract) return;
-                  const v = e.target.value;
-                  const ok = isCorrectForGap(gap, v);
-                  setAnswer(gapId, v, ok ? "correct" : "incorrect");
-                }}
-                classNames={{
-                  trigger: triggerClass,
-                  value:
-                    "text-[16px] " +
-                    (status === "correct"
-                      ? "!text-[#3F2A1D] font-bold"
-                      : status === "incorrect"
-                        ? "text-[#991B1B] font-semibold"
-                        : "text-[#111827]"),
-                }}
-              >
-                {(gap.options || []).map((o) => (
-                  <SelectItem
-                    key={o.value}
-                    value={o.value}
-                    textValue={o.value}
+            <Select
+              size="sm"
+              className={styles.gapSelect}
+              key={gapId + ":" + answersVersion}
+              defaultSelectedKeys={current ? [current] : []}
+              isDisabled={!canInteract}
+              onChange={(e) => {
+                if (!canInteract) return;
+                const v = e.target.value;
+                const ok = isCorrectForGap(gap, v);
+                setAnswer(gapId, v, ok ? "correct" : "incorrect");
+              }}
+              classNames={{
+                trigger: triggerClass,
+                value:
+                  "text-[16px] " +
+                  (status === "correct"
+                    ? "!text-[#3F2A1D] font-bold"
+                    : status === "incorrect"
+                      ? "text-[#991B1B] font-semibold"
+                      : "text-[#111827]"),
+              }}
+            >
+              {(gap.options || []).map((o) => (
+                <SelectItem key={o.value} value={o.value} textValue={o.value}>
+                  <span
+                    style={
+                      highlightCorrectInDropdown && o.isCorrect
+                        ? { color: "#059669", fontWeight: 800 }
+                        : undefined
+                    }
                   >
-                    <span
-                      style={
-                        highlightCorrectInDropdown && o.isCorrect
-                          ? { color: "#059669", fontWeight: 800 }
-                          : undefined
-                      }
-                    >
-                      {o.value}
-                    </span>
-                  </SelectItem>
-                ))}
-              </Select>
-            </span>
+                    {o.value}
+                  </span>
+                </SelectItem>
+              ))}
+            </Select>
           </Tooltip>
         );
       }
