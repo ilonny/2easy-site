@@ -366,7 +366,9 @@ export const FillGapsDragExView: FC<TProps> = ({
   const onDrop = useCallback(() => {}, [activeDragId]);
 
   return (
-    <div className="fill-the-gaps-draggable exercise-view-shell max-w-[886px]">
+    <div
+      className={`${styles.root} fill-the-gaps-draggable exercise-view-shell max-w-[886px]`}
+    >
       <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto exercise-view-head`}>
         <p
           className="exercise-view-title"

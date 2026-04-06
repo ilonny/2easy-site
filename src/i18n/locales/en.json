@@ -58,6 +58,13 @@
     "subtitle": "No theory, rules, or fill-in-the-blank drills here. We’ve collected only speaking-focused exercises and games, so after learning a grammar topic, your student can immediately practice it in speech."
   },
   "auth": {
+    "loginAsTeacher": "I'm a teacher",
+    "loginAsStudent": "I'm a student",
+    "studentForgotHint": "Enter your email",
+    "backToLogin": "Back to sign in",
+    "studentLoginHint": "Your teacher creates your account. Contact them to get access.",
+    "studentNotRegistered": "You are not registered on the platform. Contact your teacher to get access.",
+    "studentPasswordSent": "Your password has been sent to your email",
     "loginTitle": "Log in",
     "email": "E-mail",
     "password": "Password",

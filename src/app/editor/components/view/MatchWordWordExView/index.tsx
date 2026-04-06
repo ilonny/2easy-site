@@ -289,12 +289,12 @@ export const MatchWordWordExView: FC<TProps> = ({
           {incorrectedMatches.map((m) => {
             return (
               <div
-                className="flex flex-row items-stretch gap-2 sm:gap-3 md:gap-4 w-full mb-3 sm:mb-4 relative min-w-0"
+                className="flex flex-row items-start gap-2 sm:gap-3 md:gap-4 w-full mb-3 sm:mb-4 relative min-w-0"
                 key={m.id}
               >
                 <div className="w-1/2 min-w-0 basis-1/2 radius-10 relative">
                   <div
-                    className="pointer-events-none absolute top-1/2 right-0 z-0 h-0.5 -translate-y-1/2 bg-[rgb(33,159,89)] w-4 sm:w-12 md:w-[100px] -mr-1 sm:-mr-2 md:-mr-[30px]"
+                    className="pointer-events-none absolute top-1/2 left-full z-0 h-0.5 -translate-y-1/2 bg-[rgb(33,159,89)] w-12 sm:w-20 md:w-[100px]"
                   />
                   <Card
                     shadow="sm"
@@ -330,12 +330,12 @@ export const MatchWordWordExView: FC<TProps> = ({
           {correctedMatches.map((m) => {
             return (
               <div
-                className="flex flex-row items-stretch gap-2 sm:gap-3 md:gap-4 w-full mb-3 sm:mb-4 relative min-w-0"
+                className="flex flex-row items-start gap-2 sm:gap-3 md:gap-4 w-full mb-3 sm:mb-4 relative min-w-0"
                 key={m.id}
               >
                 <div className="w-1/2 min-w-0 basis-1/2 radius-10 relative">
                   <div
-                    className="pointer-events-none absolute top-1/2 right-0 z-0 h-0.5 -translate-y-1/2 bg-[rgb(33,159,89)] w-4 sm:w-12 md:w-[100px] -mr-1 sm:-mr-2 md:-mr-[30px]"
+                    className="pointer-events-none absolute top-1/2 left-full z-0 h-0.5 -translate-y-1/2 bg-[rgb(33,159,89)] w-12 sm:w-20 md:w-[100px]"
                   />
                   <Card
                     shadow="sm"
