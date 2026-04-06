@@ -45,6 +45,11 @@ function shufflePoolItems(items: TPoolItem[]): TPoolItem[] {
   return copy;
 }
 
+/** Сравнение ответов без учёта регистра (вписать / выбрать / перетащить) */
+function normalizeGapAnswer(s: string): string {
+  return (s || "").trim().toLowerCase();
+}
+
 /** TouchEvent has no clientX; read from touches / changedTouches */
 function getClientXY(e: any): { x: number; y: number } {
   if (typeof e?.clientX === "number" && typeof e?.clientY === "number") {
@@ -171,9 +176,11 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
   }, []);
 
   const isCorrectForGap = useCallback((gap: TFillGapsNewGap | undefined, v: string) => {
-    const val = (v || "").trim();
+    const val = normalizeGapAnswer(v);
     if (!gap || !val) return false;
-    return !!gap.options?.some((o) => o.isCorrect && (o.value || "").trim() === val);
+    return !!gap.options?.some(
+      (o) => o.isCorrect && normalizeGapAnswer(o.value || "") === val,
+    );
   }, []);
 
   const setAnswer = useCallback(
@@ -288,7 +295,9 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
       if (gapId) {
         const gap = gapsById.get(gapId);
         const word = dragValueRef.current;
-        const ok = !!gap?.options?.some((o) => o.isCorrect && (o.value || "").trim() === word);
+        const ok = !!gap?.options?.some(
+          (o) => o.isCorrect && normalizeGapAnswer(o.value || "") === normalizeGapAnswer(word),
+        );
         setAnswer(gapId, word, ok ? "correct" : "incorrect");
         if (ok) {
           setPool((prev) => prev.map((p) => (p.id === dragItemId ? { ...p, used: true } : p)));
