@@ -324,7 +324,8 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
   const renderGap = useCallback(
     (gapId: string) => {
       const gap = gapsById.get(gapId);
-      const current = (answersRef.current?.[gapId]?.value || "").trim();
+      const currentRaw = String(answersRef.current?.[gapId]?.value || "");
+      const current = currentRaw.trim();
       const status = statusByGap?.[gapId] || "neutral";
       const correctValues = (gap?.options || []).filter((o) => o.isCorrect).map((o) => o.value).filter(Boolean);
       const tooltipContent = correctValues.join(", ");
@@ -344,8 +345,8 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
               <Input
                 size="sm"
                 className={styles.gapInput}
-                key={gapId}
-                defaultValue={current}
+                key={gapId + ":" + answersVersion}
+                value={currentRaw}
                 isDisabled={!canInteract}
                 onValueChange={(val) => {
                   if (!canInteract) return;
