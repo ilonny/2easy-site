@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { ContentWrapper } from "@/components";
 import { SquareList } from "@/components/SquareList";
 import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
@@ -10,9 +9,9 @@ import { useEffect, useMemo, useState } from "react";
 import { PageLeftBlock } from "@/components/PageLeftBlock";
 import { data, dataA1, dataB1, dataSlang } from "./data";
 import Link from "next/link";
+import { T } from "@/i18n/T";
 
 export default function TabooPage() {
-  const { t } = useTranslation();
   const { checkSubscription } = useCheckSubscription();
   const router = useRouter();
   useEffect(() => {
@@ -42,9 +41,9 @@ export default function TabooPage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
+            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
             <BreadcrumbItem href="/speaking_games">
-              {t("header.speakingGames")}
+              <T k="header.speakingGames" />
             </BreadcrumbItem>
             <BreadcrumbItem href="/speaking_games/taboo">Taboo</BreadcrumbItem>
           </Breadcrumbs>

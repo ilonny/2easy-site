@@ -5,6 +5,7 @@ import { readFromLocalStorage, writeToLocalStorage } from "@/auth/utils";
 import Image from "next/image";
 import PasteIcon from "@/assets/icons/paste.svg";
 import { fetchPostJson } from "@/api";
+import { T } from "@/i18n/T";
 
 type TProps = {
   onPress: () => void;
@@ -41,7 +42,7 @@ export const CreateExButton: FC<TProps> = ({
         color="primary"
         className="w-full max-w-[310px] min-w-0 lg:min-w-[310px]"
       >
-        Добавить задание
+        <T k="editor.addTask" defaultText="Добавить задание" />
       </Button>
       {!!copyData && (
         <div className={`${styles["edit-wrapper"]} p-4`}>
@@ -72,7 +73,7 @@ export const CreateExButton: FC<TProps> = ({
                 writeToLocalStorage("exCopy", "");
               }}
             >
-              <p>Вставить задание</p>
+              <p><T k="editor.pasteTask" defaultText="Вставить задание" /></p>
               <Image src={PasteIcon} alt="arrow icon" />
             </div>
           </div>

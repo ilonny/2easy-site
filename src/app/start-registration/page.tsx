@@ -6,10 +6,9 @@ import Link from "next/link";
 import CheckedIcon from "@/assets/icons/checked.svg";
 import { Button } from "@nextui-org/react";
 import Bg from "@/assets/images/start_registration_bg.png";
-import { useTranslation } from "react-i18next";
+import { T } from "@/i18n/T";
 
 export default function StartRegistrationPage() {
-  const { t } = useTranslation();
   return (
     <main
       className="
@@ -45,24 +44,26 @@ export default function StartRegistrationPage() {
           }}
         >
           <h1 className={"text-primary font-bold text-3xl uppercase"}>
-            {t("home.notUsedYet")}
+            <T k="subscription.notUsedYet" />
           </h1>
           <div className="h-4" />
           <Link href="/registration">
             <h2 className="font-medium text-lg">
-              {t("auth.startRegistrationPrefix")}{" "}
+              <T k="auth.startRegistrationPrefix" />{" "}
               <span className="border-primary border-b-2">
-                {t("auth.startRegistrationHighlight")}
+                <T k="auth.startRegistrationHighlight" />
               </span>
             </h2>
           </Link>
           <div className="h-4" />
-          <div className="max-w-[420px]">{t("home.freeTrialDesc")}</div>
+          <div className="max-w-[420px]">
+            <T k="subscription.freeTrialDesc" />
+          </div>
           <div className="h-4" />
           <div className="max-w-[420px] flex items-center gap-4">
             <Image priority={false} src={CheckedIcon} alt="ckecked-icon" />
             <p className="text-[#219F59] text-small">
-              {t("auth.noCardUntilSubscribe")}
+              <T k="auth.noCardUntilSubscribe" />
             </p>
           </div>
           <div className="h-9" />
@@ -74,7 +75,7 @@ export default function StartRegistrationPage() {
                 color="warning"
                 style={{ backgroundColor: "#FF7EB3", color: "#fff" }}
               >
-                {t("home.startFree")}
+                <T k="home.startFree" />
               </Button>
             </Link>
           </div>

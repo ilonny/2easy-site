@@ -6,6 +6,7 @@ import { FC, useCallback, useEffect } from "react";
 import { Button } from "@nextui-org/react";
 import { useUploadNoteEx } from "../hooks/useUploadNoteEx";
 import { NoteExView } from "../../view/NoteExView";
+import { T } from "@/i18n/T";
 
 const defaultValuesStub: TNoteData = {
   title: "teacher's notes",
@@ -57,21 +58,23 @@ export const Note: FC<TProps> = ({
       <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
         <div className="w-full min-w-0">
           <TitleExInput
-            label="Заголовок задания"
+            label={<T k="editor.taskTitle" defaultText="Заголовок задания" />}
             value={data.title}
             setValue={(val) => changeData("title", val)}
           />
           <div className="h-4" />
           <TitleExInput
             isTextarea
-            label="Описание"
+            label={<T k="editor.description" defaultText="Описание" />}
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
         </div>
       </div>
       <div className="h-10" />
-      <p className="font-light mb-2">Превью</p>
+      <p className="font-light mb-2">
+        <T k="editor.preview" defaultText="Превью" />
+      </p>
       <NoteExView data={data} isPreview changeData={changeData} />
 
       <div className="h-10" />
@@ -83,7 +86,7 @@ export const Note: FC<TProps> = ({
           onClick={() => saveNoteEx(data)}
           isLoading={isLoading}
         >
-          Сохранить
+          <T k="common.save" defaultText="Сохранить" />
         </Button>
       </div>
       <div className="h-10" />

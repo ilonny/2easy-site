@@ -12,6 +12,8 @@ import Close from "@/assets/icons/close.svg";
 import { useUploadVideoEx } from "../hooks/useUploadVideoEx";
 import InfoIcon from "@/assets/icons/info.svg";
 import { VideoExView } from "../../view/VideoExView";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 const defaultValuesStub: TVideoData = {
   title: "Let's watch!",
@@ -133,7 +135,7 @@ export const Video: FC<TProps> = ({
       <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
         <div className="w-full md:w-1/2 md:pr-2 min-w-0">
           <TitleExInput
-            label="Заголовок задания"
+            label={<T k="editor.taskTitle" defaultText="Заголовок задания" />}
             value={data.title}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}
@@ -141,20 +143,22 @@ export const Video: FC<TProps> = ({
           />
           <div className="h-4" />
           <TitleExInput
-            label="Подзаголовок задания"
+            label={<T k="editor.taskSubtitle" defaultText="Подзаголовок задания" />}
             value={data.subtitle}
             setValue={(val) => changeData("subtitle", val)}
           />
           <div className="h-4" />
           <TitleExInput
             isTextarea
-            label="Описание"
+            label={<T k="editor.description" defaultText="Описание" />}
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
         </div>
         <div className="w-full md:w-1/2 md:pl-2 min-w-0">
-          <p className="font-light mb-2">Изображение для задания</p>
+          <p className="font-light mb-2">
+            <T k="editor.imageForTask" defaultText="Изображение для задания" />
+          </p>
           <ImageUpload
             images={images}
             setImages={setImages}
@@ -173,7 +177,10 @@ export const Video: FC<TProps> = ({
                   className="text-small text-center max-w-[250px]"
                   style={{ color: "#B7B7B7" }}
                 >
-                  Нажмите на этот блок или перетащите сюда изображения
+                  <T
+                    k="editor.dragImagesHere"
+                    defaultText="Нажмите на этот блок или перетащите сюда изображения"
+                  />
                 </p>
               </div>
             }
@@ -188,9 +195,12 @@ export const Video: FC<TProps> = ({
               <div className="">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <p>Ссылка на видео</p>
+                    <p><T k="editor.videoLink" defaultText="Ссылка на видео" /></p>
                     <ResponsiveTooltip
-                      content="Вставьте ссылку на видео из Youtube, Vk Видео, Vimeo, Rutube, Google Drive или TED через кнопку “поделиться”."
+                      content={i18n.t("editor.videoLinkHint", {
+                        defaultValue:
+                          "Вставьте ссылку на видео из Youtube, Vk Видео, Vimeo, Rutube, Google Drive или TED через кнопку “поделиться”.",
+                      })}
                       classNames={{
                         base: [
                           // arrow color
@@ -227,7 +237,7 @@ export const Video: FC<TProps> = ({
                     <Image priority={false} src={Close} alt="close" />
                   </Button>
                 </div>
-                <p>Название видео</p>
+                <p><T k="editor.videoTitle" defaultText="Название видео" /></p>
                 <div className="flex mt-2 gap-4">
                   <Input
                     value={video.title}
@@ -252,14 +262,16 @@ export const Video: FC<TProps> = ({
               className="w-[300px]"
               size="lg"
             >
-              + Добавить еще видео
+              <T k="editor.addMoreVideo" defaultText="+ Добавить еще видео" />
             </Button>
           </div>
         )}
       </div>
       <div className="h-10" />
       <div>
-        <p className="font-light mb-2">Превью</p>
+        <p className="font-light mb-2">
+          <T k="editor.preview" defaultText="Превью" />
+        </p>
         <div
           style={{
             border: "1px solid #3F28C6",
@@ -278,7 +290,7 @@ export const Video: FC<TProps> = ({
             onClick={() => saveVideoEx(data)}
             isLoading={isLoading}
           >
-            Сохранить
+            <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
       </div>

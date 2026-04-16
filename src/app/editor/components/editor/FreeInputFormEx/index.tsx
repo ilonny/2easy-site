@@ -11,6 +11,7 @@ import { useUploadFreeInputFormEx } from "../hooks/useUploadFreeInputFormEx";
 import Close from "@/assets/icons/close.svg";
 import { uuidv4 } from "@/app/editor/helpers";
 import { FreeInputFormExView } from "../../view/FreeInputFormExView";
+import { T } from "@/i18n/T";
 
 const defaultValuesStub: TFreeInputFormData = {
   title: "Let's practice!",
@@ -115,7 +116,7 @@ export const FreeInputFormEx: FC<TProps> = ({
       <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
         <div className="w-full md:w-1/2 md:pr-2 min-w-0">
           <TitleExInput
-            label="Заголовок задания"
+            label={<T k="editor.taskTitle" defaultText="Заголовок задания" />}
             value={data.title}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}
@@ -123,20 +124,22 @@ export const FreeInputFormEx: FC<TProps> = ({
           />
           <div className="h-4" />
           <TitleExInput
-            label="Подзаголовок задания"
+            label={<T k="editor.taskSubtitle" defaultText="Подзаголовок задания" />}
             value={data.subtitle}
             setValue={(val) => changeData("subtitle", val)}
           />
           <div className="h-4" />
           <TitleExInput
             isTextarea
-            label="Описание"
+            label={<T k="editor.description" defaultText="Описание" />}
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
         </div>
         <div className="w-full md:w-1/2 md:pl-2 min-w-0">
-          <p className="font-light mb-2">Изображение для задания</p>
+          <p className="font-light mb-2">
+            <T k="editor.imageForTask" defaultText="Изображение для задания" />
+          </p>
           <ImageUpload
             images={images}
             setImages={setImages}
@@ -155,7 +158,10 @@ export const FreeInputFormEx: FC<TProps> = ({
                   className="text-small text-center max-w-[250px]"
                   style={{ color: "#B7B7B7" }}
                 >
-                  Нажмите на этот блок или перетащите сюда изображения
+                  <T
+                    k="editor.dragImagesHere"
+                    defaultText="Нажмите на этот блок или перетащите сюда изображения"
+                  />
                 </p>
               </div>
             }
@@ -168,7 +174,9 @@ export const FreeInputFormEx: FC<TProps> = ({
           <div className="question-wrapper items-start mb-4" key={q.id}>
             <div className="w-[100%]">
               <div className="flex justify-between items-center min-h-[40px]">
-                <p className="font-light mb-2">Текст задания</p>
+                <p className="font-light mb-2">
+                  <T k="editor.taskText" defaultText="Текст задания" />
+                </p>
                 {data.questions.length > 1 && (
                   <div className="flex justify-end">
                     <Button
@@ -203,13 +211,15 @@ export const FreeInputFormEx: FC<TProps> = ({
             onClick={addQuestion}
             className="w-[300px]"
           >
-            + Добавить задание
+            <T k="editor.addTask" defaultText="+ Добавить задание" />
           </Button>
         </div>
       )}
       <div className="h-10" />
       <div>
-        <p className="font-light mb-2">Превью</p>
+        <p className="font-light mb-2">
+          <T k="editor.preview" defaultText="Превью" />
+        </p>
         <div
           style={{
             border: "1px solid #3F28C6",
@@ -228,7 +238,7 @@ export const FreeInputFormEx: FC<TProps> = ({
             onClick={() => saveFreeInputFormEx(data)}
             isLoading={isLoading}
           >
-            Сохранить
+            <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
       </div>

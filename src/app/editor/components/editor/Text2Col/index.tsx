@@ -13,6 +13,7 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import dynamic from "next/dynamic";
 import draftToHtml from "draftjs-to-html";
 import { useUploadText2ColEx } from "../hooks/useUploadText2ColEx";
+import { T } from "@/i18n/T";
 
 let htmlToDraft = null;
 if (typeof window === "object") {
@@ -159,7 +160,7 @@ export const Text2ColEx: FC<TProps> = ({
       <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
         <div className="w-full md:w-1/2 md:pr-2 min-w-0">
           <TitleExInput
-            label="Заголовок задания"
+            label={<T k="editor.taskTitle" defaultText="Заголовок задания" />}
             value={data.title}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}
@@ -167,20 +168,22 @@ export const Text2ColEx: FC<TProps> = ({
           />
           <div className="h-4" />
           <TitleExInput
-            label="Подзаголовок задания"
+            label={<T k="editor.taskSubtitle" defaultText="Подзаголовок задания" />}
             value={data.subtitle}
             setValue={(val) => changeData("subtitle", val)}
           />
           <div className="h-4" />
           <TitleExInput
             isTextarea
-            label="Описание"
+            label={<T k="editor.description" defaultText="Описание" />}
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
         </div>
         <div className="w-full md:w-1/2 md:pl-2 min-w-0">
-          <p className="font-light mb-2">Изображение для задания</p>
+          <p className="font-light mb-2">
+            <T k="editor.imageForTask" defaultText="Изображение для задания" />
+          </p>
           <ImageUpload
             images={images}
             setImages={setImages}
@@ -198,7 +201,10 @@ export const Text2ColEx: FC<TProps> = ({
                   className="text-small text-center max-w-[250px]"
                   style={{ color: "#B7B7B7" }}
                 >
-                  Нажмите на этот блок или перетащите сюда изображения
+                  <T
+                    k="editor.dragImagesHere"
+                    defaultText="Нажмите на этот блок или перетащите сюда изображения"
+                  />
                 </p>
               </div>
             }
@@ -398,7 +404,9 @@ export const Text2ColEx: FC<TProps> = ({
       </div>
       <div className="h-10" />
       <div className="w-full min-w-0">
-        <p className="font-light mb-2">Превью</p>
+        <p className="font-light mb-2">
+          <T k="editor.preview" defaultText="Превью" />
+        </p>
         <div
           className="rounded-md border bg-white overflow-hidden overflow-x-hidden max-w-full"
           style={{ borderColor: "#3F28C6" }}
@@ -414,7 +422,7 @@ export const Text2ColEx: FC<TProps> = ({
             onClick={() => saveText2ColEx(data)}
             isLoading={isLoading}
           >
-            Сохранить
+            <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
       </div>

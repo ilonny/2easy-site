@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useTranslation } from "react-i18next";
 import {
   BreadcrumbItem,
   Breadcrumbs,
@@ -51,10 +50,11 @@ import { Chat } from "@/components/Chat";
 import { VideoCall } from "@/components/VideoCall";
 import { CopyLessonLink } from "../components/CopyLessonLink";
 import { getImageUrl } from "@/app/editor/helpers";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 export default function LessonPage() {
   withLogin();
-  const { t } = useTranslation();
   const router = useRouter();
   const params = useParams() as { id: string };
   const { subscription } = (useContext(SibscribeContext as any) as any) || {};
@@ -228,7 +228,7 @@ export default function LessonPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 w-full min-w-0">
               <Link href={`/editor/${params.id}`} className="text-secondary shrink-0">
                 <Button variant="light" className="min-w-0">
-                  {t("lessons.backToEdit")}
+                  <T k="lessons.backToEdit" />
                 </Button>
               </Link>
               <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 min-w-0 w-full sm:w-auto sm:justify-end">
@@ -236,7 +236,9 @@ export default function LessonPage() {
                   className="switcher flex items-center cursor-pointer"
                   onClick={onChangePresentationMode}
                 >
-                  <p className="text-small mr-2">{t("lessons.screenDemoMode")}</p>
+                  <p className="text-small mr-2">
+                    <T k="lessons.screenDemoMode" />
+                  </p>
                   <Switch
                     size="sm"
                     isSelected={isPresentationMode}
@@ -257,7 +259,7 @@ export default function LessonPage() {
                   variant="light"
                   onClick={() => setTutorialOpen(true)}
                 >
-                  {t("lessons.howLessonModeWorks")}
+                  <T k="lessons.howLessonModeWorks" />
                 </Button>
                 <CopyLessonLink />
               </div>
@@ -395,8 +397,12 @@ export default function LessonPage() {
                 >
                 <div className="mb-1.5 sm:mb-3 md:mb-7">
                   <p className="text-center text-[7px] font-bold uppercase leading-tight text-[#231F20] sm:text-[9px] md:text-left md:text-sm">
-                    <span className="md:hidden">Участн.</span>
-                    <span className="hidden md:inline">УЧАСТНИКИ</span>
+                    <span className="md:hidden">
+                      <T k="lessons.participantsShort" defaultText="Участн." />
+                    </span>
+                    <span className="hidden md:inline">
+                      <T k="lessons.participants" defaultText="УЧАСТНИКИ" />
+                    </span>
                   </p>
                 </div>
                 <div className="flex flex-col gap-1 sm:gap-2 md:gap-3">
@@ -450,7 +456,7 @@ export default function LessonPage() {
                         const lessonId = Number(params.id) || 0;
                         const exId = getCurrentExerciseIdInView();
                         if (!lessonId || !exId) {
-                          toast(t("lessons.focusScroll.cantDetectCurrentTask"), {
+                          toast(i18n.t("lessons.focusScroll.cantDetectCurrentTask"), {
                             type: "error",
                           });
                           return;
@@ -466,7 +472,7 @@ export default function LessonPage() {
                         } catch (err) {}
                       }}
                     >
-                      {t("lessons.focusScroll.button")}
+                      <T k="lessons.focusScroll.button" />
                     </Button>
                     <ResponsiveTooltip
                       content={
@@ -477,7 +483,7 @@ export default function LessonPage() {
                             lineHeight: "140%",
                           }}
                         >
-                          {t("lessons.focusScroll.tooltip")}
+                          <T k="lessons.focusScroll.tooltip" />
                         </div>
                       }
                       placement="left"
@@ -575,7 +581,7 @@ export default function LessonPage() {
                   size="lg"
                   onClick={() => setTutorialStep(2)}
                 >
-                  <p>{t("lessons.flipNext")}</p>
+                  <p><T k="lessons.flipNext" /></p>
                 </Button>
                 <div
                   style={{
@@ -616,7 +622,7 @@ export default function LessonPage() {
                     <div className="shrink-0 pt-[3px]">
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
-                    <p>{t("lessons.sendLessonLink")}</p>
+                    <p><T k="lessons.sendLessonLink" /></p>
                   </div>
                   <div className="h-8"></div>
                   <div className="flex justify-end">
@@ -632,7 +638,7 @@ export default function LessonPage() {
                   size="lg"
                   onClick={() => setTutorialStep(3)}
                 >
-                  <p>{t("lessons.next")}</p>
+                  <p><T k="lessons.next" /></p>
                 </Button>
               </>
             )}
@@ -651,7 +657,7 @@ export default function LessonPage() {
                     <div className="shrink-0 pt-[3px]">
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
-                    <p>{t("lessons.seeRealtimeAnswers")}</p>
+                    <p><T k="lessons.seeRealtimeAnswers" /></p>
                   </div>
                   <div className="flex items-start gap-2 mb-2">
                     <div className="shrink-0 pt-[3px]">
@@ -671,7 +677,7 @@ export default function LessonPage() {
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
                     <p>
-                      {t("lessons.lessonChatNotes")}
+                      <T k="lessons.lessonChatNotes" />
                     </p>
                   </div>
                   <div className="flex items-start gap-2 mb-2">
@@ -679,7 +685,7 @@ export default function LessonPage() {
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
                     <p style={{ color: "#ACACAC", fontSize: 12 }}>
-                      {t("lessons.lessonChatHistory")}
+                      <T k="lessons.lessonChatHistory" />
                     </p>
                   </div>
                 </div>
@@ -690,7 +696,7 @@ export default function LessonPage() {
                   size="lg"
                   onClick={() => setTutorialStep(4)}
                 >
-                  <p>{t("lessons.next")}</p>
+                  <p><T k="lessons.next" /></p>
                 </Button>
               </>
             )}
@@ -727,7 +733,7 @@ export default function LessonPage() {
                   size="lg"
                   onClick={() => setTutorialStep(5)}
                 >
-                  <p>{t("lessons.next")}</p>
+                  <p><T k="lessons.next" /></p>
                 </Button>
               </>
             )}
@@ -779,7 +785,7 @@ export default function LessonPage() {
                     size="lg"
                     onClick={() => setTutorialStep(6)}
                   >
-                    <p>{t("lessons.next")}</p>
+                    <p><T k="lessons.next" /></p>
                   </Button>
                 </div>
 
@@ -823,7 +829,7 @@ export default function LessonPage() {
                     size="lg"
                     onClick={() => setTutorialOpen(false)}
                   >
-                    <p>{t("lessons.letsWork")}</p>
+                    <p><T k="lessons.letsWork" /></p>
                   </Button>
                 </div>
 

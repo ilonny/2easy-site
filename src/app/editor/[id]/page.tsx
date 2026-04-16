@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { useLessons } from "@/app/lessons/hooks/useLessons";
 import { ContentWrapper } from "@/components";
 import {
@@ -44,10 +43,11 @@ import createExStyles from "../components/create/CreateExButton/styles.module.cs
 import { getImageUrl } from "../helpers";
 import { ShareLessonLink } from "../components/ShareLessonLink";
 import { CreateHomeworkModal } from "@/app/lessons/components/CreateHomeworkModal";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 export default function EditorPage() {
   withLogin();
-  const { t } = useTranslation();
   const params = useParams();
   const { profile } = useContext(AuthContext);
   const { lesson, getLesson } = useLessons();
@@ -208,8 +208,8 @@ export default function EditorPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="overflow-x-auto max-w-full min-w-0 [-webkit-overflow-scrolling:touch] pb-0.5">
             <Breadcrumbs>
-              <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
-              <BreadcrumbItem href="/profile?lessons">{t("editor.myLessons")}</BreadcrumbItem>
+              <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
+              <BreadcrumbItem href="/profile?lessons"><T k="editor.myLessons" /></BreadcrumbItem>
               <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
             </Breadcrumbs>
             </div>
@@ -276,7 +276,7 @@ export default function EditorPage() {
                     textAlign: "center",
                   }}
                 >
-                  {t("editor.editShort")}
+                  <T k="editor.editShort" />
                 </p>
               </div>
             )}
@@ -330,7 +330,7 @@ export default function EditorPage() {
                     >
                       {lesson?.homework_lesson_id
                         ? "Homework"
-                        : t("lessons.createHomework")}
+                        : <T k="lessons.createHomework" />}
                     </Button>
                   </Card>
                 )}
@@ -355,7 +355,7 @@ export default function EditorPage() {
                   window.location.pathname = `/editor/${data.id}`;
                 }}
               >
-                {t("lessons.addToMyLessons")}
+                <T k="lessons.addToMyLessons" />
               </Button>
             </div>
           )}
@@ -368,7 +368,7 @@ export default function EditorPage() {
               size="lg"
               color="primary"
               onClick={async () => {
-                if (!window?.confirm(t("lessons.confirmPublishLesson"))) {
+                if (!window?.confirm(i18n.t("lessons.confirmPublishLesson"))) {
                   return;
                 }
                 const res = await fetchPostJson({
@@ -383,7 +383,7 @@ export default function EditorPage() {
                 window.location.pathname = `/`;
               }}
             >
-              {t("lessons.moveTo2EasyLessons")}
+              <T k="lessons.moveTo2EasyLessons" />
             </Button>
           </div>
         )}
@@ -417,7 +417,7 @@ export default function EditorPage() {
         <ModalContent>
           <ModalHeader className="justify-center">
             <p style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}>
-              {t("editor.confirmDeleteEx")}
+              <T k="editor.confirmDeleteEx" />
             </p>
           </ModalHeader>
           <ModalBody>
@@ -432,7 +432,7 @@ export default function EditorPage() {
                 getExList();
               }}
             >
-              <p style={{ color: "#A42929" }}>{t("editor.confirmDelete")}</p>
+              <p style={{ color: "#A42929" }}><T k="editor.confirmDelete" /></p>
             </Button>
             <Button
               color="primary"
@@ -440,7 +440,7 @@ export default function EditorPage() {
               size="lg"
               onClick={() => setDeleteModal(false)}
             >
-              {t("common.cancel")}
+              <T k="common.cancel" />
             </Button>
           </ModalBody>
         </ModalContent>

@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { fetchPostJson } from "@/api";
 import { Button } from "@/ui";
 import { Input } from "@nextui-org/react";
@@ -9,6 +8,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TLoginInputs = {
   login: string;
@@ -16,7 +17,6 @@ type TLoginInputs = {
 };
 
 export const RestoreForm = () => {
-  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -53,28 +53,28 @@ export const RestoreForm = () => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <h3 className="text-center font-bold text-2xl mb-2">
-        {t("auth.restorePasswordTitle")}
+        <T k="auth.restorePasswordTitle" />
       </h3>
       <p className="text-center mb-7 font-medium">
-        {t("auth.restorePasswordLine1")}
+        <T k="auth.restorePasswordLine1" />
         <br />
-        {t("auth.restorePasswordLine2")}
+        <T k="auth.restorePasswordLine2" />
       </p>
       <Controller
         name="login"
         control={control}
         rules={{
-          required: t("auth.emailRequired"),
+          required: i18n.t("auth.emailRequired"),
           pattern: {
             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            message: t("auth.invalidEmail"),
+            message: i18n.t("auth.invalidEmail"),
           },
         }}
         render={({ field }) => (
           <Input
             {...field}
             radius="sm"
-            label={t("auth.email")}
+            label={<T k="auth.email" />}
             className="mb-5"
             errorMessage={errors?.login?.message}
             isInvalid={!!errors.login?.message}
@@ -85,7 +85,7 @@ export const RestoreForm = () => {
         <Button
           isLoading={mutation.isPending}
           type="submit"
-          text={t("auth.restorePasswordSubmit")}
+          text={i18n.t("auth.restorePasswordSubmit")}
           fullWidth
           mediumHeight
         />
@@ -94,9 +94,9 @@ export const RestoreForm = () => {
         )}
       </div>
       <div className="flex justify-center items-center gap-2  font-medium text-small">
-        <p>{t("auth.rememberPassword")}</p>
+        <p><T k="auth.rememberPassword" /></p>
         <Link href="/login" className="text-[#3F28C6] underline">
-          {t("common.login")}
+          <T k="common.login" />
         </Link>
       </div>
     </form>

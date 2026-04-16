@@ -1,9 +1,8 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
+import { T } from "@/i18n/T";
 
 export default function Custom404() {
-  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -27,13 +26,13 @@ export default function Custom404() {
         404
       </h1>
       <h2 className="text-center">
-        {t("404.title")}
+        <T k="404.title" />
         <br />
-        {t("404.returnTo")}{" "}
+        <T k="404.returnTo" />{" "}
         <a style={{ color: "#3f28c6", textDecoration: "underline" }} href="/">
-          {t("404.goHome")}
+          <T k="404.goHome" />
         </a>{" "}
-        {t("404.moreInteresting")}
+        <T k="404.moreInteresting" />
       </h2>
     </div>
   );

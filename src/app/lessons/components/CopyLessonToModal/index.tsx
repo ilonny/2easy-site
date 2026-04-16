@@ -14,6 +14,8 @@ import { fetchPostJson } from "@/api";
 import { getImageUrl } from "@/app/editor/helpers";
 import CreateLessonBgCard from "@/assets/images/create_lesson_bg_card.png";
 import { toast } from "react-toastify";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TCourseOption = { id: number; title: string; image_path?: string };
 
@@ -96,7 +98,11 @@ export const CopyLessonToModal: FC<TProps> = ({
         (results?.courses || []).every((r) => r.success);
 
       if (allOk) {
-        toast.success("Копирование завершено успешно");
+        toast.success(
+          i18n.t("lessons.copySuccess", {
+            defaultValue: "Копирование завершено успешно",
+          })
+        );
         onAfterCopy?.();
         onClose();
         return;
@@ -213,9 +219,17 @@ export const CopyLessonToModal: FC<TProps> = ({
       <ModalContent>
         <ModalBody>
           <div>
-            <p style={{ fontSize: 18, fontWeight: 600 }}>Куда скопировать урок?</p>
+            <p style={{ fontSize: 18, fontWeight: 600 }}>
+              <T
+                k="lessons.copyWhereTitle"
+                defaultText="Куда скопировать урок?"
+              />
+            </p>
             <p className="text-default-500" style={{ fontSize: 13 }}>
-              Можно выбрать несколько вариантов.
+              <T
+                k="lessons.copyWhereHint"
+                defaultText="Можно выбрать несколько вариантов."
+              />
             </p>
           </div>
 
@@ -224,8 +238,12 @@ export const CopyLessonToModal: FC<TProps> = ({
           <div className="flex flex-col gap-3">
             {renderPlaque({
               key: "my-lessons",
-              title: "Мои уроки",
-              subtitle: 'Урок будет отображаться в разделе "Мои уроки"',
+              title: i18n.t("lessons.myLessons", {
+                defaultValue: "Мои уроки",
+              }),
+              subtitle: i18n.t("lessons.myLessonsCopyHint", {
+                defaultValue: 'Урок будет отображаться в разделе "Мои уроки"',
+              }),
               imageUrl: CreateLessonBgCard.src,
               selected: toMyLessons,
               onToggle: () => setToMyLessons((p) => !p),
@@ -234,7 +252,10 @@ export const CopyLessonToModal: FC<TProps> = ({
             {!!courseOptions?.length && (
               <div>
                 <p className="text-default-500 mb-2" style={{ fontSize: 13 }}>
-                  Другие мои курсы
+                  <T
+                    k="lessons.otherMyCourses"
+                    defaultText="Другие мои курсы"
+                  />
                 </p>
                 <div className="flex flex-col gap-2 max-h-[260px] overflow-auto pr-2">
                   {courseOptions.map((c) =>
@@ -261,10 +282,15 @@ export const CopyLessonToModal: FC<TProps> = ({
             <div className="text-default-700" style={{ fontSize: 13 }}>
               {result.results?.my_lessons && (
                 <p>
-                  Мои уроки:{" "}
+                  <T k="lessons.myLessons" defaultText="Мои уроки" />
+                  {": "}
                   {result.results.my_lessons.success
-                    ? "успешно"
-                    : `ошибка${result.results.my_lessons.message ? ` — ${result.results.my_lessons.message}` : ""}`}
+                    ? i18n.t("common.success", { defaultValue: "успешно" })
+                    : `${i18n.t("common.error", { defaultValue: "ошибка" })}${
+                        result.results.my_lessons.message
+                          ? ` — ${result.results.my_lessons.message}`
+                          : ""
+                      }`}
                 </p>
               )}
               {!!result.results?.courses?.length && (
@@ -273,8 +299,10 @@ export const CopyLessonToModal: FC<TProps> = ({
                     <p key={String(r.course_id) + String(r.id || "")}>
                       {courseTitleById.get(r.course_id) || `Курс #${r.course_id}`}:{" "}
                       {r.success
-                        ? "успешно"
-                        : `ошибка${r.message ? ` — ${r.message}` : ""}`}
+                        ? i18n.t("common.success", { defaultValue: "успешно" })
+                        : `${i18n.t("common.error", { defaultValue: "ошибка" })}${
+                            r.message ? ` — ${r.message}` : ""
+                          }`}
                     </p>
                   ))}
                 </div>
@@ -288,7 +316,7 @@ export const CopyLessonToModal: FC<TProps> = ({
               onClick={onClose}
               isDisabled={result.status === "loading"}
             >
-              Закрыть
+              <T k="common.close" defaultText="Закрыть" />
             </Button>
             <Button
               color="primary"
@@ -296,7 +324,7 @@ export const CopyLessonToModal: FC<TProps> = ({
               isLoading={result.status === "loading"}
               isDisabled={!canSubmit || result.status === "done"}
             >
-              Копировать
+              <T k="common.copy" defaultText="Копировать" />
             </Button>
           </div>
         </ModalBody>

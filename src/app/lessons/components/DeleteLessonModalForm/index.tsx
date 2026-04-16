@@ -1,21 +1,15 @@
-import { useTranslation } from "react-i18next";
 import { checkResponse, fetchPostJson } from "@/api";
-import { ImageUpload } from "@/components/ImageUpload";
-
 import {
   Button,
-  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalHeader,
-  Select,
-  SelectItem,
 } from "@nextui-org/react";
-import { Tag, TagInput } from "emblor";
-import { FC, useCallback, useState } from "react";
-import { Controller } from "react-hook-form";
+import { FC, useCallback } from "react";
 import { TLesson } from "../../types";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TProps = {
   isVisible: boolean;
@@ -32,7 +26,6 @@ export const DeleteLessonModalForm: FC<TProps> = ({
   lesson,
   isCourses,
 }) => {
-  const { t } = useTranslation();
   const onSubmit = useCallback(async () => {
     const lessonRes = await fetchPostJson({
       path: isCourses ? "/course/delete" : "/lesson/delete-lesson",
@@ -52,18 +45,28 @@ export const DeleteLessonModalForm: FC<TProps> = ({
     <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
       <ModalContent>
         <ModalHeader>
-          <p>{t("lessons.deleteLessonConfirm", { type: isCourses ? t("lessons.course") : t("lessons.lesson"), title: lesson.title })}</p>
+          <p>
+            <T
+              k="lessons.deleteLessonConfirm"
+              values={{
+                type: isCourses
+                  ? i18n.t("lessons.course")
+                  : i18n.t("lessons.lesson"),
+                title: lesson.title,
+              }}
+            />
+          </p>
         </ModalHeader>
         <ModalBody>
           <Button color="danger" variant="light" onClick={onSubmit}>
-            {t("editor.confirmDelete")}
+            <T k="editor.confirmDelete" />
           </Button>
           <Button
             color="primary"
             className="w-full"
             onClick={() => setIsVisible(false)}
           >
-            {t("common.cancel")}
+            <T k="common.cancel" />
           </Button>
         </ModalBody>
       </ModalContent>

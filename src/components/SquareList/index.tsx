@@ -1,6 +1,5 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
-import { useTranslation } from "react-i18next";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
@@ -13,6 +12,7 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { useState } from "react";
 import { Button } from "@nextui-org/react";
+import { T } from "@/i18n/T";
 
 export type TSquare = {
   title?: string;
@@ -62,7 +62,6 @@ const settings = {
 };
 
 export const SquareList = (props: TProps) => {
-  const { t } = useTranslation();
   const {
     data,
     squareWidth,
@@ -145,10 +144,10 @@ export const SquareList = (props: TProps) => {
                 {toggleIsOpen
                   ? toggleLabel
                     ? toggleLabel[1]
-                    : "HIDE ALL CARDS"
+                    : <T k="common.hideAllCards" defaultText="HIDE ALL CARDS" />
                   : toggleLabel
                   ? toggleLabel[0]
-                  : "SHOW ALL CARDS"}
+                  : <T k="common.showAllCards" defaultText="SHOW ALL CARDS" />}
               </Button>
             </div>
             <div className="h-10"></div>
@@ -298,7 +297,7 @@ export const SquareList = (props: TProps) => {
                   className="flex gap-2 justify-end"
                   style={{ color: "#3f28c6" }}
                 >
-                  <p>{t("lessons.open")}</p>
+                  <p><T k="lessons.open" /></p>
                   <Image
                     src={LinkArrow}
                     alt="arrow"

@@ -7,6 +7,8 @@ import { Button, Checkbox, Input } from "@nextui-org/react";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TProps = {
   type: TSubscribePeriod;
@@ -113,7 +115,9 @@ export const PaymentForm = (props: TProps) => {
       const intentData = {
         publicId: response?.publicId,
         publicTerminalId: response?.publicId,
-        description: "Оплата подписки 2EASY",
+        description: i18n.t("payment.subscriptionPayment", {
+          defaultValue: "Оплата подписки 2EASY",
+        }),
         amount: Number(response?.amount),
         currency: "RUB",
         email: response.email || profile?.login,
@@ -167,7 +171,11 @@ export const PaymentForm = (props: TProps) => {
   return (
     <>
       <p className="text-primary font-bold text-3xl text-center">
-        Подписка 2EASY {type}
+        <T
+          k="payment.subscriptionTitle"
+          defaultText="Подписка 2EASY {{type}}"
+          values={{ type }}
+        />
       </p>
       <p className="text-center font-bold text-xl">{`${price}₽`}</p>
       <div className="h-3" />
@@ -175,11 +183,15 @@ export const PaymentForm = (props: TProps) => {
         <Controller
           name="name"
           control={control}
-          rules={{ required: "Имя обязательное поле" }}
+          rules={{
+            required: i18n.t("payment.nameRequired", {
+              defaultValue: "Имя обязательное поле",
+            }),
+          }}
           render={({ field }) => (
             <Input
               {...field}
-              label="Имя"
+              label={i18n.t("common.name", { defaultValue: "Имя" })}
               className="mb-5"
               radius="sm"
               errorMessage={errors?.name?.message}
@@ -191,17 +203,21 @@ export const PaymentForm = (props: TProps) => {
           name="login"
           control={control}
           rules={{
-            required: "E-mail обязательное поле",
+            required: i18n.t("payment.emailRequired", {
+              defaultValue: "E-mail обязательное поле",
+            }),
             pattern: {
               value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-              message: "Некорректный e-mail",
+              message: i18n.t("payment.invalidEmail", {
+                defaultValue: "Некорректный e-mail",
+              }),
             },
           }}
           render={({ field }) => (
             <Input
               {...field}
               radius="sm"
-              label="E-mail"
+              label={i18n.t("common.email", { defaultValue: "E-mail" })}
               className="mb-5"
               errorMessage={errors?.login?.message}
               isInvalid={!!errors.login?.message}
@@ -212,7 +228,9 @@ export const PaymentForm = (props: TProps) => {
           name="phone"
           control={control}
           rules={{
-            required: "Номер телефона обязательное поле",
+            required: i18n.t("payment.phoneRequired", {
+              defaultValue: "Номер телефона обязательное поле",
+            }),
           }}
           render={({ field }) => (
             <InputMask
@@ -227,7 +245,7 @@ export const PaymentForm = (props: TProps) => {
                   {...inputProps}
                   // {...field}
                   radius="sm"
-                  label="Номер телефона"
+                  label={i18n.t("common.phone", { defaultValue: "Номер телефона" })}
                   className="mb-5"
                   errorMessage={errors?.phone?.message}
                   isInvalid={!!errors.phone?.message}
@@ -242,7 +260,11 @@ export const PaymentForm = (props: TProps) => {
           render={({ field }) => (
             <div>
               <div className="flex items-center justify-between">
-                <Input {...field} label="Промокод" radius="sm" />
+                <Input
+                  {...field}
+                  label={i18n.t("payment.promocode", { defaultValue: "Промокод" })}
+                  radius="sm"
+                />
                 {!!getValues().promocode?.length && (
                   <div className="ml-2">
                     <Button
@@ -253,7 +275,7 @@ export const PaymentForm = (props: TProps) => {
                       isLoading={promocodeStatus === "loading"}
                       onClick={() => checkPromo(getValues().promocode, type)}
                     >
-                      Применить
+                      <T k="payment.apply" defaultText="Применить" />
                     </Button>
                   </div>
                 )}
@@ -261,11 +283,19 @@ export const PaymentForm = (props: TProps) => {
               <div>
                 {promocodeStatus === "error" && (
                   <p className="text-small text-red-500">
-                    Промокод не действителен или не существует
+                    <T
+                      k="payment.promocodeInvalid"
+                      defaultText="Промокод не действителен или не существует"
+                    />
                   </p>
                 )}
                 {promocodeStatus === "success" && (
-                  <p className="text-green-500 text-small">Промокод применен</p>
+                  <p className="text-green-500 text-small">
+                    <T
+                      k="payment.promocodeApplied"
+                      defaultText="Промокод применен"
+                    />
+                  </p>
                 )}
               </div>
             </div>
@@ -276,7 +306,9 @@ export const PaymentForm = (props: TProps) => {
           name="privacy"
           control={control}
           rules={{
-            required: "Обязательное поле",
+            required: i18n.t("common.requiredFieldShort", {
+              defaultValue: "Обязательное поле",
+            }),
           }}
           render={({ field }) => (
             <Checkbox
@@ -287,29 +319,44 @@ export const PaymentForm = (props: TProps) => {
               isInvalid={!!errors.privacy?.message}
             >
               <p className="text-small">
-                Я принимаю условия{" "}
+                <T
+                  k="payment.acceptTermsPrefix"
+                  defaultText="Я принимаю условия"
+                />{" "}
                 <a
                   className="text-primary"
                   href="/public_offer"
                   target="_blank"
                 >
-                  публичной оферты
+                  <T
+                    k="payment.publicOffer"
+                    defaultText="публичной оферты"
+                  />
                 </a>{" "}
-                и{" "}
+                <T k="common.and" defaultText="и" />{" "}
                 <a
                   className="text-primary"
                   href="/privacy_policy"
                   target="_blank"
                 >
-                  политики конфиденциальности
+                  <T
+                    k="payment.privacyPolicy"
+                    defaultText="политики конфиденциальности"
+                  />
                 </a>{" "}
-                и даю свое{" "}
+                <T
+                  k="payment.andGiveConsentPrefix"
+                  defaultText="и даю свое"
+                />{" "}
                 <a
                   className="text-primary"
                   href="/personal_agreement"
                   target="_blank"
                 >
-                  согласие на обработку персональных данных
+                  <T
+                    k="payment.personalDataConsent"
+                    defaultText="согласие на обработку персональных данных"
+                  />
                 </a>
               </p>
             </Checkbox>
@@ -318,14 +365,18 @@ export const PaymentForm = (props: TProps) => {
         <div className="h-5" />
         {!!promocodeValue && (
           <div className="flex items-center justify-between">
-            <p>Скидка</p>
+            <p>
+              <T k="payment.discount" defaultText="Скидка" />
+            </p>
             <p className="text-success-600 font-bold">
               -{Number((price - (price - priceWithPromo)).toFixed(1))}₽
             </p>
           </div>
         )}
         <div className="flex items-center justify-between">
-          <p>Итого</p>
+          <p>
+            <T k="payment.total" defaultText="Итого" />
+          </p>
           <p className="font-bold">
             {Number((price - priceWithPromo).toFixed(1))}₽
           </p>
@@ -349,7 +400,7 @@ export const PaymentForm = (props: TProps) => {
               }
             }}
           >
-            Оплатить картой РФ
+            <T k="payment.payWithRfCard" defaultText="Оплатить картой РФ" />
           </Button>
           <div
             className="flex justify-center my-4 uppercase text-center"
@@ -364,7 +415,7 @@ export const PaymentForm = (props: TProps) => {
                 background: "#fff",
               }}
             >
-              или
+              <T k="common.or" defaultText="или" />
             </p>
           </div>
           <hr
@@ -390,13 +441,18 @@ export const PaymentForm = (props: TProps) => {
               }, 300);
             }}
           >
-            Оплатить картой не РФ
+            <T
+              k="payment.payWithNonRfCard"
+              defaultText="Оплатить картой не РФ"
+            />
           </Button>
         </div>
         {paymentStatus === "error" && (
           <p className="text-sm text-red-400">
-            Внутренняя ошибка сервера. Попробуйте позже, или свяжитесь с
-            техподдержкой
+            <T
+              k="common.serverErrorTryLater"
+              defaultText="Внутренняя ошибка сервера. Попробуйте позже, или свяжитесь с техподдержкой"
+            />
           </p>
         )}
       </form>

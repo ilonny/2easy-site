@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
@@ -35,6 +34,8 @@ import { TCourse } from "@/app/course/hooks/useCourses";
 import { useLessons } from "../../hooks/useLessons";
 import { AuthContext } from "@/auth";
 import { getImageUrl } from "@/app/editor/helpers";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TProps = {
   isVisible: boolean;
@@ -60,7 +61,6 @@ export const CreateCourseModalForm: FC<TProps> = ({
   onSuccess,
   chosenCourse,
 }) => {
-  const { t } = useTranslation();
   const { profile, authIsLoading } = useContext(AuthContext);
   const isAdmin = profile?.role_id === 1;
   console.log("profile?", profile);
@@ -200,7 +200,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
         >
           <Image
             src={DragHandleIcon.src}
-            alt={t("editor.dragHint")}
+            alt={i18n.t("editor.dragHint")}
             style={{
               flexShrink: 0,
               width: 20,
@@ -279,17 +279,17 @@ export const CreateCourseModalForm: FC<TProps> = ({
           {step === 0 && (
             <>
               <ModalHeader>
-                <p>{title ? title : t("modals.newCourse")}</p>
+                <p>{title ? title : <T k="modals.newCourse" />}</p>
               </ModalHeader>
               <ModalBody>
                 <Controller
                   name="title"
                   control={control}
-                  rules={{ required: t("profile.titleRequired") }}
+                  rules={{ required: i18n.t("profile.titleRequired") }}
                   render={({ field }) => (
                     <Input
                       {...field}
-                      label={t("editor.titleLabel")}
+                      label={<T k="editor.titleLabel" />}
                       className="mb-5"
                       radius="sm"
                       size="lg"
@@ -304,7 +304,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                   render={({ field }) => (
                     <Textarea
                       {...field}
-                      label={t("editor.description")}
+                      label={<T k="editor.description" />}
                       minRows={3}
                       className="mb-5"
                       radius="sm"
@@ -320,7 +320,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                   render={({ field }) => (
                     <Input
                       {...field}
-                      label={t("editor.level")}
+                      label={<T k="editor.level" />}
                       className="mb-5"
                       radius="sm"
                       size="lg"
@@ -332,7 +332,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                 <div className="h-5" />
                 <div className="flex gap-5 items-end">
                   <ImageUpload
-                    label={t("editor.courseCover")}
+                    label={<T k="editor.courseCover" />}
                     images={images}
                     setImages={setImages}
                   />
@@ -345,7 +345,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                   size="lg"
                   isLoading={isLoading}
                 >
-                  Дальше
+                  <T k="modals.next" />
                 </Button>
                 <div className="h-10" />
               </ModalBody>
@@ -354,14 +354,16 @@ export const CreateCourseModalForm: FC<TProps> = ({
           {step === 1 && (
             <>
               <ModalHeader>
-                <p>{t("modals.selectLessonsForCourse", { title })}</p>
+                <p>
+                  <T k="modals.selectLessonsForCourse" values={{ title }} />
+                </p>
               </ModalHeader>
               <ModalBody>
                 <div className="w-[100%] lg:w-[525px] m-auto">
                   <Input
                     value={lessonsSearchString}
                     onValueChange={setLessonsSearchString}
-                    placeholder={t("lessons.searchLessons")}
+                    placeholder={i18n.t("lessons.searchLessons")}
                     size="lg"
                     classNames={{ inputWrapper: "bg-white hove" }}
                     startContent={
@@ -444,8 +446,8 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     isLoading={isLoading}
                   >
                     {chosenLessonIds.length
-                      ? t("modals.next")
-                      : t("modals.skipLessonChoice")}
+                      ? <T k="modals.next" />
+                      : <T k="modals.skipLessonChoice" />}
                   </Button>
                   <Button
                     color="secondary"
@@ -455,7 +457,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     size="lg"
                     onClick={() => setStep((s) => s - 1)}
                   >
-                    {t("common.back")}
+                  <T k="common.back" />
                   </Button>
                 </div>
                 <div className="h-10" />
@@ -465,14 +467,16 @@ export const CreateCourseModalForm: FC<TProps> = ({
           {step === 2 && (
             <>
               <ModalHeader>
-                <p className="whitespace-pre-line">{t("modals.reorderLessonsHint")}</p>
+              <p className="whitespace-pre-line">
+                <T k="modals.reorderLessonsHint" />
+              </p>
               </ModalHeader>
               <ModalBody>
                 <div className="w-[100%] lg:w-[525px] m-auto">
                   {/* <Input
                     value={lessonsSearchString}
                     onValueChange={setLessonsSearchString}
-                    placeholder={t("lessons.searchLessons")}
+                    placeholder={i18n.t("lessons.searchLessons")}
                     size="lg"
                     classNames={{ inputWrapper: "bg-white hove" }}
                     startContent={
@@ -524,8 +528,8 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     isLoading={isLoading}
                   >
                     {chosenLessonIds.length
-                      ? t("modals.next")
-                      : t("modals.skipLessonChoice")}
+                      ? <T k="modals.next" />
+                      : <T k="modals.skipLessonChoice" />}
                   </Button>
                   <Button
                     color="secondary"
@@ -535,7 +539,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     size="lg"
                     onClick={() => setStep((s) => s - 1)}
                   >
-                    {t("common.back")}
+                  <T k="common.back" />
                   </Button>
                 </div>
                 <div className="h-10" />

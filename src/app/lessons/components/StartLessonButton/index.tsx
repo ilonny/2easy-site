@@ -3,6 +3,8 @@ import { AttachLessonModalForm } from "../AttachLessonModalForm";
 import { TLesson } from "../../types";
 import { useRouter } from "next/navigation";
 import { useCheckSubscription } from "@/app/subscription/helpers";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TProps = {
   isSkipCreateRealtion?: boolean;
@@ -63,7 +65,9 @@ export const StartLessonButton = (props: TProps) => {
         "
         onClick={() => onPressButton()}
       >
-        <p className="text-center">Начать урок</p>
+        <p className="text-center">
+          <T k="lessons.startLesson" defaultText="Начать урок" />
+        </p>
       </div>
       {!!lesson && (
         <AttachLessonModalForm
@@ -71,7 +75,12 @@ export const StartLessonButton = (props: TProps) => {
           setIsVisible={setModalVisible}
           skipChoseStatus
           hideToast
-          title="Выберите учеников, чтобы начать урок"
+          title={
+            <T
+              k="lessons.chooseStudentsToStart"
+              defaultText="Выберите учеников, чтобы начать урок"
+            />
+          }
           onSuccess={() => {
             setModalVisible(false);
             onSuccess();

@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
@@ -10,10 +9,10 @@ import { ProfileSubscribeInformer } from "../subscription/components/ProfileSubs
 import { ProfileLessons } from "../lessons/components/ProfileLessons";
 import { ProfileStudents } from "../student/components/ProfileStudents";
 import { withLogin } from "@/auth/hooks/withLogin";
+import { T } from "@/i18n/T";
 
 export default function ProfilePage() {
   withLogin();
-  const { t } = useTranslation();
   const { authIsLoading } = useContext(AuthContext);
   const { subscription } = useContext(SibscribeContext);
   const hasTariff =
@@ -52,8 +51,8 @@ export default function ProfilePage() {
           <div className="h-8 md:h-10 lg:h-14" />
           <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
             <Breadcrumbs>
-            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
-            <BreadcrumbItem>{t("profile.profileLabel")}</BreadcrumbItem>
+            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
+            <BreadcrumbItem><T k="profile.profileLabel" /></BreadcrumbItem>
           </Breadcrumbs>
           </div>
         </div>
@@ -61,7 +60,7 @@ export default function ProfilePage() {
         <div className="h-6 md:h-8 lg:h-10" />
         <div className="flex flex-col items-center w-full max-w-full min-w-0 px-0">
           <h1 className="text-primary font-bold text-xl sm:text-2xl md:text-3xl uppercase text-center px-1">
-            {t("profile.personalCabinet")}
+            <T k="profile.personalCabinet" />
           </h1>
           <div className="h-4 md:h-5" />
           <Tabs
@@ -79,17 +78,17 @@ export default function ProfilePage() {
           >
             <Tab
               key="lessons"
-              title={t("profile.lessonsAndCourses")}
+              title={<T k="profile.lessonsAndCourses" />}
               className="uppercase font-bold"
             />
             <Tab
               key="students"
-              title={t("profile.studentsTab")}
+              title={<T k="profile.studentsTab" />}
               className="uppercase font-bold"
             />
             <Tab
               key="profile"
-              title={t("profile.profileLabel")}
+              title={<T k="profile.profileLabel" />}
               className="uppercase font-bold"
             />
           </Tabs>

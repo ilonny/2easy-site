@@ -1,4 +1,3 @@
-import { useTranslation } from "react-i18next";
 import { ProfileEmptyLessons } from "@/app/lessons/components/ProfileEmptyLessons";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -22,6 +21,7 @@ import Image from "next/image";
 import Ellipse from "@/assets/icons/ellipse.svg";
 import { useRouter } from "next/navigation";
 import { useCheckSubscription } from "@/app/subscription/helpers";
+import { T } from "@/i18n/T";
 
 type TProps = {
   hideAddButton?: boolean;
@@ -36,7 +36,6 @@ type TProps = {
 };
 
 export const StudentList = (props: TProps) => {
-  const { t } = useTranslation();
   const {
     hideAddButton,
     hidePopoverButton,
@@ -93,8 +92,8 @@ export const StudentList = (props: TProps) => {
     <>
       {!students?.length && (
         <ProfileEmptyLessons
-          title={t("students.noStudents")}
-          buttonTitle={t("students.add")}
+          title={<T k="students.noStudents" />}
+          buttonTitle={<T k="students.add" />}
           onButtonPress={onPressCreateGroup}
         />
       )}
@@ -187,7 +186,7 @@ export const StudentList = (props: TProps) => {
                                     );
                                   }}
                                 >
-                                  {t("students.toStudentCabinet")}
+                                  <T k="students.toStudentCabinet" />
                                 </Button>
                                 <div className="h-2" />
                               </>
@@ -204,7 +203,7 @@ export const StudentList = (props: TProps) => {
                                 }
                               }}
                             >
-                              {t("lessons.edit")}
+                              <T k="lessons.edit" />
                             </Button>
                             <div className="h-2" />
                             <Button
@@ -217,7 +216,7 @@ export const StudentList = (props: TProps) => {
                                 }
                               }}
                             >
-                              {t("common.delete")}
+                              <T k="common.delete" />
                             </Button>
                           </PopoverContent>
                         </Popover>
@@ -241,7 +240,7 @@ export const StudentList = (props: TProps) => {
               }}
               size="lg"
             >
-              {t("students.addNewStudent")}
+              <T k="students.addNewStudent" />
             </Button>
           )}
         </div>
@@ -261,7 +260,12 @@ export const StudentList = (props: TProps) => {
       >
         <ModalContent>
           <ModalHeader>
-            <p>{t("students.deleteStudentConfirm", { name: chosenStudent?.name || "" })}</p>
+            <p>
+              <T
+                k="students.deleteStudentConfirm"
+                values={{ name: chosenStudent?.name || "" }}
+              />
+            </p>
           </ModalHeader>
           <ModalBody>
             <Button
@@ -277,7 +281,7 @@ export const StudentList = (props: TProps) => {
                 });
               }}
             >
-              {t("editor.confirmDelete")}
+              <T k="editor.confirmDelete" />
             </Button>
           </ModalBody>
         </ModalContent>

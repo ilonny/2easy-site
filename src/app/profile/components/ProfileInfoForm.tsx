@@ -1,5 +1,4 @@
 import { useCallback, useContext, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { ProfileImagePicker } from "./ProfileImagePicker";
 import { AuthContext } from "@/auth";
 import { Controller, useForm } from "react-hook-form";
@@ -13,6 +12,8 @@ import {
 } from "@nextui-org/react";
 import { ChangePasswordForm } from "@/app/login/components/ChangePasswordForm";
 import { SubscribeCancel } from "@/subscribe/components/SubscribeCancel";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TFieldList = {
   name: string;
@@ -23,7 +24,6 @@ type TFieldList = {
 };
 
 export const ProfileInfoForm = () => {
-  const { t } = useTranslation();
   const { profile } = useContext(AuthContext);
   const [changePasswordIsVisible, setChangePasswordIsVisible] = useState(false);
   const {
@@ -54,11 +54,11 @@ export const ProfileInfoForm = () => {
           <Controller
             name="name"
             control={control}
-            rules={{ required: t("profile.nameRequired") }}
+            rules={{ required: i18n.t("profile.nameRequired") }}
             render={({ field }) => (
               <Input
                 {...field}
-                label={t("profile.name")}
+                label={<T k="profile.name" />}
                 className="mb-5"
                 radius="sm"
                 size="lg"
@@ -79,7 +79,7 @@ export const ProfileInfoForm = () => {
               <Input
                 {...field}
                 isDisabled
-                label="E-mail"
+                label={<T k="auth.email" />}
                 className="mb-5"
                 radius="sm"
                 size="lg"
@@ -98,7 +98,7 @@ export const ProfileInfoForm = () => {
                 <Input
                   {...field}
                   isDisabled
-                  label={t("auth.password")}
+                  label={<T k="auth.password" />}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -116,7 +116,7 @@ export const ProfileInfoForm = () => {
               className="text-small bg-black text-white"
               onClick={() => setChangePasswordIsVisible(true)}
             >
-              {t("profile.change")}
+              <T k="profile.change" />
             </Button>
             <Modal
               size="lg"

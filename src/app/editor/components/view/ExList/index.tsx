@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import React, {
   FC,
   useCallback,
@@ -52,6 +51,8 @@ import EyeDisabledIcon from "@/assets/icons/eye_disabled.svg";
 import { AuthContext } from "@/auth";
 import CopyExIcon from "@/assets/icons/copy_ex.svg";
 import { IntExView } from "../IntExView";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TProps = {
   list: Array<any>;
@@ -228,7 +229,6 @@ export const ExListComp: FC<TProps> = (props) => {
     isPresentationMode,
   } = props;
 
-  const { t } = useTranslation();
   const [copyData, setCopyData] = useState("");
 
   useEffect(() => {
@@ -288,7 +288,7 @@ export const ExListComp: FC<TProps> = (props) => {
                 onClick={async () => {
                   if (!canEditEye) {
                     toast(
-                      t("lessons.addLessonToSelfHint"),
+                      i18n.t("lessons.addLessonToSelfHint"),
                       {
                         type: "error",
                       }
@@ -325,11 +325,11 @@ export const ExListComp: FC<TProps> = (props) => {
                 >
                   {isVisible
                     ? ex.type === "note"
-                      ? t("lessons.noteVisibleToStudent")
-                      : t("lessons.taskVisibleToStudent")
+                      ? <T k="lessons.noteVisibleToStudent" />
+                      : <T k="lessons.taskVisibleToStudent" />
                     : ex.type === "note"
-                    ? t("lessons.noteHiddenFromStudent")
-                    : t("lessons.taskHiddenFromStudent")}
+                    ? <T k="lessons.noteHiddenFromStudent" />
+                    : <T k="lessons.taskHiddenFromStudent" />}
                 </p>
               </div>
             </div>
@@ -432,7 +432,7 @@ export const ExListComp: FC<TProps> = (props) => {
                               closePopover(ex.id);
                             }}
                           >
-                            <p>{t("editor.editTask")}</p>
+                            <p><T k="editor.editTask" /></p>
                             <Image src={EditIcon} alt="arrow icon" />
                           </div>
                           <Divider className="my-2" />
@@ -450,14 +450,14 @@ export const ExListComp: FC<TProps> = (props) => {
                             writeToLocalStorage("exCopy", dataJson);
                             setCopyData(dataJson);
                             window.location.hash = `ex-${ex.id}`;
-                            toast(t("lessons.taskCopiedToClipboard"), {
+                            toast(i18n.t("lessons.taskCopiedToClipboard"), {
                               type: "success",
                             });
                             closePopover(ex.id);
                           }
                         }}
                       >
-                        <p>{t("lessons.copyTask")}</p>
+                        <p><T k="lessons.copyTask" /></p>
                         <Image src={CopyIcon} alt="arrow icon" />
                       </div>
                       {!ex.isDisabledEx && (
@@ -470,7 +470,7 @@ export const ExListComp: FC<TProps> = (props) => {
                               closePopover(ex.id);
                             }}
                           >
-                            <p style={{ color: "#A42929" }}>{t("lessons.deleteTask")}</p>
+                            <p style={{ color: "#A42929" }}><T k="lessons.deleteTask" /></p>
                             <Image src={DeleteIcon} alt="arrow icon" />
                           </div>
                         </>
@@ -488,7 +488,7 @@ export const ExListComp: FC<TProps> = (props) => {
             className={`ex-add-button mt-6 md:mt-8 relative flex justify-center gap-4`}
           >
             <div className={`${styles.dashed}`}></div>
-            <ResponsiveTooltip content={t("lessons.createNewTask")}>
+            <ResponsiveTooltip content={<T k="lessons.createNewTask" />}>
               <Image
                 onClick={() => onPressCreate(ex.sortIndex)}
                 src={PlusIcon}
@@ -520,10 +520,10 @@ export const ExListComp: FC<TProps> = (props) => {
                   window.location.hash = `ex-${data.id}`;
                 }}
               >
-                <ResponsiveTooltip content={t("lessons.pasteTask")}>
+                <ResponsiveTooltip content={<T k="lessons.pasteTask" />}>
                   <Image
                     src={CopyExIcon}
-                    alt={t("lessons.pasteTask")}
+                    alt={i18n.t("lessons.pasteTask")}
                     className="m-auto relative z-index-[2] cursor-pointer hover:opacity-[0.8]"
                   />
                 </ResponsiveTooltip>

@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import Logo from "@/assets/icons/logo.svg";
 import WaIcon from "@/assets/icons/wa.svg";
 import EmailIcon from "@/assets/icons/email.svg";
@@ -9,10 +8,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ContentWrapper } from "../ContentWrapper";
 import { usePathname } from "next/navigation";
+import { T } from "@/i18n/T";
 
 export const Footer = () => {
   const pathname = usePathname();
-  const { t } = useTranslation();
   if (pathname !== "/") {
     return null;
   }
@@ -45,21 +44,23 @@ export const Footer = () => {
             />
           </div>
           <div className="text-center flex flex-col">
-            <p className="mt-2 lg:mt-0">{t("footer.copyright")}</p>
+            <p className="mt-2 lg:mt-0">
+              <T k="footer.copyright" />
+            </p>
             <br />
             <Link
               href="/privacy_policy"
               target="_blank"
               className="text-primary underline decoration-1 hover:decoration-0"
             >
-              {t("footer.privacyPolicy")}
+              <T k="footer.privacyPolicy" />
             </Link>
             <Link
               href="/public_offer"
               target="_blank"
               className="text-primary underline decoration-1 hover:decoration-0"
             >
-              {t("footer.publicOffer")}
+              <T k="footer.publicOffer" />
             </Link>
           </div>
           <div

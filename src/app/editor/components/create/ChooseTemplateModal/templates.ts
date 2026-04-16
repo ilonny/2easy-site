@@ -23,9 +23,11 @@ import { StaticImageData } from "next/image";
 
 export type TTemplate = {
   type: string;
-  title: string;
+  titleKey: string;
+  titleDefault?: string;
   bgImage?: StaticImageData;
-  description?: string;
+  descriptionKey?: string;
+  descriptionDefault?: string;
   subTemplates?: TTemplate[];
   subItems?: TTemplate[];
 };
@@ -33,54 +35,68 @@ export type TTemplate = {
 export const templates: TTemplate[] = [
   {
     type: "text",
-    title: "Текст",
-    description: "Статьи, вопросы и другие текстовые блоки",
+    titleKey: "templates.text",
+    titleDefault: "Текст",
+    descriptionKey: "editor.templates.textGroupDesc",
+    descriptionDefault: "Статьи, вопросы и другие текстовые блоки",
     bgImage: TextBg,
     subItems: [
       {
         type: "text-default",
-        title: "Текст",
+        titleKey: "templates.text",
+        titleDefault: "Текст",
         bgImage: TextDefaultBg,
       },
       {
         type: "text-2-col",
-        title: "Текст в 2 колонки",
+        titleKey: "templates.text2Col",
+        titleDefault: "Текст в 2 колонки",
         bgImage: Text2ColBg,
       },
       {
         type: "text-sticker",
-        title: "Текст на стикерах",
+        titleKey: "templates.textSticker",
+        titleDefault: "Текст на стикерах",
         bgImage: TextStickerBg,
       },
       {
         type: "text-checklist",
-        title: "Чек-лист",
+        titleKey: "templates.textChecklist",
+        titleDefault: "Чек-лист",
         bgImage: TextChecklistBg,
       },
     ],
   },
   {
     type: "image",
-    title: "Изображения",
-    description: "jpg, png, gif, webp",
+    titleKey: "templates.images",
+    titleDefault: "Изображения",
+    descriptionKey: "editor.templates.imagesDesc",
+    descriptionDefault: "jpg, png, gif, webp",
     bgImage: ImageBg,
   },
   {
     type: "video",
-    title: "Видео",
-    description: "mp4, mov, webm",
+    titleKey: "templates.video",
+    titleDefault: "Видео",
+    descriptionKey: "editor.templates.videoDesc",
+    descriptionDefault: "mp4, mov, webm",
     bgImage: VideoBg,
   },
   {
     type: "audio",
-    title: "Аудио",
-    description: "mp3, wav, m4a",
+    titleKey: "templates.audio",
+    titleDefault: "Аудио",
+    descriptionKey: "editor.templates.audioDesc",
+    descriptionDefault: "mp3, wav, m4a",
     bgImage: AudioBg,
   },
   {
     type: "note",
-    title: "Заметка",
-    description: "for teachers only",
+    titleKey: "templates.note",
+    titleDefault: "Заметка",
+    descriptionKey: "editor.templates.noteDesc",
+    descriptionDefault: "for teachers only",
     bgImage: NoteBg,
   },
   // Старое упражнение «Заполнить пропуски» (drag/select/input) — временно скрыто из конструктора
@@ -109,49 +125,63 @@ export const templates: TTemplate[] = [
   // },
   {
     type: "FILL_GAPS_NEW",
-    title: "ЗАПОЛНИТЬ ПРОПУСКИ",
-    description: "Пропуски с вариантами ответов, форматированием и тремя режимами",
+    titleKey: "templates.fillGapsNew",
+    titleDefault: "ЗАПОЛНИТЬ ПРОПУСКИ",
+    descriptionKey: "editor.templates.fillGapsNewDesc",
+    descriptionDefault:
+      "Пропуски с вариантами ответов, форматированием и тремя режимами",
     bgImage: FillGapsBg,
   },
   {
     type: "test",
-    title: "Тест",
-    description: "Выбрать правильный вариант из предложенных",
+    titleKey: "templates.test",
+    titleDefault: "Тест",
+    descriptionKey: "editor.templates.testDesc",
+    descriptionDefault: "Выбрать правильный вариант из предложенных",
     bgImage: TestBg,
   },
   {
     type: "match_words",
-    title: "Мэтч",
-    description: "Сопоставить слово с картинкой или определением",
+    titleKey: "editor.templates.matchGroup",
+    titleDefault: "Мэтч",
+    descriptionKey: "editor.templates.matchGroupDesc",
+    descriptionDefault: "Сопоставить слово с картинкой или определением",
     bgImage: MatchBg,
     subItems: [
       {
         type: "match-word-word",
-        title: "Match слова с определением",
+        titleKey: "templates.matchWordWord",
+        titleDefault: "Match слова с определением",
         bgImage: MatchWordWordBg,
       },
       {
         type: "match-word-image",
-        title: "Match слова с изображением",
+        titleKey: "templates.matchWordImage",
+        titleDefault: "Match слова с изображением",
         bgImage: MatchWordImageBg,
       },
       {
         type: "match-word-column",
-        title: "Расставить слова по колонкам",
+        titleKey: "templates.matchWordColumn",
+        titleDefault: "Расставить слова по колонкам",
         bgImage: MatchWordColumnBg,
       },
     ],
   },
   {
     type: "free-input-form",
-    title: "Поле для ввода текста",
-    description: "Пустое поле для ответов ученика",
+    titleKey: "templates.freeInput",
+    titleDefault: "Поле для ввода текста",
+    descriptionKey: "editor.templates.freeInputDesc",
+    descriptionDefault: "Пустое поле для ответов ученика",
     bgImage: FreeFormBg,
   },
   {
     type: "int",
-    title: "Интеграции",
-    description: "Miro, Google Drive, Wordwall, Genially, Quizlet, etc",
+    titleKey: "templates.integrations",
+    titleDefault: "Интеграции",
+    descriptionKey: "editor.templates.integrationsDesc",
+    descriptionDefault: "Miro, Google Drive, Wordwall, Genially, Quizlet, etc",
     bgImage: IntTemplateBg,
   },
 ];

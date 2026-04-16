@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { fetchPostJson } from "@/api";
 import {
   EyeFilledIcon,
@@ -16,6 +15,8 @@ import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import ReactInputMask from "react-input-mask";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TLoginInputs = {
   name: string;
@@ -30,7 +31,6 @@ type TConfirmInputs = {
 };
 
 export const RegistrationForm = () => {
-  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -131,16 +131,16 @@ export const RegistrationForm = () => {
       <div>
         <div className="relative mb-16">
           <h3 className="text-center font-extrabold text-2xl mb-2">
-            {t("auth.alreadyHaveAccount")}
+            <T k="auth.alreadyHaveAccount" />
           </h3>
         </div>
         <p className="text-center mb-7 font-medium">
-          {t("auth.registrationLimited")}
+          <T k="auth.registrationLimited" />
         </p>
         <div className="mb-10">
           <div className="flex justify-center items-center gap-2 font-medium text-small">
             <Link href="/login" className="text-[#3F28C6] underline">
-              {t("common.login")}
+              <T k="common.login" />
             </Link>
           </div>
         </div>
@@ -153,29 +153,29 @@ export const RegistrationForm = () => {
       <form key={2} onSubmit={confirmSubmit(onSubmitConfirm)}>
         <div className="relative mb-16">
           <h3 className="text-center font-extrabold text-2xl mb-2">
-            {t("auth.registration")}
+            <T k="auth.registration" />
           </h3>
           <button
             type="button"
             onClick={() => setStep(0)}
             className="text-[#787878] absolute left-0 top-1"
           >
-            {"<-"} {t("common.back")}
+            {"<-"} <T k="common.back" />
           </button>
         </div>
         <p className="text-center mb-7 font-medium">
-          {t("auth.enterPasswordSent")} {getValues()?.login}
+          <T k="auth.enterPasswordSent" /> {getValues()?.login}
         </p>
         <Controller
           name="password"
           control={confirmControl}
           rules={{
-            required: t("auth.passwordRequired"),
+            required: i18n.t("auth.passwordRequired"),
           }}
           render={({ field }) => (
             <Input
               {...field}
-              label={t("auth.password")}
+              label={<T k="auth.password" />}
               type={isVisible ? "text" : "password"}
               className="mb-8"
               radius="sm"
@@ -202,7 +202,7 @@ export const RegistrationForm = () => {
           <Button
             isLoading={loginMutation.isPending}
             type="submit"
-            text={t("common.login")}
+            text={i18n.t("common.login")}
             fullWidth
             mediumHeight
           />
@@ -211,9 +211,9 @@ export const RegistrationForm = () => {
           )}
         </div>
         <div className="flex justify-center items-center gap-2 font-medium text-small">
-          <p>{t("auth.alreadyHaveSubscription")}</p>
+          <p><T k="auth.alreadyHaveSubscription" /></p>
           <Link href="/login" className="text-[#3F28C6] underline">
-            {t("common.login")}
+            <T k="common.login" />
           </Link>
         </div>
       </form>
@@ -222,25 +222,27 @@ export const RegistrationForm = () => {
 
   return (
     <form key={1} onSubmit={handleSubmit(onSubmit)}>
-      <h3 className="text-center font-extrabold text-2xl mb-2">{t("auth.registration")}</h3>
+      <h3 className="text-center font-extrabold text-2xl mb-2">
+        <T k="auth.registration" />
+      </h3>
       <p className="text-center mb-7 font-medium">
-        {t("auth.afterRegistration")}
+        <T k="auth.afterRegistration" />
       </p>
       <Controller
         name="login"
         control={control}
         rules={{
-          required: t("auth.emailRequired"),
+          required: i18n.t("auth.emailRequired"),
           pattern: {
             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-            message: t("auth.invalidEmail"),
+            message: i18n.t("auth.invalidEmail"),
           },
         }}
         render={({ field }) => (
           <Input
             {...field}
             radius="sm"
-            label={t("auth.emailLabel")}
+            label={<T k="auth.emailLabel" />}
             className="mb-5"
             errorMessage={errors?.login?.message}
             isInvalid={!!errors.login?.message}
@@ -250,11 +252,11 @@ export const RegistrationForm = () => {
       <Controller
         name="name"
         control={control}
-        rules={{ required: t("auth.nameRequired") }}
+        rules={{ required: i18n.t("auth.nameRequired") }}
         render={({ field }) => (
           <Input
             {...field}
-            label={t("auth.nameLabel")}
+            label={<T k="auth.nameLabel" />}
             className="mb-5"
             radius="sm"
             errorMessage={errors?.name?.message}
@@ -278,7 +280,7 @@ export const RegistrationForm = () => {
                 {...inputProps}
                 // {...field}
                 radius="sm"
-                label={t("auth.phoneLabel")}
+                label={<T k="auth.phoneLabel" />}
                 className="mb-5"
                 errorMessage={errors?.phone?.message}
                 isInvalid={!!errors.phone?.message}
@@ -291,7 +293,7 @@ export const RegistrationForm = () => {
         name="privacy"
         control={control}
         rules={{
-          required: t("auth.requiredField"),
+          required: i18n.t("auth.requiredField"),
         }}
         render={({ field }) => (
           <Checkbox
@@ -302,25 +304,25 @@ export const RegistrationForm = () => {
             isInvalid={!!errors.privacy?.message}
           >
             <p className="text-small">
-              {t("auth.acceptTerms")}{" "}
+              <T k="auth.acceptTerms" />{" "}
               <a className="text-primary" href="/public_offer" target="_blank">
-                {t("auth.publicOffer")}
+                <T k="auth.publicOffer" />
               </a>{" "}
-              {t("auth.and")}{" "}
+              <T k="auth.and" />{" "}
               <a
                 className="text-primary"
                 href="/privacy_policy"
                 target="_blank"
               >
-                {t("auth.privacyPolicy")}
+                <T k="auth.privacyPolicy" />
               </a>{" "}
-              {t("auth.and")}{" "}
+              <T k="auth.and" />{" "}
               <a
                 className="text-primary"
                 href="/personal_agreement"
                 target="_blank"
               >
-                {t("auth.personalDataConsent")}
+                <T k="auth.personalDataConsent" />
               </a>
             </p>
           </Checkbox>
@@ -340,7 +342,7 @@ export const RegistrationForm = () => {
             isSelected={!!field.value}
           >
             <p className="text-small">
-              {t("auth.newsConsent")}
+              <T k="auth.newsConsent" />
             </p>
           </Checkbox>
         )}
@@ -349,7 +351,7 @@ export const RegistrationForm = () => {
         <Button
           isLoading={mutation.isPending}
           type="submit"
-          text={t("auth.getPassword")}
+          text={i18n.t("auth.getPassword")}
           fullWidth
           mediumHeight
         />
@@ -358,9 +360,9 @@ export const RegistrationForm = () => {
         )}
       </div>
       <div className="flex justify-center items-center gap-2 font-medium text-small">
-        <p>{t("auth.alreadyHaveSubscription")}</p>
+        <p><T k="auth.alreadyHaveSubscription" /></p>
         <Link href="/login" className="text-[#3F28C6] underline">
-          {t("common.login")}
+          <T k="common.login" />
         </Link>
       </div>
     </form>

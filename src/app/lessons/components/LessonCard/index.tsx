@@ -7,7 +7,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useTranslation } from "react-i18next";
 import { TLesson } from "../../types";
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import styles from "./styles.module.css";
@@ -40,6 +39,7 @@ import { TCourse } from "@/app/course/hooks/useCourses";
 import { getImageUrl } from "@/app/editor/helpers";
 import { CreateHomeworkModal } from "../CreateHomeworkModal";
 import { CreateIndividualHomeworkModal } from "../CreateIndividualHomeworkModal";
+import { T } from "@/i18n/T";
 
 type TProps = {
   lesson: TLesson;
@@ -93,7 +93,6 @@ export const LessonCard: FC<TProps> = ({
   alwaysOpenLessonMode,
   onHomeworkCreated,
 }) => {
-  const { t } = useTranslation();
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
   const params = useParams();
@@ -447,14 +446,14 @@ export const LessonCard: FC<TProps> = ({
                       onPressEdit(lesson);
                     }}
                   >
-                    {t("lessons.edit")}
+                    <T k="lessons.edit" />
                   </Button>
                 )}
                 {!!showChangeStatusButton && (
                   <>
                     <div className="py-1 px-2">
                       <p className="mb-2">
-                        {isCourses ? t("lessons.lessonStatusCourse") : t("lessons.lessonStatusLesson")}
+                        {isCourses ? <T k="lessons.lessonStatusCourse" /> : <T k="lessons.lessonStatusLesson" />}
                       </p>
                       <RadioGroup
                         value={lesson?.["lesson_relations.status"]}
@@ -472,14 +471,14 @@ export const LessonCard: FC<TProps> = ({
                         color="default"
                       >
                         <Radio size="sm" value="open">
-                          {t("lessons.statusOpen")}
+                          <T k="lessons.statusOpen" />
                         </Radio>
                         <Radio size="sm" value="close">
-                          {t("lessons.statusClosed")}
+                          <T k="lessons.statusClosed" />
                         </Radio>
                         {!isCourses && (
                           <Radio size="sm" value="complete">
-                            {t("lessons.statusComplete")}
+                            <T k="lessons.statusComplete" />
                           </Radio>
                         )}
                       </RadioGroup>
@@ -500,7 +499,7 @@ export const LessonCard: FC<TProps> = ({
                           }
                         }}
                       >
-                        {t("lessons.deleteFromStudent")}
+                        <T k="lessons.deleteFromStudent" />
                       </Button>
                     )}
                   </>
@@ -516,7 +515,7 @@ export const LessonCard: FC<TProps> = ({
                       onPressAttach(lesson);
                     }}
                   >
-                    {t("lessons.attachToStudent")}
+                    <T k="lessons.attachToStudent" />
                   </Button>
                 )}
                 {!isCourses && !currentCourse && !!onPressAttachToCourse && (
@@ -530,7 +529,7 @@ export const LessonCard: FC<TProps> = ({
                       onPressAttachToCourse(lesson);
                     }}
                   >
-                    {t("lessons.addToCourse")}
+                    <T k="lessons.addToCourse" />
                   </Button>
                 )}
                 {!isCourses && !!copyLesson && !showChangeStatusButton && (
@@ -544,9 +543,7 @@ export const LessonCard: FC<TProps> = ({
                       copyLesson(lesson.id);
                     }}
                   >
-                    {lesson?.user_id === 1
-                      ? t("lessons.addToMyLessons")
-                      : t("lessons.copyLesson")}
+                    {lesson?.user_id === 1 ? <T k="lessons.addToMyLessons" /> : <T k="lessons.copyLesson" />}
                   </Button>
                 )}
                 {!!onPressDelete &&
@@ -563,7 +560,7 @@ export const LessonCard: FC<TProps> = ({
                         onPressDelete(lesson);
                       }}
                     >
-                      {t("common.delete")}
+                      <T k="common.delete" />
                     </Button>
                   )}
               </PopoverContent>
@@ -660,7 +657,7 @@ export const LessonCard: FC<TProps> = ({
                     }
                   }}
                 >
-                  {t("lessons.homeworkLabel")}
+                  <T k="lessons.homeworkLabel" />
                 </Button>
               ) : (
                 <Button
@@ -673,7 +670,7 @@ export const LessonCard: FC<TProps> = ({
                     setCreateHomeworkModalVisible(true);
                   }}
                 >
-                  {t("lessons.createHomework")}
+                  <T k="lessons.createHomework" />
                 </Button>
               )}
             </>
@@ -693,7 +690,7 @@ export const LessonCard: FC<TProps> = ({
                     router.push(`/editor/${courseHomeworkCheck.homeworkId}`);
                   }}
                 >
-                  {t("lessons.homeworkLabel")}
+                  <T k="lessons.homeworkLabel" />
                 </Button>
               ) : (
                 <Button
@@ -706,7 +703,7 @@ export const LessonCard: FC<TProps> = ({
                     setCourseHomeworkModalVisible(true);
                   }}
                 >
-                  {t("lessons.createHomework")}
+                  <T k="lessons.createHomework" />
                 </Button>
               )}
             </>
@@ -749,7 +746,7 @@ export const LessonCard: FC<TProps> = ({
                   }
                 }}
               >
-                {t("lessons.homeworkLabel")}
+                <T k="lessons.homeworkLabel" />
               </Button>
             </>
           ) : null)}
@@ -805,7 +802,7 @@ export const LessonCard: FC<TProps> = ({
                 }
               }}
             >
-              {isStudent || isCourses ? t("lessons.open") : t("lessons.startLesson")}
+              {isStudent || isCourses ? <T k="lessons.open" /> : <T k="lessons.startLesson" />}
             </Button>
           </>
         )}
@@ -819,7 +816,7 @@ export const LessonCard: FC<TProps> = ({
               isDisabled={isDisabled}
               onClick={onPressLesson}
             >
-              {t("lessons.openWithSubscription")}
+              <T k="lessons.openWithSubscription" />
             </Button>
           </>
         )}
@@ -838,13 +835,13 @@ export const LessonCard: FC<TProps> = ({
               style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
               className="mb-4"
             >
-              {t("lessons.chooseTariffToOpenFull")}
+              <T k="lessons.chooseTariffToOpenFull" />
             </p>
             <p
               style={{ fontWeight: "400", textAlign: "center" }}
               className="mb-4 whitespace-pre-line"
             >
-              {t("lessons.tariffsDifferByPeriod")}
+              <T k="lessons.tariffsDifferByPeriod" />
             </p>
 
             <SubscribeTariffs
@@ -876,19 +873,26 @@ export const LessonCard: FC<TProps> = ({
                 style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
                 className="mb-4"
               >
-                Еще не пользовались 2EASY?
+                <T
+                  k="lessons.notUsedYetTitle"
+                  defaultText="Еще не пользовались 2EASY?"
+                />
               </p>
 
               <p
                 style={{ fontWeight: "400", textAlign: "center" }}
                 className="mb-4"
               >
-                Начните с бесплатного пробного периода.
+                <T
+                  k="lessons.startWithTrial"
+                  defaultText="Начните с бесплатного пробного периода."
+                />
               </p>
               <p style={{ fontWeight: "400", textAlign: "center" }}>
-                У вас будет 7 дней доступа к конструктору уроков и части
-                материалов -- это позволит познакомиться с платформой перед
-                оформлением подписки.
+                <T
+                  k="lessons.trialDescription"
+                  defaultText="У вас будет 7 дней доступа к конструктору уроков и части материалов -- это позволит познакомиться с платформой перед оформлением подписки."
+                />
               </p>
             </div>
             <div
@@ -912,13 +916,16 @@ export const LessonCard: FC<TProps> = ({
                   router.push("/registration");
                 }}
               >
-                Начать бесплатно
+                <T k="lessons.startFree" defaultText="Начать бесплатно" />
               </Button>
               <Link
                 href="/login"
                 className="text-[#3F28C6] underline w-[100%] text-center block"
               >
-                У меня уже есть аккаунт
+                <T
+                  k="auth.alreadyHaveAccount"
+                  defaultText="У меня уже есть аккаунт"
+                />
               </Link>
             </div>
           </ModalBody>

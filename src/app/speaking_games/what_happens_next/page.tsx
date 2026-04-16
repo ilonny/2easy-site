@@ -9,10 +9,9 @@ import { useEffect, useMemo, useState } from "react";
 import { data } from "./data";
 import { PageLeftBlock } from "@/components/PageLeftBlock";
 import Link from "next/link";
-import { useTranslation } from "react-i18next";
+import { T } from "@/i18n/T";
 
 export default function GrammarPage() {
-  const { t } = useTranslation();
   const { checkSubscription } = useCheckSubscription();
   const router = useRouter();
   useEffect(() => {
@@ -38,9 +37,9 @@ export default function GrammarPage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
+            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
             <BreadcrumbItem href="/speaking_games">
-              {t("header.speakingGames")}
+              <T k="header.speakingGames" />
             </BreadcrumbItem>
             <BreadcrumbItem href="/speaking_games/what_happens_next">
               What happens next

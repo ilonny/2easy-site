@@ -11,6 +11,7 @@ import ChevronIconDown from "@/assets/icons/chevron_down.svg";
 import Image from "next/image";
 import { TField } from "./types";
 import Close from "@/assets/icons/close.svg";
+import { T } from "@/i18n/T";
 
 type TProps = {
   id: number;
@@ -121,7 +122,9 @@ export const PopoverFields: FC<TProps> = ({
       </PopoverTrigger>
       <PopoverContent>
         <div className="px-1 py-2">
-          <div className="text-small font-bold">Варианты для пропуска:</div>
+          <div className="text-small font-bold">
+            <T k="editor.gapOptions" defaultText="Варианты для пропуска:" />
+          </div>
           {field?.options?.map((option, optionIndex) => {
             return (
               <div
@@ -182,7 +185,9 @@ export const PopoverFields: FC<TProps> = ({
               }, 50);
             }}
           >
-            <p style={{ color: "#3F28C6" }}>+ добавить вариант</p>
+            <p style={{ color: "#3F28C6" }}>
+              <T k="editor.addOptionLower" defaultText="+ добавить вариант" />
+            </p>
           </Button>
         </div>
       </PopoverContent>

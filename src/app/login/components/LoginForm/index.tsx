@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { fetchPostJson } from "@/api";
 import { AuthContext } from "@/auth";
 import { writeToLocalStorage } from "@/auth/utils";
@@ -13,6 +12,8 @@ import { useContext, useState } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { EyeFilledIcon, EyeSlashFilledIcon } from "../EyeIcon";
 import { toast } from "react-toastify";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TLoginInputs = {
   login: string;
@@ -26,7 +27,6 @@ type TStudentForgotInputs = {
 type TTabKey = "teacher" | "student";
 
 export const LoginForm = () => {
-  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -94,13 +94,13 @@ export const LoginForm = () => {
       if (!response) return;
       const res = await response.json();
       if (response.ok && res.success) {
-        toast(t("auth.studentPasswordSent"), { type: "success" });
+        toast(i18n.t("auth.studentPasswordSent"), { type: "success" });
         resetForgotForm();
         setStudentForgotView(false);
         return;
       }
       if (res.code === "STUDENT_NOT_REGISTERED") {
-        setForgotError(t("auth.studentNotRegistered"));
+        setForgotError(i18n.t("auth.studentNotRegistered"));
         return;
       }
       if (res.message) {
@@ -135,7 +135,9 @@ export const LoginForm = () => {
 
   return (
     <div>
-      <h3 className="text-center font-bold text-2xl mb-4">{t("auth.loginTitle")}</h3>
+      <h3 className="text-center font-bold text-2xl mb-4">
+        <T k="auth.loginTitle" />
+      </h3>
       <div className="flex justify-center gap-6 sm:gap-10 mb-8 border-b border-default-200">
         <button
           type="button"
@@ -146,7 +148,7 @@ export const LoginForm = () => {
           }`}
           onClick={() => switchTab("teacher")}
         >
-          {t("auth.loginAsTeacher")}
+          <T k="auth.loginAsTeacher" />
         </button>
         <button
           type="button"
@@ -157,7 +159,7 @@ export const LoginForm = () => {
           }`}
           onClick={() => switchTab("student")}
         >
-          {t("auth.loginAsStudent")}
+          <T k="auth.loginAsStudent" />
         </button>
       </div>
 
@@ -166,12 +168,12 @@ export const LoginForm = () => {
           <Controller
             name="login"
             control={control}
-            rules={{ required: t("auth.emailRequired") }}
+            rules={{ required: i18n.t("auth.emailRequired") }}
             render={({ field }) => (
               <Input
                 {...field}
                 radius="sm"
-                label={t("auth.email")}
+                label={<T k="auth.email" />}
                 className="mb-5"
                 errorMessage={errors?.login?.message}
                 isInvalid={!!errors.login?.message}
@@ -182,12 +184,12 @@ export const LoginForm = () => {
             name="password"
             control={control}
             rules={{
-              required: t("auth.passwordRequired"),
+              required: i18n.t("auth.passwordRequired"),
             }}
             render={({ field }) => (
               <Input
                 {...field}
-                label={t("auth.password")}
+                label={<T k="auth.password" />}
                 type={isVisible ? "text" : "password"}
                 className="mb-8"
                 radius="sm"
@@ -215,7 +217,7 @@ export const LoginForm = () => {
               href="/restore-password"
               className="text-[#3F28C6] underline text-sm"
             >
-              {t("auth.forgotPassword")}
+              <T k="auth.forgotPassword" />
             </Link>
           </div>
           <div className="mb-10">
@@ -227,16 +229,16 @@ export const LoginForm = () => {
               size="lg"
               radius="sm"
             >
-              {t("common.login")}
+              <T k="common.login" />
             </Button>
             {!!responseError && (
               <p className="text-tiny text-danger mt-2">{responseError}</p>
             )}
           </div>
           <div className="flex justify-center items-center gap-2 font-medium text-small">
-            <p>{t("auth.noAccount")}</p>
+            <p><T k="auth.noAccount" /></p>
             <Link href="/registration" className="text-[#3F28C6] underline">
-              {t("header.register")}
+              <T k="header.register" />
             </Link>
           </div>
         </form>
@@ -245,23 +247,23 @@ export const LoginForm = () => {
       {tabKey === "student" && studentForgotView && (
         <form onSubmit={handleForgotSubmit(onForgotSubmit)}>
           <p className="text-center text-small text-default-600 mb-6">
-            {t("auth.studentForgotHint")}
+            <T k="auth.studentForgotHint" />
           </p>
           <Controller
             name="email"
             control={forgotControl}
             rules={{
-              required: t("auth.emailRequired"),
+              required: i18n.t("auth.emailRequired"),
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: t("auth.invalidEmail"),
+                message: i18n.t("auth.invalidEmail"),
               },
             }}
             render={({ field }) => (
               <Input
                 {...field}
                 radius="sm"
-                label={t("auth.email")}
+                label={<T k="auth.email" />}
                 className="mb-6"
                 errorMessage={forgotErrors?.email?.message}
                 isInvalid={!!forgotErrors.email?.message}
@@ -280,7 +282,7 @@ export const LoginForm = () => {
               size="lg"
               radius="sm"
             >
-              {t("auth.restorePasswordSubmit")}
+              <T k="auth.restorePasswordSubmit" />
             </Button>
           </div>
           <div className="flex justify-center">
@@ -289,7 +291,7 @@ export const LoginForm = () => {
               className="text-[#3F28C6] underline text-sm font-medium"
               onClick={backToStudentLogin}
             >
-              {t("auth.backToLogin")}
+              <T k="auth.backToLogin" />
             </button>
           </div>
         </form>
@@ -300,12 +302,12 @@ export const LoginForm = () => {
           <Controller
             name="login"
             control={control}
-            rules={{ required: t("auth.emailRequired") }}
+            rules={{ required: i18n.t("auth.emailRequired") }}
             render={({ field }) => (
               <Input
                 {...field}
                 radius="sm"
-                label={t("auth.email")}
+                label={<T k="auth.email" />}
                 className="mb-5"
                 errorMessage={errors?.login?.message}
                 isInvalid={!!errors.login?.message}
@@ -316,12 +318,12 @@ export const LoginForm = () => {
             name="password"
             control={control}
             rules={{
-              required: t("auth.passwordRequired"),
+              required: i18n.t("auth.passwordRequired"),
             }}
             render={({ field }) => (
               <Input
                 {...field}
-                label={t("auth.password")}
+                label={<T k="auth.password" />}
                 type={isVisible ? "text" : "password"}
                 className="mb-8"
                 radius="sm"
@@ -350,7 +352,7 @@ export const LoginForm = () => {
               className="text-[#3F28C6] underline text-sm"
               onClick={openStudentForgot}
             >
-              {t("auth.forgotPassword")}
+              <T k="auth.forgotPassword" />
             </button>
           </div>
           <div className="mb-10">
@@ -362,14 +364,14 @@ export const LoginForm = () => {
               size="lg"
               radius="sm"
             >
-              {t("common.login")}
+              <T k="common.login" />
             </Button>
             {!!responseError && (
               <p className="text-tiny text-danger mt-2">{responseError}</p>
             )}
           </div>
           <p className="text-center text-small text-default-600 font-medium">
-            {t("auth.studentLoginHint")}
+            <T k="auth.studentLoginHint" />
           </p>
         </form>
       )}

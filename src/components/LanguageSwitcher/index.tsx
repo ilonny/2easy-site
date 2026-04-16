@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { Button, ButtonGroup } from "@nextui-org/react";
+import i18n from "@/i18n/config";
 
 const languages = [
   { code: "ru", label: "RU" },
@@ -9,8 +9,6 @@ const languages = [
 ] as const;
 
 export function LanguageSwitcher() {
-  const { i18n } = useTranslation();
-
   const currentLang = i18n.language?.startsWith("ru") ? "ru" : "en";
 
   const handleChange = (lang: string) => {

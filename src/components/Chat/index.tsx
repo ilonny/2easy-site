@@ -14,7 +14,8 @@ import CloseIcon from "@/assets/icons/close.svg";
 import Image from "next/image";
 import { fetchPostJson } from "@/api";
 import { sleep } from "@/app/editor/hooks/useExAnswer";
-import { useTranslation } from "react-i18next";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TProps = {
   lesson_id: number;
@@ -23,7 +24,6 @@ type TProps = {
 };
 
 export const Chat: FC<TProps> = ({ lesson_id, students }) => {
-  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messageList, setMessageList] = useState([]);
 
@@ -78,7 +78,7 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
         size="lg"
         style={{ minWidth: 300 }}
       >
-        {t("lessons.lessonChat")}
+        <T k="lessons.lessonChat" />
       </Button>
     );
   }
@@ -90,7 +90,6 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
           <ConversationHeader>
             <ConversationHeader.Content
             // info="Active 10 mins ago"
-            // userName={t("lessons.lessonChat")}
             />
             <ConversationHeader.Actions>
               <Button
@@ -99,7 +98,7 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
                 variant="light"
                 onClick={() => setIsOpen(false)}
               >
-                {t("common.close")}
+                <T k="common.close" />
               </Button>
             </ConversationHeader.Actions>
           </ConversationHeader>
@@ -113,7 +112,7 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
             })}
           </MessageList>
           <MessageInput
-            placeholder={t("lessons.typeMessage")}
+            placeholder={i18n.t("lessons.typeMessage")}
             attachButton={false}
             onSend={sendMessage}
           />

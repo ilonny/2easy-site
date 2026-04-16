@@ -20,6 +20,9 @@ import { TestEx } from "../TestEx";
 import { FreeInputFormEx } from "../FreeInputFormEx";
 import { IntEx } from "../Int";
 import { FillGapsNew } from "../FillGapsNew";
+import { T } from "@/i18n/T";
+import Image from "next/image";
+import CloseIcon from "@/assets/icons/close.svg";
 
 type TProps = {
   isVisible: boolean;
@@ -181,6 +184,7 @@ export const EditorRootModal: FC<TProps> = ({
   return (
     <Modal
       isDismissable={false}
+      hideCloseButton
       size="5xl"
       isOpen={isVisible}
       onClose={() => {
@@ -196,6 +200,17 @@ export const EditorRootModal: FC<TProps> = ({
     >
       <ModalContent className="border-0 shadow-2xl">
         <ModalHeader className="relative px-4 pr-12 py-4 sm:px-6 sm:py-5 shrink-0 border-b border-default-200">
+          <button
+            type="button"
+            onClick={() => {
+              restoreStylesRef.current?.();
+              setIsVisible(false);
+            }}
+            className="absolute right-3 top-3 z-50 inline-flex h-9 w-9 items-center justify-center rounded-md bg-white/70 shadow-sm ring-1 ring-black/10 hover:bg-white/90"
+            aria-label="Close"
+          >
+            <Image src={CloseIcon} alt="" width={16} height={16} />
+          </button>
           <div className="flex w-full items-center">
             {!chosenExToEdit?.id ? (
               <button
@@ -204,8 +219,12 @@ export const EditorRootModal: FC<TProps> = ({
                 className="text-small font-light whitespace-nowrap"
                 style={{ cursor: "pointer" }}
               >
-                <span className="sm:hidden">{"<- другие"}</span>
-                <span className="hidden sm:inline">{"<- другие шаблоны"}</span>
+                <span className="sm:hidden">
+                  <T k="editor.backToOtherShort" defaultText="<- другие" />
+                </span>
+                <span className="hidden sm:inline">
+                  <T k="editor.backToOtherTemplates" defaultText="<- другие шаблоны" />
+                </span>
               </button>
             ) : (
               <div />

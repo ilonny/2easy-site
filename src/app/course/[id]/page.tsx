@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useTranslation } from "react-i18next";
 import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { Suspense, useContext, useEffect, useMemo } from "react";
@@ -9,9 +8,9 @@ import { useParams, useSearchParams } from "next/navigation";
 import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 import { useCourses } from "../hooks/useCourses";
 import { AuthContext } from "@/auth";
+import { T } from "@/i18n/T";
 
 function CoursePageContent() {
-  const { t } = useTranslation();
   const params = useParams();
   const searchParams = useSearchParams();
   const { getCourses, courses } = useCourses();
@@ -39,8 +38,8 @@ function CoursePageContent() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
-            <BreadcrumbItem href="/lesson_plans">{t("header.lessonPlans")}</BreadcrumbItem>
+            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
+            <BreadcrumbItem href="/lesson_plans"><T k="header.lessonPlans" /></BreadcrumbItem>
             <BreadcrumbItem>{currentCourse?.title}</BreadcrumbItem>
           </Breadcrumbs>
         </div>

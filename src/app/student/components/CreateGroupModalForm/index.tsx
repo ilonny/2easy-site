@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { checkResponse, fetchPostJson } from "@/api";
 import {
   Button,
@@ -11,6 +10,8 @@ import {
 } from "@nextui-org/react";
 import { FC, useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TProps = {
   isVisible: boolean;
@@ -28,7 +29,6 @@ export const CreateGroupModalForm: FC<TProps> = ({
   setIsVisible,
   onSuccess,
 }) => {
-  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -60,18 +60,18 @@ export const CreateGroupModalForm: FC<TProps> = ({
     <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
       <ModalContent>
         <ModalHeader>
-          <p>{title ? title : t("modals.newGroup")}</p>
+          <p>{title ? title : <T k="modals.newGroup" />}</p>
         </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Controller
               name="name"
               control={control}
-              rules={{ required: t("profile.titleRequired") }}
+              rules={{ required: i18n.t("profile.titleRequired") }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label={t("editor.titleLabel")}
+                  label={<T k="editor.titleLabel" />}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -86,7 +86,7 @@ export const CreateGroupModalForm: FC<TProps> = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label={t("editor.description")}
+                  label={<T k="editor.description" />}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -97,7 +97,7 @@ export const CreateGroupModalForm: FC<TProps> = ({
             />
             <div className="h-5" />
             <Button color="primary" type="submit" className="w-full" size="lg">
-              {t("lessons.createGroup")}
+              <T k="lessons.createGroup" />
             </Button>
             <div className="h-10" />
           </form>

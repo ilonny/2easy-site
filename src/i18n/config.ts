@@ -4,6 +4,8 @@ import ru from "./locales/ru.json";
 import en from "./locales/en.json";
 
 const resources = {
+  // Always ship a working base dictionary.
+  // Remote translations (API) will be merged on top at runtime.
   ru: { translation: ru },
   en: { translation: en },
 };

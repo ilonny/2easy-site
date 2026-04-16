@@ -1,10 +1,11 @@
-import { useTranslation } from "react-i18next";
 import { fetchPostJson } from "@/api";
 import { Button, Input } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TFieldList = {
   old_password: string;
@@ -13,7 +14,6 @@ type TFieldList = {
 };
 
 export const ChangePasswordForm = () => {
-  const { t } = useTranslation();
   const [errorText, setErrorText] = useState("");
   const [responseError, setResponseError] = useState("");
   const router = useRouter();
@@ -53,7 +53,7 @@ export const ChangePasswordForm = () => {
       setErrorText("");
       setResponseError("");
       if (data.new_password !== data.new_password_repeat) {
-        setErrorText(t("auth.passwordsMustMatch"));
+        setErrorText(i18n.t("auth.passwordsMustMatch"));
         return;
       }
       mutation.mutate(data);
@@ -64,18 +64,18 @@ export const ChangePasswordForm = () => {
   return (
     <>
       <h3 className="text-center font-extrabold text-2xl mb-2">
-        {t("profile.changePassword")}
+        <T k="profile.changePassword" />
       </h3>
       <p className="text-center mb-7 font-medium"></p>
       <form key={1} onSubmit={handleSubmit(onSubmit)}>
         <Controller
           name="old_password"
           control={control}
-          rules={{ required: t("auth.enterOldPassword") }}
+          rules={{ required: i18n.t("auth.enterOldPassword") }}
           render={({ field }) => (
             <Input
               {...field}
-              label={t("auth.oldPassword")}
+              label={<T k="auth.oldPassword" />}
               className="mb-5"
               radius="sm"
               errorMessage={errors?.old_password?.message}
@@ -88,11 +88,11 @@ export const ChangePasswordForm = () => {
         <Controller
           name="new_password"
           control={control}
-          rules={{ required: t("auth.enterNewPassword") }}
+          rules={{ required: i18n.t("auth.enterNewPassword") }}
           render={({ field }) => (
             <Input
               {...field}
-              label={t("auth.newPassword")}
+              label={<T k="auth.newPassword" />}
               className="mb-5"
               radius="sm"
               errorMessage={errors?.new_password?.message}
@@ -105,11 +105,11 @@ export const ChangePasswordForm = () => {
         <Controller
           name="new_password_repeat"
           control={control}
-          rules={{ required: t("auth.repeatNewPassword") }}
+          rules={{ required: i18n.t("auth.repeatNewPassword") }}
           render={({ field }) => (
             <Input
               {...field}
-              label={t("auth.repeatNewPassword")}
+              label={<T k="auth.repeatNewPassword" />}
               className="mb-5"
               radius="sm"
               errorMessage={errors?.new_password_repeat?.message || errorText}
@@ -126,7 +126,7 @@ export const ChangePasswordForm = () => {
             isLoading={mutation.isPending}
             size="lg"
           >
-            {t("common.confirm")}
+            <T k="common.confirm" />
           </Button>
         </div>
         {responseError && (

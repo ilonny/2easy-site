@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { checkResponse, fetchPostJson } from "@/api";
 import { TCourse } from "@/app/course/hooks/useCourses";
 import { ImageUpload } from "@/components/ImageUpload";
@@ -18,6 +17,8 @@ import {
 import { Tag, TagInput } from "emblor";
 import { FC, useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TProps = {
   isVisible: boolean;
@@ -39,7 +40,6 @@ export const CreateLessonModalForm: FC<TProps> = ({
   onSuccess,
   currentCourse,
 }) => {
-  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -105,18 +105,18 @@ export const CreateLessonModalForm: FC<TProps> = ({
     >
       <ModalContent>
         <ModalHeader>
-          <p>{title ? title : t("modals.newLesson")}</p>
+          <p>{title ? title : <T k="modals.newLesson" />}</p>
         </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Controller
               name="title"
               control={control}
-              rules={{ required: t("profile.titleRequired") }}
+              rules={{ required: i18n.t("profile.titleRequired") }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label={t("editor.titleLabel")}
+                  label={<T k="editor.titleLabel" />}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -131,7 +131,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
               render={({ field }) => (
                 <Textarea
                   {...field}
-                  label={t("editor.description")}
+                  label={<T k="editor.description" />}
                   minRows={3}
                   className="mb-5"
                   radius="sm"
@@ -147,7 +147,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
               render={({ field }) => (
                 <Select
                   {...field}
-                  label={t("modals.addLessonToGroup")}
+                  label={i18n.t("modals.addLessonToGroup")}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -164,7 +164,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label={t("editor.level")}
+                  label={<T k="editor.level" />}
                   className="mb-5"
                   radius="sm"
                   size="lg"
@@ -176,7 +176,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
             <div className="h-5" />
             <div className="flex gap-5 items-end w-full">
               <ImageUpload
-                label={t("editor.lessonCover")}
+                label={<T k="editor.lessonCover" />}
                 images={images}
                 setImages={setImages}
                 withInternetSearch
@@ -191,7 +191,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
               size="lg"
               isLoading={isLoading}
             >
-              {t("lessons.createLesson")}
+              <T k="lessons.createLesson" />
             </Button>
             <div className="h-10" />
           </form>

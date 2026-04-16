@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import {
   Button,
   Checkbox,
@@ -22,6 +21,8 @@ import {
   sortableHandle,
 } from "react-sortable-hoc";
 import { arrayMoveImmutable } from "array-move";
+import i18n from "@/i18n/config";
+import { T } from "@/i18n/T";
 
 type TProps = {
   field: TField | undefined;
@@ -125,17 +126,23 @@ export const FieldOptionsModal: FC<TProps> = ({
   onClose,
   onSaveOptions,
 }) => {
-  const { t, i18n } = useTranslation();
   const [localOptions, setLocalOptions] = useState<TFieldOption[]>([]);
 
   const DragHandle = useMemo(
-    () => createDragHandle(t("editor.dragToReorder"), t("editor.dragHint")),
-    [t, i18n.language]
+    () =>
+      createDragHandle(
+        i18n.t("editor.dragToReorder", { defaultValue: "Drag to reorder" }),
+        i18n.t("editor.dragHint", { defaultValue: "Drag" }),
+      ),
+    [i18n.language]
   );
   const SortableOptionItem = useMemo(
     () =>
-      createSortableOptionItem(t("editor.deleteOption"), t("common.delete")),
-    [t, i18n.language]
+      createSortableOptionItem(
+        i18n.t("editor.deleteOption", { defaultValue: "Delete option" }),
+        i18n.t("common.delete", { defaultValue: "Delete" }),
+      ),
+    [i18n.language]
   );
 
   useEffect(() => {
@@ -181,7 +188,9 @@ export const FieldOptionsModal: FC<TProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="md">
       <ModalContent>
-        <ModalHeader>{t("editor.optionsForGap")}</ModalHeader>
+        <ModalHeader>
+          <T k="editor.optionsForGap" defaultText="Варианты для пропуска" />
+        </ModalHeader>
         <ModalBody>
           <div className="flex flex-col gap-4">
             {localOptions.length > 0 ? (
@@ -209,16 +218,16 @@ export const FieldOptionsModal: FC<TProps> = ({
               </SortableOptionsList>
             ) : null}
             <Button variant="flat" color="primary" onPress={handleLocalAdd}>
-              {t("editor.addOption")}
+              <T k="editor.addOption" defaultText="+ Добавить вариант" />
             </Button>
           </div>
         </ModalBody>
         <ModalFooter>
           <Button variant="light" onPress={onClose}>
-            {t("common.cancel")}
+            <T k="common.cancel" defaultText="Отмена" />
           </Button>
           <Button color="primary" onPress={handleSave}>
-            {t("common.save")}
+            <T k="common.save" defaultText="Сохранить" />
           </Button>
         </ModalFooter>
       </ModalContent>

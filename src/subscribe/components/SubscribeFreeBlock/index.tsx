@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { Panel } from "@/ui";
 import Bg from "@/assets/images/start_registration_bg.png";
 import CheckedIcon from "@/assets/icons/checked.svg";
@@ -17,9 +16,9 @@ import { RegistrationForm } from "@/app/registration";
 import SubscribeGreenImage from "@/assets/images/subscribe_green.png";
 import CardIcon from "@/assets/icons/card.svg";
 import { useRouter } from "next/navigation";
+import { T } from "@/i18n/T";
 
 export const SubscribeFreeBlock = () => {
-  const { t } = useTranslation();
   const [modalIsOpen, setModalIsOpened] = useState(false);
   const router = useRouter();
   return (
@@ -46,13 +45,13 @@ export const SubscribeFreeBlock = () => {
               color: "#292929",
             }}
           >
-            {t("subscription.notUsedYet")}
+            <T k="subscription.notUsedYet" />
           </p>
           <div className="h-4" />
           <div style={{ maxWidth: 570 }}>
-            <p>{t("subscription.startFreeTrial")}</p>
+            <p><T k="subscription.startFreeTrial" /></p>
             <p className="mt-2">
-              {t("subscription.freeTrialDesc")}
+              <T k="subscription.freeTrialDesc" />
             </p>
           </div>
         </div>
@@ -67,7 +66,7 @@ export const SubscribeFreeBlock = () => {
               }}
             >
               <Image src={CardIcon} alt="card icon" />
-              <p>{t("subscription.noCardRequired")}</p>
+              <p><T k="subscription.noCardRequired" /></p>
             </div>
           </div>
           <Button
@@ -84,7 +83,7 @@ export const SubscribeFreeBlock = () => {
                 letterSpacing: 1,
               }}
             >
-              {t("subscription.startFree")}
+              <T k="subscription.startFree" />
             </span>
           </Button>
         </div>

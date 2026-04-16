@@ -1,10 +1,10 @@
 import { Input, Textarea } from "@nextui-org/react";
-import { FC } from "react";
+import { FC, type ReactNode } from "react";
 
 type TProps = {
   value: string;
   setValue: (val: string) => void;
-  label: string;
+  label: ReactNode;
   isTextarea?: boolean;
   onColorChange?: (color: string) => void;
   selectedColor?: string;
@@ -20,7 +20,7 @@ export const TitleExInput: FC<TProps> = ({
 }) => {
   return (
     <>
-      <p className="font-light mb-2">{label}</p>
+      <div className="font-light mb-2">{label}</div>
       <div>
         {isTextarea ? (
           <Textarea

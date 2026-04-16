@@ -7,10 +7,9 @@ import { SubscribeFreeBlock } from "@/subscribe";
 import { AuthContext } from "@/auth";
 import { useContext } from "react";
 import { SibscribeContext } from "@/subscribe/context";
-import { useTranslation } from "react-i18next";
+import { T } from "@/i18n/T";
 
 export default function StartRegistrationPage() {
-  const { t } = useTranslation();
   const { isAuthorized, authIsLoading } = useContext(AuthContext);
   const { subscription } = useContext(SibscribeContext);
 
@@ -24,8 +23,8 @@ export default function StartRegistrationPage() {
           <div className="h-8 md:h-10 lg:h-14" />
           <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
             <Breadcrumbs>
-            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
-            <BreadcrumbItem>{t("header.subscription")}</BreadcrumbItem>
+            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
+            <BreadcrumbItem><T k="header.subscription" /></BreadcrumbItem>
           </Breadcrumbs>
           </div>
         </div>
@@ -33,18 +32,18 @@ export default function StartRegistrationPage() {
         <div className="h-6 md:h-8 lg:h-10" />
         <div className="flex flex-col items-center w-full max-w-full px-0">
           <h1 className="text-primary font-bold text-xl sm:text-2xl md:text-3xl uppercase text-center px-1">
-            {t("subscription.title")}
+            <T k="subscription.title" />
           </h1>
           <div className="h-3" />
           <h2 className="font-medium text-base sm:text-lg text-center px-2">
-            {t("subscription.page.subtitle")}
+            <T k="subscription.page.subtitle" />
           </h2>
           <div className="h-5" />
           <p className="text-center max-w-[750px] px-2 text-sm sm:text-base leading-relaxed">
-            {t("subscription.page.description1")}
+            <T k="subscription.page.description1" />
             <br />
             <br />
-            {t("subscription.page.description2")}{" "}
+            <T k="subscription.page.description2" />{" "}
             <span className="underline">https://my.cloudpayments.ru</span>
           </p>
           <div className="h-10" />

@@ -1,4 +1,3 @@
-import { useTranslation } from "react-i18next";
 import Image from "next/image";
 import { FC, useMemo, useState } from "react";
 import ReactImageUploading, { ImageListType } from "react-images-uploading";
@@ -19,6 +18,8 @@ import {
 import Close from "@/assets/icons/close.svg";
 import { getImageNameFromPath } from "@/app/editor/components/editor/mappers";
 import { fetchPostJson } from "@/api";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TProps = {
   label?: string;
@@ -52,7 +53,6 @@ export const ImageUpload: FC<TProps> = ({
   whiteBg,
   withInternetSearch = true,
 }) => {
-  const { t } = useTranslation();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<string[]>([]);
@@ -174,8 +174,10 @@ export const ImageUpload: FC<TProps> = ({
                       <p
                         className="text-sm text-center text-[#B7B7B7] leading-snug max-w-[280px]"
                       >
-                        Найти изображение
-                        <br />в интернете
+                        <T
+                          k="editor.findImageOnInternet"
+                          defaultText={"Найти изображение\nв интернете"}
+                        />
                       </p>
                     </div>
                   </>
@@ -205,7 +207,11 @@ export const ImageUpload: FC<TProps> = ({
                             {firstImage
                               ? firstImage.file?.name ||
                                 getImageNameFromPath(firstImage?.path)
-                              : title || t("editor.addImage")}
+                              : title ? (
+                                  title
+                                ) : (
+                                  <T k="editor.addImage" defaultText="Добавить картинку" />
+                                )}
                           </p>
                           <div
                             className="shrink-0"
@@ -281,12 +287,12 @@ export const ImageUpload: FC<TProps> = ({
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                {t("editor.searchPhotos")}
+                <T k="editor.searchPhotos" />
               </ModalHeader>
               <ModalBody>
                 <div className="flex gap-2">
                   <Input
-                    placeholder={t("editor.searchPlaceholder")}
+                    placeholder={i18n.t("editor.searchPlaceholder")}
                     value={searchQuery}
                     onKeyDown={(e) =>
                       e.key === "Enter" && handleInternetSearch()
@@ -298,7 +304,7 @@ export const ImageUpload: FC<TProps> = ({
                     onClick={handleInternetSearch}
                     isLoading={isSearching}
                   >
-                    {t("editor.find")}
+                    <T k="editor.find" />
                   </Button>
                 </div>
 
@@ -338,14 +344,14 @@ export const ImageUpload: FC<TProps> = ({
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onClose}>
-                  Отмена
+                  <T k="common.cancel" defaultText="Отмена" />
                 </Button>
                 <Button
                   color="primary"
                   isDisabled={selectedUrls.length === 0}
                   onPress={onConfirmSelection}
                 >
-                  Добавить ({selectedUrls.length})
+                  <T k="common.add" defaultText="Добавить" /> ({selectedUrls.length})
                 </Button>
               </ModalFooter>
             </>

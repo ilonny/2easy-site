@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
@@ -16,6 +15,8 @@ import { PopoverFields } from "./PopoverFields";
 import styles from "./styles.module.css";
 import { FillGapsInputExView } from "../../view/FillGapsInputExView";
 import InfoIcon from "@/assets/icons/info.svg";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 const defaultValuesStub: TFillGapsInputData = {
   title: "Let's practice!",
@@ -40,7 +41,6 @@ export const FillGapsInput: FC<TProps> = ({
   lastSortIndex,
   currentSortIndexToShift,
 }) => {
-  const { t } = useTranslation();
   const { isLoading, saveFillGapsInputEx, success } = useUploadFillGapsInputEx(
     lastSortIndex,
     currentSortIndexToShift
@@ -259,7 +259,7 @@ export const FillGapsInput: FC<TProps> = ({
       <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
         <div className="w-full md:w-1/2 md:pr-2 min-w-0">
           <TitleExInput
-            label={t("editor.taskTitle")}
+            label={<T k="editor.taskTitle" defaultText="Заголовок задания" />}
             value={data.title}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}
@@ -267,20 +267,22 @@ export const FillGapsInput: FC<TProps> = ({
           />
           <div className="h-4" />
           <TitleExInput
-            label={t("editor.taskSubtitle")}
+            label={<T k="editor.taskSubtitle" defaultText="Подзаголовок задания" />}
             value={data.subtitle}
             setValue={(val) => changeData("subtitle", val)}
           />
           <div className="h-4" />
           <TitleExInput
             isTextarea
-            label={t("editor.description")}
+            label={<T k="editor.description" defaultText="Описание" />}
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
         </div>
         <div className="w-full md:w-1/2 md:pl-2 min-w-0">
-          <p className="font-light mb-2">{t("editor.imageForTask")}</p>
+          <p className="font-light mb-2">
+            <T k="editor.imageForTask" />
+          </p>
           <ImageUpload
             images={images}
             setImages={setImages}
@@ -299,7 +301,10 @@ export const FillGapsInput: FC<TProps> = ({
                   className="text-small text-center max-w-[250px]"
                   style={{ color: "#B7B7B7" }}
                 >
-                  Нажмите на этот блок или перетащите сюда изображения
+                  <T
+                    k="editor.dragImagesHere"
+                    defaultText="Нажмите на этот блок или перетащите сюда изображения"
+                  />
                 </p>
               </div>
             }
@@ -308,9 +313,11 @@ export const FillGapsInput: FC<TProps> = ({
       </div>
       <div className="h-10" />
       <div className="flex items-center gap-2 mb-2">
-        <p className="font-light">{t("editor.enterTaskText")}</p>
+        <p className="font-light">
+          <T k="editor.enterTaskText" />
+        </p>
         <ResponsiveTooltip
-          content={t("editor.fillGapsHintSelect")}
+          content={i18n.t("editor.fillGapsHintSelect")}
           classNames={{
             base: [
               // arrow color
@@ -341,7 +348,9 @@ export const FillGapsInput: FC<TProps> = ({
       </div>
       <div className="h-10" />
       <div>
-        <p className="font-light mb-2">{t("editor.preview")}</p>
+        <p className="font-light mb-2">
+          <T k="editor.preview" />
+        </p>
         <div
           style={{
             border: "1px solid #3F28C6",
@@ -360,7 +369,7 @@ export const FillGapsInput: FC<TProps> = ({
             onClick={() => saveFillGapsInputEx(data)}
             isLoading={isLoading}
           >
-            Сохранить
+            <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
       </div>

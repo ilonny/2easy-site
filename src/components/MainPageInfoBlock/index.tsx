@@ -1,11 +1,11 @@
 import { Button, ButtonProps } from "@nextui-org/react";
-import { FC, useEffect, useRef } from "react";
+import { FC, useEffect, useRef, type ReactNode } from "react";
 
 type TSide = {
   buttons?: ButtonProps[];
   videoSrc?: string;
-  title?: string;
-  description?: string;
+  title?: ReactNode;
+  description?: ReactNode;
 };
 
 type TProps = {

@@ -11,10 +11,10 @@ import Link from "next/link";
 import { SibscribeContext } from "@/subscribe/context";
 import { SubscribeTariffs } from "@/subscribe";
 import bg from "@/assets/images/feedback_bg.svg";
-import { useTranslation } from "react-i18next";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 export default function GrammarPage() {
-  const { t } = useTranslation();
   const { subscription } = useContext(SibscribeContext);
 
   const hasTariff =
@@ -26,8 +26,8 @@ export default function GrammarPage() {
         <div className="">
           <div className="h-14" />
           <Breadcrumbs>
-            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
-            <BreadcrumbItem href="/about_us">{t("header.aboutUs")}</BreadcrumbItem>
+            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
+            <BreadcrumbItem href="/about_us"><T k="header.aboutUs" /></BreadcrumbItem>
           </Breadcrumbs>
         </div>
         <div className="h-10" />
@@ -41,14 +41,16 @@ export default function GrammarPage() {
             fontWeight: 700,
           }}
         >
-          О ПРОЕКТЕ
+          <T k="about.title" defaultText="О ПРОЕКТЕ" />
         </h1>
         <p
           className="max-w-[675px] text-center m-auto"
           style={{ fontSize: 20, fontWeight: 500, lineHeight: "26px" }}
         >
-          2EASY – платформа для тичеров английского, которые преподают взрослым
-          ученикам (16+)
+          <T
+            k="about.subtitle"
+            defaultText="2EASY – платформа для тичеров английского, которые преподают взрослым ученикам (16+)"
+          />
         </p>
         <div className="h-10" />
         <div className="h-10" />
@@ -62,8 +64,12 @@ export default function GrammarPage() {
               >
                 Ekaterina Lobasenko
               </p>
-              <p style={{ fontSize: 14 }}>English teacher</p>
-              <p style={{ fontSize: 14 }}>Co-founder 2EASY</p>
+              <p style={{ fontSize: 14 }}>
+                <T k="about.role.ekaterina" defaultText="English teacher" />
+              </p>
+              <p style={{ fontSize: 14 }}>
+                <T k="about.role.cofounder" defaultText="Co-founder 2EASY" />
+              </p>
               <div className="mt-2">
                 <Link
                   href={"https://www.instagram.com/kat_lobasenko"}
@@ -82,8 +88,12 @@ export default function GrammarPage() {
               >
                 Alina Kiseleva
               </p>
-              <p style={{ fontSize: 14 }}>Web-designer</p>
-              <p style={{ fontSize: 14 }}>Co-founder 2EASY</p>
+              <p style={{ fontSize: 14 }}>
+                <T k="about.role.alina" defaultText="Web-designer" />
+              </p>
+              <p style={{ fontSize: 14 }}>
+                <T k="about.role.cofounder" defaultText="Co-founder 2EASY" />
+              </p>
               <div className="mt-2">
                 <Link
                   href={"https://www.instagram.com/shumnox_"}
@@ -98,18 +108,17 @@ export default function GrammarPage() {
           <div className="h-10" />
           <div className="h-10" />
           <p>
-            Мы верим, что главное в изучении языка – практика и разговор. Этой
-            идеей и вдохновлен наш сайт. Мы создали и собрали в одном месте
-            игры, разговорные материалы и готовые уроки – все то, что поможет
-            разговорить учеников и вывести их на новый уровень, а преподавателям
-            упростит и сократит подготовку к урокам.
+            <T
+              k="about.paragraph1"
+              defaultText="Мы верим, что главное в изучении языка – практика и разговор. Этой идеей и вдохновлен наш сайт. Мы создали и собрали в одном месте игры, разговорные материалы и готовые уроки – все то, что поможет разговорить учеников и вывести их на новый уровень, а преподавателям упростит и сократит подготовку к урокам."
+            />
           </p>
           <div className="h-10" />
           <h1
             color="primary"
             className={"text-primary font-bold text-3xl uppercase text-center"}
           >
-            ЧТО ЕСТЬ НА САЙТЕ?
+            <T k="about.whatsOnSiteTitle" defaultText="ЧТО ЕСТЬ НА САЙТЕ?" />
           </h1>
           <div className="h-10" />
           <p>
@@ -118,36 +127,42 @@ export default function GrammarPage() {
               href={"/lesson_plans"}
               style={{ color: "#5837dc", fontWeight: 600 }}
             >
-              Готовые уроки для разных уровней – от A1 до B2.
+              <T
+                k="about.readyLessonsLink"
+                defaultText="Готовые уроки для разных уровней – от A1 до B2."
+              />
             </Link>
-            Тему для каждого урока мы выбираем по принципу «а о чем нам было бы
-            реально интересно говорить?». Например, есть уроки «Hustle culture»
-            (культуру достигаторства), «Girls run the world» (о self-made
-            женщинах и их проектах), «It’s a spooky time» (страшные истории и
-            мистические случаи) и другие не менее интересные. Во всех уроках
-            есть juicy-лексика и/или актуальная грамматика.
+            <T
+              k="about.readyLessonsText"
+              defaultText="Тему для каждого урока мы выбираем по принципу «а о чем нам было бы реально интересно говорить?». Например, есть уроки «Hustle culture» (культуру достигаторства), «Girls run the world» (о self-made женщинах и их проектах), «It’s a spooky time» (страшные истории и мистические случаи) и другие не менее интересные. Во всех уроках есть juicy-лексика и/или актуальная грамматика."
+            />
           </p>
           <br />
           <p>
-            ⚡ Игры, которые отлично подходят для warm up и вообще любой части
-            занятия. Самые популярные –{" "}
+            <T
+              k="about.gamesPrefix"
+              defaultText="⚡ Игры, которые отлично подходят для warm up и вообще любой части занятия. Самые популярные –"
+            />{" "}
             <Link
               href={"/speaking_games/never_have_i_ever"}
               style={{ color: "#5837dc", fontWeight: 600 }}
             >
               "Never have I ever"
             </Link>
-            (аналог русской «я никогда не») и &nbsp;
+            <T
+              k="about.gamesBetweenLinks"
+              defaultText="(аналог русской «я никогда не») и"
+            />{" "}
             <Link
               href={"/speaking_games/what_happens_next_films"}
               style={{ color: "#5837dc", fontWeight: 600 }}
             >
               "What happens next"
             </Link>
-            &nbsp; по фильмам и сериалам, где ученик смотрит небольшой отрывок
-            из фильма и угадывает, что будет дальше, а потом сверяет свой
-            вариант с тем, что было на самом деле. Такие штуки действительно
-            классно разогревают перед занятием и поднимают настроение.
+            <T
+              k="about.gamesSuffix"
+              defaultText="по фильмам и сериалам, где ученик смотрит небольшой отрывок из фильма и угадывает, что будет дальше, а потом сверяет свой вариант с тем, что было на самом деле. Такие штуки действительно классно разогревают перед занятием и поднимают настроение."
+            />
           </p>
           <br />
           <p>
@@ -156,20 +171,25 @@ export default function GrammarPage() {
               href={"/cards/discussion_cards"}
               style={{ color: "#5837dc", fontWeight: 600 }}
             >
-              Разговорные карты на разные темы
+              <T
+                k="about.cardsLink"
+                defaultText="Разговорные карты на разные темы"
+              />
             </Link>
-            – психология, технологии, работа и бизнес и другие. Нетривиальные
-            вопросы на злободневные темы. Еще есть интересный формат &nbsp;
+            <T
+              k="about.cardsText1"
+              defaultText="– психология, технологии, работа и бизнес и другие. Нетривиальные вопросы на злободневные темы. Еще есть интересный формат"
+            />{" "}
             <Link
               href={"/cards/controversial_statements"}
               style={{ color: "#5837dc", fontWeight: 600 }}
             >
               "Controversial statements"
             </Link>
-            &nbsp; – ученик зачитывает рандомное противоречивое утверждение и
-            приводит аргументы за/против. Например: «a man has to pay for
-            everything on a first date» или «you shouldn’t share your success
-            with friends if their things are not going well».
+            <T
+              k="about.cardsText2"
+              defaultText="– ученик зачитывает рандомное противоречивое утверждение и приводит аргументы за/против. Например: «a man has to pay for everything on a first date» или «you shouldn’t share your success with friends if their things are not going well»."
+            />
           </p>
         </div>
         <div className="max-w-[940px] m-auto">
@@ -178,21 +198,34 @@ export default function GrammarPage() {
           <h3
             className={"text-primary font-bold text-3xl uppercase text-center"}
           >
-            {hasTariff ? "ВАШ ТАРИФ" : "тарифы 2easy"}
+            {hasTariff ? (
+              <T k="subscribe.yourTariff" defaultText="ВАШ ТАРИФ" />
+            ) : (
+              <T k="subscribe.tariffsTitle" defaultText="тарифы 2easy" />
+            )}
           </h3>
           {!hasTariff && (
             <>
               <div className="h-3" />
               <h2 className="font-medium text-lg text-center">
-                Выберите тариф, чтобы оформить подписку на сайт,
+                <T
+                  k="subscribe.chooseTariffPrefix"
+                  defaultText="Выберите тариф, чтобы оформить подписку на сайт,"
+                />
                 <br />
-                или{" "}
+                <T k="common.or" defaultText="или" />{" "}
                 <Link href="/login">
                   <span className="text-primary underline">
-                    войдите в личный кабинет
+                    <T
+                      k="auth.signInToAccount"
+                      defaultText="войдите в личный кабинет"
+                    />
                   </span>
                 </Link>
-                , если у вас уже есть подписка
+                <T
+                  k="subscribe.ifAlreadyHave"
+                  defaultText=", если у вас уже есть подписка"
+                />
               </h2>
               <div className="h-10" />
             </>
@@ -225,9 +258,17 @@ export default function GrammarPage() {
                 className=" text-[30px] lg:text-[42px]"
                 style={{ fontWeight: 700 }}
               >
-                МЫ ВСЕГДА НА СВЯЗИ
+                <T
+                  k="about.weAreInTouchTitle"
+                  defaultText="МЫ ВСЕГДА НА СВЯЗИ"
+                />
               </p>
-              <p>Свяжитесь с нами, если у вас есть вопросы или пожелания</p>
+              <p>
+                <T
+                  k="about.weAreInTouchText"
+                  defaultText="Свяжитесь с нами, если у вас есть вопросы или пожелания"
+                />
+              </p>
             </div>
             <Link href="https://wa.me/+79111898637" target="_blank">
               <Button className="bg-[#0ac028]" size="lg">
@@ -235,7 +276,10 @@ export default function GrammarPage() {
                   className="uppercase"
                   style={{ fontSize: 12, color: "#fff" }}
                 >
-                  Написать в whatsapp
+                  <T
+                    k="about.writeWhatsapp"
+                    defaultText="Написать в whatsapp"
+                  />
                 </p>
               </Button>
             </Link>

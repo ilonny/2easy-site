@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { SibscribeContext } from "@/subscribe/context";
 // import { Button } from "@/ui/Button";
 import {
@@ -14,9 +13,9 @@ import {
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
+import { T } from "@/i18n/T";
 
 export const ProfileSubscribeInformer = () => {
-  const { t } = useTranslation();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const { subscription } = useContext(SibscribeContext);
@@ -32,7 +31,7 @@ export const ProfileSubscribeInformer = () => {
       return (
         <>
           <p className="mb-1">
-            {t("subscriptionStatus.trialUntil")}{" "}
+            <T k="subscriptionStatus.trialUntil" />{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
           <Link
@@ -41,7 +40,7 @@ export const ProfileSubscribeInformer = () => {
             className="underline"
             size="sm"
           >
-            {t("lessons.chooseTariff")}
+            <T k="lessons.chooseTariff" />
           </Link>
         </>
       );
@@ -50,7 +49,7 @@ export const ProfileSubscribeInformer = () => {
       return (
         <>
           <p className="mb-1">
-            {t("subscriptionStatus.activeUntil")}{" "}
+            <T k="subscriptionStatus.activeUntil" />{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
         </>
@@ -60,7 +59,7 @@ export const ProfileSubscribeInformer = () => {
       return (
         <>
           <p className="mb-1">
-            {t("subscriptionStatus.activeUntil")}{" "}
+            <T k="subscriptionStatus.activeUntil" />{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
         </>
@@ -70,7 +69,7 @@ export const ProfileSubscribeInformer = () => {
       return (
         <>
           <p className="mb-1">
-            {t("subscriptionStatus.activeUntil")}{" "}
+            <T k="subscriptionStatus.activeUntil" />{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
         </>
@@ -78,10 +77,12 @@ export const ProfileSubscribeInformer = () => {
     }
     return (
       <div>
-        <p className="font-medium">{t("subscriptionStatus.noActiveSubscription")}</p>
+        <p className="font-medium">
+          <T k="subscriptionStatus.noActiveSubscription" />
+        </p>
         <div className="h-1" />
         <p className="text-small">
-          {t("subscriptionStatus.subscribeToContinue")}
+          <T k="subscriptionStatus.subscribeToContinue" />
         </p>
         <div className="h-3" />
         <Button
@@ -93,11 +94,11 @@ export const ProfileSubscribeInformer = () => {
           }}
           //   size="sm"
         >
-          {t("lessons.chooseTariff")}
+          <T k="lessons.chooseTariff" />
         </Button>
       </div>
     );
-  }, [router, subscription?.dateEnd, subscription?.subscribe_type_id, t]);
+  }, [router, subscription?.dateEnd, subscription?.subscribe_type_id]);
 
   return (
     <div className="w-full max-w-md min-w-0 mx-auto xl:mx-0 shrink-0">

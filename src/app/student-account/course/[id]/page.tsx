@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useTranslation } from "react-i18next";
 import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
@@ -10,10 +9,10 @@ import { withLogin } from "@/auth/hooks/withLogin";
 import { useParams } from "next/navigation";
 import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 import { useCourses } from "@/app/course/hooks/useCourses";
+import { T } from "@/i18n/T";
 
 export default function StudentCoursePage() {
   withLogin();
-  const { t } = useTranslation();
   const params = useParams();
   const { profile, authIsLoading } = useContext(AuthContext);
   const isStudent = profile?.isStudent;
@@ -38,9 +37,9 @@ export default function StudentCoursePage() {
           <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
             <Breadcrumbs>
               <BreadcrumbItem href={`/`}>
-                {t("profile.personalCabinetBreadcrumb")}
+                <T k="profile.personalCabinetBreadcrumb" />
               </BreadcrumbItem>
-              <BreadcrumbItem href="/course">{t("lessons.course")}</BreadcrumbItem>
+              <BreadcrumbItem href="/course"><T k="lessons.course" /></BreadcrumbItem>
             </Breadcrumbs>
           </div>
         </div>

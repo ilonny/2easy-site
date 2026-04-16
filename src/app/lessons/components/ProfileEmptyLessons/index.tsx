@@ -1,10 +1,10 @@
 import Bg from "@/assets/images/wide_bg_empty.png";
 import { Button } from "@nextui-org/react";
-import { FC } from "react";
+import { FC, type ReactNode } from "react";
 
 type TProps = {
-  title: string;
-  buttonTitle: string;
+  title: ReactNode;
+  buttonTitle: ReactNode;
   onButtonPress: () => void;
   hideButton?: boolean;
 };

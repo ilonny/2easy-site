@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { TLesson } from "../../types";
 import {
@@ -14,6 +13,8 @@ import {
 import { FC, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { writeToLocalStorage } from "@/auth/utils";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 const EX_TYPE_TO_TEMPLATE_KEY: Record<string, string> = {
   "text-default": "templates.text",
@@ -36,14 +37,13 @@ const EX_TYPE_TO_TEMPLATE_KEY: Record<string, string> = {
 };
 
 const getExDisplayInfo = (
-  t: (key: string) => string,
   ex: {
     type: string;
     data?: string | Record<string, unknown>;
   },
 ) => {
   const templateKey = EX_TYPE_TO_TEMPLATE_KEY[ex.type];
-  const typeLabel = templateKey ? t(templateKey) : ex.type;
+  const typeLabel = templateKey ? i18n.t(templateKey) : ex.type;
   let title = "";
   let description = "";
   try {
@@ -70,7 +70,6 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
   studentId,
   onSuccess,
 }) => {
-  const { t } = useTranslation();
   const router = useRouter();
   const [chosenExIds, setChosenExIds] = useState<number[]>([]);
   const [createFromScratch, setCreateFromScratch] = useState(false);
@@ -163,20 +162,20 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
     >
       <ModalContent>
         <ModalHeader>
-          <p>{t("lessons.createPersonalHomework")}</p>
+          <p><T k="lessons.createPersonalHomework" /></p>
         </ModalHeader>
         <ModalBody>
           {exListLoading && (
             <div className="flex justify-center py-8">
               <Button isLoading color="primary" variant="flat">
-                {t("modals.homeworkLoadingTasks")}
+                <T k="modals.homeworkLoadingTasks" />
               </Button>
             </div>
           )}
           {!exListLoading && (
             <>
               <p className="text-small text-default-500 mb-2">
-                {t("modals.homeworkIndividualHint")}
+                <T k="modals.homeworkIndividualHint" />
               </p>
               <div
                 role="button"
@@ -195,7 +194,7 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
                   onValueChange={setCreateFromScratch}
                   classNames={{ base: "pointer-events-none" }}
                 >
-                  {t("lessons.createFromScratch")}
+                  <T k="lessons.createFromScratch" />
                 </Checkbox>
               </div>
               {!createFromScratch && sortedExList.length > 0 && (
@@ -204,7 +203,7 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
                     .filter((ex) => ex.type !== "note")
                     .map((ex) => {
                       const { typeLabel, title, description } =
-                        getExDisplayInfo(t, ex);
+                        getExDisplayInfo(ex);
                       const isChosen = chosenExIds.includes(ex.id);
                       return (
                         <div
@@ -254,7 +253,7 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
               )}
               {!createFromScratch && exList.length === 0 && (
                 <p className="text-default-500 mb-4">
-                  {t("modals.homeworkNoTasksHint")}
+                  <T k="modals.homeworkNoTasksHint" />
                 </p>
               )}
               <Button
@@ -264,7 +263,7 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
                 disabled={!canSubmit}
                 onClick={onSubmit}
               >
-                {t("lessons.createHomework")}
+                <T k="lessons.createHomework" />
               </Button>
             </>
           )}

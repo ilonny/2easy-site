@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { checkResponse, fetchPostJson } from "@/api";
 import { ExList } from "@/app/editor/components/view/ExList";
 import { getImageUrl } from "@/app/editor/helpers";
@@ -14,9 +13,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 export default function SharedLessonPage() {
-  const { t } = useTranslation();
   const { checkSubscription, hasSubscription } = useCheckSubscription();
   const { profile } = useContext(AuthContext);
   const router = useRouter();
@@ -102,11 +102,11 @@ export default function SharedLessonPage() {
           className="max-w-[600px] text-center m-auto"
           style={{ fontSize: 20, fontWeight: 500, lineHeight: "26px" }}
         >
-          {t("lessons.sharedLessonIntro")}{" "}
+          <T k="lessons.sharedLessonIntro" />{" "}
           <Link href="/lesson_plans" className="hover:underline text-primary">
-            &quot;{t("editor.myLessons")}&quot;
+            &quot;<T k="editor.myLessons" />&quot;
           </Link>{" "}
-          {t("lessons.sharedLessonIntroEnd")}
+          <T k="lessons.sharedLessonIntroEnd" />
         </p>
         <div className="h-10" />
         <div className="h-10" />
@@ -185,7 +185,7 @@ export default function SharedLessonPage() {
                       window.location.pathname = `/editor/${data.id}`;
                     }}
                   >
-                    {t("lessons.addToMyLessons")}
+                    <T k="lessons.addToMyLessons" />
                   </Button>
                 </div>
               )}

@@ -1,4 +1,5 @@
 import { TTemplate } from "../../create/ChooseTemplateModal/templates";
+import i18n from "@/i18n/config";
 
 export const mapTypeToTitle = (type?: TTemplate["type"]) => {
   if (!type) {
@@ -6,41 +7,59 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
   }
   switch (type) {
     case "image":
-      return "Изображение";
+      return i18n.t("templates.images", { defaultValue: "Изображения" });
     case "text-default":
-      return "Текст";
+      return i18n.t("templates.text", { defaultValue: "Текст" });
     case "text-2-col":
-      return "Текст в две колонки";
+      return i18n.t("templates.text2Col", { defaultValue: "Текст в 2 колонки" });
     case "text-sticker":
-      return "Текст на стикерах";
+      return i18n.t("templates.textSticker", {
+        defaultValue: "Текст на стикерах",
+      });
     case "text-checklist":
-      return "Чек лист";
+      return i18n.t("templates.textChecklist", { defaultValue: "Чек-лист" });
     case "video":
-      return "Видео";
+      return i18n.t("templates.video", { defaultValue: "Видео" });
     case "audio":
-      return "Аудио";
+      return i18n.t("templates.audio", { defaultValue: "Аудио" });
     case "note":
-      return "Заметка";
+      return i18n.t("templates.note", { defaultValue: "Заметка" });
     case "fill-gaps-select":
-      return "Вариант из списка";
+      return i18n.t("templates.fillGapsSelect", {
+        defaultValue: "Выбрать вариант из списка",
+      });
     case "fill-gaps-input":
-      return "Вписать слово в пропуск";
+      return i18n.t("templates.fillGapsInput", {
+        defaultValue: "Вписать слово в пропуск",
+      });
     case "fill-gaps-drag":
-      return "Перетащить слово из списка";
+      return i18n.t("templates.fillGapsDrag", {
+        defaultValue: "Перетащить слово из списка",
+      });
     case "match-word-word":
-      return "Match слова с определением";
+      return i18n.t("templates.matchWordWord", {
+        defaultValue: "Match слова с определением",
+      });
     case "match-word-image":
-      return "Match слова с изображением";
+      return i18n.t("templates.matchWordImage", {
+        defaultValue: "Match слова с изображением",
+      });
     case "match-word-column":
-      return "Расставить слова по колонкам";
+      return i18n.t("templates.matchWordColumn", {
+        defaultValue: "Расставить слова по колонкам",
+      });
     case "test":
-      return "Тест";
+      return i18n.t("templates.test", { defaultValue: "Тест" });
     case "free-input-form":
-      return "Поле для ввода текста";
+      return i18n.t("templates.freeInput", {
+        defaultValue: "Поле для ввода текста",
+      });
     case "int":
-      return "Интеграции";
+      return i18n.t("templates.integrations", { defaultValue: "Интеграции" });
     case "FILL_GAPS_NEW":
-      return "ЗАПОЛНИТЬ ПРОПУСКИ";
+      return i18n.t("templates.fillGapsNew", {
+        defaultValue: "ЗАПОЛНИТЬ ПРОПУСКИ",
+      });
     default:
       return type;
   }

@@ -1,8 +1,8 @@
-import { useTranslation } from "react-i18next";
 import CheckedIcon from "@/assets/icons/checked.svg";
 import LessonOpenIcon from "@/assets/icons/lesson_open.svg";
 import LessonCloseIcon from "@/assets/icons/lesson_close.svg";
 import { Image } from "@nextui-org/react";
+import { T } from "@/i18n/T";
 
 export const LessonStatus = ({
   status,
@@ -11,7 +11,6 @@ export const LessonStatus = ({
   status: "open" | "close" | "complete";
   isCourses?: boolean;
 }) => {
-  const { t } = useTranslation();
   switch (status) {
     case "open":
       return (
@@ -22,7 +21,7 @@ export const LessonStatus = ({
             style={{ borderRadius: 0 }}
           />
           <p className="text-[#3F28C6]" style={{ fontSize: 14 }}>
-            {isCourses ? t("lessons.courseOpen") : t("lessons.lessonOpen")}
+            {isCourses ? <T k="lessons.courseOpen" /> : <T k="lessons.lessonOpen" />}
           </p>
         </div>
       );
@@ -31,7 +30,7 @@ export const LessonStatus = ({
         <div className="flex items-center gap-2">
           <Image src={CheckedIcon.src} alt="checked icon" />
           <p className="text-[#219F59]" style={{ fontSize: 14 }}>
-            {t("lessons.lessonComplete")}
+            <T k="lessons.lessonComplete" />
           </p>
         </div>
       );
@@ -40,7 +39,7 @@ export const LessonStatus = ({
         <div className="flex items-center gap-2">
           <Image src={LessonCloseIcon.src} alt="checked icon" />
           <p className="text-[#C4C4C4]" style={{ fontSize: 14 }}>
-            {isCourses ? t("lessons.courseClosed") : t("lessons.lessonClosed")}
+            {isCourses ? <T k="lessons.courseClosed" /> : <T k="lessons.lessonClosed" />}
           </p>
         </div>
       );

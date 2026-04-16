@@ -2,7 +2,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { RegistrationForm } from "@/app/registration";
 import { AuthContext } from "@/auth";
 import { PaymentForm } from "@/payment";
@@ -23,6 +22,7 @@ import { FC, useCallback, useContext, useState } from "react";
 import { SubscribeFreeBlock } from "../SubscribeFreeBlock";
 import { tariffs } from "./tariffs";
 import { SubscribeCancel } from "../SubscribeCancel";
+import { T } from "@/i18n/T";
 
 type TProps = {
   hideTitle?: boolean;
@@ -37,7 +37,6 @@ export const SubscribeTariffs: FC<TProps> = ({
   hideTariffsTitle = false,
   fullWidth = false,
 }) => {
-  const { t } = useTranslation();
   const { profile } = useContext(AuthContext);
   const { subscription } = useContext(SibscribeContext);
 
@@ -70,11 +69,11 @@ export const SubscribeTariffs: FC<TProps> = ({
       {!hideTitle && (
         <>
           <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-            {t("subscription.title")}
+            <T k="subscription.title" />
           </h1>
           <div className="h-4"></div>
           <p className="max-w-[650px] m-auto text-center font-normal text-[18px]">
-            {t("subscription.description")}
+            <T k="subscription.description" />
           </p>
           <div className="h-4"></div>
         </>
@@ -117,7 +116,7 @@ export const SubscribeTariffs: FC<TProps> = ({
                 fontSize: 14,
               }}
             >
-              {t("subscription.subscriptionBadge")}
+              <T k="subscription.subscriptionBadge" />
             </div>
             <div className="h-4"></div>
             <p
@@ -131,7 +130,7 @@ export const SubscribeTariffs: FC<TProps> = ({
                 lineHeight: "120%",
               }}
             >
-              {t("subscription.tariffIncludes")}
+              <T k="subscription.tariffIncludes" />
             </p>
             <div className="h-4"></div>
             <div
@@ -146,27 +145,27 @@ export const SubscribeTariffs: FC<TProps> = ({
               <div className="flex gap-2 mb-2">
                 <img src={tariff_checked_2.src} />
                 <p className="text-white">
-                  {t("subscription.constructorAccess")}
+                  <T k="subscription.constructorAccess" />
                 </p>
               </div>
               <div className="flex gap-2 mb-2">
                 <img src={tariff_checked_2.src} />
-                <p className="text-white">{t("subscription.allLessonPlans")}</p>
+                <p className="text-white"><T k="subscription.allLessonPlans" /></p>
               </div>
               <div className="flex gap-2 mb-2">
                 <img src={tariff_checked_2.src} />
                 <p className="text-white">
-                  {t("subscription.allGames")}
+                  <T k="subscription.allGames" />
                 </p>
               </div>
               <div className="flex gap-2 mb-2">
                 <img src={tariff_checked_2.src} />
-                <p className="text-white">{t("subscription.newMaterials")}</p>
+                <p className="text-white"><T k="subscription.newMaterials" /></p>
               </div>
               <div className="flex gap-2 mb-2">
                 <img src={tariff_checked_2.src} />
                 <p className="text-white">
-                  {t("subscription.grammarSection")}
+                  <T k="subscription.grammarSection" />
                 </p>
               </div>
             </div>
@@ -187,7 +186,7 @@ export const SubscribeTariffs: FC<TProps> = ({
         {!hideTariffsTitle && (
           <>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-              {hasTariff ? t("subscription.yourTariff") : t("subscription.tariffs")}
+              {hasTariff ? <T k="subscription.yourTariff" /> : <T k="subscription.tariffs" />}
             </h1>
             <div className="h-4" />
           </>
@@ -229,10 +228,10 @@ export const SubscribeTariffs: FC<TProps> = ({
                       }}
                     >
                       {tariff.type === "month"
-                        ? t("subscription.tariffMonth")
+                        ? <T k="subscription.tariffMonth" />
                         : tariff.type === "3month"
-                          ? t("subscription.tariff3Months")
-                          : t("subscription.tariffYear")}
+                          ? <T k="subscription.tariff3Months" />
+                          : <T k="subscription.tariffYear" />}
                     </span>
                   </p>
                 </div>
@@ -270,10 +269,10 @@ export const SubscribeTariffs: FC<TProps> = ({
                       }}
                     >
                       {tariff.type === "month"
-                        ? t("subscription.perMonth")
+                        ? <T k="subscription.perMonth" />
                         : tariff.type === "3month"
-                          ? t("subscription.per3Months")
-                          : t("subscription.perYear")}
+                          ? <T k="subscription.per3Months" />
+                          : <T k="subscription.perYear" />}
                     </span>
                   )}
                 </div>
@@ -297,7 +296,7 @@ export const SubscribeTariffs: FC<TProps> = ({
                           textTransform: "uppercase",
                         }}
                       >
-                        {t("subscription.subscribe")}
+                        <T k="subscription.subscribe" />
                       </span>
                     </Button>
                   </>

@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/auth";
 import { useRouter } from "next/navigation";
 import { FC, useCallback, useContext, useEffect, useState } from "react";
@@ -14,9 +13,9 @@ import {
 import { readFromLocalStorage, writeToLocalStorage } from "@/auth/utils";
 import Close from "@/assets/icons/close.svg";
 import Image from "next/image";
+import { T } from "@/i18n/T";
 
 export const BodyContainer: FC<any> = ({ children }) => {
-  const { t } = useTranslation();
   const { profile } = useContext(AuthContext);
   const router = useRouter();
   const { checkSubscription, subscription } = useCheckSubscription();
@@ -53,7 +52,7 @@ export const BodyContainer: FC<any> = ({ children }) => {
           className="fixed bottom-4 left-4 right-auto z-[4] max-w-[calc(100vw-2rem)] sm:bottom-6 sm:left-6 lg:bottom-[30px] lg:left-[30px]"
         >
           <Button onClick={() => setSurveyModal(true)} color="primary">
-            {t("body.shareOpinion")}
+            <T k="body.shareOpinion" />
           </Button>
           <Image
             onClick={(e) => {
@@ -84,7 +83,7 @@ export const BodyContainer: FC<any> = ({ children }) => {
       >
         <ModalContent>
           <ModalHeader className="justify-center">
-            <p className="text-center">{t("body.shareOpinionModal")}</p>
+            <p className="text-center"><T k="body.shareOpinionModal" /></p>
           </ModalHeader>
           <ModalBody>
             <div className="flex flex-wrap justify-start">

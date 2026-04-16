@@ -11,6 +11,7 @@ import ScriptCloseIcon from "@/assets/icons/audio_script_close_icon.svg";
 import Image from "next/image";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import { T } from "@/i18n/T";
 
 type TProps = {
   data: TAudioData;
@@ -89,7 +90,9 @@ export const AudioExView: FC<TProps> = ({ data, isPreview = false }) => {
               </div>
               {scriptIsVisible && (
                 <div>
-                  <p className="my-2">Скрипт</p>
+                  <p className="my-2">
+                    <T k="editor.audioScript" defaultText="Скрипт" />
+                  </p>
                   <Card
                     radius="md"
                     shadow="none"

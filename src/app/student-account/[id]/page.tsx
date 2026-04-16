@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import {
   BreadcrumbItem,
   Breadcrumbs,
@@ -21,10 +20,11 @@ import { StudentList } from "@/app/student/components/StudentList";
 import Loupe from "@/assets/icons/loupe.svg";
 import { useLessons } from "@/app/lessons/hooks/useLessons";
 import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 export default function StudentAccountPage() {
   withLogin();
-  const { t } = useTranslation();
   const [searchString, setSearchString] = useState("");
   const router = useRouter();
   const studentId = useParams()?.id;
@@ -65,9 +65,9 @@ export default function StudentAccountPage() {
           {isTeacher && (
             <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
               <Breadcrumbs>
-                <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
+                <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
                 <BreadcrumbItem href="/profile?students">
-                  {t("profile.myStudents")}
+                  <T k="profile.myStudents" />
                 </BreadcrumbItem>
                 {!!studentInfo && (
                   <BreadcrumbItem>{studentInfo.name}</BreadcrumbItem>
@@ -79,14 +79,14 @@ export default function StudentAccountPage() {
         <div className="h-6 sm:h-8 md:h-10" />
         <div className="flex flex-col items-center gap-3 w-full min-w-0 px-1">
           <h1 className="text-primary text-center font-bold text-xl sm:text-2xl md:text-3xl uppercase px-2 break-words w-full">
-            {t("students.studentCabinet")}
+            <T k="students.studentCabinet" />
           </h1>
           {isTeacher ? (
             <Link
               href="/profile?students"
               className="text-sm sm:text-base text-primary underline-offset-2 hover:underline self-center sm:self-start"
             >
-              {t("students.allStudents")}
+              <T k="students.allStudents" />
             </Link>
           ) : null}
         </div>
@@ -119,7 +119,7 @@ export default function StudentAccountPage() {
             <Input
               value={searchString}
               onValueChange={setSearchString}
-              placeholder={t("lessons.searchLessons")}
+              placeholder={i18n.t("lessons.searchLessons")}
               size="lg"
               classNames={{ inputWrapper: "bg-white hove min-w-0" }}
               startContent={

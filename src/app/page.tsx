@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/auth";
 import { ContentWrapper } from "@/components";
 import { MainPageInfoBlock } from "@/components/MainPageInfoBlock";
@@ -22,9 +21,9 @@ import ArrowRightIconBlack from "@/assets/icons/arrow_right_black.svg";
 import MainBg from "@/assets/images/main_page_bg.png";
 import MainImage from "@/assets/images/main_image.png";
 import { useCheckSubscription } from "./subscription/helpers";
+import { T } from "@/i18n/T";
 
 export default function Home() {
-  const { t } = useTranslation();
   const { profile, authIsLoading } = useContext(AuthContext);
   const { checkSubscription, hasSubscription } = useCheckSubscription();
   const router = useRouter();
@@ -98,7 +97,7 @@ export default function Home() {
                     style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
                     className="w-[100%] text-center"
                   >
-                    {t("home.startFree")}
+                    <T k="home.startFree" />
                   </p>
                 </div>
               </Button>
@@ -108,7 +107,9 @@ export default function Home() {
                 className="absolute left-[0%] top-[0%] mt-[-14px] ml-[-30px]"
                 style={{ transform: "rotate(-6deg)", pointerEvents: "none" }}
               >
-                <span className="text-white">{t("home.sevenDaysFree")}</span>
+                <span className="text-white">
+                  <T k="home.sevenDaysFree" />
+                </span>
               </Chip>
             </div>
             <Button
@@ -150,7 +151,7 @@ export default function Home() {
                 }}
                 className="w-[100%] text-center"
               >
-                {t("home.loginToAccount")}
+                <T k="home.loginToAccount" />
               </p>
             </Button>
           </div>
@@ -193,7 +194,7 @@ export default function Home() {
                 style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
                 className="text-center w-[100%]"
               >
-                {t("home.tariffs")}
+                <T k="home.tariffs" />
               </p>
             </Button>
           </div>
@@ -207,7 +208,6 @@ export default function Home() {
     onPressRegistration,
     onPressLogin,
     router,
-    t,
   ]);
 
   return (
@@ -233,13 +233,15 @@ export default function Home() {
         <ContentWrapper>
           <div className="h-6 lg:h-14"></div>
           <p className="text-center text-primary font-semibold uppercase">
-            {t("home.teachersJoined")}
+            <T k="home.teachersJoined" />
           </p>
           <div className="h-5"></div>
           <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-            {t("home.mainTitle")}{" "}
-            <span style={{ color: "#3E1BC9" }}>{t("home.mainTitleHighlight")}</span>{" "}
-            {t("home.mainTitleEnd")}
+            <T k="home.mainTitle" />{" "}
+            <span style={{ color: "#3E1BC9" }}>
+              <T k="home.mainTitleHighlight" />
+            </span>{" "}
+            <T k="home.mainTitleEnd" />
           </h1>
           {buttonsContent}
           <div className="h-6 lg:h-14"></div>
@@ -267,14 +269,14 @@ export default function Home() {
             <div className="h-6 lg:h-14"></div>
             <div className="h-6 lg:h-14"></div>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-              {t("home.easyTitle")}
+              <T k="home.easyTitle" />
             </h1>
             <div className="h-6 lg:h-14"></div>
             <MainPageInfoBlock
               sides={[
                 {
-                  title: t("home.createLessonsTitle"),
-                  description: t("home.createLessonsDesc"),
+                  title: <T k="home.createLessonsTitle" />,
+                  description: <T k="home.createLessonsDesc" />,
                 },
                 {
                   videoSrc: "/video/area23.mp4",
@@ -289,8 +291,8 @@ export default function Home() {
                   videoSrc: "/video/Area22222.mp4",
                 },
                 {
-                  title: t("home.lessonPlansTitle"),
-                  description: t("home.lessonPlansDesc"),
+                  title: <T k="home.lessonPlansTitle" />,
+                  description: <T k="home.lessonPlansDesc" />,
                 },
               ]}
             />
@@ -298,8 +300,8 @@ export default function Home() {
             <MainPageInfoBlock
               sides={[
                 {
-                  title: t("home.studentAccountsTitle"),
-                  description: t("home.studentAccountsDesc"),
+                  title: <T k="home.studentAccountsTitle" />,
+                  description: <T k="home.studentAccountsDesc" />,
                 },
                 {
                   videoSrc: "/video/Area333.mp4",
@@ -341,17 +343,17 @@ export default function Home() {
                   style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
                   className="w-[100%] text-center"
                 >
-                  {t("home.startFree")}
+                  <T k="home.startFree" />
                 </p>
               </Button>
             </div>
             <div className="h-6 lg:h-14"></div>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-              {t("home.lessonPlansSection")}
+              <T k="home.lessonPlansSection" />
             </h1>
             <div className="h-2"></div>
             <p className="max-w-[650px] m-auto text-center font-normal text-[18px]">
-              {t("home.lessonPlansSectionDesc")}
+              <T k="home.lessonPlansSectionDesc" />
             </p>
             <div className="h-6 lg:h-14"></div>
             <div className="flex relative">
@@ -381,22 +383,22 @@ export default function Home() {
             <div className="h-6 lg:h-14"></div>
             <div className="h-6 lg:h-14"></div>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-              {t("home.speakingGamesSection")}
+              <T k="home.speakingGamesSection" />
             </h1>
             <div className="h-2"></div>
             <p className="max-w-[650px] m-auto text-center font-normal text-[18px]">
-              {t("home.speakingGamesSectionDesc")}
+              <T k="home.speakingGamesSectionDesc" />
             </p>
             <div className="h-6 lg:h-14"></div>
             <MainPageGamesSlider data={speakingGames} />
             <div className="h-6 lg:h-14"></div>
             <div className="h-6 lg:h-14"></div>
             <h1 className="text-center font-semibold max-w-[800px] text-[24px] lg:text-[38px] m-auto leading-[120%]">
-              {t("home.discussionCardsSection")}
+              <T k="home.discussionCardsSection" />
             </h1>
             <div className="h-2"></div>
             <p className="max-w-[650px] m-auto text-center font-normal text-[18px]">
-              {t("home.discussionCardsSectionDesc")}
+              <T k="home.discussionCardsSectionDesc" />
             </p>
             <div className="h-6 lg:h-14"></div>
             <MainPageGamesSlider data={discussionCards} />
@@ -435,7 +437,7 @@ export default function Home() {
                   style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
                   className="w-[100%] text-center"
                 >
-                  {t("home.startFree")}
+                  <T k="home.startFree" />
                 </p>
               </Button>
             </div>

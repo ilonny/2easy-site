@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { fetchGet } from "@/api";
 import { ContentWrapper } from "@/components";
 import { BreadcrumbItem, Breadcrumbs, Input, Image } from "@nextui-org/react";
@@ -11,9 +10,10 @@ import { useRouter } from "next/navigation";
 import Dino from "@/assets/images/dino.gif";
 import { LessonsList } from "../lessons/components/LessonsList";
 import Loupe from "@/assets/icons/loupe.svg";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 export default function GrammarPage() {
-  const { t } = useTranslation();
   const { checkSubscription, hasSubscription } = useCheckSubscription();
   const router = useRouter();
 
@@ -66,20 +66,20 @@ export default function GrammarPage() {
           <div className="h-8 md:h-10 lg:h-14" />
           <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
             <Breadcrumbs>
-            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
-            <BreadcrumbItem href="/grammar">{t("grammarPage.breadcrumb")}</BreadcrumbItem>
+            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
+            <BreadcrumbItem href="/grammar"><T k="grammarPage.breadcrumb" /></BreadcrumbItem>
           </Breadcrumbs>
           </div>
         </div>
         <div className="h-6 md:h-8 lg:h-10" />
         <div className="h-6 md:h-8 lg:h-10" />
         <h1 className="text-center text-[#3f28c6] font-bold text-[26px] leading-tight px-2 sm:text-[32px] md:text-[38px] lg:text-[44px]">
-          {t("grammarPage.title")}
+          <T k="grammarPage.title" />
         </h1>
         <p
           className="max-w-[600px] text-center m-auto px-2 text-base sm:text-lg md:text-xl font-medium leading-relaxed"
         >
-          {t("grammarPage.subtitle")}
+          <T k="grammarPage.subtitle" />
         </p>
         <div className="h-6 md:h-8 lg:h-10" />
         <div className="h-6 md:h-8 lg:h-10" />
@@ -97,7 +97,7 @@ export default function GrammarPage() {
           <Input
             value={lessonsSearchString}
             onValueChange={setLessonsSearchString}
-            placeholder={t("lessons.searchLessons")}
+            placeholder={i18n.t("lessons.searchLessons")}
             size="lg"
             classNames={{ inputWrapper: "bg-white hove" }}
             startContent={

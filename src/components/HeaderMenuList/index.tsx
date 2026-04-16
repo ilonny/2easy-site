@@ -2,10 +2,9 @@
 
 import { Button } from "@nextui-org/react";
 import Link from "next/link";
-import { useTranslation } from "react-i18next";
+import { T } from "@/i18n/T";
 
 export const HeaderMenuList = () => {
-  const { t } = useTranslation();
   return (
     <div
       className="
@@ -22,32 +21,32 @@ export const HeaderMenuList = () => {
     >
       <Link href="/lesson_plans">
         <Button variant="light" className="font-bold">
-          LESSON PLANS
+          <T k="header.lessonPlans" />
         </Button>
       </Link>
       <Link href="/speaking_games">
         <Button variant="light" className="font-bold">
-          SPEAKING GAMES
+          <T k="header.speakingGames" />
         </Button>
       </Link>
       <Link href="/cards">
         <Button variant="light" className="font-bold">
-          DISCUSSION CARDS
+          <T k="header.discussionCards" />
         </Button>
       </Link>
       <Link href="/grammar">
         <Button variant="light" className="font-bold">
-          GRAMMAR
+          <T k="header.grammar" />
         </Button>
       </Link>
       <Link href="/subscription">
         <Button variant="light" className="font-bold">
-          SUBSCRIPTION
+          <T k="header.subscription" />
         </Button>
       </Link>
       <Link href="/tutorial">
         <Button variant="light" className="font-bold">
-          {t("header.tutorial")}
+          <T k="header.tutorial" />
         </Button>
       </Link>
     </div>

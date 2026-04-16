@@ -1,7 +1,7 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import LinkArrow from "@/assets/icons/link_arrow.svg";
 import Image from "next/image";
+import { T } from "@/i18n/T";
 
 export type TSquare = {
   title?: string;
@@ -16,7 +16,6 @@ type TProps = {
 };
 
 export const GalleryList = (props: TProps) => {
-  const { t } = useTranslation();
   const { data } = props;
   return (
     <div className="flex flex-wrap wrap">
@@ -70,7 +69,7 @@ export const GalleryList = (props: TProps) => {
                   className="flex gap-2 justify-end"
                   style={{ color: "#3f28c6" }}
                 >
-                  <p>{t("lessons.open")}</p>
+                  <p><T k="lessons.open" /></p>
                   <Image
                     src={LinkArrow}
                     alt="arrow"

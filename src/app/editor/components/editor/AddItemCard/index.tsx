@@ -1,5 +1,6 @@
 import { Button, Card, Select } from "@nextui-org/react";
 import { FC, useEffect, useRef, useState } from "react";
+import { T } from "@/i18n/T";
 
 type TProps = {
   onClickAddSelection: () => void;
@@ -109,7 +110,9 @@ export const AddItemCard: FC<TProps> = ({ onClickAddSelection }) => {
           }, 100);
         }}
       >
-        <p style={{ color: "#3F28C6" }}>+ пропустить</p>
+        <p style={{ color: "#3F28C6" }}>
+          <T k="editor.addGap" defaultText="+ пропустить" />
+        </p>
       </Button>
     </Card>
   );

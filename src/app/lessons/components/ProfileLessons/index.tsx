@@ -27,6 +27,7 @@ import { CreateCourseModalForm } from "../CreateCourseModalForm";
 import { TCourse, useCourses } from "@/app/course/hooks/useCourses";
 import { AttachLessonCourseModalForm } from "../AttachLessonCourseModalForm";
 import Link from "next/link";
+import { T } from "@/i18n/T";
 
 const StudentCabinetTabSync = ({
   studentId,
@@ -125,11 +126,17 @@ export const ProfileLessons = (props: TProps) => {
   const { t, i18n } = useTranslation();
   const data = useMemo(() => {
     const title =
-      tabIndex === "userLessons"
-        ? t("lessons.noLessons")
-        : t("lessons.noSavedLessons");
+      tabIndex === "userLessons" ? (
+        <T k="lessons.noLessons" />
+      ) : (
+        <T k="lessons.noSavedLessons" />
+      );
     const buttonTitle =
-      tabIndex === "userLessons" ? t("lessons.createLesson") : t("lessons.chooseLesson");
+      tabIndex === "userLessons" ? (
+        <T k="lessons.createLesson" />
+      ) : (
+        <T k="lessons.chooseLesson" />
+      );
 
     const onButtonPress = () => {
       if (tabIndex === "userLessons") {
@@ -139,7 +146,7 @@ export const ProfileLessons = (props: TProps) => {
     };
 
     return { title, buttonTitle, onButtonPress };
-  }, [tabIndex, t]);
+  }, [tabIndex]);
 
   const onCreateLesson = useCallback(
     (lessonId: number) => {
@@ -396,7 +403,7 @@ export const ProfileLessons = (props: TProps) => {
                     router.push("/lesson_plans");
                   }}
                 >
-                  {t("lessons.myLessons")}
+                  <T k="lessons.myLessons" />
                 </Button>
                 {!!courses.some((c) => c.user_id !== 1) && (
                   <Button
@@ -408,7 +415,7 @@ export const ProfileLessons = (props: TProps) => {
                       router.push("/lesson_plans");
                     }}
                   >
-                    {t("lessons.myCourses")}
+                    <T k="lessons.myCourses" />
                   </Button>
                 )}
                 <Button
@@ -420,7 +427,7 @@ export const ProfileLessons = (props: TProps) => {
                     router.push("/lesson_plans");
                   }}
                 >
-                  {t("lessons.lessons2Easy")}
+                  <T k="lessons.lessons2Easy" />
                 </Button>
                 {courses.some((c) => c.user_id === 1) && (
                   <div className="relative">
@@ -433,7 +440,7 @@ export const ProfileLessons = (props: TProps) => {
                         router.push("/lesson_plans");
                       }}
                     >
-                      {t("lessons.courses2Easy")}
+                      <T k="lessons.courses2Easy" />
                     </Button>
                     <Chip
                       color="success"
@@ -464,7 +471,7 @@ export const ProfileLessons = (props: TProps) => {
                     router.push("/lesson_plans");
                   }}
                 >
-                  {t("lessons.lessons2Easy")}
+                  <T k="lessons.lessons2Easy" />
                 </Button>
                 {courses.some((c) => c.user_id === 1) && (
                   <Button
@@ -476,7 +483,7 @@ export const ProfileLessons = (props: TProps) => {
                       router.push("/lesson_plans");
                     }}
                   >
-                    {t("lessons.courses2Easy")}
+                    <T k="lessons.courses2Easy" />
                   </Button>
                 )}
               </div>
@@ -533,7 +540,7 @@ export const ProfileLessons = (props: TProps) => {
                 router.push(`/student-account/${studentId}`);
               }}
             >
-              {t("lessons.lessonsTab")}
+              <T k="lessons.lessonsTab" />
             </Button>
             <Button
               radius="full"
@@ -544,7 +551,7 @@ export const ProfileLessons = (props: TProps) => {
                 router.push(`/student-account/${studentId}?tab=courses`);
               }}
             >
-              {t("lessons.coursesTab")}
+              <T k="lessons.coursesTab" />
             </Button>
           </div>
         </>
@@ -559,11 +566,11 @@ export const ProfileLessons = (props: TProps) => {
                 style={{ color: "#3F28C6" }}
                 className="shrink-0 text-sm sm:text-base"
               >
-                {t("lessons.backToStudentAccount")}
+                <T k="lessons.backToStudentAccount" />
               </Link>
             ) : (
               <Link href="/lesson_plans" style={{ color: "#3F28C6" }} className="shrink-0 text-sm sm:text-base">
-                {t("lessons.allCourses")}
+                <T k="lessons.allCourses" />
               </Link>
             )}
             <h2 className="font-medium text-xl sm:text-2xl lg:text-[28px] leading-snug max-w-full break-words">
@@ -582,7 +589,7 @@ export const ProfileLessons = (props: TProps) => {
       )}
       {!currentCourse && !filteredLessons.length && (
         <ProfileEmptyLessons
-          title={studentId ? t("lessons.noLessonsShort") : data.title}
+          title={studentId ? <T k="lessons.noLessonsShort" /> : data.title}
           hideButton={!!studentId}
           buttonTitle={data.buttonTitle}
           onButtonPress={data.onButtonPress}

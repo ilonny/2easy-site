@@ -32,6 +32,8 @@ import {
 } from "slate-react";
 import { withHistory } from "slate-history";
 import { Path } from "slate";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 const COLORS = ["#3F28C6", "#111827", "#16A34A", "#DC2626", "#2563EB", "#F59E0B"];
 
@@ -128,9 +130,27 @@ export const FillGapsNew: FC<TProps> = ({
   const modes = useMemo(
     () =>
       [
-        { id: "select", title: "Выбрать", desc: "Ученик выбирает вариант из списка" },
-        { id: "input", title: "Вписать", desc: "Ученик вводит ответ вручную" },
-        { id: "drag", title: "Перетащить", desc: "Перетаскивание из списка" },
+        {
+          id: "select",
+          titleKey: "editor.fillGapsModeSelect",
+          titleDefault: "Выбрать",
+          descKey: "editor.fillGapsModeSelectDesc",
+          descDefault: "Ученик выбирает вариант из списка",
+        },
+        {
+          id: "input",
+          titleKey: "editor.fillGapsModeInput",
+          titleDefault: "Вписать",
+          descKey: "editor.fillGapsModeInputDesc",
+          descDefault: "Ученик вводит ответ вручную",
+        },
+        {
+          id: "drag",
+          titleKey: "editor.fillGapsModeDrag",
+          titleDefault: "Перетащить",
+          descKey: "editor.fillGapsModeDragDesc",
+          descDefault: "Перетаскивание из списка",
+        },
       ] as const,
     [],
   );
@@ -420,7 +440,7 @@ export const FillGapsNew: FC<TProps> = ({
       <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
         <div className="w-full md:w-1/2 md:pr-2 min-w-0">
           <TitleExInput
-            label="Заголовок задания"
+            label={<T k="editor.taskTitle" defaultText="Заголовок задания" />}
             value={data.title || ""}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}
@@ -428,20 +448,22 @@ export const FillGapsNew: FC<TProps> = ({
           />
           <div className="h-4" />
           <TitleExInput
-            label="Подзаголовок"
+            label={<T k="editor.taskSubtitle" defaultText="Подзаголовок" />}
             value={data.subtitle || ""}
             setValue={(val) => changeData("subtitle", val)}
           />
           <div className="h-4" />
           <TitleExInput
             isTextarea
-            label="Описание"
+            label={<T k="editor.description" defaultText="Описание" />}
             value={data.description || ""}
             setValue={(val) => changeData("description", val)}
           />
         </div>
         <div className="w-full md:w-1/2 md:pl-2 min-w-0">
-          <p className="font-light mb-2">Изображение для задания</p>
+          <p className="font-light mb-2">
+            <T k="editor.imageForTask" defaultText="Изображение для задания" />
+          </p>
           <ImageUpload
             images={images || []}
             setImages={setImages}
@@ -460,7 +482,10 @@ export const FillGapsNew: FC<TProps> = ({
                   className="text-small text-center max-w-[250px]"
                   style={{ color: "#B7B7B7" }}
                 >
-                  Нажмите на этот блок или перетащите сюда изображения
+                  <T
+                    k="editor.dragImagesHere"
+                    defaultText="Нажмите на этот блок или перетащите сюда изображения"
+                  />
                 </p>
               </div>
             }
@@ -473,13 +498,20 @@ export const FillGapsNew: FC<TProps> = ({
       <div className={styles.header}>
         <div className={styles.headerTop}>
           <div>
-            <div className={styles.question}>Как вставить пропуск?</div>
+            <div className={styles.question}>
+              <T k="editor.howToInsertGapTitle" defaultText="Как вставить пропуск?" />
+            </div>
             <div className={styles.hint}>
-              Выберите режим выполнения. Его можно менять в любой момент.
+              <T
+                k="editor.howToInsertGapHint"
+                defaultText="Выберите режим выполнения. Его можно менять в любой момент."
+              />
             </div>
             <div className={styles.howto}>
-              1) Напишите текст задания. 2) Выделите фрагмент, который должен стать пропуском. 3)
-              Нажмите «Сделать пропуск» и добавьте варианты ответа.
+              <T
+                k="editor.howToInsertGapSteps"
+                defaultText="1) Напишите текст задания. 2) Выделите фрагмент, который должен стать пропуском. 3) Нажмите «Сделать пропуск» и добавьте варианты ответа."
+              />
             </div>
           </div>
         </div>
@@ -494,8 +526,12 @@ export const FillGapsNew: FC<TProps> = ({
                 className={`${styles.modeCard} ${isActive ? styles.modeCardActive : ""}`}
                 onClick={() => changeData("mode", m.id as TFillGapsNewMode)}
               >
-                <div className={styles.modeTitle}>{m.title}</div>
-                <div className={styles.modeDesc}>{m.desc}</div>
+                <div className={styles.modeTitle}>
+                  <T k={m.titleKey} defaultText={m.titleDefault} />
+                </div>
+                <div className={styles.modeDesc}>
+                  <T k={m.descKey} defaultText={m.descDefault} />
+                </div>
               </button>
             );
           })}
@@ -571,7 +607,9 @@ export const FillGapsNew: FC<TProps> = ({
             <Editable
               renderElement={renderElement}
               renderLeaf={renderLeaf}
-              placeholder="Начните писать..."
+              placeholder={i18n.t("editor.startTyping", {
+                defaultValue: "Начните писать...",
+              })}
               spellCheck
               onPointerDown={(e) => {
                 // iOS Safari: first tap sometimes doesn't focus; focus on "short tap"
@@ -679,7 +717,9 @@ export const FillGapsNew: FC<TProps> = ({
       <div className="h-10" />
 
       <div>
-        <p className="font-light mb-2">Превью</p>
+        <p className="font-light mb-2">
+          <T k="editor.preview" defaultText="Превью" />
+        </p>
         <div style={{ border: "1px solid #3F28C6", borderRadius: 4, background: "#fff" }}>
           <FillGapsNewExView key={`fg-new-preview-${data.mode}`} data={data} isPreview />
         </div>
@@ -692,7 +732,7 @@ export const FillGapsNew: FC<TProps> = ({
             onPress={() => saveFillGapsNewEx(data)}
             isLoading={isLoading}
           >
-            Сохранить
+            <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
       </div>
@@ -715,7 +755,7 @@ export const FillGapsNew: FC<TProps> = ({
                   makeGap();
                 }}
               >
-                Сделать пропуск
+                <T k="editor.makeGap" defaultText="Сделать пропуск" />
               </Button>
             </div>
           </div>,

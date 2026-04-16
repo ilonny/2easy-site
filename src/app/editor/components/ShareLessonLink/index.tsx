@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-import { useTranslation } from "react-i18next";
 import {
   Popover,
   PopoverTrigger,
@@ -12,9 +11,10 @@ import LinkIcon from "@/assets/icons/link.svg";
 import CopyIcon from "@/assets/icons/copy.svg";
 import { useParams } from "next/navigation";
 import { fetchPostJson } from "@/api";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 export const ShareLessonLink = () => {
-  const { t } = useTranslation();
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const lessonId = useParams()?.id;
 
@@ -75,12 +75,12 @@ export const ShareLessonLink = () => {
           endContent={<img src={LinkIcon.src} alt="icon" />}
           variant="light"
         >
-          {t("lessons.shareLessonWithTeacher")}
+          <T k="lessons.shareLessonWithTeacher" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-4 bg-white items-start cursor-pointer">
         <p style={{ whiteSpace: "pre-line" }}>
-          {t("lessons.shareLessonHint")}
+          <T k="lessons.shareLessonHint" />
         </p>
         <br />
         <div
@@ -88,7 +88,7 @@ export const ShareLessonLink = () => {
           onClick={() => {
             navigator.clipboard.writeText(link).then(() => {
               toast.success(
-                t("lessons.lessonLinkCopied"),
+                i18n.t("lessons.lessonLinkCopied"),
               );
               setPopoverIsOpen(false);
             });

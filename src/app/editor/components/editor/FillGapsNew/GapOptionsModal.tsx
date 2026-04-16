@@ -14,6 +14,8 @@ import {
 } from "@nextui-org/react";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TFillGapsNewGap, TFillGapsNewOption } from "./types";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 type TProps = {
   isOpen: boolean;
@@ -175,9 +177,14 @@ export const GapOptionsModal: FC<TProps> = ({
       <ModalContent>
         <ModalHeader className="justify-between items-center">
           <div className="flex flex-col">
-            <div className="font-semibold">Варианты ответа</div>
+            <div className="font-semibold">
+              <T k="editor.gapAnswerOptionsTitle" defaultText="Варианты ответа" />
+            </div>
             <div className="text-small text-gray-500">
-              Отметьте правильные варианты. Минимум один.
+              <T
+                k="editor.gapAnswerOptionsHint"
+                defaultText="Отметьте правильные варианты. Минимум один."
+              />
             </div>
           </div>
           <Chip
@@ -185,7 +192,11 @@ export const GapOptionsModal: FC<TProps> = ({
             color={correctCount > 0 ? "success" : "warning"}
             variant="flat"
           >
-            Правильных: {correctCount}
+            <T
+              k="editor.correctCount"
+              defaultText="Правильных: {{n}}"
+              values={{ n: correctCount }}
+            />
           </Chip>
         </ModalHeader>
         <ModalBody className="overflow-y-auto">
@@ -229,7 +240,15 @@ export const GapOptionsModal: FC<TProps> = ({
                   <Input
                     value={o.value}
                     onValueChange={(val) => setOption(idx, { value: val })}
-                    placeholder={idx === 0 ? "Правильный ответ" : "Вариант ответа"}
+                    placeholder={
+                      idx === 0
+                        ? i18n.t("editor.correctAnswer", {
+                            defaultValue: "Правильный ответ",
+                          })
+                        : i18n.t("editor.answerOption", {
+                            defaultValue: "Вариант ответа",
+                          })
+                    }
                     classNames={{
                       input: "text-[16px] leading-5",
                       inputWrapper: "bg-white",
@@ -238,7 +257,11 @@ export const GapOptionsModal: FC<TProps> = ({
                   />
                   <div className="mt-1 flex items-center justify-between">
                     <div className="text-tiny text-gray-500">
-                      {o.isCorrect ? "Правильный" : "Неправильный"}
+                      {o.isCorrect ? (
+                        <T k="editor.correct" defaultText="Правильный" />
+                      ) : (
+                        <T k="editor.incorrect" defaultText="Неправильный" />
+                      )}
                     </div>
                     {(localGap.options || []).length > 1 && (
                       <Button
@@ -247,7 +270,7 @@ export const GapOptionsModal: FC<TProps> = ({
                         color="danger"
                         onPress={() => removeOption(idx)}
                       >
-                        Удалить
+                        <T k="common.delete" defaultText="Удалить" />
                       </Button>
                     )}
                   </div>
@@ -255,7 +278,7 @@ export const GapOptionsModal: FC<TProps> = ({
               </div>
             ))}
             <Button variant="flat" onPress={addOption} className="w-full">
-              + Добавить вариант
+              <T k="editor.addOption" defaultText="+ Добавить вариант" />
             </Button>
           </div>
         </ModalBody>
@@ -266,7 +289,7 @@ export const GapOptionsModal: FC<TProps> = ({
             onPress={onPressSave}
             className="min-w-[260px]"
           >
-            Сохранить варианты
+            <T k="editor.saveOptions" defaultText="Сохранить варианты" />
           </Button>
         </ModalFooter>
       </ModalContent>

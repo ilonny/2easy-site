@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
@@ -25,6 +24,7 @@ import { TCourse, useCourses } from "@/app/course/hooks/useCourses";
 import { useLessons } from "../../hooks/useLessons";
 import { getImageUrl } from "@/app/editor/helpers";
 import { AuthContext } from "@/auth";
+import { T } from "@/i18n/T";
 
 type TProps = {
   isVisible: boolean;
@@ -50,7 +50,6 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
   chosenLesson,
   openCourseModal,
 }) => {
-  const { t } = useTranslation();
   const { profile } = useContext(AuthContext);
   const {
     control,
@@ -119,7 +118,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
           <>
             <ModalHeader>
               <p>
-                {t("modals.selectCourseForLesson")} {chosenLesson?.title}
+                <T k="modals.selectCourseForLesson" /> {chosenLesson?.title}
               </p>
             </ModalHeader>
             <ModalBody>
@@ -181,7 +180,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
                     );
                   })
                 ) : (
-                  <p className="text-center">{t("lessons.noCourses")}</p>
+                  <p className="text-center"><T k="lessons.noCourses" /></p>
                 )}
                 <div className="h-5" />
               </div>
@@ -195,7 +194,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
                     size="lg"
                     isLoading={isLoading}
                   >
-                    Добавить
+                    <T k="common.add" defaultText="Добавить" />
                   </Button>
                 ) : (
                   <Button
@@ -209,7 +208,7 @@ export const AttachLessonCourseModalForm: FC<TProps> = ({
                       openCourseModal?.();
                     }}
                   >
-                    {t("lessons.createCourse")}
+                    <T k="lessons.createCourse" />
                   </Button>
                 )}
               </div>

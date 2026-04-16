@@ -1,5 +1,4 @@
 "use client";
-import { useTranslation } from "react-i18next";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
@@ -13,6 +12,8 @@ import Close from "@/assets/icons/close.svg";
 import InfoIcon from "@/assets/icons/info.svg";
 import { IntExView } from "../../view/IntExView";
 import { useUploadIntEx } from "../hooks/useUploadIntEx";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 const defaultValuesStub: TIntData = {
   title: "Let's play!",
@@ -36,7 +37,6 @@ export const IntEx: FC<TProps> = ({
   lastSortIndex,
   currentSortIndexToShift,
 }) => {
-  const { t } = useTranslation();
   const { isLoading, saveIntEx, success } = useUploadIntEx(
     lastSortIndex,
     currentSortIndexToShift
@@ -84,7 +84,7 @@ export const IntEx: FC<TProps> = ({
       <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
         <div className="w-full md:w-1/2 md:pr-2 min-w-0">
           <TitleExInput
-            label={t("editor.taskTitle")}
+            label={<T k="editor.taskTitle" defaultText="Заголовок задания" />}
             value={data.title}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}
@@ -92,20 +92,22 @@ export const IntEx: FC<TProps> = ({
           />
           <div className="h-4" />
           <TitleExInput
-            label={t("editor.taskSubtitle")}
+            label={<T k="editor.taskSubtitle" defaultText="Подзаголовок задания" />}
             value={data.subtitle}
             setValue={(val) => changeData("subtitle", val)}
           />
           <div className="h-4" />
           <TitleExInput
             isTextarea
-            label={t("editor.description")}
+            label={<T k="editor.description" defaultText="Описание" />}
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
         </div>
         <div className="w-full md:w-1/2 md:pl-2 min-w-0">
-          <p className="font-light mb-2">{t("editor.imageForTask")}</p>
+          <p className="font-light mb-2">
+            <T k="editor.imageForTask" />
+          </p>
           <ImageUpload
             images={images}
             setImages={setImages}
@@ -124,7 +126,10 @@ export const IntEx: FC<TProps> = ({
                   className="text-small text-center max-w-[250px]"
                   style={{ color: "#B7B7B7" }}
                 >
-                  Нажмите на этот блок или перетащите сюда изображения
+                  <T
+                    k="editor.dragImagesHere"
+                    defaultText="Нажмите на этот блок или перетащите сюда изображения"
+                  />
                 </p>
               </div>
             }
@@ -136,9 +141,12 @@ export const IntEx: FC<TProps> = ({
         <div className="">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <p>{t("editor.embedCode")}</p>
+              <p><T k="editor.embedCode" /></p>
               <ResponsiveTooltip
-                content="Пожалуйста, используйте специальную ссылку для встраивания (embed link / embed code). Её можно найти в разделе 'Поделиться' (Share) на исходном сервисе (должна начинаться с <iframe ...>). Прямая ссылка из браузера может работать некорректно или не отображаться."
+                content={i18n.t("editor.embedCodeHint", {
+                  defaultValue:
+                    "Пожалуйста, используйте специальную ссылку для встраивания (embed link / embed code). Её можно найти в разделе 'Поделиться' (Share) на исходном сервисе (должна начинаться с <iframe ...>). Прямая ссылка из браузера может работать некорректно или не отображаться.",
+                })}
                 classNames={{
                   base: [
                     // arrow color
@@ -167,7 +175,9 @@ export const IntEx: FC<TProps> = ({
       </div>
       <div className="h-10" />
       <div>
-        <p className="font-light mb-2">{t("editor.preview")}</p>
+        <p className="font-light mb-2">
+          <T k="editor.preview" />
+        </p>
         <div
           style={{
             border: "1px solid #3F28C6",
@@ -186,7 +196,7 @@ export const IntEx: FC<TProps> = ({
             onClick={() => saveIntEx(data)}
             isLoading={isLoading}
           >
-            Сохранить
+            <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
       </div>

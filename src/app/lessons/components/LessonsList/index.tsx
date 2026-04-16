@@ -1,6 +1,5 @@
 "use client";
 import { FC, useCallback, useContext, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { TLesson } from "../../types";
 import { LessonCard } from "../LessonCard";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
@@ -18,6 +17,7 @@ import { useCheckSubscription } from "@/app/subscription/helpers";
 import { getImageUrl } from "@/app/editor/helpers";
 import { CopyLessonToModal } from "../CopyLessonToModal";
 import { useCourses } from "@/app/course/hooks/useCourses";
+import { T } from "@/i18n/T";
 
 type TProps = {
   lessons: TLesson[];
@@ -65,7 +65,6 @@ export const LessonsList: FC<TProps> = ({
   studentId,
   alwaysOpenLessonMode,
 }) => {
-  const { t } = useTranslation();
   const { checkSubscription, subscription } = useCheckSubscription();
   const router = useRouter();
   const { profile } = useContext(AuthContext);
@@ -210,7 +209,7 @@ export const LessonsList: FC<TProps> = ({
                   onClick={copyCourse}
                   isLoading={copyCourseIsLoading}
                 >
-                  {t("lessons.addToMyCourses")}
+                  <T k="lessons.addToMyCourses" />
                 </Button>
               )}
             {(!currentCourse ||
@@ -221,7 +220,7 @@ export const LessonsList: FC<TProps> = ({
                 size="lg"
                 onClick={onPressCreate}
               >
-                {currentCourse ? t("lessons.createLessonForCourse") : t("lessons.createLesson")}
+                {currentCourse ? <T k="lessons.createLessonForCourse" /> : <T k="lessons.createLesson" />}
               </Button>
             )}
             {currentCourse && currentCourse?.user_id === profile?.id && (
@@ -235,7 +234,7 @@ export const LessonsList: FC<TProps> = ({
                   setCoursePageEditVisible(true);
                 }}
               >
-                <span style={{ color: "#3F28C6" }}>{t("lessons.editCourse")}</span>
+                <span style={{ color: "#3F28C6" }}><T k="lessons.editCourse" /></span>
               </Button>
             )}
             {currentCourse && currentCourse?.user_id === profile?.id && (
@@ -247,7 +246,7 @@ export const LessonsList: FC<TProps> = ({
                 size="lg"
                 onClick={() => setCoursePageAttachLessonModal(true)}
               >
-                <span style={{ color: "#3F28C6" }}>{t("lessons.attachStudents")}</span>
+                <span style={{ color: "#3F28C6" }}><T k="lessons.attachStudents" /></span>
               </Button>
             )}
             {!currentCourse && (
@@ -259,7 +258,7 @@ export const LessonsList: FC<TProps> = ({
                 size="lg"
                 onClick={onPressCreateCourse}
               >
-                <span style={{ color: "#3F28C6" }}>{t("lessons.createCourse")}</span>
+                <span style={{ color: "#3F28C6" }}><T k="lessons.createCourse" /></span>
               </Button>
             )}
           </div>

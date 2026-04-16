@@ -10,6 +10,7 @@ import { Button, Textarea } from "@nextui-org/react";
 import { useUploadTextStickerEx } from "../hooks/useUploadTextStickerEx";
 import Close from "@/assets/icons/close.svg";
 import { TextStickerExView } from "../../view/TextStickerExView";
+import { T } from "@/i18n/T";
 
 const defaultValuesStub: TTextStickerData = {
   title: "Warm up",
@@ -99,7 +100,7 @@ export const TextSticker: FC<TProps> = ({
       <div className="flex flex-col md:flex-row flex-wrap gap-4 md:gap-0">
         <div className="w-full md:w-1/2 md:pr-2 min-w-0">
           <TitleExInput
-            label="Заголовок задания"
+            label={<T k="editor.taskTitle" defaultText="Заголовок задания" />}
             value={data.title}
             setValue={(val) => changeData("title", val)}
             onColorChange={(color: string) => changeData("titleColor", color)}
@@ -107,20 +108,22 @@ export const TextSticker: FC<TProps> = ({
           />
           <div className="h-4" />
           <TitleExInput
-            label="Подзаголовок задания"
+            label={<T k="editor.taskSubtitle" defaultText="Подзаголовок задания" />}
             value={data.subtitle}
             setValue={(val) => changeData("subtitle", val)}
           />
           <div className="h-4" />
           <TitleExInput
             isTextarea
-            label="Описание"
+            label={<T k="editor.description" defaultText="Описание" />}
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
         </div>
         <div className="w-full md:w-1/2 md:pl-2 min-w-0">
-          <p className="font-light mb-2">Изображение для задания</p>
+          <p className="font-light mb-2">
+            <T k="editor.imageForTask" defaultText="Изображение для задания" />
+          </p>
           <ImageUpload
             images={images}
             setImages={setImages}
@@ -139,14 +142,17 @@ export const TextSticker: FC<TProps> = ({
                   className="text-small text-center max-w-[250px]"
                   style={{ color: "#B7B7B7" }}
                 >
-                  Нажмите на этот блок или перетащите сюда изображения
+                  <T
+                    k="editor.dragImagesHere"
+                    defaultText="Нажмите на этот блок или перетащите сюда изображения"
+                  />
                 </p>
               </div>
             }
           />
           <div className="h-4" />
           <div className="flex items-center gap-4 relative w-[150px] justify-between">
-            <p>Цвет стикеров</p>{" "}
+            <p><T k="editor.stickerBgColor" defaultText="Цвет стикеров" /></p>{" "}
             <div
               style={{
                 width: 20,
@@ -169,7 +175,7 @@ export const TextSticker: FC<TProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-8 relative mt-2 w-[150px] justify-between">
-            <p>Цвет текста</p>{" "}
+            <p><T k="editor.stickerTextColor" defaultText="Цвет текста" /></p>{" "}
             <div
               style={{
                 width: 20,
@@ -200,7 +206,9 @@ export const TextSticker: FC<TProps> = ({
             <div key={index} className="w-full min-w-0">
               <div className="">
                 <div className="flex justify-between items-center">
-                  <p>Стикер {index + 1}</p>
+                  <p>
+                    <T k="editor.stickerN" defaultText="Стикер {{n}}" values={{ n: index + 1 }} />
+                  </p>
                   {data.stickers.length > 1 && (
                     <Button
                       isIconOnly
@@ -232,14 +240,16 @@ export const TextSticker: FC<TProps> = ({
             color="primary"
             className="w-[300px]"
           >
-            + Добавить стикер
+            <T k="editor.addSticker" defaultText="+ Добавить стикер" />
           </Button>
         </div>
       )}
 
       <div className="h-10" />
       <div>
-        <p className="font-light mb-2">Превью</p>
+        <p className="font-light mb-2">
+          <T k="editor.preview" defaultText="Превью" />
+        </p>
         <div
           style={{
             border: "1px solid #3F28C6",
@@ -258,7 +268,7 @@ export const TextSticker: FC<TProps> = ({
             onClick={() => saveTextStickerEx(data)}
             isLoading={isLoading}
           >
-            Сохранить
+            <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
       </div>

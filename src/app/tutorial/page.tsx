@@ -1,7 +1,6 @@
 "use client";
 
 import { ContentWrapper } from "@/components";
-import { useTranslation } from "react-i18next";
 import {
   BreadcrumbItem,
   Breadcrumbs,
@@ -21,9 +20,9 @@ import { ExList } from "../editor/components/view/ExList";
 import { BASE_URL } from "@/api";
 import Dino from "@/assets/images/dino.gif";
 import { getImageUrl } from "../editor/helpers";
+import { T } from "@/i18n/T";
 
 export default function TutorialPage() {
-  const { t } = useTranslation();
   const [activeLessonId, setActiveLessonId] = useState<number | undefined>();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -49,14 +48,14 @@ export default function TutorialPage() {
         <div className="h-10" />
         <div className="h-10" />
         <h1 style={{ fontWeight: "600", fontSize: 38, textAlign: "center" }}>
-          {t("tutorial.hero.titleLine1")}
+          <T k="tutorial.hero.titleLine1" />
           <br />
-          {t("tutorial.hero.titleLine2")}
+          <T k="tutorial.hero.titleLine2" />
         </h1>
         <p className="text-center mt-6" style={{ fontSize: 18 }}>
-          {t("tutorial.hero.subtitleLine1")}
+          <T k="tutorial.hero.subtitleLine1" />
           <br />
-          {t("tutorial.hero.subtitleLine2")}
+          <T k="tutorial.hero.subtitleLine2" />
         </p>
         <div className="h-10" />
         <div className="h-10" />
@@ -89,10 +88,10 @@ export default function TutorialPage() {
                         ...(block.titleStyle ? { ...block.titleStyle } : {}), // Spread outside
                       }}
                     >
-                      {t((block as any).titleKey)}
+                      <T k={(block as any).titleKey} />
                     </p>
                     <p style={{ marginTop: -12, padding: 20 }}>
-                      {t((block as any).descKey)}
+                      <T k={(block as any).descKey} />
                     </p>
                   </div>
                 </div>
@@ -194,7 +193,7 @@ export default function TutorialPage() {
                           setIsVisible(false);
                         }}
                       >
-                        {t("common.close")}
+                        <T k="common.close" />
                       </Button>
                     </div>
                   </div>

@@ -6,7 +6,10 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import CloseIcon from "@/assets/icons/close.svg";
 import { templates, TTemplate } from "./templates";
+import { T } from "@/i18n/T";
 
 type TProps = {
   isVisible: boolean;
@@ -55,10 +58,19 @@ export const ChooseTemplateModal: FC<TProps> = ({
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
       scrollBehavior="outside"
+      hideCloseButton
     >
       <ModalContent>
-        <ModalHeader className="relative px-4 pr-12">
-          <div className="flex w-full items-center">
+        <ModalHeader className="relative px-4 pr-12 py-3 sm:py-4">
+          <button
+            type="button"
+            onClick={() => setIsVisible(false)}
+            className="absolute right-3 top-3 z-50 inline-flex h-9 w-9 items-center justify-center rounded-md bg-white/70 shadow-sm ring-1 ring-black/10 hover:bg-white/90"
+            aria-label="Close"
+          >
+            <Image src={CloseIcon} alt="" width={16} height={16} />
+          </button>
+          <div className="relative z-10 flex shrink-0 items-center">
             {isSubViews ? (
               <button
                 type="button"
@@ -66,17 +78,21 @@ export const ChooseTemplateModal: FC<TProps> = ({
                 className="text-small font-light whitespace-nowrap"
                 style={{ cursor: "pointer" }}
               >
-                <span className="sm:hidden">{"<- все"}</span>
-                <span className="hidden sm:inline">{"<- все шаблоны"}</span>
+                <span className="sm:hidden">
+                  <T k="common.backToAll" defaultText="<- все" />
+                </span>
+                <span className="hidden sm:inline">
+                  <T k="editor.backToAllTemplates" defaultText="<- все шаблоны" />
+                </span>
               </button>
-            ) : (
-              <div />
-            )}
+            ) : null}
           </div>
-          {/* Абсолютный центр, чтобы не съезжало из‑за левой кнопки/крестика */}
-          <p className="pointer-events-none absolute left-1/2 top-1/2 w-[calc(100%-6.5rem)] -translate-x-1/2 -translate-y-1/2 text-center text-base sm:text-lg">
-            Выберите шаблон задания
-          </p>
+          {/* Центр: внешняя зона не ловит клики (крестик), у <T /> — pointer-events-auto для карандаша */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 w-[calc(100%-6.5rem)] -translate-x-1/2 -translate-y-1/2 px-2 text-center text-base sm:text-lg">
+            <span className="pointer-events-auto inline-flex max-w-full justify-center">
+              <T k="editor.chooseTemplateTitle" defaultText="Выберите шаблон задания" />
+            </span>
+          </div>
         </ModalHeader>
         <ModalBody>
           <div className="flex flex-wrap justify-start">
@@ -109,11 +125,14 @@ export const ChooseTemplateModal: FC<TProps> = ({
                       <p
                         className="font-bold text-white uppercase text-base sm:text-lg lg:text-[20px]"
                       >
-                        {template.title}
+                        <T k={template.titleKey} defaultText={template.titleDefault} />
                       </p>
-                      {!!template.description && (
+                      {!!template.descriptionKey && (
                         <p className="text-white text-center max-w-[300px]">
-                          {template.description}
+                          <T
+                            k={template.descriptionKey}
+                            defaultText={template.descriptionDefault}
+                          />
                         </p>
                       )}
                     </Card>

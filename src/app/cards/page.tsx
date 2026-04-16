@@ -6,10 +6,9 @@ import { ContentWrapper } from "@/components";
 import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import { data } from "./data";
 import Link from "next/link";
-import { useTranslation } from "react-i18next";
+import { T } from "@/i18n/T";
 
 export default function GrammarPage() {
-  const { t } = useTranslation();
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
@@ -17,9 +16,9 @@ export default function GrammarPage() {
           <div className="h-8 md:h-10 lg:h-14" />
           <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
             <Breadcrumbs>
-            <BreadcrumbItem href="/">{t("editor.home")}</BreadcrumbItem>
+            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
             <BreadcrumbItem href="/discussion_cards">
-              {t("header.discussionCards")}
+              <T k="header.discussionCards" />
             </BreadcrumbItem>
           </Breadcrumbs>
           </div>
@@ -27,13 +26,12 @@ export default function GrammarPage() {
         <div className="h-6 md:h-8 lg:h-10" />
         <div className="h-6 md:h-8 lg:h-10" />
         <h1 className="text-center text-[#3f28c6] font-bold text-[26px] leading-tight px-2 sm:text-[32px] md:text-[38px] lg:text-[44px]">
-          DISCUSSION CARDS
+          <T k="home.discussionCardsSection" />
         </h1>
         <p
           className="max-w-[675px] text-center m-auto px-3 text-base sm:text-lg md:text-xl font-medium leading-relaxed"
         >
-          Non-trivial questions on topical issues include psychology,
-          technology, work and business, relationships, and many others
+          <T k="home.discussionCardsSectionDesc" />
         </p>
         <div className="h-10" />
         <div className="h-10" />
@@ -59,11 +57,15 @@ export default function GrammarPage() {
                         fontWeight: 700,
                       }}
                     >
-                      {el.title}
+                      <T k={`${el.key}.title`} />
                     </p>
-                    <p>{el.text}</p>
+                    <p>
+                      <T k={`${el.key}.description`} />
+                    </p>
                     <div className="flex justify-end mt-2">
-                      <span style={{ color: "#5837dc" }}>Open</span>
+                      <span style={{ color: "#5837dc" }}>
+                        <T k="games.open" />
+                      </span>
                     </div>
                   </div>
                 </div>

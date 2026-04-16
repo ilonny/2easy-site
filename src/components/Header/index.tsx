@@ -12,13 +12,12 @@ import { HeaderMenuList } from "../HeaderMenuList";
 import MenuIcon from "@/assets/icons/menu.svg";
 import { SideBar } from "../SIdeBar";
 import { LanguageSwitcher } from "../LanguageSwitcher";
-import { useTranslation } from "react-i18next";
+import { T } from "@/i18n/T";
 
 export const Header = () => {
   const pathname = usePathname();
   const { profile, authIsLoading } = useContext(AuthContext);
   const [sidebarIsOpened, setSidebarIsOpened] = useState(false);
-  const { t } = useTranslation();
   if (
     [
       "/login",
@@ -95,7 +94,7 @@ export const Header = () => {
                           >
                             <Button variant="light">
                               <span className="underline">
-                                {t("header.register")}
+                                <T k="header.register" />
                               </span>
                             </Button>
                           </Link>
@@ -105,7 +104,7 @@ export const Header = () => {
                               color="primary"
                               className="sm:px-0 lg:px-10"
                             >
-                              {t("header.login")}
+                              <T k="header.login" />
                             </Button>
                           </Link>
                         </>

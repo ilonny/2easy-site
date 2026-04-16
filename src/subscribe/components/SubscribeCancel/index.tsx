@@ -9,8 +9,9 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { FC, useCallback, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { checkResponse, fetchPostJson } from "@/api";
+import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 const CANCEL_REASON_KEYS = [
   "other_platforms",
@@ -37,7 +38,6 @@ const REASON_KEY_MAP: Record<(typeof CANCEL_REASON_KEYS)[number], string> = {
 export const SubscribeCancel: FC<TProps> = ({
   disableUppercase = false,
 }) => {
-  const { t } = useTranslation();
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [selectedReason, setSelectedReason] = useState<string>("");
@@ -56,12 +56,12 @@ export const SubscribeCancel: FC<TProps> = ({
   const cancelSub = useCallback(async () => {
     setLoading(true);
     const reasonLabel = REASON_KEY_MAP[selectedReason as (typeof CANCEL_REASON_KEYS)[number]]
-      ? t(REASON_KEY_MAP[selectedReason as (typeof CANCEL_REASON_KEYS)[number]])
+      ? i18n.t(REASON_KEY_MAP[selectedReason as (typeof CANCEL_REASON_KEYS)[number]])
       : selectedReason;
     const reasonText =
       selectedReason === "other"
         ? `${reasonLabel}${otherReasonText ? `: ${otherReasonText}` : ""}`
-        : reasonLabel || t("subscriptionCancel.reasonNotSpecified");
+        : reasonLabel || i18n.t("subscriptionCancel.reasonNotSpecified");
 
     const cancelRes = await fetchPostJson({
       path: "/subscription/cancel",
@@ -74,7 +74,7 @@ export const SubscribeCancel: FC<TProps> = ({
     setLoading(false);
     checkResponse(cancel);
     closeModal();
-  }, [selectedReason, otherReasonText, closeModal, t]);
+  }, [selectedReason, otherReasonText, closeModal]);
 
   return (
     <>
@@ -90,7 +90,7 @@ export const SubscribeCancel: FC<TProps> = ({
         }}
         onClick={() => setModalIsOpen(true)}
       >
-        {t("subscriptionCancel.cancelButton")}
+        <T k="subscriptionCancel.cancelButton" />
       </Button>
       <Modal
         size="xl"
@@ -106,13 +106,13 @@ export const SubscribeCancel: FC<TProps> = ({
               className="text-center text-xl font-medium"
               style={{ fontWeight: 500, fontSize: 22 }}
             >
-              {t("subscriptionCancel.shareWhyTitle")}
+              <T k="subscriptionCancel.shareWhyTitle" />
             </p>
             <p
               className="text-center text-default-500"
               style={{ fontSize: 14, marginTop: 4 }}
             >
-              {t("subscriptionCancel.itsValuable")}
+              <T k="subscriptionCancel.itsValuable" />
             </p>
           </ModalHeader>
           <ModalBody className="pb-6">
@@ -130,14 +130,14 @@ export const SubscribeCancel: FC<TProps> = ({
                     label: "font-medium",
                   }}
                 >
-                  {t(REASON_KEY_MAP[key])}
+                  <T k={REASON_KEY_MAP[key]} />
                 </Radio>
               ))}
             </RadioGroup>
 
             {selectedReason === "other" && (
               <Textarea
-                placeholder={t("subscriptionCancel.placeholderOther")}
+                placeholder={i18n.t("subscriptionCancel.placeholderOther")}
                 value={otherReasonText}
                 onValueChange={setOtherReasonText}
                 minRows={3}
@@ -159,14 +159,14 @@ export const SubscribeCancel: FC<TProps> = ({
                   color: "white",
                 }}
               >
-                {t("subscriptionCancel.cancelButton")}
+                <T k="subscriptionCancel.cancelButton" />
               </Button>
               <Button
                 color="primary"
                 onClick={closeModal}
                 className="flex-1"
               >
-                {t("subscriptionCancel.stayWith2Easy")}
+                <T k="subscriptionCancel.stayWith2Easy" />
               </Button>
             </div>
           </ModalBody>
