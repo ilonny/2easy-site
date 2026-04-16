@@ -60,6 +60,12 @@ export const checkResponse = (
   if (skipToast) {
     return;
   }
+  if (res?.success && res?.warning) {
+    toast(res?.message ? res?.message : "Что-то пошло не так", {
+      type: "error",
+    });
+    return;
+  }
   if (!res?.success) {
     toast(res?.message ? res?.message : "Что-то пошло не так", {
       type: "error",

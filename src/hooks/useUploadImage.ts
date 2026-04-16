@@ -1,4 +1,4 @@
-import { fetchPostJson, fetchPostMultipart } from "@/api";
+import { checkResponse, fetchPostJson, fetchPostMultipart } from "@/api";
 import { useCallback, useState } from "react";
 import { ImageListType } from "react-images-uploading";
 
@@ -11,7 +11,9 @@ export const useUploadImage = () => {
         data: images,
         isSecure: true,
       });
-      return await res.json();
+      const json = await res.json();
+      checkResponse(json);
+      return json;
     }
 
     const fd = new FormData();
@@ -24,7 +26,9 @@ export const useUploadImage = () => {
       data: fd,
       isSecure: true,
     });
-    return await res.json();
+    const json = await res.json();
+    checkResponse(json);
+    return json;
   }, []);
 
   return { isLoading, uploadImages };
