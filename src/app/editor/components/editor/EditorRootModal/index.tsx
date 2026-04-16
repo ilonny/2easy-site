@@ -195,19 +195,27 @@ export const EditorRootModal: FC<TProps> = ({
       }}
     >
       <ModalContent className="border-0 shadow-2xl">
-        <ModalHeader className="justify-center px-4 py-4 sm:px-6 sm:py-5 shrink-0 border-b border-default-200">
-          <div className="text-base sm:text-lg font-semibold px-2 text-center max-w-full">
-            {mapTypeToTitle(type)}
+        <ModalHeader className="relative px-4 pr-12 py-4 sm:px-6 sm:py-5 shrink-0 border-b border-default-200">
+          <div className="flex w-full items-center">
+            {!chosenExToEdit?.id ? (
+              <button
+                type="button"
+                onClick={() => onBack && onBack()}
+                className="text-small font-light whitespace-nowrap"
+                style={{ cursor: "pointer" }}
+              >
+                <span className="sm:hidden">{"<- другие"}</span>
+                <span className="hidden sm:inline">{"<- другие шаблоны"}</span>
+              </button>
+            ) : (
+              <div />
+            )}
           </div>
-          {!chosenExToEdit?.id && (
-            <div
-              onClick={() => onBack && onBack()}
-              className="font-light absolute left-3 top-4 sm:left-4 sm:top-5 text-small"
-              style={{ cursor: "pointer" }}
-            >
-              {"<- другие шаблоны"}
-            </div>
-          )}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 w-[calc(100%-6.5rem)] -translate-x-1/2 -translate-y-1/2 px-2 text-center">
+            <p className="text-base sm:text-lg font-semibold truncate">
+              {mapTypeToTitle(type)}
+            </p>
+          </div>
         </ModalHeader>
         <ModalBody className="overflow-y-auto overscroll-contain px-4 py-4 sm:px-8 sm:py-6 gap-6 flex flex-col">
           {!!EditorComponent && (

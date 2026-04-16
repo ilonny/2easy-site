@@ -57,17 +57,26 @@ export const ChooseTemplateModal: FC<TProps> = ({
       scrollBehavior="outside"
     >
       <ModalContent>
-        <ModalHeader className="justify-center">
-          <p className="text-center">Выберите шаблон задания</p>
-          {isSubViews && (
-            <div
-              onClick={onBack}
-              className="font-light absolute left-4 text-small top-5"
-              style={{ cursor: "pointer" }}
-            >
-              {"<- все шаблоны"}
-            </div>
-          )}
+        <ModalHeader className="relative px-4 pr-12">
+          <div className="flex w-full items-center">
+            {isSubViews ? (
+              <button
+                type="button"
+                onClick={onBack}
+                className="text-small font-light whitespace-nowrap"
+                style={{ cursor: "pointer" }}
+              >
+                <span className="sm:hidden">{"<- все"}</span>
+                <span className="hidden sm:inline">{"<- все шаблоны"}</span>
+              </button>
+            ) : (
+              <div />
+            )}
+          </div>
+          {/* Абсолютный центр, чтобы не съезжало из‑за левой кнопки/крестика */}
+          <p className="pointer-events-none absolute left-1/2 top-1/2 w-[calc(100%-6.5rem)] -translate-x-1/2 -translate-y-1/2 text-center text-base sm:text-lg">
+            Выберите шаблон задания
+          </p>
         </ModalHeader>
         <ModalBody>
           <div className="flex flex-wrap justify-start">
