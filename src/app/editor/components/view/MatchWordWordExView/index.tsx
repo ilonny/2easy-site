@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { Card } from "@nextui-org/react";
-import { TMatch, TMatchWordWordData } from "../../editor/MatchWordWord/types";
+import { TMatchWordWordData } from "../../editor/MatchWordWord/types";
 import { AuthContext } from "@/auth";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
@@ -34,7 +34,7 @@ type TProps = {
 
 export const MatchWordWordExView: FC<TProps> = ({
   data,
-  isPreview = false,
+  isPreview: _isPreview = false,
   ...rest
 }) => {
   const { profile } = useContext(AuthContext);
@@ -45,7 +45,7 @@ export const MatchWordWordExView: FC<TProps> = ({
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const ex_id = data?.id;
 
-  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+  const { writeAnswer, answers, getAnswers } = useExAnswer({
     student_id,
     lesson_id,
     ex_id,
@@ -54,12 +54,11 @@ export const MatchWordWordExView: FC<TProps> = ({
     isPresentationMode: rest?.isPresentationMode,
   });
 
-  const [selectedMatchId, setSelectedMatchId] = useState<string | undefined>(
-    undefined
-  );
+  const [selectedLeftId, setSelectedLeftId] = useState<string | number | undefined>(undefined);
+  const [selectedRightId, setSelectedRightId] = useState<string | number | undefined>(undefined);
 
   const [incorrectId, setIncorrectId] = useState<string | undefined>(undefined);
-  const [correctIds, setCorrectIds] = useState<number[]>([]);
+  const [correctIds, setCorrectIds] = useState<Array<string | number>>([]);
   const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
 
   const sortOrderRef = useRef<{
@@ -131,41 +130,70 @@ export const MatchWordWordExView: FC<TProps> = ({
       });
   }, [data.matches, correctIds, incorrectIdsMap]);
 
-  const onClickAnswer = useCallback(
-    (id: string) => {
-      const m = sortedMatches.find((m) => m?.correctId === id);
-      const selectedM = sortedMatches.find((m) => m?.id === selectedMatchId);
+  const showIncorrect = useCallback((leftId: string | number, selectedValue: string | undefined) => {
+    setIncorrectId(String(leftId));
+    setTimeout(() => {
+      setIncorrectId(undefined);
+    }, 2000);
+    setIncorrectIdsMap((incorrectIds) => {
+      return {
+        ...incorrectIds,
+        [leftId]: selectedValue,
+      };
+    });
+  }, []);
 
-      const isCorrect = selectedM?.id === id;
+  const onClickLeft = useCallback(
+    (leftId: string | number) => {
+      if (selectedRightId === undefined) {
+        setSelectedLeftId(leftId);
+        return;
+      }
+
+      const rightM = sortedMatches.find((m) => m?.correctId === selectedRightId);
+      const isCorrect = leftId === selectedRightId;
 
       if (isCorrect) {
-        setCorrectIds((ids) => ids.concat(id));
+        setCorrectIds((ids) => ids.concat(leftId));
       } else {
-        if (!selectedM) {
-          return
-        }
-        setIncorrectId(m?.id);
-        setTimeout(() => {
-          setIncorrectId(undefined);
-        }, 2000);
-        setIncorrectIdsMap((incorrectIds) => {
-          return {
-            ...incorrectIds,
-            [selectedM.id]: m?.correctValue,
-          };
-        });
+        showIncorrect(leftId, rightM?.correctValue);
       }
+
+      setSelectedLeftId(undefined);
+      setSelectedRightId(undefined);
     },
-    [sortedMatches, selectedMatchId]
+    [selectedRightId, sortedMatches, showIncorrect]
+  );
+
+  const onClickRight = useCallback(
+    (rightId: string | number) => {
+      if (selectedLeftId === undefined) {
+        setSelectedRightId(rightId);
+        return;
+      }
+
+      const rightM = sortedMatches.find((m) => m?.correctId === rightId);
+      const isCorrect = selectedLeftId === rightId;
+
+      if (isCorrect) {
+        setCorrectIds((ids) => ids.concat(selectedLeftId));
+      } else {
+        showIncorrect(selectedLeftId, rightM?.correctValue);
+      }
+
+      setSelectedLeftId(undefined);
+      setSelectedRightId(undefined);
+    },
+    [selectedLeftId, sortedMatches, showIncorrect]
   );
 
   useEffect(() => {
     if (student_id) {
-      getAnswers(true).then((a) => {
+      getAnswers(true).then(() => {
         try {
           const parsedIds = JSON.parse(answers[data.id]?.answer);
           setCorrectIds(parsedIds?.correctIds);
-        } catch (err) {}
+        } catch {}
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -179,7 +207,7 @@ export const MatchWordWordExView: FC<TProps> = ({
       const parsedIds = JSON.parse(answers[data.id]?.answer);
       setCorrectIds(parsedIds?.correctIds);
       setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
-    } catch (err) {}
+    } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher]);
 
@@ -229,7 +257,7 @@ export const MatchWordWordExView: FC<TProps> = ({
               bgColor = "#E9FEE8";
             }
 
-            if (m.id === incorrectId) {
+            if (String(m.id) === incorrectId) {
               bgColor = "#FBE6E5";
             }
 
@@ -240,7 +268,7 @@ export const MatchWordWordExView: FC<TProps> = ({
               >
                 <div
                   className="w-1/2 min-w-0 basis-1/2 radius-10"
-                  onClick={() => setSelectedMatchId(m.id)}
+                  onClick={() => onClickLeft(m.id)}
                 >
                   <Card
                     shadow="none"
@@ -248,8 +276,15 @@ export const MatchWordWordExView: FC<TProps> = ({
                     className="p-2 sm:p-3 md:p-4 h-full min-h-[3.5rem] text-sm sm:text-base md:text-[18px] font-bold [overflow-wrap:anywhere] break-words"
                     style={{
                       cursor: "pointer",
+                      background:
+                        !rest.isPresentationMode &&
+                        (profile?.role_id === 2 || profile?.role_id === 1) &&
+                        selectedRightId !== undefined &&
+                        m.id === selectedRightId
+                          ? "#E9FEE8"
+                          : undefined,
                       border:
-                        m.id === selectedMatchId
+                        m.id === selectedLeftId
                           ? "2px solid #3f28c6"
                           : "2px solid transparent",
                       whiteSpace: "break-spaces",
@@ -261,7 +296,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                 </div>
                 <div
                   className="w-1/2 min-w-0 basis-1/2 radius-10"
-                  onClick={() => onClickAnswer(m.correctId)}
+                  onClick={() => onClickRight(m.correctId)}
                 >
                   <Card
                     className="p-2 sm:p-3 md:p-4 h-full min-h-[3.5rem] text-sm sm:text-base [overflow-wrap:anywhere] break-words"
@@ -271,10 +306,14 @@ export const MatchWordWordExView: FC<TProps> = ({
                       background:
                         !rest.isPresentationMode &&
                         (profile?.role_id === 2 || profile?.role_id === 1) &&
-                        selectedMatchId &&
-                        m.correctId === selectedMatchId
+                        selectedLeftId !== undefined &&
+                        m.correctId === selectedLeftId
                           ? "#E9FEE8"
                           : bgColor,
+                      border:
+                        m.correctId === selectedRightId
+                          ? "2px solid #3f28c6"
+                          : "2px solid transparent",
                       whiteSpace: "break-spaces",
                       boxShadow: "rgba(144, 137, 164, 0.15) 0px 8px 24px 0px",
                     }}
