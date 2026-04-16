@@ -16,6 +16,7 @@ import {
   Spinner,
 } from "@nextui-org/react";
 import Close from "@/assets/icons/close.svg";
+import GalleryIcon from "@/assets/icons/gallery.svg";
 import { getImageNameFromPath } from "@/app/editor/components/editor/mappers";
 import { fetchPostJson } from "@/api";
 import { T } from "@/i18n/T";
@@ -227,12 +228,27 @@ export const ImageUpload: FC<TProps> = ({
                         </div>
                       </Button>
                     ) : (
-                      <Image
-                        src={Bg}
-                        alt="placeholder"
-                        width={170}
-                        height={170}
-                      />
+                      <div
+                        style={{
+                          width: "100%",
+                          background: "#fff",
+                          minHeight: 160,
+                          borderRadius: 10,
+                        }}
+                        className="flex items-center justify-center flex-col gap-3 sm:gap-4 px-4 py-5 border border-default-200 shadow-sm"
+                      >
+                        <Image
+                          src={GalleryIcon}
+                          alt="GalleryIcon"
+                          className="w-12 h-12 sm:w-[60px] sm:h-[60px] shrink-0"
+                        />
+                        <p className="text-sm text-center text-[#B7B7B7] leading-snug max-w-[280px]">
+                          <T
+                            k="editor.clickOrDragImages"
+                            defaultText="Нажмите на этот блок или перетащите сюда изображения"
+                          />
+                        </p>
+                      </div>
                     )}
                   </button>
                 </div>

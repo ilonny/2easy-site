@@ -90,6 +90,8 @@ const SortableImageItem = sortableElement(
             <Input
               onChange={(e) => onChangeDescription(e.target.value, idx)}
               value={value}
+              label={<T k="editor.imageCaption" defaultText="Image caption" />}
+              labelPlacement="outside"
               placeholder={placeholder}
               size="sm"
               variant="flat"

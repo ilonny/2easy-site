@@ -391,6 +391,11 @@
   },
   "games": {
     "open": "open",
+    "bingo": {
+      "title": "Bingo",
+      "subTitle": "Printable cards",
+      "description": "A speaking game where students listen to situations, cover them on their card, and the first to complete a pattern shouts “Bingo!”"
+    },
     "taboo": {
       "title": "Taboo game",
       "subTitle": "90 cards, A2 -- B2 + slang",
