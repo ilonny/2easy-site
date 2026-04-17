@@ -128,6 +128,23 @@ const mapFillGapsSelectEx = (data: string) => {
   return parsedData;
 };
 
+const mapFillGapsNewExData = (data: string) => {
+  const parsedData = data ? JSON.parse(data) : {};
+
+  if (Array.isArray(parsedData?.images)) {
+    parsedData.images = parsedData.images.map((img) => {
+      const path = img?.path || img?.dataURL;
+      return {
+        ...img,
+        path: img?.path || path,
+        dataURL: path ? getImageUrl(path) : img?.dataURL,
+      };
+    });
+  }
+
+  return parsedData;
+};
+
 const getDataMapper = (type: string) => {
   switch (type) {
     case "image":
@@ -160,6 +177,8 @@ const getDataMapper = (type: string) => {
       return mapImageExData;
     case "int":
       return mapTextDefaultExData;
+    case "FILL_GAPS_NEW":
+      return mapFillGapsNewExData;
     default:
       return mapImageExData;
   }
