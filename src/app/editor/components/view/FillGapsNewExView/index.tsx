@@ -91,10 +91,10 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
   const shouldPersistAnswers = !isPreview && isViewMode && !!student_id && !isTeacher;
 
   const [answersVersion, setAnswersVersion] = useState(0);
+  const [serverHydrationVersion, setServerHydrationVersion] = useState(0);
   const answersRef = useRef<TAnswersMap>({});
   const [statusByGap, setStatusByGap] = useState<Record<string, TAnswerStatus>>({});
   const saveTimerRef = useRef<number | null>(null);
-  const inputCheckTimersRef = useRef<Record<string, number>>({});
 
   const { writeAnswer, answers, getAnswers } = useExAnswer({
     student_id,
@@ -127,6 +127,7 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
           if (s) m[k] = s;
         });
         setStatusByGap(m);
+        setServerHydrationVersion((v) => v + 1);
         setAnswersVersion((v) => v + 1);
       } catch {}
     });
@@ -153,6 +154,7 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
         if (s) m[k] = s;
       });
       setStatusByGap(m);
+      setServerHydrationVersion((v) => v + 1);
       setAnswersVersion((v) => v + 1);
     } catch {}
   }, [answers, data.id, isPreview]);
@@ -170,8 +172,6 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
-      Object.values(inputCheckTimersRef.current || {}).forEach((t) => window.clearTimeout(t));
-      inputCheckTimersRef.current = {};
     };
   }, []);
 
@@ -333,61 +333,38 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
       if (!gap) return <span style={{ padding: "0 6px" }} />;
 
       if (mode === "input") {
+        const isTeacherView = isTeacher && !canInteract && !isPresentationMode;
         const wrapperClass =
           status === "correct"
-            ? "bg-[#A7F3D0] border border-[rgba(22,163,74,0.95)]"
+            ? isTeacherView
+              ? "bg-[#6EE7B7] border-2 border-[#16A34A] ring-2 ring-[#16A34A]/30"
+              : "bg-[#A7F3D0] border border-[rgba(22,163,74,0.95)]"
             : status === "incorrect"
-              ? "bg-[#FEE2E2] border border-[rgba(220,38,38,0.75)]"
-              : "bg-white border border-[rgba(63,40,198,0.25)]";
+              ? isTeacherView
+                ? "bg-[#FCA5A5] border-2 border-[#DC2626] ring-2 ring-[#DC2626]/25"
+                : "bg-[#FEE2E2] border border-[rgba(220,38,38,0.75)]"
+              : isTeacherView
+                ? "bg-[#E0E7FF] border-2 border-[#4F46E5] ring-2 ring-[#4F46E5]/15"
+                : "bg-white border border-[rgba(63,40,198,0.25)]";
         return (
           <Tooltip isDisabled={!isTeacher || isPresentationMode || !tooltipContent} content={<div>{tooltipContent}</div>}>
             <span className="inline-flex">
               <Input
                 size="sm"
                 className={styles.gapInput}
-                key={gapId + ":" + answersVersion}
-                value={currentRaw}
+                key={
+                  canInteract
+                    ? `${gapId}:${serverHydrationVersion}`
+                    : `${gapId}:${answersVersion}`
+                }
+                {...(canInteract ? { defaultValue: currentRaw } : { value: currentRaw })}
                 isDisabled={!canInteract}
                 onValueChange={(val) => {
                   if (!canInteract) return;
                   const raw = val || "";
-                  const v = raw.trim();
-                  if (!v) {
-                    if (inputCheckTimersRef.current[gapId]) {
-                      window.clearTimeout(inputCheckTimersRef.current[gapId]);
-                      delete inputCheckTimersRef.current[gapId];
-                    }
-                    return setAnswer(gapId, "", "neutral");
-                  }
-
-                  // optimistic save value, keep current status until debounce fires
-                  answersRef.current[gapId] = {
-                    value: raw,
-                    status: answersRef.current?.[gapId]?.status || "neutral",
-                  };
-                  schedulePersist();
-
-                  // If user finished with space, validate immediately
-                  if (raw.endsWith(" ")) {
-                    if (inputCheckTimersRef.current[gapId]) {
-                      window.clearTimeout(inputCheckTimersRef.current[gapId]);
-                      delete inputCheckTimersRef.current[gapId];
-                    }
-                    const latest = raw.trim();
-                    const ok = isCorrectForGap(gap, latest);
-                    setAnswer(gapId, latest, ok ? "correct" : "incorrect");
-                    return;
-                  }
-
-                  if (inputCheckTimersRef.current[gapId]) {
-                    window.clearTimeout(inputCheckTimersRef.current[gapId]);
-                  }
-                  inputCheckTimersRef.current[gapId] = window.setTimeout(() => {
-                    const latest = (answersRef.current?.[gapId]?.value || "").trim();
-                    if (!latest) return setAnswer(gapId, "", "neutral");
-                    const ok = isCorrectForGap(gap, latest);
-                    setAnswer(gapId, latest, ok ? "correct" : "incorrect");
-                  }, 500);
+                  if (!raw.trim()) return setAnswer(gapId, "", "neutral");
+                  const ok = isCorrectForGap(gap, raw);
+                  setAnswer(gapId, raw, ok ? "correct" : "incorrect");
                 }}
                 onKeyDown={(e) => {
                   if (!canInteract) return;
@@ -395,21 +372,17 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
                   try {
                     e.preventDefault();
                   } catch {}
-                  if (inputCheckTimersRef.current[gapId]) {
-                    window.clearTimeout(inputCheckTimersRef.current[gapId]);
-                    delete inputCheckTimersRef.current[gapId];
-                  }
-                  const latest = ((e.target as any)?.value || "").trim();
-                  if (!latest) return setAnswer(gapId, "", "neutral");
-                  const ok = isCorrectForGap(gap, latest);
-                  setAnswer(gapId, latest, ok ? "correct" : "incorrect");
+                  const latestRaw = String((e.target as any)?.value || "");
+                  if (!latestRaw.trim()) return setAnswer(gapId, "", "neutral");
+                  const ok = isCorrectForGap(gap, latestRaw);
+                  setAnswer(gapId, latestRaw, ok ? "correct" : "incorrect");
                 }}
                 onBlur={(e) => {
                   if (!canInteract) return;
-                  const v = ((e.target as any).value || "").trim();
-                  if (!v) return setAnswer(gapId, "", "neutral");
-                  const ok = isCorrectForGap(gap, v);
-                  setAnswer(gapId, v, ok ? "correct" : "incorrect");
+                  const latestRaw = String((e.target as any).value || "");
+                  if (!latestRaw.trim()) return setAnswer(gapId, "", "neutral");
+                  const ok = isCorrectForGap(gap, latestRaw);
+                  setAnswer(gapId, latestRaw, ok ? "correct" : "incorrect");
                 }}
                 classNames={{
                   inputWrapper: wrapperClass,
@@ -428,12 +401,19 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
       }
 
       if (mode === "select") {
+        const isTeacherView = isTeacher && !canInteract && !isPresentationMode;
         const triggerClass =
           status === "correct"
-            ? "bg-[#A7F3D0] border border-[rgba(22,163,74,0.95)]"
+            ? isTeacherView
+              ? "bg-[#6EE7B7] border-2 border-[#16A34A] ring-2 ring-[#16A34A]/30"
+              : "bg-[#A7F3D0] border border-[rgba(22,163,74,0.95)]"
             : status === "incorrect"
-              ? "bg-[#FEE2E2] border border-[rgba(220,38,38,0.75)]"
-              : "bg-[#F7F7FF] border border-[rgba(63,40,198,0.25)]";
+              ? isTeacherView
+                ? "bg-[#FCA5A5] border-2 border-[#DC2626] ring-2 ring-[#DC2626]/25"
+                : "bg-[#FEE2E2] border border-[rgba(220,38,38,0.75)]"
+              : isTeacherView
+                ? "bg-[#E0E7FF] border-2 border-[#4F46E5] ring-2 ring-[#4F46E5]/15"
+                : "bg-[#F7F7FF] border border-[rgba(63,40,198,0.25)]";
         const highlightCorrectInDropdown = isPreview || (isTeacher && !isPresentationMode);
         return (
           <Tooltip isDisabled={!isTeacher || isPresentationMode || !tooltipContent} content={<div>{tooltipContent}</div>}>
