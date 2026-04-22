@@ -41,6 +41,15 @@ export const useUploadMatchWordImage = (
             text: img.text || "",
           };
         }
+        // Keep already saved attachment; upload only new ones.
+        if (!filterImagesToUpload(img)) {
+          return {
+            id: img?.id,
+            path: img?.path || img?.dataURL,
+            text: img.text || "",
+          };
+        }
+
         const saved = savedAttachments?.attachments?.[newUploadIndex];
         newUploadIndex++;
         return {

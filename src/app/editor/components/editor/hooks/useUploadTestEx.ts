@@ -37,15 +37,31 @@ export const useUploadTestEx = (
             }),
           )
         : [];
-      if (savedAttachments?.attachments?.length) {
-        savedAttachments?.attachments?.forEach((att, attIndex) => {
+      let newUploadIndex = 0;
+      (data?.images || []).forEach((img: any) => {
+        if (filterExBgAttachments(img)) {
+          // already present (background) attachment
+          return;
+        }
+        if (!filterImagesToUpload(img)) {
+          // already saved attachment
           exAttachments.push({
-            id: att?.id,
-            path: att?.path,
-            text: data?.images?.[attIndex]?.text || "",
+            id: img?.id,
+            path: img?.path || img?.dataURL,
+            text: img?.text || "",
           });
-        });
-      }
+          return;
+        }
+        const saved = savedAttachments?.attachments?.[newUploadIndex];
+        newUploadIndex++;
+        if (saved?.path) {
+          exAttachments.push({
+            id: saved?.id,
+            path: saved?.path,
+            text: img?.text || "",
+          });
+        }
+      });
 
       const exData = {
         ...data,
