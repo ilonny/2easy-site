@@ -70,17 +70,36 @@ export const useLessons = (
   );
 
   const changeLessonStatus = useCallback(
-    async (relation_id?: number, status?: string) => {
+    async (
+      relation_id?: number,
+      status?: string,
+      lesson_id?: number,
+      student_id?: number,
+    ) => {
       setLessonsListIslLoading(true);
-      const res = await fetchPostJson({
-        path: `/lesson-relation/edit`,
-        data: {
-          relation_id,
-          status,
-        },
-        isSecure: true,
-      });
-      const data = await res?.json();
+      let data: any = null;
+      if (!relation_id && lesson_id && student_id && status) {
+        const createRes = await fetchPostJson({
+          path: `/lesson-relation/create`,
+          data: {
+            lesson_id,
+            student_id,
+            status,
+          },
+          isSecure: true,
+        });
+        data = await createRes?.json();
+      } else {
+        const res = await fetchPostJson({
+          path: `/lesson-relation/edit`,
+          data: {
+            relation_id,
+            status,
+          },
+          isSecure: true,
+        });
+        data = await res?.json();
+      }
       setLesson(data?.lesson);
       setLessonsListIslLoading(false);
       checkResponse(data);
@@ -111,17 +130,36 @@ export const useLessons = (
   );
 
   const changeCourseStatus = useCallback(
-    async (relation_id?: number, status?: string) => {
+    async (
+      relation_id?: number,
+      status?: string,
+      course_id?: number,
+      student_id?: number,
+    ) => {
       setLessonsListIslLoading(true);
-      const res = await fetchPostJson({
-        path: `/course-relation/edit`,
-        data: {
-          relation_id,
-          status,
-        },
-        isSecure: true,
-      });
-      const data = await res?.json();
+      let data: any = null;
+      if (!relation_id && course_id && student_id && status) {
+        const createRes = await fetchPostJson({
+          path: `/course-relation/create`,
+          data: {
+            lesson_id: course_id,
+            student_id,
+            status,
+          },
+          isSecure: true,
+        });
+        data = await createRes?.json();
+      } else {
+        const res = await fetchPostJson({
+          path: `/course-relation/edit`,
+          data: {
+            relation_id,
+            status,
+          },
+          isSecure: true,
+        });
+        data = await res?.json();
+      }
       setLesson(data?.lesson);
       setLessonsListIslLoading(false);
       checkResponse(data);

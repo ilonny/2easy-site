@@ -354,12 +354,18 @@ export const ProfileLessons = (props: TProps) => {
         }
       });
     }
+    if (isStudent) {
+      res = res.filter(
+        (lesson: any) => lesson?.["lesson_relations.status"] !== "close",
+      );
+    }
     return res;
   }, [
     lessonsToRender,
     activeFilterTab,
     filterSearchString,
     isFreeTariff,
+    isStudent,
     hasHomeworkTag,
     i18n.language,
   ]);
@@ -642,28 +648,35 @@ export const ProfileLessons = (props: TProps) => {
             hideContextMenu={tabIndex === "2easyCourses"}
             showChangeStatusButton={showChangeStatusButton}
             changeLessonStatus={
-              studentTabIndex === "courses"
-                ? (relation_id, status) => {
-                    changeCourseStatus(relation_id, status).then(() => {
-                      getCourses(Number(studentId));
+              currentCourse
+                ? (relation_id, status, lesson_id, s_id) => {
+                    changeLessonStatus(relation_id, status, lesson_id, s_id).then(() => {
                       getCourseLessons(currentCourse.id, studentId);
                     });
                   }
-                : (relation_id, status) => {
-                    changeLessonStatus(relation_id, status).then(() => {
-                      getCourseLessons(currentCourse.id, studentId);
-                    });
-                  }
+                : studentTabIndex === "courses"
+                  ? (relation_id, status, course_id, s_id) => {
+                      changeCourseStatus(relation_id, status, course_id, s_id).then(() => {
+                        getCourses(Number(studentId));
+                      });
+                    }
+                  : (relation_id, status, lesson_id, s_id) => {
+                      changeLessonStatus(relation_id, status, lesson_id, s_id).then(() => {
+                        getCourseLessons(currentCourse.id, studentId);
+                      });
+                    }
             }
             hideDeleteLessonButton={hideDeleteLessonButton}
             deleteLessonRelation={
-              studentTabIndex === "courses"
-                ? (relation_id) => {
-                    deleteCourseRelation(relation_id).then(() =>
-                      getCourses(Number(studentId)),
-                    );
-                  }
-                : deleteLessonRelation
+              currentCourse
+                ? deleteLessonRelation
+                : studentTabIndex === "courses"
+                  ? (relation_id) => {
+                      deleteCourseRelation(relation_id).then(() =>
+                        getCourses(Number(studentId)),
+                      );
+                    }
+                  : deleteLessonRelation
             }
             showStartLessonButton={showStartLessonButton}
             isStudent={isStudent}
