@@ -1,5 +1,5 @@
 "use client";
-import { FC, useCallback, useContext, useEffect, useState } from "react";
+import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { TLesson } from "../../types";
 import { LessonCard } from "../LessonCard";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
@@ -68,7 +68,16 @@ export const LessonsList: FC<TProps> = ({
   const { checkSubscription, subscription } = useCheckSubscription();
   const router = useRouter();
   const { profile } = useContext(AuthContext);
+  const isTeacher =
+    Number(profile?.role_id) === 2 || Number(profile?.role_id) === 1;
   const { courses, getCourses: getMyCourses } = useCourses();
+  const [resolvedHwMap, setResolvedHwMap] = useState<
+    Record<
+      number,
+      { homework_lesson_id?: number; has_individual_homework?: boolean }
+    >
+  >({});
+  const lessonIdsForResolve = useMemo(() => lessons.map((l) => l.id), [lessons]);
   const [editIsVisible, setEditIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
   const [chosenLesson, setChosenLesson] = useState<TLesson | null>(null);
@@ -81,6 +90,39 @@ export const LessonsList: FC<TProps> = ({
   const [copyCourseIsLoading, setCopyCourseIsLoading] = useState(false);
   const [copyLessonModalOpen, setCopyLessonModalOpen] = useState(false);
   const [copyLessonId, setCopyLessonId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (
+      !isTeacher ||
+      !studentId ||
+      isCourses ||
+      lessonIdsForResolve.length === 0
+    ) {
+      setResolvedHwMap({});
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const res = await fetchPostJson({
+        path: "/lessons/homework/resolve-for-student",
+        isSecure: true,
+        data: {
+          lesson_ids: lessonIdsForResolve,
+          student_id: Number(studentId),
+        },
+      });
+      const data = await res?.json();
+      if (cancelled) return;
+      if (data?.success && data?.by_lesson_id) {
+        setResolvedHwMap(data.by_lesson_id);
+      } else {
+        setResolvedHwMap({});
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isTeacher, studentId, isCourses, lessonIdsForResolve]);
 
   const [
     attachLessonCourseModalIsVisible,
@@ -273,6 +315,8 @@ export const LessonsList: FC<TProps> = ({
             }
             isCourses={isCourses}
             lesson={lesson}
+            batchResolveEnabled={isTeacher && !!studentId && !isCourses}
+            resolvedHw={resolvedHwMap?.[lesson.id] || {}}
             onPressEdit={onPressEdit}
             onPressDelete={onPressDelete}
             onPressAttach={onAttachLesson}

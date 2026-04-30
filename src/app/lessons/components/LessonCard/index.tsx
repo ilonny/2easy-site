@@ -68,6 +68,8 @@ type TProps = {
   studentId?: number | string;
   alwaysOpenLessonMode?: boolean;
   onHomeworkCreated?: () => void;
+  batchResolveEnabled?: boolean;
+  resolvedHw?: { homework_lesson_id?: number; has_individual_homework?: boolean };
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -92,6 +94,8 @@ export const LessonCard: FC<TProps> = ({
   studentId,
   alwaysOpenLessonMode,
   onHomeworkCreated,
+  batchResolveEnabled,
+  resolvedHw: resolvedHwProp,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -131,6 +135,13 @@ export const LessonCard: FC<TProps> = ({
   } | null>(null);
 
   useEffect(() => {
+    if (batchResolveEnabled) {
+      setResolvedHw({
+        homework_lesson_id: resolvedHwProp.homework_lesson_id,
+        has_individual_homework: !!resolvedHwProp.has_individual_homework,
+      });
+      return;
+    }
     if (
       !isTeacher ||
       !studentId ||
@@ -168,11 +179,14 @@ export const LessonCard: FC<TProps> = ({
       cancelled = true;
     };
   }, [
+    batchResolveEnabled,
     isTeacher,
     studentId,
     showLessonBottomActions,
     isCourses,
     lesson?.id,
+    resolvedHwProp?.homework_lesson_id,
+    resolvedHwProp?.has_individual_homework,
   ]);
 
   useEffect(() => {
