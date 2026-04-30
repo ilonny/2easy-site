@@ -37,6 +37,20 @@ export const AttachLessonModalForm: FC<TProps> = ({
   hideToast,
   isCourses,
 }) => {
+  const isRu = (i18n.language || "").toLowerCase().startsWith("ru");
+  const courseOpenText = i18n.t("lessons.courseOpen", {
+    defaultValue: isRu ? "Курс открыт" : "Course open",
+  });
+  const courseClosedText = i18n.t("lessons.courseClosed", {
+    defaultValue: isRu ? "Курс закрыт" : "Course closed",
+  });
+  const lessonOpenText = i18n.t("lessons.lessonOpen", {
+    defaultValue: isRu ? "Урок открыт" : "Lesson open",
+  });
+  const lessonClosedText = i18n.t("lessons.lessonClosed", {
+    defaultValue: isRu ? "Урок закрыт" : "Lesson closed",
+  });
+
   const [chosenIds, setChosenIds] = useState<number[]>([]);
   const [step, setStep] = useState(0);
   const [status, setStatus] = useState<"open" | "close">("open");
@@ -198,11 +212,25 @@ export const AttachLessonModalForm: FC<TProps> = ({
                   setStatus(e.target.value);
                 }}
               >
-                <SelectItem key="open">
-                  {isCourses ? <T k="lessons.courseOpen" /> : <T k="lessons.lessonOpen" />}
+                <SelectItem
+                  key="open"
+                  textValue={isCourses ? courseOpenText : lessonOpenText}
+                >
+                  {isCourses ? (
+                    <T k="lessons.courseOpen" defaultText="Курс открыт" />
+                  ) : (
+                    <T k="lessons.lessonOpen" defaultText="Урок открыт" />
+                  )}
                 </SelectItem>
-                <SelectItem key="close">
-                  {isCourses ? <T k="lessons.courseClosed" /> : <T k="lessons.lessonClosed" />}
+                <SelectItem
+                  key="close"
+                  textValue={isCourses ? courseClosedText : lessonClosedText}
+                >
+                  {isCourses ? (
+                    <T k="lessons.courseClosed" defaultText="Курс закрыт" />
+                  ) : (
+                    <T k="lessons.lessonClosed" defaultText="Урок закрыт" />
+                  )}
                 </SelectItem>
               </Select>
               <div className="h-4"></div>

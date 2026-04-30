@@ -19,6 +19,7 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { useParams } from "next/navigation";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import styles from "./styles.module.css";
 
 type TProps = {
   data: TMatchWordColumnData;
@@ -239,7 +240,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
 
   return (
     <div
-      className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full exercise-view-shell max-w-[886px] mx-auto exercise-view-head match-word-column`}
+      className={`${styles.root} py-4 sm:py-6 md:py-7 lg:py-8 w-full exercise-view-shell max-w-[886px] mx-auto exercise-view-head match-word-column`}
       id={`ex-${ex_id}`}
     >
       <p

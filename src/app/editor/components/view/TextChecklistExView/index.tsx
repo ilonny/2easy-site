@@ -75,8 +75,8 @@ export const TextChecklistExView: FC<TProps> = ({
         </div>
       )}
       <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[886px] mx-auto`}>
-        <div className="flex flex-col md:flex-row items-stretch justify-center flex-wrap mx-auto w-full min-w-0 gap-3 md:gap-2">
-          <div className="w-full md:w-1/2 min-w-0 shrink-0 p-2">
+        <div className="flex flex-col md:flex-row md:flex-nowrap items-stretch justify-center mx-auto w-full min-w-0 gap-4 md:gap-6">
+          <div className="w-full md:flex-1 md:basis-1/2 min-w-0">
             <Card className={`w-full p-3 sm:p-4 flex-col gap-2 h-full min-w-0`}>
               {data.stickers?.map((sticker, index) => {
                 if (!sticker) {
@@ -111,7 +111,7 @@ export const TextChecklistExView: FC<TProps> = ({
             </Card>
           </div>
           {!!editorImage && (
-            <div className="w-full md:w-1/2 min-w-0 shrink-0 p-2">
+            <div className="w-full md:flex-1 md:basis-1/2 min-w-0">
               <Card className={`w-full h-full min-w-0`}>
                 {!!editorImage && (
                   <img

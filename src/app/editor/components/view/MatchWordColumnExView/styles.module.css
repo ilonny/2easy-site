@@ -1,0 +1,5 @@
+/* globals: .exercise-view-shell { overflow-x: hidden } — ломает sticky у пула чипсов */
+.root:global(.exercise-view-shell) {
+  overflow: visible !important;
+}
+
