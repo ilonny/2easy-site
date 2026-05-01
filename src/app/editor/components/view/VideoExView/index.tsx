@@ -14,6 +14,11 @@ type TProps = {
 
 const VideoExViewComp: FC<TProps> = ({ data, isPreview = false }) => {
   const image = data?.images?.[0];
+  const videoCount = data.videos?.length ?? 0;
+  const videoLayoutClass =
+    videoCount > 1
+      ? "grid w-full grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8"
+      : "flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10";
 
   return (
     <div className="exercise-view-shell max-w-[886px]">
@@ -47,12 +52,12 @@ const VideoExViewComp: FC<TProps> = ({ data, isPreview = false }) => {
         </div>
       )}
       <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[886px] mx-auto`}>
-        <div className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10 mx-auto w-full min-w-0">
+        <div className={`${videoLayoutClass} mx-auto w-full min-w-0`}>
           {data.videos?.map((video, index) => {
             return (
               <div key={index} className="w-full min-w-0">
                 <div
-                  className="flex justify-center w-full max-w-full min-w-0 [&_iframe]:max-w-full [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:h-auto"
+                  className="w-full min-w-0 [&_.videos-container]:!max-w-none [&_.videos-container]:w-full [&_.video-item]:!w-full [&_.video-item]:!max-w-full [&_.video-item]:min-w-0 md:[&_.video-item]:flex-1 [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-full [&_iframe]:border-0 [&_iframe]:h-auto [&_video]:block [&_video]:w-full [&_video]:max-w-full [&_video]:h-auto"
                   dangerouslySetInnerHTML={{ __html: video?.content }}
                 />
                 {!!video.title && (

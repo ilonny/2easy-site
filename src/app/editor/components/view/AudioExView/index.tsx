@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
-import { FC, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "@nextui-org/react";
 import { TAudioData } from "../../editor/Audio/types";
 import "./styles.scss";
 import { getImageNameFromPath } from "../../editor/mappers";
+import { getImageUrl } from "@/app/editor/helpers";
 import ScriptIcon from "@/assets/icons/audio_script_icon.svg";
 import ScriptCloseIcon from "@/assets/icons/audio_script_close_icon.svg";
 import Image from "next/image";
@@ -13,18 +14,198 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { T } from "@/i18n/T";
 
+/** Inline SVGs so play/pause/volume/loop work when Iconify API is blocked (corporate / CSP). */
+const AP_ICON = {
+  play: (
+    <svg
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M8 5v14l11-7L8 5z" />
+    </svg>
+  ),
+  pause: (
+    <svg
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+    </svg>
+  ),
+  volume: (
+    <svg
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+    </svg>
+  ),
+  volumeMute: (
+    <svg
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M16.5 12A4.5 4.5 0 0014 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.4 8.4 0 0021 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18V21h2.06a8.6 8.6 0 003.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
+    </svg>
+  ),
+  loop: (
+    <svg
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
+    </svg>
+  ),
+  loopOff: (
+    <svg
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M2.81 2.81L1.39 4.22 5.17 8H5v6h2V9.83l3.16 3.16-1.41 1.41L7 11l-4 4 4 4 1.41-1.41L3.83 13H7v4h10v-1.17l3.78 3.78 1.41-1.41L2.81 2.81zM19 10v2.17l2 2V10h-2zM7 4V2h10v6h-2V4H7z" />
+    </svg>
+  ),
+} as const;
+
 type TProps = {
   data: TAudioData;
   isPreview?: boolean;
 };
 
-export const AudioExView: FC<TProps> = ({ data, isPreview = false }) => {
+const extractAudioSrcFromHtml = (html?: string) => {
+  if (!html || typeof html !== "string") return "";
+  const m = html.match(/<audio\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i);
+  return m?.[1]?.trim() || "";
+};
+
+const stripAudioElements = (html?: string) => {
+  if (!html || typeof html !== "string") return "";
+  return html
+    .replace(/<audio\b[^>]*>[\s\S]*?<\/audio>/gi, "")
+    .replace(/<audio\b[^>]*\/\s*>/gi, "")
+    .trim();
+};
+
+export const AudioExView: FC<TProps> = ({ data }) => {
   const image = data?.images?.[0];
 
-  const audioFile = data?.editorImages?.[0]?.file || data.editorImages?.[0];
+  const attachment = data?.editorImages?.[0];
+  const pickedFile = attachment?.file;
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (pickedFile instanceof Blob) {
+      const u = URL.createObjectURL(pickedFile);
+      setBlobUrl(u);
+      return () => URL.revokeObjectURL(u);
+    }
+    setBlobUrl(null);
+    return undefined;
+  }, [pickedFile]);
+
+  const audioSrcFromAttachment = useMemo(() => {
+    if (attachment?.dataURL) return attachment.dataURL;
+    if (blobUrl) return blobUrl;
+    if (typeof attachment?.path === "string" && attachment.path) {
+      return getImageUrl(attachment.path);
+    }
+    return "";
+  }, [attachment?.dataURL, attachment?.path, blobUrl]);
+
+  const audioSrcFromDescription = useMemo(
+    () => extractAudioSrcFromHtml(data.description),
+    [data.description],
+  );
+  const audioSrc = audioSrcFromAttachment || audioSrcFromDescription;
+
+  const audioFile = pickedFile || attachment;
   const audioFileName =
-    audioFile?.name || getImageNameFromPath(audioFile?.path) || "";
+    audioFile?.name ||
+    getImageNameFromPath(audioFile?.path) ||
+    getImageNameFromPath(audioSrc) ||
+    "";
+  const displayDescription =
+    audioSrcFromDescription && data.description
+      ? stripAudioElements(data.description)
+      : data.description;
+
   const [scriptIsVisible, setScriptIsVisible] = useState(false);
+
+  const playerRef = useRef<InstanceType<typeof AudioPlayer> | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const deferSrcLoadRef = useRef(true);
+  const [deferSrcLoad, setDeferSrcLoad] = useState(true);
+
+  useEffect(() => {
+    deferSrcLoadRef.current = true;
+    setDeferSrcLoad(true);
+    const a = playerRef.current?.audio?.current;
+    if (a) {
+      a.pause();
+      a.removeAttribute("src");
+      a.load();
+    }
+  }, [audioSrc]);
+
+  useEffect(() => {
+    const wrap = wrapperRef.current;
+    if (!wrap || !audioSrc) return;
+
+    const bindSrcIfNeeded = () => {
+      if (!deferSrcLoadRef.current) return;
+      const audioEl = playerRef.current?.audio?.current;
+      if (!audioEl) return;
+      audioEl.src = audioSrc;
+      deferSrcLoadRef.current = false;
+      setDeferSrcLoad(false);
+    };
+
+    const onPointerDownCapture = (e: PointerEvent) => {
+      const el = e.target as HTMLElement;
+      if (
+        !el.closest?.(".rhap_play-pause-button") &&
+        !el.closest?.(".rhap_progress-container")
+      ) {
+        return;
+      }
+      bindSrcIfNeeded();
+    };
+
+    const onKeyDownCapture = (e: KeyboardEvent) => {
+      if (e.key !== " ") return;
+      const player = playerRef.current;
+      const container = player?.container?.current;
+      const progressBar = player?.progressBar?.current;
+      const t = e.target as Node | null;
+      if (!container || !t || (t !== container && t !== progressBar)) return;
+      bindSrcIfNeeded();
+    };
+
+    wrap.addEventListener("pointerdown", onPointerDownCapture, true);
+    wrap.addEventListener("keydown", onKeyDownCapture, true);
+    return () => {
+      wrap.removeEventListener("pointerdown", onPointerDownCapture, true);
+      wrap.removeEventListener("keydown", onKeyDownCapture, true);
+    };
+  }, [audioSrc]);
+
   return (
     <div className="exercise-view-shell max-w-[886px]">
       <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto exercise-view-head`}>
@@ -39,9 +220,9 @@ export const AudioExView: FC<TProps> = ({ data, isPreview = false }) => {
         <p className="exercise-view-subtitle">
           {data.subtitle}
         </p>
-        {!!data.description && (
+        {!!displayDescription && (
           <p className="exercise-view-desc">
-            {data.description}
+            {displayDescription}
           </p>
         )}
       </div>
@@ -57,18 +238,31 @@ export const AudioExView: FC<TProps> = ({ data, isPreview = false }) => {
         </div>
       )}
       <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[886px] mx-auto`}>
-        {!!audioFileName && (
+        {!!audioSrc && (
           <div className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10 mx-auto w-full min-w-0">
             <Card radius="md" className="p-3 sm:p-4 box-border min-w-0">
               <p
                 className="text-center"
                 style={{ fontWeight: 500, color: "#3F28C6" }}
               >
-                {data.audioTitle || audioFileName}
+                {data.audioTitle || audioFileName || (
+                  <T k="templates.audio" defaultText="Аудио" />
+                )}
               </p>
-              <div className={`audio-wrapper my-4`}>
+              <div ref={wrapperRef} className={`audio-wrapper my-4`}>
                 <AudioPlayer
-                  src={audioFile.dataURL || URL.createObjectURL(audioFile)}
+                  ref={playerRef}
+                  src={deferSrcLoad ? undefined : audioSrc}
+                  preload="none"
+                  showJumpControls={false}
+                  customIcons={{
+                    play: AP_ICON.play,
+                    pause: AP_ICON.pause,
+                    volume: AP_ICON.volume,
+                    volumeMute: AP_ICON.volumeMute,
+                    loop: AP_ICON.loop,
+                    loopOff: AP_ICON.loopOff,
+                  }}
                   customAdditionalControls={[
                     <div key={1}>
                       <div

@@ -89,6 +89,11 @@ export const useLessons = (
           isSecure: true,
         });
         data = await createRes?.json();
+        if (data?.success) {
+          // Этот create используется как "первое выставление статуса",
+          // поэтому уведомление должно быть про статус, а не про прикрепление.
+          data.successMessage = "Статус успешно обновлен";
+        }
       } else {
         const res = await fetchPostJson({
           path: `/lesson-relation/edit`,
@@ -149,6 +154,9 @@ export const useLessons = (
           isSecure: true,
         });
         data = await createRes?.json();
+        if (data?.success) {
+          data.successMessage = "Статус успешно обновлен";
+        }
       } else {
         const res = await fetchPostJson({
           path: `/course-relation/edit`,

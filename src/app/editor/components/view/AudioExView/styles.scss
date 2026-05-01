@@ -1,11 +1,16 @@
 .rhap_container {
   box-shadow: none !important;
+  /* Iconify CDN can be blocked; we use inline SVG via customIcons — color them here */
+  .rhap_play-pause-button,
+  .rhap_volume-button,
+  .rhap_repeat-button {
+    color: #3F28C6;
+  }
   .rhap_progress-indicator,
   .rhap_progress-filled,
-  svg path,
-  .rhap_volume-indicator{
+  .rhap_volume-indicator,
+  .rhap_volume-filled {
     background: #3F28C6;
-    fill: #3F28C6 !important;
   }
   .rhap_progress-bar {
     height: 10px;

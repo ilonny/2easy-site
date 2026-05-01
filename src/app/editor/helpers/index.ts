@@ -14,6 +14,11 @@ export const getImageUrl = (path?: string) => {
     return "";
   }
 
+  // Already absolute (API sometimes stores full URLs; avoid "BASE_URL/https://...")
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
   if (path.includes("608dfa18-3eae-4574-a997-0a7441c16d33.selstorage.ru")) {
     return path;
   }

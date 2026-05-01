@@ -113,7 +113,7 @@ export const Video: FC<TProps> = ({
         text.includes("rutube.ru/video")
       ) {
         const id = text.split("/").reverse()[1];
-        text = `<iframe width="100%" height="500" src="https://rutube.ru/play/embed/${id}/" frameBorder="0" allow="clipboard-write; autoplay" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>`;
+        text = `<iframe width="100%" height="500" src="https://rutube.ru/play/embed/${id}/" frameBorder="0" allow="clipboard-write; fullscreen" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>`;
       }
       if (
         key === "content" &&
@@ -122,7 +122,7 @@ export const Video: FC<TProps> = ({
       ) {
         const oid = text.split("video-")[1].split("_")[0];
         const id = text.split("video-")[1].split("_")[1];
-        text = `<iframe src="https://vkvideo.ru/video_ext.php?oid=-${oid}&id=${id}&hd=2&autoplay=1" width="100%" height="500" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>`;
+        text = `<iframe src="https://vkvideo.ru/video_ext.php?oid=-${oid}&id=${id}&hd=2&autoplay=0" width="100%" height="500" allow="encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>`;
       }
       data.videos[index][key] = text;
       changeData("videos", [...data.videos]);
