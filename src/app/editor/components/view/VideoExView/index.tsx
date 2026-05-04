@@ -57,7 +57,7 @@ const VideoExViewComp: FC<TProps> = ({ data, isPreview = false }) => {
             return (
               <div key={index} className="w-full min-w-0">
                 <div
-                  className="w-full min-w-0 [&_.videos-container]:!max-w-none [&_.videos-container]:w-full [&_.video-item]:!w-full [&_.video-item]:!max-w-full [&_.video-item]:min-w-0 md:[&_.video-item]:flex-1 [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-full [&_iframe]:border-0 [&_iframe]:h-auto [&_video]:block [&_video]:w-full [&_video]:max-w-full [&_video]:h-auto"
+                  className="w-full min-w-0 [&_.videos-container]:!max-w-none [&_.videos-container]:w-full [&_.video-item]:!w-full [&_.video-item]:!max-w-full [&_.video-item]:min-w-0 md:[&_.video-item]:flex-1 [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-full [&_iframe]:min-h-[450px] [&_iframe]:border-0 [&_iframe]:h-auto [&_video]:block [&_video]:w-full [&_video]:max-w-full [&_video]:h-auto"
                   dangerouslySetInnerHTML={{ __html: video?.content }}
                 />
                 {!!video.title && (
