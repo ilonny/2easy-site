@@ -11,7 +11,16 @@ import {
   Tooltip,
 } from "@nextui-org/react";
 import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
-import { FC, memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FC,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
@@ -50,6 +59,20 @@ function normalizeGapAnswer(s: string): string {
   return (s || "").trim().toLowerCase();
 }
 
+/** Текст подсказки для учителя: помеченные верные варианты, иначе исходный текст пропуска / первый вариант */
+function gapTooltipText(gap: TFillGapsNewGap | undefined): string {
+  if (!gap) return "";
+  const marked = (gap.options || [])
+    .filter((o) => o.isCorrect)
+    .map((o) => (o.value || "").trim())
+    .filter(Boolean);
+  if (marked.length) return Array.from(new Set(marked)).join(", ");
+  const orig = (gap.originalText || "").trim();
+  if (orig) return orig;
+  const first = (gap.options?.[0]?.value || "").trim();
+  return first;
+}
+
 /** TouchEvent has no clientX; read from touches / changedTouches */
 function getClientXY(e: any): { x: number; y: number } {
   if (typeof e?.clientX === "number" && typeof e?.clientY === "number") {
@@ -62,11 +85,10 @@ function getClientXY(e: any): { x: number; y: number } {
   return { x: 0, y: 0 };
 }
 
-const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }> = ({
-  data,
-  isPreview = false,
-  ...rest
-}) => {
+const FillGapsNewExViewImpl: FC<{
+  data: TFillGapsNewData;
+  isPreview?: boolean;
+}> = ({ data, isPreview = false, ...rest }) => {
   const { profile } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isViewMode = !!(rest as any)?.isView;
@@ -88,12 +110,15 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
     !isViewMode ||
     (!!student_id && !isTeacher) ||
     (isTeacher && isPresentationMode);
-  const shouldPersistAnswers = !isPreview && isViewMode && !!student_id && !isTeacher;
+  const shouldPersistAnswers =
+    !isPreview && isViewMode && !!student_id && !isTeacher;
 
   const [answersVersion, setAnswersVersion] = useState(0);
   const [serverHydrationVersion, setServerHydrationVersion] = useState(0);
   const answersRef = useRef<TAnswersMap>({});
-  const [statusByGap, setStatusByGap] = useState<Record<string, TAnswerStatus>>({});
+  const [statusByGap, setStatusByGap] = useState<Record<string, TAnswerStatus>>(
+    {},
+  );
   const saveTimerRef = useRef<number | null>(null);
 
   const { writeAnswer, answers, getAnswers } = useExAnswer({
@@ -117,7 +142,8 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
         const parsed: TAnswersMap = {};
         Object.keys(parsedRaw || {}).forEach((k) => {
           const v = parsedRaw[k];
-          if (v && typeof v === "object") parsed[k] = { value: v.value, status: v.status };
+          if (v && typeof v === "object")
+            parsed[k] = { value: v.value, status: v.status };
           else parsed[k] = { value: String(v || ""), status: "neutral" };
         });
         answersRef.current = parsed;
@@ -144,7 +170,8 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
       const parsed: TAnswersMap = {};
       Object.keys(parsedRaw || {}).forEach((k) => {
         const v = parsedRaw[k];
-        if (v && typeof v === "object") parsed[k] = { value: v.value, status: v.status };
+        if (v && typeof v === "object")
+          parsed[k] = { value: v.value, status: v.status };
         else parsed[k] = { value: String(v || ""), status: "neutral" };
       });
       answersRef.current = parsed;
@@ -175,13 +202,16 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
     };
   }, []);
 
-  const isCorrectForGap = useCallback((gap: TFillGapsNewGap | undefined, v: string) => {
-    const val = normalizeGapAnswer(v);
-    if (!gap || !val) return false;
-    return !!gap.options?.some(
-      (o) => o.isCorrect && normalizeGapAnswer(o.value || "") === val,
-    );
-  }, []);
+  const isCorrectForGap = useCallback(
+    (gap: TFillGapsNewGap | undefined, v: string) => {
+      const val = normalizeGapAnswer(v);
+      if (!gap || !val) return false;
+      return !!gap.options?.some(
+        (o) => o.isCorrect && normalizeGapAnswer(o.value || "") === val,
+      );
+    },
+    [],
+  );
 
   const setAnswer = useCallback(
     (gapId: string, value: string, status: TAnswerStatus) => {
@@ -233,12 +263,17 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
   const dragPoolKey = useMemo(() => {
     const ex = data.id ?? "new";
     const gapPart = (data.gaps || [])
-      .map((g) => `${g.id}:${(g.options || []).map((o) => `${o.id}:${(o.value || "").trim()}`).join("|")}`)
+      .map(
+        (g) =>
+          `${g.id}:${(g.options || []).map((o) => `${o.id}:${(o.value || "").trim()}`).join("|")}`,
+      )
       .join(";");
     return `${ex}|${gapPart}`;
   }, [data.gaps, data.id]);
 
-  const dragPoolStableRef = useRef<{ key: string; pool: TPoolItem[] } | null>(null);
+  const dragPoolStableRef = useRef<{ key: string; pool: TPoolItem[] } | null>(
+    null,
+  );
   const [pool, setPool] = useState<TPoolItem[]>([]);
 
   useEffect(() => {
@@ -260,7 +295,10 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
       } catch {}
       const { x, y } = getClientXY(e);
       try {
-        if (typeof e?.pointerId === "number" && (e.currentTarget as HTMLElement)?.setPointerCapture) {
+        if (
+          typeof e?.pointerId === "number" &&
+          (e.currentTarget as HTMLElement)?.setPointerCapture
+        ) {
           (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
         }
       } catch {}
@@ -268,8 +306,11 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
       dragValueRef.current = item.value;
       setDragXY({ x, y });
       try {
-        const rect = (e.currentTarget as HTMLElement)?.getBoundingClientRect?.();
-        if (rect) grabOffsetRef.current = { dx: x - rect.left, dy: y - rect.top };
+        const rect = (
+          e.currentTarget as HTMLElement
+        )?.getBoundingClientRect?.();
+        if (rect)
+          grabOffsetRef.current = { dx: x - rect.left, dy: y - rect.top };
       } catch {}
     },
     [canInteract, mode],
@@ -296,11 +337,15 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
         const gap = gapsById.get(gapId);
         const word = dragValueRef.current;
         const ok = !!gap?.options?.some(
-          (o) => o.isCorrect && normalizeGapAnswer(o.value || "") === normalizeGapAnswer(word),
+          (o) =>
+            o.isCorrect &&
+            normalizeGapAnswer(o.value || "") === normalizeGapAnswer(word),
         );
         setAnswer(gapId, word, ok ? "correct" : "incorrect");
         if (ok) {
-          setPool((prev) => prev.map((p) => (p.id === dragItemId ? { ...p, used: true } : p)));
+          setPool((prev) =>
+            prev.map((p) => (p.id === dragItemId ? { ...p, used: true } : p)),
+          );
         }
       }
       setDragItemId(null);
@@ -308,9 +353,21 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
     window.addEventListener("pointermove", move, { passive: false } as any);
     window.addEventListener("pointerup", finish, { passive: true } as any);
     window.addEventListener("pointercancel", finish, { passive: true } as any);
-    window.addEventListener("touchmove", move as any, { passive: false } as any);
-    window.addEventListener("touchend", finish as any, { passive: false } as any);
-    window.addEventListener("touchcancel", finish as any, { passive: false } as any);
+    window.addEventListener(
+      "touchmove",
+      move as any,
+      { passive: false } as any,
+    );
+    window.addEventListener(
+      "touchend",
+      finish as any,
+      { passive: false } as any,
+    );
+    window.addEventListener(
+      "touchcancel",
+      finish as any,
+      { passive: false } as any,
+    );
     return () => {
       window.removeEventListener("pointermove", move as any);
       window.removeEventListener("pointerup", finish as any);
@@ -327,8 +384,11 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
       const currentRaw = String(answersRef.current?.[gapId]?.value || "");
       const current = currentRaw.trim();
       const status = statusByGap?.[gapId] || "neutral";
-      const correctValues = (gap?.options || []).filter((o) => o.isCorrect).map((o) => o.value).filter(Boolean);
-      const tooltipContent = correctValues.join(", ");
+      const tooltipContent = gapTooltipText(gap);
+      const teacherHintActive =
+        isTeacher && !isPresentationMode && !!tooltipContent && !canInteract;
+      const tooltipDisabled =
+        !isTeacher || isPresentationMode || !tooltipContent;
 
       if (!gap) return <span style={{ padding: "0 6px" }} />;
 
@@ -347,8 +407,11 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
                 ? "bg-[#E0E7FF] border-2 border-[#4F46E5] ring-2 ring-[#4F46E5]/15"
                 : "bg-white border border-[rgba(63,40,198,0.25)]";
         return (
-          <Tooltip isDisabled={!isTeacher || isPresentationMode || !tooltipContent} content={<div>{tooltipContent}</div>}>
-            <span className="inline-flex">
+          <Tooltip
+            isDisabled={tooltipDisabled}
+            content={<div>{tooltipContent}</div>}
+          >
+            <span className="relative inline-flex">
               <Input
                 size="sm"
                 className={styles.gapInput}
@@ -357,7 +420,9 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
                     ? `${gapId}:${serverHydrationVersion}`
                     : `${gapId}:${answersVersion}`
                 }
-                {...(canInteract ? { defaultValue: currentRaw } : { value: currentRaw })}
+                {...(canInteract
+                  ? { defaultValue: currentRaw }
+                  : { value: currentRaw })}
                 isDisabled={!canInteract}
                 onValueChange={(val) => {
                   if (!canInteract) return;
@@ -395,6 +460,12 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
                         : "text-[#111827]"),
                 }}
               />
+              {teacherHintActive && (
+                <span
+                  className="pointer-events-auto absolute inset-0 z-10 cursor-help rounded-medium"
+                  aria-hidden
+                />
+              )}
             </span>
           </Tooltip>
         );
@@ -414,77 +485,120 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
               : isTeacherView
                 ? "bg-[#E0E7FF] border-2 border-[#4F46E5] ring-2 ring-[#4F46E5]/15"
                 : "bg-[#F7F7FF] border border-[rgba(63,40,198,0.25)]";
-        const highlightCorrectInDropdown = isPreview || (isTeacher && !isPresentationMode);
+        const highlightCorrectInDropdown =
+          isPreview || (isTeacher && !isPresentationMode);
         return (
-          <Tooltip isDisabled={!isTeacher || isPresentationMode || !tooltipContent} content={<div>{tooltipContent}</div>}>
-            <Select
-              size="sm"
-              className={styles.gapSelect}
-              key={gapId + ":" + answersVersion}
-              defaultSelectedKeys={current ? [current] : []}
-              isDisabled={!canInteract}
-              onChange={(e) => {
-                if (!canInteract) return;
-                const v = e.target.value;
-                const ok = isCorrectForGap(gap, v);
-                setAnswer(gapId, v, ok ? "correct" : "incorrect");
-              }}
-              classNames={{
-                trigger: triggerClass,
-                value:
-                  "text-[16px] " +
-                  (status === "correct"
-                    ? "!text-[#3F2A1D] font-bold"
-                    : status === "incorrect"
-                      ? "text-[#991B1B] font-semibold"
-                      : "text-[#111827]"),
-              }}
-            >
-              {(gap.options || []).map((o) => (
-                <SelectItem key={o.value} value={o.value} textValue={o.value}>
-                  <span
-                    style={
-                      highlightCorrectInDropdown && o.isCorrect
-                        ? { color: "#059669", fontWeight: 800 }
-                        : undefined
-                    }
-                  >
-                    {o.value}
-                  </span>
-                </SelectItem>
-              ))}
-            </Select>
+          <Tooltip
+            isDisabled={tooltipDisabled}
+            content={<div>{tooltipContent}</div>}
+          >
+            <span className="relative inline-flex min-w-0 max-w-full">
+              <Select
+                size="sm"
+                className={styles.gapSelect}
+                key={gapId + ":" + answersVersion}
+                defaultSelectedKeys={current ? [current] : []}
+                isDisabled={!canInteract}
+                onChange={(e) => {
+                  if (!canInteract) return;
+                  const v = e.target.value;
+                  const ok = isCorrectForGap(gap, v);
+                  setAnswer(gapId, v, ok ? "correct" : "incorrect");
+                }}
+                classNames={{
+                  trigger: triggerClass,
+                  value:
+                    "text-[16px] " +
+                    (status === "correct"
+                      ? "!text-[#3F2A1D] font-bold"
+                      : status === "incorrect"
+                        ? "text-[#991B1B] font-semibold"
+                        : "text-[#111827]"),
+                }}
+              >
+                {(gap.options || []).map((o) => (
+                  <SelectItem key={o.value} value={o.value} textValue={o.value}>
+                    <span
+                      style={
+                        highlightCorrectInDropdown && o.isCorrect
+                          ? { color: "#059669", fontWeight: 800 }
+                          : undefined
+                      }
+                    >
+                      {o.value}
+                    </span>
+                  </SelectItem>
+                ))}
+              </Select>
+              {teacherHintActive && (
+                <span
+                  className="pointer-events-auto absolute inset-0 z-10 cursor-help rounded-medium"
+                  aria-hidden
+                />
+              )}
+            </span>
           </Tooltip>
         );
       }
 
       return (
-        <ResponsiveTooltip isDisabled={!isTeacher || isPresentationMode || !tooltipContent} content={<div>{tooltipContent}</div>}>
-          <span
-            data-gap-drop="1"
-            data-gap-id={gapId}
-            className={`${styles.gapDrop} ${
-              status === "incorrect" ? styles.gapDropIncorrect : current ? styles.gapDropFilled : ""
-            }`}
-          >
-            <span>{current || "\u00A0"}</span>
+        <ResponsiveTooltip
+          isDisabled={tooltipDisabled}
+          content={<div>{tooltipContent}</div>}
+        >
+          <span className="relative inline-flex">
+            <span
+              data-gap-drop="1"
+              data-gap-id={gapId}
+              className={`${styles.gapDrop} ${
+                status === "incorrect"
+                  ? styles.gapDropIncorrect
+                  : current
+                    ? styles.gapDropFilled
+                    : ""
+              }`}
+            >
+              <span>{current || "\u00A0"}</span>
+            </span>
+            {teacherHintActive && (
+              <span
+                className="pointer-events-auto absolute inset-0 z-10 cursor-help rounded-full"
+                aria-hidden
+              />
+            )}
           </span>
         </ResponsiveTooltip>
       );
     },
-    [answersVersion, canInteract, gapsById, isCorrectForGap, isPresentationMode, isTeacher, mode, setAnswer, statusByGap],
+    [
+      answersVersion,
+      canInteract,
+      gapsById,
+      isCorrectForGap,
+      isPresentationMode,
+      isPreview,
+      isTeacher,
+      mode,
+      serverHydrationVersion,
+      setAnswer,
+      statusByGap,
+    ],
   );
 
   const contentToRender = useMemo<TSlateParagraphElement[]>(() => {
     const v = Array.isArray(data.content) ? (data.content as any) : [];
-    return v.length ? v : [{ type: "paragraph", children: [{ text: "" }] }] as any;
+    return v.length
+      ? v
+      : ([{ type: "paragraph", children: [{ text: "" }] }] as any);
   }, [data.content]);
 
   const image = (data as any)?.images?.[0];
 
   return (
     <div className={`${styles.root} exercise-view-shell`}>
-      <div className={`py-4 sm:py-5 md:py-6 w-full max-w-[900px] mx-auto exercise-view-head`}>
+      <div
+        className={`py-4 sm:py-5 md:py-6 w-full max-w-[900px] mx-auto exercise-view-head`}
+      >
         {!!data?.title && (
           <p
             className="exercise-view-title lg:text-[34px]"
@@ -522,16 +636,34 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
           <div className={styles.pool}>
             {pool
               .filter((i) => !i.used)
-              .map((i) => (
-                <Chip
-                  key={i.id}
-                  color="primary"
-                  className={`cursor-pointer select-none ${styles.draggableChip}`}
-                  onPointerDown={(e) => onPointerDownChip(e, i)}
-                >
-                  {i.value}
-                </Chip>
-              ))}
+              .map((i) => {
+                const chip = (
+                  <Chip
+                    color="primary"
+                    className={`cursor-pointer select-none ${styles.draggableChip}`}
+                    onPointerDown={(e) => onPointerDownChip(e, i)}
+                  >
+                    {i.value}
+                  </Chip>
+                );
+                const showChipHint =
+                  isTeacher && !isPresentationMode && !canInteract && !!i.value;
+                if (!showChipHint) {
+                  return (
+                    <span key={i.id} className="inline-flex">
+                      {chip}
+                    </span>
+                  );
+                }
+                return (
+                  <ResponsiveTooltip
+                    key={i.id}
+                    content={<div>Вариант: {i.value}</div>}
+                  >
+                    <span className="inline-flex">{chip}</span>
+                  </ResponsiveTooltip>
+                );
+              })}
             {!!dragItemId &&
               !!portalRef.current &&
               createPortal(
@@ -550,13 +682,18 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
 
         <div className="text-[16px] sm:text-[17px] md:text-[18px] leading-relaxed break-words [overflow-wrap:anywhere]">
           {contentToRender.map((p, pIdx) => {
-            const children = (p.children || []) as Array<TSlateText | TSlateGapElement>;
+            const children = (p.children || []) as Array<
+              TSlateText | TSlateGapElement
+            >;
             return (
               <p key={pIdx} style={{ marginBottom: 10 }}>
                 {children.map((ch: any, idx) => {
                   if (ch?.type === "gap") {
                     return (
-                      <span key={idx} style={{ display: "inline-block", margin: "0 6px" }}>
+                      <span
+                        key={idx}
+                        style={{ display: "inline-block", margin: "0 6px" }}
+                      >
                         {renderGap(ch.gapId)}
                       </span>
                     );
@@ -573,4 +710,3 @@ const FillGapsNewExViewImpl: FC<{ data: TFillGapsNewData; isPreview?: boolean }>
 };
 
 export const FillGapsNewExView = memo(FillGapsNewExViewImpl);
-
