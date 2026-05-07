@@ -116,16 +116,22 @@ export default function LessonPage() {
   }, [getExList, getLesson, params.id, isStudent, students, profile?.studentId]);
 
   const fetchStudents = useCallback(async () => {
+    let selectedIds: number[] = [];
+    try {
+      selectedIds = JSON.parse(
+        readFromLocalStorage("start_lesson_selected_ids") || "",
+      )?.map((el: any) => Number(el))?.filter((n: any) => Number(n) > 0);
+    } catch (err) {}
+
     const list = await (
       await fetchGet({
-        path: `/lesson-students?lesson_id=${params.id}`,
+        path: `/lesson-students?lesson_id=${params.id}${
+          selectedIds?.length ? `&student_ids=${selectedIds.join(",")}` : ""
+        }`,
         isSecure: true,
       })
     )?.json();
     try {
-      const selectedIds = JSON.parse(
-        readFromLocalStorage("start_lesson_selected_ids") || "",
-      )?.map((el: any) => Number(el));
       const filteredIds = selectedIds?.length
         ? list?.studentList?.filter((s: any) => {
             return selectedIds.includes(s.student_id);

@@ -27,7 +27,7 @@ export const PaymentForm = (props: TProps) => {
   const { profile } = useContext(AuthContext);
 
   const [price, setPrice] = useState(
-    type === "month" ? 790 : type === "3month" ? 1890 : 6990
+    type === "month" ? 790 : type === "3month" ? 1890 : 6990,
   );
 
   const {
@@ -56,7 +56,7 @@ export const PaymentForm = (props: TProps) => {
         type,
         getValues().phone,
         getValues().promocode,
-        getValues().login
+        getValues().login,
       );
       if (!response.success) {
         // error
@@ -80,12 +80,12 @@ export const PaymentForm = (props: TProps) => {
         return false;
       }
 
-      window?.ym(103955671, "reachGoal", "create-payment");
       const cp = new window.cp.CloudPayments();
 
       let reccurentData;
 
       if (type === "month") {
+        window?.ym(103955671, "reachGoal", "create-payment");
         reccurentData = {
           period: 1,
           interval: "Month",
@@ -95,6 +95,7 @@ export const PaymentForm = (props: TProps) => {
       }
 
       if (type === "year") {
+        window?.ym(103955671, "reachGoal", "create-payment-1year");
         reccurentData = {
           period: 12,
           interval: "Month",
@@ -104,6 +105,7 @@ export const PaymentForm = (props: TProps) => {
       }
 
       if (type === "3month") {
+        window?.ym(103955671, "reachGoal", "create-payment-3");
         reccurentData = {
           period: 3,
           interval: "Month",
@@ -141,11 +143,19 @@ export const PaymentForm = (props: TProps) => {
       cp.start(intentData).then((startResult) => {
         console.log("startResult", startResult);
         if (startResult?.status === "success") {
-          window?.ym(103955671, "reachGoal", "buy-subscribe-success");
+          window?.ym(
+            103955671,
+            "reachGoal",
+            type === "month"
+              ? "buy-subscribe-success"
+              : type === "3month"
+                ? "buy-subscribe-success-3"
+                : "buy-subscribe-success-1",
+          );
         }
         setTimeout(() => {
           window.location.reload();
-        }, 300);
+        }, 500);
       });
     },
     [
@@ -158,7 +168,7 @@ export const PaymentForm = (props: TProps) => {
       profile?.name,
       profile?.surname,
       type,
-    ]
+    ],
   );
 
   const priceWithPromo = useMemo(() => {
@@ -245,7 +255,9 @@ export const PaymentForm = (props: TProps) => {
                   {...inputProps}
                   // {...field}
                   radius="sm"
-                  label={i18n.t("common.phone", { defaultValue: "Номер телефона" })}
+                  label={i18n.t("common.phone", {
+                    defaultValue: "Номер телефона",
+                  })}
                   className="mb-5"
                   errorMessage={errors?.phone?.message}
                   isInvalid={!!errors.phone?.message}
@@ -262,7 +274,9 @@ export const PaymentForm = (props: TProps) => {
               <div className="flex items-center justify-between">
                 <Input
                   {...field}
-                  label={i18n.t("payment.promocode", { defaultValue: "Промокод" })}
+                  label={i18n.t("payment.promocode", {
+                    defaultValue: "Промокод",
+                  })}
                   radius="sm"
                 />
                 {!!getValues().promocode?.length && (
@@ -328,10 +342,7 @@ export const PaymentForm = (props: TProps) => {
                   href="/public_offer"
                   target="_blank"
                 >
-                  <T
-                    k="payment.publicOffer"
-                    defaultText="публичной оферты"
-                  />
+                  <T k="payment.publicOffer" defaultText="публичной оферты" />
                 </a>{" "}
                 <T k="common.and" defaultText="и" />{" "}
                 <a
@@ -344,10 +355,7 @@ export const PaymentForm = (props: TProps) => {
                     defaultText="политики конфиденциальности"
                   />
                 </a>{" "}
-                <T
-                  k="payment.andGiveConsentPrefix"
-                  defaultText="и даю свое"
-                />{" "}
+                <T k="payment.andGiveConsentPrefix" defaultText="и даю свое" />{" "}
                 <a
                   className="text-primary"
                   href="/personal_agreement"
