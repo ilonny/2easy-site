@@ -5,7 +5,16 @@ import { useTranslation } from "react-i18next";
 import { AuthContext } from "@/auth";
 import Image from "next/image";
 import EditIcon from "@/assets/icons/edit_blue.svg";
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea } from "@nextui-org/react";
+import {
+  Button,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Textarea,
+} from "@nextui-org/react";
 import i18n from "./config";
 import { apiUpdateTranslationKey } from "@/api/translations";
 import { checkResponse } from "@/api";
@@ -67,13 +76,17 @@ export function T({ k, values, defaultText, className, as }: TProps) {
     }
   };
 
+  return <Tag className={className}>{rendered}</Tag>;
+
   if (!canEdit) {
     return <Tag className={className}>{rendered}</Tag>;
   }
 
   return (
     <>
-      <span className={`inline-flex items-center gap-1 min-w-0 group ${className || ""}`}>
+      <span
+        className={`inline-flex items-center gap-1 min-w-0 group ${className || ""}`}
+      >
         <Tag className="min-w-0">{rendered}</Tag>
         <span
           role="button"
@@ -116,7 +129,13 @@ export function T({ k, values, defaultText, className, as }: TProps) {
           className="inline-flex shrink-0 items-center justify-center rounded-full bg-white/95 p-0.5 shadow-sm ring-1 ring-black/15 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity dark:bg-zinc-900/90 dark:ring-white/20"
           aria-label={`Edit translation ${k}`}
         >
-          <Image src={EditIcon} alt="edit" width={14} height={14} className="size-[14px]" />
+          <Image
+            src={EditIcon}
+            alt="edit"
+            width={14}
+            height={14}
+            className="size-[14px]"
+          />
         </span>
       </span>
 
@@ -133,19 +152,19 @@ export function T({ k, values, defaultText, className, as }: TProps) {
               Edit translation
             </ModalHeader>
             <ModalBody className="gap-4">
-            <Input label="Key" value={k} isReadOnly />
-            <Textarea
-              label="Русский"
-              minRows={3}
-              value={ru}
-              onValueChange={setRu}
-            />
-            <Textarea
-              label="English"
-              minRows={3}
-              value={en}
-              onValueChange={setEn}
-            />
+              <Input label="Key" value={k} isReadOnly />
+              <Textarea
+                label="Русский"
+                minRows={3}
+                value={ru}
+                onValueChange={setRu}
+              />
+              <Textarea
+                label="English"
+                minRows={3}
+                value={en}
+                onValueChange={setEn}
+              />
             </ModalBody>
             <ModalFooter>
               <Button variant="light" onPress={() => setIsOpen(false)}>
@@ -161,4 +180,3 @@ export function T({ k, values, defaultText, className, as }: TProps) {
     </>
   );
 }
-
