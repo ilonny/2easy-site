@@ -70,29 +70,34 @@ export const ChooseTemplateModal: FC<TProps> = ({
           >
             <Image src={CloseIcon} alt="" width={16} height={16} />
           </button>
-          <div className="relative z-10 flex shrink-0 items-center">
-            {isSubViews ? (
-              <button
-                type="button"
-                onClick={onBack}
-                className="text-small font-light whitespace-nowrap"
-                style={{ cursor: "pointer" }}
-              >
-                <span className="sm:hidden">
-                  <T k="common.backToAll" defaultText="<- все" />
-                </span>
-                <span className="hidden sm:inline">
+          {isSubViews ? (
+            <div className="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1">
+              <div className="flex min-w-0 items-center justify-start self-center">
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className="shrink-0 text-left text-small font-light whitespace-nowrap"
+                  style={{ cursor: "pointer" }}
+                >
                   <T k="editor.backToAllTemplates" defaultText="<- все шаблоны" />
-                </span>
-              </button>
-            ) : null}
-          </div>
-          {/* Центр: внешняя зона не ловит клики (крестик), у <T /> — pointer-events-auto для карандаша */}
-          <div className="pointer-events-none absolute left-1/2 top-1/2 w-[calc(100%-6.5rem)] -translate-x-1/2 -translate-y-1/2 px-2 text-center text-base sm:text-lg">
-            <span className="pointer-events-auto inline-flex max-w-full justify-center">
-              <T k="editor.chooseTemplateTitle" defaultText="Выберите шаблон задания" />
-            </span>
-          </div>
+                </button>
+              </div>
+              <div className="min-w-0 self-center px-1 text-center text-base leading-snug sm:text-lg">
+                <p className="break-words text-balance [overflow-wrap:anywhere]">
+                  <T k="editor.chooseTemplateTitle" defaultText="Выберите шаблон задания" />
+                </p>
+              </div>
+              <div className="flex shrink-0 justify-end self-center" aria-hidden>
+                <div className="h-9 w-9" />
+              </div>
+            </div>
+          ) : (
+            <div className="min-w-0 pr-10 text-center text-base leading-snug sm:text-lg">
+              <p className="break-words text-balance [overflow-wrap:anywhere]">
+                <T k="editor.chooseTemplateTitle" defaultText="Выберите шаблон задания" />
+              </p>
+            </div>
+          )}
         </ModalHeader>
         <ModalBody>
           <div className="flex flex-wrap justify-start">

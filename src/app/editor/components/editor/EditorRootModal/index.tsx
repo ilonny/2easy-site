@@ -211,29 +211,30 @@ export const EditorRootModal: FC<TProps> = ({
           >
             <Image src={CloseIcon} alt="" width={16} height={16} />
           </button>
-          <div className="flex w-full items-center">
-            {!chosenExToEdit?.id ? (
-              <button
-                type="button"
-                onClick={() => onBack && onBack()}
-                className="text-small font-light whitespace-nowrap"
-                style={{ cursor: "pointer" }}
-              >
-                <span className="sm:hidden">
-                  <T k="editor.backToOtherShort" defaultText="<- другие" />
-                </span>
-                <span className="hidden sm:inline">
-                  <T k="editor.backToOtherTemplates" defaultText="<- другие шаблоны" />
-                </span>
-              </button>
-            ) : (
-              <div />
-            )}
-          </div>
-          <div className="pointer-events-none absolute left-1/2 top-1/2 w-[calc(100%-6.5rem)] -translate-x-1/2 -translate-y-1/2 px-2 text-center">
-            <p className="text-base sm:text-lg font-semibold truncate">
-              {mapTypeToTitle(type)}
-            </p>
+          <div className="grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 pr-2">
+            <div className="flex min-w-0 items-center justify-start">
+              {!chosenExToEdit?.id ? (
+                <button
+                  type="button"
+                  onClick={() => onBack && onBack()}
+                  className="shrink-0 text-left text-small font-light whitespace-nowrap"
+                  style={{ cursor: "pointer" }}
+                >
+                  <T
+                    k="editor.backToOtherTemplates"
+                    defaultText="<- другие шаблоны"
+                  />
+                </button>
+              ) : (
+                <div className="h-9 w-9 shrink-0" aria-hidden />
+              )}
+            </div>
+            <div className="min-w-0 px-1 text-center">
+              <p className="break-words text-balance text-base font-semibold [overflow-wrap:anywhere] sm:text-lg">
+                {mapTypeToTitle(type)}
+              </p>
+            </div>
+            <div className="h-9 w-9 shrink-0" aria-hidden />
           </div>
         </ModalHeader>
         <ModalBody className="overflow-y-auto overscroll-contain px-4 py-4 sm:px-8 sm:py-6 gap-6 flex flex-col">
