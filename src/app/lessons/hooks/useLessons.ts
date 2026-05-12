@@ -1,11 +1,11 @@
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { TLesson } from "../types";
 
 export const useLessons = (
   studentId?: string,
   searchString?: string,
-  isAuth?: boolean = true,
+  isAuth: boolean = true,
   includeCourseLessons?: boolean,
 ) => {
   const [lessons, setLessons] = useState<TLesson[]>([]);
@@ -66,7 +66,7 @@ export const useLessons = (
       checkResponse(data);
       return data;
     },
-    []
+    [],
   );
 
   const changeLessonStatus = useCallback(
@@ -90,8 +90,6 @@ export const useLessons = (
         });
         data = await createRes?.json();
         if (data?.success) {
-          // Этот create используется как "первое выставление статуса",
-          // поэтому уведомление должно быть про статус, а не про прикрепление.
           data.successMessage = "Статус успешно обновлен";
         }
       } else {
@@ -196,10 +194,6 @@ export const useLessons = (
     },
     [getLessons],
   );
-
-  // useEffect(() => {
-  //   getLessons();
-  // }, [getLessons]);
 
   const filteredLessons = useMemo(() => {
     if (!searchString) {

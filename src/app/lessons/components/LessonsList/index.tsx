@@ -1,5 +1,5 @@
 "use client";
-import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { TLesson } from "../../types";
 import { LessonCard } from "../LessonCard";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
@@ -18,6 +18,9 @@ import { getImageUrl } from "@/app/editor/helpers";
 import { CopyLessonToModal } from "../CopyLessonToModal";
 import { useCourses } from "@/app/course/hooks/useCourses";
 import { T } from "@/i18n/T";
+
+const INITIAL_LESSON_BATCH = 24;
+const LESSON_RENDER_STEP = 24;
 
 type TProps = {
   lessons: TLesson[];
@@ -90,6 +93,43 @@ export const LessonsList: FC<TProps> = ({
   const [copyCourseIsLoading, setCopyCourseIsLoading] = useState(false);
   const [copyLessonModalOpen, setCopyLessonModalOpen] = useState(false);
   const [copyLessonId, setCopyLessonId] = useState<number | null>(null);
+
+  const lessonIdsKey = useMemo(
+    () => lessons.map((l) => l.id).join(","),
+    [lessons],
+  );
+  const [visibleLessonCount, setVisibleLessonCount] = useState(
+    INITIAL_LESSON_BATCH,
+  );
+
+  useEffect(() => {
+    setVisibleLessonCount(Math.min(INITIAL_LESSON_BATCH, lessons.length));
+  }, [lessonIdsKey, lessons.length]);
+
+  const visibleLessons = useMemo(
+    () => lessons.slice(0, visibleLessonCount),
+    [lessons, visibleLessonCount],
+  );
+  const hasMoreLessonsToRender =
+    !isCourses && visibleLessonCount < lessons.length;
+
+  const revealSentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!hasMoreLessonsToRender || isCourses) return;
+    const el = revealSentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting) return;
+        setVisibleLessonCount((c) =>
+          Math.min(c + LESSON_RENDER_STEP, lessons.length),
+        );
+      },
+      { rootMargin: "480px 0px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMoreLessonsToRender, isCourses, lessons.length]);
 
   useEffect(() => {
     if (
@@ -306,7 +346,7 @@ export const LessonsList: FC<TProps> = ({
           </div>
         </div>
       )}
-      {lessons?.map((lesson) => {
+      {visibleLessons?.map((lesson) => {
         return (
           <LessonCard
             studentId={studentId}
@@ -341,6 +381,14 @@ export const LessonsList: FC<TProps> = ({
           />
         );
       })}
+
+      {hasMoreLessonsToRender && (
+        <div
+          ref={revealSentinelRef}
+          className="w-full min-h-[120px] shrink-0"
+          aria-hidden
+        />
+      )}
 
       {!!copyLessonId && (
         <CopyLessonToModal

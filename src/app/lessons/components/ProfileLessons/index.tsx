@@ -66,6 +66,8 @@ type TProps = {
   includeCourseLessons?: boolean;
 };
 
+const HOMEWORK_TAG = "Homework";
+
 export const ProfileLessons = (props: TProps) => {
   const {
     canCreateLesson = true,
@@ -230,12 +232,9 @@ export const ProfileLessons = (props: TProps) => {
       case "2easyCourses":
         return courses.filter((c) => c.user_id === 1); // Курсы 2easy (user_id=1)
       case "userLessons":
-        return lessons.filter((l) => l.user_id !== 1); // Уроки пользователя (кроме user_id=1)
+        return lessons.filter((l) => l.user_id !== 1);
       default:
-        // Это условие соответствует закомментированному 'return lessons;'
-        // и вашей последней строке 'return lessons.filter((l) => l.user_id === 1);'
-        // Я предполагаю, что в этом случае вы хотите показывать уроки 2easy.
-        return lessons.filter((l) => l.user_id === 1); // Уроки 2easy (user_id=1)
+        return lessons.filter((l) => l.user_id === 1);
     }
   }, [
     isTeacher,
@@ -249,8 +248,6 @@ export const ProfileLessons = (props: TProps) => {
   ]);
 
   console.log("lessonsToRender", lessonsToRender);
-
-  const HOMEWORK_TAG = "Homework";
 
   const hasHomeworkTag = useCallback((lesson: TLesson) => {
     if (!lesson?.tags) return false;
