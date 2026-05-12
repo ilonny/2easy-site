@@ -337,7 +337,8 @@
     "embedCode": "Embed code",
     "clickOrDragImages": "Click this block or drag images here",
     "searchPhotos": "Search photos",
-    "find": "Find"
+    "find": "Find",
+    "questionN": "Question {{n}}"
   },
   "templates": {
     "text": "Text",
@@ -358,6 +359,8 @@
     "fillGapsDrag": "Drag word from list",
     "fillGapsSelect": "Select option from list",
     "fillGapsInput": "Type word in gap",
+    "fillGapsNew": "FILL IN THE GAPS",
+    "fillGapsNewDesc": "Gaps with answer options, formatting, and three modes",
     "test": "Test",
     "testDesc": "Select the correct option from the given choices",
     "match": "Match",
