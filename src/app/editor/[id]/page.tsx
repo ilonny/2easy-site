@@ -228,7 +228,11 @@ export default function EditorPage() {
             borderRadius: 10,
           }}
         >
-          {!lesson?.lesson_id_homework && <StartLessonButton lesson={lesson} />}
+          {lesson?.lesson_id_homework && lesson?.user_id === profile?.id ? (
+            <StartLessonButton lesson={lesson} mode="homeworkCheck" />
+          ) : (
+            !lesson?.lesson_id_homework && <StartLessonButton lesson={lesson} />
+          )}
           <div
             className={`${styles["wrapper"]} relative pt-12 sm:pt-14 md:pt-[52px] lg:pt-0 common_info relative group`}
           >

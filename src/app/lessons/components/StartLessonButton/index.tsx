@@ -4,15 +4,17 @@ import { TLesson } from "../../types";
 import { useRouter } from "next/navigation";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { T } from "@/i18n/T";
-import i18n from "@/i18n/config";
 
 type TProps = {
   isSkipCreateRealtion?: boolean;
   lesson: TLesson;
+  /** В редакторе домашки: та же модалка выбора учеников, другая подпись на кнопке */
+  mode?: "start" | "homeworkCheck";
 };
 
 export const StartLessonButton = (props: TProps) => {
-  const { isSkipCreateRealtion, lesson } = props;
+  const { isSkipCreateRealtion, lesson, mode = "start" } = props;
+  const isHomeworkCheck = mode === "homeworkCheck";
   const router = useRouter();
   const { checkSubscription } = useCheckSubscription();
   const [modalVisible, setModalVisible] = useState(false);
@@ -23,11 +25,11 @@ export const StartLessonButton = (props: TProps) => {
 
   const onPressButton = useCallback(() => {
     if (checkSubscription()) {
-      if (!isSkipCreateRealtion) {
-        setModalVisible(true);
+      if (isSkipCreateRealtion) {
+        onSuccess();
         return;
       }
-      onSuccess();
+      setModalVisible(true);
     }
   }, [isSkipCreateRealtion, onSuccess, checkSubscription]);
 
@@ -40,7 +42,7 @@ export const StartLessonButton = (props: TProps) => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          lineHeight: "22px",
+          lineHeight: isHomeworkCheck ? 1.15 : "22px",
           color: "#fff",
           cursor: "pointer",
           transition: "all 250ms ease",
@@ -50,23 +52,20 @@ export const StartLessonButton = (props: TProps) => {
           float: "right",
           // marginRight: -150,
         }}
-        className="
-          hover:opacity-[0.8]
-          top-[80px]
-          h-[80px]
-          w-[80px]
-          text-[18px]
-          lg:text-[22px]
-          lg:h-[90px]
-          lg:w-[90px]
-          lg:top-[40]
-          mt-[-90px]
-          lg:mt-0
-        "
+        className={[
+          "hover:opacity-[0.8] top-[80px] h-[80px] w-[80px] lg:h-[90px] lg:w-[90px] lg:top-[40] mt-[-90px] lg:mt-0",
+          isHomeworkCheck
+            ? "text-[13px] lg:text-[15px] px-1"
+            : "text-[18px] lg:text-[22px]",
+        ].join(" ")}
         onClick={() => onPressButton()}
       >
         <p className="text-center">
-          <T k="lessons.startLesson" defaultText="Начать урок" />
+          {isHomeworkCheck ? (
+            <T k="lessons.checkHomework" defaultText="Check homework" />
+          ) : (
+            <T k="lessons.startLesson" defaultText="Начать урок" />
+          )}
         </p>
       </div>
       {!!lesson && (
