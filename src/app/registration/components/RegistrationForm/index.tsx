@@ -210,10 +210,12 @@ export const RegistrationForm = () => {
             <p className="text-tiny text-danger mt-2">{responseError}</p>
           )}
         </div>
-        <div className="flex justify-center items-center gap-2 font-medium text-small">
-          <p><T k="auth.alreadyHaveSubscription" /></p>
-          <Link href="/login" className="text-[#3F28C6] underline">
-            <T k="common.login" />
+        <div className="flex justify-center items-center font-medium text-small">
+          <Link href="/login" className="text-[#3F28C6] underline text-center">
+            <T
+              k="auth.registrationFooterPrompt"
+              defaultText="Уже есть подписка? Войти"
+            />
           </Link>
         </div>
       </form>
@@ -307,16 +309,16 @@ export const RegistrationForm = () => {
               <T k="auth.acceptTerms" />{" "}
               <a className="text-primary" href="/public_offer" target="_blank">
                 <T k="auth.publicOffer" />
-              </a>{" "}
-              <T k="auth.and" />{" "}
+              </a>
+              <T k="auth.registrationTermsAfterPublicOffer" />
               <a
                 className="text-primary"
                 href="/privacy_policy"
                 target="_blank"
               >
                 <T k="auth.privacyPolicy" />
-              </a>{" "}
-              <T k="auth.and" />{" "}
+              </a>
+              <T k="auth.registrationTermsBeforeConsent" />
               <a
                 className="text-primary"
                 href="/personal_agreement"
@@ -359,10 +361,12 @@ export const RegistrationForm = () => {
           <p className="text-tiny text-danger mt-2">{responseError}</p>
         )}
       </div>
-      <div className="flex justify-center items-center gap-2 font-medium text-small">
-        <p><T k="auth.alreadyHaveSubscription" /></p>
-        <Link href="/login" className="text-[#3F28C6] underline">
-          <T k="common.login" />
+      <div className="flex justify-center items-center font-medium text-small">
+        <Link href="/login" className="text-[#3F28C6] underline text-center">
+          <T
+            k="auth.registrationFooterPrompt"
+            defaultText="Уже есть подписка? Войти"
+          />
         </Link>
       </div>
     </form>

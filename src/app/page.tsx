@@ -95,7 +95,7 @@ export default function Home() {
                 <div>
                   <p
                     style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
-                    className="w-[100%] text-center"
+                    className="w-[100%] text-center uppercase"
                   >
                     <T k="home.startFree" />
                   </p>
@@ -149,7 +149,7 @@ export default function Home() {
                   fontWeight: 600,
                   color: "#262626",
                 }}
-                className="w-[100%] text-center"
+                className="w-[100%] text-center uppercase"
               >
                 <T k="home.loginToAccount" />
               </p>
@@ -192,7 +192,7 @@ export default function Home() {
             >
               <p
                 style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
-                className="text-center w-[100%]"
+                className="text-center w-[100%] uppercase"
               >
                 <T k="home.tariffs" />
               </p>
@@ -341,7 +341,7 @@ export default function Home() {
               >
                 <p
                   style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
-                  className="w-[100%] text-center"
+                  className="w-[100%] text-center uppercase"
                 >
                   <T k="home.startFree" />
                 </p>
@@ -435,7 +435,7 @@ export default function Home() {
               >
                 <p
                   style={{ fontSize: 14, letterSpacing: 2, fontWeight: 600 }}
-                  className="w-[100%] text-center"
+                  className="w-[100%] text-center uppercase"
                 >
                   <T k="home.startFree" />
                 </p>

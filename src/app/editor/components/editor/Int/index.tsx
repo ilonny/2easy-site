@@ -13,7 +13,6 @@ import InfoIcon from "@/assets/icons/info.svg";
 import { IntExView } from "../../view/IntExView";
 import { useUploadIntEx } from "../hooks/useUploadIntEx";
 import { T } from "@/i18n/T";
-import i18n from "@/i18n/config";
 
 const defaultValuesStub: TIntData = {
   title: "Let's play!",
@@ -143,10 +142,11 @@ export const IntEx: FC<TProps> = ({
             <div className="flex items-center gap-2">
               <p><T k="editor.embedCode" /></p>
               <ResponsiveTooltip
-                content={i18n.t("editor.embedCodeHint", {
-                  defaultValue:
-                    "Пожалуйста, используйте специальную ссылку для встраивания (embed link / embed code). Её можно найти в разделе 'Поделиться' (Share) на исходном сервисе (должна начинаться с <iframe ...>). Прямая ссылка из браузера может работать некорректно или не отображаться.",
-                })}
+                content={
+                  <span className="text-small leading-snug">
+                    <T k="editor.embedCodeHint" />
+                  </span>
+                }
                 classNames={{
                   base: [
                     // arrow color

@@ -171,7 +171,13 @@ export const Audio: FC<TProps> = ({
         >
           {audioFileName
             ? audioFileName
-            : i18n.t("editor.uploadAudioFile", { defaultValue: "Загрузить аудиофайл" })}
+            : i18n.t("editor.uploadAudioFile", {
+                defaultValue: (i18n.language || "")
+                  .toLowerCase()
+                  .startsWith("ru")
+                  ? "Загрузить аудиофайл"
+                  : "Upload an audio file",
+              })}
         </p>
         {!!audioFileName && (
           <Image

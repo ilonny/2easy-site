@@ -39,16 +39,16 @@ export const AttachLessonModalForm: FC<TProps> = ({
 }) => {
   const isRu = (i18n.language || "").toLowerCase().startsWith("ru");
   const courseOpenText = i18n.t("lessons.courseOpen", {
-    defaultValue: isRu ? "Курс открыт" : "Course open",
+    defaultValue: isRu ? "Курс открыт" : "The course is open",
   });
   const courseClosedText = i18n.t("lessons.courseClosed", {
-    defaultValue: isRu ? "Курс закрыт" : "Course closed",
+    defaultValue: isRu ? "Курс закрыт" : "The course is closed",
   });
   const lessonOpenText = i18n.t("lessons.lessonOpen", {
-    defaultValue: isRu ? "Урок открыт" : "Lesson open",
+    defaultValue: isRu ? "Урок открыт" : "The lesson is open",
   });
   const lessonClosedText = i18n.t("lessons.lessonClosed", {
-    defaultValue: isRu ? "Урок закрыт" : "Lesson closed",
+    defaultValue: isRu ? "Урок закрыт" : "The lesson is closed",
   });
 
   const [chosenIds, setChosenIds] = useState<number[]>([]);
@@ -186,16 +186,20 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 description={
                   status === "open"
                     ? i18n.t("modals.availableToStudent", {
-                        defaultValue: "Ученик сможет открыть материал",
+                        defaultValue: isRu
+                          ? "Ученик сможет открыть материал"
+                          : "Available to the student",
                       })
                     : isCourses
                     ? i18n.t("lessons.studentSeesCourseCannotOpen", {
-                        defaultValue:
-                          "Ученик будет видеть курс, но не сможет его открыть",
+                        defaultValue: isRu
+                          ? "Ученик будет видеть курс, но не сможет его открыть"
+                          : "The student can see the course, but cannot open it",
                       })
                     : i18n.t("lessons.studentSeesLessonCannotOpen", {
-                        defaultValue:
-                          "Ученик будет видеть урок, но не сможет его открыть",
+                        defaultValue: isRu
+                          ? "Ученик будет видеть урок, но не сможет его открыть"
+                          : "The student can see the lesson, but cannot open it",
                       })
                 }
                 placeholder={

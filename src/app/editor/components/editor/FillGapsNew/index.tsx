@@ -608,7 +608,7 @@ export const FillGapsNew: FC<TProps> = ({
               renderElement={renderElement}
               renderLeaf={renderLeaf}
               placeholder={i18n.t("editor.startTyping", {
-                defaultValue: "Начните писать...",
+                defaultValue: "Начните писать",
               })}
               spellCheck
               onPointerDown={(e) => {

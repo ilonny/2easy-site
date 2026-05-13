@@ -198,8 +198,11 @@ export const Video: FC<TProps> = ({
                     <p><T k="editor.videoLink" defaultText="Ссылка на видео" /></p>
                     <ResponsiveTooltip
                       content={i18n.t("editor.videoLinkHint", {
-                        defaultValue:
-                          "Вставьте ссылку на видео из Youtube, Vk Видео, Vimeo, Rutube, Google Drive или TED через кнопку “поделиться”.",
+                        defaultValue: (i18n.language || "")
+                          .toLowerCase()
+                          .startsWith("ru")
+                          ? "Вставьте ссылку на видео из Youtube, Vk Видео, Vimeo, Rutube, Google Drive или TED через кнопку «поделиться»."
+                          : "Insert the link to the video from YouTube, VK Video, Vimeo, Rutube, Google Drive, or TED using the 'Share' button.",
                       })}
                       classNames={{
                         base: [

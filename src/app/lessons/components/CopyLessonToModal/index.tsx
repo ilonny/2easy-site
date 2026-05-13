@@ -238,11 +238,12 @@ export const CopyLessonToModal: FC<TProps> = ({
           <div className="flex flex-col gap-3">
             {renderPlaque({
               key: "my-lessons",
-              title: i18n.t("lessons.myLessons", {
-                defaultValue: "Мои уроки",
+              title: i18n.t("lessons.copyMyLessonsTitle", {
+                defaultValue: "Мои уроки.",
               }),
               subtitle: i18n.t("lessons.myLessonsCopyHint", {
-                defaultValue: 'Урок будет отображаться в разделе "Мои уроки"',
+                defaultValue:
+                  "Урок будет отображаться в разделе «Мои уроки»",
               }),
               imageUrl: CreateLessonBgCard.src,
               selected: toMyLessons,

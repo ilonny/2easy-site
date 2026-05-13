@@ -235,10 +235,15 @@ export const LoginForm = () => {
               <p className="text-tiny text-danger mt-2">{responseError}</p>
             )}
           </div>
-          <div className="flex justify-center items-center gap-2 font-medium text-small">
-            <p><T k="auth.noAccount" /></p>
-            <Link href="/registration" className="text-[#3F28C6] underline">
-              <T k="header.register" />
+          <div className="flex justify-center items-center font-medium text-small">
+            <Link
+              href="/registration"
+              className="text-[#3F28C6] underline text-center"
+            >
+              <T
+                k="auth.loginSignUpPrompt"
+                defaultText="Нет аккаунта? Зарегистрироваться"
+              />
             </Link>
           </div>
         </form>

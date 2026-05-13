@@ -73,6 +73,7 @@ export default function StartRegistrationPage() {
                 fullWidth
                 size="lg"
                 color="warning"
+                className="uppercase font-semibold tracking-wide"
                 style={{ backgroundColor: "#FF7EB3", color: "#fff" }}
               >
                 <T k="home.startFree" />
