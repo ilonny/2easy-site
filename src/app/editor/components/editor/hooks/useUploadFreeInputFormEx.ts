@@ -1,7 +1,7 @@
 import { checkResponse, fetchPostJson } from "@/api";
 import {
-  filterExBgAttachments,
   filterImagesToUpload,
+  persistExerciseAttachments,
 } from "@/app/editor/helpers";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { useParams } from "next/navigation";
@@ -18,50 +18,15 @@ export const useUploadFreeInputFormEx = (
   const saveFreeInputFormEx = useCallback(
     async (data: any) => {
       setIsLoading(true);
-      const exAttachments: any[] =
-        (!!data?.images?.length &&
-          data?.images?.filter(filterExBgAttachments)) ||
-        [];
-
       const imagesToUpload =
-        (!!data?.images?.length &&
-          data?.images?.filter(filterImagesToUpload)) ||
-        [];
-
-      const savedAttachments = imagesToUpload?.length
-        ? await uploadImages(
-            imagesToUpload?.map((i) => {
-              return {
-                ...i,
-              };
-            }),
-          )
-        : [];
-      let newUploadIndex = 0;
-      (data?.images || []).forEach((img: any) => {
-        if (filterExBgAttachments(img)) {
-          // already present (background) attachment
-          return;
-        }
-        if (!filterImagesToUpload(img)) {
-          // already saved attachment
-          exAttachments.push({
-            id: img?.id,
-            path: img?.path || img?.dataURL,
-            text: img?.text || "",
-          });
-          return;
-        }
-        const saved = savedAttachments?.attachments?.[newUploadIndex];
-        newUploadIndex++;
-        if (saved?.path) {
-          exAttachments.push({
-            id: saved?.id,
-            path: saved?.path,
-            text: img?.text || "",
-          });
-        }
-      });
+        (data?.images || []).filter(filterImagesToUpload) || [];
+      const savedAttachments = imagesToUpload.length
+        ? await uploadImages(imagesToUpload.map((i) => ({ ...i })))
+        : undefined;
+      const exAttachments = persistExerciseAttachments(
+        data?.images,
+        savedAttachments,
+      );
 
       const exData = {
         ...data,

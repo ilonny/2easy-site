@@ -1,6 +1,6 @@
 import {
-  filterExBgAttachments,
   filterImagesToUpload,
+  persistExerciseAttachments,
 } from "@/app/editor/helpers";
 import { TText2ColData } from "./../Text2Col/types";
 import { checkResponse, fetchPostJson } from "@/api";
@@ -20,91 +20,35 @@ export const useUploadText2ColEx = (
     async (data: TText2ColData) => {
       setIsLoading(true);
 
-      const exBgAttachments: any[] =
-        (!!data?.images?.length &&
-          data?.images?.filter(filterExBgAttachments)) ||
-        [];
       const bgImagesToUpload =
-        (!!data?.images?.length &&
-          data?.images?.filter(filterImagesToUpload)) ||
-        [];
-
-      const exEditorAttachments: any[] =
-        (!!data?.editorImages?.length &&
-          data?.editorImages?.filter(filterExBgAttachments)) ||
-        [];
+        (data?.images || []).filter(filterImagesToUpload) || [];
       const editorImagesToUpload =
-        (!!data?.editorImages?.length &&
-          data?.editorImages?.filter(filterImagesToUpload)) ||
-        [];
-
-      const exSecondEditorAttachments: any[] =
-        (!!data?.secondEditorImages?.length &&
-          data?.secondEditorImages?.filter(filterExBgAttachments)) ||
-        [];
+        (data?.editorImages || []).filter(filterImagesToUpload) || [];
       const secondEditorImagesToUpload =
-        (!!data?.secondEditorImages?.length &&
-          data?.secondEditorImages?.filter(filterImagesToUpload)) ||
-        [];
+        (data?.secondEditorImages || []).filter(filterImagesToUpload) || [];
 
-      const savedBgAttachments = bgImagesToUpload?.length
-        ? await uploadImages(
-            bgImagesToUpload?.map((i) => {
-              return {
-                ...i,
-              };
-            }),
-          )
-        : [];
+      const savedBgAttachments = bgImagesToUpload.length
+        ? await uploadImages(bgImagesToUpload.map((i) => ({ ...i })))
+        : undefined;
+      const savedEditorAttachments = editorImagesToUpload.length
+        ? await uploadImages(editorImagesToUpload.map((i) => ({ ...i })))
+        : undefined;
+      const savedSecondEditorAttachments = secondEditorImagesToUpload.length
+        ? await uploadImages(secondEditorImagesToUpload.map((i) => ({ ...i })))
+        : undefined;
 
-      if (savedBgAttachments?.attachments?.length) {
-        savedBgAttachments?.attachments?.forEach((att, attIndex) => {
-          exBgAttachments.push({
-            id: att?.id,
-            path: att?.path,
-            text: data?.images?.[attIndex]?.text || "",
-          });
-        });
-      }
-      const savedEditorAttachments = editorImagesToUpload?.length
-        ? await uploadImages(
-            editorImagesToUpload?.map((i) => {
-              return {
-                ...i,
-              };
-            }),
-          )
-        : [];
-
-      const savedSecondEditorAttachments = secondEditorImagesToUpload?.length
-        ? await uploadImages(
-            secondEditorImagesToUpload?.map((i) => {
-              return {
-                ...i,
-              };
-            }),
-          )
-        : [];
-
-      if (savedEditorAttachments?.attachments?.length) {
-        savedEditorAttachments?.attachments?.forEach((att, attIndex) => {
-          exEditorAttachments.push({
-            id: att?.id,
-            path: att?.path,
-            text: data?.editorImages?.[attIndex]?.text || "",
-          });
-        });
-      }
-
-      if (savedSecondEditorAttachments?.attachments?.length) {
-        savedSecondEditorAttachments?.attachments?.forEach((att, attIndex) => {
-          exSecondEditorAttachments.push({
-            id: att?.id,
-            path: att?.path,
-            text: data?.secondEditorImages?.[attIndex]?.text || "",
-          });
-        });
-      }
+      const exBgAttachments = persistExerciseAttachments(
+        data?.images,
+        savedBgAttachments,
+      );
+      const exEditorAttachments = persistExerciseAttachments(
+        data?.editorImages,
+        savedEditorAttachments,
+      );
+      const exSecondEditorAttachments = persistExerciseAttachments(
+        data?.secondEditorImages,
+        savedSecondEditorAttachments,
+      );
 
       const exData = {
         ...data,

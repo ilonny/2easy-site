@@ -4,8 +4,8 @@ import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { TAudioData } from "../Audio/types";
 import {
-  filterExBgAttachments,
   filterImagesToUpload,
+  persistExerciseAttachments,
 } from "@/app/editor/helpers";
 
 export const useUploadAudioEx = (
@@ -19,63 +19,26 @@ export const useUploadAudioEx = (
   const saveAudioEx = useCallback(
     async (data: TAudioData) => {
       setIsLoading(true);
-      const exBgAttachments: any[] =
-        (!!data?.images?.length &&
-          data?.images?.filter(filterExBgAttachments)) ||
-        [];
       const bgImagesToUpload =
-        (!!data?.images?.length &&
-          data?.images?.filter(filterImagesToUpload)) ||
-        [];
-
-      const exEditorAttachments: any[] =
-        (!!data?.editorImages?.length &&
-          data?.editorImages?.filter(filterExBgAttachments)) ||
-        [];
+        (data?.images || []).filter(filterImagesToUpload) || [];
       const editorImagesToUpload =
-        (!!data?.editorImages?.length &&
-          data?.editorImages?.filter(filterImagesToUpload)) ||
-        [];
+        (data?.editorImages || []).filter(filterImagesToUpload) || [];
 
-      const savedBgAttachments = bgImagesToUpload?.length
-        ? await uploadImages(
-            bgImagesToUpload?.map((i) => {
-              return {
-                ...i,
-              };
-            }),
-          )
-        : [];
+      const savedBgAttachments = bgImagesToUpload.length
+        ? await uploadImages(bgImagesToUpload.map((i) => ({ ...i })))
+        : undefined;
+      const savedEditorAttachments = editorImagesToUpload.length
+        ? await uploadImages(editorImagesToUpload.map((i) => ({ ...i })))
+        : undefined;
 
-      if (savedBgAttachments?.attachments?.length) {
-        savedBgAttachments?.attachments?.forEach((att, attIndex) => {
-          exBgAttachments.push({
-            id: att?.id,
-            path: att?.path,
-            text: data?.images?.[attIndex]?.text || "",
-          });
-        });
-      }
-
-      const savedEditorAttachments = editorImagesToUpload?.length
-        ? await uploadImages(
-            editorImagesToUpload?.map((i) => {
-              return {
-                ...i,
-              };
-            }),
-          )
-        : [];
-
-      if (savedEditorAttachments?.attachments?.length) {
-        savedEditorAttachments?.attachments?.forEach((att, attIndex) => {
-          exEditorAttachments.push({
-            id: att?.id,
-            path: att?.path,
-            text: data?.editorImages?.[attIndex]?.text || "",
-          });
-        });
-      }
+      const exBgAttachments = persistExerciseAttachments(
+        data?.images,
+        savedBgAttachments,
+      );
+      const exEditorAttachments = persistExerciseAttachments(
+        data?.editorImages,
+        savedEditorAttachments,
+      );
 
       const exData = {
         ...data,

@@ -4,8 +4,8 @@ import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { TMatchWordWordData } from "../MatchWordWord/types";
 import {
-  filterExBgAttachments,
   filterImagesToUpload,
+  persistExerciseAttachments,
 } from "@/app/editor/helpers";
 
 export const useUploadMatchWordWordEx = (
@@ -20,34 +20,15 @@ export const useUploadMatchWordWordEx = (
     async (data: TMatchWordWordData) => {
       setIsLoading(true);
 
-      const exBgAttachments: any[] =
-        (!!data?.images?.length &&
-          data?.images?.filter(filterExBgAttachments)) ||
-        [];
       const bgImagesToUpload =
-        (!!data?.images?.length &&
-          data?.images?.filter(filterImagesToUpload)) ||
-        [];
-
-      const savedBgAttachments = bgImagesToUpload?.length
-        ? await uploadImages(
-            bgImagesToUpload?.map((i) => {
-              return {
-                ...i,
-              };
-            }),
-          )
-        : [];
-
-      if (savedBgAttachments?.attachments?.length) {
-        savedBgAttachments?.attachments?.forEach((att, attIndex) => {
-          exBgAttachments.push({
-            id: att?.id,
-            path: att?.path,
-            text: data?.images?.[attIndex]?.text || "",
-          });
-        });
-      }
+        (data?.images || []).filter(filterImagesToUpload) || [];
+      const savedBgAttachments = bgImagesToUpload.length
+        ? await uploadImages(bgImagesToUpload.map((i) => ({ ...i })))
+        : undefined;
+      const exBgAttachments = persistExerciseAttachments(
+        data?.images,
+        savedBgAttachments,
+      );
 
       const exData = {
         ...data,

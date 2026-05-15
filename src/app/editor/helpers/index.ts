@@ -26,10 +26,8 @@ export const getImageUrl = (path?: string) => {
 };
 
 export const filterExBgAttachments = (i) => {
-  return (
-    !i.file &&
-    i.dataURL.includes("608dfa18-3eae-4574-a997-0a7441c16d33.selstorage.ru")
-  );
+  // Legacy helper: already persisted attachment (local uploads or S3).
+  return !filterImagesToUpload(i) && (!!i?.id || !!i?.path);
 };
 
 export const filterImagesToUpload = (i) => {
@@ -47,4 +45,40 @@ export const filterImagesToUpload = (i) => {
 
   const url = i?.dataURL;
   return typeof url === "string" && /^https?:\/\//i.test(url);
+};
+
+/** Build attachments array: keep saved images, upload and append new ones. */
+export const persistExerciseAttachments = (
+  images: any[] | undefined,
+  savedUploadResponse?: { attachments?: Array<any | null> },
+) => {
+  const list = images || [];
+  const result: any[] = [];
+  let newUploadIndex = 0;
+
+  list.forEach((img) => {
+    if (!filterImagesToUpload(img)) {
+      const path = img?.path || img?.dataURL;
+      if (path || img?.id) {
+        result.push({
+          id: img?.id,
+          path,
+          text: img?.text || "",
+        });
+      }
+      return;
+    }
+
+    const saved = savedUploadResponse?.attachments?.[newUploadIndex];
+    newUploadIndex++;
+    if (saved?.path) {
+      result.push({
+        id: saved?.id,
+        path: saved?.path,
+        text: img?.text || "",
+      });
+    }
+  });
+
+  return result;
 };

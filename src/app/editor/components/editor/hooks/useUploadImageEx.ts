@@ -1,7 +1,7 @@
 import { checkResponse, fetchPostJson } from "@/api";
 import {
-  filterExBgAttachments,
   filterImagesToUpload,
+  persistExerciseAttachments,
 } from "@/app/editor/helpers";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { useParams } from "next/navigation";
@@ -25,39 +25,13 @@ export const useUploadImageEx = (
         [];
 
       const savedAttachments = imagesToUpload?.length
-        ? await uploadImages(
-            imagesToUpload?.map((i) => ({
-              ...i,
-            })),
-          )
-        : [];
+        ? await uploadImages(imagesToUpload.map((i) => ({ ...i })))
+        : undefined;
 
-      let newUploadIndex = 0;
-      const exAttachments: any[] = (data?.images || []).map((img: any) => {
-        if (filterExBgAttachments(img)) {
-          return {
-            id: img.id,
-            path: img.path,
-            text: img.text || "",
-          };
-        }
-        // Keep already saved attachment; upload only new ones.
-        if (!filterImagesToUpload(img)) {
-          return {
-            id: img?.id,
-            path: img?.path || img?.dataURL,
-            text: img.text || "",
-          };
-        }
-
-        const saved = savedAttachments?.attachments?.[newUploadIndex];
-        newUploadIndex++;
-        return {
-          id: saved?.id,
-          path: saved?.path,
-          text: img.text || "",
-        };
-      });
+      const exAttachments = persistExerciseAttachments(
+        data?.images,
+        savedAttachments,
+      );
 
       const exData = {
         ...data,

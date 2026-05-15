@@ -179,6 +179,9 @@ const getDataMapper = (type: string) => {
       return mapTextDefaultExData;
     case "FILL_GAPS_NEW":
       return mapFillGapsNewExData;
+    case "free-input-form":
+    case "test":
+      return mapImageExData;
     default:
       return mapImageExData;
   }

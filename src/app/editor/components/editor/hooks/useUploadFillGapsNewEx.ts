@@ -5,7 +5,10 @@ import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { TFillGapsNewData } from "../FillGapsNew/types";
 import { useUploadImage } from "@/hooks/useUploadImage";
-import { filterImagesToUpload } from "@/app/editor/helpers";
+import {
+  filterImagesToUpload,
+  persistExerciseAttachments,
+} from "@/app/editor/helpers";
 
 export const useUploadFillGapsNewEx = (
   lastSortIndex: number,
@@ -34,25 +37,9 @@ export const useUploadFillGapsNewEx = (
             )
           : [];
 
-        let newUploadIndex = 0;
-        const persistedImages = (
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ((data?.images as any[]) || []).map((img: any) => {
-            // Keep already-persisted attachment shape
-            if (!filterImagesToUpload(img)) {
-              return {
-                id: img?.id,
-                path: img?.path || img?.dataURL,
-              };
-            }
-
-            const saved = savedAttachments?.attachments?.[newUploadIndex];
-            newUploadIndex++;
-            return {
-              id: saved?.id,
-              path: saved?.path,
-            };
-          }) || []
+        const persistedImages = persistExerciseAttachments(
+          data?.images as any[],
+          savedAttachments,
         ).filter((i) => !!i?.path);
 
         const createdExRes = await fetchPostJson({
