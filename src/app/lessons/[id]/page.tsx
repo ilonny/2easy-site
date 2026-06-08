@@ -52,6 +52,13 @@ import { CopyLessonLink } from "../components/CopyLessonLink";
 import { getImageUrl } from "@/app/editor/helpers";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { VocabularyModal } from "@/app/vocabulary/components/VocabularyModal";
+import { AddWordModal } from "@/app/vocabulary/components/AddWordModal";
+import {
+  LessonVocabularyButton,
+  CompactVocabularyButton,
+} from "@/app/vocabulary/components/VocabularyButtons";
+import { VocabularySelectionWidget } from "@/app/vocabulary/components/VocabularySelectionWidget";
 
 export default function LessonPage() {
   withLogin();
@@ -74,6 +81,10 @@ export default function LessonPage() {
   const lastStudentFocusUpdatedAtRef = useRef<number>(0);
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+  const [vocabularyModalOpen, setVocabularyModalOpen] = useState(false);
+  const [vocabularyStudentId, setVocabularyStudentId] = useState(0);
+  const [addWordModalOpen, setAddWordModalOpen] = useState(false);
+  const [selectedWord, setSelectedWord] = useState("");
 
   const getCurrentExerciseIdInView = useCallback(() => {
     if (typeof document === "undefined" || typeof window === "undefined") {
@@ -277,7 +288,8 @@ export default function LessonPage() {
         <div className="flex flex-row items-stretch gap-2 sm:gap-3 md:gap-4 w-full min-w-0">
           <div className="min-w-0 flex-1">
             <div
-              className="p-3 sm:p-5 md:p-8 lg:p-10 w-full max-w-[1160px] mx-auto bg-white rounded-[10px] box-border min-w-0"
+              className="p-3 sm:p-5 md:p-8 lg:p-10 w-full max-w-[1160px] mx-auto bg-white rounded-[10px] box-border min-w-0 relative"
+              id="lessonContentWrapper"
               style={{
                 marginLeft: isStudent ? "auto" : undefined,
                 marginRight: isStudent ? "auto" : undefined,
@@ -321,6 +333,15 @@ export default function LessonPage() {
                   onChangeIsVisible={() => {}}
                 />
               </div>
+              {isStudent && profile?.studentId && (
+                <VocabularySelectionWidget
+                  wrapperId="lessonContentWrapper"
+                  onAddSelection={(selection) => {
+                    setSelectedWord(selection);
+                    setAddWordModalOpen(true);
+                  }}
+                />
+              )}
               {!!lesson?.homework_lesson_id &&
                 !lesson?.lesson_id_homework && (
                   <div className="mt-8 flex justify-center">
@@ -435,6 +456,14 @@ export default function LessonPage() {
                               {s["student.email"]}
                             </p>
                           )}
+                          {isTeacher && (
+                            <CompactVocabularyButton
+                              onClick={() => {
+                                setVocabularyStudentId(Number(s.student_id));
+                                setVocabularyModalOpen(true);
+                              }}
+                            />
+                          )}
                         </Card>
                       </div>
                     );
@@ -530,6 +559,14 @@ export default function LessonPage() {
           <div
             className="fixed right-2 bottom-3 sm:right-4 sm:bottom-4 flex flex-col items-end gap-2 max-w-[calc(100vw-1rem)] z-10"
           >
+            {isStudent && profile?.studentId && (
+              <LessonVocabularyButton
+                onClick={() => {
+                  setVocabularyStudentId(Number(profile.studentId));
+                  setVocabularyModalOpen(true);
+                }}
+              />
+            )}
             <VideoCall lessonId={params.id as string} />
             <Chat
               students={students as any}
@@ -887,6 +924,23 @@ export default function LessonPage() {
           </ModalBody>
         </ModalContent>
       </Modal>
+      {!!vocabularyStudentId && (
+        <VocabularyModal
+          isOpen={vocabularyModalOpen}
+          onClose={() => setVocabularyModalOpen(false)}
+          studentId={vocabularyStudentId}
+          initialLessonId={Number(params.id) || undefined}
+        />
+      )}
+      {isStudent && profile?.studentId && (
+        <AddWordModal
+          isVisible={addWordModalOpen}
+          setIsVisible={setAddWordModalOpen}
+          studentId={Number(profile.studentId)}
+          sourceWord={selectedWord}
+          lessonId={Number(params.id) || undefined}
+        />
+      )}
     </main>
   );
 }

@@ -22,6 +22,7 @@ import Ellipse from "@/assets/icons/ellipse.svg";
 import { useRouter } from "next/navigation";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { T } from "@/i18n/T";
+import { CompactVocabularyButton } from "@/app/vocabulary/components/VocabularyButtons";
 
 type TProps = {
   hideAddButton?: boolean;
@@ -33,6 +34,7 @@ type TProps = {
   onSuccessEditCallback?: () => void;
   onSuccessDeleteCallback?: () => void;
   btnSecondary?: boolean;
+  onOpenVocabulary?: () => void;
 };
 
 export const StudentList = (props: TProps) => {
@@ -46,6 +48,7 @@ export const StudentList = (props: TProps) => {
     onSuccessEditCallback,
     onSuccessDeleteCallback,
     btnSecondary,
+    onOpenVocabulary,
   } = props;
   const [createIsVisible, setCreateIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
@@ -159,6 +162,12 @@ export const StudentList = (props: TProps) => {
                         </div>
                       </div>
                     </div>
+                    {onOpenVocabulary && (
+                      <CompactVocabularyButton
+                        onClick={onOpenVocabulary}
+                        className="mt-3"
+                      />
+                    )}
                     {!hidePopoverButton && (
                       <div>
                         <Popover
@@ -187,6 +196,19 @@ export const StudentList = (props: TProps) => {
                                   }}
                                 >
                                   <T k="students.toStudentCabinet" />
+                                </Button>
+                                <div className="h-2" />
+                              </>
+                            )}
+                            {onOpenVocabulary && (
+                              <>
+                                <Button
+                                  fullWidth
+                                  color="primary"
+                                  variant="flat"
+                                  onClick={onOpenVocabulary}
+                                >
+                                  <T k="vocabulary.tab" />
                                 </Button>
                                 <div className="h-2" />
                               </>

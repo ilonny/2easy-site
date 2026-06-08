@@ -56,6 +56,7 @@ export default function StudentAccountPage() {
 
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
+  const [vocabularyModalOpen, setVocabularyModalOpen] = useState(false);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
@@ -112,6 +113,9 @@ export default function StudentAccountPage() {
                 hideAccountButton
                 studentsList={[studentInfo]}
                 hideAddButton
+                onOpenVocabulary={
+                  isTeacher ? () => setVocabularyModalOpen(true) : undefined
+                }
               />
             )}
           </div>
@@ -146,6 +150,8 @@ export default function StudentAccountPage() {
             isStudent={isStudent}
             alwaysOpenLessonMode={true}
             includeCourseLessons
+            vocabularyModalOpen={vocabularyModalOpen}
+            onVocabularyModalChange={setVocabularyModalOpen}
           />
         )}
       </ContentWrapper>

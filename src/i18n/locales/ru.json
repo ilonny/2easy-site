@@ -565,6 +565,34 @@
   "commonErrors": {
     "somethingWentWrong": "Что-то пошло не так"
   },
+  "vocabulary": {
+    "tab": "Словарь",
+    "title": "Словарь",
+    "unlearnedTab": "Неизученные слова",
+    "learnedTab": "Изученные слова",
+    "searchPlaceholder": "Поиск по слову или переводу",
+    "addWordPlaceholder": "Новое слово",
+    "wordsCount": "Слов: {{count}}",
+    "selectedCount": "Выбрано: {{count}}",
+    "selectAll": "Выбрать все",
+    "empty": "Слов пока нет",
+    "allWords": "Все слова",
+    "lessonWords": "Слова урока",
+    "resetSelection": "Сбросить",
+    "actions": "Действия",
+    "markLearned": "Отметить как выученное",
+    "markUnlearned": "Отметить как невыученное",
+    "deleteConfirm": "Удалить выбранные слова ({{count}})?",
+    "markedAsLearned": "Слова отмечены как выученные",
+    "markedAsUnlearned": "Слова отмечены как невыученные",
+    "wordsDeleted": "Слова удалены",
+    "addToDictionary": "Добавить в словарь",
+    "addWordTitle": "Добавить в словарь",
+    "sourceWord": "Исходное слово",
+    "translation": "Перевод",
+    "translationRequired": "Укажите перевод",
+    "wordAdded": "Слово добавлено в словарь"
+  },
   "metadata": {
     "title": "2EASY Interactive",
     "description": "Интерактивная платформа с готовыми материалами для создания и проведения языковых уроков"

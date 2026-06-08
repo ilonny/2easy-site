@@ -564,6 +564,34 @@
   "commonErrors": {
     "somethingWentWrong": "Something went wrong"
   },
+  "vocabulary": {
+    "tab": "Dictionary",
+    "title": "Dictionary",
+    "unlearnedTab": "Unlearned words",
+    "learnedTab": "Learned words",
+    "searchPlaceholder": "Search by word or translation",
+    "addWordPlaceholder": "New word",
+    "wordsCount": "Words: {{count}}",
+    "selectedCount": "Selected: {{count}}",
+    "selectAll": "Select all",
+    "empty": "No words yet",
+    "allWords": "All words",
+    "lessonWords": "Lesson words",
+    "resetSelection": "Reset",
+    "actions": "Actions",
+    "markLearned": "Mark as learned",
+    "markUnlearned": "Mark as unlearned",
+    "deleteConfirm": "Delete selected words ({{count}})?",
+    "markedAsLearned": "Words marked as learned",
+    "markedAsUnlearned": "Words marked as unlearned",
+    "wordsDeleted": "Words deleted",
+    "addToDictionary": "Add to dictionary",
+    "addWordTitle": "Add to dictionary",
+    "sourceWord": "Source word",
+    "translation": "Translation",
+    "translationRequired": "Enter a translation",
+    "wordAdded": "Word added to dictionary"
+  },
   "metadata": {
     "title": "2EASY Interactive",
     "description": "Interactive platform with ready-made materials for creating and conducting language lessons"

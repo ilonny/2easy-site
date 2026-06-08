@@ -28,6 +28,7 @@ import { TCourse, useCourses } from "@/app/course/hooks/useCourses";
 import { AttachLessonCourseModalForm } from "../AttachLessonCourseModalForm";
 import Link from "next/link";
 import { T } from "@/i18n/T";
+import { VocabularyModal } from "@/app/vocabulary/components/VocabularyModal";
 
 const StudentCabinetTabSync = ({
   studentId,
@@ -64,6 +65,8 @@ type TProps = {
   alwaysOpenLessonMode?: boolean;
   showCourseSearch?: boolean;
   includeCourseLessons?: boolean;
+  vocabularyModalOpen?: boolean;
+  onVocabularyModalChange?: (open: boolean) => void;
 };
 
 const HOMEWORK_TAG = "Homework";
@@ -83,6 +86,8 @@ export const ProfileLessons = (props: TProps) => {
     alwaysOpenLessonMode,
     showCourseSearch,
     includeCourseLessons,
+    vocabularyModalOpen: controlledVocabularyModalOpen,
+    onVocabularyModalChange,
   } = props;
   const router = useRouter();
   const { profile, createLessonModalIsVisible, setCreateLessonModalIsVisible } =
@@ -110,6 +115,12 @@ export const ProfileLessons = (props: TProps) => {
   const [studentTabIndex, setStudentTabIndex] = useState<"lessons" | "courses">(
     "lessons",
   );
+  const [internalVocabularyModalOpen, setInternalVocabularyModalOpen] =
+    useState(false);
+  const vocabularyModalOpen =
+    controlledVocabularyModalOpen ?? internalVocabularyModalOpen;
+  const setVocabularyModalOpen =
+    onVocabularyModalChange ?? setInternalVocabularyModalOpen;
 
   const { courses, coursesIsLoading, getCourses } = useCourses();
 
@@ -556,6 +567,14 @@ export const ProfileLessons = (props: TProps) => {
             >
               <T k="lessons.coursesTab" />
             </Button>
+            <Button
+              radius="full"
+              color="primary"
+              variant="faded"
+              onClick={() => setVocabularyModalOpen(true)}
+            >
+              <T k="vocabulary.tab" defaultText="Словарь" />
+            </Button>
           </div>
         </>
       )}
@@ -697,6 +716,13 @@ export const ProfileLessons = (props: TProps) => {
         setIsVisible={setCreateCourseModalIsVisible}
         onSuccess={onCreateCourse}
       />
+      {!!studentId && (
+        <VocabularyModal
+          isOpen={vocabularyModalOpen}
+          onClose={() => setVocabularyModalOpen(false)}
+          studentId={Number(studentId)}
+        />
+      )}
     </>
   );
 };
