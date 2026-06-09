@@ -17,7 +17,7 @@ type TProps = {
   count: number;
 };
 
-export const DeleteVocabularyConfirmModal: FC<TProps> = ({
+export const DeleteDictionaryConfirmModal: FC<TProps> = ({
   isVisible,
   setIsVisible,
   onConfirm,
@@ -34,7 +34,7 @@ export const DeleteVocabularyConfirmModal: FC<TProps> = ({
         <ModalHeader>
           <p>
             <T
-              k="vocabulary.deleteConfirm"
+              k="dictionary.deleteConfirm"
               values={{ count }}
               defaultText="Удалить выбранные слова ({{count}})?"
             />

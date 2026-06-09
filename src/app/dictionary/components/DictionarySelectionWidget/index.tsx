@@ -1,42 +1,16 @@
 "use client";
 
 import { FC, useCallback, useEffect, useRef, useState } from "react";
-import { VocabularyIcon } from "@/components/icons/VocabularyIcon";
+import { DictionaryIcon } from "@/components/icons/DictionaryIcon";
+import i18n from "@/i18n/config";
+import { getSelectionEndRect } from "../../utils/selection";
 
 type TProps = {
   wrapperId: string;
   onAddSelection: (selection: string) => void;
 };
 
-const getSelectionEndRect = (selection: Selection): DOMRect | null => {
-  const { focusNode, focusOffset } = selection;
-  if (!focusNode) {
-    return null;
-  }
-
-  const range = document.createRange();
-
-  try {
-    range.setStart(focusNode, focusOffset);
-    range.collapse(true);
-  } catch {
-    return null;
-  }
-
-  const rects = range.getClientRects();
-  if (rects.length > 0) {
-    return rects[rects.length - 1];
-  }
-
-  const rect = range.getBoundingClientRect();
-  if (rect.width === 0 && rect.height === 0) {
-    return null;
-  }
-
-  return rect;
-};
-
-export const VocabularySelectionWidget: FC<TProps> = ({
+export const DictionarySelectionWidget: FC<TProps> = ({
   wrapperId,
   onAddSelection,
 }) => {
@@ -149,7 +123,7 @@ export const VocabularySelectionWidget: FC<TProps> = ({
         left: widgetState.left,
         top: widgetState.top,
       }}
-      aria-label="Добавить в словарь"
+      aria-label={i18n.t("dictionary.addToDictionary")}
       onMouseDown={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -164,7 +138,7 @@ export const VocabularySelectionWidget: FC<TProps> = ({
         window.getSelection()?.removeAllRanges();
       }}
     >
-      <VocabularyIcon size={20} className="text-primary" />
+      <DictionaryIcon size={20} className="text-primary" />
     </button>
   );
 };

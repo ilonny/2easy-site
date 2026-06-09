@@ -8,7 +8,7 @@ type TProps = {
   color?: string;
 };
 
-export const VocabularyIcon: FC<TProps> = ({
+export const DictionaryIcon: FC<TProps> = ({
   size = 20,
   className = "",
   color,

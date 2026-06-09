@@ -28,7 +28,7 @@ import { TCourse, useCourses } from "@/app/course/hooks/useCourses";
 import { AttachLessonCourseModalForm } from "../AttachLessonCourseModalForm";
 import Link from "next/link";
 import { T } from "@/i18n/T";
-import { VocabularyModal } from "@/app/vocabulary/components/VocabularyModal";
+import { DictionaryModal } from "@/app/dictionary/components/DictionaryModal";
 
 const StudentCabinetTabSync = ({
   studentId,
@@ -65,8 +65,8 @@ type TProps = {
   alwaysOpenLessonMode?: boolean;
   showCourseSearch?: boolean;
   includeCourseLessons?: boolean;
-  vocabularyModalOpen?: boolean;
-  onVocabularyModalChange?: (open: boolean) => void;
+  dictionaryModalOpen?: boolean;
+  onDictionaryModalChange?: (open: boolean) => void;
 };
 
 const HOMEWORK_TAG = "Homework";
@@ -86,8 +86,8 @@ export const ProfileLessons = (props: TProps) => {
     alwaysOpenLessonMode,
     showCourseSearch,
     includeCourseLessons,
-    vocabularyModalOpen: controlledVocabularyModalOpen,
-    onVocabularyModalChange,
+    dictionaryModalOpen: controlledDictionaryModalOpen,
+    onDictionaryModalChange,
   } = props;
   const router = useRouter();
   const { profile, createLessonModalIsVisible, setCreateLessonModalIsVisible } =
@@ -115,12 +115,12 @@ export const ProfileLessons = (props: TProps) => {
   const [studentTabIndex, setStudentTabIndex] = useState<"lessons" | "courses">(
     "lessons",
   );
-  const [internalVocabularyModalOpen, setInternalVocabularyModalOpen] =
+  const [internalDictionaryModalOpen, setInternalDictionaryModalOpen] =
     useState(false);
-  const vocabularyModalOpen =
-    controlledVocabularyModalOpen ?? internalVocabularyModalOpen;
-  const setVocabularyModalOpen =
-    onVocabularyModalChange ?? setInternalVocabularyModalOpen;
+  const dictionaryModalOpen =
+    controlledDictionaryModalOpen ?? internalDictionaryModalOpen;
+  const setDictionaryModalOpen =
+    onDictionaryModalChange ?? setInternalDictionaryModalOpen;
 
   const { courses, coursesIsLoading, getCourses } = useCourses();
 
@@ -571,9 +571,9 @@ export const ProfileLessons = (props: TProps) => {
               radius="full"
               color="primary"
               variant="faded"
-              onClick={() => setVocabularyModalOpen(true)}
+              onClick={() => setDictionaryModalOpen(true)}
             >
-              <T k="vocabulary.tab" defaultText="Словарь" />
+              <T k="dictionary.tab" defaultText="Словарь" />
             </Button>
           </div>
         </>
@@ -717,9 +717,9 @@ export const ProfileLessons = (props: TProps) => {
         onSuccess={onCreateCourse}
       />
       {!!studentId && (
-        <VocabularyModal
-          isOpen={vocabularyModalOpen}
-          onClose={() => setVocabularyModalOpen(false)}
+        <DictionaryModal
+          isOpen={dictionaryModalOpen}
+          onClose={() => setDictionaryModalOpen(false)}
           studentId={Number(studentId)}
         />
       )}

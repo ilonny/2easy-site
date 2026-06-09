@@ -6,10 +6,10 @@ import {
   useImperativeHandle,
   useState,
 } from "react";
-import { VocabularyModal } from "../VocabularyModal";
+import { DictionaryModal } from "../DictionaryModal";
 import { AddWordModal } from "../AddWordModal";
 
-export type LessonVocabularyHandle = {
+export type LessonDictionaryHandle = {
   openDictionary: (studentId: number) => void;
   openAddWord: (word: string) => void;
 };
@@ -19,16 +19,16 @@ type TProps = {
   addWordStudentId?: number;
 };
 
-export const LessonVocabularyLayer = forwardRef<LessonVocabularyHandle, TProps>(
+export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
   ({ lessonId, addWordStudentId }, ref) => {
-    const [vocabularyModalOpen, setVocabularyModalOpen] = useState(false);
-    const [vocabularyStudentId, setVocabularyStudentId] = useState(0);
+    const [dictionaryModalOpen, setDictionaryModalOpen] = useState(false);
+    const [dictionaryStudentId, setDictionaryStudentId] = useState(0);
     const [addWordModalOpen, setAddWordModalOpen] = useState(false);
     const [selectedWord, setSelectedWord] = useState("");
 
     const openDictionary = useCallback((studentId: number) => {
-      setVocabularyStudentId(studentId);
-      setVocabularyModalOpen(true);
+      setDictionaryStudentId(studentId);
+      setDictionaryModalOpen(true);
     }, []);
 
     const openAddWord = useCallback((word: string) => {
@@ -47,11 +47,11 @@ export const LessonVocabularyLayer = forwardRef<LessonVocabularyHandle, TProps>(
 
     return (
       <>
-        {!!vocabularyStudentId && (
-          <VocabularyModal
-            isOpen={vocabularyModalOpen}
-            onClose={() => setVocabularyModalOpen(false)}
-            studentId={vocabularyStudentId}
+        {!!dictionaryStudentId && (
+          <DictionaryModal
+            isOpen={dictionaryModalOpen}
+            onClose={() => setDictionaryModalOpen(false)}
+            studentId={dictionaryStudentId}
             initialLessonId={lessonId}
           />
         )}
@@ -69,4 +69,4 @@ export const LessonVocabularyLayer = forwardRef<LessonVocabularyHandle, TProps>(
   }
 );
 
-LessonVocabularyLayer.displayName = "LessonVocabularyLayer";
+LessonDictionaryLayer.displayName = "LessonDictionaryLayer";

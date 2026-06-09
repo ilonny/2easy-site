@@ -53,14 +53,14 @@ import { getImageUrl } from "@/app/editor/helpers";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import {
-  LessonVocabularyButton,
-  IconVocabularyButton,
-} from "@/app/vocabulary/components/VocabularyButtons";
-import { VocabularySelectionWidget } from "@/app/vocabulary/components/VocabularySelectionWidget";
+  LessonDictionaryButton,
+  IconDictionaryButton,
+} from "@/app/dictionary/components/DictionaryButtons";
+import { DictionarySelectionWidget } from "@/app/dictionary/components/DictionarySelectionWidget";
 import {
-  LessonVocabularyHandle,
-  LessonVocabularyLayer,
-} from "@/app/vocabulary/components/LessonVocabularyLayer";
+  LessonDictionaryHandle,
+  LessonDictionaryLayer,
+} from "@/app/dictionary/components/LessonDictionaryLayer";
 
 const VIEW_NOOP = () => {};
 const VIEW_ASYNC_NOOP = async () => {};
@@ -86,15 +86,15 @@ export default function LessonPage() {
   const lastStudentFocusUpdatedAtRef = useRef<number>(0);
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
-  const vocabularyRef = useRef<LessonVocabularyHandle>(null);
+  const dictionaryRef = useRef<LessonDictionaryHandle>(null);
 
   const handleAddWordSelection = useCallback((selection: string) => {
-    vocabularyRef.current?.openAddWord(selection);
+    dictionaryRef.current?.openAddWord(selection);
   }, []);
 
   const handleOpenStudentDictionary = useCallback(() => {
     if (profile?.studentId) {
-      vocabularyRef.current?.openDictionary(Number(profile.studentId));
+      dictionaryRef.current?.openDictionary(Number(profile.studentId));
     }
   }, [profile?.studentId]);
 
@@ -346,7 +346,7 @@ export default function LessonPage() {
                 />
               </div>
               {isStudent && profile?.studentId && (
-                <VocabularySelectionWidget
+                <DictionarySelectionWidget
                   wrapperId="lessonContentWrapper"
                   onAddSelection={handleAddWordSelection}
                 />
@@ -425,7 +425,7 @@ export default function LessonPage() {
           {!isStudent && !!students?.length && (
             <aside
               className="flex w-[64px] shrink-0 min-w-0 flex-col self-stretch sm:w-[100px] md:w-[180px] lg:w-[200px]"
-              aria-label="Участники урока"
+              aria-label={i18n.t("lessons.participantsAriaLabel")}
             >
               <div className="sticky top-[88px] w-full lg:top-8">
                 <div
@@ -469,9 +469,9 @@ export default function LessonPage() {
                               )}
                             </div>
                             {isTeacher && (
-                              <IconVocabularyButton
+                              <IconDictionaryButton
                                 onClick={() => {
-                                  vocabularyRef.current?.openDictionary(
+                                  dictionaryRef.current?.openDictionary(
                                     Number(s.student_id)
                                   );
                                 }}
@@ -574,7 +574,7 @@ export default function LessonPage() {
             className="fixed right-2 bottom-3 sm:right-4 sm:bottom-4 flex flex-col items-end gap-2 max-w-[calc(100vw-1rem)] z-10"
           >
             {isStudent && profile?.studentId && (
-              <LessonVocabularyButton onClick={handleOpenStudentDictionary} />
+              <LessonDictionaryButton onClick={handleOpenStudentDictionary} />
             )}
             <VideoCall lessonId={params.id as string} />
             <Chat
@@ -933,8 +933,8 @@ export default function LessonPage() {
           </ModalBody>
         </ModalContent>
       </Modal>
-      <LessonVocabularyLayer
-        ref={vocabularyRef}
+      <LessonDictionaryLayer
+        ref={dictionaryRef}
         lessonId={Number(params.id) || undefined}
         addWordStudentId={
           isStudent && profile?.studentId

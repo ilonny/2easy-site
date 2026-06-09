@@ -1,4 +1,4 @@
-export type TVocabularyItem = {
+export type TDictionaryItem = {
   id: number;
   studentId: number;
   lessonId: number | null;
@@ -20,10 +20,25 @@ export type TLanguage = {
   nativeName: string;
 };
 
-export type TVocabularyListParams = {
+export type TDictionaryListParams = {
   search?: string;
   isLearned?: boolean;
   lessonId?: number;
   sortField?: string;
   sortOrder?: "asc" | "desc";
 };
+
+export type TTranslateResult = {
+  sourceWord: string;
+  translatedWord: string;
+};
+
+export type TCreateWordPayload = {
+  sourceWord: string;
+  translatedWord: string;
+  sourceLanguageCode?: string;
+  targetLanguageCode?: string;
+  lessonId?: number;
+};
+
+export type DictionaryTab = "unlearned" | "learned";

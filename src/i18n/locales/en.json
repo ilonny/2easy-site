@@ -307,7 +307,10 @@
       "button": "To my task",
       "tooltip": "Use this if students got lost during the lesson. When you click the button, all students in the lesson will be moved to the current task you’re looking at.",
       "cantDetectCurrentTask": "Couldn't detect the current task on the screen"
-    }
+    },
+    "participants": "PARTICIPANTS",
+    "participantsShort": "Partic.",
+    "participantsAriaLabel": "Lesson participants"
   },
   "editor": {
     "home": "Home",
@@ -564,7 +567,7 @@
   "commonErrors": {
     "somethingWentWrong": "Something went wrong"
   },
-  "vocabulary": {
+  "dictionary": {
     "tab": "Dictionary",
     "title": "Dictionary",
     "unlearnedTab": "Unlearned words",
