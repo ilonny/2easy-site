@@ -594,7 +594,9 @@
     "sourceWord": "Исходное слово",
     "translation": "Перевод",
     "translationRequired": "Укажите перевод",
-    "wordAdded": "Слово добавлено в словарь"
+    "wordAdded": "Слово добавлено в словарь",
+    "playPronunciation": "Прослушать произношение",
+    "pronunciationError": "Не удалось воспроизвести произношение"
   },
   "metadata": {
     "title": "2EASY Interactive",

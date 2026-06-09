@@ -2,7 +2,9 @@
 
 import { Checkbox } from "@nextui-org/react";
 import { FC, KeyboardEvent } from "react";
+import { SpeakWordButton } from "../SpeakWordButton";
 import { TDictionaryItem } from "../../types";
+import { buildSpeakWordId } from "../../utils/speechIds";
 
 type TProps = {
   item: TDictionaryItem;
@@ -44,6 +46,13 @@ export const DictionaryWordCard: FC<TProps> = ({
           : "border-[#eee] bg-[#fafafa]"
       } ${isLoading ? "pointer-events-none" : ""}`}
     >
+      <div onClick={(event) => event.stopPropagation()}>
+        <SpeakWordButton
+          id={buildSpeakWordId(item.id)}
+          text={item.sourceWord}
+          disabled={isLoading}
+        />
+      </div>
       <div className="min-w-0 flex-1">
         <p className="font-medium break-words text-[#231F20] text-sm">
           {item.sourceWord}

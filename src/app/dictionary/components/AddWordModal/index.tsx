@@ -16,9 +16,11 @@ import { useDictionary } from "../../hooks/useDictionary";
 import { toast } from "react-toastify";
 import i18n from "@/i18n/config";
 import {
-  DICTIONARY_FIELD_LABEL_CLASS,
+  ADD_WORD_SPEAK_ID,
   DICTIONARY_INPUT_CLASS_NAMES,
+  DICTIONARY_READONLY_INPUT_CLASS_NAMES,
 } from "../../constants";
+import { SpeakWordButton } from "../SpeakWordButton";
 
 type TProps = {
   isVisible: boolean;
@@ -110,16 +112,20 @@ export const AddWordModal: FC<TProps> = ({
           <T k="dictionary.addWordTitle" defaultText="Добавить в словарь" />
         </ModalHeader>
         <ModalBody className="gap-4 text-sm">
-          <div className="flex h-14 w-full flex-col justify-end px-3 py-2">
-            <label className={`${DICTIONARY_FIELD_LABEL_CLASS} scale-[0.85]`}>
-              <T k="dictionary.sourceWord" defaultText="Исходное слово" />
-            </label>
-            <p className="text-sm font-normal break-words text-[#231F20]">
-              {sourceWord}
-            </p>
-          </div>
           <Input
             size="md"
+            labelPlacement="outside"
+            label={<T k="dictionary.sourceWord" defaultText="Исходное слово" />}
+            value={sourceWord}
+            isReadOnly
+            classNames={DICTIONARY_READONLY_INPUT_CLASS_NAMES}
+            startContent={
+              <SpeakWordButton id={ADD_WORD_SPEAK_ID} text={sourceWord} />
+            }
+          />
+          <Input
+            size="md"
+            labelPlacement="outside"
             label={<T k="dictionary.translation" defaultText="Перевод" />}
             value={translatedWord}
             onValueChange={setTranslatedWord}

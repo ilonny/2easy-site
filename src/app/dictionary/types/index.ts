@@ -42,3 +42,12 @@ export type TCreateWordPayload = {
 };
 
 export type DictionaryTab = "unlearned" | "learned";
+
+export type TSpeechPlaybackState = {
+  activeId: string | null;
+  isLoading: boolean;
+};
+
+export type TSynthesizeSpeechPayload = {
+  text: string;
+};

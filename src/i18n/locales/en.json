@@ -593,7 +593,9 @@
     "sourceWord": "Source word",
     "translation": "Translation",
     "translationRequired": "Enter a translation",
-    "wordAdded": "Word added to dictionary"
+    "wordAdded": "Word added to dictionary",
+    "playPronunciation": "Play pronunciation",
+    "pronunciationError": "Could not play pronunciation"
   },
   "metadata": {
     "title": "2EASY Interactive",
