@@ -113,9 +113,6 @@ export default function StudentAccountPage() {
                 hideAccountButton
                 studentsList={[studentInfo]}
                 hideAddButton
-                onOpenVocabulary={
-                  isTeacher ? () => setVocabularyModalOpen(true) : undefined
-                }
               />
             )}
           </div>

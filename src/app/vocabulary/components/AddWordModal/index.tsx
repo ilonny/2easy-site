@@ -25,6 +25,16 @@ type TProps = {
   onSuccess?: () => void;
 };
 
+const fieldLabelClassName =
+  "block subpixel-antialiased pointer-events-none origin-top-left text-sm text-[#767676]";
+
+const inputClassNames = {
+  base: "w-full min-w-0",
+  inputWrapper: "bg-white hove min-w-0",
+  input: "text-sm",
+  label: fieldLabelClassName,
+};
+
 export const AddWordModal: FC<TProps> = ({
   isVisible,
   setIsVisible,
@@ -100,28 +110,34 @@ export const AddWordModal: FC<TProps> = ({
       scrollBehavior="inside"
     >
       <ModalContent>
-        <ModalHeader>
+        <ModalHeader className="shrink-0">
           <T k="vocabulary.addWordTitle" defaultText="Добавить в словарь" />
         </ModalHeader>
-        <ModalBody className="gap-4">
+        <ModalBody className="gap-4 text-sm">
+          <div className="flex h-14 w-full flex-col justify-end px-3 py-2">
+            <label className={`${fieldLabelClassName} scale-[0.85]`}>
+              <T k="vocabulary.sourceWord" defaultText="Исходное слово" />
+            </label>
+            <p className="text-sm font-normal break-words text-[#231F20]">
+              {sourceWord}
+            </p>
+          </div>
           <Input
-            label={<T k="vocabulary.sourceWord" defaultText="Исходное слово" />}
-            value={sourceWord}
-            isReadOnly
-          />
-          <Input
+            size="md"
             label={<T k="vocabulary.translation" defaultText="Перевод" />}
             value={translatedWord}
             onValueChange={setTranslatedWord}
+            classNames={inputClassNames}
             endContent={isTranslating ? <Spinner size="sm" /> : null}
           />
         </ModalBody>
-        <ModalFooter className="gap-2">
-          <Button variant="light" onClick={() => setIsVisible(false)}>
+        <ModalFooter className="gap-2 text-sm shrink-0">
+          <Button variant="light" size="sm" onClick={() => setIsVisible(false)}>
             <T k="common.cancel" />
           </Button>
           <Button
             color="primary"
+            size="sm"
             onClick={onSave}
             isLoading={isSaving}
             isDisabled={isTranslating}

@@ -3,36 +3,41 @@
 import { Button } from "@nextui-org/react";
 import { FC, MouseEvent } from "react";
 import { T } from "@/i18n/T";
-
-export const DictionaryIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-  </svg>
-);
-
-const lessonActionButtonClass =
-  "w-full max-w-[300px] justify-between font-medium";
+import { VocabularyIcon } from "@/components/icons/VocabularyIcon";
 
 export const LessonVocabularyButton: FC<{ onClick: () => void }> = ({
   onClick,
 }) => (
   <Button
-    endContent={<DictionaryIcon />}
+    endContent={<VocabularyIcon />}
     color="primary"
     variant="light"
     onClick={onClick}
     size="lg"
-    className={lessonActionButtonClass}
+    style={{ minWidth: 300 }}
   >
     <T k="vocabulary.tab" defaultText="Словарь" />
+  </Button>
+);
+
+export const IconVocabularyButton: FC<{
+  onClick: (e?: MouseEvent<HTMLButtonElement>) => void;
+  className?: string;
+}> = ({ onClick, className = "" }) => (
+  <Button
+    isIconOnly
+    size="sm"
+    variant="light"
+    color="primary"
+    radius="lg"
+    aria-label="Словарь"
+    className={`h-8 w-8 min-w-8 shrink-0 rounded-lg sm:h-9 sm:w-9 sm:min-w-9 ${className}`}
+    onClick={(e) => {
+      e.stopPropagation();
+      onClick(e);
+    }}
+  >
+    <VocabularyIcon size={18} className="text-primary" />
   </Button>
 );
 
@@ -45,7 +50,7 @@ export const CompactVocabularyButton: FC<{
     variant="flat"
     color="primary"
     className={`mt-2 w-full min-h-0 text-[8px] leading-tight sm:text-[10px] md:text-xs ${className}`}
-    endContent={<DictionaryIcon />}
+    endContent={<VocabularyIcon size={16} className="text-primary" />}
     onClick={(e) => {
       e.stopPropagation();
       onClick(e);

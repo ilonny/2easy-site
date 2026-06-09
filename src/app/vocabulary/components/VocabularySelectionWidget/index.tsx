@@ -1,12 +1,39 @@
 "use client";
 
-import { Button, Card } from "@nextui-org/react";
-import { FC, useCallback, useEffect, useState } from "react";
-import { T } from "@/i18n/T";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { VocabularyIcon } from "@/components/icons/VocabularyIcon";
 
 type TProps = {
   wrapperId: string;
   onAddSelection: (selection: string) => void;
+};
+
+const getSelectionEndRect = (selection: Selection): DOMRect | null => {
+  const { focusNode, focusOffset } = selection;
+  if (!focusNode) {
+    return null;
+  }
+
+  const range = document.createRange();
+
+  try {
+    range.setStart(focusNode, focusOffset);
+    range.collapse(true);
+  } catch {
+    return null;
+  }
+
+  const rects = range.getClientRects();
+  if (rects.length > 0) {
+    return rects[rects.length - 1];
+  }
+
+  const rect = range.getBoundingClientRect();
+  if (rect.width === 0 && rect.height === 0) {
+    return null;
+  }
+
+  return rect;
 };
 
 export const VocabularySelectionWidget: FC<TProps> = ({
@@ -19,6 +46,7 @@ export const VocabularySelectionWidget: FC<TProps> = ({
     top: 0,
   });
   const [isVisible, setIsVisible] = useState(false);
+  const widgetRef = useRef<HTMLButtonElement>(null);
 
   const isInsideWrapper = useCallback(
     (node: Node | null | undefined) => {
@@ -50,13 +78,16 @@ export const VocabularySelectionWidget: FC<TProps> = ({
       return;
     }
 
-    const range = selection.getRangeAt(0);
-    const bound = range.getBoundingClientRect();
+    const endRect = getSelectionEndRect(selection);
+    if (!endRect) {
+      setIsVisible(false);
+      return;
+    }
 
     setWidgetState({
       selection: selection.toString().trim(),
-      left: bound.left - bounds.left,
-      top: bound.top - bounds.top + 20,
+      left: endRect.right - bounds.left,
+      top: endRect.bottom - bounds.top,
     });
     setIsVisible(true);
   }, [isInsideWrapper, wrapperId]);
@@ -64,6 +95,11 @@ export const VocabularySelectionWidget: FC<TProps> = ({
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
       const target = event.target as Node | null;
+
+      if (widgetRef.current?.contains(target)) {
+        return;
+      }
+
       const wrapper = document.getElementById(wrapperId);
 
       if (wrapper?.contains(target)) {
@@ -105,30 +141,30 @@ export const VocabularySelectionWidget: FC<TProps> = ({
   }
 
   return (
-    <Card
-      radius="md"
-      shadow="lg"
-      className="absolute z-20 p-0 overflow-hidden border border-primary/20"
+    <button
+      ref={widgetRef}
+      type="button"
+      className="absolute z-20 flex h-10 w-10 items-center justify-center rounded-lg border border-primary/10 bg-white shadow-lg transition-colors hover:bg-[#faf9ff]"
       style={{
         left: widgetState.left,
         top: widgetState.top,
       }}
+      aria-label="Добавить в словарь"
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onTouchStart={(e) => {
+        e.stopPropagation();
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onAddSelection(widgetState.selection);
+        setIsVisible(false);
+        window.getSelection()?.removeAllRanges();
+      }}
     >
-      <Button
-        color="primary"
-        variant="flat"
-        size="sm"
-        className="px-3 py-2 h-auto min-h-0"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={(e) => {
-          e.stopPropagation();
-          onAddSelection(widgetState.selection);
-          setIsVisible(false);
-          window.getSelection()?.removeAllRanges();
-        }}
-      >
-        <T k="vocabulary.addToDictionary" defaultText="Добавить в словарь" />
-      </Button>
-    </Card>
+      <VocabularyIcon size={20} className="text-primary" />
+    </button>
   );
 };

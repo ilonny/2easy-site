@@ -19,11 +19,14 @@ import {
   Tabs,
 } from "@nextui-org/react";
 import Loupe from "@/assets/icons/loupe.svg";
+import VocabularyIcon from "@/assets/icons/vocabulary.svg";
+import ArrowRightIcon from "@/assets/icons/arrow_right.svg";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { useVocabulary } from "../../hooks/useVocabulary";
 import { useLanguages } from "../../hooks/useLanguages";
 import { TVocabularyItem } from "../../types";
+import { AddWordModal } from "../AddWordModal";
 import { DeleteVocabularyConfirmModal } from "../DeleteVocabularyConfirmModal";
 import { toast } from "react-toastify";
 
@@ -64,14 +67,15 @@ export const VocabularyModal: FC<TProps> = ({
   studentId,
   initialLessonId,
 }) => {
-  const { items, isLoading, getVocabulary, updateLearned, deleteWords, translateWord, createWord } =
+  const { items, isLoading, getVocabulary, updateLearned, deleteWords } =
     useVocabulary(studentId);
   const { languages, getLanguages } = useLanguages();
 
   const [activeTab, setActiveTab] = useState<"unlearned" | "learned">(
     "unlearned"
   );
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [lessonFilterId, setLessonFilterId] = useState<number | undefined>(
     initialLessonId
@@ -79,7 +83,7 @@ export const VocabularyModal: FC<TProps> = ({
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [newWordText, setNewWordText] = useState("");
-  const [isAddingWord, setIsAddingWord] = useState(false);
+  const [addWordModalOpen, setAddWordModalOpen] = useState(false);
 
   const hasLessonContext = !!initialLessonId;
   const isLessonFilterActive =
@@ -93,60 +97,50 @@ export const VocabularyModal: FC<TProps> = ({
     [languages]
   );
 
-  const loadVocabulary = useCallback(async () => {
+  const fetchList = useCallback(() => {
     if (!studentId) {
-      return;
+      return Promise.resolve();
     }
 
-    await getVocabulary({
-      search: search.trim() || undefined,
+    return getVocabulary({
+      search: debouncedSearch.trim() || undefined,
       isLearned: activeTab === "learned",
       lessonId: lessonFilterId,
     });
-    setSelectedIds([]);
-  }, [
-    activeTab,
-    getVocabulary,
-    lessonFilterId,
-    search,
-    studentId,
-  ]);
+  }, [activeTab, debouncedSearch, getVocabulary, lessonFilterId, studentId]);
 
   useEffect(() => {
-    if (isOpen) {
-      getLanguages();
-    }
-  }, [getLanguages, isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      setLessonFilterId(initialLessonId);
+    if (!isOpen) {
       setActiveTab("unlearned");
-      setSearch("");
+      setSearchInput("");
+      setDebouncedSearch("");
       setSelectedIds([]);
       setNewWordText("");
-    }
-  }, [initialLessonId, isOpen]);
-
-  useEffect(() => {
-    if (!isOpen || !studentId) {
+      setAddWordModalOpen(false);
+      setLessonFilterId(undefined);
       return;
     }
 
-    loadVocabulary();
-  }, [isOpen, studentId, activeTab, lessonFilterId, loadVocabulary]);
+    setLessonFilterId(initialLessonId);
+    getLanguages();
+  }, [getLanguages, initialLessonId, isOpen]);
 
   useEffect(() => {
-    if (!isOpen || !studentId) {
-      return;
-    }
-
     const timeoutId = window.setTimeout(() => {
-      loadVocabulary();
-    }, 300);
+      setDebouncedSearch(searchInput);
+    }, 500);
 
     return () => window.clearTimeout(timeoutId);
-  }, [search]);
+  }, [searchInput]);
+
+  useEffect(() => {
+    if (!isOpen || !studentId) {
+      return;
+    }
+
+    fetchList();
+    setSelectedIds([]);
+  }, [isOpen, studentId, activeTab, lessonFilterId, debouncedSearch, fetchList]);
 
   const groupedItems = useMemo(
     () => groupByLanguagePair(items, getLanguageName),
@@ -180,6 +174,7 @@ export const VocabularyModal: FC<TProps> = ({
       setActionsPopoverOpen(false);
 
       if (success) {
+        setSelectedIds([]);
         toast(
           i18n.t(
             isLearned
@@ -188,10 +183,10 @@ export const VocabularyModal: FC<TProps> = ({
           ),
           { type: "success" }
         );
-        await loadVocabulary();
+        await fetchList();
       }
     },
-    [loadVocabulary, selectedIds, updateLearned]
+    [fetchList, selectedIds, updateLearned]
   );
 
   const handleDelete = useCallback(async () => {
@@ -203,134 +198,141 @@ export const VocabularyModal: FC<TProps> = ({
 
     if (success) {
       toast(i18n.t("vocabulary.wordsDeleted"), { type: "success" });
-      await loadVocabulary();
+      await fetchList();
     }
-  }, [deleteWords, loadVocabulary, selectedIds]);
+  }, [deleteWords, fetchList, selectedIds]);
 
-  const handleAddWord = useCallback(async () => {
-    const sourceWord = newWordText.trim();
-
-    if (!sourceWord) {
+  const openAddWordModal = useCallback(() => {
+    if (!newWordText.trim()) {
       return;
     }
 
-    setIsAddingWord(true);
+    setAddWordModalOpen(true);
+  }, [newWordText]);
 
-    try {
-      const translation = await translateWord(sourceWord);
-      if (!translation?.translatedWord) {
-        return;
-      }
-
-      const created = await createWord({
-        sourceWord,
-        translatedWord: translation.translatedWord,
-        lessonId: lessonFilterId,
-      });
-
-      if (created) {
-        toast(i18n.t("vocabulary.wordAdded"), { type: "success" });
-        setNewWordText("");
-        await loadVocabulary();
-      }
-    } finally {
-      setIsAddingWord(false);
-    }
-  }, [
-    createWord,
-    lessonFilterId,
-    loadVocabulary,
-    newWordText,
-    translateWord,
-  ]);
+  const handleWordAdded = useCallback(async () => {
+    setNewWordText("");
+    await fetchList();
+  }, [fetchList]);
 
   return (
     <>
       <Modal
-        size="3xl"
+        size="xl"
         isOpen={isOpen}
         onClose={onClose}
         scrollBehavior="inside"
+        classNames={{
+          base: "max-h-[85vh]",
+          body: "overflow-hidden py-0",
+        }}
       >
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
+        <ModalContent className="max-h-[85vh]">
+          <ModalHeader className="flex flex-col gap-1 shrink-0">
             <T k="vocabulary.title" defaultText="Словарь" />
           </ModalHeader>
-          <ModalBody className="gap-4">
-            <Tabs
-              selectedKey={activeTab}
-              onSelectionChange={(key) => {
-                setActiveTab(key as "unlearned" | "learned");
-                setSelectedIds([]);
-              }}
-              color="primary"
-              variant="underlined"
-            >
-              <Tab
-                key="unlearned"
-                title={<T k="vocabulary.unlearnedTab" defaultText="Неизученные слова" />}
-              />
-              <Tab
-                key="learned"
-                title={<T k="vocabulary.learnedTab" defaultText="Изученные слова" />}
-              />
-            </Tabs>
+          <ModalBody className="gap-4 px-0 text-sm flex flex-col min-h-0 overflow-hidden">
+            <div className="px-6 pt-2 shrink-0">
+              <Tabs
+                selectedKey={activeTab}
+                onSelectionChange={(key) => {
+                  setActiveTab(key as "unlearned" | "learned");
+                }}
+                color="primary"
+                variant="underlined"
+                classNames={{
+                  tabList: "gap-6 w-full border-b border-[#eee] p-0",
+                  cursor: "w-full bg-primary",
+                  tab: "px-0 h-10 text-sm",
+                }}
+              >
+                <Tab
+                  key="unlearned"
+                  title={<T k="vocabulary.unlearnedTab" defaultText="Неизученные слова" />}
+                />
+                <Tab
+                  key="learned"
+                  title={<T k="vocabulary.learnedTab" defaultText="Изученные слова" />}
+                />
+              </Tabs>
+            </div>
 
-            <div className="flex flex-col gap-3">
-              <Input
-                value={search}
-                onValueChange={setSearch}
-                placeholder={i18n.t("vocabulary.searchPlaceholder")}
-                size="lg"
-                classNames={{ inputWrapper: "bg-white min-w-0" }}
-                isDisabled={isLoading}
-                startContent={
-                  <Image
-                    src={Loupe.src}
-                    alt="search"
-                    style={{ borderRadius: 0 }}
-                  />
-                }
-              />
-              <div className="flex flex-col xs:flex-row gap-2 w-full">
+            <div className="px-6 pt-1 pb-4 border-b border-[#eee] shrink-0">
+              <div className="flex items-center gap-3 w-full">
                 <Input
                   value={newWordText}
                   onValueChange={setNewWordText}
                   placeholder={i18n.t("vocabulary.addWordPlaceholder")}
-                  size="lg"
-                  classNames={{ inputWrapper: "bg-white min-w-0 flex-1" }}
-                  isDisabled={isAddingWord || isLoading}
+                  size="md"
+                  classNames={{
+                    base: "flex-1 min-w-0",
+                    inputWrapper: "bg-white hove min-w-0",
+                    input: "text-sm",
+                  }}
+                  startContent={
+                    <Image
+                      src={VocabularyIcon.src}
+                      alt="vocabulary"
+                      style={{ borderRadius: 0 }}
+                    />
+                  }
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
+                    if (e.key === "Enter" && newWordText.trim()) {
                       e.preventDefault();
-                      handleAddWord();
+                      openAddWordModal();
                     }
                   }}
                 />
                 <Button
+                  isIconOnly
                   color="primary"
-                  size="lg"
-                  className="shrink-0 w-full sm:w-auto"
-                  isLoading={isAddingWord}
-                  isDisabled={!newWordText.trim() || isLoading}
-                  onClick={handleAddWord}
+                  radius="lg"
+                  size="md"
+                  className="shrink-0 !w-10 !h-10 !min-w-10 self-center"
+                  isDisabled={!newWordText.trim()}
+                  onClick={openAddWordModal}
                 >
-                  <T k="common.add" />
+                  <Image
+                    src={ArrowRightIcon.src}
+                    alt="add"
+                    style={{ borderRadius: 0 }}
+                  />
                 </Button>
+              </div>
+
+              <div className="pt-4">
+                <Input
+                  value={searchInput}
+                  onValueChange={setSearchInput}
+                  placeholder={i18n.t("vocabulary.searchPlaceholder")}
+                  size="md"
+                  classNames={{
+                    base: "w-full min-w-0",
+                    inputWrapper: "bg-white hove min-w-0",
+                    input: "text-sm",
+                  }}
+                  startContent={
+                    <Image
+                      src={Loupe.src}
+                      alt="search"
+                      style={{ borderRadius: 0 }}
+                    />
+                  }
+                />
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 flex-wrap py-1 border-y border-[#eee]">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                <p className="text-sm text-[#767676]">
+            <div className="px-6 py-1 flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-3 shrink-0">
+                <p className="text-[#767676] whitespace-nowrap">
                   <T
                     k="vocabulary.wordsCount"
                     values={{ count: items.length }}
-                    defaultText="Слов: {{count}}"
+                    defaultText="Всего слов {{count}}"
                   />
                 </p>
                 {selectedIds.length > 0 && (
-                  <p className="text-sm text-primary font-medium">
+                  <p className="text-primary font-medium whitespace-nowrap">
                     <T
                       k="vocabulary.selectedCount"
                       values={{ count: selectedIds.length }}
@@ -339,96 +341,123 @@ export const VocabularyModal: FC<TProps> = ({
                   </p>
                 )}
               </div>
-              <Checkbox
-                isSelected={allSelected}
-                onValueChange={toggleSelectAll}
-                isDisabled={isLoading || !items.length}
+              <div className="flex-1 border-t border-dotted border-[#ccc] min-w-[24px]" />
+              <div
+                role="button"
+                tabIndex={isLoading || !items.length ? -1 : 0}
+                onClick={() => {
+                  if (!isLoading && items.length) {
+                    toggleSelectAll();
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (isLoading || !items.length) {
+                    return;
+                  }
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    toggleSelectAll();
+                  }
+                }}
+                className={`flex items-center gap-2 shrink-0 ${
+                  isLoading || !items.length
+                    ? "pointer-events-none"
+                    : "cursor-pointer"
+                }`}
               >
-                <T k="vocabulary.selectAll" defaultText="Выбрать все" />
-              </Checkbox>
-            </div>
-
-            {isLoading && (
-              <div className="flex justify-center py-10">
-                <Spinner color="primary" />
-              </div>
-            )}
-
-            {!isLoading && !items.length && (
-              <p className="text-center text-[#767676] py-10">
-                <T k="vocabulary.empty" defaultText="Слов пока нет" />
-              </p>
-            )}
-
-            {!isLoading &&
-              groupedItems.map((group) => (
-                <div key={group.key} className="flex flex-col gap-2">
-                  <p className="text-sm font-bold text-primary uppercase">
-                    {group.label}
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    {group.items.map((item) => {
-                      const isSelected = selectedIds.includes(item.id);
-                      return (
-                      <div
-                        key={item.id}
-                        className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
-                          isSelected
-                            ? "bg-[#eeebff] border-primary/30"
-                            : "bg-[#fafafa] border-[#eee]"
-                        }`}
-                      >
-                        <Checkbox
-                          isSelected={isSelected}
-                          onValueChange={() => toggleItem(item.id)}
-                          isDisabled={isLoading}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium break-words text-[#231F20]">
-                            {item.sourceWord}
-                          </p>
-                          <p className="text-[#767676] break-words mt-1">
-                            {item.translatedWord}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                    })}
-                  </div>
+                <span className="text-[#767676]">
+                  <T k="vocabulary.selectAll" defaultText="Выбрать все" />
+                </span>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    isSelected={allSelected}
+                    onValueChange={toggleSelectAll}
+                    isDisabled={isLoading || !items.length}
+                    aria-label={i18n.t("vocabulary.selectAll")}
+                  />
                 </div>
-              ))}
-          </ModalBody>
-          <ModalFooter className="flex flex-wrap gap-2 justify-between">
-            <div className="flex flex-wrap gap-2">
-              {hasLessonContext && (
-                <Button
-                  variant="flat"
-                  color={isLessonFilterActive ? "primary" : "default"}
-                  onClick={() => {
-                    if (isLessonFilterActive) {
-                      setLessonFilterId(undefined);
-                      return;
-                    }
-                    setLessonFilterId(initialLessonId);
-                  }}
-                >
-                  {isLessonFilterActive ? (
-                    <T
-                      k="vocabulary.allWords"
-                      defaultText="Все слова"
-                    />
-                  ) : (
-                    <T
-                      k="vocabulary.lessonWords"
-                      defaultText="Слова урока"
-                    />
-                  )}
-                </Button>
-              )}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-2">
+
+            <div className="px-6 pb-2 flex flex-col h-[300px] min-h-[300px] overflow-y-auto">
+              {isLoading && (
+                <div className="flex justify-center py-10">
+                  <Spinner color="primary" />
+                </div>
+              )}
+
+              {!isLoading && !items.length && (
+                <p className="text-center text-[#767676] py-10 text-sm">
+                  <T k="vocabulary.empty" defaultText="Слов пока нет" />
+                </p>
+              )}
+
+              {!isLoading &&
+                groupedItems.map((group) => (
+                  <div key={group.key} className="flex flex-col">
+                    {groupedItems.length > 1 && (
+                      <p className="font-bold text-primary uppercase py-2">
+                        {group.label}
+                      </p>
+                    )}
+                    <div className="flex flex-col gap-2">
+                      {group.items.map((item) => {
+                        const isSelected = selectedIds.includes(item.id);
+                        return (
+                          <div
+                            key={item.id}
+                            role="button"
+                            tabIndex={isLoading ? -1 : 0}
+                            onClick={() => {
+                              if (!isLoading) {
+                                toggleItem(item.id);
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (isLoading) {
+                                return;
+                              }
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                toggleItem(item.id);
+                              }
+                            }}
+                            className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
+                              isSelected
+                                ? "bg-[#eeebff] border-primary/30"
+                                : "border-[#eee] bg-[#fafafa]"
+                            } ${isLoading ? "pointer-events-none" : ""}`}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium break-words text-[#231F20] text-sm">
+                                {item.sourceWord}
+                              </p>
+                              <p className="text-[#767676] break-words mt-0.5 text-sm">
+                                {item.translatedWord}
+                              </p>
+                            </div>
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <Checkbox
+                                className="shrink-0"
+                                isSelected={isSelected}
+                                onValueChange={() => toggleItem(item.id)}
+                                isDisabled={isLoading}
+                                aria-label={item.sourceWord}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </ModalBody>
+          <ModalFooter className="relative flex min-h-10 items-center text-sm shrink-0 px-6">
+            <div className="flex w-full flex-wrap items-center justify-center gap-2">
               <Button
                 variant="light"
+                size="sm"
                 onClick={() => setSelectedIds([])}
                 isDisabled={!selectedIds.length}
               >
@@ -440,17 +469,15 @@ export const VocabularyModal: FC<TProps> = ({
                 placement="top"
               >
                 <PopoverTrigger>
-                  <Button
-                    color="primary"
-                    isDisabled={!selectedIds.length}
-                  >
+                  <Button color="primary" size="sm" isDisabled={!selectedIds.length}>
                     <T k="vocabulary.actions" defaultText="Действия" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="bg-white p-2 items-start">
+                <PopoverContent className="flex w-full flex-col items-stretch bg-white p-2 text-sm">
                   {activeTab === "unlearned" && (
                     <Button
                       variant="light"
+                      size="sm"
                       className="justify-start"
                       onClick={() => handleMarkLearned(true)}
                     >
@@ -463,6 +490,7 @@ export const VocabularyModal: FC<TProps> = ({
                   {activeTab === "learned" && (
                     <Button
                       variant="light"
+                      size="sm"
                       className="justify-start"
                       onClick={() => handleMarkLearned(false)}
                     >
@@ -474,8 +502,9 @@ export const VocabularyModal: FC<TProps> = ({
                   )}
                   <Button
                     variant="light"
+                    size="sm"
                     color="danger"
-                    className="justify-start"
+                    className="w-full justify-start"
                     onClick={() => {
                       setActionsPopoverOpen(false);
                       setDeleteConfirmOpen(true);
@@ -486,9 +515,40 @@ export const VocabularyModal: FC<TProps> = ({
                 </PopoverContent>
               </Popover>
             </div>
+            {hasLessonContext && (
+              <Button
+                color="primary"
+                radius="lg"
+                size="sm"
+                className="absolute left-6 shrink-0 font-medium"
+                variant={isLessonFilterActive ? "solid" : "flat"}
+                onClick={() => {
+                  if (isLessonFilterActive) {
+                    setLessonFilterId(undefined);
+                    return;
+                  }
+                  setLessonFilterId(initialLessonId);
+                }}
+              >
+                {isLessonFilterActive ? (
+                  <T k="vocabulary.allWords" defaultText="Все слова" />
+                ) : (
+                  <T k="vocabulary.lessonWords" defaultText="Слова урока" />
+                )}
+              </Button>
+            )}
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      <AddWordModal
+        isVisible={addWordModalOpen}
+        setIsVisible={setAddWordModalOpen}
+        studentId={studentId}
+        sourceWord={newWordText.trim()}
+        lessonId={lessonFilterId}
+        onSuccess={handleWordAdded}
+      />
 
       <DeleteVocabularyConfirmModal
         isVisible={deleteConfirmOpen}
