@@ -54,10 +54,10 @@ src/
 **Новая фича** — colocation в `src/app/{feature}/`:
 
 ```
-src/app/vocabulary/
+src/app/dictionary/
 ├── types/index.ts
-├── hooks/useVocabulary.ts
-└── components/VocabularyModal/index.tsx
+├── hooks/useDictionary.ts
+└── components/DictionaryModal/index.tsx
 ```
 
 Не создавай `src/services/` или `src/store/` — так в проекте не принято.
@@ -116,7 +116,7 @@ const data = await res?.json();
 **Два типа API:**
 
 1. **Legacy** — `{ success: true/false, message }` → `checkResponse(data)`.
-2. **Новые** (vocabulary, translate, languages) — без `success` → проверяй `res.ok`, ошибки через toast:
+2. **Новые** (dictionary, translate, languages) — без `success` → проверяй `res.ok`, ошибки через toast:
 
 ```typescript
 if (!res?.ok) {
@@ -132,7 +132,7 @@ if (!res?.ok) {
 
 ## Hooks
 
-Образец — `src/app/lessons/hooks/useLessons.ts`, `src/app/vocabulary/hooks/useVocabulary.ts`:
+Образец — `src/app/lessons/hooks/useLessons.ts`, `src/app/dictionary/hooks/useDictionary.ts`:
 
 ```typescript
 export const useSomething = (id?: number) => {
@@ -155,7 +155,7 @@ export const useSomething = (id?: number) => {
 
 - Hook рядом с фичей: `src/app/{feature}/hooks/`.
 - Loading state в hook, не в каждом компоненте отдельно.
-- Domain types — `src/app/{feature}/types/index.ts`, префикс `T`: `TVocabularyItem`, `TLesson`.
+- Domain types — `src/app/{feature}/types/index.ts`, префикс `T`: `TDictionaryItem`, `TLesson`.
 
 ---
 
@@ -197,7 +197,7 @@ export const SomeModalForm: FC<TProps> = ({ isVisible, setIsVisible, onSuccess }
 - **NextUI** — основная библиотека; не подключай MUI/Ant без необходимости.
 - **Tailwind** — layout, spacing; inline `style={{}}` допустим там, где уже используется (урок, VideoCall).
 - **Иконки** — SVG из `src/assets/icons/` или inline SVG как в `VideoCall`.
-- **Цвет primary** — `#3F28C6`, фон выделения — `#eeebff` (как в LessonCard, vocabulary).
+- **Цвет primary** — `#3F28C6`, фон выделения — `#eeebff` (как в LessonCard, dictionary).
 - Кнопки действий на уроке (Видеосвязь, Чат, Словарь):
 
 ```tsx
@@ -212,7 +212,7 @@ export const SomeModalForm: FC<TProps> = ({ isVisible, setIsVisible, onSuccess }
 2. В JSX:
 
 ```tsx
-<T k="vocabulary.tab" defaultText="Словарь" />
+<T k="dictionary.tab" defaultText="Словарь" />
 <T k="lessons.deleteLessonConfirm" values={{ title }} />
 ```
 
@@ -220,11 +220,11 @@ export const SomeModalForm: FC<TProps> = ({ isVisible, setIsVisible, onSuccess }
 
 ```typescript
 import i18n from "@/i18n/config";
-i18n.t("vocabulary.searchPlaceholder");
+i18n.t("dictionary.searchPlaceholder");
 ```
 
 - Не хардкодь пользовательские строки на русском без ключей (допустимы `defaultText` у `<T />`).
-- Вложенность ключей: `vocabulary.tab`, `lessons.lessonsTab`, `common.save`.
+- Вложенность ключей: `dictionary.tab`, `lessons.lessonsTab`, `common.save`.
 
 ---
 
@@ -240,10 +240,10 @@ i18n.t("vocabulary.searchPlaceholder");
 
 | Сущность | Стиль | Пример |
 |----------|-------|--------|
-| Компоненты | PascalCase | `VocabularyModal` |
-| Файлы компонентов | `index.tsx` в папке | `VocabularyModal/index.tsx` |
-| Hooks | camelCase, `use` | `useVocabulary` |
-| Types | `T` + PascalCase | `TVocabularyItem` |
+| Компоненты | PascalCase | `DictionaryModal` |
+| Файлы компонентов | `index.tsx` в папке | `DictionaryModal/index.tsx` |
+| Hooks | camelCase, `use` | `useDictionary` |
+| Types | `T` + PascalCase | `TDictionaryItem` |
 | Props type | `TProps` | локально в файле |
 | Query/body к API | camelCase | `isLearned`, `lessonId` |
 
@@ -262,7 +262,7 @@ i18n.t("vocabulary.searchPlaceholder");
 | Задача | Смотри |
 |--------|--------|
 | Hook + API | `src/app/lessons/hooks/useLessons.ts` |
-| Hook без `success` | `src/app/vocabulary/hooks/useVocabulary.ts` |
+| Hook без `success` | `src/app/dictionary/hooks/useDictionary.ts` |
 | Модалка + form | `src/app/lessons/components/CreateLessonModalForm` |
 | Confirm delete | `src/app/lessons/components/DeleteLessonModalForm` |
 | Popover actions | `src/app/lessons/components/LessonCard` |
@@ -278,7 +278,7 @@ i18n.t("vocabulary.searchPlaceholder");
 ## Чего не делать
 
 - Не добавлять axios-обёртки / RTK Query / Zustand без запроса.
-- Не создавать `src/services/vocabularyApi.ts`, если достаточно hook + `fetchGet`.
+- Не создавать `src/services/dictionaryApi.ts`, если достаточно hook + `fetchGet`.
 - Не хардкодить `BASE_URL` на localhost в коммите (используй env).
 - Не дублировать модалки — переиспользуй или прокидывай props.
 - Не менять глобальный layout/Header ради одной фичи.
