@@ -5,6 +5,11 @@ import { FC, MouseEvent } from "react";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { DictionaryIcon } from "@/components/icons/DictionaryIcon";
+import {
+  ICON_DICTIONARY_BUTTON_BASE_CLASS,
+  ICON_DICTIONARY_BUTTON_COMPACT_SIZE_CLASS,
+  ICON_DICTIONARY_BUTTON_DEFAULT_SIZE_CLASS,
+} from "../../constants";
 
 export const LessonDictionaryButton: FC<{ onClick: () => void }> = ({
   onClick,
@@ -15,30 +20,57 @@ export const LessonDictionaryButton: FC<{ onClick: () => void }> = ({
     variant="light"
     onClick={onClick}
     size="lg"
-    style={{ minWidth: 300 }}
+    className="w-full min-w-0 max-w-full sm:w-auto sm:min-w-[300px] touch-manipulation"
   >
     <T k="dictionary.tab" defaultText="Словарь" />
   </Button>
 );
 
-export const IconDictionaryButton: FC<{
+type TIconDictionaryButtonProps = {
   onClick: (e?: MouseEvent<HTMLButtonElement>) => void;
   className?: string;
-}> = ({ onClick, className = "" }) => (
-  <Button
-    isIconOnly
-    size="sm"
-    variant="light"
-    color="primary"
-    radius="lg"
-    aria-label={i18n.t("dictionary.tab")}
-    className={`h-8 w-8 min-w-8 shrink-0 rounded-lg sm:h-9 sm:w-9 sm:min-w-9 ${className}`}
-    onClick={(e) => {
-      e.stopPropagation();
-      onClick(e);
-    }}
-  >
-    <DictionaryIcon size={18} className="text-primary" />
-  </Button>
-);
+  iconSize?: number;
+  mdIconSize?: number;
+  size?: "default" | "compact";
+};
 
+export const IconDictionaryButton: FC<TIconDictionaryButtonProps> = ({
+  onClick,
+  className = "",
+  iconSize = 18,
+  mdIconSize = iconSize,
+  size = "default",
+}) => {
+  const sizeClass =
+    size === "compact"
+      ? ICON_DICTIONARY_BUTTON_COMPACT_SIZE_CLASS
+      : ICON_DICTIONARY_BUTTON_DEFAULT_SIZE_CLASS;
+
+  return (
+    <Button
+      isIconOnly
+      size="sm"
+      variant="light"
+      color="primary"
+      radius="lg"
+      aria-label={i18n.t("dictionary.tab")}
+      className={`${ICON_DICTIONARY_BUTTON_BASE_CLASS} ${sizeClass} ${className}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(e);
+      }}
+    >
+      {iconSize === mdIconSize ? (
+        <DictionaryIcon size={iconSize} className="text-primary" />
+      ) : (
+        <>
+          <DictionaryIcon size={iconSize} className="text-primary md:hidden" />
+          <DictionaryIcon
+            size={mdIconSize}
+            className="hidden text-primary md:block"
+          />
+        </>
+      )}
+    </Button>
+  );
+};

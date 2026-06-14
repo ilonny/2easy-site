@@ -4,6 +4,7 @@ import { Checkbox } from "@nextui-org/react";
 import { FC, KeyboardEvent } from "react";
 import { SpeakWordButton } from "../SpeakWordButton";
 import { TDictionaryItem } from "../../types";
+import { DICTIONARY_WORD_CARD_BASE_CLASS } from "../../constants";
 import { buildSpeakWordId } from "../../utils/speechIds";
 
 type TProps = {
@@ -40,7 +41,7 @@ export const DictionaryWordCard: FC<TProps> = ({
         }
       }}
       onKeyDown={handleKeyDown}
-      className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
+      className={`${DICTIONARY_WORD_CARD_BASE_CLASS} ${
         isSelected
           ? "bg-[#eeebff] border-primary/30"
           : "border-[#eee] bg-[#fafafa]"

@@ -4,6 +4,10 @@ import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { DictionaryIcon } from "@/components/icons/DictionaryIcon";
 import i18n from "@/i18n/config";
 import { getSelectionEndRect } from "../../utils/selection";
+import { clampWidgetPosition } from "../../utils/clampWidgetPosition";
+
+const WIDGET_SIZE = 40;
+const WIDGET_OFFSET = 6;
 
 type TProps = {
   wrapperId: string;
@@ -58,10 +62,18 @@ export const DictionarySelectionWidget: FC<TProps> = ({
       return;
     }
 
+    const position = clampWidgetPosition(
+      endRect.right - bounds.left + WIDGET_OFFSET,
+      endRect.bottom - bounds.top + WIDGET_OFFSET,
+      WIDGET_SIZE,
+      bounds.width,
+      bounds.height
+    );
+
     setWidgetState({
       selection: selection.toString().trim(),
-      left: endRect.right - bounds.left,
-      top: endRect.bottom - bounds.top,
+      left: position.left,
+      top: position.top,
     });
     setIsVisible(true);
   }, [isInsideWrapper, wrapperId]);
@@ -118,7 +130,7 @@ export const DictionarySelectionWidget: FC<TProps> = ({
     <button
       ref={widgetRef}
       type="button"
-      className="absolute z-20 flex h-10 w-10 items-center justify-center rounded-lg border border-primary/10 bg-white shadow-lg transition-colors hover:bg-[#faf9ff]"
+      className="absolute z-20 flex h-10 w-10 items-center justify-center rounded-lg border border-primary/10 bg-white shadow-lg transition-colors hover:bg-[#faf9ff] touch-manipulation"
       style={{
         left: widgetState.left,
         top: widgetState.top,

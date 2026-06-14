@@ -17,8 +17,14 @@ import { toast } from "react-toastify";
 import i18n from "@/i18n/config";
 import {
   ADD_WORD_SPEAK_ID,
+  DICTIONARY_ADD_WORD_MODAL_CLASS_NAMES,
+  DICTIONARY_ADD_WORD_MODAL_FOOTER_CLASS,
   DICTIONARY_INPUT_CLASS_NAMES,
   DICTIONARY_READONLY_INPUT_CLASS_NAMES,
+  DICTIONARY_SECONDARY_MODAL_CONTENT_CLASS,
+  DICTIONARY_SECONDARY_MODAL_SCROLL_BODY_CLASS,
+  DICTIONARY_MODAL_SECTION_PADDING_CLASS,
+  DICTIONARY_TOUCH_BUTTON_CLASS,
 } from "../../constants";
 import { SpeakWordButton } from "../SpeakWordButton";
 
@@ -106,12 +112,16 @@ export const AddWordModal: FC<TProps> = ({
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
       scrollBehavior="inside"
+      placement="center"
+      classNames={DICTIONARY_ADD_WORD_MODAL_CLASS_NAMES}
     >
-      <ModalContent>
-        <ModalHeader className="shrink-0">
+      <ModalContent className={DICTIONARY_SECONDARY_MODAL_CONTENT_CLASS}>
+        <ModalHeader className={`shrink-0 ${DICTIONARY_MODAL_SECTION_PADDING_CLASS}`}>
           <T k="dictionary.addWordTitle" defaultText="Добавить в словарь" />
         </ModalHeader>
-        <ModalBody className="gap-4 text-sm">
+        <ModalBody
+          className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} ${DICTIONARY_SECONDARY_MODAL_SCROLL_BODY_CLASS}`}
+        >
           <Input
             size="md"
             labelPlacement="outside"
@@ -133,13 +143,19 @@ export const AddWordModal: FC<TProps> = ({
             endContent={isTranslating ? <Spinner size="sm" /> : null}
           />
         </ModalBody>
-        <ModalFooter className="gap-2 text-sm shrink-0">
-          <Button variant="light" size="sm" onClick={() => setIsVisible(false)}>
+        <ModalFooter className={DICTIONARY_ADD_WORD_MODAL_FOOTER_CLASS}>
+          <Button
+            variant="light"
+            size="sm"
+            className={DICTIONARY_TOUCH_BUTTON_CLASS}
+            onClick={() => setIsVisible(false)}
+          >
             <T k="common.cancel" />
           </Button>
           <Button
             color="primary"
             size="sm"
+            className={DICTIONARY_TOUCH_BUTTON_CLASS}
             onClick={onSave}
             isLoading={isSaving}
             isDisabled={isTranslating}

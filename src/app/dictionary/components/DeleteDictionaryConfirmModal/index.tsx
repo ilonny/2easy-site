@@ -9,6 +9,12 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { T } from "@/i18n/T";
+import {
+  DICTIONARY_CONFIRM_MODAL_CLASS_NAMES,
+  DICTIONARY_CONFIRM_MODAL_TITLE_CLASS,
+  DICTIONARY_MODAL_SECTION_PADDING_CLASS,
+  DICTIONARY_SECONDARY_MODAL_MAX_HEIGHT_CLASS,
+} from "../../constants";
 
 type TProps = {
   isVisible: boolean;
@@ -29,10 +35,17 @@ export const DeleteDictionaryConfirmModal: FC<TProps> = ({
   }, [onConfirm, setIsVisible]);
 
   return (
-    <Modal size="md" isOpen={isVisible} onClose={() => setIsVisible(false)}>
-      <ModalContent>
-        <ModalHeader>
-          <p>
+    <Modal
+      size="md"
+      isOpen={isVisible}
+      onClose={() => setIsVisible(false)}
+      scrollBehavior="inside"
+      placement="center"
+      classNames={DICTIONARY_CONFIRM_MODAL_CLASS_NAMES}
+    >
+      <ModalContent className={DICTIONARY_SECONDARY_MODAL_MAX_HEIGHT_CLASS}>
+        <ModalHeader className={DICTIONARY_MODAL_SECTION_PADDING_CLASS}>
+          <p className={DICTIONARY_CONFIRM_MODAL_TITLE_CLASS}>
             <T
               k="dictionary.deleteConfirm"
               values={{ count }}
@@ -40,11 +53,20 @@ export const DeleteDictionaryConfirmModal: FC<TProps> = ({
             />
           </p>
         </ModalHeader>
-        <ModalBody className="pb-6 flex flex-col gap-2">
-          <Button color="danger" variant="light" onClick={handleConfirm}>
+        <ModalBody className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} pb-6 flex flex-col gap-2`}>
+          <Button
+            color="danger"
+            variant="light"
+            className="touch-manipulation"
+            onClick={handleConfirm}
+          >
             <T k="editor.confirmDelete" />
           </Button>
-          <Button color="primary" onClick={() => setIsVisible(false)}>
+          <Button
+            color="primary"
+            className="touch-manipulation"
+            onClick={() => setIsVisible(false)}
+          >
             <T k="common.cancel" />
           </Button>
         </ModalBody>

@@ -580,6 +580,7 @@
     "empty": "No words yet",
     "allWords": "All words",
     "lessonWords": "Lesson words",
+    "wordFilter": "Word filter",
     "resetSelection": "Reset",
     "actions": "Actions",
     "markLearned": "Mark as learned",

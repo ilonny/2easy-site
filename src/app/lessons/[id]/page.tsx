@@ -56,6 +56,7 @@ import {
   LessonDictionaryButton,
   IconDictionaryButton,
 } from "@/app/dictionary/components/DictionaryButtons";
+import { LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS } from "@/app/dictionary/constants";
 import { DictionarySelectionWidget } from "@/app/dictionary/components/DictionarySelectionWidget";
 import {
   LessonDictionaryHandle,
@@ -457,7 +458,7 @@ export default function LessonPage() {
                             backgroundColor: isActive ? "#EEEBFF" : "#fff",
                           }}
                         >
-                          <div className="flex items-center gap-1 sm:gap-2">
+                          <div className="flex flex-col gap-1 sm:gap-1.5 md:flex-row md:items-center md:gap-2">
                             <div className="min-w-0 flex-1">
                               <p className="text-[8px] font-bold uppercase leading-snug text-[#231F20] break-words line-clamp-4 sm:text-[10px] md:text-sm md:line-clamp-none">
                                 {s["student.name"]}
@@ -469,13 +470,17 @@ export default function LessonPage() {
                               )}
                             </div>
                             {isTeacher && (
-                              <IconDictionaryButton
-                                onClick={() => {
-                                  dictionaryRef.current?.openDictionary(
-                                    Number(s.student_id)
-                                  );
-                                }}
-                              />
+                              <div className={LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS}>
+                                <IconDictionaryButton
+                                  size="compact"
+                                  iconSize={18}
+                                  onClick={() => {
+                                    dictionaryRef.current?.openDictionary(
+                                      Number(s.student_id)
+                                    );
+                                  }}
+                                />
+                              </div>
                             )}
                           </div>
                         </Card>

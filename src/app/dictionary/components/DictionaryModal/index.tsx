@@ -26,12 +26,29 @@ import i18n from "@/i18n/config";
 import { DictionaryTab } from "../../types";
 import { useDictionaryModal } from "../../hooks/useDictionaryModal";
 import {
-  DICTIONARY_LIST_HEIGHT_CLASS,
+  DICTIONARY_ACTIONS_POPOVER_CLASS,
+  DICTIONARY_LIST_SCROLL_CLASS,
+  DICTIONARY_MODAL_ADD_WORD_BUTTON_CLASS,
+  DICTIONARY_MODAL_BLOCK_SPACING_CLASS,
+  DICTIONARY_MODAL_BODY_CLASS,
+  DICTIONARY_MODAL_CENTERED_BLOCK_CLASS,
+  DICTIONARY_MODAL_CLASS_NAMES,
+  DICTIONARY_MODAL_CONTENT_CLASS,
+  DICTIONARY_MODAL_FOOTER_ACTIONS_CLASS,
+  DICTIONARY_MODAL_FOOTER_CLASS,
+  DICTIONARY_MODAL_INPUT_ROW_CLASS,
+  DICTIONARY_MODAL_INPUTS_BLOCK_CLASS,
   DICTIONARY_MODAL_INPUT_CLASS_NAMES,
+  DICTIONARY_MODAL_RESPONSIVE_TEXT_CLASS,
+  DICTIONARY_MODAL_SECTION_PADDING_CLASS,
+  DICTIONARY_MODAL_SELECT_ALL_DIVIDER_CLASS,
+  DICTIONARY_MODAL_TABS_CLASS_NAMES,
   DICTIONARY_SEARCH_INPUT_CLASS_NAMES,
+  DICTIONARY_TOUCH_BUTTON_CLASS,
 } from "../../constants";
 import { AddWordModal } from "../AddWordModal";
 import { DeleteDictionaryConfirmModal } from "../DeleteDictionaryConfirmModal";
+import { DictionaryWordFilterSegment } from "../DictionaryWordFilterSegment";
 import { DictionaryWordCard } from "./DictionaryWordCard";
 
 type TProps = {
@@ -75,7 +92,7 @@ export const DictionaryModal: FC<TProps> = ({
     handleDelete,
     openAddWordModal,
     handleWordAdded,
-    toggleLessonFilter,
+    setLessonWordFilterMode,
   } = useDictionaryModal({ isOpen, studentId, initialLessonId });
 
   const handleSelectAllKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -96,27 +113,24 @@ export const DictionaryModal: FC<TProps> = ({
         isOpen={isOpen}
         onClose={onClose}
         scrollBehavior="inside"
-        classNames={{
-          base: "max-h-[85vh]",
-          body: "overflow-hidden py-0",
-        }}
+        placement="center"
+        classNames={DICTIONARY_MODAL_CLASS_NAMES}
       >
-        <ModalContent className="max-h-[85vh]">
-          <ModalHeader className="flex flex-col gap-1 shrink-0">
+        <ModalContent className={DICTIONARY_MODAL_CONTENT_CLASS}>
+          <ModalHeader
+            className={`flex flex-col gap-1 shrink-0 ${DICTIONARY_MODAL_SECTION_PADDING_CLASS} pb-2`}
+          >
             <T k="dictionary.title" defaultText="Словарь" />
           </ModalHeader>
-          <ModalBody className="gap-4 px-0 text-sm flex flex-col min-h-0 overflow-hidden">
-            <div className="px-6 pt-2 shrink-0">
+          <ModalBody className={DICTIONARY_MODAL_BODY_CLASS}>
+            <div className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} pt-1 shrink-0`}>
               <Tabs
+                fullWidth
                 selectedKey={activeTab}
                 onSelectionChange={(key) => setActiveTab(key as DictionaryTab)}
                 color="primary"
                 variant="underlined"
-                classNames={{
-                  tabList: "gap-6 w-full border-b border-[#eee] p-0",
-                  cursor: "w-full bg-primary",
-                  tab: "px-0 h-10 text-sm",
-                }}
+                classNames={DICTIONARY_MODAL_TABS_CLASS_NAMES}
               >
                 <Tab
                   key="unlearned"
@@ -136,8 +150,10 @@ export const DictionaryModal: FC<TProps> = ({
               </Tabs>
             </div>
 
-            <div className="px-6 pt-1 pb-4 border-b border-[#eee] shrink-0">
-              <div className="flex items-center gap-3 w-full">
+            <div
+              className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} ${DICTIONARY_MODAL_INPUTS_BLOCK_CLASS}`}
+            >
+              <div className={DICTIONARY_MODAL_INPUT_ROW_CLASS}>
                 <Input
                   value={newWordText}
                   onValueChange={setNewWordText}
@@ -159,7 +175,7 @@ export const DictionaryModal: FC<TProps> = ({
                   color="primary"
                   radius="lg"
                   size="md"
-                  className="shrink-0 !w-10 !h-10 !min-w-10 self-center"
+                  className={DICTIONARY_MODAL_ADD_WORD_BUTTON_CLASS}
                   isDisabled={!newWordText.trim()}
                   onClick={openAddWordModal}
                 >
@@ -171,7 +187,7 @@ export const DictionaryModal: FC<TProps> = ({
                 </Button>
               </div>
 
-              <div className="pt-4">
+              <div className={DICTIONARY_MODAL_BLOCK_SPACING_CLASS}>
                 <Input
                   value={searchInput}
                   onValueChange={setSearchInput}
@@ -187,11 +203,22 @@ export const DictionaryModal: FC<TProps> = ({
                   }
                 />
               </div>
+
+              {hasLessonContext && (
+                <div className={DICTIONARY_MODAL_CENTERED_BLOCK_CLASS}>
+                  <DictionaryWordFilterSegment
+                    isLessonFilterActive={isLessonFilterActive}
+                    onChange={setLessonWordFilterMode}
+                  />
+                </div>
+              )}
             </div>
 
-            <div className="px-6 py-1 flex items-center gap-3 shrink-0">
-              <div className="flex items-center gap-3 shrink-0">
-                <p className="text-[#767676] whitespace-nowrap">
+            <div
+              className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} py-1 flex flex-wrap items-center gap-x-3 gap-y-2 shrink-0`}
+            >
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
+                <p className={`text-[#767676] ${DICTIONARY_MODAL_RESPONSIVE_TEXT_CLASS}`}>
                   <T
                     k="dictionary.wordsCount"
                     values={{ count: items.length }}
@@ -199,7 +226,7 @@ export const DictionaryModal: FC<TProps> = ({
                   />
                 </p>
                 {selectedIds.length > 0 && (
-                  <p className="text-primary font-medium whitespace-nowrap">
+                  <p className={`text-primary font-medium ${DICTIONARY_MODAL_RESPONSIVE_TEXT_CLASS}`}>
                     <T
                       k="dictionary.selectedCount"
                       values={{ count: selectedIds.length }}
@@ -208,7 +235,7 @@ export const DictionaryModal: FC<TProps> = ({
                   </p>
                 )}
               </div>
-              <div className="flex-1 border-t border-dotted border-[#ccc] min-w-[24px]" />
+              <div className={DICTIONARY_MODAL_SELECT_ALL_DIVIDER_CLASS} />
               <div
                 role="button"
                 tabIndex={isLoading || !items.length ? -1 : 0}
@@ -218,13 +245,13 @@ export const DictionaryModal: FC<TProps> = ({
                   }
                 }}
                 onKeyDown={handleSelectAllKeyDown}
-                className={`flex items-center gap-2 shrink-0 ${
+                className={`ml-auto flex items-center gap-2 shrink-0 touch-manipulation ${
                   isLoading || !items.length
                     ? "pointer-events-none"
                     : "cursor-pointer"
                 }`}
               >
-                <span className="text-[#767676]">
+                <span className={`text-[#767676] ${DICTIONARY_MODAL_RESPONSIVE_TEXT_CLASS}`}>
                   <T k="dictionary.selectAll" defaultText="Выбрать все" />
                 </span>
                 <div onClick={(event) => event.stopPropagation()}>
@@ -238,9 +265,7 @@ export const DictionaryModal: FC<TProps> = ({
               </div>
             </div>
 
-            <div
-              className={`px-6 pb-2 flex flex-col overflow-y-auto ${DICTIONARY_LIST_HEIGHT_CLASS}`}
-            >
+            <div className={`${DICTIONARY_LIST_SCROLL_CLASS} ${DICTIONARY_MODAL_SECTION_PADDING_CLASS} pb-2`}>
               {isLoading && (
                 <div className="flex justify-center py-10">
                   <Spinner color="primary" />
@@ -255,9 +280,9 @@ export const DictionaryModal: FC<TProps> = ({
 
               {!isLoading &&
                 groupedItems.map((group) => (
-                  <div key={group.key} className="flex flex-col">
+                  <div key={group.key} className="flex flex-col min-w-0">
                     {groupedItems.length > 1 && (
-                      <p className="font-bold text-primary uppercase py-2">
+                      <p className={`font-bold text-primary uppercase py-2 break-words ${DICTIONARY_MODAL_RESPONSIVE_TEXT_CLASS}`}>
                         {group.label}
                       </p>
                     )}
@@ -276,11 +301,12 @@ export const DictionaryModal: FC<TProps> = ({
                 ))}
             </div>
           </ModalBody>
-          <ModalFooter className="relative flex min-h-10 items-center text-sm shrink-0 px-6">
-            <div className="flex w-full flex-wrap items-center justify-center gap-2">
+          <ModalFooter className={DICTIONARY_MODAL_FOOTER_CLASS}>
+            <div className={DICTIONARY_MODAL_FOOTER_ACTIONS_CLASS}>
               <Button
                 variant="light"
                 size="sm"
+                className={DICTIONARY_TOUCH_BUTTON_CLASS}
                 onClick={() => setSelectedIds([])}
                 isDisabled={!selectedIds.length}
               >
@@ -290,22 +316,24 @@ export const DictionaryModal: FC<TProps> = ({
                 isOpen={actionsPopoverOpen}
                 onOpenChange={setActionsPopoverOpen}
                 placement="top"
+                offset={8}
               >
                 <PopoverTrigger>
                   <Button
                     color="primary"
                     size="sm"
+                    className={DICTIONARY_TOUCH_BUTTON_CLASS}
                     isDisabled={!selectedIds.length}
                   >
                     <T k="dictionary.actions" defaultText="Действия" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="flex w-full flex-col items-stretch bg-white p-2 text-sm">
+                <PopoverContent className={DICTIONARY_ACTIONS_POPOVER_CLASS}>
                   {activeTab === "unlearned" && (
                     <Button
                       variant="light"
                       size="sm"
-                      className="justify-start"
+                      className="justify-start touch-manipulation"
                       onClick={() => handleMarkLearned(true)}
                     >
                       <T
@@ -318,7 +346,7 @@ export const DictionaryModal: FC<TProps> = ({
                     <Button
                       variant="light"
                       size="sm"
-                      className="justify-start"
+                      className="justify-start touch-manipulation"
                       onClick={() => handleMarkLearned(false)}
                     >
                       <T
@@ -331,7 +359,7 @@ export const DictionaryModal: FC<TProps> = ({
                     variant="light"
                     size="sm"
                     color="danger"
-                    className="w-full justify-start"
+                    className="w-full justify-start touch-manipulation"
                     onClick={() => {
                       setActionsPopoverOpen(false);
                       setDeleteConfirmOpen(true);
@@ -342,22 +370,6 @@ export const DictionaryModal: FC<TProps> = ({
                 </PopoverContent>
               </Popover>
             </div>
-            {hasLessonContext && (
-              <Button
-                color="primary"
-                radius="lg"
-                size="sm"
-                className="absolute left-6 shrink-0 font-medium"
-                variant={isLessonFilterActive ? "solid" : "flat"}
-                onClick={toggleLessonFilter}
-              >
-                {isLessonFilterActive ? (
-                  <T k="dictionary.allWords" defaultText="Все слова" />
-                ) : (
-                  <T k="dictionary.lessonWords" defaultText="Слова урока" />
-                )}
-              </Button>
-            )}
           </ModalFooter>
         </ModalContent>
       </Modal>

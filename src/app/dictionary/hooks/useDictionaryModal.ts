@@ -163,9 +163,12 @@ export const useDictionaryModal = ({
     await fetchList();
   }, [fetchList]);
 
-  const toggleLessonFilter = useCallback(() => {
-    setLessonFilterId(isLessonFilterActive ? undefined : initialLessonId);
-  }, [initialLessonId, isLessonFilterActive]);
+  const setLessonWordFilterMode = useCallback(
+    (mode: "all" | "lesson") => {
+      setLessonFilterId(mode === "lesson" ? initialLessonId : undefined);
+    },
+    [initialLessonId]
+  );
 
   return {
     items,
@@ -195,6 +198,6 @@ export const useDictionaryModal = ({
     handleDelete,
     openAddWordModal,
     handleWordAdded,
-    toggleLessonFilter,
+    setLessonWordFilterMode,
   };
 };
