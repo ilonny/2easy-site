@@ -69,5 +69,5 @@ export const useTextToSpeech = () => {
     return loading && activeId === id;
   }, []);
 
-  return { speak, isLoading, stopSpeech: stopSpeechPlayback };
+  return { speak, isLoading };
 };

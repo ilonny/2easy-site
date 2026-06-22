@@ -89,9 +89,22 @@ export default function LessonPage() {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const dictionaryRef = useRef<LessonDictionaryHandle>(null);
 
-  const handleAddWordSelection = useCallback((selection: string) => {
-    dictionaryRef.current?.openAddWord(selection);
-  }, []);
+  const handleAddWordSelection = useCallback(
+    (selection: string) => {
+      if (isTeacher) {
+        if (!activeStudentId) {
+          toast(i18n.t("dictionary.selectStudentForWord"), { type: "warning" });
+          return;
+        }
+
+        dictionaryRef.current?.openAddWord(selection, activeStudentId);
+        return;
+      }
+
+      dictionaryRef.current?.openAddWord(selection);
+    },
+    [activeStudentId, isTeacher]
+  );
 
   const handleOpenStudentDictionary = useCallback(() => {
     if (profile?.studentId) {
@@ -346,7 +359,8 @@ export default function LessonPage() {
                   onChangeIsVisible={VIEW_NOOP}
                 />
               </div>
-              {isStudent && profile?.studentId && (
+              {((isStudent && profile?.studentId) ||
+                (isTeacher && activeStudentId > 0)) && (
                 <DictionarySelectionWidget
                   wrapperId="lessonContentWrapper"
                   onAddSelection={handleAddWordSelection}
@@ -473,7 +487,7 @@ export default function LessonPage() {
                               <div className={LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS}>
                                 <IconDictionaryButton
                                   size="compact"
-                                  iconSize={18}
+                                  iconSize={20}
                                   onClick={() => {
                                     dictionaryRef.current?.openDictionary(
                                       Number(s.student_id)
@@ -941,7 +955,7 @@ export default function LessonPage() {
       <LessonDictionaryLayer
         ref={dictionaryRef}
         lessonId={Number(params.id) || undefined}
-        addWordStudentId={
+        defaultAddWordStudentId={
           isStudent && profile?.studentId
             ? Number(profile.studentId)
             : undefined

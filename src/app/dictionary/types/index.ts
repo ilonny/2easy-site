@@ -2,6 +2,7 @@ export type TDictionaryItem = {
   id: number;
   studentId: number;
   lessonId: number | null;
+  lessonName: string | null;
   sourceWord: string;
   translatedWord: string;
   sourceLanguageCode: string;

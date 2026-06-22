@@ -17,6 +17,7 @@ import {
   Spinner,
   Tab,
   Tabs,
+  Textarea,
 } from "@nextui-org/react";
 import Loupe from "@/assets/icons/loupe.svg";
 import ArrowRightIcon from "@/assets/icons/arrow_right.svg";
@@ -36,11 +37,13 @@ import {
   DICTIONARY_MODAL_CONTENT_CLASS,
   DICTIONARY_MODAL_FOOTER_ACTIONS_CLASS,
   DICTIONARY_MODAL_FOOTER_CLASS,
-  DICTIONARY_MODAL_INPUT_ROW_CLASS,
+  DICTIONARY_MODAL_INPUT_ROW_START_CLASS,
   DICTIONARY_MODAL_INPUTS_BLOCK_CLASS,
-  DICTIONARY_MODAL_INPUT_CLASS_NAMES,
+  DICTIONARY_MODAL_TEXTAREA_CLASS_NAMES,
   DICTIONARY_MODAL_RESPONSIVE_TEXT_CLASS,
   DICTIONARY_MODAL_SECTION_PADDING_CLASS,
+  DICTIONARY_TEXTAREA_ICON_ALIGN_CLASS,
+  DICTIONARY_TEXTAREA_MAX_ROWS,
   DICTIONARY_MODAL_SELECT_ALL_DIVIDER_CLASS,
   DICTIONARY_MODAL_TABS_CLASS_NAMES,
   DICTIONARY_SEARCH_INPUT_CLASS_NAMES,
@@ -93,6 +96,7 @@ export const DictionaryModal: FC<TProps> = ({
     openAddWordModal,
     handleWordAdded,
     setLessonWordFilterMode,
+    createWordLessonId,
   } = useDictionaryModal({ isOpen, studentId, initialLessonId });
 
   const handleSelectAllKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -153,18 +157,27 @@ export const DictionaryModal: FC<TProps> = ({
             <div
               className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} ${DICTIONARY_MODAL_INPUTS_BLOCK_CLASS}`}
             >
-              <div className={DICTIONARY_MODAL_INPUT_ROW_CLASS}>
-                <Input
+              <div className={DICTIONARY_MODAL_INPUT_ROW_START_CLASS}>
+                <Textarea
                   value={newWordText}
                   onValueChange={setNewWordText}
                   placeholder={i18n.t("dictionary.addWordPlaceholder")}
                   size="md"
-                  classNames={DICTIONARY_MODAL_INPUT_CLASS_NAMES}
+                  minRows={1}
+                  maxRows={DICTIONARY_TEXTAREA_MAX_ROWS}
+                  classNames={DICTIONARY_MODAL_TEXTAREA_CLASS_NAMES}
                   startContent={
-                    <DictionaryIcon size={18} className="text-[#C4C4C4]" />
+                    <DictionaryIcon
+                      size={20}
+                      className={`text-[#C4C4C4] ${DICTIONARY_TEXTAREA_ICON_ALIGN_CLASS}`}
+                    />
                   }
                   onKeyDown={(event) => {
-                    if (event.key === "Enter" && newWordText.trim()) {
+                    if (
+                      event.key === "Enter" &&
+                      !event.shiftKey &&
+                      newWordText.trim()
+                    ) {
                       event.preventDefault();
                       openAddWordModal();
                     }
@@ -181,7 +194,7 @@ export const DictionaryModal: FC<TProps> = ({
                 >
                   <Image
                     src={ArrowRightIcon.src}
-                    alt="add"
+                    alt={i18n.t("dictionary.addWordAlt")}
                     style={{ borderRadius: 0 }}
                   />
                 </Button>
@@ -197,7 +210,7 @@ export const DictionaryModal: FC<TProps> = ({
                   startContent={
                     <Image
                       src={Loupe.src}
-                      alt="search"
+                      alt={i18n.t("dictionary.searchAlt")}
                       style={{ borderRadius: 0 }}
                     />
                   }
@@ -273,7 +286,7 @@ export const DictionaryModal: FC<TProps> = ({
               )}
 
               {!isLoading && !items.length && (
-                <p className="text-center text-[#767676] py-10 text-sm">
+                <p className="text-center text-[#767676] py-10 text-base">
                   <T k="dictionary.empty" defaultText="Слов пока нет" />
                 </p>
               )}
@@ -293,6 +306,7 @@ export const DictionaryModal: FC<TProps> = ({
                           item={item}
                           isSelected={selectedIds.includes(item.id)}
                           isLoading={isLoading}
+                          showLessonBadge={!isLessonFilterActive}
                           onToggle={toggleItem}
                         />
                       ))}
@@ -305,7 +319,7 @@ export const DictionaryModal: FC<TProps> = ({
             <div className={DICTIONARY_MODAL_FOOTER_ACTIONS_CLASS}>
               <Button
                 variant="light"
-                size="sm"
+                size="md"
                 className={DICTIONARY_TOUCH_BUTTON_CLASS}
                 onClick={() => setSelectedIds([])}
                 isDisabled={!selectedIds.length}
@@ -321,7 +335,7 @@ export const DictionaryModal: FC<TProps> = ({
                 <PopoverTrigger>
                   <Button
                     color="primary"
-                    size="sm"
+                    size="md"
                     className={DICTIONARY_TOUCH_BUTTON_CLASS}
                     isDisabled={!selectedIds.length}
                   >
@@ -332,7 +346,7 @@ export const DictionaryModal: FC<TProps> = ({
                   {activeTab === "unlearned" && (
                     <Button
                       variant="light"
-                      size="sm"
+                      size="md"
                       className="justify-start touch-manipulation"
                       onClick={() => handleMarkLearned(true)}
                     >
@@ -345,7 +359,7 @@ export const DictionaryModal: FC<TProps> = ({
                   {activeTab === "learned" && (
                     <Button
                       variant="light"
-                      size="sm"
+                      size="md"
                       className="justify-start touch-manipulation"
                       onClick={() => handleMarkLearned(false)}
                     >
@@ -357,7 +371,7 @@ export const DictionaryModal: FC<TProps> = ({
                   )}
                   <Button
                     variant="light"
-                    size="sm"
+                    size="md"
                     color="danger"
                     className="w-full justify-start touch-manipulation"
                     onClick={() => {
@@ -379,7 +393,7 @@ export const DictionaryModal: FC<TProps> = ({
         setIsVisible={setAddWordModalOpen}
         studentId={studentId}
         sourceWord={newWordText.trim()}
-        lessonId={lessonFilterId}
+        lessonId={createWordLessonId}
         onSuccess={handleWordAdded}
       />
 

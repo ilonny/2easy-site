@@ -11,19 +11,20 @@ import { AddWordModal } from "../AddWordModal";
 
 export type LessonDictionaryHandle = {
   openDictionary: (studentId: number) => void;
-  openAddWord: (word: string) => void;
+  openAddWord: (word: string, studentId?: number) => void;
 };
 
 type TProps = {
   lessonId?: number;
-  addWordStudentId?: number;
+  defaultAddWordStudentId?: number;
 };
 
 export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
-  ({ lessonId, addWordStudentId }, ref) => {
+  ({ lessonId, defaultAddWordStudentId }, ref) => {
     const [dictionaryModalOpen, setDictionaryModalOpen] = useState(false);
     const [dictionaryStudentId, setDictionaryStudentId] = useState(0);
     const [addWordModalOpen, setAddWordModalOpen] = useState(false);
+    const [addWordTargetStudentId, setAddWordTargetStudentId] = useState(0);
     const [selectedWord, setSelectedWord] = useState("");
 
     const openDictionary = useCallback((studentId: number) => {
@@ -31,9 +32,28 @@ export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
       setDictionaryModalOpen(true);
     }, []);
 
-    const openAddWord = useCallback((word: string) => {
-      setSelectedWord(word);
-      setAddWordModalOpen(true);
+    const openAddWord = useCallback(
+      (word: string, studentId?: number) => {
+        const targetStudentId = studentId ?? defaultAddWordStudentId ?? 0;
+
+        if (!targetStudentId) {
+          return;
+        }
+
+        setAddWordTargetStudentId(targetStudentId);
+        setSelectedWord(word);
+        setAddWordModalOpen(true);
+      },
+      [defaultAddWordStudentId]
+    );
+
+    const closeAddWordModal = useCallback((isVisible: boolean) => {
+      setAddWordModalOpen(isVisible);
+
+      if (!isVisible) {
+        setAddWordTargetStudentId(0);
+        setSelectedWord("");
+      }
     }, []);
 
     useImperativeHandle(
@@ -42,7 +62,7 @@ export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
         openDictionary,
         openAddWord,
       }),
-      [openDictionary, openAddWord]
+      [openAddWord, openDictionary]
     );
 
     return (
@@ -55,11 +75,11 @@ export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
             initialLessonId={lessonId}
           />
         )}
-        {!!addWordStudentId && (
+        {!!addWordTargetStudentId && (
           <AddWordModal
             isVisible={addWordModalOpen}
-            setIsVisible={setAddWordModalOpen}
-            studentId={addWordStudentId}
+            setIsVisible={closeAddWordModal}
+            studentId={addWordTargetStudentId}
             sourceWord={selectedWord}
             lessonId={lessonId}
           />

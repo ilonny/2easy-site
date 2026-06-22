@@ -14,6 +14,7 @@ import {
   DICTIONARY_CONFIRM_MODAL_TITLE_CLASS,
   DICTIONARY_MODAL_SECTION_PADDING_CLASS,
   DICTIONARY_SECONDARY_MODAL_MAX_HEIGHT_CLASS,
+  DICTIONARY_TOUCH_BUTTON_CLASS,
 } from "../../constants";
 
 type TProps = {
@@ -57,14 +58,16 @@ export const DeleteDictionaryConfirmModal: FC<TProps> = ({
           <Button
             color="danger"
             variant="light"
-            className="touch-manipulation"
+            size="md"
+            className={DICTIONARY_TOUCH_BUTTON_CLASS}
             onClick={handleConfirm}
           >
-            <T k="editor.confirmDelete" />
+            <T k="common.delete" defaultText="Удалить" />
           </Button>
           <Button
             color="primary"
-            className="touch-manipulation"
+            size="md"
+            className={DICTIONARY_TOUCH_BUTTON_CLASS}
             onClick={() => setIsVisible(false)}
           >
             <T k="common.cancel" />

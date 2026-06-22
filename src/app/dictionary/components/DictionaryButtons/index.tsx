@@ -37,7 +37,7 @@ type TIconDictionaryButtonProps = {
 export const IconDictionaryButton: FC<TIconDictionaryButtonProps> = ({
   onClick,
   className = "",
-  iconSize = 18,
+  iconSize = 20,
   mdIconSize = iconSize,
   size = "default",
 }) => {

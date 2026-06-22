@@ -3,13 +3,13 @@
 import { FC, useCallback, useEffect, useState } from "react";
 import {
   Button,
-  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
   Spinner,
+  Textarea,
 } from "@nextui-org/react";
 import { T } from "@/i18n/T";
 import { useDictionary } from "../../hooks/useDictionary";
@@ -19,11 +19,14 @@ import {
   ADD_WORD_SPEAK_ID,
   DICTIONARY_ADD_WORD_MODAL_CLASS_NAMES,
   DICTIONARY_ADD_WORD_MODAL_FOOTER_CLASS,
-  DICTIONARY_INPUT_CLASS_NAMES,
-  DICTIONARY_READONLY_INPUT_CLASS_NAMES,
+  DICTIONARY_EXPANDABLE_TEXTAREA_CLASS_NAMES,
+  DICTIONARY_READONLY_TEXTAREA_CLASS_NAMES,
   DICTIONARY_SECONDARY_MODAL_CONTENT_CLASS,
   DICTIONARY_SECONDARY_MODAL_SCROLL_BODY_CLASS,
   DICTIONARY_MODAL_SECTION_PADDING_CLASS,
+  DICTIONARY_READONLY_SOURCE_WORD_MAX_ROWS,
+  DICTIONARY_TEXTAREA_ICON_ALIGN_CLASS,
+  DICTIONARY_TEXTAREA_MAX_ROWS,
   DICTIONARY_TOUCH_BUTTON_CLASS,
 } from "../../constants";
 import { SpeakWordButton } from "../SpeakWordButton";
@@ -122,31 +125,41 @@ export const AddWordModal: FC<TProps> = ({
         <ModalBody
           className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} ${DICTIONARY_SECONDARY_MODAL_SCROLL_BODY_CLASS}`}
         >
-          <Input
+          <Textarea
             size="md"
             labelPlacement="outside"
             label={<T k="dictionary.sourceWord" defaultText="Исходное слово" />}
             value={sourceWord}
             isReadOnly
-            classNames={DICTIONARY_READONLY_INPUT_CLASS_NAMES}
+            minRows={1}
+            maxRows={DICTIONARY_READONLY_SOURCE_WORD_MAX_ROWS}
+            classNames={DICTIONARY_READONLY_TEXTAREA_CLASS_NAMES}
             startContent={
               <SpeakWordButton id={ADD_WORD_SPEAK_ID} text={sourceWord} />
             }
           />
-          <Input
+          <Textarea
             size="md"
             labelPlacement="outside"
             label={<T k="dictionary.translation" defaultText="Перевод" />}
             value={translatedWord}
             onValueChange={setTranslatedWord}
-            classNames={DICTIONARY_INPUT_CLASS_NAMES}
-            endContent={isTranslating ? <Spinner size="sm" /> : null}
+            minRows={1}
+            maxRows={DICTIONARY_TEXTAREA_MAX_ROWS}
+            classNames={DICTIONARY_EXPANDABLE_TEXTAREA_CLASS_NAMES}
+            endContent={
+              isTranslating ? (
+                <div className={DICTIONARY_TEXTAREA_ICON_ALIGN_CLASS}>
+                  <Spinner size="sm" />
+                </div>
+              ) : null
+            }
           />
         </ModalBody>
         <ModalFooter className={DICTIONARY_ADD_WORD_MODAL_FOOTER_CLASS}>
           <Button
             variant="light"
-            size="sm"
+            size="md"
             className={DICTIONARY_TOUCH_BUTTON_CLASS}
             onClick={() => setIsVisible(false)}
           >
@@ -154,7 +167,7 @@ export const AddWordModal: FC<TProps> = ({
           </Button>
           <Button
             color="primary"
-            size="sm"
+            size="md"
             className={DICTIONARY_TOUCH_BUTTON_CLASS}
             onClick={onSave}
             isLoading={isSaving}

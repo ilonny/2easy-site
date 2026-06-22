@@ -1,3 +1,4 @@
+import i18n from "@/i18n/config";
 import { TDictionaryItem } from "../types";
 
 export type TDictionaryLanguageGroup = {
@@ -24,7 +25,10 @@ export const groupByLanguagePair = (
     const [sourceCode, targetCode] = key.split(":");
     return {
       key,
-      label: `${getLanguageName(sourceCode)} → ${getLanguageName(targetCode)}`,
+      label: i18n.t("dictionary.languagePair", {
+        source: getLanguageName(sourceCode),
+        target: getLanguageName(targetCode),
+      }),
       items: groupItems,
     };
   });

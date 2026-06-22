@@ -36,7 +36,7 @@ export const DictionaryWordFilterSegment: FC<TProps> = ({
       className={getWordFilterSegmentButtonClass(isLessonFilterActive, "right")}
       onClick={() => onChange("lesson")}
     >
-      <T k="dictionary.lessonWords" defaultText="Слова урока" />
+      <T k="dictionary.lessonWords" defaultText="Слова этого урока" />
     </button>
   </div>
 );

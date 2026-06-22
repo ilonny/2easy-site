@@ -170,6 +170,8 @@ export const useDictionaryModal = ({
     [initialLessonId]
   );
 
+  const createWordLessonId = hasLessonContext ? initialLessonId : lessonFilterId;
+
   return {
     items,
     isLoading,
@@ -199,5 +201,6 @@ export const useDictionaryModal = ({
     openAddWordModal,
     handleWordAdded,
     setLessonWordFilterMode,
+    createWordLessonId,
   };
 };
