@@ -57,11 +57,9 @@ export const Header = () => {
                   <Image src={MenuIcon} alt="menu" className="w-[40px]" />
                 </div>
               )}
-              {profile?.id === 18 && (
-                <div className="hidden lg:block">
-                  <LanguageSwitcher />
-                </div>
-              )}
+              <div>
+                <LanguageSwitcher />
+              </div>
             </div>
             <a
               href={
