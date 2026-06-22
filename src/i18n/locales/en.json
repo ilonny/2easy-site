@@ -602,7 +602,35 @@
     "translationRequired": "Enter a translation",
     "wordAdded": "Word added to dictionary",
     "playPronunciation": "Play pronunciation",
-    "pronunciationError": "Could not play pronunciation"
+    "pronunciationError": "Could not play pronunciation",
+    "onboarding": {
+      "title": "We added a new feature — Dictionary. Take a quick tour to learn how to use it",
+      "next": "Next",
+      "done": "Got it",
+      "imageSlot": "Screenshot: {{fileName}}",
+      "slides": {
+        "addWords": {
+          "title": "Adding words from the lesson",
+          "description": "Select a word or phrase in the lesson content and tap Add to dictionary."
+        },
+        "addWordModal": {
+          "title": "Review the translation",
+          "description": "In the dialog, review the translation and save the word to the dictionary."
+        },
+        "openDictionaryTeacher": {
+          "title": "Student dictionary",
+          "description": "Tap the dictionary icon in Participants to open the selected student's dictionary."
+        },
+        "openDictionaryStudent": {
+          "title": "Opening the dictionary",
+          "description": "Tap the Dictionary button in the bottom-right corner to open your dictionary."
+        },
+        "markLearned": {
+          "title": "Marking words as learned",
+          "description": "In the dictionary, select words and mark them as learned via the Actions menu."
+        }
+      }
+    }
   },
   "metadata": {
     "title": "2EASY Interactive",

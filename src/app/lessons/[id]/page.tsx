@@ -56,8 +56,12 @@ import {
   LessonDictionaryButton,
   IconDictionaryButton,
 } from "@/app/dictionary/components/DictionaryButtons";
-import { LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS } from "@/app/dictionary/constants";
+import {
+  DICTIONARY_ONBOARDING_STORAGE_KEY,
+  LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS,
+} from "@/app/dictionary/constants";
 import { DictionarySelectionWidget } from "@/app/dictionary/components/DictionarySelectionWidget";
+import { DictionaryOnboardingModal } from "@/app/dictionary/components/DictionaryOnboardingModal";
 import {
   LessonDictionaryHandle,
   LessonDictionaryLayer,
@@ -87,6 +91,7 @@ export default function LessonPage() {
   const lastStudentFocusUpdatedAtRef = useRef<number>(0);
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+  const [dictionaryOnboardingOpen, setDictionaryOnboardingOpen] = useState(false);
   const dictionaryRef = useRef<LessonDictionaryHandle>(null);
 
   const handleAddWordSelection = useCallback(
@@ -250,6 +255,25 @@ export default function LessonPage() {
     // }, 1000);
     // return () => clearInterval(interval);
   }, [getExList, isStudent, params.id, exList, setExList]);
+
+  useEffect(() => {
+    if (authIsLoading || !profile) {
+      return;
+    }
+
+    const hasSeenOnboarding = readFromLocalStorage(
+      DICTIONARY_ONBOARDING_STORAGE_KEY
+    );
+
+    if (!hasSeenOnboarding) {
+      setDictionaryOnboardingOpen(true);
+    }
+  }, [authIsLoading, profile]);
+
+  const handleDictionaryOnboardingComplete = useCallback(() => {
+    writeToLocalStorage(DICTIONARY_ONBOARDING_STORAGE_KEY, "1");
+    setDictionaryOnboardingOpen(false);
+  }, []);
 
   useEffect(() => {
     if (!tutorialOpen) {
@@ -952,6 +976,11 @@ export default function LessonPage() {
           </ModalBody>
         </ModalContent>
       </Modal>
+      <DictionaryOnboardingModal
+        isOpen={dictionaryOnboardingOpen}
+        isTeacher={!!isTeacher}
+        onComplete={handleDictionaryOnboardingComplete}
+      />
       <LessonDictionaryLayer
         ref={dictionaryRef}
         lessonId={Number(params.id) || undefined}

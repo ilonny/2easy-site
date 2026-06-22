@@ -245,3 +245,31 @@ export const SPEAK_WORD_BUTTON_CLASS =
   "shrink-0 flex items-center justify-center min-h-10 min-w-10 h-10 w-10 sm:min-h-8 sm:min-w-8 sm:h-8 sm:w-8 rounded-full text-primary hover:bg-[#eeebff] disabled:opacity-40 disabled:pointer-events-none transition-colors cursor-pointer pointer-events-auto touch-manipulation";
 
 export const ADD_WORD_SPEAK_ID = "add-word-source";
+
+export const DICTIONARY_ONBOARDING_STORAGE_KEY = "dictionary_onboarding_seen";
+
+export const DICTIONARY_ONBOARDING_MODAL_CLASS_NAMES = {
+  base: [
+    "mx-auto w-full sm:max-w-xl md:max-w-2xl",
+    DICTIONARY_SECONDARY_MODAL_MAX_HEIGHT_CLASS,
+  ].join(" "),
+  wrapper: `items-center ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
+};
+
+export const DICTIONARY_ONBOARDING_IMAGE_SLOT_CLASS =
+  "relative w-full overflow-hidden rounded-xl border border-dashed border-[#D4D4D8] bg-[#FAFAFA] aspect-[16/9]";
+
+export const DICTIONARY_ONBOARDING_IMAGE_CLASS =
+  "h-full w-full object-contain object-center";
+
+export const DICTIONARY_ONBOARDING_TITLE_CLASS =
+  "text-center text-lg sm:text-xl font-medium text-[#231F20]";
+
+export const DICTIONARY_ONBOARDING_DESCRIPTION_CLASS =
+  "text-center text-sm sm:text-base text-[#767676]";
+
+export const DICTIONARY_ONBOARDING_STEP_COUNTER_CLASS =
+  "text-center text-sm text-[#B7B7B7]";
+
+export const DICTIONARY_ONBOARDING_ACTIONS_CLASS =
+  "flex w-full gap-2";
