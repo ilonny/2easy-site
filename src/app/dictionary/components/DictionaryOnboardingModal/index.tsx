@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Button,
   Image,
@@ -36,9 +37,12 @@ export const DictionaryOnboardingModal: FC<TProps> = ({
   isTeacher,
   onComplete,
 }) => {
+  const { i18n: i18nInstance } = useTranslation();
+  const language = i18nInstance.resolvedLanguage || i18nInstance.language;
+
   const slides = useMemo(
-    () => getDictionaryOnboardingSlides(isTeacher),
-    [isTeacher]
+    () => getDictionaryOnboardingSlides(isTeacher, language),
+    [isTeacher, language]
   );
   const [activeIndex, setActiveIndex] = useState(0);
 
