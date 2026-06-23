@@ -607,14 +607,14 @@
       "title": "We added a new feature — Dictionary. Take a quick tour to learn how to use it",
       "next": "Next",
       "done": "Got it",
-      "imageSlot": "Screenshot: {{fileName}}",
       "slides": {
+        "addWords": {
+          "title": "Adding words from the lesson"
+        },
         "addWordsTeacher": {
-          "title": "Adding words from the lesson",
           "description": "Select your student in the Participants block, select a word or phrase in the lesson content, and tap Add to dictionary."
         },
         "addWordsStudent": {
-          "title": "Adding words from the lesson",
           "description": "Select a word or phrase in the lesson content and tap Add to dictionary."
         },
         "addWordModal": {

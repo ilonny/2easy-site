@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Button,
@@ -11,7 +11,6 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { T } from "@/i18n/T";
-import i18n from "@/i18n/config";
 import { getDictionaryOnboardingSlides } from "../../dictionaryOnboardingData";
 import {
   DICTIONARY_MODAL_SECTION_PADDING_CLASS,
@@ -37,8 +36,8 @@ export const DictionaryOnboardingModal: FC<TProps> = ({
   isTeacher,
   onComplete,
 }) => {
-  const { i18n: i18nInstance } = useTranslation();
-  const language = i18nInstance.resolvedLanguage || i18nInstance.language;
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage || i18n.language;
 
   const slides = useMemo(
     () => getDictionaryOnboardingSlides(isTeacher, language),
@@ -49,6 +48,12 @@ export const DictionaryOnboardingModal: FC<TProps> = ({
   const activeSlide = slides[activeIndex];
   const isFirstSlide = activeIndex === 0;
   const isLastSlide = activeIndex >= slides.length - 1;
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveIndex(0);
+    }
+  }, [isOpen, slides]);
 
   const handleClose = () => {
     setActiveIndex(0);
@@ -88,10 +93,7 @@ export const DictionaryOnboardingModal: FC<TProps> = ({
           className={`flex flex-col gap-2 shrink-0 ${DICTIONARY_MODAL_SECTION_PADDING_CLASS} pb-2`}
         >
           <p className={DICTIONARY_ONBOARDING_TITLE_CLASS}>
-            <T
-              k="dictionary.onboarding.title"
-              defaultText='Добавили новую функцию — «Словарь». Посмотрите краткое обучение, как им пользоваться'
-            />
+            <T k="dictionary.onboarding.title" />
           </p>
         </ModalHeader>
         <ModalBody
@@ -108,9 +110,7 @@ export const DictionaryOnboardingModal: FC<TProps> = ({
 
           <div
             className={DICTIONARY_ONBOARDING_IMAGE_SLOT_CLASS}
-            aria-label={i18n.t("dictionary.onboarding.imageSlot", {
-              fileName: activeSlide.imageFileName,
-            })}
+            aria-label={t(activeSlide.titleKey)}
           >
             <Image
               removeWrapper
@@ -145,9 +145,9 @@ export const DictionaryOnboardingModal: FC<TProps> = ({
               onPress={handlePrimaryAction}
             >
               {isLastSlide ? (
-                <T k="dictionary.onboarding.done" defaultText="Понятно" />
+                <T k="dictionary.onboarding.done" />
               ) : (
-                <T k="dictionary.onboarding.next" defaultText="Далее" />
+                <T k="dictionary.onboarding.next" />
               )}
             </Button>
           </div>

@@ -248,6 +248,11 @@ export const ADD_WORD_SPEAK_ID = "add-word-source";
 
 export const DICTIONARY_ONBOARDING_STORAGE_KEY = "dictionary_onboarding_seen";
 
+export const DICTIONARY_ONBOARDING_IMAGE_BASE_PATH =
+  "/images/dictionary-onboarding";
+
+export const DICTIONARY_ONBOARDING_IMAGE_EXTENSION = "png";
+
 export const DICTIONARY_ONBOARDING_MODAL_CLASS_NAMES = {
   base: [
     "mx-auto w-full sm:max-w-xl md:max-w-2xl",

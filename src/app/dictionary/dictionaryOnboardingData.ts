@@ -1,29 +1,18 @@
-import addWordsRuTeacherImage from "@/assets/images/dictionary-onboarding/ru/teacher/add-words.png";
-import addWordModalRuTeacherImage from "@/assets/images/dictionary-onboarding/ru/teacher/add-word-modal.png";
-import openDictionaryRuTeacherImage from "@/assets/images/dictionary-onboarding/ru/teacher/open-dictionary.png";
-import markLearnedRuTeacherImage from "@/assets/images/dictionary-onboarding/ru/teacher/mark-learned.png";
-import addWordsRuStudentImage from "@/assets/images/dictionary-onboarding/ru/student/add-words.png";
-import addWordModalRuStudentImage from "@/assets/images/dictionary-onboarding/ru/student/add-word-modal.png";
-import openDictionaryRuStudentImage from "@/assets/images/dictionary-onboarding/ru/student/open-dictionary.png";
-import markLearnedRuStudentImage from "@/assets/images/dictionary-onboarding/ru/student/mark-learned.png";
-import addWordsEnTeacherImage from "@/assets/images/dictionary-onboarding/en/teacher/add-words.png";
-import addWordModalEnTeacherImage from "@/assets/images/dictionary-onboarding/en/teacher/add-word-modal.png";
-import openDictionaryEnTeacherImage from "@/assets/images/dictionary-onboarding/en/teacher/open-dictionary.png";
-import markLearnedEnTeacherImage from "@/assets/images/dictionary-onboarding/en/teacher/mark-learned.png";
-import addWordsEnStudentImage from "@/assets/images/dictionary-onboarding/en/student/add-words.png";
-import addWordModalEnStudentImage from "@/assets/images/dictionary-onboarding/en/student/add-word-modal.png";
-import openDictionaryEnStudentImage from "@/assets/images/dictionary-onboarding/en/student/open-dictionary.png";
-import markLearnedEnStudentImage from "@/assets/images/dictionary-onboarding/en/student/mark-learned.png";
+import {
+  DICTIONARY_ONBOARDING_IMAGE_BASE_PATH,
+  DICTIONARY_ONBOARDING_IMAGE_EXTENSION,
+} from "./constants";
 
-export type TDictionaryOnboardingAudience = "all" | "teacher" | "student";
-export type TDictionaryOnboardingLocale = "ru" | "en";
-export type TDictionaryOnboardingRole = "teacher" | "student";
+type TDictionaryOnboardingLocale = "ru" | "en";
+type TDictionaryOnboardingRole = "teacher" | "student";
 
 export type TDictionaryOnboardingImageFileName =
   | "add-words"
   | "add-word-modal"
   | "open-dictionary"
   | "mark-learned";
+
+type TDictionaryOnboardingAudience = "all" | TDictionaryOnboardingRole;
 
 type TDictionaryOnboardingSlideDefinition = {
   id: string;
@@ -33,118 +22,87 @@ type TDictionaryOnboardingSlideDefinition = {
   audience: TDictionaryOnboardingAudience;
 };
 
-export type TDictionaryOnboardingSlide = TDictionaryOnboardingSlideDefinition & {
+export type TDictionaryOnboardingSlide = Omit<
+  TDictionaryOnboardingSlideDefinition,
+  "imageFileName" | "audience"
+> & {
   imageSrc: string;
 };
 
-const DICTIONARY_ONBOARDING_IMAGES: Record<
-  TDictionaryOnboardingLocale,
-  Record<
-    TDictionaryOnboardingRole,
-    Record<TDictionaryOnboardingImageFileName, string>
-  >
-> = {
-  ru: {
-    teacher: {
-      "add-words": addWordsRuTeacherImage.src,
-      "add-word-modal": addWordModalRuTeacherImage.src,
-      "open-dictionary": openDictionaryRuTeacherImage.src,
-      "mark-learned": markLearnedRuTeacherImage.src,
-    },
-    student: {
-      "add-words": addWordsRuStudentImage.src,
-      "add-word-modal": addWordModalRuStudentImage.src,
-      "open-dictionary": openDictionaryRuStudentImage.src,
-      "mark-learned": markLearnedRuStudentImage.src,
-    },
-  },
-  en: {
-    teacher: {
-      "add-words": addWordsEnTeacherImage.src,
-      "add-word-modal": addWordModalEnTeacherImage.src,
-      "open-dictionary": openDictionaryEnTeacherImage.src,
-      "mark-learned": markLearnedEnTeacherImage.src,
-    },
-    student: {
-      "add-words": addWordsEnStudentImage.src,
-      "add-word-modal": addWordModalEnStudentImage.src,
-      "open-dictionary": openDictionaryEnStudentImage.src,
-      "mark-learned": markLearnedEnStudentImage.src,
-    },
-  },
-};
+const SLIDE_I18N_PREFIX = "dictionary.onboarding.slides";
 
-export const resolveDictionaryOnboardingLocale = (
-  language: string
-): TDictionaryOnboardingLocale =>
+const resolveLocale = (language: string): TDictionaryOnboardingLocale =>
   language.toLowerCase().startsWith("en") ? "en" : "ru";
 
-export const resolveDictionaryOnboardingRole = (
-  isTeacher: boolean
-): TDictionaryOnboardingRole => (isTeacher ? "teacher" : "student");
+const resolveRole = (isTeacher: boolean): TDictionaryOnboardingRole =>
+  isTeacher ? "teacher" : "student";
+
+const getDictionaryOnboardingImageSrc = (
+  locale: TDictionaryOnboardingLocale,
+  role: TDictionaryOnboardingRole,
+  fileName: TDictionaryOnboardingImageFileName
+) =>
+  `${DICTIONARY_ONBOARDING_IMAGE_BASE_PATH}/${locale}/${role}/${fileName}.${DICTIONARY_ONBOARDING_IMAGE_EXTENSION}`;
+
+const buildRoleSlide = (
+  id: string,
+  imageFileName: TDictionaryOnboardingImageFileName,
+  i18nKey: string,
+  role: TDictionaryOnboardingRole,
+  options?: { sharedTitleKey?: string }
+): TDictionaryOnboardingSlideDefinition => ({
+  id: `${id}-${role}`,
+  titleKey: options?.sharedTitleKey ?? `${SLIDE_I18N_PREFIX}.${i18nKey}${capitalizeRole(role)}.title`,
+  descriptionKey: `${SLIDE_I18N_PREFIX}.${i18nKey}${capitalizeRole(role)}.description`,
+  imageFileName,
+  audience: role,
+});
+
+const capitalizeRole = (role: TDictionaryOnboardingRole) =>
+  role === "teacher" ? "Teacher" : "Student";
 
 const DICTIONARY_ONBOARDING_SLIDE_DEFINITIONS: TDictionaryOnboardingSlideDefinition[] =
   [
-    {
-      id: "add-words-teacher",
-      titleKey: "dictionary.onboarding.slides.addWordsTeacher.title",
-      descriptionKey: "dictionary.onboarding.slides.addWordsTeacher.description",
-      imageFileName: "add-words",
-      audience: "teacher",
-    },
-    {
-      id: "add-words-student",
-      titleKey: "dictionary.onboarding.slides.addWordsStudent.title",
-      descriptionKey: "dictionary.onboarding.slides.addWordsStudent.description",
-      imageFileName: "add-words",
-      audience: "student",
-    },
+    buildRoleSlide("add-words", "add-words", "addWords", "teacher", {
+      sharedTitleKey: `${SLIDE_I18N_PREFIX}.addWords.title`,
+    }),
+    buildRoleSlide("add-words", "add-words", "addWords", "student", {
+      sharedTitleKey: `${SLIDE_I18N_PREFIX}.addWords.title`,
+    }),
     {
       id: "add-word-modal",
-      titleKey: "dictionary.onboarding.slides.addWordModal.title",
-      descriptionKey: "dictionary.onboarding.slides.addWordModal.description",
+      titleKey: `${SLIDE_I18N_PREFIX}.addWordModal.title`,
+      descriptionKey: `${SLIDE_I18N_PREFIX}.addWordModal.description`,
       imageFileName: "add-word-modal",
       audience: "all",
     },
-    {
-      id: "open-dictionary-teacher",
-      titleKey: "dictionary.onboarding.slides.openDictionaryTeacher.title",
-      descriptionKey:
-        "dictionary.onboarding.slides.openDictionaryTeacher.description",
-      imageFileName: "open-dictionary",
-      audience: "teacher",
-    },
-    {
-      id: "open-dictionary-student",
-      titleKey: "dictionary.onboarding.slides.openDictionaryStudent.title",
-      descriptionKey:
-        "dictionary.onboarding.slides.openDictionaryStudent.description",
-      imageFileName: "open-dictionary",
-      audience: "student",
-    },
+    buildRoleSlide("open-dictionary", "open-dictionary", "openDictionary", "teacher"),
+    buildRoleSlide("open-dictionary", "open-dictionary", "openDictionary", "student"),
     {
       id: "mark-learned",
-      titleKey: "dictionary.onboarding.slides.markLearned.title",
-      descriptionKey: "dictionary.onboarding.slides.markLearned.description",
+      titleKey: `${SLIDE_I18N_PREFIX}.markLearned.title`,
+      descriptionKey: `${SLIDE_I18N_PREFIX}.markLearned.description`,
       imageFileName: "mark-learned",
       audience: "all",
     },
   ];
 
+const matchesAudience = (
+  audience: TDictionaryOnboardingAudience,
+  role: TDictionaryOnboardingRole
+) => audience === "all" || audience === role;
+
 export const getDictionaryOnboardingSlides = (
   isTeacher: boolean,
   language: string
 ): TDictionaryOnboardingSlide[] => {
-  const locale = resolveDictionaryOnboardingLocale(language);
-  const role = resolveDictionaryOnboardingRole(isTeacher);
-  const images = DICTIONARY_ONBOARDING_IMAGES[locale][role];
+  const locale = resolveLocale(language);
+  const role = resolveRole(isTeacher);
 
-  return DICTIONARY_ONBOARDING_SLIDE_DEFINITIONS.filter(
-    (slide) =>
-      slide.audience === "all" ||
-      (isTeacher ? slide.audience === "teacher" : slide.audience === "student")
-  ).map((slide) => ({
+  return DICTIONARY_ONBOARDING_SLIDE_DEFINITIONS.filter((slide) =>
+    matchesAudience(slide.audience, role)
+  ).map(({ imageFileName, audience: _audience, ...slide }) => ({
     ...slide,
-    imageSrc: images[slide.imageFileName],
+    imageSrc: getDictionaryOnboardingImageSrc(locale, role, imageFileName),
   }));
 };
