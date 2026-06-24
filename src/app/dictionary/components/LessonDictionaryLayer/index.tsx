@@ -12,6 +12,7 @@ import { AddWordModal } from "../AddWordModal";
 export type LessonDictionaryHandle = {
   openDictionary: (studentId: number) => void;
   openAddWord: (word: string, studentId?: number) => void;
+  openAddWordForLesson: (word: string) => void;
 };
 
 type TProps = {
@@ -25,6 +26,7 @@ export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
     const [dictionaryStudentId, setDictionaryStudentId] = useState(0);
     const [addWordModalOpen, setAddWordModalOpen] = useState(false);
     const [addWordTargetStudentId, setAddWordTargetStudentId] = useState(0);
+    const [addWordBulkLessonId, setAddWordBulkLessonId] = useState(0);
     const [selectedWord, setSelectedWord] = useState("");
 
     const openDictionary = useCallback((studentId: number) => {
@@ -40,6 +42,7 @@ export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
           return;
         }
 
+        setAddWordBulkLessonId(0);
         setAddWordTargetStudentId(targetStudentId);
         setSelectedWord(word);
         setAddWordModalOpen(true);
@@ -47,11 +50,26 @@ export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
       [defaultAddWordStudentId]
     );
 
+    const openAddWordForLesson = useCallback(
+      (word: string) => {
+        if (!lessonId) {
+          return;
+        }
+
+        setAddWordTargetStudentId(0);
+        setAddWordBulkLessonId(lessonId);
+        setSelectedWord(word);
+        setAddWordModalOpen(true);
+      },
+      [lessonId]
+    );
+
     const closeAddWordModal = useCallback((isVisible: boolean) => {
       setAddWordModalOpen(isVisible);
 
       if (!isVisible) {
         setAddWordTargetStudentId(0);
+        setAddWordBulkLessonId(0);
         setSelectedWord("");
       }
     }, []);
@@ -61,9 +79,12 @@ export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
       () => ({
         openDictionary,
         openAddWord,
+        openAddWordForLesson,
       }),
-      [openAddWord, openDictionary]
+      [openAddWord, openAddWordForLesson, openDictionary]
     );
+
+    const isAddWordModalMounted = addWordTargetStudentId > 0 || addWordBulkLessonId > 0;
 
     return (
       <>
@@ -75,11 +96,12 @@ export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
             initialLessonId={lessonId}
           />
         )}
-        {!!addWordTargetStudentId && (
+        {isAddWordModalMounted && (
           <AddWordModal
             isVisible={addWordModalOpen}
             setIsVisible={closeAddWordModal}
-            studentId={addWordTargetStudentId}
+            studentId={addWordTargetStudentId || undefined}
+            bulkLessonId={addWordBulkLessonId || undefined}
             sourceWord={selectedWord}
             lessonId={lessonId}
           />

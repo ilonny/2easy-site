@@ -12,7 +12,7 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { T } from "@/i18n/T";
-import { useDictionary } from "../../hooks/useDictionary";
+import { useDictionary, createWordsForLesson } from "../../hooks/useDictionary";
 import { toast } from "react-toastify";
 import i18n from "@/i18n/config";
 import {
@@ -34,7 +34,8 @@ import { SpeakWordButton } from "../SpeakWordButton";
 type TProps = {
   isVisible: boolean;
   setIsVisible: (val: boolean) => void;
-  studentId: number;
+  studentId?: number;
+  bulkLessonId?: number;
   sourceWord: string;
   lessonId?: number;
   onSuccess?: () => void;
@@ -44,11 +45,12 @@ export const AddWordModal: FC<TProps> = ({
   isVisible,
   setIsVisible,
   studentId,
+  bulkLessonId,
   sourceWord,
   lessonId,
   onSuccess,
 }) => {
-  const { translateWord, createWord } = useDictionary(studentId);
+  const { translateWord, createWord } = useDictionary(studentId ?? 0);
   const [translatedWord, setTranslatedWord] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -88,6 +90,28 @@ export const AddWordModal: FC<TProps> = ({
     }
 
     setIsSaving(true);
+
+    if (bulkLessonId) {
+      const result = await createWordsForLesson(bulkLessonId, {
+        sourceWord: sourceWord.trim(),
+        translatedWord: translatedWord.trim(),
+      });
+      setIsSaving(false);
+
+      if (result) {
+        toast(i18n.t("dictionary.wordAdded"), { type: "success" });
+        onSuccess?.();
+        setIsVisible(false);
+      }
+
+      return;
+    }
+
+    if (!studentId) {
+      setIsSaving(false);
+      return;
+    }
+
     const created = await createWord({
       sourceWord: sourceWord.trim(),
       translatedWord: translatedWord.trim(),
@@ -101,11 +125,13 @@ export const AddWordModal: FC<TProps> = ({
       setIsVisible(false);
     }
   }, [
+    bulkLessonId,
     createWord,
     lessonId,
     onSuccess,
     setIsVisible,
     sourceWord,
+    studentId,
     translatedWord,
   ]);
 

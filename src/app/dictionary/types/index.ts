@@ -42,6 +42,15 @@ export type TCreateWordPayload = {
   lessonId?: number;
 };
 
+export type TLessonBulkCreateWordsResult = {
+  lessonId: number;
+  totalStudents: number;
+  createdCount: number;
+  skippedCount: number;
+  created: TDictionaryItem[];
+  skipped: Array<{ studentId: number; reason: "duplicate" }>;
+};
+
 export type DictionaryTab = "unlearned" | "learned";
 
 export type TSpeechPlaybackState = {

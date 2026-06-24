@@ -97,18 +97,18 @@ export default function LessonPage() {
   const handleAddWordSelection = useCallback(
     (selection: string) => {
       if (isTeacher) {
-        if (!activeStudentId) {
-          toast(i18n.t("dictionary.selectStudentForWord"), { type: "warning" });
+        if (!students?.length) {
+          toast(i18n.t("dictionary.noStudentsOnLesson"), { type: "warning" });
           return;
         }
 
-        dictionaryRef.current?.openAddWord(selection, activeStudentId);
+        dictionaryRef.current?.openAddWordForLesson(selection);
         return;
       }
 
       dictionaryRef.current?.openAddWord(selection);
     },
-    [activeStudentId, isTeacher]
+    [isTeacher, students?.length]
   );
 
   const handleOpenStudentDictionary = useCallback(() => {
@@ -384,7 +384,7 @@ export default function LessonPage() {
                 />
               </div>
               {((isStudent && profile?.studentId) ||
-                (isTeacher && activeStudentId > 0)) && (
+                (isTeacher && !!students?.length)) && (
                 <DictionarySelectionWidget
                   wrapperId="lessonContentWrapper"
                   onAddSelection={handleAddWordSelection}

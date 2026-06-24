@@ -10,12 +10,38 @@ import { useCallback, useState } from "react";
 import { toast } from "react-toastify";
 import {
   TCreateWordPayload,
+  TLessonBulkCreateWordsResult,
   TTranslateResult,
   TDictionaryItem,
   TDictionaryListParams,
 } from "../types";
 import { parseApiErrorMessage } from "../utils/apiError";
 import { buildDictionaryQueryString } from "../utils/buildDictionaryQuery";
+
+export const createWordsForLesson = async (
+  lessonId: number,
+  data: Pick<
+    TCreateWordPayload,
+    "sourceWord" | "translatedWord" | "sourceLanguageCode" | "targetLanguageCode"
+  >
+): Promise<TLessonBulkCreateWordsResult | null> => {
+  if (!lessonId) {
+    return null;
+  }
+
+  const res = await fetchPostJson({
+    path: `/lessons/${lessonId}/dictionary/words`,
+    isSecure: true,
+    data,
+  });
+
+  if (!res?.ok) {
+    toast(await parseApiErrorMessage(res), { type: "error" });
+    return null;
+  }
+
+  return res.json() as Promise<TLessonBulkCreateWordsResult>;
+};
 
 export const useDictionary = (studentId: number) => {
   const [items, setItems] = useState<TDictionaryItem[]>([]);

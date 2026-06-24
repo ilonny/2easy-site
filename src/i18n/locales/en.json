@@ -600,7 +600,8 @@
     "sourceWord": "Source word",
     "translation": "Translation",
     "translationRequired": "Enter a translation",
-    "wordAdded": "Word added to dictionary",
+    "wordAdded": "Word added",
+    "noStudentsOnLesson": "There are no students on this lesson",
     "playPronunciation": "Play pronunciation",
     "pronunciationError": "Could not play pronunciation",
     "onboarding": {
@@ -609,12 +610,7 @@
       "done": "Got it",
       "slides": {
         "addWords": {
-          "title": "Adding words from the lesson"
-        },
-        "addWordsTeacher": {
-          "description": "Select your student in the Participants block, select a word or phrase in the lesson content, and tap Add to dictionary."
-        },
-        "addWordsStudent": {
+          "title": "Adding words from the lesson",
           "description": "Select a word or phrase in the lesson content and tap Add to dictionary."
         },
         "addWordModal": {

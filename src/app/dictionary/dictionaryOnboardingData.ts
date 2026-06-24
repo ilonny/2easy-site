@@ -49,11 +49,13 @@ const buildRoleSlide = (
   imageFileName: TDictionaryOnboardingImageFileName,
   i18nKey: string,
   role: TDictionaryOnboardingRole,
-  options?: { sharedTitleKey?: string }
+  options?: { sharedTitleKey?: string; sharedDescriptionKey?: string }
 ): TDictionaryOnboardingSlideDefinition => ({
   id: `${id}-${role}`,
   titleKey: options?.sharedTitleKey ?? `${SLIDE_I18N_PREFIX}.${i18nKey}${capitalizeRole(role)}.title`,
-  descriptionKey: `${SLIDE_I18N_PREFIX}.${i18nKey}${capitalizeRole(role)}.description`,
+  descriptionKey:
+    options?.sharedDescriptionKey ??
+    `${SLIDE_I18N_PREFIX}.${i18nKey}${capitalizeRole(role)}.description`,
   imageFileName,
   audience: role,
 });
@@ -65,9 +67,11 @@ const DICTIONARY_ONBOARDING_SLIDE_DEFINITIONS: TDictionaryOnboardingSlideDefinit
   [
     buildRoleSlide("add-words", "add-words", "addWords", "teacher", {
       sharedTitleKey: `${SLIDE_I18N_PREFIX}.addWords.title`,
+      sharedDescriptionKey: `${SLIDE_I18N_PREFIX}.addWords.description`,
     }),
     buildRoleSlide("add-words", "add-words", "addWords", "student", {
       sharedTitleKey: `${SLIDE_I18N_PREFIX}.addWords.title`,
+      sharedDescriptionKey: `${SLIDE_I18N_PREFIX}.addWords.description`,
     }),
     {
       id: "add-word-modal",
