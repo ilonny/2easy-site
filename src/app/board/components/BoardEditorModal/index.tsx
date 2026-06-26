@@ -1,7 +1,11 @@
 "use client";
 
-import { TBoard } from "@/app/board/types";
+import { TBoard, TBoardSaveStatus } from "@/app/board/types";
 import { useBoardContent } from "@/app/board/hooks/useBoardContent";
+import {
+  BOARD_EDITOR_MODAL_CLASS_NAMES,
+  BOARD_SAVE_STATUS_LABEL_KEY,
+} from "@/app/board/constants";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import {
@@ -20,13 +24,7 @@ const BoardExcalidrawEditor = dynamic(
     import("./BoardExcalidrawEditor").then((mod) => mod.BoardExcalidrawEditor),
   {
     ssr: false,
-    loading: () => (
-      <div className={styles.editorWrap}>
-        <div className="w-full h-full flex items-center justify-center">
-          <Spinner color="primary" />
-        </div>
-      </div>
-    ),
+    loading: () => <BoardEditorSpinner />,
   },
 );
 
@@ -34,6 +32,23 @@ type TProps = {
   isOpen: boolean;
   onClose: () => void;
   board?: TBoard | null;
+};
+
+const BoardEditorSpinner: FC<{ size?: "md" | "lg" }> = ({ size = "md" }) => (
+  <div className={styles.editorWrap}>
+    <div className={styles.editorLoading}>
+      <Spinner color="primary" size={size} />
+    </div>
+  </div>
+);
+
+const getSaveStatusLabel = (status: TBoardSaveStatus): string => {
+  if (status === "idle") {
+    return "";
+  }
+
+  const labelKey = BOARD_SAVE_STATUS_LABEL_KEY[status];
+  return labelKey ? i18n.t(labelKey) : "";
 };
 
 export const BoardEditorModal: FC<TProps> = ({ isOpen, onClose, board }) => {
@@ -52,21 +67,12 @@ export const BoardEditorModal: FC<TProps> = ({ isOpen, onClose, board }) => {
     onClose();
   }, [flushSave, onClose]);
 
-  const statusLabel = useMemo(() => {
-    if (saveStatus === "loading") {
-      return i18n.t("boards.loading");
-    }
-    if (saveStatus === "saving") {
-      return i18n.t("boards.saving");
-    }
-    if (saveStatus === "saved") {
-      return i18n.t("boards.saved");
-    }
-    if (saveStatus === "error") {
-      return i18n.t("boards.saveError");
-    }
-    return "";
-  }, [saveStatus]);
+  const statusLabel = useMemo(
+    () => getSaveStatusLabel(saveStatus),
+    [saveStatus],
+  );
+
+  const isEditorReady = !isLoading && !!initialData && !!boardId;
 
   return (
     <Modal
@@ -76,29 +82,23 @@ export const BoardEditorModal: FC<TProps> = ({ isOpen, onClose, board }) => {
       isOpen={isOpen}
       onClose={handleClose}
       scrollBehavior="inside"
-      classNames={{
-        base: "max-h-[92dvh] max-w-[1280px] w-[min(100%,1280px)] mx-auto my-2 sm:my-4",
-        body: "pb-4",
-      }}
+      placement="center"
+      classNames={BOARD_EDITOR_MODAL_CLASS_NAMES}
     >
       <ModalContent>
         <ModalHeader>
           <p>{board?.title || <T k="boards.myBoards" />}</p>
         </ModalHeader>
         <ModalBody>
-          {isLoading || !initialData || !boardId ? (
-            <div className={styles.editorWrap}>
-              <div className="w-full h-full flex items-center justify-center">
-                <Spinner color="primary" size="lg" />
-              </div>
-            </div>
-          ) : (
+          {isEditorReady ? (
             <BoardExcalidrawEditor
               boardId={boardId}
               contentRevision={contentRevision}
               initialData={initialData}
               onSceneChange={queueSave}
             />
+          ) : (
+            <BoardEditorSpinner size="lg" />
           )}
           {!!statusLabel && (
             <div className={styles.statusBar}>

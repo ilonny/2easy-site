@@ -8,6 +8,22 @@
   background: #fff;
 }
 
+.editorLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.editorWrap :global(.main-menu-trigger) {
+  display: none !important;
+}
+
+.editorWrap :global(.sidebar-trigger__label-element:has(.default-sidebar-trigger)) {
+  display: none !important;
+}
+
 .statusBar {
   display: flex;
   align-items: center;

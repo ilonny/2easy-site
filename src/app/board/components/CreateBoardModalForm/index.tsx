@@ -14,6 +14,7 @@ import {
 } from "@nextui-org/react";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { TBoardFormFields } from "@/app/board/types";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 
@@ -21,12 +22,6 @@ type TProps = {
   isVisible: boolean;
   setIsVisible: (val: boolean) => void;
   onSuccess: (createdBoardId: number) => void;
-};
-
-type TFieldList = {
-  title: string;
-  description: string;
-  tags: string;
 };
 
 export const CreateBoardModalForm: FC<TProps> = ({
@@ -40,7 +35,7 @@ export const CreateBoardModalForm: FC<TProps> = ({
     formState: { errors },
     watch,
     reset,
-  } = useForm<TFieldList>({
+  } = useForm<TBoardFormFields>({
     defaultValues: {
       title: "",
       description: "",
@@ -61,7 +56,7 @@ export const CreateBoardModalForm: FC<TProps> = ({
   }, [isVisible, reset]);
 
   const onSubmit = useCallback(
-    async (data: TFieldList) => {
+    async (data: TBoardFormFields) => {
       setIsLoading(true);
       try {
         let attachments;

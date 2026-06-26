@@ -1,9 +1,18 @@
 "use client";
 
-import { Excalidraw, serializeAsJSON } from "@excalidraw/excalidraw";
+import { Excalidraw, MainMenu } from "@excalidraw/excalidraw";
 import "@excalidraw/excalidraw/index.css";
-import { FC, useCallback, useMemo } from "react";
-import { snapshotToExcalidrawInitialData, TBoardSnapshot } from "../../types";
+import { FC, useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  buildBoardSnapshotFromExcalidraw,
+  hasBoardSnapshotChanged,
+  initialDataToBoardSnapshot,
+} from "../../utils/snapshot";
+import {
+  getBoardSnapshotFingerprint,
+  snapshotToExcalidrawInitialData,
+  TBoardSnapshot,
+} from "../../types";
 import styles from "./styles.module.css";
 
 type TInitialData = ReturnType<typeof snapshotToExcalidrawInitialData>;
@@ -21,6 +30,14 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
   initialData,
   onSceneChange,
 }) => {
+  const lastFingerprintRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    lastFingerprintRef.current = getBoardSnapshotFingerprint(
+      initialDataToBoardSnapshot(initialData),
+    );
+  }, [contentRevision, initialData]);
+
   const excalidrawInitialData = useMemo(
     () => ({
       elements: initialData.elements,
@@ -34,33 +51,18 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
   );
 
   const handleChange = useCallback(
-    (elements: readonly unknown[], appState: Record<string, unknown>, files: Record<string, unknown>) => {
-      try {
-        const serialized = serializeAsJSON(
-          elements as never,
-          appState as never,
-          files as never,
-          "database",
-        );
-        const parsed = JSON.parse(serialized) as {
-          elements?: unknown[];
-          files?: Record<string, unknown>;
-          appState?: Record<string, unknown>;
-        };
-        onSceneChange({
-          format: "excalidraw",
-          elements: parsed.elements || [],
-          files: parsed.files || {},
-          appState: parsed.appState || {},
-        });
-      } catch {
-        onSceneChange({
-          format: "excalidraw",
-          elements: [...elements],
-          files,
-          appState,
-        });
+    (
+      elements: readonly unknown[],
+      appState: Record<string, unknown>,
+      files: Record<string, unknown>,
+    ) => {
+      const snapshot = buildBoardSnapshotFromExcalidraw(elements, appState, files);
+      if (!hasBoardSnapshotChanged(snapshot, lastFingerprintRef.current)) {
+        return;
       }
+
+      lastFingerprintRef.current = getBoardSnapshotFingerprint(snapshot);
+      onSceneChange(snapshot);
     },
     [onSceneChange],
   );
@@ -71,7 +73,9 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
         key={`board-excalidraw-${boardId}-${contentRevision}`}
         initialData={excalidrawInitialData}
         onChange={handleChange}
-      />
+      >
+        <MainMenu />
+      </Excalidraw>
     </div>
   );
 };

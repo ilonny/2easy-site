@@ -17,6 +17,14 @@ export type TBoard = {
   canEdit?: boolean;
 };
 
+export type TBoardFormFields = {
+  title: string;
+  description: string;
+  tags: string;
+};
+
+export type TBoardSaveStatus = "idle" | "loading" | "saving" | "saved" | "error";
+
 export type TBoardContent = {
   type: string;
   data: TBoardSnapshot;
@@ -62,3 +70,11 @@ export const snapshotToExcalidrawInitialData = (snapshot: TBoardSnapshot) => ({
   files: snapshot.files as never,
   appState: snapshot.appState as never,
 });
+
+export const getBoardSnapshotFingerprint = (snapshot: TBoardSnapshot): string =>
+  JSON.stringify({
+    format: snapshot.format,
+    elements: snapshot.elements,
+    files: snapshot.files,
+    appState: snapshot.appState,
+  });

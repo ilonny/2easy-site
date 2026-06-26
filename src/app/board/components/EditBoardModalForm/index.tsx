@@ -2,7 +2,7 @@
 
 import { checkResponse, fetchPostJson } from "@/api";
 import { getImageUrl } from "@/app/editor/helpers";
-import { TBoard } from "@/app/board/types";
+import { TBoard, TBoardFormFields } from "@/app/board/types";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import {
@@ -27,12 +27,6 @@ type TProps = {
   board: TBoard;
 };
 
-type TFieldList = {
-  title: string;
-  description: string;
-  tags: string;
-};
-
 export const EditBoardModalForm: FC<TProps> = ({
   isVisible,
   setIsVisible,
@@ -46,7 +40,7 @@ export const EditBoardModalForm: FC<TProps> = ({
     formState: { errors },
     watch,
     reset,
-  } = useForm<TFieldList>({
+  } = useForm<TBoardFormFields>({
     defaultValues: {
       title: board?.title || "",
       description: board?.description || "",
@@ -75,7 +69,7 @@ export const EditBoardModalForm: FC<TProps> = ({
   }, [board, isVisible, reset]);
 
   const onSubmit = useCallback(
-    async (data: TFieldList) => {
+    async (data: TBoardFormFields) => {
       setIsLoading(true);
       try {
         const imagesToUpload = images.filter((image) => !!image?.file);
