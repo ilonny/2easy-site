@@ -1,0 +1,19 @@
+.editorWrap {
+  position: relative;
+  width: 100%;
+  height: min(70vh, 720px);
+  min-height: 420px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.statusBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 24px;
+  padding-top: 4px;
+  font-size: 13px;
+  color: #767676;
+}

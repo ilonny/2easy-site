@@ -38,6 +38,7 @@ type TProps = {
   isStudent?: boolean;
   isFreeTariff?: boolean;
   onPressCreateCourse?: () => void;
+  onPressCreateBoard?: () => void;
   isCourses?: boolean;
   openCourseModal?: () => void;
   currentCourse?: TCourse;
@@ -60,6 +61,7 @@ export const LessonsList: FC<TProps> = ({
   isStudent,
   isFreeTariff,
   onPressCreateCourse,
+  onPressCreateBoard,
   isCourses,
   getCourses,
   openCourseModal,
@@ -245,6 +247,16 @@ export const LessonsList: FC<TProps> = ({
     router.push(`/course/${data.id}`);
   }, [checkSubscription, currentCourse?.id, router]);
 
+  const createCardFooterHeight = useMemo(() => {
+    if (currentCourse) {
+      return undefined;
+    }
+    return onPressCreateBoard ? 196 : 140;
+  }, [currentCourse, onPressCreateBoard]);
+
+  const createActionButtonClass =
+    "w-full flex-shrink-0 min-h-12 h-12";
+
   return (
     <div className="flex items-start justify-start w-full flex-wrap">
       {canCreateLesson && (
@@ -276,7 +288,8 @@ export const LessonsList: FC<TProps> = ({
           <div
             className="p-4 bg-white flex items-center justify-center flex-col gap-2"
             style={{
-              height: !currentCourse ? 140 : "auto",
+              height: createCardFooterHeight,
+              minHeight: createCardFooterHeight,
               borderBottomLeftRadius: 4,
               borderBottomRightRadius: 4,
             }}
@@ -286,7 +299,7 @@ export const LessonsList: FC<TProps> = ({
               subscription?.subscribe_type_id !== 1 && (
                 <Button
                   color="primary"
-                  className="w-full"
+                  className={createActionButtonClass}
                   size="lg"
                   onClick={copyCourse}
                   isLoading={copyCourseIsLoading}
@@ -298,7 +311,7 @@ export const LessonsList: FC<TProps> = ({
               (currentCourse && currentCourse?.user_id === profile?.id)) && (
               <Button
                 color="primary"
-                className="w-full"
+                className={createActionButtonClass}
                 size="lg"
                 onClick={onPressCreate}
               >
@@ -310,7 +323,7 @@ export const LessonsList: FC<TProps> = ({
                 color="secondary"
                 variant="flat"
                 style={{ outline: "none" }}
-                className="btn-secondary-bg w-full"
+                className={`btn-secondary-bg ${createActionButtonClass}`}
                 size="lg"
                 onClick={() => {
                   setCoursePageEditVisible(true);
@@ -324,7 +337,7 @@ export const LessonsList: FC<TProps> = ({
                 color="secondary"
                 variant="flat"
                 style={{ outline: "none" }}
-                className="btn-secondary-bg w-full"
+                className={`btn-secondary-bg ${createActionButtonClass}`}
                 size="lg"
                 onClick={() => setCoursePageAttachLessonModal(true)}
               >
@@ -336,11 +349,23 @@ export const LessonsList: FC<TProps> = ({
                 color="secondary"
                 variant="flat"
                 style={{ outline: "none" }}
-                className="btn-secondary-bg w-full"
+                className={`btn-secondary-bg ${createActionButtonClass}`}
                 size="lg"
                 onClick={onPressCreateCourse}
               >
                 <span style={{ color: "#3F28C6" }}><T k="lessons.createCourse" /></span>
+              </Button>
+            )}
+            {!currentCourse && onPressCreateBoard && (
+              <Button
+                color="secondary"
+                variant="flat"
+                style={{ outline: "none" }}
+                className={`btn-secondary-bg ${createActionButtonClass}`}
+                size="lg"
+                onClick={onPressCreateBoard}
+              >
+                <span style={{ color: "#3F28C6" }}><T k="boards.createBoard" /></span>
               </Button>
             )}
           </div>

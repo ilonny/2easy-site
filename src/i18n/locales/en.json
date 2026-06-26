@@ -564,6 +564,22 @@
   "commonErrors": {
     "somethingWentWrong": "Something went wrong"
   },
+  "boards": {
+    "myBoards": "My boards",
+    "createBoard": "Create board",
+    "newBoard": "New board",
+    "editBoard": "Edit board",
+    "deleteBoard": "Delete board",
+    "deleteConfirm": "Are you sure you want to delete the board \"{{title}}\"?",
+    "cover": "Board cover",
+    "searchBoards": "Search boards",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Could not save",
+    "loadError": "Could not load board",
+    "loading": "Loading…",
+    "conflictError": "The board was changed in another tab. Latest data loaded."
+  },
   "metadata": {
     "title": "2EASY Interactive",
     "description": "Interactive platform with ready-made materials for creating and conducting language lessons"
