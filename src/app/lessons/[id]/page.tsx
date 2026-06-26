@@ -984,6 +984,9 @@ export default function LessonPage() {
       <LessonDictionaryLayer
         ref={dictionaryRef}
         lessonId={Number(params.id) || undefined}
+        lessonStudentIds={students
+          ?.map((item) => Number(item.student_id))
+          .filter((id) => Number.isInteger(id) && id > 0)}
         defaultAddWordStudentId={
           isStudent && profile?.studentId
             ? Number(profile.studentId)

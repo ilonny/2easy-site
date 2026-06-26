@@ -36,6 +36,7 @@ type TProps = {
   setIsVisible: (val: boolean) => void;
   studentId?: number;
   bulkLessonId?: number;
+  bulkLessonStudentIds?: number[];
   sourceWord: string;
   lessonId?: number;
   onSuccess?: () => void;
@@ -46,6 +47,7 @@ export const AddWordModal: FC<TProps> = ({
   setIsVisible,
   studentId,
   bulkLessonId,
+  bulkLessonStudentIds,
   sourceWord,
   lessonId,
   onSuccess,
@@ -92,10 +94,14 @@ export const AddWordModal: FC<TProps> = ({
     setIsSaving(true);
 
     if (bulkLessonId) {
-      const result = await createWordsForLesson(bulkLessonId, {
-        sourceWord: sourceWord.trim(),
-        translatedWord: translatedWord.trim(),
-      });
+      const result = await createWordsForLesson(
+        bulkLessonId,
+        {
+          sourceWord: sourceWord.trim(),
+          translatedWord: translatedWord.trim(),
+        },
+        bulkLessonStudentIds
+      );
       setIsSaving(false);
 
       if (result) {
@@ -126,6 +132,7 @@ export const AddWordModal: FC<TProps> = ({
     }
   }, [
     bulkLessonId,
+    bulkLessonStudentIds,
     createWord,
     lessonId,
     onSuccess,

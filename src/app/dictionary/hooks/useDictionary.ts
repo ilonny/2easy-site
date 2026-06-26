@@ -23,7 +23,8 @@ export const createWordsForLesson = async (
   data: Pick<
     TCreateWordPayload,
     "sourceWord" | "translatedWord" | "sourceLanguageCode" | "targetLanguageCode"
-  >
+  >,
+  studentIds?: number[]
 ): Promise<TLessonBulkCreateWordsResult | null> => {
   if (!lessonId) {
     return null;
@@ -32,7 +33,10 @@ export const createWordsForLesson = async (
   const res = await fetchPostJson({
     path: `/lessons/${lessonId}/dictionary/words`,
     isSecure: true,
-    data,
+    data: {
+      ...data,
+      ...(studentIds?.length ? { studentIds } : {}),
+    },
   });
 
   if (!res?.ok) {

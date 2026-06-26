@@ -17,11 +17,12 @@ export type LessonDictionaryHandle = {
 
 type TProps = {
   lessonId?: number;
+  lessonStudentIds?: number[];
   defaultAddWordStudentId?: number;
 };
 
 export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
-  ({ lessonId, defaultAddWordStudentId }, ref) => {
+  ({ lessonId, lessonStudentIds, defaultAddWordStudentId }, ref) => {
     const [dictionaryModalOpen, setDictionaryModalOpen] = useState(false);
     const [dictionaryStudentId, setDictionaryStudentId] = useState(0);
     const [addWordModalOpen, setAddWordModalOpen] = useState(false);
@@ -102,6 +103,7 @@ export const LessonDictionaryLayer = forwardRef<LessonDictionaryHandle, TProps>(
             setIsVisible={closeAddWordModal}
             studentId={addWordTargetStudentId || undefined}
             bulkLessonId={addWordBulkLessonId || undefined}
+            bulkLessonStudentIds={lessonStudentIds}
             sourceWord={selectedWord}
             lessonId={lessonId}
           />
