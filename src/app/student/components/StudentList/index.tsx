@@ -22,7 +22,6 @@ import Ellipse from "@/assets/icons/ellipse.svg";
 import { useRouter } from "next/navigation";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { T } from "@/i18n/T";
-
 type TProps = {
   hideAddButton?: boolean;
   hidePopoverButton?: boolean;

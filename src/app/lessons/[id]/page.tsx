@@ -52,6 +52,23 @@ import { CopyLessonLink } from "../components/CopyLessonLink";
 import { getImageUrl } from "@/app/editor/helpers";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import {
+  LessonDictionaryButton,
+  IconDictionaryButton,
+} from "@/app/dictionary/components/DictionaryButtons";
+import {
+  DICTIONARY_ONBOARDING_STORAGE_KEY,
+  LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS,
+} from "@/app/dictionary/constants";
+import { DictionarySelectionWidget } from "@/app/dictionary/components/DictionarySelectionWidget";
+import { DictionaryOnboardingModal } from "@/app/dictionary/components/DictionaryOnboardingModal";
+import {
+  LessonDictionaryHandle,
+  LessonDictionaryLayer,
+} from "@/app/dictionary/components/LessonDictionaryLayer";
+
+const VIEW_NOOP = () => {};
+const VIEW_ASYNC_NOOP = async () => {};
 
 export default function LessonPage() {
   withLogin();
@@ -74,6 +91,31 @@ export default function LessonPage() {
   const lastStudentFocusUpdatedAtRef = useRef<number>(0);
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+  const [dictionaryOnboardingOpen, setDictionaryOnboardingOpen] = useState(false);
+  const dictionaryRef = useRef<LessonDictionaryHandle>(null);
+
+  const handleAddWordSelection = useCallback(
+    (selection: string) => {
+      if (isTeacher) {
+        if (!students?.length) {
+          toast(i18n.t("dictionary.noStudentsOnLesson"), { type: "warning" });
+          return;
+        }
+
+        dictionaryRef.current?.openAddWordForLesson(selection);
+        return;
+      }
+
+      dictionaryRef.current?.openAddWord(selection);
+    },
+    [isTeacher, students?.length]
+  );
+
+  const handleOpenStudentDictionary = useCallback(() => {
+    if (profile?.studentId) {
+      dictionaryRef.current?.openDictionary(Number(profile.studentId));
+    }
+  }, [profile?.studentId]);
 
   const getCurrentExerciseIdInView = useCallback(() => {
     if (typeof document === "undefined" || typeof window === "undefined") {
@@ -215,6 +257,25 @@ export default function LessonPage() {
   }, [getExList, isStudent, params.id, exList, setExList]);
 
   useEffect(() => {
+    if (authIsLoading || !profile) {
+      return;
+    }
+
+    const hasSeenOnboarding = readFromLocalStorage(
+      DICTIONARY_ONBOARDING_STORAGE_KEY
+    );
+
+    if (!hasSeenOnboarding) {
+      setDictionaryOnboardingOpen(true);
+    }
+  }, [authIsLoading, profile]);
+
+  const handleDictionaryOnboardingComplete = useCallback(() => {
+    writeToLocalStorage(DICTIONARY_ONBOARDING_STORAGE_KEY, "1");
+    setDictionaryOnboardingOpen(false);
+  }, []);
+
+  useEffect(() => {
     if (!tutorialOpen) {
       setTutorialStep(1);
     }
@@ -277,7 +338,8 @@ export default function LessonPage() {
         <div className="flex flex-row items-stretch gap-2 sm:gap-3 md:gap-4 w-full min-w-0">
           <div className="min-w-0 flex-1">
             <div
-              className="p-3 sm:p-5 md:p-8 lg:p-10 w-full max-w-[1160px] mx-auto bg-white rounded-[10px] box-border min-w-0"
+              className="p-3 sm:p-5 md:p-8 lg:p-10 w-full max-w-[1160px] mx-auto bg-white rounded-[10px] box-border min-w-0 relative"
+              id="lessonContentWrapper"
               style={{
                 marginLeft: isStudent ? "auto" : undefined,
                 marginRight: isStudent ? "auto" : undefined,
@@ -313,14 +375,21 @@ export default function LessonPage() {
                   is2easy={lesson?.user_id === 1}
                   isAdmin={profile?.role_id === 1}
                   isPresentationMode={isPresentationMode}
-                  onPressCreate={() => {}}
-                  onSuccessCreate={() => {}}
-                  onPressDelete={() => {}}
-                  onPressEdit={() => {}}
-                  changeSortIndex={async () => {}}
-                  onChangeIsVisible={() => {}}
+                  onPressCreate={VIEW_NOOP}
+                  onSuccessCreate={VIEW_NOOP}
+                  onPressDelete={VIEW_NOOP}
+                  onPressEdit={VIEW_NOOP}
+                  changeSortIndex={VIEW_ASYNC_NOOP}
+                  onChangeIsVisible={VIEW_NOOP}
                 />
               </div>
+              {((isStudent && profile?.studentId) ||
+                (isTeacher && !!students?.length)) && (
+                <DictionarySelectionWidget
+                  wrapperId="lessonContentWrapper"
+                  onAddSelection={handleAddWordSelection}
+                />
+              )}
               {!!lesson?.homework_lesson_id &&
                 !lesson?.lesson_id_homework && (
                   <div className="mt-8 flex justify-center">
@@ -395,7 +464,7 @@ export default function LessonPage() {
           {!isStudent && !!students?.length && (
             <aside
               className="flex w-[64px] shrink-0 min-w-0 flex-col self-stretch sm:w-[100px] md:w-[180px] lg:w-[200px]"
-              aria-label="Участники урока"
+              aria-label={i18n.t("lessons.participantsAriaLabel")}
             >
               <div className="sticky top-[88px] w-full lg:top-8">
                 <div
@@ -427,14 +496,31 @@ export default function LessonPage() {
                             backgroundColor: isActive ? "#EEEBFF" : "#fff",
                           }}
                         >
-                          <p className="text-[8px] font-bold uppercase leading-snug text-[#231F20] break-words line-clamp-4 sm:text-[10px] md:text-sm md:line-clamp-none">
-                            {s["student.name"]}
-                          </p>
-                          {!!s["student.email"] && (
-                            <p className="mt-0.5 hidden text-[#767676] break-all md:mt-1 md:block md:text-sm">
-                              {s["student.email"]}
-                            </p>
-                          )}
+                          <div className="flex flex-col gap-1 sm:gap-1.5 md:flex-row md:items-center md:gap-2">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[8px] font-bold uppercase leading-snug text-[#231F20] break-words line-clamp-4 sm:text-[10px] md:text-sm md:line-clamp-none">
+                                {s["student.name"]}
+                              </p>
+                              {!!s["student.email"] && (
+                                <p className="mt-0.5 hidden text-[#767676] break-all md:mt-1 md:block md:text-sm">
+                                  {s["student.email"]}
+                                </p>
+                              )}
+                            </div>
+                            {isTeacher && (
+                              <div className={LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS}>
+                                <IconDictionaryButton
+                                  size="compact"
+                                  iconSize={20}
+                                  onClick={() => {
+                                    dictionaryRef.current?.openDictionary(
+                                      Number(s.student_id)
+                                    );
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
                         </Card>
                       </div>
                     );
@@ -530,6 +616,9 @@ export default function LessonPage() {
           <div
             className="fixed right-2 bottom-3 sm:right-4 sm:bottom-4 flex flex-col items-end gap-2 max-w-[calc(100vw-1rem)] z-10"
           >
+            {isStudent && profile?.studentId && (
+              <LessonDictionaryButton onClick={handleOpenStudentDictionary} />
+            )}
             <VideoCall lessonId={params.id as string} />
             <Chat
               students={students as any}
@@ -887,6 +976,23 @@ export default function LessonPage() {
           </ModalBody>
         </ModalContent>
       </Modal>
+      <DictionaryOnboardingModal
+        isOpen={dictionaryOnboardingOpen}
+        isTeacher={!!isTeacher}
+        onComplete={handleDictionaryOnboardingComplete}
+      />
+      <LessonDictionaryLayer
+        ref={dictionaryRef}
+        lessonId={Number(params.id) || undefined}
+        lessonStudentIds={students
+          ?.map((item) => Number(item.student_id))
+          .filter((id) => Number.isInteger(id) && id > 0)}
+        defaultAddWordStudentId={
+          isStudent && profile?.studentId
+            ? Number(profile.studentId)
+            : undefined
+        }
+      />
     </main>
   );
 }

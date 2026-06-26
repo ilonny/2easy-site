@@ -56,6 +56,7 @@ export default function StudentAccountPage() {
 
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
+  const [dictionaryModalOpen, setDictionaryModalOpen] = useState(false);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
@@ -146,6 +147,8 @@ export default function StudentAccountPage() {
             isStudent={isStudent}
             alwaysOpenLessonMode={true}
             includeCourseLessons
+            dictionaryModalOpen={dictionaryModalOpen}
+            onDictionaryModalChange={setDictionaryModalOpen}
           />
         )}
       </ContentWrapper>

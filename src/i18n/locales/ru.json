@@ -308,7 +308,10 @@
       "button": "К моему заданию",
       "tooltip": "Нужно, если ученики \"потерялись\" на уроке. По нажатию кнопки все ученики на уроке будут перемещены к текущему заданию, которое сейчас видите вы",
       "cantDetectCurrentTask": "Не удалось определить текущее задание на экране"
-    }
+    },
+    "participants": "УЧАСТНИКИ",
+    "participantsShort": "Участн.",
+    "participantsAriaLabel": "Участники урока"
   },
   "editor": {
     "home": "Главная",
@@ -564,6 +567,71 @@
   },
   "commonErrors": {
     "somethingWentWrong": "Что-то пошло не так"
+  },
+  "dictionary": {
+    "tab": "Словарь",
+    "title": "Словарь",
+    "unlearnedTab": "Неизученные слова",
+    "learnedTab": "Изученные слова",
+    "searchPlaceholder": "Поиск по слову или переводу",
+    "addWordPlaceholder": "Добавить слово",
+    "addWordAlt": "Добавить слово",
+    "searchAlt": "Поиск",
+    "languagePair": "{{source}} → {{target}}",
+    "selectWord": "Выбрать «{{word}}»",
+    "wordsCount": "Всего слов {{count}}",
+    "selectedCount": "Выбрано: {{count}}",
+    "selectAll": "Выбрать все",
+    "empty": "Слов пока нет",
+    "allWords": "Все слова",
+    "lessonWords": "Слова этого урока",
+    "lessonBadge": "Урок: {{name}}",
+    "wordFilter": "Фильтр слов",
+    "selectStudentForWord": "Выберите ученика в списке участников",
+    "resetSelection": "Сбросить",
+    "actions": "Действия",
+    "markLearned": "Отметить как выученное",
+    "markUnlearned": "Отметить как невыученное",
+    "deleteConfirm": "Удалить выбранные слова ({{count}})?",
+    "markedAsLearned": "Слова отмечены как выученные",
+    "markedAsUnlearned": "Слова отмечены как невыученные",
+    "wordsDeleted": "Слова удалены",
+    "addToDictionary": "Добавить в словарь",
+    "addWordTitle": "Добавить в словарь",
+    "sourceWord": "Исходное слово",
+    "translation": "Перевод",
+    "translationRequired": "Укажите перевод",
+    "wordAdded": "Слово добавлено",
+    "noStudentsOnLesson": "На уроке нет учеников",
+    "playPronunciation": "Прослушать произношение",
+    "pronunciationError": "Не удалось воспроизвести произношение",
+    "onboarding": {
+      "title": "Добавили новую функцию — «Словарь». Посмотрите краткое обучение, как им пользоваться",
+      "next": "Далее",
+      "done": "Понятно",
+      "slides": {
+        "addWords": {
+          "title": "Добавление слов из урока",
+          "description": "Выделите слово или фразу в материале урока и нажмите «Добавить в словарь»."
+        },
+        "addWordModal": {
+          "title": "Проверка перевода",
+          "description": "В открывшемся окне проверьте перевод и сохраните слово в словарь."
+        },
+        "openDictionaryTeacher": {
+          "title": "Словарь ученика",
+          "description": "Нажмите на иконку словаря напротив имени, чтобы открыть словарь вашего ученика."
+        },
+        "openDictionaryStudent": {
+          "title": "Открытие словаря",
+          "description": "Нажмите кнопку «Словарь» в правом нижнем углу, чтобы открыть свой словарь."
+        },
+        "markLearned": {
+          "title": "Отметка выученных слов",
+          "description": "В словаре выберите слова и отметьте их как выученные через меню «Действия»."
+        }
+      }
+    }
   },
   "boards": {
     "myBoards": "Мои доски",

@@ -31,6 +31,7 @@ type TParams = {
   path: string;
   data?: any;
   isSecure?: boolean;
+  signal?: AbortSignal;
 };
 
 const mapHeaders = (params: TParams) => {
@@ -83,15 +84,18 @@ export const checkResponse = (
 };
 
 export const fetchPostJson = (params: TParams) => {
-  const { path, data } = params;
+  const { path, data, signal } = params;
   const headers = mapHeaders(params);
   const url = (API_URL + path).replace("/undefined", "");
   return fetch(url, {
     method: "POST",
     body: JSON.stringify(data),
     headers,
+    signal,
   });
 };
+
+export const fetchPostBlob = (params: TParams) => fetchPostJson(params);
 
 export const fetchPostMultipart = (params: TParams) => {
   const { path, data } = params;
@@ -115,6 +119,28 @@ export const fetchGet = (params: TParams) => {
   const url = (API_URL + path).replace("/undefined", "");
   return fetch(url, {
     method: "GET",
+    headers,
+  });
+};
+
+export const fetchPatch = (params: TParams) => {
+  const { path, data } = params;
+  const headers = mapHeaders(params);
+  const url = (API_URL + path).replace("/undefined", "");
+  return fetch(url, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+    headers,
+  });
+};
+
+export const fetchDelete = (params: TParams) => {
+  const { path, data } = params;
+  const headers = mapHeaders(params);
+  const url = (API_URL + path).replace("/undefined", "");
+  return fetch(url, {
+    method: "DELETE",
+    body: JSON.stringify(data),
     headers,
   });
 };

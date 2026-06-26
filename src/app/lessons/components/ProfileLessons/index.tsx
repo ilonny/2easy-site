@@ -28,6 +28,7 @@ import { TCourse, useCourses } from "@/app/course/hooks/useCourses";
 import { AttachLessonCourseModalForm } from "../AttachLessonCourseModalForm";
 import Link from "next/link";
 import { T } from "@/i18n/T";
+import { DictionaryModal } from "@/app/dictionary/components/DictionaryModal";
 import { useBoards } from "@/app/board/hooks/useBoards";
 import { TBoard } from "@/app/board/types";
 import { BoardsList } from "@/app/board/components/BoardsList";
@@ -69,6 +70,8 @@ type TProps = {
   alwaysOpenLessonMode?: boolean;
   showCourseSearch?: boolean;
   includeCourseLessons?: boolean;
+  dictionaryModalOpen?: boolean;
+  onDictionaryModalChange?: (open: boolean) => void;
 };
 
 const HOMEWORK_TAG = "Homework";
@@ -88,6 +91,8 @@ export const ProfileLessons = (props: TProps) => {
     alwaysOpenLessonMode,
     showCourseSearch,
     includeCourseLessons,
+    dictionaryModalOpen: controlledDictionaryModalOpen,
+    onDictionaryModalChange,
   } = props;
   const router = useRouter();
   const { profile, createLessonModalIsVisible, setCreateLessonModalIsVisible } =
@@ -119,6 +124,12 @@ export const ProfileLessons = (props: TProps) => {
   const [studentTabIndex, setStudentTabIndex] = useState<"lessons" | "courses">(
     "lessons",
   );
+  const [internalDictionaryModalOpen, setInternalDictionaryModalOpen] =
+    useState(false);
+  const dictionaryModalOpen =
+    controlledDictionaryModalOpen ?? internalDictionaryModalOpen;
+  const setDictionaryModalOpen =
+    onDictionaryModalChange ?? setInternalDictionaryModalOpen;
 
   const { courses, coursesIsLoading, getCourses } = useCourses();
   const { boards, boardsIsLoading, getBoards } = useBoards();
@@ -634,6 +645,14 @@ export const ProfileLessons = (props: TProps) => {
             >
               <T k="lessons.coursesTab" />
             </Button>
+            <Button
+              radius="full"
+              color="primary"
+              variant="faded"
+              onClick={() => setDictionaryModalOpen(true)}
+            >
+              <T k="dictionary.tab" defaultText="Словарь" />
+            </Button>
           </div>
         </>
       )}
@@ -788,6 +807,13 @@ export const ProfileLessons = (props: TProps) => {
         setIsVisible={setCreateCourseModalIsVisible}
         onSuccess={onCreateCourse}
       />
+      {!!studentId && (
+        <DictionaryModal
+          isOpen={dictionaryModalOpen}
+          onClose={() => setDictionaryModalOpen(false)}
+          studentId={Number(studentId)}
+        />
+      )}
       <CreateBoardModalForm
         isVisible={createBoardModalIsVisible}
         setIsVisible={setCreateBoardModalIsVisible}
