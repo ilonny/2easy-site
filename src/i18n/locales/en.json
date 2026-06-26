@@ -361,7 +361,7 @@
     "backToOtherTemplates": "<- other templates",
     "addGap": "+ add gap",
     "fillColumnsWithWords": "Fill the columns with words",
-    "addWord": "Add word",
+    "addWord": "Add a word",
     "columnTitle": "Column title",
     "word": "Word",
     "definition": "Definition",
@@ -573,8 +573,8 @@
     "unlearnedTab": "Unlearned words",
     "learnedTab": "Learned words",
     "searchPlaceholder": "Search by word or translation",
-    "addWordPlaceholder": "Add word",
-    "addWordAlt": "Add word",
+    "addWordPlaceholder": "Add a word",
+    "addWordAlt": "Add a word",
     "searchAlt": "Search",
     "languagePair": "{{source}} → {{target}}",
     "selectWord": "Select \"{{word}}\"",
@@ -595,8 +595,8 @@
     "markedAsLearned": "Words marked as learned",
     "markedAsUnlearned": "Words marked as unlearned",
     "wordsDeleted": "Words deleted",
-    "addToDictionary": "Add to dictionary",
-    "addWordTitle": "Add to dictionary",
+    "addToDictionary": "Add to the dictionary",
+    "addWordTitle": "Add to the dictionary",
     "sourceWord": "Source word",
     "translation": "Translation",
     "translationRequired": "Enter a translation",
@@ -611,11 +611,11 @@
       "slides": {
         "addWords": {
           "title": "Adding words from the lesson",
-          "description": "Select a word or phrase in the lesson content and tap Add to dictionary."
+          "description": "Select a word or phrase from the lesson content and tap \"Add to the dictionary\"."
         },
         "addWordModal": {
-          "title": "Review the translation",
-          "description": "In the dialog, review the translation and save the word to the dictionary."
+          "title": "Check the translation",
+          "description": "In the dialog, check the translation and save the word to the dictionary."
         },
         "openDictionaryTeacher": {
           "title": "Student dictionary",
@@ -627,7 +627,7 @@
         },
         "markLearned": {
           "title": "Marking words as learned",
-          "description": "In the dictionary, select words and mark them as learned via the Actions menu."
+          "description": "In the dictionary, select words and mark them as learned using the actions menu."
         }
       }
     }
