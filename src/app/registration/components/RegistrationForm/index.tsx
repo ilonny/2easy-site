@@ -17,6 +17,7 @@ import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import ReactInputMask from "react-input-mask";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { isOutlookEmail } from "@/utils/isOutlookEmail";
 
 type TLoginInputs = {
   name: string;
@@ -239,6 +240,10 @@ export const RegistrationForm = () => {
             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
             message: i18n.t("auth.invalidEmail"),
           },
+          validate: (value) =>
+            isOutlookEmail(value)
+              ? i18n.t("auth.outlookEmailBlocked")
+              : true,
         }}
         render={({ field }) => (
           <Input

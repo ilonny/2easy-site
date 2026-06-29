@@ -92,6 +92,7 @@
     "nameRequired": "Name is required",
     "phoneLabel": "Phone number",
     "invalidEmail": "Invalid e-mail",
+    "outlookEmailBlocked": "We temporarily cannot deliver emails to Outlook addresses. Please use a different email or contact support.",
     "requiredField": "Required field",
     "acceptTerms": "I accept the terms of the ",
     "publicOffer": "public offer",

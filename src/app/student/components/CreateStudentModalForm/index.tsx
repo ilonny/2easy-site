@@ -11,6 +11,7 @@ import { FC, useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { isOutlookEmail } from "@/utils/isOutlookEmail";
 
 type TProps = {
   isVisible: boolean;
@@ -53,8 +54,9 @@ export const CreateStudentModalForm: FC<TProps> = ({
       if (lesson.success) {
         window?.ym(103955671, "reachGoal", "student-create");
         onSuccess();
+      } else {
+        checkResponse(lesson);
       }
-      checkResponse(lesson);
     },
     [onSuccess]
   );
@@ -88,7 +90,13 @@ export const CreateStudentModalForm: FC<TProps> = ({
             <Controller
               name="email"
               control={control}
-              rules={{ required: i18n.t("auth.emailRequired") }}
+              rules={{
+                required: i18n.t("auth.emailRequired"),
+                validate: (value) =>
+                  isOutlookEmail(value)
+                    ? i18n.t("auth.outlookEmailBlocked")
+                    : true,
+              }}
               render={({ field }) => (
                 <Input
                   {...field}
