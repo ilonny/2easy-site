@@ -102,10 +102,17 @@ export const FillGapsNew: FC<TProps> = ({
   const [slateMountKey, setSlateMountKey] = useState(0);
   const [gapFloatPos, setGapFloatPos] = useState<{ top: number; left: number } | null>(null);
   const [portalReady, setPortalReady] = useState(false);
+  const gapFloatTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isPointerSelectingRef = useRef(false);
+  const gapFloatVisibleRef = useRef(false);
 
   useEffect(() => {
     setPortalReady(true);
   }, []);
+
+  useEffect(() => {
+    gapFloatVisibleRef.current = gapFloatPos !== null;
+  }, [gapFloatPos]);
 
   const editor = useMemo(() => {
     const e = withHistory(withReact(createEditor()));
@@ -216,81 +223,131 @@ export const FillGapsNew: FC<TProps> = ({
     setGapFloatPos(null);
   }, [changeData, data.gaps, editor, openGapModalFor]);
 
-  const scheduleUpdateGapFloat = useCallback(() => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        try {
-          const sel = editor.selection;
-          if (!sel || Range.isCollapsed(sel)) {
-            setGapFloatPos(null);
-            return;
-          }
-          const hasGapNode = Array.from(
-            Editor.nodes(editor, {
-              at: sel,
-              match: (n) => Element.isElement(n) && (n as any).type === "gap",
-            }),
-          ).length > 0;
-          if (hasGapNode) {
-            setGapFloatPos(null);
-            return;
-          }
-          const text = Editor.string(editor, sel).trim();
-          if (!text) {
-            setGapFloatPos(null);
-            return;
-          }
-          try {
-            const domEditor = ReactEditor.toDOMNode(editor as any, editor as any);
-            const nativeSel = window.getSelection();
-            if (!nativeSel || nativeSel.rangeCount === 0) {
-              setGapFloatPos(null);
-              return;
-            }
-            if (!domEditor.contains(nativeSel.anchorNode)) {
-              setGapFloatPos(null);
-              return;
-            }
-          } catch {
-            setGapFloatPos(null);
-            return;
-          }
-          const domRange = ReactEditor.toDOMRange(editor as any, sel);
-          const rect = domRange.getBoundingClientRect();
-          if (rect.width < 1 && rect.height < 1) {
-            setGapFloatPos(null);
-            return;
-          }
-          const approxH = 48;
-          const margin = 10;
-          // Сначала над выделением — реже пересекается со строкой ниже и с уже созданными пропусками
-          let top = rect.top - approxH - margin;
-          if (top < 8) {
-            top = rect.bottom + margin;
-          }
-          if (top + approxH > window.innerHeight - 8) {
-            top = Math.max(8, window.innerHeight - approxH - 8);
-          }
-          const left = rect.left + rect.width / 2;
-          const clampedLeft = Math.max(96, Math.min(left, window.innerWidth - 96));
-          setGapFloatPos({ top, left: clampedLeft });
-        } catch {
+  const GAP_FLOAT_SHOW_DELAY_MS = 300;
+
+  const hideGapFloat = useCallback(() => {
+    if (gapFloatTimerRef.current) {
+      clearTimeout(gapFloatTimerRef.current);
+      gapFloatTimerRef.current = null;
+    }
+    if (gapFloatVisibleRef.current) {
+      setGapFloatPos(null);
+    }
+  }, []);
+
+  const computeGapFloatPos = useCallback(() => {
+    try {
+      const sel = editor.selection;
+      if (!sel || Range.isCollapsed(sel)) {
+        setGapFloatPos(null);
+        return;
+      }
+      const hasGapNode = Array.from(
+        Editor.nodes(editor, {
+          at: sel,
+          match: (n) => Element.isElement(n) && (n as any).type === "gap",
+        }),
+      ).length > 0;
+      if (hasGapNode) {
+        setGapFloatPos(null);
+        return;
+      }
+      const text = Editor.string(editor, sel).trim();
+      if (!text) {
+        setGapFloatPos(null);
+        return;
+      }
+      try {
+        const domEditor = ReactEditor.toDOMNode(editor as any, editor as any);
+        const nativeSel = window.getSelection();
+        if (!nativeSel || nativeSel.rangeCount === 0) {
           setGapFloatPos(null);
+          return;
         }
-      });
-    });
+        if (!domEditor.contains(nativeSel.anchorNode)) {
+          setGapFloatPos(null);
+          return;
+        }
+      } catch {
+        setGapFloatPos(null);
+        return;
+      }
+      const domRange = ReactEditor.toDOMRange(editor as any, sel);
+      const rect = domRange.getBoundingClientRect();
+      if (rect.width < 1 && rect.height < 1) {
+        setGapFloatPos(null);
+        return;
+      }
+      const approxH = 48;
+      const margin = 10;
+      let top = rect.top - approxH - margin;
+      if (top < 8) {
+        top = rect.bottom + margin;
+      }
+      if (top + approxH > window.innerHeight - 8) {
+        top = Math.max(8, window.innerHeight - approxH - 8);
+      }
+      const left = rect.left + rect.width / 2;
+      const clampedLeft = Math.max(96, Math.min(left, window.innerWidth - 96));
+      setGapFloatPos({ top, left: clampedLeft });
+    } catch {
+      setGapFloatPos(null);
+    }
   }, [editor]);
+
+  const scheduleUpdateGapFloat = useCallback(
+    (opts?: { immediate?: boolean }) => {
+      if (gapFloatTimerRef.current) {
+        clearTimeout(gapFloatTimerRef.current);
+        gapFloatTimerRef.current = null;
+      }
+
+      const sel = editor.selection;
+      if (!sel || Range.isCollapsed(sel)) {
+        hideGapFloat();
+        return;
+      }
+
+      if (isPointerSelectingRef.current && !opts?.immediate) {
+        return;
+      }
+
+      const run = () => {
+        gapFloatTimerRef.current = null;
+        requestAnimationFrame(() => {
+          requestAnimationFrame(computeGapFloatPos);
+        });
+      };
+
+      if (opts?.immediate) {
+        run();
+        return;
+      }
+
+      gapFloatTimerRef.current = setTimeout(run, GAP_FLOAT_SHOW_DELAY_MS);
+    },
+    [editor, hideGapFloat, computeGapFloatPos],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (gapFloatTimerRef.current) {
+        clearTimeout(gapFloatTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const fn = () => scheduleUpdateGapFloat();
+    const fn = () => {
+      if (!gapFloatVisibleRef.current) return;
+      scheduleUpdateGapFloat({ immediate: true });
+    };
     window.addEventListener("scroll", fn, true);
     window.addEventListener("resize", fn);
-    document.addEventListener("selectionchange", fn);
     return () => {
       window.removeEventListener("scroll", fn, true);
       window.removeEventListener("resize", fn);
-      document.removeEventListener("selectionchange", fn);
     };
   }, [scheduleUpdateGapFloat]);
 
@@ -600,7 +657,6 @@ export const FillGapsNew: FC<TProps> = ({
           }}
           onChange={(val: any) => {
             changeData("content", val as TFillGapsNewContent);
-            scheduleUpdateGapFloat();
           }}
         >
           <div className={styles.draftArea}>
@@ -612,6 +668,8 @@ export const FillGapsNew: FC<TProps> = ({
               })}
               spellCheck
               onPointerDown={(e) => {
+                isPointerSelectingRef.current = true;
+                hideGapFloat();
                 // iOS Safari: first tap sometimes doesn't focus; focus on "short tap"
                 const se = getScrollParent((e as any).target as Element | null);
                 tapFocusRef.current = {
@@ -632,10 +690,17 @@ export const FillGapsNew: FC<TProps> = ({
                 if (Math.abs(x - st.x) > 8 || Math.abs(y - st.y) > 8) st.moved = true;
               }}
               onPointerUpCapture={tryFocusOnShortTap}
+              onPointerUp={() => {
+                isPointerSelectingRef.current = false;
+                scheduleUpdateGapFloat();
+              }}
               onPointerCancel={() => {
+                isPointerSelectingRef.current = false;
                 tapFocusRef.current = null;
               }}
               onTouchStart={(e) => {
+                isPointerSelectingRef.current = true;
+                hideGapFloat();
                 const t = (e as any).touches?.[0];
                 const se = getScrollParent((e as any).target as Element | null);
                 tapFocusRef.current = {
@@ -658,9 +723,11 @@ export const FillGapsNew: FC<TProps> = ({
               }}
               onTouchEndCapture={tryFocusOnShortTap}
               onTouchEnd={() => {
+                isPointerSelectingRef.current = false;
                 scheduleUpdateGapFloat();
               }}
               onTouchCancel={() => {
+                isPointerSelectingRef.current = false;
                 tapFocusRef.current = null;
               }}
               onKeyDown={(event) => {
