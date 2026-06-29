@@ -3,10 +3,14 @@ export const BOARD_SAVE_DEBOUNCE_MS = 2500;
 export const BOARD_CARD_IMAGE_HEIGHT = 317;
 export const BOARD_CARD_FOOTER_MIN_HEIGHT = 100;
 
+export const BOARD_EDITOR_JIVO_OFFSET_PX = 85;
+
 export const BOARD_EDITOR_MODAL_CLASS_NAMES = {
-  base: "max-h-[92dvh] max-w-[1280px] w-[min(100%,1280px)] mx-auto my-2 sm:my-4",
-  wrapper: "items-center px-4 sm:px-0",
-  body: "pb-4",
+  base: "m-0 max-w-full h-[100dvh] min-h-[100dvh] rounded-none",
+  wrapper: "items-center p-0",
+  header: "shrink-0 border-b border-default-200",
+  body: "flex flex-1 min-h-0 flex-col overflow-hidden p-0",
+  closeButton: "z-20",
 };
 
 export const BOARD_SAVE_STATUS_LABEL_KEY: Record<

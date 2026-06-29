@@ -3,6 +3,7 @@
 import { TBoard, TBoardSaveStatus } from "@/app/board/types";
 import { useBoardContent } from "@/app/board/hooks/useBoardContent";
 import {
+  BOARD_EDITOR_JIVO_OFFSET_PX,
   BOARD_EDITOR_MODAL_CLASS_NAMES,
   BOARD_SAVE_STATUS_LABEL_KEY,
 } from "@/app/board/constants";
@@ -78,28 +79,39 @@ export const BoardEditorModal: FC<TProps> = ({ isOpen, onClose, board }) => {
     <Modal
       isDismissable={false}
       hideCloseButton={false}
-      size="5xl"
+      size="full"
+      radius="none"
       isOpen={isOpen}
       onClose={handleClose}
       scrollBehavior="inside"
       placement="center"
       classNames={BOARD_EDITOR_MODAL_CLASS_NAMES}
     >
-      <ModalContent>
-        <ModalHeader>
+      <ModalContent className="h-full max-h-[100dvh] rounded-none flex flex-col">
+        <ModalHeader className="px-4 py-3 sm:px-6">
           <p>{board?.title || <T k="boards.myBoards" />}</p>
         </ModalHeader>
-        <ModalBody>
-          {isEditorReady ? (
-            <BoardExcalidrawEditor
-              boardId={boardId}
-              contentRevision={contentRevision}
-              initialData={initialData}
-              onSceneChange={queueSave}
-            />
-          ) : (
-            <BoardEditorSpinner size="lg" />
-          )}
+        <ModalBody
+          className="flex flex-1 min-h-0 flex-col"
+          style={
+            {
+              paddingBottom: BOARD_EDITOR_JIVO_OFFSET_PX,
+              "--board-jivo-offset": `${BOARD_EDITOR_JIVO_OFFSET_PX}px`,
+            } as React.CSSProperties
+          }
+        >
+          <div className={styles.editorArea}>
+            {isEditorReady ? (
+              <BoardExcalidrawEditor
+                boardId={boardId}
+                contentRevision={contentRevision}
+                initialData={initialData}
+                onSceneChange={queueSave}
+              />
+            ) : (
+              <BoardEditorSpinner size="lg" />
+            )}
+          </div>
           {!!statusLabel && (
             <div className={styles.statusBar}>
               <span>{statusLabel}</span>

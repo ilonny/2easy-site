@@ -1,10 +1,16 @@
+.editorArea {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
 .editorWrap {
   position: relative;
   width: 100%;
-  height: min(70vh, 720px);
-  min-height: 420px;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 0;
   background: #fff;
 }
 
@@ -24,12 +30,17 @@
   display: none !important;
 }
 
+.editorWrap :global(.App-bottom-bar) {
+  margin-bottom: var(--board-jivo-offset, 85px);
+}
+
 .statusBar {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  min-height: 24px;
-  padding-top: 4px;
+  flex-shrink: 0;
+  min-height: 32px;
+  padding: 4px 16px 8px;
   font-size: 13px;
   color: #767676;
 }
