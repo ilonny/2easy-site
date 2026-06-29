@@ -354,3 +354,10 @@ ol, ul {
   overflow: hidden !important;
   opacity: 1 !important;
 }
+
+body.jivo-chat-hidden jdiv {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
