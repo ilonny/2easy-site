@@ -1,84 +1,68 @@
 "use client";
 
-import { TBoard, TBoardSaveStatus } from "@/app/board/types";
-import { useBoardContent } from "@/app/board/hooks/useBoardContent";
+import { TBoard } from "@/app/board/types";
+import { useBoardEditor } from "@/app/board/hooks/useBoardEditor";
 import {
   BOARD_EDITOR_JIVO_OFFSET_PX,
   BOARD_EDITOR_MODAL_CLASS_NAMES,
-  BOARD_SAVE_STATUS_LABEL_KEY,
 } from "@/app/board/constants";
+import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
+import { BoardEditorShell } from "@/app/board/components/BoardEditorShell";
+import { getBoardSaveStatusLabel } from "@/app/board/utils/saveStatus";
 import { T } from "@/i18n/T";
-import i18n from "@/i18n/config";
 import {
   Modal,
   ModalBody,
   ModalContent,
   ModalHeader,
-  Spinner,
 } from "@nextui-org/react";
-import dynamic from "next/dynamic";
 import { FC, useCallback, useMemo } from "react";
-import styles from "./styles.module.css";
-
-const BoardExcalidrawEditor = dynamic(
-  () =>
-    import("./BoardExcalidrawEditor").then((mod) => mod.BoardExcalidrawEditor),
-  {
-    ssr: false,
-    loading: () => <BoardEditorSpinner />,
-  },
-);
 
 type TProps = {
   isOpen: boolean;
   onClose: () => void;
   board?: TBoard | null;
+  mode?: "solo" | "realtime";
+  isHost?: boolean;
 };
 
-const BoardEditorSpinner: FC<{ size?: "md" | "lg" }> = ({ size = "md" }) => (
-  <div className={styles.editorWrap}>
-    <div className={styles.editorLoading}>
-      <Spinner color="primary" size={size} />
-    </div>
-  </div>
-);
-
-const getSaveStatusLabel = (status: TBoardSaveStatus): string => {
-  if (status === "idle") {
-    return "";
-  }
-
-  const labelKey = BOARD_SAVE_STATUS_LABEL_KEY[status];
-  return labelKey ? i18n.t(labelKey) : "";
-};
-
-export const BoardEditorModal: FC<TProps> = ({ isOpen, onClose, board }) => {
+export const BoardEditorModal: FC<TProps> = ({
+  isOpen,
+  onClose,
+  board,
+  mode = "solo",
+  isHost = false,
+}) => {
   const boardId = board?.id;
-  const {
-    saveStatus,
-    initialData,
-    contentRevision,
-    isLoading,
-    queueSave,
-    flushSave,
-  } = useBoardContent(boardId, isOpen);
+  const editor = useBoardEditor({
+    boardId,
+    mode,
+    enabled: isOpen && !!boardId,
+    isHost,
+  });
 
   const handleClose = useCallback(async () => {
-    await flushSave();
+    if (editor.mode === "realtime" && isHost) {
+      await editor.leaveSession();
+    } else {
+      await editor.flushSave();
+    }
     onClose();
-  }, [flushSave, onClose]);
+  }, [editor, isHost, onClose]);
 
   const statusLabel = useMemo(
-    () => getSaveStatusLabel(saveStatus),
-    [saveStatus],
+    () => getBoardSaveStatusLabel(editor.saveStatus),
+    [editor.saveStatus],
   );
 
-  const isEditorReady = !isLoading && !!initialData && !!boardId;
+  const isEditorReady =
+    !!editor.initialData && !!boardId && !editor.isWaitingForHost;
 
   return (
     <Modal
       isDismissable={false}
       hideCloseButton={false}
+      closeButton={<BoardCloseButton />}
       size="full"
       radius="none"
       isOpen={isOpen}
@@ -100,23 +84,20 @@ export const BoardEditorModal: FC<TProps> = ({ isOpen, onClose, board }) => {
             } as React.CSSProperties
           }
         >
-          <div className={styles.editorArea}>
-            {isEditorReady ? (
-              <BoardExcalidrawEditor
-                boardId={boardId}
-                contentRevision={contentRevision}
-                initialData={initialData}
-                onSceneChange={queueSave}
-              />
-            ) : (
-              <BoardEditorSpinner size="lg" />
-            )}
-          </div>
-          {!!statusLabel && (
-            <div className={styles.statusBar}>
-              <span>{statusLabel}</span>
-            </div>
-          )}
+          {boardId && editor.initialData ? (
+            <BoardEditorShell
+              boardId={boardId}
+              editorKey={`lesson-board-editor-${boardId}`}
+              contentRevision={editor.contentRevision}
+              initialData={editor.initialData}
+              isWaitingForHost={editor.isWaitingForHost}
+              isEditorReady={isEditorReady}
+              syncMode={editor.mode}
+              statusLabel={statusLabel}
+              onSceneChange={editor.queueSave}
+              waitingText={<T k="boards.waitingForHost" />}
+            />
+          ) : null}
         </ModalBody>
       </ModalContent>
     </Modal>

@@ -3,8 +3,8 @@ import {
   getBoardSnapshotFingerprint,
   normalizeBoardSnapshot,
   snapshotToExcalidrawInitialData,
-  TBoardSnapshot,
-} from "../types";
+} from "./boardSnapshot";
+import { TBoardSnapshot } from "../types";
 
 type TExcalidrawInitialData = ReturnType<typeof snapshotToExcalidrawInitialData>;
 
@@ -44,3 +44,38 @@ export const hasBoardSnapshotChanged = (
   snapshot: TBoardSnapshot,
   previousFingerprint: string | null,
 ): boolean => getBoardSnapshotFingerprint(snapshot) !== previousFingerprint;
+
+type TExcalidrawElementLike = {
+  id: string;
+  isDeleted?: boolean;
+  version: number;
+  versionNonce: number;
+  updated?: number;
+};
+
+/**
+ * Excalidraw DB serialization drops erased elements entirely. reconcileElements
+ * keeps local elements missing from remote, so erasures never reach peers unless
+ * we synthesize deletion tombstones for locals absent from the remote snapshot.
+ */
+export const augmentRemoteElementsWithDeletions = <
+  T extends TExcalidrawElementLike,
+>(
+  localElements: readonly T[],
+  remoteElements: readonly T[],
+): T[] => {
+  const remoteIds = new Set(remoteElements.map((el) => el.id));
+  const tombstones = localElements
+    .filter((el) => !remoteIds.has(el.id) && !el.isDeleted)
+    .map((el) => ({
+      ...el,
+      isDeleted: true,
+      version: el.version + 1,
+      versionNonce: Math.floor(Math.random() * 2 ** 31),
+      updated: Date.now(),
+    }));
+
+  return tombstones.length
+    ? [...remoteElements, ...tombstones]
+    : [...remoteElements];
+};

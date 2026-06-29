@@ -15,6 +15,7 @@ import {
 import Image from "next/image";
 import { FC, useState } from "react";
 import { T } from "@/i18n/T";
+import { StartBoardButton } from "../StartBoardButton";
 import styles from "./styles.module.css";
 
 type TProps = {
@@ -22,6 +23,9 @@ type TProps = {
   onPress: (board: TBoard) => void;
   onPressEdit?: (board: TBoard) => void;
   onPressDelete?: (board: TBoard) => void;
+  onPressAttach?: (board: TBoard) => void;
+  showStartBoardButton?: boolean;
+  showAttachAction?: boolean;
 };
 
 export const BoardCard: FC<TProps> = ({
@@ -29,6 +33,9 @@ export const BoardCard: FC<TProps> = ({
   onPress,
   onPressEdit,
   onPressDelete,
+  onPressAttach,
+  showStartBoardButton = false,
+  showAttachAction = false,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
 
@@ -71,6 +78,19 @@ export const BoardCard: FC<TProps> = ({
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="bg-white p-2 items-start">
+                {!!onPressAttach && showAttachAction && (
+                  <Button
+                    variant="light"
+                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
+                    style={{ fontSize: 14 }}
+                    onPress={() => {
+                      setPopoverIsOpen(false);
+                      onPressAttach(board);
+                    }}
+                  >
+                    <T k="boards.attachToStudent" />
+                  </Button>
+                )}
                 {!!onPressEdit && (
                   <Button
                     variant="light"
@@ -105,23 +125,27 @@ export const BoardCard: FC<TProps> = ({
         )}
       </div>
       <div
-        onClick={() => onPress(board)}
-        className="p-4 bg-white"
+        className="p-4 bg-white flex flex-col gap-3"
         style={{
           minHeight: BOARD_CARD_FOOTER_MIN_HEIGHT,
           borderBottomLeftRadius: 4,
           borderBottomRightRadius: 4,
         }}
       >
-        <p className="text-black font-bold" style={{ fontSize: 18 }}>
-          {board.title}
-        </p>
-        {!!board.description && (
-          <div className="mt-2" style={{ whiteSpace: "break-spaces", fontSize: 14 }}>
-            {board.description.length > 100
-              ? `${board.description.slice(0, 110)}...`
-              : board.description}
-          </div>
+        <div onClick={() => onPress(board)} className="cursor-pointer">
+          <p className="text-black font-bold" style={{ fontSize: 18 }}>
+            {board.title}
+          </p>
+          {!!board.description && (
+            <div className="mt-2" style={{ whiteSpace: "break-spaces", fontSize: 14 }}>
+              {board.description.length > 100
+                ? `${board.description.slice(0, 110)}...`
+                : board.description}
+            </div>
+          )}
+        </div>
+        {showStartBoardButton && board.canEdit && (
+          <StartBoardButton board={board} />
         )}
       </div>
     </div>

@@ -1,27 +1,23 @@
-import { fetchGet, fetchPostJson } from "@/api";
+import { fetchPostJson } from "@/api";
+import { loadBoardContent } from "../api/loadBoardContent";
 import {
   BoardContentConflictError,
   IBoardSyncAdapter,
   TBoardLoadResult,
 } from "./types";
-import { normalizeBoardSnapshot, TBoardSnapshot } from "../types";
+import { normalizeBoardSnapshot } from "../utils/boardSnapshot";
+import { TBoardSnapshot } from "../types";
+import i18n from "@/i18n/config";
 
 export const soloBoardSyncAdapter: IBoardSyncAdapter = {
   mode: "solo",
 
   async load(boardId: number): Promise<TBoardLoadResult> {
-    const res = await fetchGet({
-      path: `/board?id=${boardId}`,
-      isSecure: true,
-    });
-    const json = await res?.json();
-    if (!json?.success) {
-      throw new Error(json?.message || "Failed to load board");
+    const content = await loadBoardContent(boardId);
+    if (!content) {
+      throw new Error(i18n.t("boards.loadError"));
     }
-    return {
-      data: normalizeBoardSnapshot(json.content?.data),
-      version: Number(json.content?.version || 0),
-    };
+    return content;
   },
 
   async save(
@@ -49,7 +45,7 @@ export const soloBoardSyncAdapter: IBoardSyncAdapter = {
 
     const json = await res.json();
     if (!json?.success) {
-      throw new Error(json?.message || "Failed to save board");
+      throw new Error(json?.message || i18n.t("boards.saveError"));
     }
     return Number(json.version || 0);
   },

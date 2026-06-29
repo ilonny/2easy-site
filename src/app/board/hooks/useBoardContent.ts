@@ -6,6 +6,8 @@ import { BOARD_SAVE_DEBOUNCE_MS } from "../constants";
 import {
   getBoardSnapshotFingerprint,
   snapshotToExcalidrawInitialData,
+} from "../utils/boardSnapshot";
+import {
   TBoardSaveStatus,
   TBoardSnapshot,
 } from "../types";

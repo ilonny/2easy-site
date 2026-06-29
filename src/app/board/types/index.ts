@@ -13,6 +13,10 @@ export type TBoard = {
   created_from_2easy?: number;
   is_free?: string;
   lesson_id?: number;
+  scope_student_id?: number | null;
+  scope?: "individual" | "group";
+  room_key?: string;
+  anchor_lesson_id?: number;
   student_ids?: string;
   canEdit?: boolean;
 };
@@ -23,7 +27,38 @@ export type TBoardFormFields = {
   tags: string;
 };
 
-export type TBoardSaveStatus = "idle" | "loading" | "saving" | "saved" | "error";
+export type TBoardSaveStatus =
+  | "idle"
+  | "loading"
+  | "saving"
+  | "saved"
+  | "error"
+  | "waiting_for_host"
+  | "connecting"
+  | "connected";
+
+export type TLessonBoardScope = "individual" | "group";
+
+export type TBoardSessionStatus = {
+  active: boolean;
+  waiting_for_host: boolean;
+  is_host: boolean;
+  room_key?: string;
+  session?: {
+    id: number;
+    board_id: number;
+    room_key?: string;
+    status?: string;
+  } | null;
+};
+
+export type TBoardWsParticipant = {
+  id: string;
+  isStudent: boolean;
+  userId?: number;
+  studentId?: number;
+  displayName: string;
+};
 
 export type TBoardContent = {
   type: string;
@@ -38,43 +73,3 @@ export type TBoardSnapshot = {
   files: Record<string, unknown>;
   appState: Record<string, unknown>;
 };
-
-export const EMPTY_BOARD_SNAPSHOT: TBoardSnapshot = {
-  format: "excalidraw",
-  elements: [],
-  files: {},
-  appState: {},
-};
-
-export const normalizeBoardSnapshot = (raw?: unknown): TBoardSnapshot => {
-  if (!raw || typeof raw !== "object") {
-    return { ...EMPTY_BOARD_SNAPSHOT };
-  }
-  const data = raw as Partial<TBoardSnapshot>;
-  return {
-    format: "excalidraw",
-    elements: Array.isArray(data.elements) ? data.elements : [],
-    files:
-      data.files && typeof data.files === "object"
-        ? (data.files as Record<string, unknown>)
-        : {},
-    appState:
-      data.appState && typeof data.appState === "object"
-        ? (data.appState as Record<string, unknown>)
-        : {},
-  };
-};
-
-export const snapshotToExcalidrawInitialData = (snapshot: TBoardSnapshot) => ({
-  elements: snapshot.elements as never[],
-  files: snapshot.files as never,
-  appState: snapshot.appState as never,
-});
-
-export const getBoardSnapshotFingerprint = (snapshot: TBoardSnapshot): string =>
-  JSON.stringify({
-    format: snapshot.format,
-    elements: snapshot.elements,
-    files: snapshot.files,
-    appState: snapshot.appState,
-  });

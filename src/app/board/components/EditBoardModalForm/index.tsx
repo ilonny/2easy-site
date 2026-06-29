@@ -4,22 +4,24 @@ import { checkResponse, fetchPostJson } from "@/api";
 import { getImageUrl } from "@/app/editor/helpers";
 import { TBoard, TBoardFormFields } from "@/app/board/types";
 import { resolveBoardCoverImageId } from "@/app/board/utils/coverImage";
-import { ImageUpload } from "@/components/ImageUpload";
+import { BOARD_MODAL_CLASS_NAMES } from "@/app/board/constants";
+import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
+import { BoardFormFields } from "@/app/board/components/BoardFormFields";
 import { useUploadImage } from "@/hooks/useUploadImage";
+import { toast } from "react-toastify";
 import {
   Button,
-  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalHeader,
-  Textarea,
 } from "@nextui-org/react";
 import { FC, useCallback, useContext, useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { AuthContext } from "@/auth";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { ImageListType } from "react-images-uploading";
 
 type TProps = {
   isVisible: boolean;
@@ -49,7 +51,7 @@ export const EditBoardModalForm: FC<TProps> = ({
     },
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [images, setImages] = useState(
+  const [images, setImages] = useState<ImageListType>(
     board?.image_path
       ? [
           {
@@ -106,7 +108,8 @@ export const EditBoardModalForm: FC<TProps> = ({
           onSuccess();
         }
         checkResponse(json);
-      } catch (err) {
+      } catch {
+        toast(i18n.t("boards.saveError"), { type: "error" });
       } finally {
         setIsLoading(false);
       }
@@ -115,62 +118,24 @@ export const EditBoardModalForm: FC<TProps> = ({
   );
 
   return (
-    <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
+    <Modal
+      size="xl"
+      isOpen={isVisible}
+      onClose={() => setIsVisible(false)}
+      closeButton={<BoardCloseButton />}
+      classNames={BOARD_MODAL_CLASS_NAMES}
+    >
       <ModalContent>
         <ModalHeader>
           <p>{title ? title : <T k="boards.editBoard" />}</p>
         </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <Controller
-              name="title"
+            <BoardFormFields
               control={control}
-              rules={{ required: i18n.t("profile.titleRequired") }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label={<T k="editor.titleLabel" />}
-                  className="mb-5"
-                  radius="sm"
-                  size="lg"
-                  errorMessage={errors?.title?.message}
-                  isInvalid={!!errors.title?.message}
-                />
-              )}
-            />
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <Textarea
-                  {...field}
-                  label={<T k="editor.description" />}
-                  minRows={3}
-                  className="mb-5"
-                  radius="sm"
-                  size="lg"
-                />
-              )}
-            />
-            <Controller
-              name="tags"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label={<T k="editor.level" />}
-                  className="mb-5"
-                  radius="sm"
-                  size="lg"
-                />
-              )}
-            />
-            <ImageUpload
-              label={<T k="boards.cover" />}
+              errors={errors}
               images={images}
               setImages={setImages}
-              withInternetSearch
-              fullWidth
             />
             <div className="h-5" />
             <Button

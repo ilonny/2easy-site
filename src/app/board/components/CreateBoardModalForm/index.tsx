@@ -1,22 +1,24 @@
 "use client";
 
 import { checkResponse, fetchPostJson } from "@/api";
-import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
+import { toast } from "react-toastify";
 import {
   Button,
-  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalHeader,
-  Textarea,
 } from "@nextui-org/react";
 import { FC, useCallback, useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { TBoardFormFields } from "@/app/board/types";
+import { BOARD_MODAL_CLASS_NAMES } from "@/app/board/constants";
+import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
+import { BoardFormFields } from "@/app/board/components/BoardFormFields";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { ImageListType } from "react-images-uploading";
 
 type TProps = {
   isVisible: boolean;
@@ -43,7 +45,7 @@ export const CreateBoardModalForm: FC<TProps> = ({
     },
   });
 
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState<ImageListType>([]);
   const { uploadImages } = useUploadImage();
   const [isLoading, setIsLoading] = useState(false);
   const title = watch("title");
@@ -77,7 +79,8 @@ export const CreateBoardModalForm: FC<TProps> = ({
           onSuccess(json.createdBoard.id);
         }
         checkResponse(json);
-      } catch (err) {
+      } catch {
+        toast(i18n.t("boards.saveError"), { type: "error" });
       } finally {
         setIsLoading(false);
       }
@@ -91,6 +94,8 @@ export const CreateBoardModalForm: FC<TProps> = ({
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
       scrollBehavior="outside"
+      closeButton={<BoardCloseButton />}
+      classNames={BOARD_MODAL_CLASS_NAMES}
     >
       <ModalContent>
         <ModalHeader>
@@ -98,56 +103,12 @@ export const CreateBoardModalForm: FC<TProps> = ({
         </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <Controller
-              name="title"
+            <BoardFormFields
               control={control}
-              rules={{ required: i18n.t("profile.titleRequired") }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label={<T k="editor.titleLabel" />}
-                  className="mb-5"
-                  radius="sm"
-                  size="lg"
-                  errorMessage={errors?.title?.message}
-                  isInvalid={!!errors.title?.message}
-                />
-              )}
-            />
-            <Controller
-              name="description"
-              control={control}
-              render={({ field }) => (
-                <Textarea
-                  {...field}
-                  label={<T k="editor.description" />}
-                  minRows={3}
-                  className="mb-5"
-                  radius="sm"
-                  size="lg"
-                />
-              )}
-            />
-            <Controller
-              name="tags"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label={<T k="editor.level" />}
-                  className="mb-5"
-                  radius="sm"
-                  size="lg"
-                />
-              )}
-            />
-            <div className="h-5" />
-            <ImageUpload
-              label={<T k="boards.cover" />}
+              errors={errors}
               images={images}
               setImages={setImages}
-              withInternetSearch
-              fullWidth
+              showCoverSpacer
             />
             <div className="h-5" />
             <Button
