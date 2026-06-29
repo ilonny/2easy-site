@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  BOARD_CARD_FOOTER_MIN_HEIGHT,
+  BOARD_CARD_IMAGE_HEIGHT,
+} from "@/app/board/constants";
 import { TBoard } from "@/app/board/types";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
 import { Button } from "@nextui-org/react";
@@ -44,20 +48,26 @@ export const BoardsList: FC<TProps> = ({
             className="image-wrapper"
             style={{
               width: "100%",
-              height: 317,
+              height: BOARD_CARD_IMAGE_HEIGHT,
               position: "relative",
               overflow: "hidden",
               borderTopLeftRadius: 4,
               borderTopRightRadius: 4,
-              background: `url(${Bg.src}) center center no-repeat #fff`,
-              backgroundSize: "cover",
             }}
-          />
+          >
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                background: `url(${Bg.src}) center center no-repeat #fff`,
+                backgroundSize: "cover",
+              }}
+            />
+          </div>
           <div
-            className="p-4 bg-white flex items-center justify-center flex-col gap-2"
+            className="p-4 bg-white flex items-center justify-center"
             style={{
-              height: 140,
-              minHeight: 140,
+              minHeight: BOARD_CARD_FOOTER_MIN_HEIGHT,
               borderBottomLeftRadius: 4,
               borderBottomRightRadius: 4,
             }}

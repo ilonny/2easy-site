@@ -1,10 +1,10 @@
 "use client";
 
+import { BOARD_CARD_FOOTER_MIN_HEIGHT, BOARD_CARD_IMAGE_HEIGHT } from "@/app/board/constants";
 import { TBoard } from "@/app/board/types";
 import { getImageUrl } from "@/app/editor/helpers";
 import Ellipse from "@/assets/icons/ellipse.svg";
 import DeleteIcon from "@/assets/icons/delete.svg";
-import EditIcon from "@/assets/icons/edit.svg";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
 import {
   Button,
@@ -15,6 +15,7 @@ import {
 import Image from "next/image";
 import { FC, useState } from "react";
 import { T } from "@/i18n/T";
+import styles from "./styles.module.css";
 
 type TProps = {
   board: TBoard;
@@ -32,63 +33,49 @@ export const BoardCard: FC<TProps> = ({
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
 
   return (
-    <div className="p-2 w-[100%] md:w-1/2 lg:w-[25%]">
+    <div className={`p-2 w-[100%] md:w-1/2 lg:w-[25%] ${styles.boardCard}`}>
       <div
-        className="cursor-pointer"
         onClick={() => onPress(board)}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            onPress(board);
-          }
+        className="image-wrapper"
+        style={{
+          width: "100%",
+          height: BOARD_CARD_IMAGE_HEIGHT,
+          position: "relative",
+          overflow: "hidden",
+          borderTopLeftRadius: 4,
+          borderTopRightRadius: 4,
         }}
       >
         <div
-          className="image-wrapper"
+          className={styles.imageBg}
           style={{
-            width: "100%",
-            height: 317,
-            position: "relative",
-            overflow: "hidden",
-            borderTopLeftRadius: 4,
-            borderTopRightRadius: 4,
+            background: `url(${
+              board?.image_path ? getImageUrl(board.image_path) : Bg.src
+            })`,
           }}
-        >
+        />
+        <div className={styles.shadow} />
+        {board.canEdit && (
           <div
-            style={{
-              width: "104%",
-              height: "104%",
-              background: `url(${
-                board?.image_path ? getImageUrl(board.image_path) : Bg.src
-              }) center center no-repeat #fff`,
-              backgroundSize: "cover",
-            }}
-          />
-          {board.canEdit && (
+            className={styles.btnWrapper}
+            onClick={(event) => event.stopPropagation()}
+          >
             <Popover
               placement="bottom-end"
               isOpen={popoverIsOpen}
               onOpenChange={setPopoverIsOpen}
             >
               <PopoverTrigger>
-                <button
-                  type="button"
-                  className="absolute top-3 right-3 z-10"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Image src={Ellipse.src} alt="menu" width={24} height={24} />
-                </button>
+                <Button isIconOnly variant="flat">
+                  <Image src={Ellipse} alt="icon" />
+                </Button>
               </PopoverTrigger>
               <PopoverContent className="bg-white p-2 items-start">
                 {!!onPressEdit && (
                   <Button
                     variant="light"
-                    className="justify-start w-full"
-                    startContent={
-                      <Image src={EditIcon.src} alt="edit" width={16} height={16} />
-                    }
+                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
+                    style={{ fontSize: 14 }}
                     onPress={() => {
                       setPopoverIsOpen(false);
                       onPressEdit(board);
@@ -99,12 +86,11 @@ export const BoardCard: FC<TProps> = ({
                 )}
                 {!!onPressDelete && (
                   <Button
+                    size="sm"
                     variant="light"
-                    color="danger"
-                    className="justify-start w-full"
-                    startContent={
-                      <Image src={DeleteIcon.src} alt="delete" width={16} height={16} />
-                    }
+                    className="w-full text-default-foreground py-1 px-2 justify-start"
+                    style={{ fontSize: 14 }}
+                    endContent={<Image src={DeleteIcon} alt="icon" />}
                     onPress={() => {
                       setPopoverIsOpen(false);
                       onPressDelete(board);
@@ -115,23 +101,28 @@ export const BoardCard: FC<TProps> = ({
                 )}
               </PopoverContent>
             </Popover>
-          )}
-        </div>
-        <div
-          className="p-4 bg-white"
-          style={{
-            minHeight: 100,
-            borderBottomLeftRadius: 4,
-            borderBottomRightRadius: 4,
-          }}
-        >
-          <p className="font-medium text-lg line-clamp-2">{board.title}</p>
-          {!!board.description && (
-            <p className="text-sm text-default-500 mt-2 line-clamp-3">
-              {board.description}
-            </p>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
+      <div
+        onClick={() => onPress(board)}
+        className="p-4 bg-white"
+        style={{
+          minHeight: BOARD_CARD_FOOTER_MIN_HEIGHT,
+          borderBottomLeftRadius: 4,
+          borderBottomRightRadius: 4,
+        }}
+      >
+        <p className="text-black font-bold" style={{ fontSize: 18 }}>
+          {board.title}
+        </p>
+        {!!board.description && (
+          <div className="mt-2" style={{ whiteSpace: "break-spaces", fontSize: 14 }}>
+            {board.description.length > 100
+              ? `${board.description.slice(0, 110)}...`
+              : board.description}
+          </div>
+        )}
       </div>
     </div>
   );

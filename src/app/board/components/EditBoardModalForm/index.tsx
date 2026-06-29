@@ -3,6 +3,7 @@
 import { checkResponse, fetchPostJson } from "@/api";
 import { getImageUrl } from "@/app/editor/helpers";
 import { TBoard, TBoardFormFields } from "@/app/board/types";
+import { resolveBoardCoverImageId } from "@/app/board/utils/coverImage";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import {
@@ -50,7 +51,12 @@ export const EditBoardModalForm: FC<TProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState(
     board?.image_path
-      ? [{ dataURL: getImageUrl(board.image_path) }]
+      ? [
+          {
+            dataURL: getImageUrl(board.image_path),
+            id: board.image_id,
+          },
+        ]
       : [],
   );
   const { uploadImages } = useUploadImage();
@@ -64,7 +70,14 @@ export const EditBoardModalForm: FC<TProps> = ({
       tags: board.tags || "",
     });
     setImages(
-      board.image_path ? [{ dataURL: getImageUrl(board.image_path) }] : [],
+      board.image_path
+        ? [
+            {
+              dataURL: getImageUrl(board.image_path),
+              id: board.image_id,
+            },
+          ]
+        : [],
     );
   }, [board, isVisible, reset]);
 
@@ -72,11 +85,11 @@ export const EditBoardModalForm: FC<TProps> = ({
     async (data: TBoardFormFields) => {
       setIsLoading(true);
       try {
-        const imagesToUpload = images.filter((image) => !!image?.file);
-        let attachments;
-        if (imagesToUpload?.length) {
-          attachments = await uploadImages(imagesToUpload);
-        }
+        const imageId = await resolveBoardCoverImageId(
+          images,
+          board.image_id,
+          uploadImages,
+        );
 
         const res = await fetchPostJson({
           path: "/board/edit",
@@ -85,7 +98,7 @@ export const EditBoardModalForm: FC<TProps> = ({
             ...data,
             id: board.id,
             user_id: profile?.id,
-            image_id: attachments?.attachments?.[0]?.id ?? board.image_id,
+            image_id: imageId,
           },
         });
         const json = await res.json();
