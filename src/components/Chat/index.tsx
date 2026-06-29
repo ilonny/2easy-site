@@ -7,7 +7,7 @@ import {
   MessageInput,
   ConversationHeader,
 } from "@chatscope/chat-ui-kit-react";
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { ClipboardEvent, FC, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@nextui-org/react";
 import ChatIcon from "@/assets/icons/chat.svg";
 import CloseIcon from "@/assets/icons/close.svg";
@@ -68,6 +68,13 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
     [lesson_id, students]
   );
 
+  const handlePaste = useCallback((evt: ClipboardEvent) => {
+    evt.preventDefault();
+    const text = evt.clipboardData.getData("text/plain").trim();
+    if (!text) return;
+    document.execCommand("insertText", false, text);
+  }, []);
+
   if (!isOpen) {
     return (
       <Button
@@ -115,6 +122,7 @@ export const Chat: FC<TProps> = ({ lesson_id, students }) => {
             placeholder={i18n.t("lessons.typeMessage")}
             attachButton={false}
             onSend={sendMessage}
+            onPaste={handlePaste}
           />
         </ChatContainer>
       </MainContainer>
