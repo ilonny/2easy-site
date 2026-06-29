@@ -48,7 +48,6 @@ const SortableImageItem = sortableElement(
     onRemove,
     onChangeDescription,
     value,
-    placeholder,
   }: {
     image: Record<string, string>;
     index: number;
@@ -56,7 +55,6 @@ const SortableImageItem = sortableElement(
     onRemove: (index: number) => void;
     onChangeDescription: (text: string, index: number) => void;
     value: string;
-    placeholder: string;
   }) => {
     const idx = itemIndex ?? index;
     return (
@@ -92,7 +90,6 @@ const SortableImageItem = sortableElement(
               value={value}
               label={<T k="editor.imageCaption" defaultText="Image caption" />}
               labelPlacement="outside"
-              placeholder={placeholder}
               size="sm"
               variant="flat"
               className="w-full min-w-0"
@@ -286,7 +283,6 @@ export const ImageEx: FC<TProps> = ({
               onRemove={handleRemoveImage}
               onChangeDescription={changeImageDescription}
               value={image?.text || ""}
-              placeholder={i18n.t("editor.imageCaption")}
             />
           ))}
         </SortableImagesList>
