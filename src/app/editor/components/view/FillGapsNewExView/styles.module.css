@@ -41,14 +41,27 @@
   margin-bottom: 14px;
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: 100;
+  isolation: isolate;
   box-shadow: 0 8px 20px rgba(17, 24, 39, 0.08);
+}
+
+.poolChipWrapper {
+  position: relative;
+  z-index: 2;
 }
 
 .draggableChip {
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
+  position: relative;
+  z-index: 2;
+}
+
+.content {
+  position: relative;
+  z-index: 0;
 }
 
 .dragGhost {
@@ -70,6 +83,8 @@
   border: 1px dashed #3f28c6;
   font-weight: 700;
   color: #3f28c6;
+  position: relative;
+  z-index: 0;
 }
 
 .gapDropFilled {

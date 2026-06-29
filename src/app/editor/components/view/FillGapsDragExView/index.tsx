@@ -61,7 +61,7 @@ const AnswerField: FC<{
       }
     >
       <div
-        className={`answer-wrapper mx-2 ${isCorrect && "bg-success"} ${
+        className={`answer-wrapper mx-2 ${styles.answerDrop} ${isCorrect && "bg-success"} ${
           ((field.id == String(errorAnswerId) && !isCorrect) ||
             (hasIncorrectAnswerForTeacher && !isCorrect)) &&
           "bg-error"
@@ -233,14 +233,7 @@ const DraggableItem = (props: {
         color={isError ? "danger" : "primary"}
         className={`${
           isActiveDrag && "bg-[#271399]"
-        } handle text-[18px] cursor-pointer`}
-        style={{
-          zIndex: 1,
-          cursor: "pointer",
-          whiteSpace: "break-spaces",
-          height: "auto",
-          textAlign: "center",
-        }}
+        } handle text-[18px] cursor-pointer ${styles.draggableChip}`}
       >
         <span style={{ fontSize: 18, fontWeight: 400 }}>{field.value}</span>
       </Chip>
@@ -399,49 +392,31 @@ export const FillGapsDragExView: FC<TProps> = ({
             </Zoom>
           </div>
         )}
-        <div
-          className="
-            flex
-            justify-center
-            items-center
-            py-4
-            gap-2
-            flex-wrap
-            mx-auto
-            shadow-lg
-            top-[80px]
-            lg:top-[0px]
-          "
-          style={{
-            position: "sticky",
-            zIndex: 2,
-            background: "#fff",
-            borderRadius: 10,
-          }}
-        >
+        <div className={styles.pool}>
           {sortedFields.map((field) => {
             return (
-              <DraggableItem
-                key={field?.id}
-                field={field}
-                setActiveDragId={setActiveDragId}
-                activeDragId={activeDragId}
-                isIntersected={isIntersected}
-                isMissedIntersectedId={isMissedIntersectedId}
-                onDrop={onDrop}
-                setCorrectIds={setCorrectIds}
-                isCorrect={correctIds?.includes(field?.id)}
-                setErrorAnswerId={setErrorAnswerId}
-                setIncorrectIdsMap={setIncorrectIdsMap}
-                fields={data.fields}
-              />
+              <div key={field?.id} className={styles.poolChipWrapper}>
+                <DraggableItem
+                  field={field}
+                  setActiveDragId={setActiveDragId}
+                  activeDragId={activeDragId}
+                  isIntersected={isIntersected}
+                  isMissedIntersectedId={isMissedIntersectedId}
+                  onDrop={onDrop}
+                  setCorrectIds={setCorrectIds}
+                  isCorrect={correctIds?.includes(field?.id)}
+                  setErrorAnswerId={setErrorAnswerId}
+                  setIncorrectIdsMap={setIncorrectIdsMap}
+                  fields={data.fields}
+                />
+              </div>
             );
           })}
         </div>
-        <Card className={`p-4 sm:p-6 md:p-8 lg:p-10 box relative mt-2 min-w-0`}>
+        <Card className={`${styles.card} p-4 sm:p-6 md:p-8 lg:p-10 box relative mt-2 min-w-0`}>
           <div
             style={{ margin: "0 auto", lineHeight: "230%" }}
-            className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10"
+            className={`${styles.content} flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10`}
           >
             {editableContent}
           </div>

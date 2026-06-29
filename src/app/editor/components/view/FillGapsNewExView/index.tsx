@@ -650,7 +650,7 @@ const FillGapsNewExViewImpl: FC<{
                   isTeacher && !isPresentationMode && !canInteract && !!i.value;
                 if (!showChipHint) {
                   return (
-                    <span key={i.id} className="inline-flex">
+                    <span key={i.id} className={`inline-flex ${styles.poolChipWrapper}`}>
                       {chip}
                     </span>
                   );
@@ -660,7 +660,7 @@ const FillGapsNewExViewImpl: FC<{
                     key={i.id}
                     content={<div>Вариант: {i.value}</div>}
                   >
-                    <span className="inline-flex">{chip}</span>
+                    <span className={`inline-flex ${styles.poolChipWrapper}`}>{chip}</span>
                   </ResponsiveTooltip>
                 );
               })}
@@ -680,7 +680,9 @@ const FillGapsNewExViewImpl: FC<{
           </div>
         )}
 
-        <div className="text-[16px] sm:text-[17px] md:text-[18px] leading-relaxed break-words [overflow-wrap:anywhere]">
+        <div
+          className={`${styles.content} text-[16px] sm:text-[17px] md:text-[18px] leading-relaxed break-words [overflow-wrap:anywhere]`}
+        >
           {contentToRender.map((p, pIdx) => {
             const children = (p.children || []) as Array<
               TSlateText | TSlateGapElement
