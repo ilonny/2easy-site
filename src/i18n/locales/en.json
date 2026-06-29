@@ -13,6 +13,11 @@
     "search": "Search",
     "confirm": "Confirm"
   },
+  "cookieConsent": {
+    "message": "By clicking «OK», you consent to the use of cookies in accordance with the <1>Privacy Policy</1>.",
+    "accept": "OK",
+    "ariaLabel": "Cookie consent"
+  },
   "header": {
     "register": "Sign up",
     "login": "Log in.",

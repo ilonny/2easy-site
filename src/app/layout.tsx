@@ -15,6 +15,7 @@ import { Footer } from "@/components/Footer";
 import Script from "next/script";
 import { EditorContextProvider } from "./editor/context";
 import { JivoSite } from "@/components/JivoSite";
+import { CookieConsent } from "@/components/CookieConsent";
 import { I18nProvider } from "@/i18n/I18nProvider";
 
 export const metadata: Metadata = {
@@ -51,6 +52,7 @@ export default function RootLayout({
                     <Header />
                     <BodyContainer>{children}</BodyContainer>
                     <Footer />
+                    <CookieConsent />
                     <ToastWrapper />
                   </EditorContextProvider>
                 </SibscribeContextProvider>
