@@ -14,6 +14,7 @@ type TProps = {
   lessonId: number;
   isTeacher: boolean;
   studentIdForBoard?: number;
+  onOpenChange?: (open: boolean) => void;
 };
 
 const BoardIcon = () => (
@@ -29,6 +30,7 @@ export const LessonBoardButton: FC<TProps> = ({
   lessonId,
   isTeacher,
   studentIdForBoard,
+  onOpenChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [board, setBoard] = useState<TBoard | null>(null);
@@ -106,6 +108,10 @@ export const LessonBoardButton: FC<TProps> = ({
 
     void loadBoard({ silent: true });
   }, [isOpen, isTeacher, loadBoard, scope, studentIdForBoard]);
+
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
 
   return (
     <>

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { FC, ReactNode } from "react";
 import { Spinner } from "@nextui-org/react";
-import { TBoardSnapshot } from "../../types";
+import { TBoardSnapshot, TBoardTeacherCursor } from "../../types";
 import { TExcalidrawInitialData } from "../../utils/boardSnapshot";
 import styles from "../BoardEditorModal/styles.module.css";
 
@@ -34,6 +34,8 @@ type TProps = {
   isWaitingForHost: boolean;
   isEditorReady: boolean;
   syncMode: "solo" | "realtime";
+  isHost?: boolean;
+  teacherCursor?: TBoardTeacherCursor | null;
   statusLabel: string;
   onSceneChange: (snapshot: TBoardSnapshot) => void;
   waitingText: ReactNode;
@@ -47,6 +49,8 @@ export const BoardEditorShell: FC<TProps> = ({
   isWaitingForHost,
   isEditorReady,
   syncMode,
+  isHost = false,
+  teacherCursor = null,
   statusLabel,
   onSceneChange,
   waitingText,
@@ -66,6 +70,8 @@ export const BoardEditorShell: FC<TProps> = ({
           initialData={initialData}
           onSceneChange={onSceneChange}
           syncMode={syncMode}
+          isHost={isHost}
+          teacherCursor={teacherCursor}
         />
       ) : (
         <BoardEditorSpinner size="lg" />

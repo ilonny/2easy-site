@@ -1,0 +1,72 @@
+.toolButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #fff3bf;
+  color: #5c4a00;
+  cursor: pointer;
+  padding: 0;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.05),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.15s ease;
+  line-height: 0;
+}
+
+.toolButton:hover:not(:disabled) {
+  background: #ffec99;
+}
+
+.toolButton:active:not(:disabled) {
+  background: #ffe066;
+}
+
+.toolButton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.toolButton:focus-visible {
+  outline: 2px solid #3f28c6;
+  outline-offset: 1px;
+}
+
+.icon {
+  display: block;
+  width: 1.625rem;
+  height: 1.625rem;
+  flex-shrink: 0;
+}
+
+.wrap {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.wrap > * {
+  pointer-events: auto;
+}
+
+@media screen and (max-width: 450px) {
+  .toolButton {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .wrap {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+}

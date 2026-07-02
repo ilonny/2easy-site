@@ -3,12 +3,11 @@
 import {
   CaptureUpdateAction,
   Excalidraw,
-  MainMenu,
   reconcileElements,
 } from "@excalidraw/excalidraw";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import "@excalidraw/excalidraw/index.css";
-import { FC, useCallback, useEffect, useMemo, useRef } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   augmentRemoteElementsWithDeletions,
   buildBoardSnapshotFromExcalidraw,
@@ -19,7 +18,13 @@ import {
   getBoardSnapshotFingerprint,
   snapshotToExcalidrawInitialData,
 } from "../../utils/boardSnapshot";
-import { TBoardSnapshot } from "../../types";
+import { mergeBoardEditorAppState } from "../../utils/boardEditorDefaults";
+import { attachFitBoardViewportOnLoad } from "../../utils/boardStickyNote";
+import { buildTeacherCollaboratorsMap } from "../../utils/boardTeacherCursor";
+import { multiplayerBoardSyncAdapter } from "../../sync/MultiplayerBoardSyncAdapter";
+import { BOARD_CURSOR_THROTTLE_MS } from "../../constants";
+import { BoardStickyNoteButton } from "../BoardStickyNoteButton";
+import { TBoardSnapshot, TBoardTeacherCursor } from "../../types";
 import styles from "./styles.module.css";
 
 type TInitialData = ReturnType<typeof snapshotToExcalidrawInitialData>;
@@ -30,6 +35,8 @@ type TProps = {
   initialData: TInitialData;
   onSceneChange: (snapshot: TBoardSnapshot) => void;
   syncMode?: "solo" | "realtime";
+  isHost?: boolean;
+  teacherCursor?: TBoardTeacherCursor | null;
 };
 
 export const BoardExcalidrawEditor: FC<TProps> = ({
@@ -38,12 +45,63 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
   initialData,
   onSceneChange,
   syncMode = "solo",
+  isHost = false,
+  teacherCursor = null,
 }) => {
   const lastFingerprintRef = useRef<string | null>(null);
   const excalidrawAPIRef = useRef<ExcalidrawImperativeAPI | null>(null);
   const lastAppliedRevisionRef = useRef(-1);
   const isApplyingRemoteRef = useRef(false);
   const isRealtime = syncMode === "realtime";
+  const shouldFitViewportRef = useRef(true);
+  const fitViewportUnsubscribeRef = useRef<(() => void) | null>(null);
+  const lastCursorSentAtRef = useRef(0);
+  const teacherCursorRef = useRef(teacherCursor);
+  const isHostRef = useRef(isHost);
+  const [excalidrawAPI, setExcalidrawAPI] =
+    useState<ExcalidrawImperativeAPI | null>(null);
+
+  const excalidrawKey = isRealtime
+    ? `board-excalidraw-${boardId}`
+    : `board-excalidraw-${boardId}-${contentRevision}`;
+
+  const fitViewportIfNeeded = useCallback((api: ExcalidrawImperativeAPI) => {
+    fitViewportUnsubscribeRef.current?.();
+    fitViewportUnsubscribeRef.current = null;
+
+    fitViewportUnsubscribeRef.current = attachFitBoardViewportOnLoad(
+      api,
+      () => shouldFitViewportRef.current,
+      () => {
+        shouldFitViewportRef.current = false;
+        fitViewportUnsubscribeRef.current?.();
+        fitViewportUnsubscribeRef.current = null;
+      },
+    );
+  }, []);
+
+  useEffect(() => {
+    shouldFitViewportRef.current = true;
+    fitViewportUnsubscribeRef.current?.();
+    fitViewportUnsubscribeRef.current = null;
+    setExcalidrawAPI(null);
+  }, [excalidrawKey]);
+
+  useEffect(
+    () => () => {
+      fitViewportUnsubscribeRef.current?.();
+      fitViewportUnsubscribeRef.current = null;
+    },
+    [],
+  );
+
+  useEffect(() => {
+    teacherCursorRef.current = teacherCursor;
+  }, [teacherCursor]);
+
+  useEffect(() => {
+    isHostRef.current = isHost;
+  }, [isHost]);
 
   const applyRemoteScene = useCallback(
     (data: TInitialData, revision: number) => {
@@ -77,6 +135,16 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
       isApplyingRemoteRef.current = true;
       api.updateScene({
         elements: reconciled,
+        appState: {
+          ...mergeBoardEditorAppState(remoteSnapshot.appState as Record<string, unknown>),
+          ...(!isHostRef.current && isRealtime
+            ? {
+                collaborators: buildTeacherCollaboratorsMap(
+                  teacherCursorRef.current,
+                ),
+              }
+            : {}),
+        },
         captureUpdate: CaptureUpdateAction.NEVER,
       });
 
@@ -102,11 +170,25 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
     );
   }, [applyRemoteScene, contentRevision, initialData, isRealtime]);
 
+  useEffect(() => {
+    const api = excalidrawAPIRef.current;
+    if (!api || !isRealtime || isHost) {
+      return;
+    }
+
+    api.updateScene({
+      appState: {
+        collaborators: buildTeacherCollaboratorsMap(teacherCursor),
+      },
+      captureUpdate: CaptureUpdateAction.NEVER,
+    });
+  }, [excalidrawAPI, isHost, isRealtime, teacherCursor]);
+
   const excalidrawInitialData = useMemo(
     () => ({
       elements: initialData.elements,
       appState: {
-        ...initialData.appState,
+        ...mergeBoardEditorAppState(initialData.appState as Record<string, unknown>),
         collaborators: new Map(),
       },
       files: initialData.files,
@@ -135,30 +217,66 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
     [onSceneChange],
   );
 
+  const handlePointerUpdate = useCallback(
+    (payload: {
+      pointer: { x: number; y: number; tool: "pointer" | "laser" };
+      button: "down" | "up";
+    }) => {
+      if (!isRealtime || !isHost || !multiplayerBoardSyncAdapter.isConnected()) {
+        return;
+      }
+
+      const now = Date.now();
+      if (now - lastCursorSentAtRef.current < BOARD_CURSOR_THROTTLE_MS) {
+        return;
+      }
+      lastCursorSentAtRef.current = now;
+
+      multiplayerBoardSyncAdapter.sendCursor({
+        x: payload.pointer.x,
+        y: payload.pointer.y,
+        tool: payload.pointer.tool,
+        button: payload.button,
+      });
+    },
+    [isHost, isRealtime],
+  );
+
   const handleExcalidrawAPI = useCallback(
     (api: ExcalidrawImperativeAPI) => {
       excalidrawAPIRef.current = api;
+      setExcalidrawAPI(api);
       if (isRealtime) {
         applyRemoteScene(initialData, contentRevision);
       }
+      fitViewportIfNeeded(api);
     },
-    [applyRemoteScene, contentRevision, initialData, isRealtime],
+    [
+      applyRemoteScene,
+      contentRevision,
+      fitViewportIfNeeded,
+      initialData,
+      isRealtime,
+    ],
   );
 
-  const excalidrawKey = isRealtime
-    ? `board-excalidraw-${boardId}`
-    : `board-excalidraw-${boardId}-${contentRevision}`;
-
   return (
-    <div className={styles.editorWrap}>
+    <div className={styles.editorWrap} data-board-editor-wrap>
+      <BoardStickyNoteButton api={excalidrawAPI} />
       <Excalidraw
         key={excalidrawKey}
-        excalidrawAPI={isRealtime ? handleExcalidrawAPI : undefined}
+        excalidrawAPI={handleExcalidrawAPI}
         initialData={excalidrawInitialData}
+        gridModeEnabled
+        isCollaborating={isRealtime && !isHost}
         onChange={handleChange}
-      >
-        <MainMenu />
-      </Excalidraw>
+        onPointerUpdate={isRealtime && isHost ? handlePointerUpdate : undefined}
+        UIOptions={{
+          tools: {
+            image: true,
+          },
+        }}
+      />
     </div>
   );
 };

@@ -5,11 +5,12 @@ import { fetchGet } from "@/api";
 import { useDebouncedCallback } from "use-debounce";
 import { closeBoardSession, startBoardSession } from "../api/boardSession";
 import { loadBoardContent } from "../api/loadBoardContent";
-import { BOARD_SAVE_DEBOUNCE_MS } from "../constants";
+import { BOARD_REALTIME_SAVE_DEBOUNCE_MS } from "../constants";
 import {
   TBoardSaveStatus,
   TBoardSessionStatus,
   TBoardSnapshot,
+  TBoardTeacherCursor,
   TBoardWsParticipant,
 } from "../types";
 import {
@@ -17,6 +18,7 @@ import {
   snapshotToExcalidrawInitialData,
 } from "../utils/boardSnapshot";
 import { multiplayerBoardSyncAdapter } from "../sync/MultiplayerBoardSyncAdapter";
+import { isBoardTeacherParticipantId } from "../utils/boardTeacherCursor";
 
 type TExcalidrawInitialData = ReturnType<typeof snapshotToExcalidrawInitialData>;
 
@@ -38,6 +40,9 @@ export const useBoardRealtime = ({
   const [contentRevision, setContentRevision] = useState(0);
   const [participants, setParticipants] = useState<TBoardWsParticipant[]>([]);
   const [sessionStatus, setSessionStatus] = useState<TBoardSessionStatus | null>(
+    null,
+  );
+  const [teacherCursor, setTeacherCursor] = useState<TBoardTeacherCursor | null>(
     null,
   );
 
@@ -140,7 +145,7 @@ export const useBoardRealtime = ({
       versionRef.current,
     );
     setSaveStatus("connected");
-  }, BOARD_SAVE_DEBOUNCE_MS);
+  }, BOARD_REALTIME_SAVE_DEBOUNCE_MS);
 
   useEffect(() => {
     if (!enabled || !boardId) {
@@ -149,6 +154,7 @@ export const useBoardRealtime = ({
       setSaveStatus("idle");
       setParticipants([]);
       setSessionStatus(null);
+      setTeacherCursor(null);
       versionRef.current = 0;
       lastSentFingerprintRef.current = null;
       hasInitialSceneRef.current = false;
@@ -181,8 +187,8 @@ export const useBoardRealtime = ({
         if (!disposed) {
           setSaveStatus(hasInitialSceneRef.current ? "connected" : "connecting");
         }
-      } else if (!status?.active) {
-        setSaveStatus("waiting_for_host");
+      } else if (!disposed) {
+        setSaveStatus(hasInitialSceneRef.current ? "connected" : "connecting");
       }
 
       await multiplayerBoardSyncAdapter.connect(boardId, {
@@ -195,13 +201,13 @@ export const useBoardRealtime = ({
           }
         },
         onWaitingForHost: () => {
-          if (!isHostRef.current) {
-            setSaveStatus("waiting_for_host");
+          if (!isHostRef.current && hasInitialSceneRef.current) {
+            setSaveStatus("connected");
           }
         },
         onSessionClosed: () => {
-          if (!isHostRef.current) {
-            setSaveStatus("waiting_for_host");
+          if (!isHostRef.current && hasInitialSceneRef.current) {
+            setSaveStatus("connected");
           }
         },
         onJoined: ({ scene, version }) => {
@@ -224,6 +230,19 @@ export const useBoardRealtime = ({
         },
         onParticipants: (list) => {
           setParticipants((list || []) as TBoardWsParticipant[]);
+        },
+        onCursor: ({ from, username, pointer, button }) => {
+          if (isHostRef.current || !isBoardTeacherParticipantId(from)) {
+            return;
+          }
+          setTeacherCursor({
+            id: from,
+            username: username || "Учитель",
+            x: pointer.x,
+            y: pointer.y,
+            tool: pointer.tool === "laser" ? "laser" : "pointer",
+            button: button === "down" ? "down" : "up",
+          });
         },
         onSessionStarted: () => {
           if (disposed || isHostRef.current) {
@@ -297,7 +316,9 @@ export const useBoardRealtime = ({
     participants,
     sessionStatus,
     isLoading: saveStatus === "connecting" && initialData === null,
-    isWaitingForHost: saveStatus === "waiting_for_host",
+    isWaitingForHost: isHost && saveStatus === "waiting_for_host",
+    teacherCursor,
+    isHost,
     queueSave,
     flushSave,
     leaveSession,

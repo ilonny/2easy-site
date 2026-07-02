@@ -666,7 +666,18 @@
     "loadLessonBoardError": "Не удалось загрузить доску урока",
     "loadListError": "Не удалось загрузить список досок",
     "sessionCreateError": "Не удалось создать сессию доски",
-    "sessionCloseError": "Не удалось закрыть сессию доски"
+    "sessionCloseError": "Не удалось закрыть сессию доски",
+    "bgPlain": "Белый",
+    "bgGrid": "Сетка",
+    "bgDots": "Точки",
+    "stickers": "Стикеры",
+    "addStickyNote": "Стикер",
+    "stickyYellow": "Жёлтый стикер",
+    "stickyPink": "Розовый стикер",
+    "stickyGreen": "Зелёный стикер",
+    "stickyBlue": "Голубой стикер",
+    "stickyPurple": "Фиолетовый стикер",
+    "stickyOrange": "Оранжевый стикер"
   },
   "metadata": {
     "title": "2EASY Interactive",

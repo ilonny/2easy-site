@@ -20,6 +20,16 @@ export type TBoardRealtimeCallbacks = {
   }) => void;
   onError?: (message: string) => void;
   onConnectionChange?: (connected: boolean) => void;
+  onCursor?: (payload: {
+    from: string;
+    username?: string;
+    pointer: {
+      x: number;
+      y: number;
+      tool?: "pointer" | "laser";
+    };
+    button?: "up" | "down";
+  }) => void;
 };
 
 export interface IBoardSyncAdapter {
@@ -39,7 +49,12 @@ export interface IBoardRealtimeAdapter {
   ) => Promise<void>;
   disconnect: () => void;
   sendScene: (boardId: number, data: TBoardSnapshot, version: number) => void;
-  sendCursor: (pointer: { x: number; y: number }) => void;
+  sendCursor: (payload: {
+    x: number;
+    y: number;
+    tool: "pointer" | "laser";
+    button: "up" | "down";
+  }) => void;
   requestJoin: () => void;
   isConnected: () => boolean;
 }

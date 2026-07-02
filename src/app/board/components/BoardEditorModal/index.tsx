@@ -93,6 +93,8 @@ export const BoardEditorModal: FC<TProps> = ({
               isWaitingForHost={editor.isWaitingForHost}
               isEditorReady={isEditorReady}
               syncMode={editor.mode}
+              isHost={isHost}
+              teacherCursor={editor.teacherCursor}
               statusLabel={statusLabel}
               onSceneChange={editor.queueSave}
               waitingText={<T k="boards.waitingForHost" />}

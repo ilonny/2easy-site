@@ -60,6 +60,15 @@ export type TBoardWsParticipant = {
   displayName: string;
 };
 
+export type TBoardTeacherCursor = {
+  id: string;
+  username: string;
+  x: number;
+  y: number;
+  tool: "pointer" | "laser";
+  button: "up" | "down";
+};
+
 export type TBoardContent = {
   type: string;
   data: TBoardSnapshot;

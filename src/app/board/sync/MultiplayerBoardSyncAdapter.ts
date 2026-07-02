@@ -147,8 +147,25 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
           this.callbacks.onParticipants?.(message.participants);
         }
         return;
-      case "cursor":
+      case "cursor": {
+        const from = message.from;
+        if (!from || !from.startsWith("user:")) {
+          return;
+        }
+        const pointer = message.pointer as
+          | { x: number; y: number; tool?: "pointer" | "laser" }
+          | undefined;
+        if (!pointer || typeof pointer.x !== "number" || typeof pointer.y !== "number") {
+          return;
+        }
+        this.callbacks.onCursor?.({
+          from,
+          username: typeof message.username === "string" ? message.username : undefined,
+          pointer,
+          button: (message as { button?: "up" | "down" }).button,
+        });
         return;
+      }
       case "error":
         this.callbacks.onError?.(String(message.message || "Unknown error"));
         return;
@@ -184,10 +201,16 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
     });
   }
 
-  sendCursor(pointer: { x: number; y: number }) {
+  sendCursor(payload: {
+    x: number;
+    y: number;
+    tool: "pointer" | "laser";
+    button: "up" | "down";
+  }) {
     this.sendRaw({
       type: "cursor",
-      pointer,
+      pointer: payload,
+      button: payload.button,
     });
   }
 

@@ -1,4 +1,10 @@
+/** Solo editor: save to REST API */
 export const BOARD_SAVE_DEBOUNCE_MS = 2500;
+
+/** Realtime: send scene snapshot over WebSocket (DB persist stays debounced on server) */
+export const BOARD_REALTIME_SAVE_DEBOUNCE_MS = 400;
+
+export const BOARD_CURSOR_THROTTLE_MS = 40;
 
 export const BOARD_WS_PATH = "/api/board/ws";
 
@@ -9,7 +15,18 @@ export const BOARD_CARD_FOOTER_MIN_HEIGHT = 100;
 
 export const BOARD_EDITOR_JIVO_OFFSET_PX = 85;
 
+/** Realtime lesson page — fullscreen board without site chrome */
+export const BOARD_LESSON_PAGE_PATH_PREFIX = "/boards/";
+
+export const BOARD_FORM_MODAL_CLASS_NAMES = {
+  closeButton: "z-20",
+};
+
 export const BOARD_MODAL_CLASS_NAMES = {
+  base: "m-0 max-w-full w-full h-[100dvh] min-h-[100dvh] rounded-none",
+  wrapper: "items-stretch justify-center p-0",
+  header: "shrink-0 border-b border-default-200 px-4 py-3 sm:px-6",
+  body: "flex-1 overflow-y-auto px-4 py-4 sm:px-6",
   closeButton: "z-20",
 };
 

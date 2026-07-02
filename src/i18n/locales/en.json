@@ -665,7 +665,18 @@
     "loadLessonBoardError": "Could not load lesson board",
     "loadListError": "Could not load boards list",
     "sessionCreateError": "Could not create board session",
-    "sessionCloseError": "Could not close board session"
+    "sessionCloseError": "Could not close board session",
+    "bgPlain": "Plain",
+    "bgGrid": "Grid",
+    "bgDots": "Dots",
+    "stickers": "Stickers",
+    "addStickyNote": "Sticky note",
+    "stickyYellow": "Yellow sticky",
+    "stickyPink": "Pink sticky",
+    "stickyGreen": "Green sticky",
+    "stickyBlue": "Blue sticky",
+    "stickyPurple": "Purple sticky",
+    "stickyOrange": "Orange sticky"
   },
   "metadata": {
     "title": "2EASY Interactive",

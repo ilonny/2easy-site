@@ -12,7 +12,7 @@ import {
 } from "@nextui-org/react";
 import { FC, useCallback, useEffect, useState } from "react";
 import { TBoard } from "@/app/board/types";
-import { BOARD_MODAL_CLASS_NAMES } from "@/app/board/constants";
+import { BOARD_FORM_MODAL_CLASS_NAMES } from "@/app/board/constants";
 import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
 import { StudentList } from "@/app/student/components/StudentList";
 import { T } from "@/i18n/T";
@@ -102,7 +102,7 @@ export const AttachBoardModalForm: FC<TProps> = ({
       scrollBehavior="outside"
       style={{ backgroundColor: "#F9F9F9" }}
       closeButton={<BoardCloseButton />}
-      classNames={BOARD_MODAL_CLASS_NAMES}
+      classNames={BOARD_FORM_MODAL_CLASS_NAMES}
     >
       <ModalContent>
         <ModalHeader>

@@ -84,7 +84,11 @@ export default function LessonPage() {
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const [dictionaryOnboardingOpen, setDictionaryOnboardingOpen] = useState(false);
+  const [boardModalOpen, setBoardModalOpen] = useState(false);
   const dictionaryRef = useRef<LessonDictionaryHandle>(null);
+  const boardModalOpenRef = useRef(false);
+
+  boardModalOpenRef.current = boardModalOpen;
 
   const handleAddWordSelection = useCallback(
     (selection: string) => {
@@ -197,7 +201,7 @@ export default function LessonPage() {
     if (!lessonId) return;
 
     const interval = setInterval(async () => {
-      if (!active) return;
+      if (!active || boardModalOpenRef.current) return;
       try {
         const res = await fetchGet({
           path: `/lesson-focus?lesson_id=${lessonId}`,
@@ -228,7 +232,12 @@ export default function LessonPage() {
     }
     let canGetList = true;
     const getList = async () => {
-      if (!canGetList) {
+      if (!canGetList || boardModalOpenRef.current) {
+        if (canGetList) {
+          setTimeout(() => {
+            getList();
+          }, 1000);
+        }
         return;
       }
       const res = await fetchGet({
@@ -623,6 +632,7 @@ export default function LessonPage() {
               lessonId={Number(params.id) || lesson?.id || 0}
               isTeacher={isTeacher}
               studentIdForBoard={lessonBoardStudentId}
+              onOpenChange={setBoardModalOpen}
             />
             <VideoCall lessonId={params.id as string} />
             <Chat

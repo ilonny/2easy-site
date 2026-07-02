@@ -34,6 +34,7 @@ export default function BoardRealtimePage() {
     initialData,
     contentRevision,
     isWaitingForHost,
+    teacherCursor,
     queueSave,
     leaveSession,
   } = editor;
@@ -51,7 +52,7 @@ export default function BoardRealtimePage() {
 
   if (loadError) {
     return (
-      <div className="flex h-[100dvh] flex-col items-center justify-center gap-4 bg-white px-6 text-center">
+      <div className="fixed inset-0 z-[2] flex flex-col items-center justify-center gap-4 bg-white px-6 text-center">
         <p><T k="boards.loadError" /></p>
         <button type="button" onClick={handleClose}>
           <T k="common.back" defaultText="Назад" />
@@ -61,12 +62,13 @@ export default function BoardRealtimePage() {
   }
 
   const isEditorReady = !!initialData && !!boardId && !isWaitingForHost;
+  const editorAreaStyle = {
+    paddingBottom: BOARD_EDITOR_JIVO_OFFSET_PX,
+    "--board-jivo-offset": `${BOARD_EDITOR_JIVO_OFFSET_PX}px`,
+  } as React.CSSProperties;
 
   return (
-    <div
-      className="flex h-[100dvh] flex-col bg-white"
-      style={{ paddingBottom: BOARD_EDITOR_JIVO_OFFSET_PX }}
-    >
+    <div className="fixed inset-0 z-[2] flex flex-col bg-white">
       <div className="relative flex shrink-0 items-center border-b border-default-200 px-4 py-3 sm:px-6">
         <p className="pr-10 font-medium">
           {board?.title || <T k="boards.myBoards" />}
@@ -74,7 +76,7 @@ export default function BoardRealtimePage() {
         <BoardCloseButton variant="header" onClick={handleClose} />
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col" style={editorAreaStyle}>
         {boardId && initialData ? (
           <BoardEditorShell
             boardId={boardId}
@@ -84,6 +86,8 @@ export default function BoardRealtimePage() {
             isWaitingForHost={isWaitingForHost}
             isEditorReady={isEditorReady}
             syncMode="realtime"
+            isHost={isTeacher}
+            teacherCursor={teacherCursor}
             statusLabel={statusLabel}
             onSceneChange={queueSave}
             waitingText={<T k="boards.waitingForHost" />}

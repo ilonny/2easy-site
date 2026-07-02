@@ -119,13 +119,16 @@ export const EditBoardModalForm: FC<TProps> = ({
 
   return (
     <Modal
-      size="xl"
+      size="full"
+      radius="none"
+      placement="center"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
+      scrollBehavior="inside"
       closeButton={<BoardCloseButton />}
       classNames={BOARD_MODAL_CLASS_NAMES}
     >
-      <ModalContent>
+      <ModalContent className="h-full max-h-[100dvh] rounded-none flex flex-col">
         <ModalHeader>
           <p>{title ? title : <T k="boards.editBoard" />}</p>
         </ModalHeader>

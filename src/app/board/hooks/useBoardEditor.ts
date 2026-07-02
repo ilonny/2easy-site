@@ -35,6 +35,8 @@ export const useBoardEditor = ({
       contentRevision: realtime.contentRevision,
       isLoading: realtime.isLoading,
       isWaitingForHost: realtime.isWaitingForHost,
+      teacherCursor: realtime.teacherCursor,
+      isHost,
       queueSave: realtime.queueSave,
       flushSave: realtime.flushSave,
       leaveSession: realtime.leaveSession,
@@ -50,6 +52,8 @@ export const useBoardEditor = ({
     contentRevision: solo.contentRevision,
     isLoading: solo.isLoading,
     isWaitingForHost: false,
+    teacherCursor: null,
+    isHost: false,
     queueSave: solo.queueSave,
     flushSave: solo.flushSave,
     leaveSession: async () => {

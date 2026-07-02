@@ -26,7 +26,12 @@
   display: none !important;
 }
 
-.editorWrap :global(.sidebar-trigger__label-element:has(.default-sidebar-trigger)) {
+.editorWrap :global(.sidebar-trigger__label-element:has(.default-sidebar-trigger)),
+.editorWrap :global(.default-sidebar-trigger) {
+  display: none !important;
+}
+
+.editorWrap :global(.UserList) {
   display: none !important;
 }
 
