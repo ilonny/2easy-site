@@ -11,8 +11,7 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC, useCallback, useContext } from "react";
-import { AuthContext } from "@/auth";
+import { FC, useCallback } from "react";
 import { T } from "@/i18n/T";
 
 type TProps = {
@@ -28,15 +27,12 @@ export const DeleteBoardModalForm: FC<TProps> = ({
   onSuccess,
   board,
 }) => {
-  const { profile } = useContext(AuthContext);
-
   const onSubmit = useCallback(async () => {
     const res = await fetchPostJson({
       path: "/board/delete",
       isSecure: true,
       data: {
         id: board.id,
-        user_id: profile?.id,
       },
     });
     const json = await res.json();
@@ -44,7 +40,7 @@ export const DeleteBoardModalForm: FC<TProps> = ({
       onSuccess();
     }
     checkResponse(json);
-  }, [board.id, onSuccess, profile?.id]);
+  }, [board.id, onSuccess]);
 
   return (
     <Modal

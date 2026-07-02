@@ -4,12 +4,9 @@ import { useCallback, useContext, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { AuthContext } from "@/auth";
 import { withLogin } from "@/auth/hooks/withLogin";
-import { useBoard } from "@/app/board/hooks/useBoard";
-import { useBoardEditor } from "@/app/board/hooks/useBoardEditor";
-import { BOARD_EDITOR_JIVO_OFFSET_PX } from "@/app/board/constants";
+import { useBoardEditorChrome } from "@/app/board/hooks/useBoardEditorChrome";
 import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
-import { BoardEditorShell } from "@/app/board/components/BoardEditorShell";
-import { getBoardSaveStatusLabel } from "@/app/board/utils/saveStatus";
+import { BoardEditorChrome } from "@/app/board/components/BoardEditorChrome";
 import { T } from "@/i18n/T";
 
 export default function BoardRealtimePage() {
@@ -21,23 +18,16 @@ export default function BoardRealtimePage() {
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const authReady = !authIsLoading && !!profile;
 
-  const { board, loadError } = useBoard(boardId);
-  const editor = useBoardEditor({
-    boardId,
-    mode: "realtime",
-    enabled: boardId > 0 && authReady,
-    isHost: isTeacher,
-  });
+  const { editor, statusLabel, isEditorReady, editorKey, editorAreaStyle } =
+    useBoardEditorChrome({
+      boardId,
+      mode: "realtime",
+      enabled: boardId > 0 && authReady,
+      isHost: isTeacher,
+      editorKeyPrefix: "board-page-editor",
+    });
 
-  const {
-    saveStatus,
-    initialData,
-    contentRevision,
-    isWaitingForHost,
-    teacherCursor,
-    queueSave,
-    leaveSession,
-  } = editor;
+  const { board, loadError, leaveSession } = editor;
 
   const handleClose = useCallback(() => {
     void leaveSession().finally(() => {
@@ -45,9 +35,9 @@ export default function BoardRealtimePage() {
     });
   }, [leaveSession, router]);
 
-  const statusLabel = useMemo(
-    () => getBoardSaveStatusLabel(saveStatus),
-    [saveStatus],
+  const title = useMemo(
+    () => board?.title || <T k="boards.myBoards" />,
+    [board?.title],
   );
 
   if (loadError) {
@@ -61,36 +51,22 @@ export default function BoardRealtimePage() {
     );
   }
 
-  const isEditorReady = !!initialData && !!boardId && !isWaitingForHost;
-  const editorAreaStyle = {
-    paddingBottom: BOARD_EDITOR_JIVO_OFFSET_PX,
-    "--board-jivo-offset": `${BOARD_EDITOR_JIVO_OFFSET_PX}px`,
-  } as React.CSSProperties;
-
   return (
     <div className="fixed inset-0 z-[2] flex flex-col bg-white">
       <div className="relative flex shrink-0 items-center border-b border-default-200 px-4 py-3 sm:px-6">
-        <p className="pr-10 font-medium">
-          {board?.title || <T k="boards.myBoards" />}
-        </p>
+        <p className="pr-10 font-medium">{title}</p>
         <BoardCloseButton variant="header" onClick={handleClose} />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col" style={editorAreaStyle}>
-        {boardId && initialData ? (
-          <BoardEditorShell
+        {boardId ? (
+          <BoardEditorChrome
             boardId={boardId}
-            editorKey={`board-page-editor-${boardId}`}
-            contentRevision={contentRevision}
-            initialData={initialData}
-            isWaitingForHost={isWaitingForHost}
+            editorKey={editorKey}
+            editor={editor}
             isEditorReady={isEditorReady}
-            syncMode="realtime"
-            isHost={isTeacher}
-            teacherCursor={teacherCursor}
             statusLabel={statusLabel}
-            onSceneChange={queueSave}
-            waitingText={<T k="boards.waitingForHost" />}
+            isHost={isTeacher}
           />
         ) : null}
       </div>

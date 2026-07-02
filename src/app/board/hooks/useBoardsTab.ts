@@ -1,12 +1,26 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/auth";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { TBoard } from "../types";
 import { useBoards } from "./useBoards";
-import { useFilteredBoards } from "./useFilteredBoards";
+
+const filterBoardsBySearch = (boards: TBoard[], searchString?: string) => {
+  if (!searchString) {
+    return boards;
+  }
+
+  const query = searchString.toLowerCase();
+  return boards.filter((board) => {
+    return (
+      board.title?.toLowerCase()?.includes(query) ||
+      board.description?.toLowerCase()?.includes(query) ||
+      board.tags?.toLowerCase()?.includes(query)
+    );
+  });
+};
 
 type TTabIndex =
   | "userLessons"
@@ -47,7 +61,10 @@ export const useBoardsTab = ({
       : undefined;
 
   const { boards, boardsIsLoading, getBoards } = useBoards(boardsStudentId);
-  const filteredBoards = useFilteredBoards(boards, filterSearchString);
+  const filteredBoards = useMemo(
+    () => filterBoardsBySearch(boards, filterSearchString),
+    [boards, filterSearchString],
+  );
 
   const [createBoardModalIsVisible, setCreateBoardModalIsVisible] =
     useState(false);
@@ -113,7 +130,7 @@ export const useBoardsTab = ({
   const onPressBoard = useCallback(
     (board: TBoard) => {
       if (studentId || profile?.isStudent) {
-        router.push(`/boards/${board.id}`);
+        router.push(`/board/${board.id}`);
         return;
       }
       setEditorBoard(board);

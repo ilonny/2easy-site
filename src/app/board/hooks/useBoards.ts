@@ -1,3 +1,5 @@
+"use client";
+
 import { fetchGet } from "@/api";
 import { useCallback, useState } from "react";
 import { toast } from "react-toastify";
@@ -34,7 +36,6 @@ export const useBoards = (studentId?: number) => {
 
   return {
     boards,
-    setBoards,
     boardsIsLoading,
     getBoards,
   };

@@ -16,9 +16,8 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC, useCallback, useContext, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { AuthContext } from "@/auth";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { ImageListType } from "react-images-uploading";
@@ -36,7 +35,6 @@ export const EditBoardModalForm: FC<TProps> = ({
   onSuccess,
   board,
 }) => {
-  const { profile } = useContext(AuthContext);
   const {
     control,
     handleSubmit,
@@ -99,7 +97,6 @@ export const EditBoardModalForm: FC<TProps> = ({
           data: {
             ...data,
             id: board.id,
-            user_id: profile?.id,
             image_id: imageId,
           },
         });
@@ -114,7 +111,7 @@ export const EditBoardModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [board.id, board.image_id, images, onSuccess, profile?.id, uploadImages],
+    [board.id, board.image_id, images, onSuccess, uploadImages],
   );
 
   return (

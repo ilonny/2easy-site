@@ -4,23 +4,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchGet } from "@/api";
 import { useDebouncedCallback } from "use-debounce";
 import { closeBoardSession, startBoardSession } from "../api/boardSession";
-import { loadBoardContent } from "../api/loadBoardContent";
+import { loadBoardDetail } from "../api/loadBoardContent";
 import { BOARD_REALTIME_SAVE_DEBOUNCE_MS } from "../constants";
 import {
+  TBoard,
   TBoardSaveStatus,
-  TBoardSessionStatus,
   TBoardSnapshot,
   TBoardTeacherCursor,
-  TBoardWsParticipant,
 } from "../types";
 import {
   getBoardSnapshotFingerprint,
   snapshotToExcalidrawInitialData,
+  type TExcalidrawInitialData,
 } from "../utils/boardSnapshot";
 import { multiplayerBoardSyncAdapter } from "../sync/MultiplayerBoardSyncAdapter";
 import { isBoardTeacherParticipantId } from "../utils/boardTeacherCursor";
-
-type TExcalidrawInitialData = ReturnType<typeof snapshotToExcalidrawInitialData>;
 
 type TUseBoardRealtimeParams = {
   boardId?: number;
@@ -37,11 +35,9 @@ export const useBoardRealtime = ({
   const [initialData, setInitialData] = useState<TExcalidrawInitialData | null>(
     null,
   );
+  const [board, setBoard] = useState<TBoard | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [contentRevision, setContentRevision] = useState(0);
-  const [participants, setParticipants] = useState<TBoardWsParticipant[]>([]);
-  const [sessionStatus, setSessionStatus] = useState<TBoardSessionStatus | null>(
-    null,
-  );
   const [teacherCursor, setTeacherCursor] = useState<TBoardTeacherCursor | null>(
     null,
   );
@@ -52,7 +48,7 @@ export const useBoardRealtime = ({
   const isHostRef = useRef(isHost);
   const boardIdRef = useRef(boardId);
   const hasInitialSceneRef = useRef(false);
-  const saveStatusRef = useRef<TBoardSaveStatus>("idle");
+  const sessionClosedRef = useRef(false);
 
   useEffect(() => {
     isHostRef.current = isHost;
@@ -61,10 +57,6 @@ export const useBoardRealtime = ({
   useEffect(() => {
     boardIdRef.current = boardId;
   }, [boardId]);
-
-  useEffect(() => {
-    saveStatusRef.current = saveStatus;
-  }, [saveStatus]);
 
   const applyScene = useCallback((data: TBoardSnapshot, version: number) => {
     versionRef.current = version;
@@ -89,14 +81,12 @@ export const useBoardRealtime = ({
       return null;
     }
 
-    const status: TBoardSessionStatus = {
+    const status = {
       active: !!json.active,
-      waiting_for_host: !!json.waiting_for_host,
       is_host: !!json.is_host,
       room_key: json.room_key,
       session: json.session || null,
     };
-    setSessionStatus(status);
     return status;
   }, []);
 
@@ -119,6 +109,7 @@ export const useBoardRealtime = ({
 
     try {
       await closeBoardSession(currentBoardId);
+      sessionClosedRef.current = true;
       await loadSessionStatus();
     } catch {
       // ignore close errors on unmount
@@ -151,28 +142,43 @@ export const useBoardRealtime = ({
     if (!enabled || !boardId) {
       multiplayerBoardSyncAdapter.disconnect();
       setInitialData(null);
+      setBoard(null);
+      setLoadError(false);
       setSaveStatus("idle");
-      setParticipants([]);
-      setSessionStatus(null);
       setTeacherCursor(null);
       versionRef.current = 0;
       lastSentFingerprintRef.current = null;
       hasInitialSceneRef.current = false;
+      sessionClosedRef.current = false;
       return;
     }
 
     let disposed = false;
+    sessionClosedRef.current = false;
 
     const connect = async () => {
       setSaveStatus("connecting");
+      setLoadError(false);
 
       try {
-        const content = await loadBoardContent(boardId);
-        if (!disposed && content) {
-          applyScene(content.data, content.version);
+        const detail = await loadBoardDetail(boardId);
+        if (disposed) {
+          return;
         }
+
+        if (!detail) {
+          setLoadError(true);
+          setSaveStatus("error");
+          return;
+        }
+
+        setBoard(detail.board);
+        applyScene(detail.content.data, detail.content.version);
       } catch {
-        // REST fallback is best-effort; WS may still deliver the scene.
+        if (!disposed) {
+          setLoadError(true);
+          setSaveStatus("error");
+        }
       }
 
       const status = await loadSessionStatus();
@@ -200,13 +206,8 @@ export const useBoardRealtime = ({
             setSaveStatus("connected");
           }
         },
-        onWaitingForHost: () => {
-          if (!isHostRef.current && hasInitialSceneRef.current) {
-            setSaveStatus("connected");
-          }
-        },
         onSessionClosed: () => {
-          if (!isHostRef.current && hasInitialSceneRef.current) {
+          if (!disposed && hasInitialSceneRef.current) {
             setSaveStatus("connected");
           }
         },
@@ -227,9 +228,6 @@ export const useBoardRealtime = ({
           applyScene(data, version);
           setSaveStatus("connected");
           isRemoteUpdateRef.current = false;
-        },
-        onParticipants: (list) => {
-          setParticipants((list || []) as TBoardWsParticipant[]);
         },
         onCursor: ({ from, username, pointer, button }) => {
           if (isHostRef.current || !isBoardTeacherParticipantId(from)) {
@@ -269,6 +267,13 @@ export const useBoardRealtime = ({
       disposed = true;
       debouncedSendScene.flush();
       multiplayerBoardSyncAdapter.disconnect();
+      if (
+        !sessionClosedRef.current &&
+        boardIdRef.current &&
+        isHostRef.current
+      ) {
+        void closeBoardSession(boardIdRef.current).catch(() => {});
+      }
     };
   }, [
     applyScene,
@@ -280,20 +285,8 @@ export const useBoardRealtime = ({
     startHostSession,
   ]);
 
-  useEffect(() => {
-    return () => {
-      const currentBoardId = boardIdRef.current;
-      if (currentBoardId && isHostRef.current) {
-        void closeBoardSession(currentBoardId).catch(() => {});
-      }
-    };
-  }, []);
-
   const queueSave = useCallback(
     (snapshot: TBoardSnapshot) => {
-      if (saveStatusRef.current === "waiting_for_host") {
-        return;
-      }
       debouncedSendScene(snapshot);
     },
     [debouncedSendScene],
@@ -312,18 +305,12 @@ export const useBoardRealtime = ({
   return {
     saveStatus,
     initialData,
+    board,
+    loadError,
     contentRevision,
-    participants,
-    sessionStatus,
-    isLoading: saveStatus === "connecting" && initialData === null,
-    isWaitingForHost: isHost && saveStatus === "waiting_for_host",
     teacherCursor,
-    isHost,
     queueSave,
     flushSave,
     leaveSession,
-    reloadSessionStatus: loadSessionStatus,
-    startHostSession,
-    closeHostSession,
   };
 };

@@ -3,10 +3,9 @@ import {
   getBoardSnapshotFingerprint,
   normalizeBoardSnapshot,
   snapshotToExcalidrawInitialData,
+  type TExcalidrawInitialData,
 } from "./boardSnapshot";
 import { TBoardSnapshot } from "../types";
-
-type TExcalidrawInitialData = ReturnType<typeof snapshotToExcalidrawInitialData>;
 
 export const initialDataToBoardSnapshot = (
   initialData: TExcalidrawInitialData,
@@ -23,11 +22,12 @@ export const buildBoardSnapshotFromExcalidraw = (
   files: Record<string, unknown>,
 ): TBoardSnapshot => {
   try {
+    // "local" keeps image binaries in `files`; "database" strips them for Excalidraw cloud.
     const serialized = serializeAsJSON(
       elements as never,
       appState as never,
       files as never,
-      "database",
+      "local",
     );
     return normalizeBoardSnapshot(JSON.parse(serialized));
   } catch {

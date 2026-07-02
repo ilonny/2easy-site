@@ -21,7 +21,7 @@ export const StartBoardButton: React.FC<TProps> = ({ board, className }) => {
   const [isStarting, setIsStarting] = useState(false);
 
   const navigateToBoard = useCallback(() => {
-    router.push(`/boards/${board.id}`);
+    router.push(`/board/${board.id}`);
   }, [board.id, router]);
 
   const startSessionAndNavigate = useCallback(async () => {

@@ -1,15 +1,15 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { FC, ReactNode } from "react";
+import { FC } from "react";
 import { Spinner } from "@nextui-org/react";
 import { TBoardSnapshot, TBoardTeacherCursor } from "../../types";
 import { TExcalidrawInitialData } from "../../utils/boardSnapshot";
-import styles from "../BoardEditorModal/styles.module.css";
+import styles from "../BoardEditor/boardEditor.module.css";
 
 const BoardExcalidrawEditor = dynamic(
   () =>
-    import("../BoardEditorModal/BoardExcalidrawEditor").then(
+    import("../BoardEditor/BoardExcalidrawEditor").then(
       (mod) => mod.BoardExcalidrawEditor,
     ),
   {
@@ -31,14 +31,12 @@ type TProps = {
   editorKey: string;
   contentRevision: number;
   initialData: TExcalidrawInitialData;
-  isWaitingForHost: boolean;
   isEditorReady: boolean;
   syncMode: "solo" | "realtime";
   isHost?: boolean;
   teacherCursor?: TBoardTeacherCursor | null;
   statusLabel: string;
   onSceneChange: (snapshot: TBoardSnapshot) => void;
-  waitingText: ReactNode;
 };
 
 export const BoardEditorShell: FC<TProps> = ({
@@ -46,23 +44,16 @@ export const BoardEditorShell: FC<TProps> = ({
   editorKey,
   contentRevision,
   initialData,
-  isWaitingForHost,
   isEditorReady,
   syncMode,
   isHost = false,
   teacherCursor = null,
   statusLabel,
   onSceneChange,
-  waitingText,
 }) => (
   <>
     <div className={styles.editorArea}>
-      {isWaitingForHost ? (
-        <div className={styles.waitingWrap}>
-          <Spinner color="primary" size="lg" />
-          <p className={styles.waitingText}>{waitingText}</p>
-        </div>
-      ) : isEditorReady ? (
+      {isEditorReady ? (
         <BoardExcalidrawEditor
           key={editorKey}
           boardId={boardId}

@@ -16,7 +16,8 @@ export const BOARD_CARD_FOOTER_MIN_HEIGHT = 100;
 export const BOARD_EDITOR_JIVO_OFFSET_PX = 85;
 
 /** Realtime lesson page — fullscreen board without site chrome */
-export const BOARD_LESSON_PAGE_PATH_PREFIX = "/boards/";
+export const BOARD_LESSON_PAGE_PATH_PREFIX = "/board/";
+export const BOARD_LESSON_PAGE_LEGACY_PATH_PREFIX = "/boards/";
 
 export const BOARD_FORM_MODAL_CLASS_NAMES = {
   closeButton: "z-20",
@@ -43,7 +44,6 @@ export const BOARD_SAVE_STATUS_LABEL_KEY: Record<
   | "saving"
   | "saved"
   | "error"
-  | "waiting_for_host"
   | "connecting"
   | "connected",
   string
@@ -52,7 +52,6 @@ export const BOARD_SAVE_STATUS_LABEL_KEY: Record<
   saving: "boards.saving",
   saved: "boards.saved",
   error: "boards.saveError",
-  waiting_for_host: "boards.waitingForHost",
   connecting: "boards.connecting",
   connected: "boards.connected",
 };

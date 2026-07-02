@@ -13,7 +13,7 @@ import {
   buildBoardSnapshotFromExcalidraw,
   hasBoardSnapshotChanged,
   initialDataToBoardSnapshot,
-} from "../../utils/snapshot";
+} from "../../utils/excalidrawSnapshot";
 import {
   getBoardSnapshotFingerprint,
   snapshotToExcalidrawInitialData,
@@ -25,7 +25,7 @@ import { multiplayerBoardSyncAdapter } from "../../sync/MultiplayerBoardSyncAdap
 import { BOARD_CURSOR_THROTTLE_MS } from "../../constants";
 import { BoardStickyNoteButton } from "../BoardStickyNoteButton";
 import { TBoardSnapshot, TBoardTeacherCursor } from "../../types";
-import styles from "./styles.module.css";
+import styles from "./boardEditor.module.css";
 
 type TInitialData = ReturnType<typeof snapshotToExcalidrawInitialData>;
 

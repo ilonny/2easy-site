@@ -1,7 +1,5 @@
 import { TBoardSnapshot } from "../types";
 
-export type TBoardSyncMode = "solo" | "multiplayer";
-
 export type TBoardLoadResult = {
   data: TBoardSnapshot;
   version: number;
@@ -9,8 +7,6 @@ export type TBoardLoadResult = {
 
 export type TBoardRealtimeCallbacks = {
   onScene?: (payload: { data: TBoardSnapshot; version: number; from?: string }) => void;
-  onParticipants?: (participants: unknown[]) => void;
-  onWaitingForHost?: () => void;
   onSessionStarted?: (sessionId: number) => void;
   onSessionClosed?: () => void;
   onJoined?: (payload: {
@@ -33,7 +29,7 @@ export type TBoardRealtimeCallbacks = {
 };
 
 export interface IBoardSyncAdapter {
-  mode: TBoardSyncMode;
+  mode: "solo";
   load: (boardId: number) => Promise<TBoardLoadResult>;
   save: (
     boardId: number,

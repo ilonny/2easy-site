@@ -1,5 +1,7 @@
+"use client";
+
 import { fetchPostJson } from "@/api";
-import { loadBoardContent } from "../api/loadBoardContent";
+import { loadBoardDetail } from "../api/loadBoardContent";
 import {
   BoardContentConflictError,
   IBoardSyncAdapter,
@@ -13,11 +15,11 @@ export const soloBoardSyncAdapter: IBoardSyncAdapter = {
   mode: "solo",
 
   async load(boardId: number): Promise<TBoardLoadResult> {
-    const content = await loadBoardContent(boardId);
-    if (!content) {
+    const detail = await loadBoardDetail(boardId);
+    if (!detail) {
       throw new Error(i18n.t("boards.loadError"));
     }
-    return content;
+    return detail.content;
   },
 
   async save(

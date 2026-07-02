@@ -33,32 +33,10 @@ export type TBoardSaveStatus =
   | "saving"
   | "saved"
   | "error"
-  | "waiting_for_host"
   | "connecting"
   | "connected";
 
 export type TLessonBoardScope = "individual" | "group";
-
-export type TBoardSessionStatus = {
-  active: boolean;
-  waiting_for_host: boolean;
-  is_host: boolean;
-  room_key?: string;
-  session?: {
-    id: number;
-    board_id: number;
-    room_key?: string;
-    status?: string;
-  } | null;
-};
-
-export type TBoardWsParticipant = {
-  id: string;
-  isStudent: boolean;
-  userId?: number;
-  studentId?: number;
-  displayName: string;
-};
 
 export type TBoardTeacherCursor = {
   id: string;
@@ -67,13 +45,6 @@ export type TBoardTeacherCursor = {
   y: number;
   tool: "pointer" | "laser";
   button: "up" | "down";
-};
-
-export type TBoardContent = {
-  type: string;
-  data: TBoardSnapshot;
-  version: number;
-  is_visible?: number;
 };
 
 export type TBoardSnapshot = {

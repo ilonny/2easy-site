@@ -648,7 +648,6 @@
     "loading": "Loading…",
     "conflictError": "The board was changed in another tab. Latest data loaded.",
     "lessonBoard": "Lesson board",
-    "waitingForHost": "Wait for the teacher",
     "connecting": "Connecting…",
     "connected": "Live",
     "selectStudentForBoard": "Select a student in the participants list",
@@ -666,17 +665,7 @@
     "loadListError": "Could not load boards list",
     "sessionCreateError": "Could not create board session",
     "sessionCloseError": "Could not close board session",
-    "bgPlain": "Plain",
-    "bgGrid": "Grid",
-    "bgDots": "Dots",
-    "stickers": "Stickers",
-    "addStickyNote": "Sticky note",
-    "stickyYellow": "Yellow sticky",
-    "stickyPink": "Pink sticky",
-    "stickyGreen": "Green sticky",
-    "stickyBlue": "Blue sticky",
-    "stickyPurple": "Purple sticky",
-    "stickyOrange": "Orange sticky"
+    "addStickyNote": "Sticky note"
   },
   "metadata": {
     "title": "2EASY Interactive",

@@ -1,14 +1,12 @@
 "use client";
 
 import { TBoard } from "@/app/board/types";
-import { useBoardEditor } from "@/app/board/hooks/useBoardEditor";
+import { useBoardEditorChrome } from "@/app/board/hooks/useBoardEditorChrome";
 import {
-  BOARD_EDITOR_JIVO_OFFSET_PX,
   BOARD_EDITOR_MODAL_CLASS_NAMES,
 } from "@/app/board/constants";
 import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
-import { BoardEditorShell } from "@/app/board/components/BoardEditorShell";
-import { getBoardSaveStatusLabel } from "@/app/board/utils/saveStatus";
+import { BoardEditorChrome } from "@/app/board/components/BoardEditorChrome";
 import { T } from "@/i18n/T";
 import {
   Modal,
@@ -16,7 +14,7 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC, useCallback, useMemo } from "react";
+import { FC, useCallback } from "react";
 
 type TProps = {
   isOpen: boolean;
@@ -34,12 +32,14 @@ export const BoardEditorModal: FC<TProps> = ({
   isHost = false,
 }) => {
   const boardId = board?.id;
-  const editor = useBoardEditor({
-    boardId,
-    mode,
-    enabled: isOpen && !!boardId,
-    isHost,
-  });
+  const { editor, statusLabel, isEditorReady, editorKey, editorAreaStyle } =
+    useBoardEditorChrome({
+      boardId,
+      mode,
+      enabled: isOpen && !!boardId,
+      isHost,
+      editorKeyPrefix: "lesson-board-editor",
+    });
 
   const handleClose = useCallback(async () => {
     if (editor.mode === "realtime" && isHost) {
@@ -49,14 +49,6 @@ export const BoardEditorModal: FC<TProps> = ({
     }
     onClose();
   }, [editor, isHost, onClose]);
-
-  const statusLabel = useMemo(
-    () => getBoardSaveStatusLabel(editor.saveStatus),
-    [editor.saveStatus],
-  );
-
-  const isEditorReady =
-    !!editor.initialData && !!boardId && !editor.isWaitingForHost;
 
   return (
     <Modal
@@ -75,29 +67,15 @@ export const BoardEditorModal: FC<TProps> = ({
         <ModalHeader className="px-4 py-3 sm:px-6">
           <p>{board?.title || <T k="boards.myBoards" />}</p>
         </ModalHeader>
-        <ModalBody
-          className="flex flex-1 min-h-0 flex-col"
-          style={
-            {
-              paddingBottom: BOARD_EDITOR_JIVO_OFFSET_PX,
-              "--board-jivo-offset": `${BOARD_EDITOR_JIVO_OFFSET_PX}px`,
-            } as React.CSSProperties
-          }
-        >
-          {boardId && editor.initialData ? (
-            <BoardEditorShell
+        <ModalBody className="flex flex-1 min-h-0 flex-col" style={editorAreaStyle}>
+          {boardId ? (
+            <BoardEditorChrome
               boardId={boardId}
-              editorKey={`lesson-board-editor-${boardId}`}
-              contentRevision={editor.contentRevision}
-              initialData={editor.initialData}
-              isWaitingForHost={editor.isWaitingForHost}
+              editorKey={editorKey}
+              editor={editor}
               isEditorReady={isEditorReady}
-              syncMode={editor.mode}
-              isHost={isHost}
-              teacherCursor={editor.teacherCursor}
               statusLabel={statusLabel}
-              onSceneChange={editor.queueSave}
-              waitingText={<T k="boards.waitingForHost" />}
+              isHost={isHost}
             />
           ) : null}
         </ModalBody>

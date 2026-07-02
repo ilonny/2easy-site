@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { toast } from "react-toastify";
@@ -6,6 +8,7 @@ import { BOARD_SAVE_DEBOUNCE_MS } from "../constants";
 import {
   getBoardSnapshotFingerprint,
   snapshotToExcalidrawInitialData,
+  type TExcalidrawInitialData,
 } from "../utils/boardSnapshot";
 import {
   TBoardSaveStatus,
@@ -13,8 +16,6 @@ import {
 } from "../types";
 import { soloBoardSyncAdapter } from "../sync/SoloBoardSyncAdapter";
 import { BoardContentConflictError } from "../sync/types";
-
-type TExcalidrawInitialData = ReturnType<typeof snapshotToExcalidrawInitialData>;
 
 export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
   const [saveStatus, setSaveStatus] = useState<TBoardSaveStatus>("idle");
@@ -172,9 +173,7 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
     saveStatus,
     initialData,
     contentRevision,
-    isLoading: saveStatus === "loading",
     queueSave,
     flushSave,
-    reload: load,
   };
 };

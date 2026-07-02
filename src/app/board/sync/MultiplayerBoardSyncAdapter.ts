@@ -14,7 +14,6 @@ type TWsMessage = {
   data?: unknown;
   version?: number;
   from?: string;
-  participants?: unknown[];
   session_id?: number;
   message?: string;
   pointer?: { x: number; y: number };
@@ -103,12 +102,6 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
     switch (message.type) {
       case "pong":
         return;
-      case "waiting_for_host":
-        this.callbacks.onWaitingForHost?.();
-        if (message.participants) {
-          this.callbacks.onParticipants?.(message.participants);
-        }
-        return;
       case "session_started":
         if (message.session_id) {
           this.callbacks.onSessionStarted?.(Number(message.session_id));
@@ -131,9 +124,6 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
             version: Number(message.version || 0),
           });
         }
-        if (message.participants) {
-          this.callbacks.onParticipants?.(message.participants);
-        }
         return;
       case "scene":
         this.callbacks.onScene?.({
@@ -141,11 +131,6 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
           version: Number(message.version || 0),
           from: message.from,
         });
-        return;
-      case "participants":
-        if (message.participants) {
-          this.callbacks.onParticipants?.(message.participants);
-        }
         return;
       case "cursor": {
         const from = message.from;

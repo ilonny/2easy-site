@@ -7,69 +7,21 @@ import {
   viewportCoordsToSceneCoords,
 } from "@excalidraw/excalidraw";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
-import type { LibraryItem } from "@excalidraw/excalidraw/types";
-
-export type TStickyNotePreset = {
-  id: string;
-  nameKey: string;
-  backgroundColor: string;
-  strokeColor: string;
-};
 
 export const STICKY_NOTE_WIDTH = 220;
 export const STICKY_NOTE_HEIGHT = 220;
 
-export const STICKY_NOTE_PRESETS: TStickyNotePreset[] = [
-  {
-    id: "sticky-yellow",
-    nameKey: "boards.stickyYellow",
-    backgroundColor: "#fff3bf",
-    strokeColor: "#f08c00",
-  },
-  {
-    id: "sticky-pink",
-    nameKey: "boards.stickyPink",
-    backgroundColor: "#ffc9c9",
-    strokeColor: "#e64980",
-  },
-  {
-    id: "sticky-green",
-    nameKey: "boards.stickyGreen",
-    backgroundColor: "#b2f2bb",
-    strokeColor: "#37b24d",
-  },
-  {
-    id: "sticky-blue",
-    nameKey: "boards.stickyBlue",
-    backgroundColor: "#a5d8ff",
-    strokeColor: "#1c7ed6",
-  },
-  {
-    id: "sticky-purple",
-    nameKey: "boards.stickyPurple",
-    backgroundColor: "#eebefa",
-    strokeColor: "#9c36b5",
-  },
-  {
-    id: "sticky-orange",
-    nameKey: "boards.stickyOrange",
-    backgroundColor: "#ffd8a8",
-    strokeColor: "#f76707",
-  },
-];
+const STICKY_NOTE_BACKGROUND = "#fff3bf";
+const STICKY_NOTE_STROKE = "#f08c00";
 
-const createStickyNoteSkeleton = (
-  preset: TStickyNotePreset,
-  x: number,
-  y: number,
-) => ({
+const createStickyNoteSkeleton = (x: number, y: number) => ({
   type: "rectangle" as const,
   x,
   y,
   width: STICKY_NOTE_WIDTH,
   height: STICKY_NOTE_HEIGHT,
-  backgroundColor: preset.backgroundColor,
-  strokeColor: preset.strokeColor,
+  backgroundColor: STICKY_NOTE_BACKGROUND,
+  strokeColor: STICKY_NOTE_STROKE,
   fillStyle: "solid" as const,
   strokeWidth: 1,
   roundness: { type: ROUNDNESS.ADAPTIVE_RADIUS },
@@ -79,19 +31,6 @@ const createStickyNoteSkeleton = (
     textAlign: "center" as const,
     verticalAlign: "middle" as const,
   },
-});
-
-export const createStickyNoteLibraryItem = (
-  preset: TStickyNotePreset,
-  displayName: string,
-): LibraryItem => ({
-  id: preset.id,
-  status: "published",
-  created: 1,
-  name: displayName,
-  elements: convertToExcalidrawElements([
-    createStickyNoteSkeleton(preset, 0, 0),
-  ]) as LibraryItem["elements"],
 });
 
 const getViewportCenterSceneCoords = (api: ExcalidrawImperativeAPI) => {
@@ -119,16 +58,10 @@ const getViewportCenterSceneCoords = (api: ExcalidrawImperativeAPI) => {
   };
 };
 
-export const insertStickyNote = (
-  api: ExcalidrawImperativeAPI,
-  presetId: string = STICKY_NOTE_PRESETS[0].id,
-) => {
-  const preset =
-    STICKY_NOTE_PRESETS.find((item) => item.id === presetId) ||
-    STICKY_NOTE_PRESETS[0];
+export const insertStickyNote = (api: ExcalidrawImperativeAPI) => {
   const { x, y } = getViewportCenterSceneCoords(api);
   const newElements = convertToExcalidrawElements(
-    [createStickyNoteSkeleton(preset, x, y)],
+    [createStickyNoteSkeleton(x, y)],
     { regenerateIds: true },
   );
   const stickyContainer = newElements.find((element) => element.type === "rectangle");

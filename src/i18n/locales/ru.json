@@ -649,7 +649,6 @@
     "loading": "Загрузка…",
     "conflictError": "Доска была изменена в другой вкладке. Загружены актуальные данные.",
     "lessonBoard": "Доска урока",
-    "waitingForHost": "Ожидайте учителя",
     "connecting": "Подключение…",
     "connected": "В эфире",
     "selectStudentForBoard": "Выберите ученика в списке участников",
@@ -667,17 +666,7 @@
     "loadListError": "Не удалось загрузить список досок",
     "sessionCreateError": "Не удалось создать сессию доски",
     "sessionCloseError": "Не удалось закрыть сессию доски",
-    "bgPlain": "Белый",
-    "bgGrid": "Сетка",
-    "bgDots": "Точки",
-    "stickers": "Стикеры",
-    "addStickyNote": "Стикер",
-    "stickyYellow": "Жёлтый стикер",
-    "stickyPink": "Розовый стикер",
-    "stickyGreen": "Зелёный стикер",
-    "stickyBlue": "Голубой стикер",
-    "stickyPurple": "Фиолетовый стикер",
-    "stickyOrange": "Оранжевый стикер"
+    "addStickyNote": "Стикер"
   },
   "metadata": {
     "title": "2EASY Interactive",

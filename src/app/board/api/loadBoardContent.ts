@@ -1,7 +1,8 @@
 import { fetchGet } from "@/api";
 import { normalizeBoardSnapshot } from "../utils/boardSnapshot";
+import { TBoard } from "../types";
 
-export const loadBoardContent = async (boardId: number) => {
+export const loadBoardDetail = async (boardId: number) => {
   const res = await fetchGet({
     path: `/board?id=${boardId}`,
     isSecure: true,
@@ -12,7 +13,10 @@ export const loadBoardContent = async (boardId: number) => {
   }
 
   return {
-    data: normalizeBoardSnapshot(json.content.data),
-    version: Number(json.content.version || 0),
+    board: json.board as TBoard,
+    content: {
+      data: normalizeBoardSnapshot(json.content.data),
+      version: Number(json.content.version || 0),
+    },
   };
 };

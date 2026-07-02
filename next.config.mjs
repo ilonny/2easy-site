@@ -15,6 +15,14 @@ const nextConfig = {
     BASE_URL: process.env.BASE_URL,
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
   },
+  async rewrites() {
+    return [
+      {
+        source: "/boards/:id",
+        destination: "/board/:id",
+      },
+    ];
+  },
   // async headers() {
   //   return [
   //     {

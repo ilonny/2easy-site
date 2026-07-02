@@ -32,16 +32,14 @@ export const useBoardEditor = ({
       mode: "realtime" as const,
       saveStatus: realtime.saveStatus,
       initialData: realtime.initialData,
+      board: realtime.board,
+      loadError: realtime.loadError,
       contentRevision: realtime.contentRevision,
-      isLoading: realtime.isLoading,
-      isWaitingForHost: realtime.isWaitingForHost,
       teacherCursor: realtime.teacherCursor,
       isHost,
       queueSave: realtime.queueSave,
       flushSave: realtime.flushSave,
       leaveSession: realtime.leaveSession,
-      participants: realtime.participants,
-      sessionStatus: realtime.sessionStatus,
     };
   }
 
@@ -49,9 +47,9 @@ export const useBoardEditor = ({
     mode: "solo" as const,
     saveStatus: solo.saveStatus,
     initialData: solo.initialData,
+    board: null,
+    loadError: false,
     contentRevision: solo.contentRevision,
-    isLoading: solo.isLoading,
-    isWaitingForHost: false,
     teacherCursor: null,
     isHost: false,
     queueSave: solo.queueSave,
@@ -59,7 +57,5 @@ export const useBoardEditor = ({
     leaveSession: async () => {
       await solo.flushSave();
     },
-    participants: [],
-    sessionStatus: null,
   };
 };
