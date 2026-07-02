@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@nextui-org/react";
 import Image from "next/image";
 import Draggable from "react-draggable";
@@ -10,6 +10,18 @@ import { useContext } from "react";
 import { toast } from "react-toastify";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { TProfile } from "@/auth/types";
+
+function resolveTeacherUserId(profile?: TProfile): string | null {
+  if (!profile) return null;
+  if (profile.isStudent) {
+    const teacherId = profile.user_id;
+    if (teacherId == null || teacherId === "") return null;
+    return String(teacherId);
+  }
+  if (profile.id == null) return null;
+  return String(profile.id);
+}
 
 type JitsiApi = {
   dispose: () => void;
@@ -74,7 +86,12 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
   const boundsRef = useRef<HTMLDivElement>(null);
 
   const roomId = Array.isArray(lessonId) ? lessonId[0] : lessonId;
-  const roomName = `2easy-lesson-${roomId}`;
+  const teacherUserId = resolveTeacherUserId(profile);
+  const roomName = useMemo(() => {
+    if (!roomId) return "";
+    if (!teacherUserId) return `2easy-lesson-${roomId}`;
+    return `2easy-lesson-${roomId}-teacher-${teacherUserId}`;
+  }, [roomId, teacherUserId]);
   const displayName =
     [profile?.name, profile?.surname].filter(Boolean).join(" ") ||
     profile?.login ||

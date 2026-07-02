@@ -7,4 +7,5 @@ export type TProfile = {
   isStudent?: boolean;
   studentId?: number;
   id?: number;
+  user_id?: string | number;
 };
