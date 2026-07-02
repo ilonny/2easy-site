@@ -18,24 +18,24 @@ import Dino from "@/assets/images/dino.gif";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { AuthContext } from "@/auth";
 import { readFromLocalStorage, writeToLocalStorage } from "@/auth/utils";
-import { LessonsFilters } from "../LessonsFilters";
 import { tabs } from "../LessonsFilters/tabs";
 import Loupe from "@/assets/icons/loupe.svg";
 import { TLesson } from "../../types";
 import { SibscribeContext } from "@/subscribe/context";
 import { CreateCourseModalForm } from "../CreateCourseModalForm";
 import { TCourse, useCourses } from "@/app/course/hooks/useCourses";
-import { AttachLessonCourseModalForm } from "../AttachLessonCourseModalForm";
 import Link from "next/link";
 import { T } from "@/i18n/T";
 import { DictionaryModal } from "@/app/dictionary/components/DictionaryModal";
+import { useBoardsTab } from "@/app/board/hooks/useBoardsTab";
+import { BoardsTabPanel } from "@/app/board/components/BoardsTabPanel";
 
 const StudentCabinetTabSync = ({
   studentId,
   setStudentTabIndex,
 }: {
   studentId: string;
-  setStudentTabIndex: (v: "lessons" | "courses") => void;
+  setStudentTabIndex: (v: "lessons" | "courses" | "boards") => void;
 }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -46,7 +46,15 @@ const StudentCabinetTabSync = ({
       return;
     }
     const tab = searchParams.get("tab");
-    setStudentTabIndex(tab === "courses" ? "courses" : "lessons");
+    if (tab === "courses") {
+      setStudentTabIndex("courses");
+      return;
+    }
+    if (tab === "boards") {
+      setStudentTabIndex("boards");
+      return;
+    }
+    setStudentTabIndex("lessons");
   }, [pathname, searchParams, studentId, setStudentTabIndex]);
   return null;
 };
@@ -103,7 +111,7 @@ export const ProfileLessons = (props: TProps) => {
   }, [subscription]);
 
   const [tabIndex, setTabIndex] = useState<
-    "userLessons" | "savedLessons" | "userCourses" | "2easyCourses"
+    "userLessons" | "savedLessons" | "userCourses" | "2easyCourses" | "userBoards"
   >(
     currentCourse
       ? "userCourses"
@@ -112,9 +120,36 @@ export const ProfileLessons = (props: TProps) => {
         : "userLessons",
   );
 
-  const [studentTabIndex, setStudentTabIndex] = useState<"lessons" | "courses">(
-    "lessons",
-  );
+  const [studentTabIndex, setStudentTabIndex] = useState<
+    "lessons" | "courses" | "boards"
+  >("lessons");
+  const [filterSearchString, setFilterSearchString] = useState("");
+
+  const {
+    boards,
+    boardsIsLoading,
+    filteredBoards,
+    getBoards,
+    isBoardsTabActive,
+    showBoardsTabButton,
+    createBoardModalIsVisible,
+    setCreateBoardModalIsVisible,
+    boardEditorOpen,
+    setBoardEditorOpen,
+    editorBoard,
+    openCreateBoardModal,
+    onCreateBoard,
+    onPressBoard,
+  } = useBoardsTab({
+    studentId,
+    isTeacher,
+    tabIndex,
+    setTabIndex,
+    studentTabIndex,
+    setStudentTabIndex,
+    filterSearchString,
+  });
+
   const [internalDictionaryModalOpen, setInternalDictionaryModalOpen] =
     useState(false);
   const dictionaryModalOpen =
@@ -208,8 +243,6 @@ export const ProfileLessons = (props: TProps) => {
     writeToLocalStorage("saved_lessons_tab", tabIndex);
   }, [tabIndex]);
 
-  const [filterSearchString, setFilterSearchString] = useState("");
-
   const lessonsToRender = useMemo(() => {
     // 1. Приоритетный режим: просмотр конкретного курса
     if (currentCourse) {
@@ -222,16 +255,22 @@ export const ProfileLessons = (props: TProps) => {
     if (isTeacher && studentId) {
       console.log("isTeacher && studentId", tabIndex, studentTabIndex);
       if (studentTabIndex === "lessons") {
-        return lessons; // Если студент смотрит список всех уроков
+        return lessons;
       }
-      return courses; // Если студент смотрит список всех курсов
+      if (studentTabIndex === "boards") {
+        return [];
+      }
+      return courses;
     }
     if (!isTeacher && studentId) {
-      console.log("lol?", studentTabIndex, lessons, studentId); // Для отладки, если нужно
+      console.log("lol?", studentTabIndex, lessons, studentId);
       if (studentTabIndex === "lessons") {
-        return lessons; // Если студент смотрит список всех уроков
+        return lessons;
       }
-      return courses; // Если студент смотрит список всех курсов
+      if (studentTabIndex === "boards") {
+        return [];
+      }
+      return courses;
     }
 
     // 3. Режим для учителя (isTeacher === true && studentId === false/undefined/null)
@@ -419,6 +458,19 @@ export const ProfileLessons = (props: TProps) => {
                 >
                   <T k="lessons.myLessons" />
                 </Button>
+                {showBoardsTabButton ? (
+                  <Button
+                    radius="full"
+                    color="primary"
+                    variant={tabIndex === "userBoards" ? "solid" : "faded"}
+                    onClick={() => {
+                      setTabIndex("userBoards");
+                      router.push("/lesson_plans");
+                    }}
+                  >
+                    <T k="boards.myBoards" />
+                  </Button>
+                ) : null}
                 {!!courses.some((c) => c.user_id !== 1) && (
                   <Button
                     radius="full"
@@ -527,7 +579,11 @@ export const ProfileLessons = (props: TProps) => {
             <Input
               value={filterSearchString}
               onValueChange={setFilterSearchString}
-              placeholder={t("lessons.searchLessons")}
+              placeholder={
+                tabIndex === "userBoards"
+                  ? t("boards.searchBoards")
+                  : t("lessons.searchLessons")
+              }
               size="lg"
               classNames={{ inputWrapper: "bg-white hove min-w-0" }}
               startContent={
@@ -567,6 +623,19 @@ export const ProfileLessons = (props: TProps) => {
             >
               <T k="lessons.coursesTab" />
             </Button>
+            {boards.length > 0 && (
+              <Button
+                radius="full"
+                color="primary"
+                variant={studentTabIndex === "boards" ? "solid" : "faded"}
+                onClick={() => {
+                  setStudentTabIndex("boards");
+                  router.push(`/student-account/${studentId}?tab=boards`);
+                }}
+              >
+                <T k="boards.myBoards" />
+              </Button>
+            )}
             <Button
               radius="full"
               color="primary"
@@ -604,12 +673,16 @@ export const ProfileLessons = (props: TProps) => {
           <div className="h-10" />
         </>
       )}
-      {lessonsListIslLoading && (
+      {(lessonsListIslLoading && !isBoardsTabActive) ||
+      (boardsIsLoading && isBoardsTabActive) ? (
         <div className="w-full h-[500px] flex justify-center items-center ">
           <Image src={Dino.src} alt="dino animated" width={150} height={150} />
         </div>
-      )}
-      {!currentCourse && !filteredLessons.length && (
+      ) : null}
+      {!currentCourse &&
+        !isBoardsTabActive &&
+        !filteredLessons.length &&
+        !lessonsListIslLoading && (
         <ProfileEmptyLessons
           title={studentId ? <T k="lessons.noLessonsShort" /> : data.title}
           hideButton={!!studentId}
@@ -617,7 +690,28 @@ export const ProfileLessons = (props: TProps) => {
           onButtonPress={data.onButtonPress}
         />
       )}
-      {(!!currentCourse || !!filteredLessons?.length) && (
+      <BoardsTabPanel
+        boards={filteredBoards}
+        isLoading={boardsIsLoading}
+        isActive={isBoardsTabActive}
+        hasCurrentCourse={!!currentCourse}
+        studentId={studentId}
+        isTeacher={isTeacher}
+        filterSearchString={filterSearchString}
+        onFilterSearchChange={setFilterSearchString}
+        showStudentSearch={!!studentId && studentTabIndex === "boards"}
+        onPressCreate={openCreateBoardModal}
+        onPressBoard={onPressBoard}
+        getBoards={getBoards}
+        createBoardModalIsVisible={createBoardModalIsVisible}
+        setCreateBoardModalIsVisible={setCreateBoardModalIsVisible}
+        onCreateBoard={onCreateBoard}
+        boardEditorOpen={boardEditorOpen}
+        setBoardEditorOpen={setBoardEditorOpen}
+        editorBoard={editorBoard}
+      />
+      {!isBoardsTabActive &&
+        (!!currentCourse || !!filteredLessons?.length) && (
         <>
           {showCourseSearch && (
             <>
@@ -652,6 +746,7 @@ export const ProfileLessons = (props: TProps) => {
                 setCreateCourseModalIsVisible(true);
               }
             }}
+            onPressCreateBoard={isTeacher ? openCreateBoardModal : undefined}
             canCreateLesson={canCreateLesson}
             lessons={filteredLessons}
             getLessons={
