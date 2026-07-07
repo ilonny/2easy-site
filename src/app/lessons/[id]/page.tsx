@@ -467,10 +467,8 @@ export default function LessonPage() {
               aria-label={i18n.t("lessons.participantsAriaLabel")}
             >
               <div className="sticky top-[88px] w-full lg:top-8">
-                <div
-                  className="max-h-[calc(100dvh-96px)] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] lg:max-h-[calc(100dvh-2rem)]"
-                >
-                <div className="mb-1.5 sm:mb-3 md:mb-7">
+                <div className="flex max-h-[calc(100dvh-88px-12rem)] flex-col lg:max-h-[calc(100dvh-2rem-12rem)]">
+                <div className="mb-1.5 shrink-0 sm:mb-3 md:mb-7">
                   <p className="text-center text-[7px] font-bold uppercase leading-tight text-[#231F20] sm:text-[9px] md:text-left md:text-sm">
                     <span className="md:hidden">
                       <T k="lessons.participantsShort" defaultText="Участн." />
@@ -480,7 +478,7 @@ export default function LessonPage() {
                     </span>
                   </p>
                 </div>
-                <div className="flex flex-col gap-1 sm:gap-2 md:gap-3">
+                <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] sm:gap-2 md:gap-3">
                   {students?.map((s) => {
                     const isActive = s?.student_id === activeStudentId;
                     return (
@@ -527,7 +525,7 @@ export default function LessonPage() {
                   })}
                 </div>
                 {isTeacher && (
-                  <div className="mt-2 flex flex-col items-stretch gap-1.5 sm:mt-3 sm:flex-row sm:items-center sm:gap-2 md:mt-4">
+                  <div className="mt-2 flex shrink-0 flex-col items-stretch gap-1.5 sm:mt-3 sm:flex-row sm:items-center sm:gap-2 md:mt-4">
                     <Button
                       variant="flat"
                       color="default"

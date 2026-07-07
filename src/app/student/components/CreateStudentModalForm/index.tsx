@@ -48,6 +48,7 @@ export const CreateStudentModalForm: FC<TProps> = ({
         isSecure: true,
         data: {
           ..._data,
+          email: _data.email?.trim(),
         },
       });
       const lesson = await lessonRes.json();

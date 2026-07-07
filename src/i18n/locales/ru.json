@@ -374,6 +374,8 @@
     "definition": "Определение",
     "gapAnswerOptionsTitle": "Варианты ответа",
     "gapAnswerOptionsHint": "Отметьте правильные варианты. Минимум один.",
+    "gapAnswerOptionsHintInput": "Укажите правильный ответ или оставьте пустым — тогда засчитается любой ответ ученика.",
+    "anyAnswerAccepted": "Любой ответ",
     "correctCount": "Правильных: {{n}}",
     "correct": "Правильный",
     "incorrect": "Неправильный",

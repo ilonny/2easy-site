@@ -4,11 +4,13 @@ import Image from "next/image";
 import Logo from "@/assets/icons/logo.svg";
 import Link from "next/link";
 import { LoginForm } from "./components";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function LoginPage() {
   return (
     <main
       className="
+      relative
       flex
       flex-col
       flex-1
@@ -25,6 +27,9 @@ export default function LoginPage() {
       lg:gap-6
       "
     >
+      <div className="absolute top-4 right-4 lg:top-8 lg:right-8 z-10">
+        <LanguageSwitcher />
+      </div>
       <div className="w-[100%] max-w-[460px]">
         <Panel>
           <div className="flex justify-center">

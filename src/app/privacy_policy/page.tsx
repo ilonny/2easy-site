@@ -8,10 +8,16 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { PageLeftBlock } from "@/components/PageLeftBlock";
 import { ProfileLessons } from "../lessons/components/ProfileLessons";
+import { useTranslation } from "react-i18next";
+import { PrivacyPolicyEn } from "./PrivacyPolicyEn";
 
 export default function GrammarPage() {
   const { checkSubscription } = useCheckSubscription();
   const router = useRouter();
+  const { i18n } = useTranslation();
+  const isEn = (i18n.resolvedLanguage || i18n.language || "ru")
+    .toLowerCase()
+    .startsWith("en");
   // useEffect(() => {
   //   if (!checkSubscription()) {
   //     router.push("/subscription");
@@ -21,6 +27,9 @@ export default function GrammarPage() {
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
+        {isEn ? (
+          <PrivacyPolicyEn />
+        ) : (
         <>
           <br />
           <br />
@@ -1076,6 +1085,7 @@ export default function GrammarPage() {
           <br />
           <br />
         </>
+        )}
       </ContentWrapper>
     </main>
   );

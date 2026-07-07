@@ -8,7 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useContext, useState } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { EyeFilledIcon, EyeSlashFilledIcon } from "../EyeIcon";
 import { toast } from "react-toastify";
@@ -25,6 +25,15 @@ type TStudentForgotInputs = {
 };
 
 type TTabKey = "teacher" | "student";
+
+const ROLE_OPTIONS: {
+  key: TTabKey;
+  emoji: string;
+  labelKey: "auth.loginAsTeacher" | "auth.loginAsStudent";
+}[] = [
+  { key: "teacher", emoji: "🧑‍🏫", labelKey: "auth.loginAsTeacher" },
+  { key: "student", emoji: "🧑‍🎓", labelKey: "auth.loginAsStudent" },
+];
 
 export const LoginForm = () => {
   const {
@@ -46,12 +55,22 @@ export const LoginForm = () => {
 
   const [responseError, setResponseError] = useState("");
   const [forgotError, setForgotError] = useState("");
-  const [tabKey, setTabKey] = useState<TTabKey>("teacher");
+  const [tabKey, setTabKey] = useState<TTabKey | null>(null);
   const [studentForgotView, setStudentForgotView] = useState(false);
+  const loginInputRef = useRef<HTMLInputElement>(null);
   const { setProfile } = useContext(AuthContext);
   const router = useRouter();
 
+  useEffect(() => {
+    if (!tabKey || studentForgotView) return;
+    const timeoutId = window.setTimeout(() => {
+      loginInputRef.current?.focus();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [tabKey, studentForgotView]);
+
   const onSubmit: SubmitHandler<TLoginInputs> = (data) => {
+    if (!tabKey) return;
     mutation.mutate({ ...data, role: tabKey });
   };
 
@@ -138,29 +157,29 @@ export const LoginForm = () => {
       <h3 className="text-center font-bold text-2xl mb-4">
         <T k="auth.loginTitle" />
       </h3>
-      <div className="flex justify-center gap-6 sm:gap-10 mb-8 border-b border-default-200">
-        <button
-          type="button"
-          className={`pb-3 px-1 text-sm sm:text-base font-medium transition-colors border-b-2 -mb-px ${
-            tabKey === "teacher"
-              ? "border-primary text-primary"
-              : "border-transparent text-default-500 hover:text-default-700"
-          }`}
-          onClick={() => switchTab("teacher")}
-        >
-          <T k="auth.loginAsTeacher" />
-        </button>
-        <button
-          type="button"
-          className={`pb-3 px-1 text-sm sm:text-base font-medium transition-colors border-b-2 -mb-px ${
-            tabKey === "student"
-              ? "border-primary text-primary"
-              : "border-transparent text-default-500 hover:text-default-700"
-          }`}
-          onClick={() => switchTab("student")}
-        >
-          <T k="auth.loginAsStudent" />
-        </button>
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8">
+        {ROLE_OPTIONS.map(({ key, emoji, labelKey }) => {
+          const isActive = tabKey === key;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => switchTab(key)}
+              className={`flex flex-col items-center gap-2 p-4 sm:p-5 rounded-xl border-2 transition-all duration-200 ${
+                isActive
+                  ? "border-primary bg-[#eeebff] text-primary shadow-md ring-2 ring-primary/20 scale-[1.02]"
+                  : "border-default-200 bg-default-50 text-default-600 hover:border-primary/50 hover:bg-[#faf9ff] hover:text-default-800 hover:shadow-sm"
+              }`}
+            >
+              <span className="text-3xl sm:text-4xl leading-none" aria-hidden>
+                {emoji}
+              </span>
+              <span className="text-sm sm:text-base font-semibold text-center leading-tight">
+                <T k={labelKey} />
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {tabKey === "teacher" && (
@@ -169,9 +188,13 @@ export const LoginForm = () => {
             name="login"
             control={control}
             rules={{ required: i18n.t("auth.emailRequired") }}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <Input
                 {...field}
+                ref={(node) => {
+                  ref(node);
+                  loginInputRef.current = node;
+                }}
                 radius="sm"
                 label={<T k="auth.email" />}
                 className="mb-5"
@@ -308,9 +331,13 @@ export const LoginForm = () => {
             name="login"
             control={control}
             rules={{ required: i18n.t("auth.emailRequired") }}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <Input
                 {...field}
+                ref={(node) => {
+                  ref(node);
+                  loginInputRef.current = node;
+                }}
                 radius="sm"
                 label={<T k="auth.email" />}
                 className="mb-5"

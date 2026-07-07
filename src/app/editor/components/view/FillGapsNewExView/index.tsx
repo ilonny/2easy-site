@@ -206,11 +206,17 @@ const FillGapsNewExViewImpl: FC<{
     (gap: TFillGapsNewGap | undefined, v: string) => {
       const val = normalizeGapAnswer(v);
       if (!gap || !val) return false;
+      if (mode === "input") {
+        const hasDefinedCorrect = (gap.options || []).some(
+          (o) => o.isCorrect && (o.value || "").trim(),
+        );
+        if (!hasDefinedCorrect) return true;
+      }
       return !!gap.options?.some(
         (o) => o.isCorrect && normalizeGapAnswer(o.value || "") === val,
       );
     },
-    [],
+    [mode],
   );
 
   const setAnswer = useCallback(

@@ -835,6 +835,7 @@ export const FillGapsNew: FC<TProps> = ({
         gapId={activeGapId || ""}
         initialCorrectText={initialCorrectText}
         currentGap={activeGap}
+        mode={data.mode}
         onSave={onSaveGap}
       />
     </div>

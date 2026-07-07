@@ -8,8 +8,12 @@ import styles from "./styles.module.css";
 const CONSENT_STORAGE_KEY = "2easy-cookie-consent";
 
 export const CookieConsent = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
+  const isEn = (i18n.resolvedLanguage || i18n.language || "ru")
+    .toLowerCase()
+    .startsWith("en");
+  const policyHref = isEn ? "/cookie_policy" : "/privacy_policy";
 
   useEffect(() => {
     try {
@@ -53,7 +57,7 @@ export const CookieConsent = () => {
                 components={{
                   1: (
                     <Link
-                      href="https://2easyeng.com/privacy_policy"
+                      href={policyHref}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={styles.link}

@@ -14,7 +14,7 @@
     "confirm": "Confirm"
   },
   "cookieConsent": {
-    "message": "By clicking «OK», you consent to the use of cookies in accordance with the <1>Privacy Policy</1>.",
+    "message": "By clicking «OK», you consent to the use of cookies in accordance with the <1>Cookie Policy</1>.",
     "accept": "OK",
     "ariaLabel": "Cookie consent"
   },
@@ -373,6 +373,8 @@
     "definition": "Definition",
     "gapAnswerOptionsTitle": "Answer options",
     "gapAnswerOptionsHint": "Mark the correct options. At least one.",
+    "gapAnswerOptionsHintInput": "Specify the correct answer or leave empty — any student answer will be accepted.",
+    "anyAnswerAccepted": "Any answer",
     "correctCount": "Correct: {{n}}",
     "correct": "Correct",
     "incorrect": "Incorrect",

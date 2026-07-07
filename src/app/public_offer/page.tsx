@@ -3,10 +3,16 @@
 import { ContentWrapper } from "@/components";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import { PublicOfferEn } from "./PublicOfferEn";
 
 export default function GrammarPage() {
   const { checkSubscription } = useCheckSubscription();
   const router = useRouter();
+  const { i18n } = useTranslation();
+  const isEn = (i18n.resolvedLanguage || i18n.language || "ru")
+    .toLowerCase()
+    .startsWith("en");
   // useEffect(() => {
   //   if (!checkSubscription()) {
   //     router.push("/subscription");
@@ -16,6 +22,9 @@ export default function GrammarPage() {
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
+        {isEn ? (
+          <PublicOfferEn />
+        ) : (
         <>
           <br />
           <br />
@@ -3000,6 +3009,7 @@ export default function GrammarPage() {
             </span>
           </p>
         </>
+        )}
       </ContentWrapper>
     </main>
   );

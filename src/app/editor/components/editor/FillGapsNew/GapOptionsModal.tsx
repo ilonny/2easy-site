@@ -13,7 +13,7 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { TFillGapsNewGap, TFillGapsNewOption } from "./types";
+import { TFillGapsNewGap, TFillGapsNewMode, TFillGapsNewOption } from "./types";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 
@@ -23,6 +23,7 @@ type TProps = {
   gapId: string;
   initialCorrectText?: string;
   currentGap?: TFillGapsNewGap;
+  mode?: TFillGapsNewMode;
   onSave: (gap: TFillGapsNewGap) => void;
 };
 
@@ -32,8 +33,10 @@ export const GapOptionsModal: FC<TProps> = ({
   gapId,
   initialCorrectText,
   currentGap,
+  mode = "select",
   onSave,
 }) => {
+  const isInputMode = mode === "input";
   const initialGap = useMemo<TFillGapsNewGap>(() => {
     if (currentGap) return currentGap;
     return {
@@ -144,10 +147,11 @@ export const GapOptionsModal: FC<TProps> = ({
   }, []);
 
   const canSave = useMemo(() => {
+    if (isInputMode) return true;
     const options = (localGap.options || []).filter((o) => o.value?.trim());
     const hasCorrect = options.some((o) => o.isCorrect);
     return options.length >= 1 && hasCorrect;
-  }, [localGap.options]);
+  }, [isInputMode, localGap.options]);
 
   const correctCount = useMemo(() => {
     return (localGap.options || []).filter((o) => o.value?.trim() && o.isCorrect)
@@ -181,22 +185,41 @@ export const GapOptionsModal: FC<TProps> = ({
               <T k="editor.gapAnswerOptionsTitle" defaultText="Варианты ответа" />
             </div>
             <div className="text-small text-gray-500">
-              <T
-                k="editor.gapAnswerOptionsHint"
-                defaultText="Отметьте правильные варианты. Минимум один."
-              />
+              {isInputMode ? (
+                <T
+                  k="editor.gapAnswerOptionsHintInput"
+                  defaultText="Укажите правильный ответ или оставьте пустым — тогда засчитается любой ответ ученика."
+                />
+              ) : (
+                <T
+                  k="editor.gapAnswerOptionsHint"
+                  defaultText="Отметьте правильные варианты. Минимум один."
+                />
+              )}
             </div>
           </div>
           <Chip
             size="sm"
-            color={correctCount > 0 ? "success" : "warning"}
+            color={
+              correctCount > 0 ? "success" : isInputMode ? "primary" : "warning"
+            }
             variant="flat"
           >
-            <T
-              k="editor.correctCount"
-              defaultText="Правильных: {{n}}"
-              values={{ n: correctCount }}
-            />
+            {correctCount > 0 ? (
+              <T
+                k="editor.correctCount"
+                defaultText="Правильных: {{n}}"
+                values={{ n: correctCount }}
+              />
+            ) : isInputMode ? (
+              <T k="editor.anyAnswerAccepted" defaultText="Любой ответ" />
+            ) : (
+              <T
+                k="editor.correctCount"
+                defaultText="Правильных: {{n}}"
+                values={{ n: correctCount }}
+              />
+            )}
           </Chip>
         </ModalHeader>
         <ModalBody className="overflow-y-auto">
