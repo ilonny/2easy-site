@@ -12,6 +12,7 @@ import { Controller, useForm } from "react-hook-form";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { isOutlookEmail } from "@/utils/isOutlookEmail";
+import { toast } from "react-toastify";
 
 type TProps = {
   isVisible: boolean;
@@ -54,6 +55,9 @@ export const CreateStudentModalForm: FC<TProps> = ({
       const lesson = await lessonRes.json();
       if (lesson.success) {
         window?.ym(103955671, "reachGoal", "student-create");
+        if (!_data?.id) {
+          toast(i18n.t("students.credentialsSent"), { type: "success" });
+        }
         onSuccess();
       } else {
         checkResponse(lesson);

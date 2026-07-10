@@ -178,7 +178,7 @@ export const RegistrationForm = () => {
               {...field}
               label={<T k="auth.password" />}
               type={isVisible ? "text" : "password"}
-              className="mb-8"
+              className="mb-2"
               radius="sm"
               errorMessage={confirmErrors?.password?.message}
               isInvalid={!!confirmErrors.password?.message}
@@ -199,6 +199,9 @@ export const RegistrationForm = () => {
             />
           )}
         />
+        <p className="text-small text-default-600 mb-8">
+          <T k="auth.checkSpamFolder" />
+        </p>
         <div className="mb-10">
           <Button
             isLoading={loginMutation.isPending}

@@ -104,8 +104,10 @@ export const LessonCard: FC<TProps> = ({
   const isTeacher =
     Number(profile?.role_id) === 2 || Number(profile?.role_id) === 1;
   const is2easyCourse = Number(currentCourse?.user_id) === 1;
+  const isTeacherViewingStudent =
+    isTeacher && studentId != null && String(studentId).trim() !== "";
   const showLessonBottomActions =
-    !!showStartLessonButton && !is2easyCourse;
+    !!showStartLessonButton && (!is2easyCourse || isTeacherViewingStudent);
   /** Свой курс в /course/:id без ?student_id — «Начать урок» не показываем. */
   const hideStartLessonForMyCourseWithoutStudent =
     !!currentCourse &&
@@ -250,6 +252,8 @@ export const LessonCard: FC<TProps> = ({
       .catch(() => setCourseHomeworkExList([]));
   }, [courseHomeworkModalVisible, lesson?.id]);
 
+  const is2easyLesson = Number(lesson?.user_id) === 1;
+
   const lessonHomeworkExists = useMemo(() => {
     const raw = lesson?.homework_lesson_id;
     if (raw != null && raw !== "") {
@@ -261,21 +265,41 @@ export const LessonCard: FC<TProps> = ({
     return !!lesson?.has_individual_homework;
   }, [lesson?.homework_lesson_id, lesson?.has_individual_homework]);
 
-  const homeworkAlreadyExists = useMemo(() => {
-    if (resolvedHw === null) {
-      return lessonHomeworkExists;
-    }
-    const rid = resolvedHw.homework_lesson_id;
-    if (rid != null && Number(rid) > 0) {
-      return true;
-    }
-    if (resolvedHw.has_individual_homework) {
-      return true;
-    }
-    return lessonHomeworkExists;
-  }, [resolvedHw, lessonHomeworkExists]);
+  const pickIndividualHomeworkId = useCallback(
+    (
+      hwId?: number | string,
+      hasIndividual?: boolean,
+    ): number | undefined => {
+      if (!hasIndividual) {
+        return undefined;
+      }
+      const n = Number(hwId);
+      if (!Number.isNaN(n) && n > 0) {
+        return n;
+      }
+      return undefined;
+    },
+    [],
+  );
 
   const effectiveHomeworkLessonId = useMemo(() => {
+    if (isTeacherViewingStudent) {
+      const fromResolved =
+        resolvedHw !== null
+          ? pickIndividualHomeworkId(
+              resolvedHw.homework_lesson_id,
+              resolvedHw.has_individual_homework,
+            )
+          : undefined;
+      if (fromResolved) {
+        return fromResolved;
+      }
+      return pickIndividualHomeworkId(
+        lesson?.homework_lesson_id,
+        lesson?.has_individual_homework,
+      );
+    }
+
     const fromResolved =
       resolvedHw !== null &&
       resolvedHw.homework_lesson_id != null &&
@@ -291,14 +315,53 @@ export const LessonCard: FC<TProps> = ({
           })()
         : undefined;
     return fromResolved ?? fromLesson;
-  }, [resolvedHw, lesson?.homework_lesson_id]);
+  }, [
+    isTeacherViewingStudent,
+    pickIndividualHomeworkId,
+    resolvedHw,
+    lesson?.homework_lesson_id,
+    lesson?.has_individual_homework,
+  ]);
 
   const effectiveHasIndividualHomework = useMemo(() => {
+    if (isTeacherViewingStudent) {
+      return effectiveHomeworkLessonId != null;
+    }
     if (resolvedHw !== null && resolvedHw.has_individual_homework) {
       return true;
     }
     return !!lesson?.has_individual_homework;
-  }, [resolvedHw, lesson?.has_individual_homework]);
+  }, [
+    isTeacherViewingStudent,
+    effectiveHomeworkLessonId,
+    resolvedHw,
+    lesson?.has_individual_homework,
+  ]);
+
+  const homeworkAlreadyExists = useMemo(() => {
+    if (is2easyLesson && (isTeacherViewingStudent || isStudent)) {
+      return !!(effectiveHasIndividualHomework && effectiveHomeworkLessonId);
+    }
+    if (resolvedHw === null) {
+      return lessonHomeworkExists;
+    }
+    const rid = resolvedHw.homework_lesson_id;
+    if (rid != null && Number(rid) > 0) {
+      return true;
+    }
+    if (resolvedHw.has_individual_homework) {
+      return true;
+    }
+    return lessonHomeworkExists;
+  }, [
+    is2easyLesson,
+    isTeacherViewingStudent,
+    isStudent,
+    effectiveHasIndividualHomework,
+    effectiveHomeworkLessonId,
+    resolvedHw,
+    lessonHomeworkExists,
+  ]);
 
   const isDisabled =
     isStudent && lesson?.["lesson_relations.status"] === "close";
@@ -649,25 +712,43 @@ export const LessonCard: FC<TProps> = ({
                       );
                       router.push(`/lessons/${hwId}`);
                     };
+
+                    const resolveRes = await fetchPostJson({
+                      path: "/lessons/homework/resolve-for-student",
+                      isSecure: true,
+                      data: {
+                        lesson_id: lesson.id,
+                        student_id: Number(studentId),
+                      },
+                    });
+                    const resolveData = await resolveRes?.json();
                     if (
-                      effectiveHasIndividualHomework &&
-                      effectiveHomeworkLessonId
+                      resolveData?.has_individual_homework &&
+                      resolveData?.homework_lesson_id
                     ) {
+                      saveSelectedAndNavigate(
+                        Number(resolveData.homework_lesson_id),
+                      );
+                      return;
+                    }
+
+                    if (effectiveHomeworkLessonId) {
                       saveSelectedAndNavigate(effectiveHomeworkLessonId);
-                    } else {
-                      const res = await fetchPostJson({
-                        path: "/lessons/homework/get-or-create-for-student",
-                        isSecure: true,
-                        data: {
-                          lesson_id: lesson.id,
-                          student_id: studentId,
-                        },
-                      });
-                      const data = await res?.json();
-                      checkResponse(data);
-                      if (data?.homework_lesson_id) {
-                        saveSelectedAndNavigate(data.homework_lesson_id);
-                      }
+                      return;
+                    }
+
+                    const res = await fetchPostJson({
+                      path: "/lessons/homework/get-or-create-for-student",
+                      isSecure: true,
+                      data: {
+                        lesson_id: lesson.id,
+                        student_id: studentId,
+                      },
+                    });
+                    const data = await res?.json();
+                    checkResponse(data);
+                    if (data?.homework_lesson_id) {
+                      saveSelectedAndNavigate(data.homework_lesson_id);
                     }
                   }}
                 >
@@ -721,7 +802,7 @@ export const LessonCard: FC<TProps> = ({
                 </Button>
               )}
             </>
-          ) : isStudent && homeworkAlreadyExists ? (
+          ) : isStudent && (homeworkAlreadyExists || is2easyLesson) ? (
             <>
               <div className="h-4"></div>
               <Button
@@ -959,7 +1040,7 @@ export const LessonCard: FC<TProps> = ({
           </ModalBody>
         </ModalContent>
       </Modal>
-      {isTeacher && studentId && !is2easyCourse && (
+      {isTeacher && studentId && (
         <CreateIndividualHomeworkModal
           isVisible={createHomeworkModalVisible}
           setIsVisible={setCreateHomeworkModalVisible}
