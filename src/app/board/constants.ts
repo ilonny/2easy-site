@@ -23,14 +23,6 @@ export const BOARD_FORM_MODAL_CLASS_NAMES = {
   closeButton: "z-20",
 };
 
-export const BOARD_MODAL_CLASS_NAMES = {
-  base: "m-0 max-w-full w-full h-[100dvh] min-h-[100dvh] rounded-none",
-  wrapper: "items-stretch justify-center p-0",
-  header: "shrink-0 border-b border-default-200 px-4 py-3 sm:px-6",
-  body: "flex-1 overflow-y-auto px-4 py-4 sm:px-6",
-  closeButton: "z-20",
-};
-
 export const BOARD_EDITOR_MODAL_CLASS_NAMES = {
   base: "m-0 max-w-full h-[100dvh] min-h-[100dvh] rounded-none",
   wrapper: "items-center p-0",

@@ -2,7 +2,7 @@
 
 import { checkResponse, fetchPostJson } from "@/api";
 import { TBoard } from "@/app/board/types";
-import { BOARD_MODAL_CLASS_NAMES } from "@/app/board/constants";
+import { BOARD_FORM_MODAL_CLASS_NAMES } from "@/app/board/constants";
 import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
 import {
   Button,
@@ -44,16 +44,14 @@ export const DeleteBoardModalForm: FC<TProps> = ({
 
   return (
     <Modal
-      size="full"
-      radius="none"
-      placement="center"
+      size="xl"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
-      scrollBehavior="inside"
+      scrollBehavior="outside"
       closeButton={<BoardCloseButton />}
-      classNames={BOARD_MODAL_CLASS_NAMES}
+      classNames={BOARD_FORM_MODAL_CLASS_NAMES}
     >
-      <ModalContent className="h-full max-h-[100dvh] rounded-none flex flex-col">
+      <ModalContent>
         <ModalHeader>
           <p>
             <T k="boards.deleteConfirm" values={{ title: board.title }} />

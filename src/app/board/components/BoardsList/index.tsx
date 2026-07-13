@@ -21,6 +21,8 @@ type TProps = {
   getBoards: () => void;
   showTeacherActions?: boolean;
   showStartBoardButton?: boolean;
+  showStudentCabinetActions?: boolean;
+  deleteBoardRelation?: (relationId?: number) => void;
 };
 
 export const BoardsList: FC<TProps> = ({
@@ -30,6 +32,8 @@ export const BoardsList: FC<TProps> = ({
   getBoards,
   showTeacherActions = false,
   showStartBoardButton = false,
+  showStudentCabinetActions = false,
+  deleteBoardRelation,
 }) => {
   const [editIsVisible, setEditIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
@@ -50,6 +54,13 @@ export const BoardsList: FC<TProps> = ({
     setChosenBoard(board);
     setAttachIsVisible(true);
   }, []);
+
+  const onPressRemoveFromStudent = useCallback(
+    (board: TBoard) => {
+      deleteBoardRelation?.(board["board_relations.id"]);
+    },
+    [deleteBoardRelation],
+  );
 
   return (
     <>
@@ -100,15 +111,23 @@ export const BoardsList: FC<TProps> = ({
             key={board.id}
             board={board}
             onPress={onPressBoard}
-            onPressEdit={showTeacherActions ? onPressEdit : undefined}
+            onPressEdit={
+              showTeacherActions || showStudentCabinetActions
+                ? onPressEdit
+                : undefined
+            }
             onPressDelete={showTeacherActions ? onPressDelete : undefined}
             onPressAttach={showTeacherActions ? onPressAttach : undefined}
+            onPressRemoveFromStudent={
+              showStudentCabinetActions ? onPressRemoveFromStudent : undefined
+            }
             showAttachAction={showTeacherActions}
             showStartBoardButton={showStartBoardButton}
+            showStudentCabinetMenu={showStudentCabinetActions}
           />
         ))}
       </div>
-      {!!chosenBoard && (
+      {!!chosenBoard && (showTeacherActions || showStudentCabinetActions) && (
         <>
           <EditBoardModalForm
             isVisible={editIsVisible}
@@ -119,24 +138,28 @@ export const BoardsList: FC<TProps> = ({
               getBoards();
             }}
           />
-          <DeleteBoardModalForm
-            isVisible={deleteIsVisible}
-            setIsVisible={setDeleteIsVisible}
-            board={chosenBoard}
-            onSuccess={() => {
-              setDeleteIsVisible(false);
-              getBoards();
-            }}
-          />
-          <AttachBoardModalForm
-            isVisible={attachIsVisible}
-            setIsVisible={setAttachIsVisible}
-            board={chosenBoard}
-            onSuccess={() => {
-              setAttachIsVisible(false);
-              getBoards();
-            }}
-          />
+          {showTeacherActions && (
+            <>
+              <DeleteBoardModalForm
+                isVisible={deleteIsVisible}
+                setIsVisible={setDeleteIsVisible}
+                board={chosenBoard}
+                onSuccess={() => {
+                  setDeleteIsVisible(false);
+                  getBoards();
+                }}
+              />
+              <AttachBoardModalForm
+                isVisible={attachIsVisible}
+                setIsVisible={setAttachIsVisible}
+                board={chosenBoard}
+                onSuccess={() => {
+                  setAttachIsVisible(false);
+                  getBoards();
+                }}
+              />
+            </>
+          )}
         </>
       )}
     </>

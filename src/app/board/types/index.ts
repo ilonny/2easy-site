@@ -19,6 +19,7 @@ export type TBoard = {
   anchor_lesson_id?: number;
   student_ids?: string;
   canEdit?: boolean;
+  "board_relations.id"?: number;
 };
 
 export type TBoardFormFields = {

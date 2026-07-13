@@ -4,7 +4,7 @@ import { checkResponse, fetchPostJson } from "@/api";
 import { getImageUrl } from "@/app/editor/helpers";
 import { TBoard, TBoardFormFields } from "@/app/board/types";
 import { resolveBoardCoverImageId } from "@/app/board/utils/coverImage";
-import { BOARD_MODAL_CLASS_NAMES } from "@/app/board/constants";
+import { BOARD_FORM_MODAL_CLASS_NAMES } from "@/app/board/constants";
 import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
 import { BoardFormFields } from "@/app/board/components/BoardFormFields";
 import { useUploadImage } from "@/hooks/useUploadImage";
@@ -116,16 +116,14 @@ export const EditBoardModalForm: FC<TProps> = ({
 
   return (
     <Modal
-      size="full"
-      radius="none"
-      placement="center"
+      size="xl"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
-      scrollBehavior="inside"
+      scrollBehavior="outside"
       closeButton={<BoardCloseButton />}
-      classNames={BOARD_MODAL_CLASS_NAMES}
+      classNames={BOARD_FORM_MODAL_CLASS_NAMES}
     >
-      <ModalContent className="h-full max-h-[100dvh] rounded-none flex flex-col">
+      <ModalContent>
         <ModalHeader>
           <p>{title ? title : <T k="boards.editBoard" />}</p>
         </ModalHeader>

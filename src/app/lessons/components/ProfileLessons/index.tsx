@@ -140,6 +140,7 @@ export const ProfileLessons = (props: TProps) => {
     openCreateBoardModal,
     onCreateBoard,
     onPressBoard,
+    deleteBoardRelation,
   } = useBoardsTab({
     studentId,
     isTeacher,
@@ -458,19 +459,6 @@ export const ProfileLessons = (props: TProps) => {
                 >
                   <T k="lessons.myLessons" />
                 </Button>
-                {showBoardsTabButton ? (
-                  <Button
-                    radius="full"
-                    color="primary"
-                    variant={tabIndex === "userBoards" ? "solid" : "faded"}
-                    onClick={() => {
-                      setTabIndex("userBoards");
-                      router.push("/lesson_plans");
-                    }}
-                  >
-                    <T k="boards.myBoards" />
-                  </Button>
-                ) : null}
                 {!!courses.some((c) => c.user_id !== 1) && (
                   <Button
                     radius="full"
@@ -484,6 +472,19 @@ export const ProfileLessons = (props: TProps) => {
                     <T k="lessons.myCourses" />
                   </Button>
                 )}
+                {showBoardsTabButton ? (
+                  <Button
+                    radius="full"
+                    color="primary"
+                    variant={tabIndex === "userBoards" ? "solid" : "faded"}
+                    onClick={() => {
+                      setTabIndex("userBoards");
+                      router.push("/lesson_plans");
+                    }}
+                  >
+                    <T k="boards.myBoards" />
+                  </Button>
+                ) : null}
                 <Button
                   radius="full"
                   color="primary"
@@ -709,6 +710,7 @@ export const ProfileLessons = (props: TProps) => {
         boardEditorOpen={boardEditorOpen}
         setBoardEditorOpen={setBoardEditorOpen}
         editorBoard={editorBoard}
+        deleteBoardRelation={deleteBoardRelation}
       />
       {!isBoardsTabActive &&
         (!!currentCourse || !!filteredLessons?.length) && (

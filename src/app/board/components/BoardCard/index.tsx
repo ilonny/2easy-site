@@ -24,8 +24,10 @@ type TProps = {
   onPressEdit?: (board: TBoard) => void;
   onPressDelete?: (board: TBoard) => void;
   onPressAttach?: (board: TBoard) => void;
+  onPressRemoveFromStudent?: (board: TBoard) => void;
   showStartBoardButton?: boolean;
   showAttachAction?: boolean;
+  showStudentCabinetMenu?: boolean;
 };
 
 export const BoardCard: FC<TProps> = ({
@@ -34,10 +36,16 @@ export const BoardCard: FC<TProps> = ({
   onPressEdit,
   onPressDelete,
   onPressAttach,
+  onPressRemoveFromStudent,
   showStartBoardButton = false,
   showAttachAction = false,
+  showStudentCabinetMenu = false,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+  const showMenu =
+    showStudentCabinetMenu ||
+    (board.canEdit &&
+      !!(onPressEdit || onPressDelete || (onPressAttach && showAttachAction)));
 
   return (
     <div className={`p-2 w-[100%] md:w-1/2 lg:w-[25%] ${styles.boardCard}`}>
@@ -62,7 +70,7 @@ export const BoardCard: FC<TProps> = ({
           }}
         />
         <div className={styles.shadow} />
-        {board.canEdit && (
+        {showMenu && (
           <div
             className={styles.btnWrapper}
             onClick={(event) => event.stopPropagation()}
@@ -78,20 +86,7 @@ export const BoardCard: FC<TProps> = ({
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="bg-white p-2 items-start">
-                {!!onPressAttach && showAttachAction && (
-                  <Button
-                    variant="light"
-                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
-                    style={{ fontSize: 14 }}
-                    onPress={() => {
-                      setPopoverIsOpen(false);
-                      onPressAttach(board);
-                    }}
-                  >
-                    <T k="boards.attachToStudent" />
-                  </Button>
-                )}
-                {!!onPressEdit && (
+                {showStudentCabinetMenu && !!onPressEdit && (
                   <Button
                     variant="light"
                     className="w-full text-default-foreground py-1 px-2 text-left justify-start"
@@ -104,7 +99,48 @@ export const BoardCard: FC<TProps> = ({
                     <T k="boards.editBoard" />
                   </Button>
                 )}
-                {!!onPressDelete && (
+                {showStudentCabinetMenu && !!onPressRemoveFromStudent && (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    className="w-full text-default-foreground py-1 px-2 justify-start"
+                    style={{ fontSize: 14 }}
+                    endContent={<Image src={DeleteIcon} alt="icon" />}
+                    onPress={() => {
+                      setPopoverIsOpen(false);
+                      onPressRemoveFromStudent(board);
+                    }}
+                  >
+                    <T k="lessons.deleteFromStudent" />
+                  </Button>
+                )}
+                {!showStudentCabinetMenu && !!onPressAttach && showAttachAction && (
+                  <Button
+                    variant="light"
+                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
+                    style={{ fontSize: 14 }}
+                    onPress={() => {
+                      setPopoverIsOpen(false);
+                      onPressAttach(board);
+                    }}
+                  >
+                    <T k="boards.attachToStudent" />
+                  </Button>
+                )}
+                {!showStudentCabinetMenu && !!onPressEdit && (
+                  <Button
+                    variant="light"
+                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
+                    style={{ fontSize: 14 }}
+                    onPress={() => {
+                      setPopoverIsOpen(false);
+                      onPressEdit(board);
+                    }}
+                  >
+                    <T k="boards.editBoard" />
+                  </Button>
+                )}
+                {!showStudentCabinetMenu && !!onPressDelete && (
                   <Button
                     size="sm"
                     variant="light"

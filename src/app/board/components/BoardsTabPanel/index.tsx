@@ -29,6 +29,7 @@ type TProps = {
   boardEditorOpen: boolean;
   setBoardEditorOpen: (value: boolean) => void;
   editorBoard: TBoard | null;
+  deleteBoardRelation?: (relationId?: number) => void;
 };
 
 export const BoardsTabPanel: FC<TProps> = ({
@@ -50,6 +51,7 @@ export const BoardsTabPanel: FC<TProps> = ({
   boardEditorOpen,
   setBoardEditorOpen,
   editorBoard,
+  deleteBoardRelation,
 }) => {
   const { t } = useTranslation();
 
@@ -90,6 +92,8 @@ export const BoardsTabPanel: FC<TProps> = ({
             getBoards={getBoards}
             showTeacherActions={isTeacher && !studentId}
             showStartBoardButton={isTeacher && !studentId}
+            showStudentCabinetActions={isTeacher && !!studentId}
+            deleteBoardRelation={deleteBoardRelation}
           />
         </>
       ) : null}

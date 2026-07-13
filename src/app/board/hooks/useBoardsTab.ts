@@ -2,6 +2,7 @@
 
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { checkResponse, fetchPostJson } from "@/api";
 import { AuthContext } from "@/auth";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { TBoard } from "../types";
@@ -139,6 +140,26 @@ export const useBoardsTab = ({
     [profile?.isStudent, router, studentId],
   );
 
+  const deleteBoardRelation = useCallback(
+    async (relationId?: number) => {
+      if (!relationId) {
+        return;
+      }
+
+      const res = await fetchPostJson({
+        path: "/board-relation/delete",
+        isSecure: true,
+        data: {
+          relation_id: relationId,
+        },
+      });
+      const data = await res?.json();
+      checkResponse(data);
+      await getBoards();
+    },
+    [getBoards],
+  );
+
   return {
     boards,
     boardsIsLoading,
@@ -154,5 +175,6 @@ export const useBoardsTab = ({
     openCreateBoardModal,
     onCreateBoard,
     onPressBoard,
+    deleteBoardRelation,
   };
 };
