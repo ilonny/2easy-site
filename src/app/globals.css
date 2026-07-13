@@ -355,7 +355,14 @@ ol, ul {
   opacity: 1 !important;
 }
 
-body.jivo-chat-hidden jdiv {
+body.site-chat-hidden iframe[src*="site-chat.me"],
+body.site-chat-hidden iframe[src*="me-talk.ru"],
+body.site-chat-hidden iframe[src*="talk-me.ru"],
+body.site-chat-hidden iframe[src*="widget.me-talk.ru"],
+body.site-chat-hidden [id*="talkme"],
+body.site-chat-hidden [id*="me-talk"],
+body.site-chat-hidden [class*="me-talk"],
+body.site-chat-hidden [class*="talkme"] {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;

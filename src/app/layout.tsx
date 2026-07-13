@@ -14,7 +14,7 @@ import { BodyContainer } from "./BodyContainer";
 import { Footer } from "@/components/Footer";
 import Script from "next/script";
 import { EditorContextProvider } from "./editor/context";
-import { JivoSite } from "@/components/JivoSite";
+import { TalkMeSite } from "@/components/TalkMeSite";
 import { CookieConsent } from "@/components/CookieConsent";
 import { I18nProvider } from "@/i18n/I18nProvider";
 
@@ -71,7 +71,28 @@ export default function RootLayout({
             ym(103955671, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
           `}
         </Script>
-        <JivoSite />
+        <Script id="talk-me-setup" strategy="afterInteractive">
+          {`window.TalkMeSetup = {
+            domain: window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+              ? "2easyeng.com"
+              : undefined,
+            disableTimeouts: true
+          };`}
+        </Script>
+        <Script id="talk-me-script" strategy="afterInteractive">
+          {`(function(){(function c(d,w,m,i) {
+        window.supportAPIMethod = m;
+        var s = d.createElement('script');
+        s.id = 'supportScript';
+        s.async = true;
+        var id = 'a4267f4522dacb1b9837b30ca1279301';
+        s.src = (!i ? 'https://lcab.talk-me.ru/support/support.js' : 'https://static.site-chat.me/support/support.int.js') + '?h=' + id;
+        s.onerror = i ? undefined : function(){c(d,w,m,true)};
+        w[m] = w[m] ? w[m] : function(){(w[m].q = w[m].q ? w[m].q : []).push(arguments);};
+        (d.head ? d.head : d.body).appendChild(s);
+      })(document,window,'TalkMe')})();`}
+        </Script>
+        <TalkMeSite />
         <noscript>
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
