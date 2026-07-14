@@ -63,17 +63,26 @@ export const SubscribeCancel: FC<TProps> = ({
         ? `${reasonLabel}${otherReasonText ? `: ${otherReasonText}` : ""}`
         : reasonLabel || i18n.t("subscriptionCancel.reasonNotSpecified");
 
-    const cancelRes = await fetchPostJson({
-      path: "/subscription/cancel",
-      isSecure: true,
-      data: { cancelReason: reasonText },
-    });
+    try {
+      const cancelRes = await fetchPostJson({
+        path: "/subscription/cancel",
+        isSecure: true,
+        data: { cancelReason: reasonText },
+      });
 
-    const cancel = await cancelRes.json();
-    window?.ym(103955671, "reachGoal", "subscribe-cancel");
-    setLoading(false);
-    checkResponse(cancel);
-    closeModal();
+      const cancel = await cancelRes.json();
+      try {
+        window?.ym?.(103955671, "reachGoal", "subscribe-cancel");
+      } catch {
+        // analytics must not block success toast
+      }
+      checkResponse(cancel);
+      closeModal();
+    } catch {
+      checkResponse({ success: false, message: "Что-то пошло не так" });
+    } finally {
+      setLoading(false);
+    }
   }, [selectedReason, otherReasonText, closeModal]);
 
   return (
