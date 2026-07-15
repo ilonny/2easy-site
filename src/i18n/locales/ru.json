@@ -666,7 +666,9 @@
     "loadListError": "Не удалось загрузить список досок",
     "sessionCreateError": "Не удалось создать сессию доски",
     "sessionCloseError": "Не удалось закрыть сессию доски",
-    "addStickyNote": "Стикер"
+    "addStickyNote": "Стикер",
+    "editingModeBanner": "Это режим редактирования. Чтобы совместно использовать доску, нажмите «Начать урок» и выберите ученика.",
+    "endBoardLesson": "Завершить урок"
   },
   "metadata": {
     "title": "2EASY Interactive",

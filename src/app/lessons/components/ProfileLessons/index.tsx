@@ -134,9 +134,6 @@ export const ProfileLessons = (props: TProps) => {
     showBoardsTabButton,
     createBoardModalIsVisible,
     setCreateBoardModalIsVisible,
-    boardEditorOpen,
-    setBoardEditorOpen,
-    editorBoard,
     openCreateBoardModal,
     onCreateBoard,
     onPressBoard,
@@ -707,9 +704,6 @@ export const ProfileLessons = (props: TProps) => {
         createBoardModalIsVisible={createBoardModalIsVisible}
         setCreateBoardModalIsVisible={setCreateBoardModalIsVisible}
         onCreateBoard={onCreateBoard}
-        boardEditorOpen={boardEditorOpen}
-        setBoardEditorOpen={setBoardEditorOpen}
-        editorBoard={editorBoard}
         deleteBoardRelation={deleteBoardRelation}
       />
       {!isBoardsTabActive &&

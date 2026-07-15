@@ -1,15 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
-import { BOARD_EDITOR_JIVO_OFFSET_PX } from "../constants";
 import { useBoardEditor } from "./useBoardEditor";
-import { getBoardSaveStatusLabel } from "../utils/saveStatus";
 
 type TParams = {
   boardId?: number;
   mode: "solo" | "realtime";
   enabled: boolean;
   isHost?: boolean;
+  autoStartHostSession?: boolean;
+  closeSessionOnUnmount?: boolean;
   editorKeyPrefix: string;
 };
 
@@ -18,6 +17,8 @@ export const useBoardEditorChrome = ({
   mode,
   enabled,
   isHost = false,
+  autoStartHostSession = true,
+  closeSessionOnUnmount = true,
   editorKeyPrefix,
 }: TParams) => {
   const editor = useBoardEditor({
@@ -25,30 +26,18 @@ export const useBoardEditorChrome = ({
     mode,
     enabled,
     isHost,
+    autoStartHostSession,
+    closeSessionOnUnmount,
   });
 
-  const statusLabel = useMemo(
-    () => getBoardSaveStatusLabel(editor.saveStatus),
-    [editor.saveStatus],
-  );
-
   const isEditorReady = !!editor.initialData && !!boardId;
-  const editorKey = boardId ? `${editorKeyPrefix}-${boardId}` : editorKeyPrefix;
-
-  const editorAreaStyle = useMemo(
-    () =>
-      ({
-        paddingBottom: BOARD_EDITOR_JIVO_OFFSET_PX,
-        "--board-jivo-offset": `${BOARD_EDITOR_JIVO_OFFSET_PX}px`,
-      }) as React.CSSProperties,
-    [],
-  );
+  const editorKey = boardId
+    ? `${editorKeyPrefix}-${boardId}-${mode}`
+    : editorKeyPrefix;
 
   return {
     editor,
-    statusLabel,
     isEditorReady,
     editorKey,
-    editorAreaStyle,
   };
 };

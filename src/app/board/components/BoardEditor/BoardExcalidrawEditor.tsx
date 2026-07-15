@@ -20,11 +20,11 @@ import {
 } from "../../utils/boardSnapshot";
 import { mergeBoardEditorAppState } from "../../utils/boardEditorDefaults";
 import { attachFitBoardViewportOnLoad } from "../../utils/boardStickyNote";
-import { buildTeacherCollaboratorsMap } from "../../utils/boardTeacherCursor";
+import { buildBoardCollaboratorsMap } from "../../utils/boardTeacherCursor";
 import { multiplayerBoardSyncAdapter } from "../../sync/MultiplayerBoardSyncAdapter";
 import { BOARD_CURSOR_THROTTLE_MS } from "../../constants";
 import { BoardStickyNoteButton } from "../BoardStickyNoteButton";
-import { TBoardSnapshot, TBoardTeacherCursor } from "../../types";
+import { TBoardCursor, TBoardSnapshot } from "../../types";
 import styles from "./boardEditor.module.css";
 
 type TInitialData = ReturnType<typeof snapshotToExcalidrawInitialData>;
@@ -35,8 +35,8 @@ type TProps = {
   initialData: TInitialData;
   onSceneChange: (snapshot: TBoardSnapshot) => void;
   syncMode?: "solo" | "realtime";
-  isHost?: boolean;
-  teacherCursor?: TBoardTeacherCursor | null;
+  cursors?: TBoardCursor[];
+  onApiChange?: (api: ExcalidrawImperativeAPI | null) => void;
 };
 
 export const BoardExcalidrawEditor: FC<TProps> = ({
@@ -45,8 +45,8 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
   initialData,
   onSceneChange,
   syncMode = "solo",
-  isHost = false,
-  teacherCursor = null,
+  cursors = [],
+  onApiChange,
 }) => {
   const lastFingerprintRef = useRef<string | null>(null);
   const excalidrawAPIRef = useRef<ExcalidrawImperativeAPI | null>(null);
@@ -56,10 +56,13 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
   const shouldFitViewportRef = useRef(true);
   const fitViewportUnsubscribeRef = useRef<(() => void) | null>(null);
   const lastCursorSentAtRef = useRef(0);
-  const teacherCursorRef = useRef(teacherCursor);
-  const isHostRef = useRef(isHost);
+  const cursorsRef = useRef(cursors);
+  const editorWrapRef = useRef<HTMLDivElement>(null);
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
+  const [toolbarContainer, setToolbarContainer] = useState<HTMLElement | null>(
+    null,
+  );
 
   const excalidrawKey = isRealtime
     ? `board-excalidraw-${boardId}`
@@ -96,12 +99,38 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
   );
 
   useEffect(() => {
-    teacherCursorRef.current = teacherCursor;
-  }, [teacherCursor]);
+    cursorsRef.current = cursors;
+  }, [cursors]);
 
   useEffect(() => {
-    isHostRef.current = isHost;
-  }, [isHost]);
+    onApiChange?.(excalidrawAPI);
+    return () => onApiChange?.(null);
+  }, [excalidrawAPI, onApiChange]);
+
+  useEffect(() => {
+    if (!excalidrawAPI) {
+      setToolbarContainer(null);
+      return;
+    }
+
+    let frame = 0;
+    let attempts = 0;
+    const findContainer = () => {
+      const container = editorWrapRef.current?.querySelector<HTMLElement>(
+        ".App-toolbar-container",
+      );
+      if (container) {
+        setToolbarContainer(container);
+        return;
+      }
+      if (attempts++ < 30) {
+        frame = requestAnimationFrame(findContainer);
+      }
+    };
+    findContainer();
+
+    return () => cancelAnimationFrame(frame);
+  }, [excalidrawAPI]);
 
   const applyRemoteScene = useCallback(
     (data: TInitialData, revision: number) => {
@@ -137,11 +166,9 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
         elements: reconciled,
         appState: {
           ...mergeBoardEditorAppState(remoteSnapshot.appState as Record<string, unknown>),
-          ...(!isHostRef.current && isRealtime
+          ...(isRealtime
             ? {
-                collaborators: buildTeacherCollaboratorsMap(
-                  teacherCursorRef.current,
-                ),
+                collaborators: buildBoardCollaboratorsMap(cursorsRef.current),
               }
             : {}),
         },
@@ -172,17 +199,17 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
 
   useEffect(() => {
     const api = excalidrawAPIRef.current;
-    if (!api || !isRealtime || isHost) {
+    if (!api || !isRealtime) {
       return;
     }
 
     api.updateScene({
       appState: {
-        collaborators: buildTeacherCollaboratorsMap(teacherCursor),
+        collaborators: buildBoardCollaboratorsMap(cursors),
       },
       captureUpdate: CaptureUpdateAction.NEVER,
     });
-  }, [excalidrawAPI, isHost, isRealtime, teacherCursor]);
+  }, [cursors, excalidrawAPI, isRealtime]);
 
   const excalidrawInitialData = useMemo(
     () => ({
@@ -222,7 +249,7 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
       pointer: { x: number; y: number; tool: "pointer" | "laser" };
       button: "down" | "up";
     }) => {
-      if (!isRealtime || !isHost || !multiplayerBoardSyncAdapter.isConnected()) {
+      if (!isRealtime || !multiplayerBoardSyncAdapter.isConnected()) {
         return;
       }
 
@@ -239,7 +266,7 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
         button: payload.button,
       });
     },
-    [isHost, isRealtime],
+    [isRealtime],
   );
 
   const handleExcalidrawAPI = useCallback(
@@ -261,20 +288,32 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
   );
 
   return (
-    <div className={styles.editorWrap} data-board-editor-wrap>
-      <BoardStickyNoteButton api={excalidrawAPI} />
+    <div className={styles.editorWrap} data-board-editor-wrap ref={editorWrapRef}>
+      <BoardStickyNoteButton api={excalidrawAPI} container={toolbarContainer} />
       <Excalidraw
         key={excalidrawKey}
         excalidrawAPI={handleExcalidrawAPI}
         initialData={excalidrawInitialData}
         gridModeEnabled
-        isCollaborating={isRealtime && !isHost}
+        // Presentational only in this Excalidraw build: it just renders the
+        // standalone laser button in the toolbar. Keep it on so the laser tool
+        // is always reachable, not only during a live lesson.
+        isCollaborating
         onChange={handleChange}
-        onPointerUpdate={isRealtime && isHost ? handlePointerUpdate : undefined}
+        onPointerUpdate={isRealtime ? handlePointerUpdate : undefined}
         UIOptions={{
+          // The public type only declares `image`, but the runtime hides any
+          // tool set to `false` and blocks its keyboard shortcut. Laser stays
+          // enabled so its standalone toolbar button keeps working.
           tools: {
             image: true,
-          },
+            diamond: false,
+            ellipse: false,
+            arrow: false,
+            eraser: false,
+            frame: false,
+            embeddable: false,
+          } as { image: boolean },
         }}
       />
     </div>

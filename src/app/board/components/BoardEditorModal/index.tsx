@@ -7,14 +7,16 @@ import {
 } from "@/app/board/constants";
 import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
 import { BoardEditorChrome } from "@/app/board/components/BoardEditorChrome";
+import { BoardParticipantsList } from "@/app/board/components/BoardParticipantsList";
 import { T } from "@/i18n/T";
+import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import {
   Modal,
   ModalBody,
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC, useCallback } from "react";
+import { FC, useCallback, useState } from "react";
 
 type TProps = {
   isOpen: boolean;
@@ -32,7 +34,10 @@ export const BoardEditorModal: FC<TProps> = ({
   isHost = false,
 }) => {
   const boardId = board?.id;
-  const { editor, statusLabel, isEditorReady, editorKey, editorAreaStyle } =
+  const [boardApi, setBoardApi] = useState<ExcalidrawImperativeAPI | null>(
+    null,
+  );
+  const { editor, isEditorReady, editorKey } =
     useBoardEditorChrome({
       boardId,
       mode,
@@ -65,17 +70,25 @@ export const BoardEditorModal: FC<TProps> = ({
     >
       <ModalContent className="h-full max-h-[100dvh] rounded-none flex flex-col">
         <ModalHeader className="px-4 py-3 sm:px-6">
-          <p>{board?.title || <T k="boards.myBoards" />}</p>
+          <div className="flex w-full items-center gap-3">
+            <p className="min-w-0 flex-1 truncate">
+              {board?.title || <T k="boards.myBoards" />}
+            </p>
+            {isHost ? (
+              <div className="flex shrink-0 items-center pr-10">
+                <BoardParticipantsList api={boardApi} cursors={editor.cursors} />
+              </div>
+            ) : null}
+          </div>
         </ModalHeader>
-        <ModalBody className="flex flex-1 min-h-0 flex-col" style={editorAreaStyle}>
+        <ModalBody className="flex flex-1 min-h-0 flex-col">
           {boardId ? (
             <BoardEditorChrome
               boardId={boardId}
               editorKey={editorKey}
               editor={editor}
               isEditorReady={isEditorReady}
-              statusLabel={statusLabel}
-              isHost={isHost}
+              onApiChange={setBoardApi}
             />
           ) : null}
         </ModalBody>

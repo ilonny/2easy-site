@@ -3,7 +3,6 @@
 import {
   CaptureUpdateAction,
   convertToExcalidrawElements,
-  ROUNDNESS,
   viewportCoordsToSceneCoords,
 } from "@excalidraw/excalidraw";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
@@ -11,8 +10,9 @@ import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 export const STICKY_NOTE_WIDTH = 220;
 export const STICKY_NOTE_HEIGHT = 220;
 
-const STICKY_NOTE_BACKGROUND = "#fff3bf";
-const STICKY_NOTE_STROKE = "#f08c00";
+const STICKY_NOTE_BACKGROUND = "#ffec99";
+const STICKY_NOTE_STROKE = "#ffd43b";
+const STICKY_NOTE_TEXT = "#212529";
 
 const createStickyNoteSkeleton = (x: number, y: number) => ({
   type: "rectangle" as const,
@@ -24,10 +24,12 @@ const createStickyNoteSkeleton = (x: number, y: number) => ({
   strokeColor: STICKY_NOTE_STROKE,
   fillStyle: "solid" as const,
   strokeWidth: 1,
-  roundness: { type: ROUNDNESS.ADAPTIVE_RADIUS },
+  roughness: 0,
+  roundness: null,
   label: {
     text: " ",
     fontSize: 20,
+    strokeColor: STICKY_NOTE_TEXT,
     textAlign: "center" as const,
     verticalAlign: "middle" as const,
   },
@@ -55,11 +57,13 @@ const getViewportCenterSceneCoords = (api: ExcalidrawImperativeAPI) => {
   return {
     x: center.x - STICKY_NOTE_WIDTH / 2,
     y: center.y - STICKY_NOTE_HEIGHT / 2,
+    clientX: appState.offsetLeft + width / 2,
+    clientY: appState.offsetTop + height / 2,
   };
 };
 
 export const insertStickyNote = (api: ExcalidrawImperativeAPI) => {
-  const { x, y } = getViewportCenterSceneCoords(api);
+  const { x, y, clientX, clientY } = getViewportCenterSceneCoords(api);
   const newElements = convertToExcalidrawElements(
     [createStickyNoteSkeleton(x, y)],
     { regenerateIds: true },
@@ -75,6 +79,18 @@ export const insertStickyNote = (api: ExcalidrawImperativeAPI) => {
         }
       : undefined,
     captureUpdate: CaptureUpdateAction.IMMEDIATELY,
+  });
+
+  requestAnimationFrame(() => {
+    document.elementFromPoint(clientX, clientY)?.dispatchEvent(
+      new MouseEvent("dblclick", {
+        bubbles: true,
+        cancelable: true,
+        clientX,
+        clientY,
+        view: window,
+      }),
+    );
   });
 };
 

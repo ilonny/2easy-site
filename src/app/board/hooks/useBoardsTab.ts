@@ -69,8 +69,6 @@ export const useBoardsTab = ({
 
   const [createBoardModalIsVisible, setCreateBoardModalIsVisible] =
     useState(false);
-  const [boardEditorOpen, setBoardEditorOpen] = useState(false);
-  const [editorBoard, setEditorBoard] = useState<TBoard | null>(null);
 
   const isBoardsTabActive =
     tabIndex === "userBoards" ||
@@ -134,10 +132,11 @@ export const useBoardsTab = ({
         router.push(`/board/${board.id}`);
         return;
       }
-      setEditorBoard(board);
-      setBoardEditorOpen(true);
+      if (isTeacher) {
+        router.push(`/board/${board.id}?catalog=1`);
+      }
     },
-    [profile?.isStudent, router, studentId],
+    [isTeacher, profile?.isStudent, router, studentId],
   );
 
   const deleteBoardRelation = useCallback(
@@ -169,9 +168,6 @@ export const useBoardsTab = ({
     showBoardsTabButton,
     createBoardModalIsVisible,
     setCreateBoardModalIsVisible,
-    boardEditorOpen,
-    setBoardEditorOpen,
-    editorBoard,
     openCreateBoardModal,
     onCreateBoard,
     onPressBoard,

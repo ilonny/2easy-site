@@ -1,72 +1,53 @@
-.toolButton {
+/* The button and divider are portaled into Excalidraw's `.App-toolbar-container`
+ * (a flex row). Ordering keeps the group after the default tools:
+ * shapes (0) | divider (1) | laser (2) | sticky (3). */
+.divider {
+  order: 1;
+  align-self: center;
+  width: 1px;
+  height: 1.5rem;
+  margin: 0 0.25rem;
+  background-color: var(--default-border-color);
+}
+
+/* Plain action button: it reuses only `.ToolIcon__icon` (for the native button
+ * sizing) and defines a self-contained hover/press state, so it behaves like
+ * the default tools without the persistent radio "selected" highlight, the
+ * active border or the focus ring the `.ToolIcon` classes bring. */
+.stickyTool {
+  order: 3;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border: none;
-  border-radius: 0.5rem;
-  background: #fff3bf;
-  color: #5c4a00;
-  cursor: pointer;
   padding: 0;
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: background-color 0.15s ease;
-  line-height: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
 }
 
-.toolButton:hover:not(:disabled) {
-  background: #ffec99;
+.stickyTool :global(.ToolIcon__icon) {
+  border-radius: var(--border-radius-lg);
 }
 
-.toolButton:active:not(:disabled) {
-  background: #ffe066;
+.stickyTool:hover:not(:disabled) :global(.ToolIcon__icon),
+.stickyTool:active:not(:disabled) :global(.ToolIcon__icon) {
+  background: var(--button-hover-bg);
 }
 
-.toolButton:disabled {
-  opacity: 0.45;
+/* Match the default tools' pressed feedback (`.ToolIcon__icon` is border-box,
+ * so the 1px border does not shift the size). */
+.stickyTool:active:not(:disabled) :global(.ToolIcon__icon) {
+  border: 1px solid var(--button-active-border);
+}
+
+.stickyTool:focus,
+.stickyTool:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.stickyTool:disabled {
   cursor: default;
-}
-
-.toolButton:focus-visible {
-  outline: 2px solid #3f28c6;
-  outline-offset: 1px;
-}
-
-.icon {
-  display: block;
-  width: 1.625rem;
-  height: 1.625rem;
-  flex-shrink: 0;
-}
-
-.wrap {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 6;
-  pointer-events: none;
-}
-
-.wrap > * {
-  pointer-events: auto;
-}
-
-@media screen and (max-width: 450px) {
-  .toolButton {
-    width: 2.25rem;
-    height: 2.25rem;
-  }
-
-  .icon {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-
-  .wrap {
-    top: 0.75rem;
-    right: 0.75rem;
-  }
+  opacity: 0.45;
 }

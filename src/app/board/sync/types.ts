@@ -7,6 +7,7 @@ export type TBoardLoadResult = {
 
 export type TBoardRealtimeCallbacks = {
   onScene?: (payload: { data: TBoardSnapshot; version: number; from?: string }) => void;
+  onParticipants?: (participants: { id: string }[]) => void;
   onSessionStarted?: (sessionId: number) => void;
   onSessionClosed?: () => void;
   onJoined?: (payload: {
@@ -19,6 +20,7 @@ export type TBoardRealtimeCallbacks = {
   onCursor?: (payload: {
     from: string;
     username?: string;
+    isStudent: boolean;
     pointer: {
       x: number;
       y: number;

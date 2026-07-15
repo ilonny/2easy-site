@@ -3,7 +3,6 @@
 import { TBoard } from "@/app/board/types";
 import { BoardsList } from "@/app/board/components/BoardsList";
 import { CreateBoardModalForm } from "@/app/board/components/CreateBoardModalForm";
-import { BoardEditorModal } from "@/app/board/components/BoardEditorModal";
 import { Input } from "@nextui-org/react";
 import Image from "next/image";
 import Loupe from "@/assets/icons/loupe.svg";
@@ -26,9 +25,6 @@ type TProps = {
   createBoardModalIsVisible: boolean;
   setCreateBoardModalIsVisible: (value: boolean) => void;
   onCreateBoard: (boardId: number) => void;
-  boardEditorOpen: boolean;
-  setBoardEditorOpen: (value: boolean) => void;
-  editorBoard: TBoard | null;
   deleteBoardRelation?: (relationId?: number) => void;
 };
 
@@ -48,9 +44,6 @@ export const BoardsTabPanel: FC<TProps> = ({
   createBoardModalIsVisible,
   setCreateBoardModalIsVisible,
   onCreateBoard,
-  boardEditorOpen,
-  setBoardEditorOpen,
-  editorBoard,
   deleteBoardRelation,
 }) => {
   const { t } = useTranslation();
@@ -91,7 +84,6 @@ export const BoardsTabPanel: FC<TProps> = ({
             onPressBoard={onPressBoard}
             getBoards={getBoards}
             showTeacherActions={isTeacher && !studentId}
-            showStartBoardButton={isTeacher && !studentId}
             showStudentCabinetActions={isTeacher && !!studentId}
             deleteBoardRelation={deleteBoardRelation}
           />
@@ -102,11 +94,6 @@ export const BoardsTabPanel: FC<TProps> = ({
         isVisible={createBoardModalIsVisible}
         setIsVisible={setCreateBoardModalIsVisible}
         onSuccess={onCreateBoard}
-      />
-      <BoardEditorModal
-        isOpen={boardEditorOpen}
-        onClose={() => setBoardEditorOpen(false)}
-        board={editorBoard}
       />
     </>
   );

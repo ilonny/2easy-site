@@ -8,6 +8,8 @@ type TUseBoardEditorParams = {
   mode: "solo" | "realtime";
   enabled?: boolean;
   isHost?: boolean;
+  autoStartHostSession?: boolean;
+  closeSessionOnUnmount?: boolean;
 };
 
 export const useBoardEditor = ({
@@ -15,6 +17,8 @@ export const useBoardEditor = ({
   mode,
   enabled = false,
   isHost = false,
+  autoStartHostSession = true,
+  closeSessionOnUnmount = true,
 }: TUseBoardEditorParams) => {
   const isRealtime = mode === "realtime";
   const isSoloActive = enabled && !isRealtime && !!boardId;
@@ -25,6 +29,8 @@ export const useBoardEditor = ({
     boardId: isRealtime ? boardId : undefined,
     enabled: isRealtimeActive,
     isHost,
+    autoStartHostSession,
+    closeSessionOnUnmount,
   });
 
   if (isRealtime) {
@@ -35,7 +41,7 @@ export const useBoardEditor = ({
       board: realtime.board,
       loadError: realtime.loadError,
       contentRevision: realtime.contentRevision,
-      teacherCursor: realtime.teacherCursor,
+      cursors: realtime.cursors,
       isHost,
       queueSave: realtime.queueSave,
       flushSave: realtime.flushSave,
@@ -47,10 +53,10 @@ export const useBoardEditor = ({
     mode: "solo" as const,
     saveStatus: solo.saveStatus,
     initialData: solo.initialData,
-    board: null,
-    loadError: false,
+    board: solo.board,
+    loadError: solo.loadError,
     contentRevision: solo.contentRevision,
-    teacherCursor: null,
+    cursors: [],
     isHost: false,
     queueSave: solo.queueSave,
     flushSave: solo.flushSave,

@@ -15,7 +15,6 @@ import {
 import Image from "next/image";
 import { FC, useState } from "react";
 import { T } from "@/i18n/T";
-import { StartBoardButton } from "../StartBoardButton";
 import styles from "./styles.module.css";
 
 type TProps = {
@@ -25,7 +24,6 @@ type TProps = {
   onPressDelete?: (board: TBoard) => void;
   onPressAttach?: (board: TBoard) => void;
   onPressRemoveFromStudent?: (board: TBoard) => void;
-  showStartBoardButton?: boolean;
   showAttachAction?: boolean;
   showStudentCabinetMenu?: boolean;
 };
@@ -37,7 +35,6 @@ export const BoardCard: FC<TProps> = ({
   onPressDelete,
   onPressAttach,
   onPressRemoveFromStudent,
-  showStartBoardButton = false,
   showAttachAction = false,
   showStudentCabinetMenu = false,
 }) => {
@@ -180,9 +177,6 @@ export const BoardCard: FC<TProps> = ({
             </div>
           )}
         </div>
-        {showStartBoardButton && board.canEdit && (
-          <StartBoardButton board={board} />
-        )}
       </div>
     </div>
   );

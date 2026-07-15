@@ -10,7 +10,9 @@ import {
   snapshotToExcalidrawInitialData,
   type TExcalidrawInitialData,
 } from "../utils/boardSnapshot";
+import { loadBoardDetail } from "../api/loadBoardContent";
 import {
+  TBoard,
   TBoardSaveStatus,
   TBoardSnapshot,
 } from "../types";
@@ -22,6 +24,8 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
   const [initialData, setInitialData] = useState<TExcalidrawInitialData | null>(
     null,
   );
+  const [board, setBoard] = useState<TBoard | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [contentRevision, setContentRevision] = useState(0);
 
   const versionRef = useRef(0);
@@ -51,11 +55,21 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
     if (!boardId) return;
 
     setSaveStatus("loading");
+    setLoadError(false);
     try {
-      const result = await soloBoardSyncAdapter.load(boardId);
-      applyLoadedContent(result.data, result.version);
+      const detail = await loadBoardDetail(boardId);
+      if (!detail) {
+        setLoadError(true);
+        setSaveStatus("error");
+        toast(i18n.t("boards.loadError"), { type: "error" });
+        return;
+      }
+
+      setBoard(detail.board);
+      applyLoadedContent(detail.content.data, detail.content.version);
       setSaveStatus("saved");
     } catch {
+      setLoadError(true);
       setSaveStatus("error");
       toast(i18n.t("boards.loadError"), { type: "error" });
     }
@@ -64,6 +78,8 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
   useEffect(() => {
     if (!isOpen || !boardId) {
       setInitialData(null);
+      setBoard(null);
+      setLoadError(false);
       setSaveStatus("idle");
       resetSyncState();
       return;
@@ -172,6 +188,8 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
   return {
     saveStatus,
     initialData,
+    board,
+    loadError,
     contentRevision,
     queueSave,
     flushSave,

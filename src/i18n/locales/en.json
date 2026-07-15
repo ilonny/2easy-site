@@ -665,7 +665,9 @@
     "loadListError": "Could not load boards list",
     "sessionCreateError": "Could not create board session",
     "sessionCloseError": "Could not close board session",
-    "addStickyNote": "Sticky note"
+    "addStickyNote": "Sticky note",
+    "editingModeBanner": "This is editing mode. To use the board together, click \"Start lesson\" and select a student.",
+    "endBoardLesson": "End lesson"
   },
   "metadata": {
     "title": "2EASY Interactive",

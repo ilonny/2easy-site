@@ -3,7 +3,8 @@
 import dynamic from "next/dynamic";
 import { FC } from "react";
 import { Spinner } from "@nextui-org/react";
-import { TBoardSnapshot, TBoardTeacherCursor } from "../../types";
+import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
+import { TBoardCursor, TBoardSnapshot } from "../../types";
 import { TExcalidrawInitialData } from "../../utils/boardSnapshot";
 import styles from "../BoardEditor/boardEditor.module.css";
 
@@ -33,10 +34,9 @@ type TProps = {
   initialData: TExcalidrawInitialData;
   isEditorReady: boolean;
   syncMode: "solo" | "realtime";
-  isHost?: boolean;
-  teacherCursor?: TBoardTeacherCursor | null;
-  statusLabel: string;
+  cursors?: TBoardCursor[];
   onSceneChange: (snapshot: TBoardSnapshot) => void;
+  onApiChange?: (api: ExcalidrawImperativeAPI | null) => void;
 };
 
 export const BoardEditorShell: FC<TProps> = ({
@@ -46,32 +46,24 @@ export const BoardEditorShell: FC<TProps> = ({
   initialData,
   isEditorReady,
   syncMode,
-  isHost = false,
-  teacherCursor = null,
-  statusLabel,
+  cursors = [],
   onSceneChange,
+  onApiChange,
 }) => (
-  <>
-    <div className={styles.editorArea}>
-      {isEditorReady ? (
-        <BoardExcalidrawEditor
-          key={editorKey}
-          boardId={boardId}
-          contentRevision={contentRevision}
-          initialData={initialData}
-          onSceneChange={onSceneChange}
-          syncMode={syncMode}
-          isHost={isHost}
-          teacherCursor={teacherCursor}
-        />
-      ) : (
-        <BoardEditorSpinner size="lg" />
-      )}
-    </div>
-    {!!statusLabel && (
-      <div className={styles.statusBar}>
-        <span>{statusLabel}</span>
-      </div>
+  <div className={styles.editorArea}>
+    {isEditorReady ? (
+      <BoardExcalidrawEditor
+        key={editorKey}
+        boardId={boardId}
+        contentRevision={contentRevision}
+        initialData={initialData}
+        onSceneChange={onSceneChange}
+        syncMode={syncMode}
+        cursors={cursors}
+        onApiChange={onApiChange}
+      />
+    ) : (
+      <BoardEditorSpinner size="lg" />
     )}
-  </>
+  </div>
 );

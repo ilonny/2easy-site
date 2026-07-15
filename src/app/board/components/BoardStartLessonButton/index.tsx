@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
 import { startBoardSession } from "@/app/board/api/boardSession";
 import { TBoard } from "@/app/board/types";
 import { useCheckSubscription } from "@/app/subscription/helpers";
@@ -11,48 +10,42 @@ import { T } from "@/i18n/T";
 
 type TProps = {
   board: TBoard;
-  className?: string;
+  onLessonStarted: () => void;
 };
 
-export const StartBoardButton: React.FC<TProps> = ({ board, className }) => {
-  const router = useRouter();
+export const BoardStartLessonButton: React.FC<TProps> = ({
+  board,
+  onLessonStarted,
+}) => {
   const { checkSubscription } = useCheckSubscription();
   const [modalVisible, setModalVisible] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
 
-  const navigateToBoard = useCallback(() => {
-    router.push(`/board/${board.id}`);
-  }, [board.id, router]);
-
-  const startSessionAndNavigate = useCallback(async () => {
+  const startLesson = useCallback(async () => {
     setIsStarting(true);
     try {
       await startBoardSession(board.id);
+      onLessonStarted();
     } finally {
       setIsStarting(false);
     }
-    navigateToBoard();
-  }, [board.id, navigateToBoard]);
+  }, [board.id, onLessonStarted]);
 
-  const onPressButton = useCallback(
-    (event: React.MouseEvent) => {
-      event.stopPropagation();
-      if (!checkSubscription()) {
-        return;
-      }
-      setModalVisible(true);
-    },
-    [checkSubscription],
-  );
+  const onPressButton = useCallback(() => {
+    if (!checkSubscription()) {
+      return;
+    }
+    setModalVisible(true);
+  }, [checkSubscription]);
 
   return (
     <>
       <Button
         color="primary"
-        className={className || "w-full"}
-        size="md"
+        size="sm"
+        className="shrink-0"
         isLoading={isStarting}
-        onClick={onPressButton}
+        onPress={onPressButton}
       >
         <T k="boards.startBoardLesson" />
       </Button>
@@ -65,7 +58,7 @@ export const StartBoardButton: React.FC<TProps> = ({ board, className }) => {
         board={board}
         onSuccess={() => {
           setModalVisible(false);
-          void startSessionAndNavigate();
+          void startLesson();
         }}
       />
     </>

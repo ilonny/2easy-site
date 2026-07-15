@@ -20,7 +20,6 @@ type TProps = {
   onPressBoard: (board: TBoard) => void;
   getBoards: () => void;
   showTeacherActions?: boolean;
-  showStartBoardButton?: boolean;
   showStudentCabinetActions?: boolean;
   deleteBoardRelation?: (relationId?: number) => void;
 };
@@ -31,7 +30,6 @@ export const BoardsList: FC<TProps> = ({
   onPressBoard,
   getBoards,
   showTeacherActions = false,
-  showStartBoardButton = false,
   showStudentCabinetActions = false,
   deleteBoardRelation,
 }) => {
@@ -122,7 +120,6 @@ export const BoardsList: FC<TProps> = ({
               showStudentCabinetActions ? onPressRemoveFromStudent : undefined
             }
             showAttachAction={showTeacherActions}
-            showStartBoardButton={showStartBoardButton}
             showStudentCabinetMenu={showStudentCabinetActions}
           />
         ))}

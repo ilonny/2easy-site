@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import { BoardEditorShell } from "../BoardEditorShell";
 import { useBoardEditor } from "../../hooks/useBoardEditor";
 
@@ -11,8 +12,7 @@ type TProps = {
   editorKey: string;
   editor: TEditor;
   isEditorReady: boolean;
-  statusLabel: string;
-  isHost?: boolean;
+  onApiChange?: (api: ExcalidrawImperativeAPI | null) => void;
 };
 
 export const BoardEditorChrome: FC<TProps> = ({
@@ -20,8 +20,7 @@ export const BoardEditorChrome: FC<TProps> = ({
   editorKey,
   editor,
   isEditorReady,
-  statusLabel,
-  isHost = false,
+  onApiChange,
 }) => {
   if (!editor.initialData) {
     return null;
@@ -35,10 +34,9 @@ export const BoardEditorChrome: FC<TProps> = ({
       initialData={editor.initialData}
       isEditorReady={isEditorReady}
       syncMode={editor.mode}
-      isHost={isHost}
-      teacherCursor={editor.teacherCursor}
-      statusLabel={statusLabel}
+      cursors={editor.cursors}
       onSceneChange={editor.queueSave}
+      onApiChange={onApiChange}
     />
   );
 };

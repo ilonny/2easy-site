@@ -11,7 +11,12 @@ export const JivoSite = () => {
     setTimeout(() => {
       const jdiv = document?.getElementsByTagName("jdiv")?.[0] || { style: {} };
 
-      if (path?.includes("/lessons/") || path?.includes("/grammar/")) {
+      if (
+        path?.includes("/lessons/") ||
+        path?.includes("/grammar/") ||
+        path?.includes("/board/") ||
+        path?.includes("/boards/")
+      ) {
         jdiv.style.display = "none";
       } else {
         jdiv.style.display = "block";

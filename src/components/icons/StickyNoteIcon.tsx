@@ -6,7 +6,7 @@ type TProps = {
   className?: string;
 };
 
-/** Single sticky note with pushpin — centered in viewBox */
+/** Note with a folded bottom-right corner (dog-ear) — outline only */
 export const StickyNoteIcon: FC<TProps> = ({ className = "" }) => (
   <svg
     viewBox="0 0 24 24"
@@ -15,31 +15,18 @@ export const StickyNoteIcon: FC<TProps> = ({ className = "" }) => (
     className={className}
     aria-hidden
   >
-    <g transform="translate(0 -1.25) rotate(-12 12 12)">
-      <rect
-        x="6"
-        y="8"
-        width="12"
-        height="12"
-        rx="1.5"
-        fill="#FFEB3B"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <circle
-        cx="12"
-        cy="6.25"
-        r="1.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M11.2 7.55L10.35 8.65"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </g>
+    <path
+      d="M6 4H18A2 2 0 0 1 20 6V14L14 20H6A2 2 0 0 1 4 18V6A2 2 0 0 1 6 4Z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M20 14H14V20"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+      strokeLinecap="round"
+    />
   </svg>
 );

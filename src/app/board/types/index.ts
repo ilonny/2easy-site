@@ -39,9 +39,10 @@ export type TBoardSaveStatus =
 
 export type TLessonBoardScope = "individual" | "group";
 
-export type TBoardTeacherCursor = {
+export type TBoardCursor = {
   id: string;
   username: string;
+  isStudent: boolean;
   x: number;
   y: number;
   tool: "pointer" | "laser";

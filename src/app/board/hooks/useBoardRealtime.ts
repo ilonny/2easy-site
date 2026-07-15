@@ -8,9 +8,9 @@ import { loadBoardDetail } from "../api/loadBoardContent";
 import { BOARD_REALTIME_SAVE_DEBOUNCE_MS } from "../constants";
 import {
   TBoard,
+  TBoardCursor,
   TBoardSaveStatus,
   TBoardSnapshot,
-  TBoardTeacherCursor,
 } from "../types";
 import {
   getBoardSnapshotFingerprint,
@@ -18,18 +18,21 @@ import {
   type TExcalidrawInitialData,
 } from "../utils/boardSnapshot";
 import { multiplayerBoardSyncAdapter } from "../sync/MultiplayerBoardSyncAdapter";
-import { isBoardTeacherParticipantId } from "../utils/boardTeacherCursor";
 
 type TUseBoardRealtimeParams = {
   boardId?: number;
   enabled?: boolean;
   isHost?: boolean;
+  autoStartHostSession?: boolean;
+  closeSessionOnUnmount?: boolean;
 };
 
 export const useBoardRealtime = ({
   boardId,
   enabled = false,
   isHost = false,
+  autoStartHostSession = true,
+  closeSessionOnUnmount = true,
 }: TUseBoardRealtimeParams) => {
   const [saveStatus, setSaveStatus] = useState<TBoardSaveStatus>("idle");
   const [initialData, setInitialData] = useState<TExcalidrawInitialData | null>(
@@ -38,9 +41,7 @@ export const useBoardRealtime = ({
   const [board, setBoard] = useState<TBoard | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [contentRevision, setContentRevision] = useState(0);
-  const [teacherCursor, setTeacherCursor] = useState<TBoardTeacherCursor | null>(
-    null,
-  );
+  const [cursors, setCursors] = useState<TBoardCursor[]>([]);
 
   const versionRef = useRef(0);
   const lastSentFingerprintRef = useRef<string | null>(null);
@@ -49,6 +50,16 @@ export const useBoardRealtime = ({
   const boardIdRef = useRef(boardId);
   const hasInitialSceneRef = useRef(false);
   const sessionClosedRef = useRef(false);
+  const autoStartHostSessionRef = useRef(autoStartHostSession);
+  const closeSessionOnUnmountRef = useRef(closeSessionOnUnmount);
+
+  useEffect(() => {
+    autoStartHostSessionRef.current = autoStartHostSession;
+  }, [autoStartHostSession]);
+
+  useEffect(() => {
+    closeSessionOnUnmountRef.current = closeSessionOnUnmount;
+  }, [closeSessionOnUnmount]);
 
   useEffect(() => {
     isHostRef.current = isHost;
@@ -145,7 +156,7 @@ export const useBoardRealtime = ({
       setBoard(null);
       setLoadError(false);
       setSaveStatus("idle");
-      setTeacherCursor(null);
+      setCursors([]);
       versionRef.current = 0;
       lastSentFingerprintRef.current = null;
       hasInitialSceneRef.current = false;
@@ -187,7 +198,7 @@ export const useBoardRealtime = ({
       }
 
       if (isHostRef.current) {
-        if (!status?.active) {
+        if (!status?.active && autoStartHostSessionRef.current) {
           await startHostSession();
         }
         if (!disposed) {
@@ -229,17 +240,35 @@ export const useBoardRealtime = ({
           setSaveStatus("connected");
           isRemoteUpdateRef.current = false;
         },
-        onCursor: ({ from, username, pointer, button }) => {
-          if (isHostRef.current || !isBoardTeacherParticipantId(from)) {
-            return;
-          }
-          setTeacherCursor({
-            id: from,
-            username: username || "Учитель",
-            x: pointer.x,
-            y: pointer.y,
-            tool: pointer.tool === "laser" ? "laser" : "pointer",
-            button: button === "down" ? "down" : "up",
+        onParticipants: (participants) => {
+          const participantIds = new Set(
+            participants.map((participant) => participant.id),
+          );
+          setCursors((current) =>
+            current.filter((cursor) => participantIds.has(cursor.id)),
+          );
+        },
+        onCursor: ({ from, username, isStudent, pointer, button }) => {
+          setCursors((current) => {
+            const cursor: TBoardCursor = {
+              id: from,
+              username:
+                username || (isStudent ? "Ученик" : "Учитель"),
+              isStudent,
+              x: pointer.x,
+              y: pointer.y,
+              tool: pointer.tool === "laser" ? "laser" : "pointer",
+              button: button === "down" ? "down" : "up",
+            };
+            const existingIndex = current.findIndex(
+              (item) => item.id === from,
+            );
+            if (existingIndex < 0) {
+              return [...current, cursor];
+            }
+            return current.map((item, index) =>
+              index === existingIndex ? cursor : item,
+            );
           });
         },
         onSessionStarted: () => {
@@ -268,6 +297,7 @@ export const useBoardRealtime = ({
       debouncedSendScene.flush();
       multiplayerBoardSyncAdapter.disconnect();
       if (
+        closeSessionOnUnmountRef.current &&
         !sessionClosedRef.current &&
         boardIdRef.current &&
         isHostRef.current
@@ -283,6 +313,8 @@ export const useBoardRealtime = ({
     isHost,
     loadSessionStatus,
     startHostSession,
+    autoStartHostSession,
+    closeSessionOnUnmount,
   ]);
 
   const queueSave = useCallback(
@@ -308,7 +340,7 @@ export const useBoardRealtime = ({
     board,
     loadError,
     contentRevision,
-    teacherCursor,
+    cursors,
     queueSave,
     flushSave,
     leaveSession,

@@ -14,9 +14,13 @@ type TWsMessage = {
   data?: unknown;
   version?: number;
   from?: string;
+  participants?: { id: string }[];
   session_id?: number;
   message?: string;
   pointer?: { x: number; y: number };
+  username?: string;
+  is_student?: boolean;
+  button?: "up" | "down";
 };
 
 export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
@@ -124,6 +128,9 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
             version: Number(message.version || 0),
           });
         }
+        if (message.participants) {
+          this.callbacks.onParticipants?.(message.participants);
+        }
         return;
       case "scene":
         this.callbacks.onScene?.({
@@ -134,7 +141,7 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
         return;
       case "cursor": {
         const from = message.from;
-        if (!from || !from.startsWith("user:")) {
+        if (!from) {
           return;
         }
         const pointer = message.pointer as
@@ -145,12 +152,18 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
         }
         this.callbacks.onCursor?.({
           from,
-          username: typeof message.username === "string" ? message.username : undefined,
+          username: message.username,
+          isStudent: !!message.is_student,
           pointer,
-          button: (message as { button?: "up" | "down" }).button,
+          button: message.button,
         });
         return;
       }
+      case "participants":
+        if (message.participants) {
+          this.callbacks.onParticipants?.(message.participants);
+        }
+        return;
       case "error":
         this.callbacks.onError?.(String(message.message || "Unknown error"));
         return;
