@@ -19,10 +19,12 @@ import {
   snapshotToExcalidrawInitialData,
 } from "../../utils/boardSnapshot";
 import { mergeBoardEditorAppState } from "../../utils/boardEditorDefaults";
-import { attachFitBoardViewportOnLoad } from "../../utils/boardStickyNote";
+import { attachFitBoardViewportOnLoad } from "../../utils/boardViewport";
 import { buildBoardCollaboratorsMap } from "../../utils/boardTeacherCursor";
 import { multiplayerBoardSyncAdapter } from "../../sync/MultiplayerBoardSyncAdapter";
 import { BOARD_CURSOR_THROTTLE_MS } from "../../constants";
+import { useAutoFinalizeLineTool } from "../../hooks/useAutoFinalizeLineTool";
+import { useBoardToolbarContainer } from "../../hooks/useBoardToolbarContainer";
 import { BoardStickyNoteButton } from "../BoardStickyNoteButton";
 import { TBoardCursor, TBoardSnapshot } from "../../types";
 import styles from "./boardEditor.module.css";
@@ -38,6 +40,16 @@ type TProps = {
   cursors?: TBoardCursor[];
   onApiChange?: (api: ExcalidrawImperativeAPI | null) => void;
 };
+
+const BOARD_UI_TOOLS = {
+  image: true,
+  diamond: false,
+  ellipse: false,
+  arrow: false,
+  eraser: false,
+  frame: false,
+  embeddable: false,
+} as { image: boolean };
 
 export const BoardExcalidrawEditor: FC<TProps> = ({
   boardId,
@@ -60,9 +72,12 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
   const editorWrapRef = useRef<HTMLDivElement>(null);
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
-  const [toolbarContainer, setToolbarContainer] = useState<HTMLElement | null>(
-    null,
+
+  const toolbarContainer = useBoardToolbarContainer(
+    excalidrawAPI,
+    editorWrapRef,
   );
+  useAutoFinalizeLineTool(excalidrawAPI, editorWrapRef);
 
   const excalidrawKey = isRealtime
     ? `board-excalidraw-${boardId}`
@@ -106,31 +121,6 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
     onApiChange?.(excalidrawAPI);
     return () => onApiChange?.(null);
   }, [excalidrawAPI, onApiChange]);
-
-  useEffect(() => {
-    if (!excalidrawAPI) {
-      setToolbarContainer(null);
-      return;
-    }
-
-    let frame = 0;
-    let attempts = 0;
-    const findContainer = () => {
-      const container = editorWrapRef.current?.querySelector<HTMLElement>(
-        ".App-toolbar-container",
-      );
-      if (container) {
-        setToolbarContainer(container);
-        return;
-      }
-      if (attempts++ < 30) {
-        frame = requestAnimationFrame(findContainer);
-      }
-    };
-    findContainer();
-
-    return () => cancelAnimationFrame(frame);
-  }, [excalidrawAPI]);
 
   const applyRemoteScene = useCallback(
     (data: TInitialData, revision: number) => {
@@ -295,25 +285,12 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
         excalidrawAPI={handleExcalidrawAPI}
         initialData={excalidrawInitialData}
         gridModeEnabled
-        // Presentational only in this Excalidraw build: it just renders the
-        // standalone laser button in the toolbar. Keep it on so the laser tool
-        // is always reachable, not only during a live lesson.
+        // Presentational only: renders the standalone laser toolbar button.
         isCollaborating
         onChange={handleChange}
         onPointerUpdate={isRealtime ? handlePointerUpdate : undefined}
         UIOptions={{
-          // The public type only declares `image`, but the runtime hides any
-          // tool set to `false` and blocks its keyboard shortcut. Laser stays
-          // enabled so its standalone toolbar button keeps working.
-          tools: {
-            image: true,
-            diamond: false,
-            ellipse: false,
-            arrow: false,
-            eraser: false,
-            frame: false,
-            embeddable: false,
-          } as { image: boolean },
+          tools: BOARD_UI_TOOLS,
         }}
       />
     </div>

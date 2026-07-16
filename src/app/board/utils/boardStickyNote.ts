@@ -3,25 +3,45 @@
 import {
   CaptureUpdateAction,
   convertToExcalidrawElements,
-  viewportCoordsToSceneCoords,
 } from "@excalidraw/excalidraw";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
+import { getViewportCenterSceneCoords } from "./boardExcalidrawCoords";
 
 export const STICKY_NOTE_WIDTH = 220;
 export const STICKY_NOTE_HEIGHT = 220;
 
-const STICKY_NOTE_BACKGROUND = "#ffec99";
-const STICKY_NOTE_STROKE = "#ffd43b";
-const STICKY_NOTE_TEXT = "#212529";
+export type TStickyNoteColor = {
+  background: string;
+  stroke: string;
+};
 
-const createStickyNoteSkeleton = (x: number, y: number) => ({
+/** Miro-like pastel fills with a slightly deeper edge. */
+export const STICKY_NOTE_COLORS: readonly TStickyNoteColor[] = [
+  { background: "#ffec99", stroke: "#ffd43b" },
+  { background: "#ffc9c9", stroke: "#ff8787" },
+  { background: "#ffd8a8", stroke: "#ffa94d" },
+  { background: "#b2f2bb", stroke: "#69db7c" },
+  { background: "#a5d8ff", stroke: "#4dabf7" },
+  { background: "#eebefa", stroke: "#da77f2" },
+  { background: "#e9ecef", stroke: "#adb5bd" },
+  { background: "#ffffff", stroke: "#ced4da" },
+];
+
+const STICKY_NOTE_TEXT_COLOR = "#212529";
+const DEFAULT_STICKY_COLOR = STICKY_NOTE_COLORS[0];
+
+const createStickyNoteSkeleton = (
+  x: number,
+  y: number,
+  color: TStickyNoteColor,
+) => ({
   type: "rectangle" as const,
   x,
   y,
   width: STICKY_NOTE_WIDTH,
   height: STICKY_NOTE_HEIGHT,
-  backgroundColor: STICKY_NOTE_BACKGROUND,
-  strokeColor: STICKY_NOTE_STROKE,
+  backgroundColor: color.background,
+  strokeColor: color.stroke,
   fillStyle: "solid" as const,
   strokeWidth: 1,
   roughness: 0,
@@ -29,133 +49,36 @@ const createStickyNoteSkeleton = (x: number, y: number) => ({
   label: {
     text: " ",
     fontSize: 20,
-    strokeColor: STICKY_NOTE_TEXT,
+    strokeColor: STICKY_NOTE_TEXT_COLOR,
     textAlign: "center" as const,
     verticalAlign: "middle" as const,
   },
 });
 
-const getViewportCenterSceneCoords = (api: ExcalidrawImperativeAPI) => {
-  const appState = api.getAppState();
-  const width = appState.width || 0;
-  const height = appState.height || 0;
-
-  const center = viewportCoordsToSceneCoords(
-    {
-      clientX: appState.offsetLeft + width / 2,
-      clientY: appState.offsetTop + height / 2,
-    },
-    {
-      zoom: appState.zoom,
-      offsetLeft: appState.offsetLeft,
-      offsetTop: appState.offsetTop,
-      scrollX: appState.scrollX,
-      scrollY: appState.scrollY,
-    },
-  );
-
-  return {
-    x: center.x - STICKY_NOTE_WIDTH / 2,
-    y: center.y - STICKY_NOTE_HEIGHT / 2,
-    clientX: appState.offsetLeft + width / 2,
-    clientY: appState.offsetTop + height / 2,
-  };
-};
-
-export const insertStickyNote = (api: ExcalidrawImperativeAPI) => {
-  const { x, y, clientX, clientY } = getViewportCenterSceneCoords(api);
+/** Places a sticky at the viewport center. Double-click afterward to type. */
+export const insertStickyNote = (
+  api: ExcalidrawImperativeAPI,
+  color: TStickyNoteColor = DEFAULT_STICKY_COLOR,
+) => {
+  const center = getViewportCenterSceneCoords(api);
   const newElements = convertToExcalidrawElements(
-    [createStickyNoteSkeleton(x, y)],
+    [
+      createStickyNoteSkeleton(
+        center.x - STICKY_NOTE_WIDTH / 2,
+        center.y - STICKY_NOTE_HEIGHT / 2,
+        color,
+      ),
+    ],
     { regenerateIds: true },
   );
-  const stickyContainer = newElements.find((element) => element.type === "rectangle");
 
   api.updateScene({
     elements: [...api.getSceneElementsIncludingDeleted(), ...newElements],
-    appState: stickyContainer
-      ? {
-          selectedElementIds: { [stickyContainer.id]: true },
-          newElement: null,
-        }
-      : undefined,
+    appState: {
+      selectedElementIds: {},
+      editingTextElement: null,
+      newElement: null,
+    },
     captureUpdate: CaptureUpdateAction.IMMEDIATELY,
   });
-
-  requestAnimationFrame(() => {
-    document.elementFromPoint(clientX, clientY)?.dispatchEvent(
-      new MouseEvent("dblclick", {
-        bubbles: true,
-        cancelable: true,
-        clientX,
-        clientY,
-        view: window,
-      }),
-    );
-  });
-};
-
-export const fitBoardViewport = (api: ExcalidrawImperativeAPI) => {
-  const appState = api.getAppState();
-  const elements = api.getSceneElements();
-
-  if (
-    !elements.length ||
-    !appState.width ||
-    !appState.height ||
-    appState.isLoading
-  ) {
-    return false;
-  }
-
-  api.scrollToContent(elements, {
-    fitToViewport: true,
-    viewportZoomFactor: 0.92,
-    animate: false,
-  });
-  return true;
-};
-
-/**
- * Excalidraw invokes excalidrawAPI before async initialData restore finishes.
- * Wait until the scene is loaded, then fit content into the viewport once.
- */
-export const attachFitBoardViewportOnLoad = (
-  api: ExcalidrawImperativeAPI,
-  shouldFit: () => boolean,
-  onFit: () => void,
-) => {
-  const attemptFit = () => {
-    if (!shouldFit()) {
-      return true;
-    }
-
-    const appState = api.getAppState();
-    const elements = api.getSceneElements();
-    const isSceneReady =
-      !appState.isLoading && appState.width > 0 && appState.height > 0;
-
-    if (!isSceneReady) {
-      return false;
-    }
-
-    onFit();
-
-    if (elements.length > 0) {
-      fitBoardViewport(api);
-    }
-
-    return true;
-  };
-
-  if (attemptFit()) {
-    return () => {};
-  }
-
-  const unsubscribe = api.onChange(() => {
-    if (attemptFit()) {
-      unsubscribe();
-    }
-  });
-
-  return unsubscribe;
 };
