@@ -11,7 +11,8 @@
     "yes": "Yes",
     "no": "No",
     "search": "Search",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "download": "Download"
   },
   "cookieConsent": {
     "message": "By clicking «OK», you consent to the use of cookies in accordance with the <1>Cookie Policy</1>.",

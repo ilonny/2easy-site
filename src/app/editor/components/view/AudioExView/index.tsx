@@ -13,6 +13,8 @@ import Image from "next/image";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { T } from "@/i18n/T";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
+import { useTranslation } from "react-i18next";
 
 /** Inline SVGs so play/pause/volume/loop work when Iconify API is blocked (corporate / CSP). */
 const AP_ICON = {
@@ -82,7 +84,41 @@ const AP_ICON = {
       <path d="M2.81 2.81L1.39 4.22 5.17 8H5v6h2V9.83l3.16 3.16-1.41 1.41L7 11l-4 4 4 4 1.41-1.41L3.83 13H7v4h10v-1.17l3.78 3.78 1.41-1.41L2.81 2.81zM19 10v2.17l2 2V10h-2zM7 4V2h10v6h-2V4H7z" />
     </svg>
   ),
+  download: (
+    <svg
+      viewBox="0 0 24 24"
+      width="26"
+      height="26"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M12 3a1 1 0 011 1v9.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L11 13.586V4a1 1 0 011-1z" />
+      <path d="M5 18a1 1 0 011-1h12a1 1 0 110 2H6a1 1 0 01-1-1z" />
+    </svg>
+  ),
 } as const;
+
+const triggerBlobDownload = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
+const ensureAudioFilename = (name: string, mime?: string) => {
+  if (/\.\w+$/.test(name)) return name;
+  const ext = mime?.includes("wav")
+    ? "wav"
+    : mime?.includes("m4a") || mime?.includes("mp4")
+      ? "m4a"
+      : "mp3";
+  return `${name || "audio"}.${ext}`;
+};
 
 type TProps = {
   data: TAudioData;
@@ -104,6 +140,8 @@ const stripAudioElements = (html?: string) => {
 };
 
 export const AudioExView: FC<TProps> = ({ data }) => {
+  const { t } = useTranslation();
+  const downloadLabel = t("common.download", { defaultValue: "Скачать" });
   const image = data?.images?.[0];
 
   const attachment = data?.editorImages?.[0];
@@ -147,6 +185,48 @@ export const AudioExView: FC<TProps> = ({ data }) => {
       : data.description;
 
   const [scriptIsVisible, setScriptIsVisible] = useState(false);
+
+  const handleDownloadAudio = async () => {
+    if (!audioSrc) return;
+
+    const baseName =
+      (pickedFile instanceof File && pickedFile.name) ||
+      audioFileName ||
+      "audio";
+
+    try {
+      let blob: Blob;
+      if (pickedFile instanceof Blob) {
+        blob = pickedFile;
+      } else {
+        const response = await fetch(audioSrc);
+        if (!response.ok) throw new Error("fetch failed");
+        blob = await response.blob();
+      }
+      triggerBlobDownload(blob, ensureAudioFilename(baseName, blob.type));
+      return;
+    } catch {
+      /* CORS / network — fall through to same-origin proxy */
+    }
+
+    if (/^https?:\/\//i.test(audioSrc)) {
+      const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(audioSrc)}&filename=${encodeURIComponent(ensureAudioFilename(baseName))}`;
+      try {
+        const response = await fetch(proxyUrl);
+        if (!response.ok) throw new Error("proxy failed");
+        const blob = await response.blob();
+        triggerBlobDownload(blob, ensureAudioFilename(baseName, blob.type));
+      } catch {
+        const a = document.createElement("a");
+        a.href = proxyUrl;
+        a.download = ensureAudioFilename(baseName);
+        a.rel = "noopener";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    }
+  };
 
   const playerRef = useRef<InstanceType<typeof AudioPlayer> | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -241,14 +321,26 @@ export const AudioExView: FC<TProps> = ({ data }) => {
         {!!audioSrc && (
           <div className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10 mx-auto w-full min-w-0">
             <Card radius="md" className="p-3 sm:p-4 box-border min-w-0">
-              <p
-                className="text-center"
-                style={{ fontWeight: 500, color: "#3F28C6" }}
-              >
-                {data.audioTitle || audioFileName || (
-                  <T k="templates.audio" defaultText="Аудио" />
-                )}
-              </p>
+              <div className="relative flex items-center justify-center min-h-[28px] px-8">
+                <p
+                  className="text-center"
+                  style={{ fontWeight: 500, color: "#3F28C6" }}
+                >
+                  {data.audioTitle || audioFileName || (
+                    <T k="templates.audio" defaultText="Аудио" />
+                  )}
+                </p>
+                <ResponsiveTooltip content={downloadLabel} placement="top">
+                  <button
+                    type="button"
+                    onClick={handleDownloadAudio}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center justify-center text-[#3F28C6] hover:opacity-80 transition-opacity"
+                    aria-label={downloadLabel}
+                  >
+                    {AP_ICON.download}
+                  </button>
+                </ResponsiveTooltip>
+              </div>
               <div ref={wrapperRef} className={`audio-wrapper my-4`}>
                 <AudioPlayer
                   ref={playerRef}
