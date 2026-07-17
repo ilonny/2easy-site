@@ -6,19 +6,15 @@ import {
   Image,
   Input,
   Link,
-  Tab,
-  Tabs,
 } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { SibscribeContext } from "@/subscribe/context";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { checkResponse, fetchGet } from "@/api";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { StudentList } from "@/app/student/components/StudentList";
 import Loupe from "@/assets/icons/loupe.svg";
-import { useLessons } from "@/app/lessons/hooks/useLessons";
 import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
@@ -27,9 +23,12 @@ export default function StudentAccountPage() {
   withLogin();
   const [searchString, setSearchString] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const studentId = useParams()?.id;
+  const isBoardsTab = searchParams.get("tab") === "boards";
+  const isCoursesTab = searchParams.get("tab") === "courses";
+  const activeTab = searchParams.get("tab") || "lessons";
 
-  const { subscription } = useContext(SibscribeContext);
   const { profile, authIsLoading } = useContext(AuthContext);
 
   const [studentInfo, setStudentInfo] = useState();
@@ -53,6 +52,10 @@ export default function StudentAccountPage() {
   useEffect(() => {
     fetchStudentInfo();
   }, [studentId, fetchStudentInfo]);
+
+  useEffect(() => {
+    setSearchString("");
+  }, [activeTab]);
 
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
@@ -120,7 +123,13 @@ export default function StudentAccountPage() {
             <Input
               value={searchString}
               onValueChange={setSearchString}
-              placeholder={i18n.t("lessons.searchLessons")}
+              placeholder={
+                isBoardsTab
+                  ? i18n.t("boards.searchBoards")
+                  : isCoursesTab
+                    ? i18n.t("lessons.searchCourses")
+                    : i18n.t("lessons.searchLessons")
+              }
               size="lg"
               classNames={{ inputWrapper: "bg-white hove min-w-0" }}
               startContent={
