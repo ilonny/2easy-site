@@ -13,6 +13,7 @@ import MenuIcon from "@/assets/icons/menu.svg";
 import { SideBar } from "../SIdeBar";
 import { LanguageSwitcher } from "../LanguageSwitcher";
 import { T } from "@/i18n/T";
+import { BOARD_LESSON_PAGE_LEGACY_PATH_PREFIX, BOARD_LESSON_PAGE_PATH_PREFIX } from "@/app/board/constants";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -27,7 +28,9 @@ export const Header = () => {
       "/taboo_a1_a2",
       "/taboo_b1_b2",
       "/taboo_b1_b2_slang",
-    ].includes(pathname)
+    ].includes(pathname) ||
+    pathname?.startsWith(BOARD_LESSON_PAGE_PATH_PREFIX) ||
+    pathname?.startsWith(BOARD_LESSON_PAGE_LEGACY_PATH_PREFIX)
   ) {
     return null;
   }

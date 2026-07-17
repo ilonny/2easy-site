@@ -1,0 +1,77 @@
+.editorArea {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.editorWrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 0;
+  background: #fff;
+}
+
+.editorLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.editorWrap :global(.main-menu-trigger) {
+  display: none !important;
+}
+
+.editorWrap :global(.sidebar-trigger__label-element:has(.default-sidebar-trigger)),
+.editorWrap :global(.default-sidebar-trigger) {
+  display: none !important;
+}
+
+.editorWrap :global(.UserList) {
+  display: none !important;
+}
+
+/* Compact toolbar: keep only selection, hand, rectangle, line, pen, text, image.
+ * The laser pointer stays reachable as the standalone button Excalidraw renders
+ * next to the toolbar, so the whole "more tools" menu (frames, embeds, mermaid,
+ * AI) is hidden. */
+.editorWrap :global(.ToolIcon__lock),
+.editorWrap :global(.App-toolbar__divider),
+.editorWrap :global(.App-toolbar__extra-tools-trigger),
+.editorWrap :global(.help-icon) {
+  display: none !important;
+}
+
+/* Merge the standalone collaboration laser button into the toolbar so it reads
+ * as one continuous panel: the container carries the island chrome and the
+ * inner islands become transparent, gapless segments. */
+.editorWrap :global(.App-toolbar-container) {
+  gap: 0;
+  background-color: var(--island-bg-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-island);
+  /* Mirror the 8px content padding the default tools carry on the left so the
+   * trailing sticky button keeps the same breathing room from the panel edge. */
+  padding-right: 0.5rem;
+}
+
+.editorWrap :global(.App-toolbar-container > .Island) {
+  margin-left: 0 !important;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* Keep the panel segments in a stable visual order regardless of the DOM order
+ * the portaled sticky button lands in:
+ * shapes (0) | divider (1) | laser (2) | sticky (3). */
+.editorWrap :global(.App-toolbar-container > .App-toolbar) {
+  order: 0;
+}
+
+.editorWrap :global(.App-toolbar-container > .Island:not(.App-toolbar)) {
+  order: 2;
+}

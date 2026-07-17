@@ -2,20 +2,14 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import {
-  BreadcrumbItem,
-  Breadcrumbs,
   Button,
   Card,
   Image,
-  Input,
   Link,
   Modal,
   ModalBody,
   ModalContent,
   ModalHeader,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
   Switch,
 } from "@nextui-org/react";
 import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
@@ -24,12 +18,9 @@ import { AuthContext } from "@/auth";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { SibscribeContext } from "@/subscribe/context";
 import { withLogin } from "@/auth/hooks/withLogin";
-import { BASE_URL, checkResponse, fetchGet, fetchPostJson } from "@/api";
+import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useParams, useRouter } from "next/navigation";
-import { StudentList } from "@/app/student/components/StudentList";
-import Loupe from "@/assets/icons/loupe.svg";
 import { useLessons } from "@/app/lessons/hooks/useLessons";
-import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 import { ExList } from "@/app/editor/components/view/ExList";
 import { useExList } from "@/app/editor/hooks/useExList";
 import Zoom from "react-medium-image-zoom";
@@ -66,6 +57,7 @@ import {
   LessonDictionaryHandle,
   LessonDictionaryLayer,
 } from "@/app/dictionary/components/LessonDictionaryLayer";
+import { LessonBoardButton } from "@/app/board/components/LessonBoardButton";
 
 const VIEW_NOOP = () => {};
 const VIEW_ASYNC_NOOP = async () => {};
@@ -92,7 +84,11 @@ export default function LessonPage() {
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const [dictionaryOnboardingOpen, setDictionaryOnboardingOpen] = useState(false);
+  const [boardModalOpen, setBoardModalOpen] = useState(false);
   const dictionaryRef = useRef<LessonDictionaryHandle>(null);
+  const boardModalOpenRef = useRef(false);
+
+  boardModalOpenRef.current = boardModalOpen;
 
   const handleAddWordSelection = useCallback(
     (selection: string) => {
@@ -116,6 +112,14 @@ export default function LessonPage() {
       dictionaryRef.current?.openDictionary(Number(profile.studentId));
     }
   }, [profile?.studentId]);
+
+  const lessonBoardStudentId = isStudent
+    ? Number(profile?.studentId || 0) || undefined
+    : students?.length === 1
+      ? Number(students[0]?.student_id || 0) || undefined
+      : activeStudentId
+        ? Number(activeStudentId)
+        : undefined;
 
   const getCurrentExerciseIdInView = useCallback(() => {
     if (typeof document === "undefined" || typeof window === "undefined") {
@@ -197,7 +201,7 @@ export default function LessonPage() {
     if (!lessonId) return;
 
     const interval = setInterval(async () => {
-      if (!active) return;
+      if (!active || boardModalOpenRef.current) return;
       try {
         const res = await fetchGet({
           path: `/lesson-focus?lesson_id=${lessonId}`,
@@ -228,7 +232,12 @@ export default function LessonPage() {
     }
     let canGetList = true;
     const getList = async () => {
-      if (!canGetList) {
+      if (!canGetList || boardModalOpenRef.current) {
+        if (canGetList) {
+          setTimeout(() => {
+            getList();
+          }, 1000);
+        }
         return;
       }
       const res = await fetchGet({
@@ -617,6 +626,12 @@ export default function LessonPage() {
             {isStudent && profile?.studentId && (
               <LessonDictionaryButton onClick={handleOpenStudentDictionary} />
             )}
+            <LessonBoardButton
+              lessonId={Number(params.id) || lesson?.id || 0}
+              isTeacher={isTeacher}
+              studentIdForBoard={lessonBoardStudentId}
+              onOpenChange={setBoardModalOpen}
+            />
             <VideoCall lessonId={params.id as string} />
             <Chat
               students={students as any}
