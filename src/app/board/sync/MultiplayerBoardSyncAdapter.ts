@@ -3,7 +3,7 @@
 import { getBoardWsUrl } from "../api/boardWs";
 import { BOARD_REALTIME_PING_MS } from "../constants";
 import { normalizeBoardSnapshot } from "../utils/boardSnapshot";
-import { TBoardSnapshot } from "../types";
+import { TBoardParticipant, TBoardSnapshot } from "../types";
 import {
   IBoardRealtimeAdapter,
   TBoardRealtimeCallbacks,
@@ -14,13 +14,36 @@ type TWsMessage = {
   data?: unknown;
   version?: number;
   from?: string;
-  participants?: { id: string }[];
+  participants?: Array<{
+    id: string;
+    isStudent?: boolean;
+    is_student?: boolean;
+    displayName?: string;
+    display_name?: string;
+  }>;
   session_id?: number;
   message?: string;
   pointer?: { x: number; y: number };
   username?: string;
   is_student?: boolean;
   button?: "up" | "down";
+};
+
+const normalizeParticipants = (
+  participants: TWsMessage["participants"],
+): TBoardParticipant[] => {
+  if (!participants?.length) {
+    return [];
+  }
+
+  return participants.map((participant) => ({
+    id: participant.id,
+    isStudent: !!(participant.isStudent ?? participant.is_student),
+    username:
+      participant.displayName ||
+      participant.display_name ||
+      (participant.isStudent ?? participant.is_student ? "Ученик" : "Учитель"),
+  }));
 };
 
 export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
@@ -129,7 +152,9 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
           });
         }
         if (message.participants) {
-          this.callbacks.onParticipants?.(message.participants);
+          this.callbacks.onParticipants?.(
+            normalizeParticipants(message.participants),
+          );
         }
         return;
       case "scene":
@@ -161,7 +186,9 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
       }
       case "participants":
         if (message.participants) {
-          this.callbacks.onParticipants?.(message.participants);
+          this.callbacks.onParticipants?.(
+            normalizeParticipants(message.participants),
+          );
         }
         return;
       case "error":

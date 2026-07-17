@@ -668,7 +668,9 @@
     "sessionCloseError": "Не удалось закрыть сессию доски",
     "addStickyNote": "Стикер",
     "editingModeBanner": "Это режим редактирования. Чтобы совместно использовать доску, нажмите «Начать урок» и выберите ученика.",
-    "endBoardLesson": "Завершить урок"
+    "endBoardLesson": "Завершить урок",
+    "teacher": "Учитель",
+    "followTeacher": "Перейти к курсору учителя"
   },
   "metadata": {
     "title": "2EASY Interactive",

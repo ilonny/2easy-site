@@ -9,6 +9,7 @@ import { BOARD_REALTIME_SAVE_DEBOUNCE_MS } from "../constants";
 import {
   TBoard,
   TBoardCursor,
+  TBoardParticipant,
   TBoardSaveStatus,
   TBoardSnapshot,
 } from "../types";
@@ -42,6 +43,7 @@ export const useBoardRealtime = ({
   const [loadError, setLoadError] = useState(false);
   const [contentRevision, setContentRevision] = useState(0);
   const [cursors, setCursors] = useState<TBoardCursor[]>([]);
+  const [participants, setParticipants] = useState<TBoardParticipant[]>([]);
 
   const versionRef = useRef(0);
   const lastSentFingerprintRef = useRef<string | null>(null);
@@ -157,6 +159,7 @@ export const useBoardRealtime = ({
       setLoadError(false);
       setSaveStatus("idle");
       setCursors([]);
+      setParticipants([]);
       versionRef.current = 0;
       lastSentFingerprintRef.current = null;
       hasInitialSceneRef.current = false;
@@ -240,9 +243,10 @@ export const useBoardRealtime = ({
           setSaveStatus("connected");
           isRemoteUpdateRef.current = false;
         },
-        onParticipants: (participants) => {
+        onParticipants: (nextParticipants) => {
+          setParticipants(nextParticipants);
           const participantIds = new Set(
-            participants.map((participant) => participant.id),
+            nextParticipants.map((participant) => participant.id),
           );
           setCursors((current) =>
             current.filter((cursor) => participantIds.has(cursor.id)),
@@ -341,6 +345,7 @@ export const useBoardRealtime = ({
     loadError,
     contentRevision,
     cursors,
+    participants,
     queueSave,
     flushSave,
     leaveSession,

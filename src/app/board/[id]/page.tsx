@@ -111,8 +111,13 @@ export default function BoardRealtimePage() {
           ) : null}
         </div>
         <div className="flex shrink-0 items-center pr-10">
-          {isTeacher ? (
-            <BoardParticipantsList api={boardApi} cursors={editor.cursors} />
+          {!isEditMode ? (
+            <BoardParticipantsList
+              api={boardApi}
+              participants={editor.participants}
+              cursors={editor.cursors}
+              variant={isTeacher ? "teacher" : "student"}
+            />
           ) : null}
         </div>
         <BoardCloseButton variant="header" onClick={handleClose} />

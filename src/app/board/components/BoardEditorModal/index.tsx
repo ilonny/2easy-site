@@ -74,9 +74,14 @@ export const BoardEditorModal: FC<TProps> = ({
             <p className="min-w-0 flex-1 truncate">
               {board?.title || <T k="boards.myBoards" />}
             </p>
-            {isHost ? (
+            {mode === "realtime" ? (
               <div className="flex shrink-0 items-center pr-10">
-                <BoardParticipantsList api={boardApi} cursors={editor.cursors} />
+                <BoardParticipantsList
+                  api={boardApi}
+                  participants={editor.participants}
+                  cursors={editor.cursors}
+                  variant={isHost ? "teacher" : "student"}
+                />
               </div>
             ) : null}
           </div>

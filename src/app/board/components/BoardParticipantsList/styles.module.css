@@ -1,6 +1,30 @@
 .wrap {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+}
+
+.teacherBlock {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.teacherBlockDivider {
+  padding-right: 0.5rem;
+  border-right: 1px solid #e4e4e7;
+}
+
+.teacherLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #2563eb;
+  white-space: nowrap;
+}
+
+.studentsGroup {
+  display: flex;
+  align-items: center;
 }
 
 .avatar {
@@ -25,7 +49,7 @@
   margin-left: -0.5rem;
 }
 
-.avatar:hover {
+.avatar:hover:not(:disabled) {
   transform: translateY(-1px) scale(1.06);
   z-index: 1;
 }
@@ -33,6 +57,14 @@
 .avatar:focus-visible {
   outline: 2px solid #3f28c6;
   outline-offset: 1px;
+}
+
+.avatarInactive {
+  cursor: default;
+}
+
+.avatarInactive:hover {
+  transform: none;
 }
 
 .more {
@@ -64,8 +96,13 @@
   text-align: left;
 }
 
-.overflowItem:hover {
+.overflowItem:hover:not(:disabled) {
   background: #f4f4f5;
+}
+
+.overflowItem:disabled {
+  cursor: default;
+  opacity: 0.55;
 }
 
 .dot {

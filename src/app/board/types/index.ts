@@ -49,6 +49,12 @@ export type TBoardCursor = {
   button: "up" | "down";
 };
 
+export type TBoardParticipant = {
+  id: string;
+  username: string;
+  isStudent: boolean;
+};
+
 export type TBoardSnapshot = {
   format: "excalidraw";
   elements: readonly unknown[];

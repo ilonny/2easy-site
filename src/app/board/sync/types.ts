@@ -1,4 +1,4 @@
-import { TBoardSnapshot } from "../types";
+import { TBoardParticipant, TBoardSnapshot } from "../types";
 
 export type TBoardLoadResult = {
   data: TBoardSnapshot;
@@ -7,7 +7,7 @@ export type TBoardLoadResult = {
 
 export type TBoardRealtimeCallbacks = {
   onScene?: (payload: { data: TBoardSnapshot; version: number; from?: string }) => void;
-  onParticipants?: (participants: { id: string }[]) => void;
+  onParticipants?: (participants: TBoardParticipant[]) => void;
   onSessionStarted?: (sessionId: number) => void;
   onSessionClosed?: () => void;
   onJoined?: (payload: {
