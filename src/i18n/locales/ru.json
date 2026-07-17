@@ -11,6 +11,7 @@
     "yes": "Да",
     "no": "Нет",
     "search": "Поиск",
+    "nothingFound": "Ничего не найдено",
     "confirm": "Подтвердить",
     "download": "Скачать"
   },
@@ -254,6 +255,7 @@
     "lessons2Easy": "Уроки 2EASY",
     "courses2Easy": "Курсы 2EASY",
     "searchLessons": "Поиск уроков",
+    "searchCourses": "Поиск курсов",
     "lessonStatusCourse": "Статус курса:",
     "lessonStatusLesson": "Статус урока:",
     "copyLesson": "Копировать урок",
@@ -650,6 +652,8 @@
   },
   "boards": {
     "myBoards": "Мои доски",
+    "boardsTab": "Доски",
+    "noBoards": "Пока нет досок.",
     "createBoard": "Создать доску",
     "newBoard": "Новая доска",
     "editBoard": "Редактировать доску",
@@ -684,6 +688,7 @@
     "addStickyNote": "Стикер",
     "editingModeBanner": "Это режим редактирования. Чтобы совместно использовать доску, нажмите «Начать урок» и выберите ученика.",
     "endBoardLesson": "Завершить урок",
+    "backToEdit": "← Вернуться к редактированию",
     "teacher": "Учитель",
     "followTeacher": "Перейти к курсору учителя"
   },

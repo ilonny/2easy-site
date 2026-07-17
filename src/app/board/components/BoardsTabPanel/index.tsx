@@ -3,11 +3,7 @@
 import { TBoard } from "@/app/board/types";
 import { BoardsList } from "@/app/board/components/BoardsList";
 import { CreateBoardModalForm } from "@/app/board/components/CreateBoardModalForm";
-import { Input } from "@nextui-org/react";
-import Image from "next/image";
-import Loupe from "@/assets/icons/loupe.svg";
 import { FC } from "react";
-import { useTranslation } from "react-i18next";
 
 type TProps = {
   boards: TBoard[];
@@ -16,11 +12,9 @@ type TProps = {
   hasCurrentCourse: boolean;
   studentId?: string;
   isTeacher: boolean;
-  filterSearchString: string;
-  onFilterSearchChange: (value: string) => void;
-  showStudentSearch: boolean;
   onPressCreate: () => void;
   onPressBoard: (board: TBoard) => void;
+  onStartBoardLesson?: (board: TBoard) => void;
   getBoards: () => Promise<TBoard[] | unknown[]>;
   createBoardModalIsVisible: boolean;
   setCreateBoardModalIsVisible: (value: boolean) => void;
@@ -35,59 +29,30 @@ export const BoardsTabPanel: FC<TProps> = ({
   hasCurrentCourse,
   studentId,
   isTeacher,
-  filterSearchString,
-  onFilterSearchChange,
-  showStudentSearch,
   onPressCreate,
   onPressBoard,
+  onStartBoardLesson,
   getBoards,
   createBoardModalIsVisible,
   setCreateBoardModalIsVisible,
   onCreateBoard,
   deleteBoardRelation,
 }) => {
-  const { t } = useTranslation();
-
   const showPanelContent = isActive && !hasCurrentCourse && !isLoading;
 
   return (
     <>
       {showPanelContent ? (
-        <>
-          {showStudentSearch ? (
-            <>
-              <div className="w-full max-w-[525px] m-auto min-w-0 px-0">
-                <Input
-                  value={filterSearchString}
-                  onValueChange={onFilterSearchChange}
-                  placeholder={t("boards.searchBoards")}
-                  size="lg"
-                  classNames={{ inputWrapper: "bg-white hove min-w-0" }}
-                  startContent={
-                    <Image
-                      src={Loupe.src}
-                      alt="search"
-                      width={18}
-                      height={18}
-                      style={{ borderRadius: 0 }}
-                    />
-                  }
-                />
-              </div>
-              <div className="h-10" />
-            </>
-          ) : null}
-
-          <BoardsList
-            boards={boards}
-            onPressCreate={isTeacher && !studentId ? onPressCreate : () => {}}
-            onPressBoard={onPressBoard}
-            getBoards={getBoards}
-            showTeacherActions={isTeacher && !studentId}
-            showStudentCabinetActions={isTeacher && !!studentId}
-            deleteBoardRelation={deleteBoardRelation}
-          />
-        </>
+        <BoardsList
+          boards={boards}
+          onPressCreate={isTeacher && !studentId ? onPressCreate : () => {}}
+          onPressBoard={onPressBoard}
+          onStartBoardLesson={onStartBoardLesson}
+          getBoards={getBoards}
+          showTeacherActions={isTeacher && !studentId}
+          showStudentCabinetActions={isTeacher && !!studentId}
+          deleteBoardRelation={deleteBoardRelation}
+        />
       ) : null}
 
       <CreateBoardModalForm

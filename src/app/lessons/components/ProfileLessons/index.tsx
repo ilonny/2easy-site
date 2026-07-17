@@ -137,6 +137,7 @@ export const ProfileLessons = (props: TProps) => {
     openCreateBoardModal,
     onCreateBoard,
     onPressBoard,
+    onStartBoardLesson,
     deleteBoardRelation,
   } = useBoardsTab({
     studentId,
@@ -145,7 +146,7 @@ export const ProfileLessons = (props: TProps) => {
     setTabIndex,
     studentTabIndex,
     setStudentTabIndex,
-    filterSearchString,
+    filterSearchString: studentId ? (searchString || "") : filterSearchString,
   });
 
   const [internalDictionaryModalOpen, setInternalDictionaryModalOpen] =
@@ -167,7 +168,12 @@ export const ProfileLessons = (props: TProps) => {
     getCourseLessons,
     changeCourseStatus,
     deleteCourseRelation,
-  } = useLessons(studentId, searchString, !!profile?.name, includeCourseLessons);
+  } = useLessons(
+    studentId,
+    studentId && studentTabIndex !== "lessons" ? "" : searchString,
+    !!profile?.name,
+    includeCourseLessons,
+  );
 
   const { t, i18n } = useTranslation();
   const data = useMemo(() => {
@@ -339,6 +345,9 @@ export const ProfileLessons = (props: TProps) => {
       activeFilterTab.trim().toLowerCase() === "tutorial"
         ? "tutorial-en"
         : activeFilterTab;
+    const effectiveSearch = studentId
+      ? searchString || ""
+      : filterSearchString;
 
     if (effectiveFilterTab !== "All lessons") {
       res = res.filter((lesson: TLesson) => {
@@ -370,18 +379,13 @@ export const ProfileLessons = (props: TProps) => {
         return false;
       });
     }
-    if (filterSearchString) {
+    if (effectiveSearch) {
+      const query = effectiveSearch.toLowerCase();
       res = res.filter((lesson: TLesson) => {
         if (
-          lesson.title
-            ?.toLowerCase()
-            ?.includes(filterSearchString?.toLowerCase()) ||
-          lesson.description
-            ?.toLowerCase()
-            ?.includes(filterSearchString?.toLowerCase()) ||
-          lesson.tags
-            ?.toLowerCase()
-            ?.includes(filterSearchString?.toLowerCase())
+          lesson.title?.toLowerCase()?.includes(query) ||
+          lesson.description?.toLowerCase()?.includes(query) ||
+          lesson.tags?.toLowerCase()?.includes(query)
         ) {
           return true;
         }
@@ -409,6 +413,8 @@ export const ProfileLessons = (props: TProps) => {
     lessonsToRender,
     activeFilterTab,
     filterSearchString,
+    searchString,
+    studentId,
     isFreeTariff,
     isStudent,
     hasHomeworkTag,
@@ -580,7 +586,9 @@ export const ProfileLessons = (props: TProps) => {
               placeholder={
                 tabIndex === "userBoards"
                   ? t("boards.searchBoards")
-                  : t("lessons.searchLessons")
+                  : tabIndex === "userCourses" || tabIndex === "2easyCourses"
+                    ? t("lessons.searchCourses")
+                    : t("lessons.searchLessons")
               }
               size="lg"
               classNames={{ inputWrapper: "bg-white hove min-w-0" }}
@@ -631,7 +639,7 @@ export const ProfileLessons = (props: TProps) => {
                   router.push(`/student-account/${studentId}?tab=boards`);
                 }}
               >
-                <T k="boards.myBoards" />
+                <T k="boards.boardsTab" />
               </Button>
             )}
             <Button
@@ -682,24 +690,60 @@ export const ProfileLessons = (props: TProps) => {
         !filteredLessons.length &&
         !lessonsListIslLoading && (
         <ProfileEmptyLessons
-          title={studentId ? <T k="lessons.noLessonsShort" /> : data.title}
-          hideButton={!!studentId}
+          title={
+            (studentId ? searchString : filterSearchString)?.trim() ? (
+              <T k="common.nothingFound" />
+            ) : studentId ? (
+              <T k="lessons.noLessonsShort" />
+            ) : (
+              data.title
+            )
+          }
+          hideButton={
+            !!studentId ||
+            !!(studentId ? searchString : filterSearchString)?.trim()
+          }
           buttonTitle={data.buttonTitle}
           onButtonPress={data.onButtonPress}
         />
       )}
+      {isBoardsTabActive &&
+        !boardsIsLoading &&
+        !filteredBoards.length &&
+        !currentCourse &&
+        (!!studentId ||
+          !!(studentId ? searchString : filterSearchString)?.trim()) && (
+          <ProfileEmptyLessons
+            title={
+              (studentId ? searchString : filterSearchString)?.trim() ? (
+                <T k="common.nothingFound" />
+              ) : (
+                <T k="boards.noBoards" />
+              )
+            }
+            hideButton
+            buttonTitle=""
+            onButtonPress={() => {}}
+          />
+        )}
       <BoardsTabPanel
         boards={filteredBoards}
         isLoading={boardsIsLoading}
-        isActive={isBoardsTabActive}
+        isActive={
+          isBoardsTabActive &&
+          (filteredBoards.length > 0 ||
+            (isTeacher &&
+              !studentId &&
+              !(studentId ? searchString : filterSearchString)?.trim()))
+        }
         hasCurrentCourse={!!currentCourse}
         studentId={studentId}
         isTeacher={isTeacher}
-        filterSearchString={filterSearchString}
-        onFilterSearchChange={setFilterSearchString}
-        showStudentSearch={!!studentId && studentTabIndex === "boards"}
         onPressCreate={openCreateBoardModal}
         onPressBoard={onPressBoard}
+        onStartBoardLesson={
+          studentId && isTeacher ? onStartBoardLesson : undefined
+        }
         getBoards={getBoards}
         createBoardModalIsVisible={createBoardModalIsVisible}
         setCreateBoardModalIsVisible={setCreateBoardModalIsVisible}

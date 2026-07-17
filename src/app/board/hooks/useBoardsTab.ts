@@ -128,7 +128,7 @@ export const useBoardsTab = ({
 
   const onPressBoard = useCallback(
     (board: TBoard) => {
-      if (studentId || profile?.isStudent) {
+      if (profile?.isStudent) {
         router.push(`/board/${board.id}`);
         return;
       }
@@ -136,7 +136,17 @@ export const useBoardsTab = ({
         router.push(`/board/${board.id}?catalog=1`);
       }
     },
-    [isTeacher, profile?.isStudent, router, studentId],
+    [isTeacher, profile?.isStudent, router],
+  );
+
+  const onStartBoardLesson = useCallback(
+    (board: TBoard) => {
+      if (!checkSubscription()) {
+        return;
+      }
+      router.push(`/board/${board.id}`);
+    },
+    [checkSubscription, router],
   );
 
   const deleteBoardRelation = useCallback(
@@ -171,6 +181,7 @@ export const useBoardsTab = ({
     openCreateBoardModal,
     onCreateBoard,
     onPressBoard,
+    onStartBoardLesson,
     deleteBoardRelation,
   };
 };

@@ -63,16 +63,25 @@ export default function BoardRealtimePage() {
     setIsLessonMode(true);
   }, []);
 
-  const handleEndLesson = useCallback(() => {
+  const handleBackToEdit = useCallback(() => {
+    if (isCatalogTeacherFlow && isLessonMode) {
+      void leaveSession().finally(() => {
+        setIsLessonMode(false);
+      });
+      return;
+    }
+
     void leaveSession().finally(() => {
-      setIsLessonMode(false);
+      router.push(`/board/${boardId}?catalog=1`);
     });
-  }, [leaveSession]);
+  }, [boardId, isCatalogTeacherFlow, isLessonMode, leaveSession, router]);
 
   const title = useMemo(
     () => board?.title || <T k="boards.myBoards" />,
     [board?.title],
   );
+
+  const showBackToEdit = isTeacher && !isEditMode;
 
   if (loadError) {
     return (
@@ -98,15 +107,15 @@ export default function BoardRealtimePage() {
               onLessonStarted={handleStartLesson}
             />
           ) : null}
-          {isLessonMode && isCatalogTeacherFlow ? (
+          {showBackToEdit ? (
             <Button
               color="default"
               size="sm"
               variant="flat"
               className="shrink-0"
-              onPress={handleEndLesson}
+              onPress={handleBackToEdit}
             >
-              <T k="boards.endBoardLesson" />
+              <T k="boards.backToEdit" />
             </Button>
           ) : null}
         </div>

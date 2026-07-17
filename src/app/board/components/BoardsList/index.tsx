@@ -18,6 +18,7 @@ type TProps = {
   boards: TBoard[];
   onPressCreate: () => void;
   onPressBoard: (board: TBoard) => void;
+  onStartBoardLesson?: (board: TBoard) => void;
   getBoards: () => void;
   showTeacherActions?: boolean;
   showStudentCabinetActions?: boolean;
@@ -28,6 +29,7 @@ export const BoardsList: FC<TProps> = ({
   boards,
   onPressCreate,
   onPressBoard,
+  onStartBoardLesson,
   getBoards,
   showTeacherActions = false,
   showStudentCabinetActions = false,
@@ -109,6 +111,7 @@ export const BoardsList: FC<TProps> = ({
             key={board.id}
             board={board}
             onPress={onPressBoard}
+            onPressStartLesson={onStartBoardLesson}
             onPressEdit={
               showTeacherActions || showStudentCabinetActions
                 ? onPressEdit
