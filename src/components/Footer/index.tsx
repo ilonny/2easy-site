@@ -3,6 +3,7 @@
 import Logo from "@/assets/icons/logo.svg";
 import WaIcon from "@/assets/icons/wa.svg";
 import EmailIcon from "@/assets/icons/email.svg";
+import TelegramIcon from "@/assets/icons/telegram.svg";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -65,7 +66,6 @@ export const Footer = () => {
           </div>
           <div
             className="
-            w-[30px]
             flex
             items-center
             gap-4
@@ -82,6 +82,14 @@ export const Footer = () => {
               className="text-primary underline hover:opacity-[0.8]"
             >
               <Image src={EmailIcon} alt="email" />
+            </Link>
+            <Link
+              href="https://t.me/my2easy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline hover:opacity-[0.8]"
+            >
+              <Image src={TelegramIcon} alt="telegram" />
             </Link>
           </div>
         </div>

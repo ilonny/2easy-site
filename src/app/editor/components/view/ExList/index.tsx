@@ -51,8 +51,36 @@ import EyeDisabledIcon from "@/assets/icons/eye_disabled.svg";
 import { AuthContext } from "@/auth";
 import CopyExIcon from "@/assets/icons/copy_ex.svg";
 import { IntExView } from "../IntExView";
+import { ResetAnswersControl } from "../ResetAnswersControl";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { usePathname } from "next/navigation";
+import {
+  EX_ANSWERS_RESET_EVENT,
+  TExAnswersResetDetail,
+} from "@/app/editor/hooks/useExAnswer";
+
+const ANSWER_EX_TYPES = new Set([
+  "text-checklist",
+  "fill-gaps-select",
+  "fill-gaps-input",
+  "fill-gaps-drag",
+  "FILL_GAPS_NEW",
+  "match-word-word",
+  "match-word-image",
+  "match-word-column",
+  "test",
+  "free-input-form",
+]);
+
+const getExerciseTitle = (data: any) => {
+  const title =
+    data?.title || data?.description || data?.subtitle || data?.name;
+  if (typeof title === "string" && title.trim()) {
+    return title.trim();
+  }
+  return i18n.t("lessons.resetAnswersUntitled");
+};
 
 type TProps = {
   list: Array<any>;
@@ -251,7 +279,19 @@ export const ExListComp: FC<TProps> = (props) => {
     isPresentationMode,
   }) => {
     const { profile } = useContext(AuthContext);
+    const pathname = usePathname();
+    const isLessonMode = pathname?.startsWith("/lessons/");
     const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
+    const isStudent = !!profile?.isStudent || !!profile?.studentId;
+    const resetTargetStudentId = isStudent
+      ? profile?.studentId
+      : activeStudentId;
+    const canResetAnswers =
+      isView &&
+      !isPresentationMode &&
+      ANSWER_EX_TYPES.has(ex.type) &&
+      !!resetTargetStudentId &&
+      (isStudent || (isTeacher && isLessonMode));
 
     const Viewer = mapComponent(ex.type, {
       ...props,
@@ -260,9 +300,40 @@ export const ExListComp: FC<TProps> = (props) => {
       isPresentationMode,
     });
     const [popoverIsOpen, setPopoverIsOpen] = useState(false);
+    const [answersResetKey, setAnswersResetKey] = useState(0);
     const closePopover = useCallback(() => {
       setPopoverIsOpen(false);
     }, []);
+
+    useEffect(() => {
+      if (!canResetAnswers || !resetTargetStudentId) {
+        return;
+      }
+      let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+      const onAnswersReset = (event: Event) => {
+        const detail = (event as CustomEvent<TExAnswersResetDetail>).detail;
+        if (!detail) return;
+        if (
+          Number(detail.ex_id) === Number(ex.id) &&
+          Number(detail.student_id) === Number(resetTargetStudentId)
+        ) {
+          if (debounceTimer) {
+            clearTimeout(debounceTimer);
+          }
+          debounceTimer = setTimeout(() => {
+            setAnswersResetKey((k) => k + 1);
+          }, 150);
+        }
+      };
+      window.addEventListener(EX_ANSWERS_RESET_EVENT, onAnswersReset);
+      return () => {
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+        }
+        window.removeEventListener(EX_ANSWERS_RESET_EVENT, onAnswersReset);
+      };
+    }, [canResetAnswers, resetTargetStudentId, ex.id]);
+
     const { checkSubscription } = useCheckSubscription();
     const [isVisible, setIsVisible] = useState(!!ex?.is_visible);
     const canEditEye = useMemo(() => {
@@ -276,7 +347,9 @@ export const ExListComp: FC<TProps> = (props) => {
         <div
           className={`${styles["wrapper"]} ${
             isView && styles["is-view"]
-          } relative pt-12 sm:pt-14 md:pt-[52px] lg:pt-0`}
+          } relative pt-12 sm:pt-14 md:pt-[52px] lg:pt-0 ${
+            canResetAnswers ? "pb-14 sm:pb-12" : ""
+          }`}
           style={{ fontSize: 18 }}
           id={`ex-${ex.id}`}
         >
@@ -335,11 +408,21 @@ export const ExListComp: FC<TProps> = (props) => {
             </div>
           )}
           <Viewer
+            key={`${ex.id}-${answersResetKey}`}
             data={ex.data}
             activeStudentId={activeStudentId}
             isView={isView}
             isPresentationMode={isPresentationMode}
           />
+          {canResetAnswers && (
+            <ResetAnswersControl
+              exId={ex.id}
+              lessonId={ex.lesson_id}
+              exerciseTitle={getExerciseTitle(ex.data)}
+              studentId={Number(resetTargetStudentId)}
+              onSuccess={() => setAnswersResetKey((k) => k + 1)}
+            />
+          )}
           {!isView && (
             <>
               <Popover

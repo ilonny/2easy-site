@@ -15,8 +15,33 @@ type TParams = {
 const limit = pLimit(1);
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+export const EX_ANSWERS_RESET_EVENT = "ex-answers-reset";
+
+export type TExAnswersResetDetail = {
+  ex_id: number;
+  student_id: number;
+  lesson_id: number;
+};
+
+const dispatchAnswersReset = (detail: TExAnswersResetDetail) => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(EX_ANSWERS_RESET_EVENT, { detail }));
+};
+
+const toAnswersMap = (data: any[]) =>
+  (data || []).reduce(function (map, obj) {
+    map[obj.q_id] = obj;
+    return map;
+  }, {} as Record<string, any>);
+
+const answersSignature = (answersMap: Record<string, any>) => {
+  const keys = Object.keys(answersMap).sort();
+  return keys
+    .map((k) => `${k}:${answersMap[k]?.answer ?? ""}`)
+    .join("|");
+};
+
 export const useExAnswer = (params: TParams) => {
-  let idRef = 0;
   const {
     student_id,
     lesson_id,
@@ -26,9 +51,19 @@ export const useExAnswer = (params: TParams) => {
     sleepDelay,
     isPresentationMode,
   } = params;
-  // const [activeStudentId, setActiveStudentId] = useState(0);
   const queue = useRef<Promise<Response>[]>([]);
-  const [answers, setAnswers] = useState({});
+  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const visibleTargetRef = useRef(0);
+  const lastSignatureRef = useRef<string | null>(null);
+  const pollGenRef = useRef(0);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const writeAnswer = useCallback(
     async (q_id: number | string, answer: string) => {
@@ -52,90 +87,150 @@ export const useExAnswer = (params: TParams) => {
       );
       await Promise.all(queue.current);
     },
-    [lesson_id, ex_id]
+    [lesson_id, ex_id, student_id]
   );
+
+  const applyAnswers = useCallback(
+    (answersMap: Record<string, any>, targetStudentId: number) => {
+      if (!mountedRef.current) {
+        return answersMap;
+      }
+
+      const nextSig = answersSignature(answersMap);
+      const prevSig = lastSignatureRef.current;
+      if (prevSig === nextSig) {
+        return answersMap;
+      }
+
+      const prevHadAnswers = !!prevSig;
+      const nextHasAnswers = Object.keys(answersMap).length > 0;
+
+      lastSignatureRef.current = nextSig;
+      setAnswers(answersMap);
+
+      if (prevHadAnswers && !nextHasAnswers && targetStudentId) {
+        dispatchAnswersReset({
+          ex_id: Number(ex_id),
+          student_id: targetStudentId,
+          lesson_id: Number(lesson_id),
+        });
+      }
+
+      return answersMap;
+    },
+    [ex_id, lesson_id]
+  );
+
+  const fetchAnswersMap = useCallback(async () => {
+    const targetStudentId = Number(activeStudentId || student_id || 0);
+    let reqStr = `/answer?lesson_id=${lesson_id}&ex_id=${ex_id}`;
+    if (targetStudentId) {
+      reqStr += `&student_id=${targetStudentId}`;
+    }
+    const res = await fetchGet({
+      path: reqStr,
+      isSecure: true,
+    });
+    const data = (await res?.json()) || [];
+    return {
+      answersMap: toAnswersMap(data),
+      targetStudentId,
+    };
+  }, [activeStudentId, student_id, lesson_id, ex_id]);
 
   const getAnswers = useCallback(
     async (once?: boolean) => {
       if (isPresentationMode) {
         return;
       }
-      if (!once && (!isTeacher || !activeStudentId || !idRef)) {
-        return;
+      const { answersMap, targetStudentId } = await fetchAnswersMap();
+      if (!mountedRef.current) {
+        return answersMap;
       }
-      let reqStr = `/answer?lesson_id=${lesson_id}&ex_id=${ex_id}`;
-      if (activeStudentId || student_id) {
-        reqStr += `&student_id=${activeStudentId || student_id}`;
-      }
-      const res = await fetchGet({
-        path: reqStr,
-        isSecure: true,
-      });
-
-      const data = (await res?.json()) || [];
-      const answersMap = data?.reduce(function (map, obj) {
-        map[obj.q_id] = obj;
-        return map;
-      }, {});
-      setAnswers(answersMap);
-      if (!once) {
-        await sleep(sleepDelay || 1000);
-        getAnswers();
-        return;
-      }
-      return answersMap;
+      return applyAnswers(answersMap, targetStudentId);
     },
-    [
-      isTeacher,
-      activeStudentId,
-      lesson_id,
-      ex_id,
-      student_id,
-      sleepDelay,
-      isPresentationMode,
-      idRef,
-    ]
+    [isPresentationMode, fetchAnswersMap, applyAnswers]
   );
 
   useEffect(() => {
+    const targetStudentId = Number(activeStudentId || student_id || 0);
+    const shouldPoll =
+      !isPresentationMode &&
+      !!targetStudentId &&
+      (isTeacher || !!student_id);
+
+    const myGen = ++pollGenRef.current;
+    visibleTargetRef.current = 0;
+
+    if (!shouldPoll) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const pollLoop = async () => {
+      while (!cancelled && pollGenRef.current === myGen) {
+        if (visibleTargetRef.current === targetStudentId) {
+          try {
+            const { answersMap } = await fetchAnswersMap();
+            if (cancelled || pollGenRef.current !== myGen || !mountedRef.current) {
+              return;
+            }
+            applyAnswers(answersMap, targetStudentId);
+          } catch (err) {}
+        }
+        await sleep(sleepDelay || 1000);
+      }
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            idRef = activeStudentId || 0;
-            if (activeStudentId) {
-              getAnswers();
-            }
-            // console.log(`Элемент ex-${ex_id} появился в поле зрения`);
-          } else {
-            idRef = 0;
-            // console.log(`Элемент ex-${ex_id} исчез из поля зрения`);
-          }
+          visibleTargetRef.current = entry.isIntersecting
+            ? targetStudentId
+            : 0;
         });
       },
       {
-        root: null, // Следим за видимостью относительно viewport (окна браузера)
-        rootMargin: "0px", // Не добавляем отступы
-        // threshold: 0, // Элемент должен быть виден хотя бы на 0%
+        root: null,
+        rootMargin: "0px",
       }
     );
 
     const target = document.getElementById(`ex-${ex_id}`);
-
     if (target) {
       observer.observe(target);
+      const rect = target.getBoundingClientRect();
+      const inView =
+        rect.bottom > 0 &&
+        rect.top <
+          (window.innerHeight || document.documentElement.clientHeight);
+      if (inView) {
+        visibleTargetRef.current = targetStudentId;
+      }
     }
 
-    return () => {
-      try {
-        observer?.unobserve(target);
-        observer?.disconnect(); //отключает все наблюдаемые элементы.
-      } catch (err) {}
+    pollLoop();
 
-      idRef = 0;
+    return () => {
+      cancelled = true;
+      pollGenRef.current += 1;
+      visibleTargetRef.current = 0;
+      try {
+        if (target) observer.unobserve(target);
+        observer.disconnect();
+      } catch (err) {}
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTeacher, activeStudentId, getAnswers]);
+  }, [
+    isTeacher,
+    activeStudentId,
+    student_id,
+    ex_id,
+    isPresentationMode,
+    sleepDelay,
+    fetchAnswersMap,
+    applyAnswers,
+  ]);
 
   return { writeAnswer, answers, getAnswers, setAnswers };
 };

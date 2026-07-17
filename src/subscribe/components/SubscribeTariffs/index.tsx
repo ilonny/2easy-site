@@ -23,6 +23,7 @@ import { SubscribeFreeBlock } from "../SubscribeFreeBlock";
 import { tariffs } from "./tariffs";
 import { SubscribeCancel } from "../SubscribeCancel";
 import { T } from "@/i18n/T";
+import { useTranslation } from "react-i18next";
 
 type TProps = {
   hideTitle?: boolean;
@@ -37,6 +38,10 @@ export const SubscribeTariffs: FC<TProps> = ({
   hideTariffsTitle = false,
   fullWidth = false,
 }) => {
+  const { i18n } = useTranslation();
+  const isEn = (i18n.resolvedLanguage || i18n.language || "")
+    .toLowerCase()
+    .startsWith("en");
   const { profile } = useContext(AuthContext);
   const { subscription } = useContext(SibscribeContext);
 
@@ -212,7 +217,7 @@ export const SubscribeTariffs: FC<TProps> = ({
                     <span
                       style={{
                         position: "absolute",
-                        right: -10,
+                        ...(isEn ? { left: -10 } : { right: -10 }),
                         top: 0,
                         background: tariff.color,
                         width:

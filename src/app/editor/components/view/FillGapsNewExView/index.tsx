@@ -59,18 +59,22 @@ function normalizeGapAnswer(s: string): string {
   return (s || "").trim().toLowerCase();
 }
 
-/** Текст подсказки для учителя: помеченные верные варианты, иначе исходный текст пропуска / первый вариант */
+/** Есть ли у пропуска непустой вариант, отмеченный как правильный */
+function hasDefinedCorrectAnswer(gap: TFillGapsNewGap | undefined): boolean {
+  if (!gap) return false;
+  return (gap.options || []).some(
+    (o) => o.isCorrect && (o.value || "").trim().length > 0,
+  );
+}
+
+/** Текст подсказки для учителя: только непустые варианты, отмеченные как правильные */
 function gapTooltipText(gap: TFillGapsNewGap | undefined): string {
-  if (!gap) return "";
-  const marked = (gap.options || [])
+  if (!hasDefinedCorrectAnswer(gap)) return "";
+  const marked = (gap!.options || [])
     .filter((o) => o.isCorrect)
     .map((o) => (o.value || "").trim())
     .filter(Boolean);
-  if (marked.length) return Array.from(new Set(marked)).join(", ");
-  const orig = (gap.originalText || "").trim();
-  if (orig) return orig;
-  const first = (gap.options?.[0]?.value || "").trim();
-  return first;
+  return Array.from(new Set(marked)).join(", ");
 }
 
 /** TouchEvent has no clientX; read from touches / changedTouches */
@@ -160,12 +164,20 @@ const FillGapsNewExViewImpl: FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [student_id, isPreview]);
 
-  // teacher live updates
+  // teacher live updates + remote reset sync
   useEffect(() => {
     if (isPreview || !answers) return;
     try {
       const raw = (answers as any)?.[data.id]?.answer;
-      if (!raw) return;
+      if (!raw) {
+        if (Object.keys(answersRef.current || {}).length > 0) {
+          answersRef.current = {};
+          setStatusByGap({});
+          setServerHydrationVersion((v) => v + 1);
+          setAnswersVersion((v) => v + 1);
+        }
+        return;
+      }
       const parsedRaw = JSON.parse(raw);
       const parsed: TAnswersMap = {};
       Object.keys(parsedRaw || {}).forEach((k) => {
@@ -206,12 +218,7 @@ const FillGapsNewExViewImpl: FC<{
     (gap: TFillGapsNewGap | undefined, v: string) => {
       const val = normalizeGapAnswer(v);
       if (!gap || !val) return false;
-      if (mode === "input") {
-        const hasDefinedCorrect = (gap.options || []).some(
-          (o) => o.isCorrect && (o.value || "").trim(),
-        );
-        if (!hasDefinedCorrect) return true;
-      }
+      if (mode === "input" && !hasDefinedCorrectAnswer(gap)) return true;
       return !!gap.options?.some(
         (o) => o.isCorrect && normalizeGapAnswer(o.value || "") === val,
       );
@@ -412,60 +419,75 @@ const FillGapsNewExViewImpl: FC<{
               : isTeacherView
                 ? "bg-[#E0E7FF] border-2 border-[#4F46E5] ring-2 ring-[#4F46E5]/15"
                 : "bg-white border border-[rgba(63,40,198,0.25)]";
+        const inputTextClass =
+          status === "correct"
+            ? "!text-[#3F2A1D] font-bold"
+            : status === "incorrect"
+              ? "text-[#991B1B] font-semibold"
+              : "text-[#111827]";
+
+        const isEmptyAnswer = !current;
+
+        const gapBody = !canInteract ? (
+          <span
+            className={`${styles.gapInputReadonly} ${isEmptyAnswer ? styles.gapInputReadonlyEmpty : ""} ${wrapperClass} ${inputTextClass}`}
+          >
+            {currentRaw || "\u00A0"}
+          </span>
+        ) : (
+          <span
+            className={`${styles.gapInputSizer} ${isEmptyAnswer ? styles.gapInputSizerEmpty : ""} ${
+              status === "correct"
+                ? styles.gapInputSizerBold
+                : status === "incorrect"
+                  ? styles.gapInputSizerSemibold
+                  : ""
+            }`}
+            data-value={currentRaw || "\u00a0"}
+          >
+            <Input
+              size="sm"
+              className={styles.gapInput}
+              key={`${gapId}:${serverHydrationVersion}`}
+              defaultValue={currentRaw}
+              isDisabled={false}
+              onValueChange={(val) => {
+                const raw = val || "";
+                if (!raw.trim()) return setAnswer(gapId, "", "neutral");
+                const ok = isCorrectForGap(gap, raw);
+                setAnswer(gapId, raw, ok ? "correct" : "incorrect");
+              }}
+              onKeyDown={(e) => {
+                if ((e as any)?.key !== "Enter") return;
+                try {
+                  e.preventDefault();
+                } catch {}
+                const latestRaw = String((e.target as any)?.value || "");
+                if (!latestRaw.trim()) return setAnswer(gapId, "", "neutral");
+                const ok = isCorrectForGap(gap, latestRaw);
+                setAnswer(gapId, latestRaw, ok ? "correct" : "incorrect");
+              }}
+              onBlur={(e) => {
+                const latestRaw = String((e.target as any).value || "");
+                if (!latestRaw.trim()) return setAnswer(gapId, "", "neutral");
+                const ok = isCorrectForGap(gap, latestRaw);
+                setAnswer(gapId, latestRaw, ok ? "correct" : "incorrect");
+              }}
+              classNames={{
+                inputWrapper: wrapperClass,
+                input: "text-[16px] leading-5 " + inputTextClass,
+              }}
+            />
+          </span>
+        );
+
         return (
           <Tooltip
             isDisabled={tooltipDisabled}
             content={<div>{tooltipContent}</div>}
           >
-            <span className="relative inline-flex">
-              <Input
-                size="sm"
-                className={styles.gapInput}
-                key={
-                  canInteract
-                    ? `${gapId}:${serverHydrationVersion}`
-                    : `${gapId}:${answersVersion}`
-                }
-                {...(canInteract
-                  ? { defaultValue: currentRaw }
-                  : { value: currentRaw })}
-                isDisabled={!canInteract}
-                onValueChange={(val) => {
-                  if (!canInteract) return;
-                  const raw = val || "";
-                  if (!raw.trim()) return setAnswer(gapId, "", "neutral");
-                  const ok = isCorrectForGap(gap, raw);
-                  setAnswer(gapId, raw, ok ? "correct" : "incorrect");
-                }}
-                onKeyDown={(e) => {
-                  if (!canInteract) return;
-                  if ((e as any)?.key !== "Enter") return;
-                  try {
-                    e.preventDefault();
-                  } catch {}
-                  const latestRaw = String((e.target as any)?.value || "");
-                  if (!latestRaw.trim()) return setAnswer(gapId, "", "neutral");
-                  const ok = isCorrectForGap(gap, latestRaw);
-                  setAnswer(gapId, latestRaw, ok ? "correct" : "incorrect");
-                }}
-                onBlur={(e) => {
-                  if (!canInteract) return;
-                  const latestRaw = String((e.target as any).value || "");
-                  if (!latestRaw.trim()) return setAnswer(gapId, "", "neutral");
-                  const ok = isCorrectForGap(gap, latestRaw);
-                  setAnswer(gapId, latestRaw, ok ? "correct" : "incorrect");
-                }}
-                classNames={{
-                  inputWrapper: wrapperClass,
-                  input:
-                    "text-[16px] leading-5 " +
-                    (status === "correct"
-                      ? "!text-[#3F2A1D] font-bold"
-                      : status === "incorrect"
-                        ? "text-[#991B1B] font-semibold"
-                        : "text-[#111827]"),
-                }}
-              />
+            <span className={`relative ${styles.gapInputWrap}`}>
+              {gapBody}
               {teacherHintActive && (
                 <span
                   className="pointer-events-auto absolute inset-0 z-10 cursor-help rounded-medium"
@@ -698,10 +720,7 @@ const FillGapsNewExViewImpl: FC<{
                 {children.map((ch: any, idx) => {
                   if (ch?.type === "gap") {
                     return (
-                      <span
-                        key={idx}
-                        style={{ display: "inline-block", margin: "0 6px" }}
-                      >
+                      <span key={idx} className={styles.gapInline}>
                         {renderGap(ch.gapId)}
                       </span>
                     );

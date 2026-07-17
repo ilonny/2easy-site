@@ -95,14 +95,12 @@ const AnswerField: FC<{
     }
   }, [field.id, isTeacher, selectedValue, writeAnswer]);
 
-  //чтение ответов учителем
+  //чтение ответов учителем / сброс с другой стороны
   useEffect(() => {
     if (!isTeacher || isPresentationMode) {
       return;
     }
-    if (answers?.[field?.id]?.answer) {
-      setSelectedValue(answers?.[field?.id]?.answer);
-    }
+    setSelectedValue(answers?.[field?.id]?.answer || "");
   }, [isTeacher, answers, field?.id, isPresentationMode]);
 
   return (

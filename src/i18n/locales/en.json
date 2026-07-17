@@ -171,7 +171,7 @@
     "page": {
       "subtitle": "Access to materials and the lesson builder platform",
       "description1": "A subscription gives you access to materials and updates released during your subscription period, the lesson builder platform, and your student dashboard for teaching in real time.",
-      "description2": "Your subscription renews automatically. You can cancel anytime in your account or via"
+      "description2": "Your subscription renews automatically. You can cancel it anytime in your personal account."
     },
     "description": "Access to materials, lesson creation platform and student dashboard for conducting real-time lessons",
     "subscriptionBadge": "2EASY Subscription",
@@ -318,7 +318,11 @@
     },
     "participants": "PARTICIPANTS",
     "participantsShort": "Partic.",
-    "participantsAriaLabel": "Lesson participants"
+    "participantsAriaLabel": "Lesson participants",
+    "resetAnswers": "Reset answers",
+    "resetAnswersConfirm": "Reset answers in exercise {{title}}",
+    "resetAnswersCancel": "Cancel",
+    "resetAnswersUntitled": "untitled"
   },
   "editor": {
     "home": "Home",

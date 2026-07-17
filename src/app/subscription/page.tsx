@@ -43,8 +43,7 @@ export default function StartRegistrationPage() {
             <T k="subscription.page.description1" />
             <br />
             <br />
-            <T k="subscription.page.description2" />{" "}
-            <span className="underline">https://my.cloudpayments.ru</span>
+            <T k="subscription.page.description2" />
           </p>
           <div className="h-10" />
           <div className="h-10" />

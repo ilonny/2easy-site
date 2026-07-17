@@ -99,9 +99,101 @@
   color: #991b1b;
 }
 
-.gapInput {
-  min-width: min(100%, 180px);
+.gapInline {
+  display: inline-block;
+  margin: 0 6px;
+  vertical-align: middle;
+}
+
+.gapInputWrap {
+  display: inline-block;
+  vertical-align: middle;
   max-width: 100%;
+}
+
+.gapInput {
+  min-width: 200px;
+  max-width: 100%;
+}
+
+.gapInputReadonly {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  min-width: 200px;
+  width: max-content;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 16px;
+  line-height: 1.25rem;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.gapInputSizer {
+  display: inline-grid;
+  vertical-align: middle;
+  align-items: stretch;
+  box-sizing: border-box;
+  min-width: 200px;
+  width: max-content;
+  max-width: 100%;
+}
+
+.gapInputSizer::after {
+  content: attr(data-value);
+  visibility: hidden;
+  white-space: pre;
+  font-size: 16px;
+  line-height: 1.25rem;
+  padding: 0 14px;
+  grid-area: 1 / 1;
+  min-width: 200px;
+  box-sizing: border-box;
+}
+
+.gapInputReadonlyEmpty {
+  width: 200px;
+  min-width: 200px;
+}
+
+.gapInputSizerEmpty {
+  width: 200px;
+  min-width: 200px;
+}
+
+.gapInputSizerEmpty::after {
+  min-width: 200px;
+}
+
+.gapInputSizerBold::after {
+  font-weight: 700;
+}
+
+.gapInputSizerSemibold::after {
+  font-weight: 600;
+}
+
+.gapInputSizer .gapInput {
+  grid-area: 1 / 1;
+  width: 100%;
+  min-width: 200px;
+  max-width: 100%;
+}
+
+.gapInputSizer :global([data-slot="input-wrapper"]) {
+  width: 100%;
+  min-width: 200px;
+  min-height: 36px;
+}
+
+.gapInputSizer :global(input) {
+  width: 100% !important;
+  min-width: 200px !important;
+  field-sizing: content;
 }
 
 .gapSelect {
