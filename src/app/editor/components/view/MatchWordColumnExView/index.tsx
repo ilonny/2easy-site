@@ -217,7 +217,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
   }, [student_id]);
 
   useEffect(() => {
-    if (!answers && !isTeacher) {
+    if (!isTeacher) {
       return;
     }
     try {

@@ -20,6 +20,7 @@ import styles from "./styles.module.css";
 type TProps = {
   board: TBoard;
   onPress: (board: TBoard) => void;
+  onPressStartLesson?: (board: TBoard) => void;
   onPressEdit?: (board: TBoard) => void;
   onPressDelete?: (board: TBoard) => void;
   onPressAttach?: (board: TBoard) => void;
@@ -31,6 +32,7 @@ type TProps = {
 export const BoardCard: FC<TProps> = ({
   board,
   onPress,
+  onPressStartLesson,
   onPressEdit,
   onPressDelete,
   onPressAttach,
@@ -177,7 +179,18 @@ export const BoardCard: FC<TProps> = ({
             </div>
           )}
         </div>
+        {!!onPressStartLesson ? (
+          <Button
+            color="primary"
+            className="w-full"
+            size="md"
+            onPress={() => onPressStartLesson(board)}
+          >
+            <T k="boards.startBoardLesson" />
+          </Button>
+        ) : null}
       </div>
     </div>
   );
 };
+

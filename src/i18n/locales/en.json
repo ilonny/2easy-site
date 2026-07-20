@@ -11,6 +11,7 @@
     "yes": "Yes",
     "no": "No",
     "search": "Search",
+    "nothingFound": "Nothing found",
     "confirm": "Confirm",
     "download": "Download"
   },
@@ -253,6 +254,7 @@
     "lessons2Easy": "2EASY lessons",
     "courses2Easy": "2EASY courses",
     "searchLessons": "Search lessons",
+    "searchCourses": "Search courses",
     "lessonStatusCourse": "Course status:",
     "lessonStatusLesson": "Lesson status:",
     "copyLesson": "Copy lesson",
@@ -657,6 +659,8 @@
   },
   "boards": {
     "myBoards": "My boards",
+    "boardsTab": "Boards",
+    "noBoards": "No boards yet.",
     "createBoard": "Create board",
     "newBoard": "New board",
     "editBoard": "Edit board",
@@ -691,6 +695,7 @@
     "addStickyNote": "Sticky note",
     "editingModeBanner": "This is editing mode. To use the board together, click \"Start lesson\" and select a student.",
     "endBoardLesson": "End lesson",
+    "backToEdit": "← Back to editing",
     "teacher": "Teacher",
     "followTeacher": "Go to teacher's cursor"
   },

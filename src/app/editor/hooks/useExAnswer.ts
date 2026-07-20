@@ -91,13 +91,20 @@ export const useExAnswer = (params: TParams) => {
   );
 
   const applyAnswers = useCallback(
-    (answersMap: Record<string, any>, targetStudentId: number) => {
+    (
+      answersMap: Record<string, any>,
+      targetStudentId: number,
+      options?: { updateState?: boolean; detectReset?: boolean }
+    ) => {
       if (!mountedRef.current) {
         return answersMap;
       }
 
+      const updateState = options?.updateState !== false;
+      const detectReset = options?.detectReset !== false;
       const nextSig = answersSignature(answersMap);
       const prevSig = lastSignatureRef.current;
+
       if (prevSig === nextSig) {
         return answersMap;
       }
@@ -106,9 +113,20 @@ export const useExAnswer = (params: TParams) => {
       const nextHasAnswers = Object.keys(answersMap).length > 0;
 
       lastSignatureRef.current = nextSig;
-      setAnswers(answersMap);
 
-      if (prevHadAnswers && !nextHasAnswers && targetStudentId) {
+      if (updateState) {
+        setAnswers(answersMap);
+      }
+
+      if (
+        detectReset &&
+        prevHadAnswers &&
+        !nextHasAnswers &&
+        targetStudentId
+      ) {
+        if (!updateState) {
+          setAnswers({});
+        }
         dispatchAnswersReset({
           ex_id: Number(ex_id),
           student_id: targetStudentId,
@@ -147,7 +165,11 @@ export const useExAnswer = (params: TParams) => {
       if (!mountedRef.current) {
         return answersMap;
       }
-      return applyAnswers(answersMap, targetStudentId);
+      // Explicit loads always hydrate local state (initial student load).
+      return applyAnswers(answersMap, targetStudentId, {
+        updateState: true,
+        detectReset: false,
+      });
     },
     [isPresentationMode, fetchAnswersMap, applyAnswers]
   );
@@ -173,10 +195,27 @@ export const useExAnswer = (params: TParams) => {
         if (visibleTargetRef.current === targetStudentId) {
           try {
             const { answersMap } = await fetchAnswersMap();
-            if (cancelled || pollGenRef.current !== myGen || !mountedRef.current) {
+            if (
+              cancelled ||
+              pollGenRef.current !== myGen ||
+              !mountedRef.current
+            ) {
               return;
             }
-            applyAnswers(answersMap, targetStudentId);
+            if (isTeacher) {
+              // Teacher: live-sync answers into UI.
+              applyAnswers(answersMap, targetStudentId, {
+                updateState: true,
+                detectReset: true,
+              });
+            } else {
+              // Student: only watch for remote reset. Do NOT push poll data into
+              // React state — that remounts inputs and steals focus while typing.
+              applyAnswers(answersMap, targetStudentId, {
+                updateState: false,
+                detectReset: true,
+              });
+            }
           } catch (err) {}
         }
         await sleep(sleepDelay || 1000);

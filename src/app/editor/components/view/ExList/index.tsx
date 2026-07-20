@@ -74,10 +74,11 @@ const ANSWER_EX_TYPES = new Set([
 ]);
 
 const getExerciseTitle = (data: any) => {
-  const title =
-    data?.title || data?.description || data?.subtitle || data?.name;
-  if (typeof title === "string" && title.trim()) {
-    return title.trim();
+  const candidates = [data?.subtitle, data?.description, data?.title, data?.name];
+  for (const value of candidates) {
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
   }
   return i18n.t("lessons.resetAnswersUntitled");
 };
