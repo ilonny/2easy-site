@@ -318,7 +318,7 @@ export const FillGapsDragExView: FC<TProps> = ({
   }, [student_id]);
 
   useEffect(() => {
-    if (!answers && !isTeacher) {
+    if (!isTeacher) {
       return;
     }
     try {

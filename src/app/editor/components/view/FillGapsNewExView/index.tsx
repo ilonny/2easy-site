@@ -166,7 +166,7 @@ const FillGapsNewExViewImpl: FC<{
 
   // teacher live updates + remote reset sync
   useEffect(() => {
-    if (isPreview || !answers) return;
+    if (isPreview || !answers || !isTeacher) return;
     try {
       const raw = (answers as any)?.[data.id]?.answer;
       if (!raw) {
@@ -196,7 +196,7 @@ const FillGapsNewExViewImpl: FC<{
       setServerHydrationVersion((v) => v + 1);
       setAnswersVersion((v) => v + 1);
     } catch {}
-  }, [answers, data.id, isPreview]);
+  }, [answers, data.id, isPreview, isTeacher]);
 
   const schedulePersist = useCallback(() => {
     if (!shouldPersistAnswers) return;
