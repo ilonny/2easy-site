@@ -23,12 +23,6 @@ export type TChatMessage = {
   reactions?: TChatReaction[];
 };
 
-export type TChatStudent = {
-  student_id?: number;
-  "student.name"?: string;
-  student?: { name?: string };
-};
-
 export type TChatRealtimeCallbacks = {
   onHistory?: (messages: TChatMessage[]) => void;
   onMessage?: (message: TChatMessage) => void;

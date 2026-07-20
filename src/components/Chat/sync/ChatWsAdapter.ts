@@ -18,7 +18,6 @@ type TWsIncoming = {
 
 type TPendingSend = {
   message: string;
-  studentIds: number[];
   replyToId?: number | null;
 };
 
@@ -68,33 +67,23 @@ export class ChatWsAdapter {
       };
 
       ws.onmessage = (event) => {
-        if (gen !== this.connectionGen || this.ws !== ws) {
-          return;
-        }
+        if (gen !== this.connectionGen || this.ws !== ws) return;
         this.handleMessage(String(event.data || ""));
       };
 
       ws.onerror = () => {
-        if (gen !== this.connectionGen || this.ws !== ws) {
-          return;
-        }
+        if (gen !== this.connectionGen || this.ws !== ws) return;
         this.callbacks.onError?.("WebSocket error");
       };
 
       ws.onclose = () => {
-        if (this.ws === ws) {
-          this.ws = null;
-        }
+        if (this.ws === ws) this.ws = null;
         this.stopPing();
-        if (gen !== this.connectionGen) {
-          return;
-        }
+        if (gen !== this.connectionGen) return;
         this.callbacks.onConnectionChange?.(false);
         if (this.shouldReconnect && this.lessonId) {
           this.reconnectTimer = setTimeout(() => {
-            if (!this.shouldReconnect || gen !== this.connectionGen) {
-              return;
-            }
+            if (!this.shouldReconnect || gen !== this.connectionGen) return;
             void this.openSocket(this.connectionGen);
           }, CHAT_RECONNECT_MS);
         }
@@ -125,16 +114,13 @@ export class ChatWsAdapter {
   }
 
   private flushPendingSends() {
-    if (!this.pendingSends.length) {
-      return;
-    }
+    if (!this.pendingSends.length) return;
     const queue = [...this.pendingSends];
     this.pendingSends = [];
     for (const item of queue) {
       const ok = this.sendRaw({
         type: "send",
         message: item.message,
-        student_ids: item.studentIds,
         ...(item.replyToId ? { reply_to_id: item.replyToId } : {}),
       });
       if (!ok) {
@@ -171,7 +157,11 @@ export class ChatWsAdapter {
         }
         return;
       case "reaction":
-        if (payload.message_id && Array.isArray(payload.reactions)) {
+        if (
+          payload.message_id != null &&
+          Number(payload.message_id) > 0 &&
+          Array.isArray(payload.reactions)
+        ) {
           this.callbacks.onReaction?.(
             Number(payload.message_id),
             payload.reactions,
@@ -190,27 +180,16 @@ export class ChatWsAdapter {
     }
   }
 
-  sendMessage(
-    message: string,
-    studentIds: number[] = [],
-    replyToId?: number | null,
-  ) {
+  sendMessage(message: string, replyToId?: number | null) {
     const payload = {
       type: "send",
       message,
-      student_ids: studentIds,
       ...(replyToId ? { reply_to_id: replyToId } : {}),
     };
-    if (this.sendRaw(payload)) {
-      return;
-    }
+    if (this.sendRaw(payload)) return;
 
-    this.pendingSends.push({ message, studentIds, replyToId });
-
-    if (this.ws?.readyState === WebSocket.CONNECTING) {
-      return;
-    }
-
+    this.pendingSends.push({ message, replyToId });
+    if (this.ws?.readyState === WebSocket.CONNECTING) return;
     if (this.shouldReconnect && this.lessonId && !this.reconnectTimer) {
       this.connectionGen += 1;
       void this.openSocket(this.connectionGen);
@@ -218,19 +197,11 @@ export class ChatWsAdapter {
   }
 
   editMessage(id: number, message: string) {
-    this.sendRaw({
-      type: "edit",
-      id,
-      message,
-    });
+    this.sendRaw({ type: "edit", id, message });
   }
 
   toggleReaction(messageId: number, emoji: string) {
-    this.sendRaw({
-      type: "reaction",
-      message_id: messageId,
-      emoji,
-    });
+    this.sendRaw({ type: "reaction", message_id: messageId, emoji });
   }
 
   private teardownSocket() {

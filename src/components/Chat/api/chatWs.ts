@@ -8,8 +8,6 @@ export const getChatWsUrl = (lessonId: number) => {
   const params = new URLSearchParams({
     lesson_id: String(lessonId),
   });
-  if (token) {
-    params.set("token", token);
-  }
+  if (token) params.set("token", token);
   return `${wsBase}${CHAT_WS_PATH}?${params.toString()}`;
 };

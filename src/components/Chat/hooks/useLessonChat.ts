@@ -3,22 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatWsAdapter } from "../sync/ChatWsAdapter";
 import type { TChatMessage } from "../types";
+import { applyLocalReactionToggle } from "../utils/applyLocalReactionToggle";
 
 type TParams = {
   lessonId: number;
   enabled: boolean;
-  studentIds?: number[];
 };
 
-export const useLessonChat = ({
-  lessonId,
-  enabled,
-  studentIds = [],
-}: TParams) => {
+export const useLessonChat = ({ lessonId, enabled }: TParams) => {
   const [messageList, setMessageList] = useState<TChatMessage[]>([]);
   const [connected, setConnected] = useState(false);
-  const studentIdsRef = useRef(studentIds);
-  studentIdsRef.current = studentIds;
   const adapterRef = useRef<ChatWsAdapter | null>(null);
 
   useEffect(() => {
@@ -35,8 +29,7 @@ export const useLessonChat = ({
 
     void adapter.connect(lessonId, {
       onHistory: (messages) => {
-        if (cancelled) return;
-        setMessageList(messages);
+        if (!cancelled) setMessageList(messages);
       },
       onMessage: (message) => {
         if (cancelled) return;
@@ -64,8 +57,7 @@ export const useLessonChat = ({
         );
       },
       onConnectionChange: (isConnected) => {
-        if (cancelled) return;
-        setConnected(isConnected);
+        if (!cancelled) setConnected(isConnected);
       },
       onError: (errorMessage) => {
         console.error("[lesson-chat]", errorMessage);
@@ -75,24 +67,15 @@ export const useLessonChat = ({
     return () => {
       cancelled = true;
       adapter.disconnect();
-      if (adapterRef.current === adapter) {
-        adapterRef.current = null;
-      }
+      if (adapterRef.current === adapter) adapterRef.current = null;
     };
   }, [enabled, lessonId]);
 
-  const sendMessage = useCallback(
-    (text: string, replyToId?: number | null) => {
-      const trimmed = text.trim();
-      if (!trimmed) return;
-      adapterRef.current?.sendMessage(
-        trimmed,
-        studentIdsRef.current,
-        replyToId || null,
-      );
-    },
-    [],
-  );
+  const sendMessage = useCallback((text: string, replyToId?: number | null) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    adapterRef.current?.sendMessage(trimmed, replyToId || null);
+  }, []);
 
   const editMessage = useCallback((id: number, text: string) => {
     const trimmed = text.trim();
@@ -102,6 +85,13 @@ export const useLessonChat = ({
 
   const toggleReaction = useCallback((messageId: number, emoji: string) => {
     if (!messageId || !emoji) return;
+    setMessageList((prev) =>
+      prev.map((m) =>
+        m.id === messageId
+          ? { ...m, reactions: applyLocalReactionToggle(m.reactions, emoji) }
+          : m,
+      ),
+    );
     adapterRef.current?.toggleReaction(messageId, emoji);
   }, []);
 
