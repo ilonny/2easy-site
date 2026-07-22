@@ -254,13 +254,16 @@ export const FillGapsDragExView: FC<TProps> = ({
   const [errorAnswerId, setErrorAnswerId] = useState<number>(0);
   const [correctIds, setCorrectIds] = useState<number[]>([]);
   const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
+  const rootsMapRef = useRef(
+    new Map<Element, ReturnType<typeof ReactDOM.createRoot>>()
+  );
 
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
   const ex_id = data?.id;
-  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+  const { writeAnswer, answers, getAnswers } = useExAnswer({
     student_id,
     lesson_id,
     ex_id,
@@ -274,11 +277,15 @@ export const FillGapsDragExView: FC<TProps> = ({
       .querySelectorAll(
         `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`
       )
-      .forEach((el, index) => {
+      .forEach((el) => {
         const id = el.id;
         const field = data.fields.find((f) => f.id == id);
         el.setAttribute("index", field?.id?.toString());
-        const root = ReactDOM.createRoot(el);
+        let root = rootsMapRef.current.get(el);
+        if (!root) {
+          root = ReactDOM.createRoot(el);
+          rootsMapRef.current.set(el, root);
+        }
         root.render(
           <>
             {field && (
@@ -306,11 +313,23 @@ export const FillGapsDragExView: FC<TProps> = ({
   ]);
 
   useEffect(() => {
+    return () => {
+      rootsMapRef.current.forEach((root) => {
+        try {
+          root.unmount();
+        } catch {}
+      });
+      rootsMapRef.current.clear();
+    };
+  }, []);
+
+  useEffect(() => {
     if (student_id) {
       getAnswers(true).then((a) => {
         try {
-          const parsedIds = JSON.parse(answers[data.id]?.answer);
-          setCorrectIds(parsedIds?.correctIds);
+          const parsedIds = JSON.parse(a?.[data.id]?.answer || "{}");
+          setCorrectIds(parsedIds?.correctIds || []);
+          setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
         } catch (err) {}
       });
     }
@@ -322,10 +341,19 @@ export const FillGapsDragExView: FC<TProps> = ({
       return;
     }
     try {
-      const parsedIds = JSON.parse(answers[data.id]?.answer);
-      setCorrectIds(parsedIds?.correctIds);
+      const raw = answers[data.id]?.answer;
+      if (!raw) {
+        setCorrectIds([]);
+        setIncorrectIdsMap({});
+        return;
+      }
+      const parsedIds = JSON.parse(raw);
+      setCorrectIds(parsedIds?.correctIds || []);
       setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
-    } catch (err) {}
+    } catch (err) {
+      setCorrectIds([]);
+      setIncorrectIdsMap({});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher]);
 

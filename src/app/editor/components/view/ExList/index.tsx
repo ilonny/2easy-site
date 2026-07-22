@@ -421,7 +421,6 @@ export const ExListComp: FC<TProps> = (props) => {
               lessonId={ex.lesson_id}
               exerciseTitle={getExerciseTitle(ex.data)}
               studentId={Number(resetTargetStudentId)}
-              onSuccess={() => setAnswersResetKey((k) => k + 1)}
             />
           )}
           {!isView && (

@@ -197,7 +197,6 @@ export const FillGapsSelectExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
-    sleepDelay: 1000,
     isPresentationMode: rest?.isPresentationMode
   });
 
@@ -217,8 +216,15 @@ export const FillGapsSelectExView: FC<TProps> = ({
       return;
     }
     try {
-      setLocalAnswers(JSON.parse(answers[data.id].answer));
-    } catch (err) {}
+      const raw = answers[data.id]?.answer;
+      if (!raw) {
+        setLocalAnswers([]);
+        return;
+      }
+      setLocalAnswers(JSON.parse(raw));
+    } catch (err) {
+      setLocalAnswers([]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher]);
 

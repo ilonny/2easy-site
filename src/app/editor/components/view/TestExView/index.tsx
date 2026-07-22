@@ -446,11 +446,17 @@ export const TestExView: FC<TProps> = ({
     if (!isTeacher) {
       return;
     }
+    if (!answers || !Object.keys(answers).length) {
+      setActiveIndex(0);
+      setScore(0);
+      setIsFinished(false);
+      return;
+    }
     const newActiveIndex = Number(answers["step"]?.answer);
     const newScore = Number(answers["score"]?.answer);
     if (!isNaN(newActiveIndex)) {
       setActiveIndex(newActiveIndex);
-      setScore(newScore);
+      setScore(isNaN(newScore) ? 0 : newScore);
     }
     if (currentStep > totalSteps && newActiveIndex !== 0) {
       setIsFinished(true);

@@ -41,7 +41,8 @@
   margin-bottom: 14px;
   position: sticky;
   top: 0;
-  z-index: 100;
+  /* Below NextUI Modal (z-50); above exercise content */
+  z-index: 10;
   isolation: isolate;
   box-shadow: 0 8px 20px rgba(17, 24, 39, 0.08);
 }

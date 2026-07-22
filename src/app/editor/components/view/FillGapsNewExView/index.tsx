@@ -131,7 +131,6 @@ const FillGapsNewExViewImpl: FC<{
     ex_id,
     activeStudentId: (rest as any).activeStudentId,
     isTeacher,
-    sleepDelay: 1000,
     isPresentationMode,
   });
 
@@ -289,16 +288,51 @@ const FillGapsNewExViewImpl: FC<{
   );
   const [pool, setPool] = useState<TPoolItem[]>([]);
 
+  const applyUsedFlags = useCallback((items: TPoolItem[], parsed: TAnswersMap) => {
+    const usedValues = new Set(
+      Object.values(parsed)
+        .filter((a) => a?.status === "correct" && (a.value || "").trim())
+        .map((a) => normalizeGapAnswer(a.value || "")),
+    );
+    if (!usedValues.size) return items;
+    const claimed = new Set<string>();
+    return items.map((p) => {
+      const key = normalizeGapAnswer(p.value);
+      if (!usedValues.has(key) || claimed.has(p.id) || p.used) return p;
+      claimed.add(p.id);
+      usedValues.delete(key);
+      return { ...p, used: true };
+    });
+  }, []);
+
   useEffect(() => {
     if (mode !== "drag") return;
     const prev = dragPoolStableRef.current;
     if (prev?.key === dragPoolKey) {
       return;
     }
-    const shuffled = shufflePoolItems(poolItems);
+    const shuffled = applyUsedFlags(
+      shufflePoolItems(poolItems),
+      answersRef.current,
+    );
     dragPoolStableRef.current = { key: dragPoolKey, pool: shuffled };
     setPool(shuffled);
-  }, [mode, dragPoolKey, poolItems]);
+  }, [mode, dragPoolKey, poolItems, applyUsedFlags]);
+
+  // After server hydrate / teacher sync, hide already-placed chips from the pool
+  useEffect(() => {
+    if (mode !== "drag" || !serverHydrationVersion) return;
+    setPool((prev) => {
+      if (!prev.length) return prev;
+      const cleared = prev.map((p) => ({ ...p, used: false }));
+      const next = applyUsedFlags(cleared, answersRef.current);
+      dragPoolStableRef.current = {
+        key: dragPoolKey,
+        pool: next,
+      };
+      return next;
+    });
+  }, [mode, serverHydrationVersion, applyUsedFlags, dragPoolKey]);
 
   const onPointerDownChip = useCallback(
     (e: any, item: TPoolItem) => {

@@ -34,7 +34,8 @@
   margin-right: auto;
   position: sticky;
   top: 80px;
-  z-index: 100;
+  /* Below NextUI Modal (z-50); above exercise content */
+  z-index: 10;
   isolation: isolate;
   background: #fff;
   border-radius: 10px;

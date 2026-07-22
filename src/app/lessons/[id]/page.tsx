@@ -218,7 +218,7 @@ export default function LessonPage() {
         const el = document.getElementById(`ex-${exId}`);
         el?.scrollIntoView({ behavior: "smooth", block: "start" });
       } catch (err) {}
-    }, 1000);
+    }, 3000);
 
     return () => {
       active = false;
@@ -236,7 +236,7 @@ export default function LessonPage() {
         if (canGetList) {
           setTimeout(() => {
             getList();
-          }, 1000);
+          }, 4000);
         }
         return;
       }
@@ -252,7 +252,7 @@ export default function LessonPage() {
 
       setTimeout(() => {
         getList();
-      }, 1000);
+      }, 4000);
       return list;
     };
     getList();

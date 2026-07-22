@@ -6,13 +6,12 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { TField, TFillGapsSelectData } from "../../editor/FillGapsSelect/types";
-import { Card, Input, Select, SelectItem } from "@nextui-org/react";
+import { Card, Input } from "@nextui-org/react";
 import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
@@ -21,7 +20,10 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { useParams } from "next/navigation";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
-import { maxOptionTextLength, normalizeField } from "@/app/editor/helpers/fillGapsLegacy";
+import {
+  maxOptionTextLength,
+  normalizeField,
+} from "@/app/editor/helpers/fillGapsLegacy";
 
 type TProps = {
   data: TFillGapsSelectData;
@@ -32,31 +34,20 @@ const AnswerField: FC<{
   field: TField;
   isTeacher: boolean;
   isPresentationMode?: boolean;
-  ex_id?: number;
-  lesson_id?: number;
-  student_id?: number;
-  activeStudentId?: number;
+  answers: Record<string, any>;
+  writeAnswer: (q_id: number | string, answer: string) => Promise<void>;
+  initialAnswer?: string;
 }> = ({
   field,
   isTeacher,
   isPresentationMode,
-  ex_id,
-  lesson_id,
-  student_id,
-  activeStudentId,
+  answers,
+  writeAnswer,
+  initialAnswer,
 }) => {
-  const { getAnswers, writeAnswer, answers } = useExAnswer({
-    ex_id,
-    lesson_id,
-    student_id,
-    isTeacher,
-    activeStudentId,
-    isPresentationMode,
-    sleepDelay: 2000,
-  });
-
-  const [selectedValue, setSelectedValue] = useState("");
-  const [isIncorrect, setIsIncorrect] = useState(false);
+  const [selectedValue, setSelectedValue] = useState(initialAnswer || "");
+  const [isIncorrect] = useState(false);
+  const hydratedRef = useRef(false);
 
   const isCorrect = useMemo(() => {
     return !!field?.options?.find((o) => {
@@ -71,44 +62,35 @@ const AnswerField: FC<{
 
   const onChangeSelection = useCallback((val: string) => {
     setSelectedValue(val);
-    return;
   }, []);
 
-  //первоначальное получение старых ответов ученику
+  // Student: hydrate once from parent-loaded answers
   useEffect(() => {
-    if (!isTeacher) {
-      getAnswers(true).then((a) => {
-        if (a?.[field?.id]?.answer) {
-          setSelectedValue(a?.[field?.id]?.answer);
-        }
-      });
+    if (isTeacher || hydratedRef.current) return;
+    const fromServer = answers?.[field?.id]?.answer || initialAnswer;
+    if (fromServer) {
+      setSelectedValue(fromServer);
+      hydratedRef.current = true;
     }
-  }, [field?.id, getAnswers, isTeacher]);
+  }, [answers, field?.id, initialAnswer, isTeacher]);
 
-  //запись ответа учеником
+  // Student: persist
   useEffect(() => {
-    if (isTeacher) {
-      return;
-    }
+    if (isTeacher) return;
     if (selectedValue) {
       writeAnswer(field.id, selectedValue);
     }
   }, [field.id, isTeacher, selectedValue, writeAnswer]);
 
-  //чтение ответов учителем / сброс с другой стороны
+  // Teacher: live sync
   useEffect(() => {
-    if (!isTeacher || isPresentationMode) {
-      return;
-    }
+    if (!isTeacher || isPresentationMode) return;
     setSelectedValue(answers?.[field?.id]?.answer || "");
   }, [isTeacher, answers, field?.id, isPresentationMode]);
 
   return (
     <>
       <Input
-        // placeholder={
-        //   isTeacher && !isPresentationMode ? field.options[0]?.value : ""
-        // }
         variant="flat"
         className={`${styles["answer-wrapper"]} inputcustom ${
           isCorrect && "isCorrect"
@@ -132,14 +114,9 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
 }) => {
   const image = data?.images?.[0];
   const { profile } = useContext(AuthContext);
-
-  const [localAnswers, setLocalAnswers] = useState<
-    {
-      id: number;
-      word: string;
-      isCorrect: boolean;
-    }[]
-  >([]);
+  const rootsMapRef = useRef(
+    new Map<Element, ReturnType<typeof ReactDOM.createRoot>>()
+  );
 
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
@@ -147,12 +124,30 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
   const student_id = profile?.studentId;
   const ex_id = data?.id;
 
+  const { writeAnswer, answers, getAnswers } = useExAnswer({
+    ex_id,
+    lesson_id,
+    student_id,
+    isTeacher,
+    activeStudentId: (rest as any)?.activeStudentId,
+    isPresentationMode: (rest as any)?.isPresentationMode,
+  });
+
+  // One initial fetch for the whole exercise (not per gap)
+  useEffect(() => {
+    if (isPreview) return;
+    const targetId = student_id || (rest as any)?.activeStudentId;
+    if (!targetId) return;
+    getAnswers(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student_id, isPreview, (rest as any)?.activeStudentId]);
+
   const renderContent = useCallback(() => {
     document
       .querySelectorAll(
         `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`
       )
-      .forEach((el, index) => {
+      .forEach((el) => {
         const id = el.id;
         const rawField = data.fields.find((f) => f.id == id);
         const field = normalizeField(rawField);
@@ -160,7 +155,11 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
         const maxOptionLength = maxOptionTextLength(field.options);
         const safeLen = Number.isFinite(maxOptionLength) ? maxOptionLength : 8;
         el.setAttribute("index", field?.id?.toString());
-        const root = ReactDOM.createRoot(el);
+        let root = rootsMapRef.current.get(el);
+        if (!root) {
+          root = ReactDOM.createRoot(el);
+          rootsMapRef.current.set(el, root);
+        }
         const toolTipContent = field.options
           .filter((o) => o.isCorrect)
           .map((o) => o.value)
@@ -176,23 +175,18 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
             }}
           >
             <ResponsiveTooltip
-              isDisabled={!isTeacher || rest?.isPresentationMode}
+              isDisabled={!isTeacher || (rest as any)?.isPresentationMode}
               content={toolTipContent}
             >
               <div className="">
                 <AnswerField
                   field={field}
                   key={field?.id}
-                  isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
-                  localAnswers={localAnswers}
-                  setLocalAnswers={setLocalAnswers}
-                  isPresentationMode={rest?.isPresentationMode}
-                  ex_id={ex_id}
-                  lesson_id={lesson_id}
-                  student_id={student_id}
-                  activeStudentId={rest?.activeStudentId}
-                  // localAnswers={localAnswers}
-                  // setLocalAnswers={setLocalAnswers}
+                  isTeacher={isTeacher}
+                  isPresentationMode={(rest as any)?.isPresentationMode}
+                  answers={answers}
+                  writeAnswer={writeAnswer}
+                  initialAnswer={answers?.[field?.id]?.answer}
                 />
               </div>
             </ResponsiveTooltip>
@@ -203,20 +197,28 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
     data?.id,
     data.fields,
     isTeacher,
-    rest?.isPresentationMode,
-    rest?.activeStudentId,
-    profile?.role_id,
-    localAnswers,
-    ex_id,
-    lesson_id,
-    student_id,
+    rest,
+    answers,
+    writeAnswer,
   ]);
 
   useEffect(() => {
-    setTimeout(() => {
+    const t = setTimeout(() => {
       renderContent();
     }, 300);
+    return () => clearTimeout(t);
   }, [renderContent]);
+
+  useEffect(() => {
+    return () => {
+      rootsMapRef.current.forEach((root) => {
+        try {
+          root.unmount();
+        } catch {}
+      });
+      rootsMapRef.current.clear();
+    };
+  }, []);
 
   const textHtml = useMemo(() => {
     return data.dataText;
@@ -224,7 +226,9 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
 
   return (
     <div className="exercise-view-shell max-w-[886px]">
-      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto exercise-view-head`}>
+      <div
+        className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto exercise-view-head`}
+      >
         <p
           className="exercise-view-title"
           style={{
@@ -233,13 +237,9 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
         >
           {data.title}
         </p>
-        <p className="exercise-view-subtitle">
-          {data.subtitle}
-        </p>
+        <p className="exercise-view-subtitle">{data.subtitle}</p>
         {!!data.description && (
-          <p className="exercise-view-desc">
-            {data.description}
-          </p>
+          <p className="exercise-view-desc">{data.description}</p>
         )}
       </div>
       {!!image && (
@@ -253,7 +253,9 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
           </Zoom>
         </div>
       )}
-      <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[886px] mx-auto`}>
+      <div
+        className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[886px] mx-auto`}
+      >
         <Card className={`p-4 sm:p-6 md:p-8 lg:p-10 min-w-0`}>
           <div
             style={{ margin: "0 auto", lineHeight: "230%" }}
@@ -264,11 +266,6 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
                 "fill-gaps-input-area answerWrapperArea answerWrapperArea-" +
                 (data?.id || 0).toString()
               }
-              // onBlur={() =>
-              //   setTimeout(() => {
-              //     renderContent();
-              //   }, 300)
-              // }
               dangerouslySetInnerHTML={{ __html: textHtml }}
             ></div>
           </div>

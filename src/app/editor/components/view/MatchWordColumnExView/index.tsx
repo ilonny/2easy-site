@@ -208,8 +208,9 @@ export const MatchWordColumnExView: FC<TProps> = ({
     if (student_id) {
       getAnswers(true).then((a) => {
         try {
-          const parsedIds = JSON.parse(answers[data.id]?.answer);
-          setCorrectChips(parsedIds?.correctIds);
+          const parsedIds = JSON.parse(a?.[data.id]?.answer || "{}");
+          setCorrectChips(parsedIds?.correctIds || []);
+          setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
         } catch (err) {}
       });
     }
@@ -221,10 +222,19 @@ export const MatchWordColumnExView: FC<TProps> = ({
       return;
     }
     try {
-      const parsedIds = JSON.parse(answers[data.id]?.answer);
-      setCorrectChips(parsedIds?.correctIds);
+      const raw = answers[data.id]?.answer;
+      if (!raw) {
+        setCorrectChips([]);
+        setIncorrectIdsMap({});
+        return;
+      }
+      const parsedIds = JSON.parse(raw);
+      setCorrectChips(parsedIds?.correctIds || []);
       setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
-    } catch (err) {}
+    } catch (err) {
+      setCorrectChips([]);
+      setIncorrectIdsMap({});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher]);
 

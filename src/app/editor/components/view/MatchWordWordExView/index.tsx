@@ -189,10 +189,11 @@ export const MatchWordWordExView: FC<TProps> = ({
 
   useEffect(() => {
     if (student_id) {
-      getAnswers(true).then(() => {
+      getAnswers(true).then((a) => {
         try {
-          const parsedIds = JSON.parse(answers[data.id]?.answer);
-          setCorrectIds(parsedIds?.correctIds);
+          const parsedIds = JSON.parse(a?.[data.id]?.answer || "{}");
+          setCorrectIds(parsedIds?.correctIds || []);
+          setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
         } catch {}
       });
     }
@@ -204,10 +205,19 @@ export const MatchWordWordExView: FC<TProps> = ({
       return;
     }
     try {
-      const parsedIds = JSON.parse(answers[data.id]?.answer);
-      setCorrectIds(parsedIds?.correctIds);
+      const raw = answers[data.id]?.answer;
+      if (!raw) {
+        setCorrectIds([]);
+        setIncorrectIdsMap({});
+        return;
+      }
+      const parsedIds = JSON.parse(raw);
+      setCorrectIds(parsedIds?.correctIds || []);
       setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
-    } catch {}
+    } catch {
+      setCorrectIds([]);
+      setIncorrectIdsMap({});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher]);
 

@@ -13,6 +13,7 @@ import RefreshIcon from "@/assets/icons/refresh.svg";
 import { checkResponse, fetchPostJson } from "@/api";
 import { T } from "@/i18n/T";
 import { useParams } from "next/navigation";
+import { notifyLocalAnswersReset } from "@/app/editor/hooks/useExAnswer";
 
 type TProps = {
   exId: number;
@@ -52,6 +53,11 @@ export const ResetAnswersControl: FC<TProps> = ({
       const data = await res.json();
       checkResponse(data);
       if (data?.success) {
+        notifyLocalAnswersReset({
+          lesson_id: Number(lesson_id),
+          ex_id: Number(exId),
+          student_id: Number(studentId),
+        });
         setModalOpen(false);
         onSuccess?.();
       }
