@@ -340,6 +340,11 @@ export const FillGapsDragExView: FC<TProps> = ({
     if (!isTeacher) {
       return;
     }
+    // Only mirror student answers when viewing a student —
+    // otherwise empty poll wipes local practice progress.
+    if (!rest.activeStudentId) {
+      return;
+    }
     try {
       const raw = answers[data.id]?.answer;
       if (!raw) {
@@ -355,7 +360,7 @@ export const FillGapsDragExView: FC<TProps> = ({
       setIncorrectIdsMap({});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers, isTeacher]);
+  }, [answers, isTeacher, rest.activeStudentId]);
 
   useEffect(() => {
     if (correctIds.length || Object.keys(incorrectIdsMap)?.length) {

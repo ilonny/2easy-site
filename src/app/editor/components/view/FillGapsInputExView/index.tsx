@@ -34,6 +34,7 @@ const AnswerField: FC<{
   field: TField;
   isTeacher: boolean;
   isPresentationMode?: boolean;
+  activeStudentId?: number | string | null;
   answers: Record<string, any>;
   writeAnswer: (q_id: number | string, answer: string) => Promise<void>;
   initialAnswer?: string;
@@ -41,6 +42,7 @@ const AnswerField: FC<{
   field,
   isTeacher,
   isPresentationMode,
+  activeStudentId,
   answers,
   writeAnswer,
   initialAnswer,
@@ -82,12 +84,12 @@ const AnswerField: FC<{
     }
   }, [field.id, isTeacher, selectedValue, writeAnswer]);
 
-  // Teacher: live sync
+  // Teacher: live sync only when viewing a student (don't wipe solo practice)
   useEffect(() => {
     if (!isTeacher || isPresentationMode) return;
+    if (!activeStudentId) return;
     setSelectedValue(answers?.[field?.id]?.answer || "");
-  }, [isTeacher, answers, field?.id, isPresentationMode]);
-
+  }, [isTeacher, answers, field?.id, isPresentationMode, activeStudentId]);
   return (
     <>
       <Input
@@ -184,6 +186,7 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
                   key={field?.id}
                   isTeacher={isTeacher}
                   isPresentationMode={(rest as any)?.isPresentationMode}
+                  activeStudentId={(rest as any)?.activeStudentId}
                   answers={answers}
                   writeAnswer={writeAnswer}
                   initialAnswer={answers?.[field?.id]?.answer}

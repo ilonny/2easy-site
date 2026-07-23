@@ -1,6 +1,6 @@
 import { checkResponse, fetchPostJson } from "@/api";
 import { useUploadImage } from "@/hooks/useUploadImage";
-import { useParams } from "next/navigation";
+import { useEditorLessonId } from "@/app/editor/hooks/useEditorLessonId";
 import { useCallback, useState } from "react";
 import { TAudioData } from "../Audio/types";
 import {
@@ -12,7 +12,7 @@ export const useUploadAudioEx = (
   lastSortIndex: number,
   currentSortIndexToShift?: number,
 ) => {
-  const params = useParams();
+  const lessonId = useEditorLessonId();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { uploadImages } = useUploadImage();
@@ -54,7 +54,7 @@ export const useUploadAudioEx = (
           path: "/ex/create",
           isSecure: true,
           data: {
-            lesson_id: params.id,
+            lesson_id: lessonId,
             id: data.id,
             type: "audio",
             data: JSON.stringify(exData),
@@ -73,7 +73,7 @@ export const useUploadAudioEx = (
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift],
+    [lastSortIndex, lessonId, uploadImages, currentSortIndexToShift],
   );
 
   return { isLoading, saveAudioEx, success };

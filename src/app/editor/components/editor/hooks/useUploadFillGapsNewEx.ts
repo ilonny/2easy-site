@@ -1,7 +1,7 @@
 "use client";
 
 import { checkResponse, fetchPostJson } from "@/api";
-import { useParams } from "next/navigation";
+import { useEditorLessonId } from "@/app/editor/hooks/useEditorLessonId";
 import { useCallback, useState } from "react";
 import { TFillGapsNewData } from "../FillGapsNew/types";
 import { useUploadImage } from "@/hooks/useUploadImage";
@@ -14,7 +14,7 @@ export const useUploadFillGapsNewEx = (
   lastSortIndex: number,
   currentSortIndexToShift?: number,
 ) => {
-  const params = useParams();
+  const lessonId = useEditorLessonId();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { uploadImages } = useUploadImage();
@@ -46,7 +46,7 @@ export const useUploadFillGapsNewEx = (
           path: "/ex/create",
           isSecure: true,
           data: {
-            lesson_id: params.id,
+            lesson_id: lessonId,
             id: data.id,
             type: "FILL_GAPS_NEW",
             data: JSON.stringify({
@@ -73,7 +73,7 @@ export const useUploadFillGapsNewEx = (
         setIsLoading(false);
       }
     },
-    [currentSortIndexToShift, lastSortIndex, params.id, uploadImages],
+    [currentSortIndexToShift, lastSortIndex, lessonId, uploadImages],
   );
 
   return { isLoading, saveFillGapsNewEx, success };

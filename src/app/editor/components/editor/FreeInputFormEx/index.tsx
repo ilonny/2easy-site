@@ -1,6 +1,7 @@
 "use client";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
+import { CreateExWithAiButton } from "../CreateExWithAiButton";
 import { TitleExInput } from "../TitleExInput";
 import { TFreeInputFormData } from "./types";
 import { FC, useCallback, useEffect, useState } from "react";
@@ -241,6 +242,16 @@ export const FreeInputFormEx: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
+        <CreateExWithAiButton
+          type="free-input-form"
+          onApply={(generated) => {
+            resetData({
+              ...generated,
+              id: (data as any)?.id,
+              sortIndex: (data as any)?.sortIndex,
+            } as any);
+          }}
+        />
       </div>
       <div className="h-10" />
     </div>

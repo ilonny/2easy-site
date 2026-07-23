@@ -5,14 +5,14 @@ import {
 import { TVideoData } from "./../Video/types";
 import { checkResponse, fetchPostJson } from "@/api";
 import { useUploadImage } from "@/hooks/useUploadImage";
-import { useParams } from "next/navigation";
+import { useEditorLessonId } from "@/app/editor/hooks/useEditorLessonId";
 import { useCallback, useState } from "react";
 
 export const useUploadFillGapsDragEx = (
   lastSortIndex: number,
   currentSortIndexToShift?: number,
 ) => {
-  const params = useParams();
+  const lessonId = useEditorLessonId();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { uploadImages } = useUploadImage();
@@ -42,7 +42,7 @@ export const useUploadFillGapsDragEx = (
           path: "/ex/create",
           isSecure: true,
           data: {
-            lesson_id: params.id,
+            lesson_id: lessonId,
             id: data.id,
             type: "fill-gaps-drag",
             data: JSON.stringify(exData),
@@ -61,7 +61,7 @@ export const useUploadFillGapsDragEx = (
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift],
+    [lastSortIndex, lessonId, uploadImages, currentSortIndexToShift],
   );
 
   return { isLoading, saveFillGapsDragEx, success };

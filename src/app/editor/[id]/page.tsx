@@ -45,6 +45,7 @@ import { ShareLessonLink } from "../components/ShareLessonLink";
 import { CreateHomeworkModal } from "@/app/lessons/components/CreateHomeworkModal";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { EditorAiAssistModal } from "../components/EditorAiAssistModal";
 
 export default function EditorPage() {
   withLogin();
@@ -192,6 +193,16 @@ export default function EditorPage() {
     }
     return true;
   }, [is2easy, isAdmin, lesson?.course_id, lesson?.user_id, profile.id]);
+
+  const canEditWithAi = useMemo(() => {
+    if (!lesson || !profile?.id) return false;
+    const isOwner =
+      Number(profile.id) === Number(lesson.user_id) ||
+      Boolean(lesson.is_my_lesson);
+    // Same edit access as constructor: own lessons, admin for 2easy catalog
+    if (is2easy) return isAdmin;
+    return isOwner;
+  }, [lesson, profile?.id, is2easy, isAdmin]);
 
   const [editIsVisible, setEditIsVisible] = useState(false);
   const [homeworkModalVisible, setHomeworkModalVisible] = useState(false);
@@ -392,6 +403,16 @@ export default function EditorPage() {
           </div>
         )}
       </ContentWrapper>
+      <EditorAiAssistModal
+        lessonId={params.id as string}
+        lesson={lesson}
+        exList={exList || []}
+        onApplied={() => {
+          getLesson(String(params.id));
+          getExList();
+        }}
+        canEdit={canEditWithAi}
+      />
       <ChooseTemplateModal
         onChooseTemplate={onChooseTemplate}
         isVisible={exCreateTemplateModal}

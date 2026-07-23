@@ -15,10 +15,14 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { Tag, TagInput } from "emblor";
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { CreateLessonWithAiModal } from "../CreateLessonWithAiModal";
+import { useCheckSubscription } from "@/app/subscription/helpers";
+import { canUseAi } from "@/app/ai/canUseAi";
+import { AuthContext } from "@/auth";
 
 type TProps = {
   isVisible: boolean;
@@ -40,6 +44,9 @@ export const CreateLessonModalForm: FC<TProps> = ({
   onSuccess,
   currentCourse,
 }) => {
+  const { profile } = useContext(AuthContext);
+  const { requireAiSubscription } = useCheckSubscription();
+  const showAi = canUseAi(profile);
   const {
     control,
     handleSubmit,
@@ -55,6 +62,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
   const [images, setImages] = useState([]);
   const { uploadImages } = useUploadImage();
   const [isLoading, setIsLoading] = useState(false);
+  const [aiModalVisible, setAiModalVisible] = useState(false);
 
   const onSubmit = useCallback(
     async (_data) => {
@@ -97,6 +105,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   return (
+    <>
     <Modal
       size="xl"
       isOpen={isVisible}
@@ -193,10 +202,40 @@ export const CreateLessonModalForm: FC<TProps> = ({
             >
               <T k="lessons.createLesson" />
             </Button>
+            {showAi && (
+              <>
+                <div className="h-3" />
+                <Button
+                  variant="bordered"
+                  className="w-full"
+                  size="lg"
+                  type="button"
+                  onPress={() => {
+                    if (!requireAiSubscription()) return;
+                    setIsVisible(false);
+                    setAiModalVisible(true);
+                  }}
+                >
+                  <T
+                    k="ai.createWithAi"
+                    defaultText="Создать урок с помощью AI"
+                  />
+                </Button>
+              </>
+            )}
             <div className="h-10" />
           </form>
         </ModalBody>
       </ModalContent>
     </Modal>
+    {showAi && (
+      <CreateLessonWithAiModal
+        isVisible={aiModalVisible}
+        setIsVisible={setAiModalVisible}
+        onSuccess={onSuccess}
+        currentCourse={currentCourse}
+      />
+    )}
+    </>
   );
 };

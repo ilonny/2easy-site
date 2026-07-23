@@ -2,6 +2,7 @@ import { AuthContext } from "@/auth";
 import { SibscribeContext } from "@/subscribe/context";
 import { useRouter } from "next/navigation";
 import { useCallback, useContext } from "react";
+import { toast } from "react-toastify";
 
 export const useCheckSubscription = () => {
   const { subscription } = useContext(SibscribeContext);
@@ -23,7 +24,29 @@ export const useCheckSubscription = () => {
     return true;
   }, [authIsLoading, profile?.login, profile?.studentId, router, subscription]);
 
+  const requireAiSubscription = useCallback(() => {
+    if (!authIsLoading && !profile?.login && !profile?.studentId) {
+      toast("AI работает только с активной подпиской", { type: "error" });
+      router.push("/subscription");
+      return false;
+    }
+    if (subscription === undefined) {
+      return true;
+    }
+    if (!subscription?.success) {
+      toast("AI работает только с активной подпиской", { type: "error" });
+      router.push("/subscription");
+      return false;
+    }
+    return true;
+  }, [authIsLoading, profile?.login, profile?.studentId, router, subscription]);
+
   const hasSubscription = subscription?.success;
 
-  return { checkSubscription, subscription, hasSubscription };
+  return {
+    checkSubscription,
+    requireAiSubscription,
+    subscription,
+    hasSubscription,
+  };
 };

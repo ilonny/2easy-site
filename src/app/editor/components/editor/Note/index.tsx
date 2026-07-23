@@ -1,5 +1,6 @@
 "use client";
 import { useExData } from "../hooks/useExData";
+import { CreateExWithAiButton } from "../CreateExWithAiButton";
 import { TitleExInput } from "../TitleExInput";
 import { TNoteData } from "./types";
 import { FC, useCallback, useEffect } from "react";
@@ -89,6 +90,16 @@ export const Note: FC<TProps> = ({
           <T k="common.save" defaultText="Сохранить" />
         </Button>
       </div>
+        <CreateExWithAiButton
+          type="note"
+          onApply={(generated) => {
+            resetData({
+              ...generated,
+              id: (data as any)?.id,
+              sortIndex: (data as any)?.sortIndex,
+            } as any);
+          }}
+        />
       <div className="h-10" />
     </div>
   );

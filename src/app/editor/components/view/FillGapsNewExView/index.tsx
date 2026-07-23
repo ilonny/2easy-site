@@ -163,9 +163,10 @@ const FillGapsNewExViewImpl: FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [student_id, isPreview]);
 
-  // teacher live updates + remote reset sync
+  // teacher live updates + remote reset sync (only when viewing a student)
   useEffect(() => {
     if (isPreview || !answers || !isTeacher) return;
+    if (!(rest as any)?.activeStudentId) return;
     try {
       const raw = (answers as any)?.[data.id]?.answer;
       if (!raw) {
@@ -195,7 +196,7 @@ const FillGapsNewExViewImpl: FC<{
       setServerHydrationVersion((v) => v + 1);
       setAnswersVersion((v) => v + 1);
     } catch {}
-  }, [answers, data.id, isPreview, isTeacher]);
+  }, [answers, data.id, isPreview, isTeacher, (rest as any)?.activeStudentId]);
 
   const schedulePersist = useCallback(() => {
     if (!shouldPersistAnswers) return;

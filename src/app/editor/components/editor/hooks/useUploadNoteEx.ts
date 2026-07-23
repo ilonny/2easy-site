@@ -1,13 +1,13 @@
 import { TNoteData } from "./../Note/types";
 import { checkResponse, fetchPostJson } from "@/api";
-import { useParams } from "next/navigation";
+import { useEditorLessonId } from "@/app/editor/hooks/useEditorLessonId";
 import { useCallback, useState } from "react";
 
 export const useUploadNoteEx = (
   lastSortIndex?: number,
   currentSortIndexToShift?: number
 ) => {
-  const params = useParams();
+  const lessonId = useEditorLessonId();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const saveNoteEx = useCallback(
@@ -20,7 +20,7 @@ export const useUploadNoteEx = (
 
       try {
         const body = {
-          lesson_id: params.id,
+          lesson_id: lessonId,
           id: data.id,
           type: "note",
           data: JSON.stringify(exData),
@@ -48,7 +48,7 @@ export const useUploadNoteEx = (
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id, currentSortIndexToShift]
+    [lastSortIndex, lessonId, currentSortIndexToShift]
   );
 
   return { isLoading, saveNoteEx, success };

@@ -395,12 +395,13 @@ export const TestExView: FC<TProps> = ({
   // }, [student_id]);
 
   const onPressNext = useCallback(() => {
-    setActiveIndex((i) => i + 1);
-    // if (!isLastStep) {
-    //   return;
-    // }
-    setIsFinished(isLastStep);
-  }, [isLastStep]);
+    setActiveIndex((i) => {
+      const next = i + 1;
+      const total = data?.questions?.length || 0;
+      setIsFinished(next >= total);
+      return next;
+    });
+  }, [data?.questions?.length]);
 
   const onPressRestart = useCallback(() => {
     setScore(0);
@@ -434,16 +435,25 @@ export const TestExView: FC<TProps> = ({
         });
       }
     }
+    setIsFinished(false);
     setActiveIndex((i) => (i - 1 < 0 ? 0 : i - 1));
   }, [activeIndex, data.questions, writeAnswer, setAnswers]);
 
   useEffect(() => {
+    // Teachers without student_id can't persist answers — skip noop writes
+    if (!student_id) return;
     writeAnswer("step", activeIndex.toString());
     writeAnswer("score", score.toString());
-  }, [activeIndex, writeAnswer, score]);
+  }, [activeIndex, writeAnswer, score, student_id]);
 
   useEffect(() => {
     if (!isTeacher) {
+      return;
+    }
+    // Local preview / teacher alone: don't sync step from empty answers —
+    // that resets activeIndex to 0 and breaks the Next button.
+    const hasStudentTarget = Boolean(rest?.activeStudentId || student_id);
+    if (!hasStudentTarget || isPreview) {
       return;
     }
     if (!answers || !Object.keys(answers).length) {
@@ -458,12 +468,20 @@ export const TestExView: FC<TProps> = ({
       setActiveIndex(newActiveIndex);
       setScore(isNaN(newScore) ? 0 : newScore);
     }
-    if (currentStep > totalSteps && newActiveIndex !== 0) {
+    const total = data?.questions?.length || 0;
+    if (newActiveIndex >= total && newActiveIndex !== 0) {
       setIsFinished(true);
     } else {
       setIsFinished(false);
     }
-  }, [answers, currentStep, isTeacher, totalSteps]);
+  }, [
+    answers,
+    isTeacher,
+    isPreview,
+    student_id,
+    rest?.activeStudentId,
+    data?.questions?.length,
+  ]);
 
   const questionStepAnswers = useMemo(() => {
     return answers?.[activeQuestion?.id];

@@ -215,6 +215,11 @@ export const FillGapsSelectExView: FC<TProps> = ({
     if (!isTeacher) {
       return;
     }
+    // Only mirror student answers when viewing a student —
+    // otherwise empty poll wipes local practice progress.
+    if (!rest.activeStudentId) {
+      return;
+    }
     try {
       const raw = answers[data.id]?.answer;
       if (!raw) {
@@ -226,7 +231,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
       setLocalAnswers([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers, isTeacher]);
+  }, [answers, isTeacher, rest.activeStudentId]);
 
   useEffect(() => {
     if (localAnswers.length) {

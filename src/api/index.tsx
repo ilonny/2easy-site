@@ -11,12 +11,12 @@ export const ApiProvider = ({ children }) => {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
 // console.log("process.env?", process.env);
-export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.replace(
-  "/undefined",
-  ""
-);
+// export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.replace(
+//   "/undefined",
+//   ""
+// );
 // console.log("BASE_URL", BASE_URL);
-// export const BASE_URL = "http://localhost:8888";
+export const BASE_URL = "http://localhost:8888";
 // export const BASE_URL = "https://beta-api.2easyeng.com";
 
 export const API_URL = BASE_URL + "/api";
@@ -51,6 +51,9 @@ export const checkResponse = (
     message?: string;
     successMessage?: string;
     warning?: boolean;
+    status?: number;
+    needRedirect?: boolean | string;
+    needSubscription?: boolean;
   },
   skipToast?: boolean
 ) => {
@@ -71,8 +74,13 @@ export const checkResponse = (
     toast(res?.message ? res?.message : "Что-то пошло не так", {
       type: "error",
     });
+    if (res?.needSubscription) {
+      window.location.pathname = "/subscription";
+      return;
+    }
     if (res?.needRedirect) {
-      window.location.pathname = "/";
+      window.location.pathname =
+        typeof res.needRedirect === "string" ? res.needRedirect : "/";
     }
     return;
   }

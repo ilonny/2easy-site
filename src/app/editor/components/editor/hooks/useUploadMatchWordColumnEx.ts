@@ -1,6 +1,6 @@
 import { checkResponse, fetchPostJson } from "@/api";
 import { useUploadImage } from "@/hooks/useUploadImage";
-import { useParams } from "next/navigation";
+import { useEditorLessonId } from "@/app/editor/hooks/useEditorLessonId";
 import { useCallback, useState } from "react";
 import { TMatchWordColumnData } from "../MatchWordColumn/types";
 import {
@@ -12,7 +12,7 @@ export const useUploadMatchWordColumnEx = (
   lastSortIndex: number,
   currentSortIndexToShift?: number,
 ) => {
-  const params = useParams();
+  const lessonId = useEditorLessonId();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { uploadImages } = useUploadImage();
@@ -48,7 +48,7 @@ export const useUploadMatchWordColumnEx = (
           path: "/ex/create",
           isSecure: true,
           data: {
-            lesson_id: params.id,
+            lesson_id: lessonId,
             id: data.id,
             type: "match-word-column",
             data: JSON.stringify(exData),
@@ -67,7 +67,7 @@ export const useUploadMatchWordColumnEx = (
         setIsLoading(false);
       }
     },
-    [lastSortIndex, params.id, uploadImages, currentSortIndexToShift],
+    [lastSortIndex, lessonId, uploadImages, currentSortIndexToShift],
   );
 
   return { isLoading, saveMathWordColumnEx, success };

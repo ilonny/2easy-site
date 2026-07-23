@@ -1,6 +1,7 @@
 "use client";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
+import { CreateExWithAiButton } from "../CreateExWithAiButton";
 import { TitleExInput } from "../TitleExInput";
 import { TTextDefaultData } from "./types";
 import { FC, useEffect, useState } from "react";
@@ -295,6 +296,16 @@ export const TextDefaultEx: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
+        <CreateExWithAiButton
+          type="text-default"
+          onApply={(generated) => {
+            resetData({
+              ...generated,
+              id: (data as any)?.id,
+              sortIndex: (data as any)?.sortIndex,
+            } as any);
+          }}
+        />
       </div>
       <div className="h-10" />
     </div>

@@ -7,6 +7,7 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FillGapsNewExView } from "../../view/FillGapsNewExView";
 import { useExData } from "../hooks/useExData";
+import { CreateExWithAiButton } from "../CreateExWithAiButton";
 import { useUploadFillGapsNewEx } from "../hooks/useUploadFillGapsNewEx";
 import { GapOptionsModal } from "./GapOptionsModal";
 import { TitleExInput } from "../TitleExInput";
@@ -802,6 +803,18 @@ export const FillGapsNew: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
+        <CreateExWithAiButton
+          type="FILL_GAPS_NEW"
+          onApply={(generated) => {
+            resetData({
+              ...generated,
+              id: (data as any)?.id,
+              sortIndex: (data as any)?.sortIndex,
+            } as any);
+            setImages([]);
+            setSlateMountKey((k) => k + 1);
+          }}
+        />
       </div>
 
       {portalReady &&
