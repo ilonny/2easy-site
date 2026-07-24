@@ -280,6 +280,7 @@ export const MatchWordWord: FC<TProps> = ({
         </div>
         <CreateExWithAiButton
           type="match-word-word"
+          currentData={data as any}
           onApply={(generated) => {
             resetData({
               ...generated,

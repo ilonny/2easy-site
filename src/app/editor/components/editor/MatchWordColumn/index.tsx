@@ -325,6 +325,7 @@ export const MatchWordColumn: FC<TProps> = ({
         </div>
         <CreateExWithAiButton
           type="match-word-column"
+          currentData={data as any}
           onApply={(generated) => {
             resetData({
               ...generated,

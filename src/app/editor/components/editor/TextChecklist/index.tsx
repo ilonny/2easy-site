@@ -249,6 +249,7 @@ export const TextChecklist: FC<TProps> = ({
         </div>
         <CreateExWithAiButton
           type="text-checklist"
+          currentData={data as any}
           onApply={(generated) => {
             resetData({
               ...generated,

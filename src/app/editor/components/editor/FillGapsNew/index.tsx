@@ -805,6 +805,7 @@ export const FillGapsNew: FC<TProps> = ({
         </div>
         <CreateExWithAiButton
           type="FILL_GAPS_NEW"
+          currentData={data as any}
           onApply={(generated) => {
             resetData({
               ...generated,

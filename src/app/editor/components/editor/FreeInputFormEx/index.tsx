@@ -244,6 +244,7 @@ export const FreeInputFormEx: FC<TProps> = ({
         </div>
         <CreateExWithAiButton
           type="free-input-form"
+          currentData={data as any}
           onApply={(generated) => {
             resetData({
               ...generated,

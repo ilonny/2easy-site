@@ -423,6 +423,7 @@ export const TestEx: FC<TProps> = ({
         </div>
         <CreateExWithAiButton
           type="test"
+          currentData={data as any}
           onApply={(generated) => {
             resetData({
               ...generated,

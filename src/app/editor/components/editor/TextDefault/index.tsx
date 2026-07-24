@@ -298,6 +298,7 @@ export const TextDefaultEx: FC<TProps> = ({
         </div>
         <CreateExWithAiButton
           type="text-default"
+          currentData={data as any}
           onApply={(generated) => {
             resetData({
               ...generated,

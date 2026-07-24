@@ -2,7 +2,6 @@
 
 import { checkResponse, fetchPostJson } from "@/api";
 import { canUseAi } from "@/app/ai/canUseAi";
-import { AI_LEVELS, TAiLevel } from "@/app/lessons/components/CreateLessonWithAiModal/types";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { useEditorLessonId } from "@/app/editor/hooks/useEditorLessonId";
 import { AuthContext } from "@/auth";
@@ -10,14 +9,14 @@ import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import {
   Button,
-  Chip,
   Modal,
   ModalBody,
   ModalContent,
   ModalHeader,
+  Spinner,
   Textarea,
 } from "@nextui-org/react";
-import { FC, useCallback, useContext, useState } from "react";
+import { FC, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 export const AI_SUPPORTED_EX_TYPES = [
   "text-default",
@@ -32,8 +31,16 @@ export const AI_SUPPORTED_EX_TYPES = [
   "free-input-form",
 ] as const;
 
+type TChatMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+};
+
 type TProps = {
   type: string;
+  /** Current exercise fields from the editor (without id/sortIndex if preferred) */
+  currentData?: Record<string, any> | null;
   onApply: (data: Record<string, any>) => void;
   lessonContext?: {
     title?: string;
@@ -42,8 +49,42 @@ type TProps = {
   };
 };
 
+const makeId = () =>
+  `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+const WELCOME =
+  "Привет! Я помогу отредактировать это задание. Напиши, что изменить: упростить текст, добавить вопросы, поменять тон, переписать примеры и т.д.\n\nЯ отвечаю только про уроки и упражнения 2easy.";
+
+const slimExerciseData = (raw: Record<string, any>) =>
+  JSON.parse(
+    JSON.stringify(raw || {}, (key, value) => {
+      if (
+        [
+          "bgAttachments",
+          "editorAttachments",
+          "secondEditorAttachments",
+          "attachments",
+          "images",
+          "videos",
+          "editorImages",
+          "dataURL",
+          "path",
+          "id",
+          "sortIndex",
+        ].includes(key)
+      ) {
+        return Array.isArray(value) ? [] : undefined;
+      }
+      if (typeof value === "string" && value.length > 2000) {
+        return value.slice(0, 2000) + "…";
+      }
+      return value;
+    }),
+  );
+
 export const CreateExWithAiButton: FC<TProps> = ({
   type,
+  currentData,
   onApply,
   lessonContext,
 }) => {
@@ -51,42 +92,99 @@ export const CreateExWithAiButton: FC<TProps> = ({
   const { requireAiSubscription } = useCheckSubscription();
   const lessonId = useEditorLessonId();
   const [open, setOpen] = useState(false);
-  const [prompt, setPrompt] = useState("");
-  const [level, setLevel] = useState<TAiLevel | null>(null);
+  const [instruction, setInstruction] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [messages, setMessages] = useState<TChatMessage[]>([
+    { id: makeId(), role: "assistant", content: WELCOME },
+  ]);
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const latestDataRef = useRef<Record<string, any>>(currentData || {});
 
-  const onGenerate = useCallback(async () => {
-    if (!prompt.trim() || isLoading) return;
+  useEffect(() => {
+    latestDataRef.current = currentData || {};
+  }, [currentData]);
+
+  useEffect(() => {
+    if (!open) return;
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading, open]);
+
+  const onSubmit = useCallback(async () => {
+    if (!instruction.trim() || isLoading) return;
+    const text = instruction.trim();
+    setInstruction("");
     setIsLoading(true);
     setError(null);
+    setMessages((prev) => [
+      ...prev,
+      { id: makeId(), role: "user", content: text },
+    ]);
+
     try {
       const res = await fetchPostJson({
-        path: "/ai/generate-exercise",
+        path: "/ai/refine-exercise",
         isSecure: true,
         data: {
           type,
-          prompt: prompt.trim(),
-          level: level || undefined,
+          instruction: text,
+          currentData: slimExerciseData(latestDataRef.current),
           lesson_id: lessonId ? Number(lessonId) : undefined,
           lessonContext,
+          conversation: messages
+            .slice(-8)
+            .map((m) => ({ role: m.role, content: m.content })),
         },
       });
       const json = await res.json();
-      if (!json?.success || !json?.data) {
+      if (!json?.success) {
         checkResponse(json);
-        setError(json?.message || "Не удалось создать задание");
+        const msg = json?.message || "Не удалось обновить задание";
+        setError(msg);
+        setMessages((prev) => [
+          ...prev,
+          { id: makeId(), role: "assistant", content: msg },
+        ]);
         return;
       }
-      onApply(json.data);
-      setOpen(false);
-      setPrompt("");
+
+      const assistantText =
+        json.assistantMessage ||
+        (json.refused
+          ? "Я помогаю только с уроками и упражнениями. Напиши, что изменить в задании."
+          : "Готово — обновил задание.");
+
+      setMessages((prev) => [
+        ...prev,
+        { id: makeId(), role: "assistant", content: assistantText },
+      ]);
+
+      if (!json.refused && json.data && typeof json.data === "object") {
+        latestDataRef.current = json.data;
+        onApply(json.data);
+      }
     } catch (e) {
       setError("Ошибка сети");
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: makeId(),
+          role: "assistant",
+          content: "Ошибка сети. Попробуй ещё раз.",
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
-  }, [prompt, isLoading, type, level, lessonContext, onApply, lessonId]);
+  }, [
+    instruction,
+    isLoading,
+    type,
+    lessonId,
+    lessonContext,
+    messages,
+    onApply,
+  ]);
 
   if (!canUseAi(profile)) {
     return null;
@@ -109,55 +207,71 @@ export const CreateExWithAiButton: FC<TProps> = ({
             setOpen(true);
           }}
         >
-          <T k="ai.createExWithAi" defaultText="Создать с помощью AI" />
+          <T k="ai.editExWithAi" defaultText="Отредактировать с помощью ИИ" />
         </Button>
       </div>
 
       <Modal
         isOpen={open}
         onClose={() => setOpen(false)}
-        size="lg"
+        size="2xl"
         scrollBehavior="inside"
+        classNames={{ base: "max-h-[90dvh]" }}
       >
         <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            <T k="ai.createExWithAi" defaultText="Создать с помощью AI" />
+          <ModalHeader className="flex flex-col gap-1 border-b border-default-100">
+            <T k="ai.editExWithAi" defaultText="Отредактировать с помощью ИИ" />
             <p className="text-sm font-normal text-default-500">
               <T
-                k="ai.createExWithAiHint"
-                defaultText="Опиши тему и что должно быть в задании — AI заполнит поля"
+                k="ai.editExWithAiHint"
+                defaultText="Чат по этому заданию — опиши правку, и поля обновятся"
               />
             </p>
           </ModalHeader>
-          <ModalBody className="pb-6 gap-4">
-            <div>
-              <p className="text-sm font-medium mb-2">
-                <T k="ai.levelOptional" defaultText="Уровень (необязательно)" />
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {AI_LEVELS.map((l) => (
-                  <Chip
-                    key={l}
-                    variant={level === l ? "solid" : "bordered"}
-                    color={level === l ? "primary" : "default"}
-                    className="cursor-pointer"
-                    onClick={() => setLevel((prev) => (prev === l ? null : l))}
+          <ModalBody className="pb-6 gap-3">
+            <div className="flex flex-col gap-3 max-h-[45vh] overflow-y-auto overscroll-contain py-1">
+              {messages.map((m) => (
+                <div
+                  key={m.id}
+                  className={`flex ${
+                    m.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-[90%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap ${
+                      m.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-default-100 text-foreground"
+                    }`}
                   >
-                    {l}
-                  </Chip>
-                ))}
-              </div>
+                    {m.content}
+                  </div>
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex items-center gap-2 text-sm text-default-500">
+                  <Spinner size="sm" />
+                  <T k="ai.thinking" defaultText="AI думает…" />
+                </div>
+              )}
+              <div ref={chatEndRef} />
             </div>
+
             <Textarea
-              minRows={4}
-              label={<T k="ai.exPrompt" defaultText="Что создать" />}
-              placeholder={i18n.t("ai.exPromptPlaceholder", {
+              minRows={3}
+              value={instruction}
+              onValueChange={setInstruction}
+              placeholder={i18n.t("ai.editExPlaceholder", {
                 defaultValue:
-                  "Например: 5 вопросов про travel для B1, с юмором в стиле 2easy",
+                  "Например: сделай проще для A2 / добавь 2 вопроса / перепиши примеры",
               })}
-              value={prompt}
-              onValueChange={setPrompt}
               isDisabled={isLoading}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                  e.preventDefault();
+                  onSubmit();
+                }
+              }}
             />
             {error && <p className="text-sm text-danger">{error}</p>}
             <Button
@@ -165,11 +279,14 @@ export const CreateExWithAiButton: FC<TProps> = ({
               className="w-full"
               size="lg"
               isLoading={isLoading}
-              isDisabled={!prompt.trim()}
-              onPress={onGenerate}
+              isDisabled={!instruction.trim()}
+              onPress={onSubmit}
             >
-              <T k="ai.generateEx" defaultText="Сгенерировать задание" />
+              <T k="ai.applyChanges" defaultText="Отправить правку AI" />
             </Button>
+            <p className="text-xs text-default-400 text-center">
+              ⌘/Ctrl + Enter — отправить
+            </p>
           </ModalBody>
         </ModalContent>
       </Modal>

@@ -428,6 +428,7 @@ export const Text2ColEx: FC<TProps> = ({
         </div>
         <CreateExWithAiButton
           type="text-2-col"
+          currentData={data as any}
           onApply={(generated) => {
             resetData({
               ...generated,

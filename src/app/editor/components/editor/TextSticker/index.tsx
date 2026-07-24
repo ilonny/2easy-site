@@ -274,6 +274,7 @@ export const TextSticker: FC<TProps> = ({
         </div>
         <CreateExWithAiButton
           type="text-sticker"
+          currentData={data as any}
           onApply={(generated) => {
             resetData({
               ...generated,

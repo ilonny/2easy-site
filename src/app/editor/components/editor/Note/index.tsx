@@ -92,6 +92,7 @@ export const Note: FC<TProps> = ({
       </div>
         <CreateExWithAiButton
           type="note"
+          currentData={data as any}
           onApply={(generated) => {
             resetData({
               ...generated,
