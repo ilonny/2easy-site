@@ -178,14 +178,29 @@ export const EditorAiAssistModal: FC<TProps> = ({
         return;
       }
 
+      const beforeCount = currentDraft.exercises.length;
+      const afterCount = Array.isArray(refined.exercises)
+        ? refined.exercises.length
+        : beforeCount;
+      let assistantText =
+        refined.assistantMessage ||
+        "Готово — обновил урок. Можешь проверить задания и написать следующую правку.";
+      if (
+        /добав|add\b|создай.*задан/i.test(text) &&
+        afterCount <= beforeCount
+      ) {
+        assistantText +=
+          "\n\n⚠️ Количество заданий не увеличилось — попробуй сформулировать точнее, например: «добавь match-word-word с 6 парами слово–определение».";
+      } else if (afterCount > beforeCount) {
+        assistantText += `\n\n(+${afterCount - beforeCount} задание, сейчас ${afterCount})`;
+      }
+
       setMessages((prev) => [
         ...prev,
         {
           id: makeId(),
           role: "assistant",
-          content:
-            refined.assistantMessage ||
-            "Готово — обновил урок. Можешь проверить задания и написать следующую правку.",
+          content: assistantText,
         },
       ]);
       onApplied();
