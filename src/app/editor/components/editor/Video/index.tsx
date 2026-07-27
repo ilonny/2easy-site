@@ -2,11 +2,11 @@
 import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
-import { TVideoData } from "./types";
+import { TVideoData, TVideoItem, TVideoSource } from "./types";
 import { FC, useCallback, useEffect, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button, Input, Textarea } from "@nextui-org/react";
+import { Button, Input, Progress } from "@nextui-org/react";
 import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import Close from "@/assets/icons/close.svg";
 import { useUploadVideoEx } from "../hooks/useUploadVideoEx";
@@ -14,6 +14,14 @@ import InfoIcon from "@/assets/icons/info.svg";
 import { VideoExView } from "../../view/VideoExView";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { getImageNameFromPath } from "../mappers";
+import { VideoFileDropzone, formatMb } from "./VideoFileDropzone";
+
+const emptyVideo = (): TVideoItem => ({
+  content: "",
+  title: "",
+  source: "link",
+});
 
 const defaultValuesStub: TVideoData = {
   title: "Let's watch!",
@@ -21,7 +29,7 @@ const defaultValuesStub: TVideoData = {
   subtitle: "Watch the video and answer the questions below",
   description: "",
   images: [],
-  videos: [{ content: "", title: "" }],
+  videos: [emptyVideo()],
 };
 
 type TProps = {
@@ -37,15 +45,18 @@ export const Video: FC<TProps> = ({
   lastSortIndex,
   currentSortIndexToShift,
 }) => {
-  const { isLoading, saveVideoEx, success } = useUploadVideoEx(
+  const { isLoading, saveVideoEx, success, uploadProgress } = useUploadVideoEx(
     lastSortIndex,
-    currentSortIndexToShift
+    currentSortIndexToShift,
   );
-  const { data, changeData, resetData } = useExData<TVideoData>(
-    defaultValues || defaultValuesStub
+  const { data, changeData, resetData, setData } = useExData<TVideoData>(
+    defaultValues || defaultValuesStub,
   );
   const [images, setImages] = useState<TVideoData["images"]>(
-    defaultValues?.images || []
+    defaultValues?.images || [],
+  );
+  const [fileErrors, setFileErrors] = useState<Record<number, string | null>>(
+    {},
   );
 
   useEffect(() => {
@@ -56,7 +67,7 @@ export const Video: FC<TProps> = ({
         subtitle: "Watch the video and answer the questions below",
         description: "",
         images: [],
-        videos: [{ content: "", title: "" }],
+        videos: [emptyVideo()],
       });
   }, [resetData]);
 
@@ -75,18 +86,47 @@ export const Video: FC<TProps> = ({
     (index: number) => {
       const videos = data.videos.filter((_s, i) => i !== index);
       if (!videos.length) {
-        changeData("videos", [{ content: "", title: "" }]);
+        changeData("videos", [emptyVideo()]);
         return;
       }
       changeData("videos", videos);
+      setFileErrors({});
     },
-    [changeData, data.videos]
+    [changeData, data.videos],
   );
 
   const createSticker = useCallback(() => {
-    const videos = data.videos.concat({ content: "", title: "" });
+    const videos = data.videos.concat(emptyVideo());
     changeData("videos", videos);
   }, [changeData, data.videos]);
+
+  const updateVideo = useCallback(
+    (index: number, patch: Partial<TVideoItem>) => {
+      const videos = [...(data.videos || [])];
+      videos[index] = { ...videos[index], ...patch };
+      changeData("videos", videos);
+    },
+    [changeData, data.videos],
+  );
+
+  const setVideoSource = useCallback(
+    (index: number, source: TVideoSource) => {
+      const current = data.videos[index] || emptyVideo();
+      if (source === "file") {
+        updateVideo(index, {
+          source: "file",
+          attachment: current.attachment,
+        });
+        return;
+      }
+      updateVideo(index, {
+        source: "link",
+        attachment: undefined,
+      });
+      setFileErrors((prev) => ({ ...prev, [index]: null }));
+    },
+    [data.videos, updateVideo],
+  );
 
   const onChangeSticker = useCallback(
     (text: string, index: number, key: "content" | "title") => {
@@ -125,10 +165,50 @@ export const Video: FC<TProps> = ({
         text = `<iframe src="https://vkvideo.ru/video_ext.php?oid=-${oid}&id=${id}&hd=2&autoplay=0" width="100%" height="500" allow="encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" frameborder="0" allowfullscreen></iframe>`;
       }
       data.videos[index][key] = text;
+      if (key === "content") {
+        data.videos[index].source = "link";
+        data.videos[index].attachment = undefined;
+      }
       changeData("videos", [...data.videos]);
     },
-    [data?.videos, changeData]
+    [data?.videos, changeData],
   );
+
+  const assignFile = useCallback(
+    (index: number, file: File) => {
+      setData((prev) => {
+        const videos = [...(prev.videos || [])];
+        const current = videos[index] || emptyVideo();
+        videos[index] = {
+          ...current,
+          source: "file",
+          attachment: {
+            file,
+            name: file.name,
+          },
+        };
+        return { ...prev, videos };
+      });
+      setFileErrors((prev) => ({ ...prev, [index]: null }));
+    },
+    [setData],
+  );
+
+  const clearVideoFile = (index: number) => {
+    updateVideo(index, {
+      source: "file",
+      attachment: undefined,
+      content: "",
+    });
+  };
+
+  const progressPercent =
+    uploadProgress && uploadProgress.total > 0
+      ? Math.min(
+          100,
+          Math.round((uploadProgress.loaded / uploadProgress.total) * 100),
+        )
+      : 0;
 
   return (
     <div>
@@ -143,7 +223,9 @@ export const Video: FC<TProps> = ({
           />
           <div className="h-4" />
           <TitleExInput
-            label={<T k="editor.taskSubtitle" defaultText="Подзаголовок задания" />}
+            label={
+              <T k="editor.taskSubtitle" defaultText="Подзаголовок задания" />
+            }
             value={data.subtitle}
             setValue={(val) => changeData("subtitle", val)}
           />
@@ -190,63 +272,171 @@ export const Video: FC<TProps> = ({
       <div className="h-5" />
       <div className="flex flex-wrap items-start justify-between">
         {data.videos?.map((video, index) => {
+          const source: TVideoSource =
+            video.source === "file" ||
+            !!video.attachment?.file ||
+            !!video.attachment?.path
+              ? "file"
+              : "link";
+          const isFile = source === "file";
+          const fileName =
+            video.attachment?.name ||
+            (video.attachment?.file instanceof File
+              ? video.attachment.file.name
+              : "") ||
+            getImageNameFromPath(video.attachment?.path) ||
+            "";
+          const isUploadingThis =
+            isLoading &&
+            uploadProgress &&
+            uploadProgress.videoIndex === index;
+
           return (
             <div key={index} className="w-[100%] mb-4">
               <div className="">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
                   <div className="flex items-center gap-2">
-                    <p><T k="editor.videoLink" defaultText="Ссылка на видео" /></p>
-                    <ResponsiveTooltip
-                      content={i18n.t("editor.videoLinkHint", {
-                        defaultValue: (i18n.language || "")
-                          .toLowerCase()
-                          .startsWith("ru")
-                          ? "Вставьте ссылку на видео из Youtube, Vk Видео, Vimeo, Rutube, Google Drive или TED через кнопку «поделиться»."
-                          : "Insert the link to the video from YouTube, VK Video, Vimeo, Rutube, Google Drive, or TED using the 'Share' button.",
-                      })}
-                      classNames={{
-                        base: [
-                          // arrow color
-                          "before:bg-neutral-400 dark:before:bg-white",
-                        ],
-                        content: [
-                          "py-2 px-4 shadow-xl",
-                          "text-black bg-white max-w-[255px]",
-                        ],
-                      }}
-                      placement="right-end"
-                      color="foreground"
-                    >
-                      <Image src={InfoIcon} alt="InfoIcon" />
-                    </ResponsiveTooltip>
+                    <p className="font-medium">
+                      <T
+                        k="editor.videoSource"
+                        defaultText="Источник видео"
+                      />
+                    </p>
                   </div>
-                </div>
-                <div className="flex my-2 gap-4">
-                  <Input
-                    value={video.content}
-                    onChange={(e) =>
-                      onChangeSticker(e.target.value, index, "content")
-                    }
-                    classNames={{ inputWrapper: "bg-white" }}
-                  />
-
                   <Button
                     isIconOnly
                     onClick={() => onDeleteVideo(index)}
                     variant="light"
                     className="hover:!bg-transparent"
                     size="md"
+                    isDisabled={isLoading}
                   >
                     <Image priority={false} src={Close} alt="close" />
                   </Button>
                 </div>
-                <p><T k="editor.videoTitle" defaultText="Название видео" /></p>
+
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <Button
+                    size="sm"
+                    variant={!isFile ? "solid" : "bordered"}
+                    color="primary"
+                    onClick={() => setVideoSource(index, "link")}
+                    isDisabled={isLoading}
+                  >
+                    <T k="editor.videoFromLink" defaultText="Ссылка (iframe)" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={isFile ? "solid" : "bordered"}
+                    color="primary"
+                    onClick={() => setVideoSource(index, "file")}
+                    isDisabled={isLoading}
+                  >
+                    <T
+                      k="editor.videoFromDevice"
+                      defaultText="Загрузить с устройства"
+                    />
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <p>
+                    <T k="editor.videoLink" defaultText="Ссылка на видео" />
+                  </p>
+                  <ResponsiveTooltip
+                    content={i18n.t("editor.videoLinkHint", {
+                      defaultValue: (i18n.language || "")
+                        .toLowerCase()
+                        .startsWith("ru")
+                        ? "Вставьте ссылку на видео из Youtube, Vk Видео, Vimeo, Rutube, Google Drive или TED через кнопку «поделиться»."
+                        : "Insert the link to the video from YouTube, VK Video, Vimeo, Rutube, Google Drive, or TED using the 'Share' button.",
+                    })}
+                    classNames={{
+                      base: ["before:bg-neutral-400 dark:before:bg-white"],
+                      content: [
+                        "py-2 px-4 shadow-xl",
+                        "text-black bg-white max-w-[255px]",
+                      ],
+                    }}
+                    placement="right-end"
+                    color="foreground"
+                  >
+                    <Image src={InfoIcon} alt="InfoIcon" />
+                  </ResponsiveTooltip>
+                </div>
+                <div className="flex my-2 gap-4">
+                  <Input
+                    value={isFile ? "" : video.content}
+                    onChange={(e) =>
+                      onChangeSticker(e.target.value, index, "content")
+                    }
+                    isDisabled={isFile || isLoading}
+                    placeholder={
+                      isFile
+                        ? i18n.t("editor.videoLinkDisabledHint", {
+                            defaultValue: (i18n.language || "")
+                              .toLowerCase()
+                              .startsWith("ru")
+                              ? "Недоступно при загрузке с устройства"
+                              : "Unavailable when uploading from device",
+                          })
+                        : undefined
+                    }
+                    classNames={{ inputWrapper: "bg-white" }}
+                  />
+                </div>
+
+                {isFile && (
+                  <>
+                    <VideoFileDropzone
+                      fileName={fileName}
+                      error={fileErrors[index]}
+                      disabled={isLoading}
+                      onFile={(file) => assignFile(index, file)}
+                      onClear={() => clearVideoFile(index)}
+                      onError={(message) =>
+                        setFileErrors((prev) => ({
+                          ...prev,
+                          [index]: message,
+                        }))
+                      }
+                    />
+                    {isUploadingThis && uploadProgress && (
+                      <div className="mb-3 rounded-xl border border-[#D0CBE8] bg-white p-3">
+                        <div className="mb-2 flex items-center justify-between gap-2 text-sm">
+                          <p className="min-w-0 truncate text-[#3F28C6] font-medium">
+                            {uploadProgress.fileName}
+                          </p>
+                          <p className="shrink-0 tabular-nums text-default-600">
+                            {formatMb(uploadProgress.loaded)}{" "}
+                            <T k="editor.videoUploadOf" defaultText="из" />{" "}
+                            {formatMb(uploadProgress.total)}{" "}
+                            <T k="editor.videoUploadMb" defaultText="МБ" />
+                          </p>
+                        </div>
+                        <Progress
+                          aria-label="upload progress"
+                          value={progressPercent}
+                          classNames={{
+                            indicator: "bg-[#3F28C6]",
+                            track: "bg-[#EDE9FB]",
+                          }}
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+
+                <p>
+                  <T k="editor.videoTitle" defaultText="Название видео" />
+                </p>
                 <div className="flex mt-2 gap-4">
                   <Input
                     value={video.title}
                     onChange={(e) =>
                       onChangeSticker(e.target.value, index, "title")
                     }
+                    isDisabled={isLoading}
                     classNames={{ inputWrapper: "bg-white" }}
                   />
                 </div>
@@ -264,6 +454,7 @@ export const Video: FC<TProps> = ({
               color="primary"
               className="w-[300px]"
               size="lg"
+              isDisabled={isLoading}
             >
               <T k="editor.addMoreVideo" defaultText="+ Добавить еще видео" />
             </Button>
@@ -285,6 +476,35 @@ export const Video: FC<TProps> = ({
           <VideoExView data={data} isPreview />
         </div>
         <div className="h-5" />
+        {isLoading && uploadProgress && (
+          <div className="mb-4 mx-auto w-full max-w-[480px] rounded-xl border border-[#D0CBE8] bg-white p-4">
+            <p className="mb-1 text-sm font-medium text-[#3F28C6]">
+              <T
+                k="editor.videoUploading"
+                defaultText="Загрузка видео на сервер…"
+              />
+            </p>
+            <div className="mb-2 flex items-center justify-between gap-2 text-sm">
+              <p className="min-w-0 truncate text-default-600">
+                {uploadProgress.fileName}
+              </p>
+              <p className="shrink-0 tabular-nums text-default-700">
+                {formatMb(uploadProgress.loaded)}{" "}
+                <T k="editor.videoUploadOf" defaultText="из" />{" "}
+                {formatMb(uploadProgress.total)}{" "}
+                <T k="editor.videoUploadMb" defaultText="МБ" />
+              </p>
+            </div>
+            <Progress
+              aria-label="upload progress"
+              value={progressPercent}
+              classNames={{
+                indicator: "bg-[#3F28C6]",
+                track: "bg-[#EDE9FB]",
+              }}
+            />
+          </div>
+        )}
         <div className="flex justify-center">
           <Button
             color="primary"
@@ -292,6 +512,7 @@ export const Video: FC<TProps> = ({
             size="lg"
             onClick={() => saveVideoEx(data)}
             isLoading={isLoading}
+            isDisabled={isLoading}
           >
             <T k="common.save" defaultText="Сохранить" />
           </Button>

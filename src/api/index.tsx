@@ -118,6 +118,73 @@ export const fetchPostMultipart = (params: TParams) => {
   });
 };
 
+export type TUploadProgress = {
+  loaded: number;
+  total: number;
+};
+
+/** Multipart upload with byte progress (XHR). Resolves with parsed JSON body. */
+export const fetchPostMultipartWithProgress = (params: {
+  path: string;
+  data: FormData;
+  isSecure?: boolean;
+  onProgress?: (progress: TUploadProgress) => void;
+  signal?: AbortSignal;
+}): Promise<any> => {
+  const { path, data, isSecure, onProgress, signal } = params;
+  const url = (API_URL + path).replace("/undefined", "");
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+
+    if (isSecure) {
+      const token = getTokenFromLocalStorage();
+      xhr.setRequestHeader("Authorization", `Bearer ${token || ""}`);
+    }
+
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable) return;
+      onProgress?.({ loaded: event.loaded, total: event.total });
+    };
+
+    xhr.onload = () => {
+      let json: any = null;
+      try {
+        json = JSON.parse(xhr.responseText || "{}");
+      } catch {
+        json = {
+          success: false,
+          message: "Некорректный ответ сервера",
+          status: xhr.status,
+        };
+      }
+      if (xhr.status === 401) {
+        json = { ...json, status: 401, success: false };
+      }
+      resolve(json);
+    };
+
+    xhr.onerror = () => {
+      reject(new Error("Network error"));
+    };
+
+    xhr.onabort = () => {
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+
+    if (signal) {
+      if (signal.aborted) {
+        xhr.abort();
+        return;
+      }
+      signal.addEventListener("abort", () => xhr.abort(), { once: true });
+    }
+
+    xhr.send(data);
+  });
+};
+
 export const fetchGet = (params: TParams) => {
   const { path } = params;
   // if (params.isSecure && !getTokenFromLocalStorage()) {

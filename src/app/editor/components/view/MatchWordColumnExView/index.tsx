@@ -45,6 +45,7 @@ const DraggableItem = (props: {
   setHoveredColumnId: Dispatch<SetStateAction<string | null>>;
   setIncorrectIdsMap: any;
   hoveredColumnIdRef: MutableRefObject<string | null>;
+  hoveredTeacherColumnId: string | null;
 }) => {
   const {
     chip,
@@ -53,10 +54,15 @@ const DraggableItem = (props: {
     setHoveredColumnId,
     setIncorrectIdsMap,
     hoveredColumnIdRef,
+    hoveredTeacherColumnId,
   } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
   const [isError, setIsError] = useState(false);
+
+  const isHoveredByTeacher =
+    hoveredTeacherColumnId !== null &&
+    String(chip.columnId) === hoveredTeacherColumnId;
 
   const resolveHoveredColumnId = useCallback(() => {
     const draggableEl = document.getElementById("draggable-" + chip.id);
@@ -153,7 +159,7 @@ const DraggableItem = (props: {
       }}
     >
       <Chip
-        color={isError ? "danger" : "primary"}
+        color={isHoveredByTeacher ? "success" : isError ? "danger" : "primary"}
         style={{ zIndex: 1, cursor: "pointer", maxWidth: 800 }}
         id={"draggable-" + chip.id}
         className="handle text-[18px] cursor-pointer max-w-[800px] chip-handle"
@@ -181,6 +187,9 @@ export const MatchWordColumnExView: FC<TProps> = ({
 
   const [hoveredColumnId, setHoveredColumnId] = useState<string | null>(null);
   const hoveredColumnIdRef = useRef<string | null>(null);
+  const [hoveredTeacherColumnId, setHoveredTeacherColumnId] = useState<
+    string | null
+  >(null);
   const [incorrectIdsMap, setIncorrectIdsMap] = useState<
     Record<string, string[]>
   >({});
@@ -333,6 +342,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
                   setHoveredColumnId={setHoveredColumnId}
                   setIncorrectIdsMap={setIncorrectIdsMap}
                   hoveredColumnIdRef={hoveredColumnIdRef}
+                  hoveredTeacherColumnId={hoveredTeacherColumnId}
                 />
               );
             })}
@@ -376,6 +386,16 @@ export const MatchWordColumnExView: FC<TProps> = ({
                     key={column.id}
                     className="w-full md:w-[calc(50%-0.5rem)] lg:w-[47%] min-w-0 p-4 sm:p-6 answer-wrapper"
                     id={"answer-wrapper-" + column.id}
+                    onMouseOver={() => {
+                      if (isTeacher && !rest?.isPresentationMode) {
+                        setHoveredTeacherColumnId(columnKey);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (isTeacher && !rest?.isPresentationMode) {
+                        setHoveredTeacherColumnId(null);
+                      }
+                    }}
                   >
                     <p className="text-center font-semibold text-lg sm:text-xl break-words">
                       {column.title}
