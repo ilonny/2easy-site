@@ -6,7 +6,22 @@ import { getTokenFromLocalStorage } from "@/auth/utils";
 import { toast } from "react-toastify";
 
 export const ApiProvider = ({ children }) => {
-  const [client] = useState(new QueryClient());
+  const [client] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: 1,
+            throwOnError: false,
+            refetchOnWindowFocus: false,
+          },
+          mutations: {
+            retry: 0,
+            throwOnError: false,
+          },
+        },
+      })
+  );
 
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
@@ -34,6 +49,10 @@ type TParams = {
   signal?: AbortSignal;
 };
 
+const SERVER_UNAVAILABLE_MESSAGE =
+  "Сервер временно недоступен. Попробуйте позже";
+const INVALID_RESPONSE_MESSAGE = "Некорректный ответ сервера";
+
 const mapHeaders = (params: TParams) => {
   const headers: Headers = new Headers();
   const { isSecure } = params;
@@ -43,6 +62,105 @@ const mapHeaders = (params: TParams) => {
     headers.append("Authorization", `Bearer ${token || ""}`);
   }
   return headers;
+};
+
+const defaultMessageForStatus = (status: number) => {
+  if (status >= 500) return SERVER_UNAVAILABLE_MESSAGE;
+  if (status === 401) return "Ошибка авторизации, пожалуйста, авторизуйтесь заново";
+  return "Что-то пошло не так";
+};
+
+/**
+ * Wraps a fetch Response so `.json()` never throws on HTML/empty 500 bodies
+ * and always returns a `{ success, status, message, ... }` shaped object on errors.
+ */
+const withSafeJson = async (res: Response): Promise<Response> => {
+  const text = await res.text();
+  let parsed: any = null;
+  let parseFailed = false;
+
+  if (text) {
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      parseFailed = true;
+      parsed = null;
+    }
+  } else {
+    parsed = {};
+  }
+
+  let data: any;
+  if (parseFailed) {
+    data = {
+      success: false,
+      status: res.status,
+      message:
+        res.status >= 500 ? SERVER_UNAVAILABLE_MESSAGE : INVALID_RESPONSE_MESSAGE,
+    };
+  } else if (!res.ok) {
+    const base =
+      parsed && typeof parsed === "object" && !Array.isArray(parsed)
+        ? parsed
+        : {};
+    data = {
+      ...base,
+      success: false,
+      status: base.status ?? res.status,
+      message: base.message || defaultMessageForStatus(res.status),
+    };
+  } else {
+    data = parsed;
+  }
+
+  const safeResponse = {
+    ok: res.ok,
+    status: res.status,
+    statusText: res.statusText,
+    headers: res.headers,
+    url: res.url,
+    redirected: res.redirected,
+    type: res.type,
+    bodyUsed: true,
+    json: async () => data,
+    text: async () => text,
+    clone: () => safeResponse as unknown as Response,
+  };
+
+  return safeResponse as unknown as Response;
+};
+
+const safeFetch = async (
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<Response> => {
+  try {
+    const res = await fetch(input, init);
+    return withSafeJson(res);
+  } catch (error) {
+    if ((error as DOMException)?.name === "AbortError") {
+      throw error;
+    }
+    return {
+      ok: false,
+      status: 0,
+      statusText: "Network Error",
+      headers: new Headers(),
+      url: String(input),
+      redirected: false,
+      type: "error",
+      bodyUsed: true,
+      json: async () => ({
+        success: false,
+        status: 0,
+        message: SERVER_UNAVAILABLE_MESSAGE,
+      }),
+      text: async () => "",
+      clone() {
+        return this as unknown as Response;
+      },
+    } as unknown as Response;
+  }
 };
 
 export const checkResponse = (
@@ -95,7 +213,7 @@ export const fetchPostJson = (params: TParams) => {
   const { path, data, signal } = params;
   const headers = mapHeaders(params);
   const url = (API_URL + path).replace("/undefined", "");
-  return fetch(url, {
+  return safeFetch(url, {
     method: "POST",
     body: JSON.stringify(data),
     headers,
@@ -111,7 +229,7 @@ export const fetchPostMultipart = (params: TParams) => {
   headers.set("Content-Type", "multipart/form-data");
   headers.delete("Content-Type");
   const url = (API_URL + path).replace("/undefined", "");
-  return fetch(url, {
+  return safeFetch(url, {
     method: "POST",
     body: data,
     headers,
@@ -155,8 +273,23 @@ export const fetchPostMultipartWithProgress = (params: {
       } catch {
         json = {
           success: false,
-          message: "Некорректный ответ сервера",
+          message:
+            xhr.status >= 500
+              ? SERVER_UNAVAILABLE_MESSAGE
+              : INVALID_RESPONSE_MESSAGE,
           status: xhr.status,
+        };
+      }
+      if (!xhr.status || xhr.status >= 400) {
+        json = {
+          ...(json && typeof json === "object" ? json : {}),
+          success: false,
+          status: xhr.status,
+          message:
+            json?.message ||
+            (xhr.status >= 500
+              ? SERVER_UNAVAILABLE_MESSAGE
+              : "Что-то пошло не так"),
         };
       }
       if (xhr.status === 401) {
@@ -166,7 +299,11 @@ export const fetchPostMultipartWithProgress = (params: {
     };
 
     xhr.onerror = () => {
-      reject(new Error("Network error"));
+      resolve({
+        success: false,
+        status: 0,
+        message: SERVER_UNAVAILABLE_MESSAGE,
+      });
     };
 
     xhr.onabort = () => {
@@ -192,7 +329,7 @@ export const fetchGet = (params: TParams) => {
   // }
   const headers = mapHeaders(params);
   const url = (API_URL + path).replace("/undefined", "");
-  return fetch(url, {
+  return safeFetch(url, {
     method: "GET",
     headers,
   });
@@ -202,7 +339,7 @@ export const fetchPatch = (params: TParams) => {
   const { path, data } = params;
   const headers = mapHeaders(params);
   const url = (API_URL + path).replace("/undefined", "");
-  return fetch(url, {
+  return safeFetch(url, {
     method: "PATCH",
     body: JSON.stringify(data),
     headers,
@@ -213,7 +350,7 @@ export const fetchDelete = (params: TParams) => {
   const { path, data } = params;
   const headers = mapHeaders(params);
   const url = (API_URL + path).replace("/undefined", "");
-  return fetch(url, {
+  return safeFetch(url, {
     method: "DELETE",
     body: JSON.stringify(data),
     headers,
