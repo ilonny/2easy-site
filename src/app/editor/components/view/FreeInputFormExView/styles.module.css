@@ -1,3 +1,52 @@
+.editor {
+  background: #fff;
+}
+
+.editorReadOnly {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.wrapper {
+  width: 100%;
+}
+
+.toolbar {
+  border: none !important;
+  border-bottom: 1px solid #eee !important;
+  background: #fafafa !important;
+  margin-bottom: 0 !important;
+  padding: 6px 8px !important;
+  border-radius: 8px 8px 0 0;
+}
+
+.body {
+  padding: 12px 16px !important;
+  min-height: 96px !important;
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+  color: #191919 !important;
+}
+
+.body :global(.public-DraftEditorPlaceholder-root) {
+  color: #a1a1aa;
+  font-size: 16px;
+}
+
+.body :global(.public-DraftEditor-content) {
+  min-height: 72px;
+}
+
+.editorWithToolbar .body {
+  border-radius: 0 0 8px 8px;
+}
+
+.body :global(span[style*="background-color"]),
+.body :global(span[style*="background"]) {
+  border-radius: 2px;
+}
+
+/* legacy preview card tilt (constructor) */
 .card-rotate:nth-child(4n + 1) {
   transform: rotate(1deg);
 }
