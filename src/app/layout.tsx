@@ -17,6 +17,7 @@ import { EditorContextProvider } from "./editor/context";
 import { TalkMeSite } from "@/components/TalkMeSite";
 import { CookieConsent } from "@/components/CookieConsent";
 import { I18nProvider } from "@/i18n/I18nProvider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
@@ -49,11 +50,13 @@ export default function RootLayout({
               <AuthContextProvider>
                 <SibscribeContextProvider>
                   <EditorContextProvider>
-                    <Header />
-                    <BodyContainer>{children}</BodyContainer>
-                    <Footer />
-                    <CookieConsent />
-                    <ToastWrapper />
+                    <ErrorBoundary>
+                      <Header />
+                      <BodyContainer>{children}</BodyContainer>
+                      <Footer />
+                      <CookieConsent />
+                      <ToastWrapper />
+                    </ErrorBoundary>
                   </EditorContextProvider>
                 </SibscribeContextProvider>
               </AuthContextProvider>

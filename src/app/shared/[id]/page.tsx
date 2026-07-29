@@ -36,7 +36,6 @@ export default function SharedLessonPage() {
       data: {
         hash,
       },
-      isSecure: true,
     });
     const data = await res.json();
 

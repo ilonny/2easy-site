@@ -55,28 +55,15 @@ const makeId = () =>
 const WELCOME =
   "Привет! Я помогу отредактировать это задание. Например: упростить текст, добавить вопросы, поменять тон, переписать примеры.";
 
-const slimExerciseData = (raw: Record<string, any>) =>
+/** Keep media; backend slims for the model and restores images/videos after */
+const prepareExerciseDataForAi = (raw: Record<string, any>) =>
   JSON.parse(
     JSON.stringify(raw || {}, (key, value) => {
-      if (
-        [
-          "bgAttachments",
-          "editorAttachments",
-          "secondEditorAttachments",
-          "attachments",
-          "images",
-          "videos",
-          "editorImages",
-          "dataURL",
-          "path",
-          "id",
-          "sortIndex",
-        ].includes(key)
-      ) {
-        return Array.isArray(value) ? [] : undefined;
+      if (["id", "sortIndex"].includes(key)) {
+        return undefined;
       }
-      if (typeof value === "string" && value.length > 2000) {
-        return value.slice(0, 2000) + "…";
+      if (typeof value === "string" && value.length > 8000) {
+        return value.slice(0, 8000) + "…";
       }
       return value;
     }),
@@ -128,7 +115,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
         data: {
           type,
           instruction: text,
-          currentData: slimExerciseData(latestDataRef.current),
+          currentData: prepareExerciseDataForAi(latestDataRef.current),
           lesson_id: lessonId ? Number(lessonId) : undefined,
           lessonContext,
           conversation: messages

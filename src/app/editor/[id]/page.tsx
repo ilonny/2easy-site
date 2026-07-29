@@ -46,14 +46,16 @@ import { CreateHomeworkModal } from "@/app/lessons/components/CreateHomeworkModa
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { EditorAiAssistModal } from "../components/EditorAiAssistModal";
+import { parseRouteId } from "@/utils/parseRouteId";
 
 export default function EditorPage() {
   withLogin();
   const params = useParams();
+  const lessonId = parseRouteId(params?.id);
   const { profile } = useContext(AuthContext);
   const { lesson, getLesson } = useLessons();
   const { exList, getExList, exListIsLoading, changeSortIndex, deleteEx } =
-    useExList(params.id);
+    useExList(lessonId ?? undefined);
   const [exCreateTemplateModal, setExCreateTemplateModal] = useState(false);
   const [editorModal, setEditorModal] = useState(false);
   const [chosenTemplate, setChosenTemplate] = useState<TTemplate | null>(null);
@@ -96,10 +98,10 @@ export default function EditorPage() {
   }, [scrollToExId, exList, setScrollToExId]);
 
   useEffect(() => {
-    //@ts-ignore
-    getLesson(params.id);
+    if (!lessonId) return;
+    getLesson(lessonId);
     getExList();
-  }, [getExList, getLesson, params.id]);
+  }, [getExList, getLesson, lessonId]);
 
   const onChooseTemplate = useCallback((template: TTemplate) => {
     setExCreateTemplateModal(false);
@@ -404,11 +406,12 @@ export default function EditorPage() {
         )}
       </ContentWrapper>
       <EditorAiAssistModal
-        lessonId={params.id as string}
+        lessonId={lessonId as string}
         lesson={lesson}
         exList={exList || []}
         onApplied={() => {
-          getLesson(String(params.id));
+          if (!lessonId) return;
+          getLesson(lessonId);
           getExList();
         }}
         canEdit={canEditWithAi}
@@ -478,7 +481,7 @@ export default function EditorPage() {
           exList={exList}
           onSuccess={() => {
             getExList();
-            getLesson(params.id);
+            if (lessonId) getLesson(lessonId);
           }}
         />
       )}
