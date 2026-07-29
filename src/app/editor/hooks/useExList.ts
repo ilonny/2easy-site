@@ -1,6 +1,7 @@
 import { fetchGet, fetchPostJson } from "@/api";
 import { useCallback, useRef, useState } from "react";
 import { getImageUrl } from "../helpers";
+import { parseRouteIdNumber } from "@/utils/parseRouteId";
 
 const mapImageExData = (data: string) => {
   const parsedData = data ? JSON.parse(data) : {};
@@ -187,7 +188,10 @@ const getDataMapper = (type: string) => {
   }
 };
 
-export const useExList = (lesson_id?: number, isPresentationMode?: boolean) => {
+export const useExList = (
+  lesson_id?: number | string,
+  isPresentationMode?: boolean,
+) => {
   const [exListIsLoading, setExListIsLoading] = useState(false);
   const [exList, setExList] = useState([]);
 
@@ -195,8 +199,8 @@ export const useExList = (lesson_id?: number, isPresentationMode?: boolean) => {
   const inFlightKeyRef = useRef<string>("");
 
   const getExList = useCallback(
-    async (_lesson_id?: number, hash?: string) => {
-      const effectiveLessonId = _lesson_id || lesson_id;
+    async (_lesson_id?: number | string, hash?: string) => {
+      const effectiveLessonId = parseRouteIdNumber(_lesson_id ?? lesson_id);
       if (!effectiveLessonId) return;
 
       const key = `${effectiveLessonId}:${hash || ""}:${isPresentationMode ? 1 : 0}`;
@@ -209,8 +213,11 @@ export const useExList = (lesson_id?: number, isPresentationMode?: boolean) => {
 
       const p = (async () => {
         try {
+          const params = new URLSearchParams();
+          params.set("lesson_id", String(effectiveLessonId));
+          if (hash) params.set("hash", String(hash));
           const listRes = await fetchGet({
-            path: `/ex/list?lesson_id=${effectiveLessonId}&hash=${hash || ""}`,
+            path: `/ex/list?${params.toString()}`,
             isSecure: true,
           });
           const list = await listRes?.json();
@@ -232,7 +239,9 @@ export const useExList = (lesson_id?: number, isPresentationMode?: boolean) => {
           if (isPresentationMode) {
             mappedList = mappedList.filter(
               (l) =>
-                l.is_visible === null || l.is_visible === "1" || l.is_visible === 1,
+                l.is_visible === null ||
+                l.is_visible === "1" ||
+                l.is_visible === 1,
             );
           }
           setExList(mappedList || []);

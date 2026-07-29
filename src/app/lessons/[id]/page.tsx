@@ -58,6 +58,7 @@ import {
   LessonDictionaryLayer,
 } from "@/app/dictionary/components/LessonDictionaryLayer";
 import { LessonBoardButton } from "@/app/board/components/LessonBoardButton";
+import { parseRouteId, parseRouteIdNumber } from "@/utils/parseRouteId";
 
 const VIEW_NOOP = () => {};
 const VIEW_ASYNC_NOOP = async () => {};
@@ -66,13 +67,15 @@ export default function LessonPage() {
   withLogin();
   const router = useRouter();
   const params = useParams() as { id: string };
+  const lessonId = parseRouteId(params.id);
+  const lessonIdNum = parseRouteIdNumber(params.id);
   const { subscription } = (useContext(SibscribeContext as any) as any) || {};
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const { exList, getExList, setExList } = useExList(
-    Number(params.id),
+    lessonIdNum ?? undefined,
     isPresentationMode,
   );
   const { lesson, getLesson } = useLessons();
@@ -151,17 +154,19 @@ export default function LessonPage() {
   }, []);
 
   useEffect(() => {
+    if (!lessonId) return;
     const studentIdForLesson =
       isStudent && profile?.studentId
         ? Number(profile.studentId)
         : !isStudent && students?.length === 1
           ? students[0]?.student_id
           : undefined;
-    getLesson(params.id as string, studentIdForLesson);
+    getLesson(lessonId, studentIdForLesson);
     getExList();
-  }, [getExList, getLesson, params.id, isStudent, students, profile?.studentId]);
+  }, [getExList, getLesson, lessonId, isStudent, students, profile?.studentId]);
 
   const fetchStudents = useCallback(async () => {
+    if (!lessonId) return;
     let selectedIds: number[] = [];
     try {
       selectedIds = JSON.parse(
@@ -169,11 +174,14 @@ export default function LessonPage() {
       )?.map((el: any) => Number(el))?.filter((n: any) => Number(n) > 0);
     } catch (err) {}
 
+    const paramsQs = new URLSearchParams();
+    paramsQs.set("lesson_id", lessonId);
+    if (selectedIds?.length) {
+      paramsQs.set("student_ids", selectedIds.join(","));
+    }
     const list = await (
       await fetchGet({
-        path: `/lesson-students?lesson_id=${params.id}${
-          selectedIds?.length ? `&student_ids=${selectedIds.join(",")}` : ""
-        }`,
+        path: `/lesson-students?${paramsQs.toString()}`,
         isSecure: true,
       })
     )?.json();
@@ -188,7 +196,7 @@ export default function LessonPage() {
         setActiveStudentId(filteredIds[0]?.student_id);
       }
     } catch (err) {}
-  }, [params.id]);
+  }, [lessonId]);
 
   useEffect(() => {
     fetchStudents();
@@ -197,14 +205,13 @@ export default function LessonPage() {
   useEffect(() => {
     if (!isStudent || isTeacher) return;
     let active = true;
-    const lessonId = Number(params.id) || 0;
-    if (!lessonId) return;
+    if (!lessonIdNum) return;
 
     const interval = setInterval(async () => {
       if (!active || boardModalOpenRef.current) return;
       try {
         const res = await fetchGet({
-          path: `/lesson-focus?lesson_id=${lessonId}`,
+          path: `/lesson-focus?lesson_id=${lessonIdNum}`,
           isSecure: true,
         });
         const data = await res?.json();
@@ -224,7 +231,7 @@ export default function LessonPage() {
       active = false;
       clearInterval(interval);
     };
-  }, [isStudent, isTeacher, params.id]);
+  }, [isStudent, isTeacher, lessonIdNum]);
 
   useEffect(() => {
     if (!isStudent) {
@@ -240,8 +247,9 @@ export default function LessonPage() {
         }
         return;
       }
+      if (!lessonId) return;
       const res = await fetchGet({
-        path: `/ex/list?lesson_id=${params.id}`,
+        path: `/ex/list?lesson_id=${lessonId}`,
         isSecure: true,
       });
       const list = await res?.json();
@@ -263,7 +271,7 @@ export default function LessonPage() {
     //   getExList();
     // }, 1000);
     // return () => clearInterval(interval);
-  }, [getExList, isStudent, params.id, exList, setExList]);
+  }, [getExList, isStudent, lessonId, exList, setExList]);
 
   useEffect(() => {
     if (authIsLoading || !profile) {

@@ -1,6 +1,7 @@
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useCallback, useMemo, useState } from "react";
 import { TLesson } from "../types";
+import { parseRouteId } from "@/utils/parseRouteId";
 
 export const useLessons = (
   studentId?: string,
@@ -15,56 +16,74 @@ export const useLessons = (
 
   const getMainPageLessons = useCallback(async () => {
     setLessonsListIslLoading(true);
-    const res = await fetchGet({
-      path: "/main-page-lessons",
-    });
-    const data = await res?.json();
-    if (data) {
-      setLessons(data?.lessons || []);
+    try {
+      const res = await fetchGet({
+        path: "/main-page-lessons",
+      });
+      const data = await res?.json();
+      if (data) {
+        setLessons(data?.lessons || []);
+      }
+      return data;
+    } finally {
+      setLessonsListIslLoading(false);
     }
-    setLessonsListIslLoading(false);
-    return data;
   }, []);
 
   const getLessons = useCallback(async () => {
     setLessonsListIslLoading(true);
-    let res;
-    if (isAuth === false) {
-      res = await fetchGet({
-        path: "/main-page-lessons?disable_limit=1",
-      });
-    } else {
-      const params = new URLSearchParams();
-      if (studentId) params.set("student_id", studentId);
-      if (includeCourseLessons) params.set("include_course_lessons", "1");
-      res = await fetchGet({
-        path: params.toString() ? `/lessons?${params.toString()}` : "/lessons",
-        isSecure: true,
-      });
+    try {
+      let res;
+      if (isAuth === false) {
+        res = await fetchGet({
+          path: "/main-page-lessons?disable_limit=1",
+        });
+      } else {
+        const params = new URLSearchParams();
+        if (studentId) params.set("student_id", studentId);
+        if (includeCourseLessons) params.set("include_course_lessons", "1");
+        res = await fetchGet({
+          path: params.toString() ? `/lessons?${params.toString()}` : "/lessons",
+          isSecure: true,
+        });
+      }
+      const data = await res?.json();
+      if (data) {
+        setLessons(data?.lessons || []);
+      }
+      return data;
+    } finally {
+      setLessonsListIslLoading(false);
     }
-    const data = await res?.json();
-    if (data) {
-      setLessons(data?.lessons || []);
-    }
-    setLessonsListIslLoading(false);
-    return data;
   }, [isAuth, studentId, includeCourseLessons]);
 
   const getLesson = useCallback(
     async (id: string, studentIdParam?: number) => {
+      const lessonId = parseRouteId(id);
+      if (!lessonId) {
+        setLesson(undefined);
+        return {
+          success: false,
+          message: "Некорректный идентификатор урока",
+        };
+      }
+
       setLessonsListIslLoading(true);
-      const url = studentIdParam
-        ? `/lesson?id=${id}&student_id=${studentIdParam}`
-        : `/lesson?id=${id}`;
-      const res = await fetchGet({
-        path: url,
-        isSecure: true,
-      });
-      const data = await res?.json();
-      setLesson(data?.lesson);
-      setLessonsListIslLoading(false);
-      checkResponse(data);
-      return data;
+      try {
+        const params = new URLSearchParams();
+        params.set("id", lessonId);
+        if (studentIdParam) params.set("student_id", String(studentIdParam));
+        const res = await fetchGet({
+          path: `/lesson?${params.toString()}`,
+          isSecure: true,
+        });
+        const data = await res?.json();
+        setLesson(data?.lesson);
+        checkResponse(data);
+        return data;
+      } finally {
+        setLessonsListIslLoading(false);
+      }
     },
     [],
   );

@@ -1,4 +1,5 @@
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
+import { getTokenFromLocalStorage } from "@/auth/utils";
 import { useCallback, useState } from "react";
 
 export const useStudentList = (localStudents?: Array<any>) => {
@@ -9,12 +10,17 @@ export const useStudentList = (localStudents?: Array<any>) => {
       setStudents(localStudents);
       return;
     }
+    if (!getTokenFromLocalStorage()) {
+      setStudents([]);
+      return;
+    }
     const res = await fetchGet({
       path: "/student",
       isSecure: true,
     });
-    const students = await res?.json();
-    setStudents(students);
+    const data = await res?.json();
+    // API returns an array on success; on 401 it returns an object
+    setStudents(Array.isArray(data) ? data : []);
   }, [localStudents]);
 
   const deleteStudent = useCallback(async (id) => {
