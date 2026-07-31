@@ -11,13 +11,108 @@
   width: 100%;
 }
 
+/* Brand purple for default black toolbar icons */
+.toolbar :global(.rdw-option-wrapper img),
+.toolbar :global(.rdw-dropdown-selectedtext img),
+.toolbar :global(.rdw-colorpicker-wrapper img) {
+  filter: brightness(0) saturate(100%) invert(18%) sepia(85%) saturate(3200%)
+    hue-rotate(244deg) brightness(92%) contrast(98%);
+  opacity: 0.9;
+}
+
 .toolbar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px !important;
   border: none !important;
-  border-bottom: 1px solid #eee !important;
-  background: #fafafa !important;
+  border-bottom: 1px solid rgba(63, 40, 198, 0.12) !important;
+  background: #f7f7ff !important;
   margin-bottom: 0 !important;
-  padding: 6px 8px !important;
+  padding: 8px 10px !important;
   border-radius: 8px 8px 0 0;
+  box-shadow: none !important;
+}
+
+.toolbar :global(.rdw-inline-wrapper),
+.toolbar :global(.rdw-colorpicker-wrapper),
+.toolbar :global(.rdw-remove-wrapper) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 0 !important;
+}
+
+.toolbar :global(.rdw-option-wrapper) {
+  border: none !important;
+  outline: none !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  border-radius: 10px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.toolbar :global(.rdw-option-wrapper:hover) {
+  background: #eeebff !important;
+  border-color: rgba(63, 40, 198, 0.35) !important;
+  box-shadow: none !important;
+}
+
+.toolbar :global(.rdw-option-active) {
+  background: #eeebff !important;
+  border-color: #3f28c6 !important;
+  box-shadow: 0 0 0 1px rgba(63, 40, 198, 0.2) inset !important;
+}
+
+.toolbar :global(.rdw-option-active img) {
+  opacity: 1;
+}
+
+/* Color picker popup — library defaults + brand accents */
+.toolbar :global(.rdw-colorpicker-modal) {
+  border: 1px solid rgba(63, 40, 198, 0.18) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px 0 #908ba826 !important;
+  padding: 10px !important;
+  width: 175px !important;
+}
+
+.toolbar :global(.rdw-colorpicker-modal-header) {
+  font-size: 12px !important;
+  color: #3f28c6 !important;
+  font-weight: 700 !important;
+}
+
+.toolbar :global(.rdw-colorpicker-modal-style-label) {
+  color: #6b7280 !important;
+  font-size: 12px !important;
+}
+
+.toolbar :global(.rdw-colorpicker-modal-style-label-active) {
+  color: #3f28c6 !important;
+  border-bottom-color: #3f28c6 !important;
+}
+
+.toolbar :global(.rdw-colorpicker-modal-options) {
+  gap: 5px !important;
+  margin: 5px 0 0 !important;
+}
+
+.toolbar :global(.rdw-colorpicker-option) {
+  margin: 0 !important;
+}
+
+.toolbar :global(.rdw-colorpicker-cube) {
+  border-radius: 10px !important;
+  border: 1px solid rgb(63, 40, 198, 0.1) !important;
+  outline: none !important;
+  width: 100%;
+  height: 100%;
 }
 
 .body {
