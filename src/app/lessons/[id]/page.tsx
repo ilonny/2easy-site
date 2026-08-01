@@ -440,6 +440,23 @@ export default function LessonPage() {
                           }
                         }
                         if (isStudent && profile?.studentId) {
+                          const saveSelectedAndNavigate = (hwId: number) => {
+                            writeToLocalStorage(
+                              "start_lesson_selected_ids",
+                              JSON.stringify([profile.studentId])
+                            );
+                            router.push(`/lessons/${hwId}`);
+                          };
+                          // Same as LessonCard: prefer resolved individual HW
+                          if (
+                            lesson.has_individual_homework &&
+                            lesson.homework_lesson_id
+                          ) {
+                            saveSelectedAndNavigate(
+                              Number(lesson.homework_lesson_id)
+                            );
+                            return;
+                          }
                           const res = await fetchPostJson({
                             path: "/lessons/homework/create-my",
                             isSecure: true,
@@ -451,21 +468,13 @@ export default function LessonPage() {
                           const data = await res?.json();
                           checkResponse(data);
                           if (data?.homework_lesson_id) {
-                            writeToLocalStorage(
-                              "start_lesson_selected_ids",
-                              JSON.stringify([profile.studentId])
-                            );
-                            router.push(
-                              `/lessons/${data.homework_lesson_id}`
-                            );
+                            saveSelectedAndNavigate(data.homework_lesson_id);
                             return;
                           }
-                        }
-                        if (isStudent && profile?.studentId) {
-                          writeToLocalStorage(
-                            "start_lesson_selected_ids",
-                            JSON.stringify([profile.studentId])
+                          saveSelectedAndNavigate(
+                            Number(lesson.homework_lesson_id)
                           );
+                          return;
                         }
                         router.push(
                           `/lessons/${lesson.homework_lesson_id}`
