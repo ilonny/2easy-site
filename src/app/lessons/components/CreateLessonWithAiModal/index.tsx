@@ -26,6 +26,12 @@ import {
   TAiLevel,
 } from "./types";
 import { AiLessonConstructorPreview } from "./AiLessonConstructorPreview";
+import {
+  commitLessonPreview,
+  requestLessonPreview,
+  TAiLessonPreview,
+} from "@/app/ai/api/lessonAssist";
+import { AiDraftPreviewSummary } from "@/app/ai/components/AiDraftPreviewSummary";
 
 type TProps = {
   isVisible: boolean;
@@ -71,6 +77,8 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
   ]);
   const [chatInput, setChatInput] = useState("");
   const [draft, setDraft] = useState<TAiLessonDraft | null>(null);
+  const [pendingPreview, setPendingPreview] =
+    useState<TAiLessonPreview | null>(null);
   const [savedLessonId, setSavedLessonId] = useState<number | null>(null);
   const [previewReloadKey, setPreviewReloadKey] = useState(0);
   const [suggestedTopic, setSuggestedTopic] = useState<TSuggestedTopic | null>(
@@ -178,49 +186,13 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
           exercises: json.exercises || [],
         };
 
-        appendAssistant("Сохраняю черновик, чтобы открыть полноценный конструктор…");
-        const saveRes = await fetchPostJson({
-          path: "/ai/save-lesson",
-          isSecure: true,
-          data: {
-            draft: nextDraft,
-            course_id: currentCourse?.id,
-          },
-        });
-        const saved = await saveRes.json();
-        if (!saved?.success) {
-          checkResponse(saved);
-          setError(saved?.message || "Не удалось сохранить урок");
-          appendAssistant(
-            saved?.message ||
-              "Урок сгенерирован, но сохранить не удалось. Попробуй ещё раз.",
-          );
-          setDraft(nextDraft);
-          return;
-        }
-
-        const lessonId = Number(
-          saved.id ??
-            saved.createdLesson?.id ??
-            saved.createdLesson?.dataValues?.id,
-        );
-        if (!lessonId) {
-          setError("Не удалось получить id урока");
-          appendAssistant(
-            "Урок сохранился странно — обнови страницу и открой последний созданный урок, либо попробуй ещё раз.",
-          );
-          return;
-        }
-
-        window?.ym?.(103955671, "reachGoal", "lesson-create");
         setDraft(nextDraft);
-        setSavedLessonId(Number(lessonId));
+        setSavedLessonId(null);
         setTopic(topicToUse.trim() || json.lesson?.title || "");
         setStep("preview");
-        setPreviewReloadKey((k) => k + 1);
         appendAssistant(
           json.assistantMessage ||
-            `Готово: «${json.lesson?.title}». Справа полный конструктор — правь вручную или через чат.`,
+            `Готово: «${json.lesson?.title}». Проверь превью — урок сохранится только по кнопке «Сохранить урок».`,
         );
       } catch (e) {
         setError("Ошибка сети при генерации урока");
@@ -229,7 +201,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
         setIsGenerating(false);
       }
     },
-    [level, description, selectedTypes, messages, currentCourse?.id],
+    [level, description, selectedTypes, messages],
   );
 
   const runSuggestTopic = useCallback(
@@ -344,71 +316,100 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
     appendUser(instruction);
 
     try {
-      const res = await fetchPostJson({
-        path: "/ai/refine-lesson",
-        isSecure: true,
-        data: {
-          instruction,
-          lesson_id: savedLessonId || undefined,
-          current: draft,
-          conversation: conversationPayload(messages),
-        },
+      const preview = await requestLessonPreview({
+        lessonId: savedLessonId || undefined,
+        instruction,
+        current: draft,
+        conversation: conversationPayload(messages),
       });
-      const json = await res.json();
-      if (!json?.success) {
-        checkResponse(json);
-        setError(json?.message || "Не удалось обновить урок");
-        appendAssistant(
-          json?.message || "Не получилось внести правки. Попробуй ещё раз.",
-        );
-        return;
-      }
-      const nextDraft: TAiLessonDraft = {
-        assistantMessage: json.assistantMessage,
-        lesson: json.lesson,
-        exercises: json.exercises || [],
-      };
-      setDraft(nextDraft);
-
-      if (savedLessonId) {
-        const applyRes = await fetchPostJson({
-          path: "/ai/apply-lesson",
-          isSecure: true,
-          data: {
-            lesson_id: savedLessonId,
-            draft: nextDraft,
-            updateMeta: true,
-          },
-        });
-        const applied = await applyRes.json();
-        if (!applied?.success) {
-          checkResponse(applied);
-          setError(applied?.message || "Не удалось применить правки к уроку");
-          appendAssistant(
-            applied?.message ||
-              "Правки сгенерированы, но не применились к уроку.",
-          );
-          return;
-        }
-        setPreviewReloadKey((k) => k + 1);
-      }
-
+      setPendingPreview(preview);
       appendAssistant(
-        json.assistantMessage || "Обновил урок по твоим правкам.",
+        preview.assistantMessage ||
+          "Предложение готово. Проверь и сохрани изменения.",
       );
-    } catch (e) {
-      setError("Ошибка сети при обновлении урока");
-      appendAssistant("Ошибка сети при обновлении. Попробуй снова.");
+    } catch (e: any) {
+      setError(e?.message || "Ошибка сети при обновлении урока");
+      appendAssistant(
+        e?.message || "Ошибка сети при обновлении. Попробуй снова.",
+      );
     } finally {
       setIsGenerating(false);
     }
   }, [draft, chatInput, isGenerating, messages, savedLessonId]);
 
-  const handleDone = useCallback(() => {
-    if (!savedLessonId) return;
-    setIsVisible(false);
-    onSuccess(savedLessonId);
-  }, [savedLessonId, onSuccess, setIsVisible]);
+  const savePendingPreview = useCallback(async () => {
+    if (!pendingPreview || isGenerating) return;
+    if (!savedLessonId) {
+      setDraft(pendingPreview);
+      setPendingPreview(null);
+      appendAssistant("Предложение принято в черновик.");
+      return;
+    }
+    if (!pendingPreview.previewId) return;
+    setIsGenerating(true);
+    setError(null);
+    try {
+      await commitLessonPreview({
+        lessonId: savedLessonId,
+        previewId: pendingPreview.previewId,
+      });
+      setDraft(pendingPreview);
+      setPendingPreview(null);
+      setPreviewReloadKey((key) => key + 1);
+      appendAssistant("Изменения сохранены.");
+    } catch (e: any) {
+      setError(e?.message || "Не удалось сохранить изменения");
+      appendAssistant(e?.message || "Не удалось сохранить изменения.");
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [appendAssistant, isGenerating, pendingPreview, savedLessonId]);
+
+  const handleDone = useCallback(async () => {
+    if (pendingPreview || isGenerating) return;
+    if (savedLessonId) {
+      setIsVisible(false);
+      onSuccess(savedLessonId);
+      return;
+    }
+    if (!draft) return;
+    setIsGenerating(true);
+    setError(null);
+    try {
+      const saveRes = await fetchPostJson({
+        path: "/ai/save-lesson",
+        isSecure: true,
+        data: { draft, course_id: currentCourse?.id },
+      });
+      const saved = await saveRes.json();
+      if (!saved?.success) {
+        checkResponse(saved);
+        throw new Error(saved?.message || "Не удалось сохранить урок");
+      }
+      const lessonId = Number(
+        saved.id ??
+          saved.createdLesson?.id ??
+          saved.createdLesson?.dataValues?.id,
+      );
+      if (!lessonId) throw new Error("Не удалось получить id урока");
+      (window as any)?.ym?.(103955671, "reachGoal", "lesson-create");
+      setSavedLessonId(lessonId);
+      setIsVisible(false);
+      onSuccess(lessonId);
+    } catch (e: any) {
+      setError(e?.message || "Не удалось сохранить урок");
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [
+    currentCourse?.id,
+    draft,
+    isGenerating,
+    onSuccess,
+    pendingPreview,
+    savedLessonId,
+    setIsVisible,
+  ]);
 
   // Prevent background page scroll while modal (and nested panels) are scrolling
   useEffect(() => {
@@ -463,7 +464,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                 {step === "preview" ? (
                   <T
                     k="ai.previewConstructorHint"
-                    defaultText="Полный конструктор справа — правь задания как обычно или через чат"
+                    defaultText="Проверь предложения справа; ничего не сохранится без подтверждения"
                   />
                 ) : (
                   <T
@@ -473,9 +474,15 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                 )}
               </p>
             </div>
-            {step === "preview" && savedLessonId && (
-              <Button color="primary" onPress={handleDone} className="shrink-0">
-                <T k="ai.doneOpenEditor" defaultText="Готово" />
+            {step === "preview" && draft && (
+              <Button
+                color="primary"
+                onPress={handleDone}
+                className="shrink-0"
+                isDisabled={Boolean(pendingPreview)}
+                isLoading={isGenerating}
+              >
+                {savedLessonId ? "Готово" : "Сохранить урок"}
               </Button>
             )}
           </div>
@@ -522,26 +529,55 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
               <div className="p-4 border-t border-default-100 space-y-2">
                 {step === "preview" ? (
                   <>
-                    <Textarea
-                      value={chatInput}
-                      onValueChange={setChatInput}
-                      minRows={2}
-                      maxRows={4}
-                      placeholder={i18n.t("ai.refinePlaceholder", {
-                        defaultValue:
-                          "Например: добавь ещё один тест / сделай проще для A2 / перепиши warm-up",
-                      })}
-                      isDisabled={isGenerating}
-                    />
-                    <Button
-                      color="primary"
-                      className="w-full"
-                      onPress={handleRefine}
-                      isLoading={isGenerating}
-                      isDisabled={!chatInput.trim()}
-                    >
-                      <T k="ai.sendRefine" defaultText="Отправить правку в AI" />
-                    </Button>
+                    {pendingPreview ? (
+                      <>
+                        <AiDraftPreviewSummary
+                          preview={pendingPreview}
+                          baseline={draft!}
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            variant="flat"
+                            className="flex-1"
+                            isDisabled={isGenerating}
+                            onPress={() => setPendingPreview(null)}
+                          >
+                            Не применять
+                          </Button>
+                          <Button
+                            color="primary"
+                            className="flex-1"
+                            isLoading={isGenerating}
+                            onPress={savePendingPreview}
+                          >
+                            Применить к уроку
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Textarea
+                          value={chatInput}
+                          onValueChange={setChatInput}
+                          minRows={2}
+                          maxRows={4}
+                          placeholder={i18n.t("ai.refinePlaceholder", {
+                            defaultValue:
+                              "Например: добавь ещё один тест / сделай проще для A2 / перепиши warm-up",
+                          })}
+                          isDisabled={isGenerating}
+                        />
+                        <Button
+                          color="primary"
+                          className="w-full"
+                          onPress={handleRefine}
+                          isLoading={isGenerating}
+                          isDisabled={!chatInput.trim()}
+                        >
+                          Показать изменения
+                        </Button>
+                      </>
+                    )}
                   </>
                 ) : step === "confirmTopic" ? (
                   <div className="flex flex-col gap-2">
@@ -759,6 +795,48 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                     description={draft.lesson.description}
                     tags={draft.lesson.tags}
                   />
+                </div>
+              )}
+              {step === "preview" && draft && !savedLessonId && (
+                <div className="h-full min-h-0 overflow-y-auto p-1">
+                  <div className="rounded-xl bg-default-50 p-4">
+                    <h3 className="text-xl font-semibold">
+                      {(pendingPreview || draft).lesson.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-primary">
+                      {(pendingPreview || draft).lesson.tags}
+                    </p>
+                    <p className="mt-2 text-sm text-default-600">
+                      {(pendingPreview || draft).lesson.description}
+                    </p>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {(pendingPreview || draft).exercises.map(
+                      (exercise, index) => (
+                        <div
+                          key={`${exercise.clientKey || exercise.id || index}`}
+                          className="rounded-xl border border-default-200 bg-content1 p-3"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-medium">
+                              {String(
+                                exercise.data?.title ||
+                                  `Задание ${index + 1}`,
+                              )}
+                            </p>
+                            <span className="text-xs text-default-400">
+                              {getExerciseTypeLabel(exercise.type)}
+                            </span>
+                          </div>
+                          {!!exercise.data?.subtitle && (
+                            <p className="mt-1 text-sm text-default-500">
+                              {String(exercise.data.subtitle)}
+                            </p>
+                          )}
+                        </div>
+                      ),
+                    )}
+                  </div>
                 </div>
               )}
             </div>

@@ -45,8 +45,8 @@ import { ShareLessonLink } from "../components/ShareLessonLink";
 import { CreateHomeworkModal } from "@/app/lessons/components/CreateHomeworkModal";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
-import { EditorAiAssistModal } from "../components/EditorAiAssistModal";
 import { parseRouteId } from "@/utils/parseRouteId";
+import { EditorAiAssistModal } from "../components/EditorAiAssistModal";
 
 export default function EditorPage() {
   withLogin();
@@ -201,7 +201,6 @@ export default function EditorPage() {
     const isOwner =
       Number(profile.id) === Number(lesson.user_id) ||
       Boolean(lesson.is_my_lesson);
-    // Same edit access as constructor: own lessons, admin for 2easy catalog
     if (is2easy) return isAdmin;
     return isOwner;
   }, [lesson, profile?.id, is2easy, isAdmin]);
@@ -406,12 +405,11 @@ export default function EditorPage() {
         )}
       </ContentWrapper>
       <EditorAiAssistModal
-        lessonId={lessonId as string}
+        lessonId={lessonId || ""}
         lesson={lesson}
         exList={exList || []}
         onApplied={() => {
-          if (!lessonId) return;
-          getLesson(lessonId);
+          if (lessonId) getLesson(lessonId);
           getExList();
         }}
         canEdit={canEditWithAi}

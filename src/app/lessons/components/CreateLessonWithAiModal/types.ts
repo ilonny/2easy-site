@@ -69,6 +69,8 @@ export type TAiChatMessage = {
 };
 
 export type TAiGeneratedExercise = {
+  id?: number;
+  clientKey?: string;
   type: string;
   sortIndex: number;
   data: Record<string, any>;

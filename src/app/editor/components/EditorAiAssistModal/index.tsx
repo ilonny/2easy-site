@@ -377,7 +377,7 @@ export const EditorAiAssistModal: FC<TProps> = ({
 
   return (
     <>
-      <div className="fixed bottom-6 left-6 z-50 flex flex-col gap-2 items-start">
+      <div className="hidden">
         <Button
           color="secondary"
           size="lg"

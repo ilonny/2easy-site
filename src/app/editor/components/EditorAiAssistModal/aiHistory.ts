@@ -81,6 +81,7 @@ const stripHeavyMedia = (data: Record<string, any>) => {
     "secondEditorAttachments",
     "attachments",
     "editorImages",
+    "secondEditorImages",
   ]) {
     if (Array.isArray(out[key]) && out[key].length > 0) {
       // Keep structure/urls if short; drop huge dataURLs

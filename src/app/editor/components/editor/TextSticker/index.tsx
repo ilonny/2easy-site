@@ -281,6 +281,7 @@ export const TextSticker: FC<TProps> = ({
               id: (data as any)?.id,
               sortIndex: (data as any)?.sortIndex,
             } as any);
+            setImages(Array.isArray(generated.images) ? generated.images : images);
           }}
         />
       </div>

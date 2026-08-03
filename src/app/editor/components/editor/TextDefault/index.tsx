@@ -300,11 +300,25 @@ export const TextDefaultEx: FC<TProps> = ({
           type="text-default"
           currentData={data as any}
           onApply={(generated) => {
+            const nextContent = String(generated.content || "");
             resetData({
               ...generated,
               id: (data as any)?.id,
               sortIndex: (data as any)?.sortIndex,
             } as any);
+            setImages(Array.isArray(generated.images) ? generated.images : images);
+            setEditorImages(
+              Array.isArray(generated.editorImages)
+                ? generated.editorImages
+                : editorImages
+            );
+            setEditorState(
+              nextContent
+                ? EditorState.createWithContent(
+                    ContentState.createFromBlockArray(htmlToDraft(nextContent))
+                  )
+                : EditorState.createEmpty()
+            );
           }}
         />
       </div>
