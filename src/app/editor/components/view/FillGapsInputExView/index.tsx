@@ -172,7 +172,13 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
             id={"answer-wrapper-" + field?.id}
             style={{
               display: "inline-block",
-              maxWidth: safeLen * (safeLen < 5 ? 30 : 15),
+              maxWidth: Math.min(
+                safeLen * (safeLen < 5 ? 30 : 15),
+                typeof window !== "undefined" && window.innerWidth < 640
+                  ? Math.max(120, window.innerWidth - 64)
+                  : 400,
+              ),
+              width: "100%",
               lineHeight: "initial",
             }}
           >
@@ -261,8 +267,8 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
       >
         <Card className={`p-4 sm:p-6 md:p-8 lg:p-10 min-w-0`}>
           <div
-            style={{ margin: "0 auto", lineHeight: "230%" }}
-            className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10"
+            style={{ margin: "0 auto" }}
+            className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10 leading-[1.8] sm:leading-[2.3]"
           >
             <div
               className={

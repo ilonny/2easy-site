@@ -126,4 +126,17 @@
     height: 1.75rem;
     font-size: 0.75rem;
   }
+
+  .teacherLabel {
+    display: none;
+  }
+
+  .teacherBlock {
+    gap: 0.5rem;
+  }
+
+  .wrap {
+    max-width: 100%;
+    overflow: hidden;
+  }
 }

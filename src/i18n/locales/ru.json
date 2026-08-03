@@ -367,6 +367,8 @@
     },
     "participants": "УЧАСТНИКИ",
     "participantsShort": "Участн.",
+    "participantsButton": "Участники",
+    "lessonTools": "Инструменты",
     "participantsAriaLabel": "Участники урока",
     "resetAnswers": "Сбросить ответы",
     "resetAnswersConfirm": "Сбросить ответы в задании {{title}}",

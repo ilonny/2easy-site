@@ -69,13 +69,13 @@ export const BoardEditorModal: FC<TProps> = ({
       classNames={BOARD_EDITOR_MODAL_CLASS_NAMES}
     >
       <ModalContent className="h-full max-h-[100dvh] rounded-none flex flex-col">
-        <ModalHeader className="px-4 py-3 sm:px-6">
-          <div className="flex w-full items-center gap-3">
-            <p className="min-w-0 flex-1 truncate">
+        <ModalHeader className="px-3 py-2.5 sm:px-6 sm:py-3 pt-[max(0.625rem,env(safe-area-inset-top))]">
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:gap-3">
+            <p className="min-w-0 flex-1 truncate text-sm sm:text-base">
               {board?.title || <T k="boards.myBoards" />}
             </p>
             {mode === "realtime" ? (
-              <div className="flex shrink-0 items-center pr-10">
+              <div className="flex max-w-[45%] shrink-0 items-center overflow-hidden pr-10 sm:max-w-none">
                 <BoardParticipantsList
                   api={boardApi}
                   participants={editor.participants}

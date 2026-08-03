@@ -33,40 +33,36 @@ export const StartLessonButton = (props: TProps) => {
     }
   }, [isSkipCreateRealtion, onSuccess, checkSubscription]);
 
+  const label = isHomeworkCheck ? (
+    <T k="lessons.checkHomework" defaultText="Check homework" />
+  ) : (
+    <T k="lessons.startLesson" defaultText="Начать урок" />
+  );
+
   return (
     <>
       <div
-        style={{
-          borderRadius: 90,
-          backgroundColor: "#3f28c6",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          lineHeight: isHomeworkCheck ? 1.15 : "22px",
-          color: "#fff",
-          cursor: "pointer",
-          transition: "all 250ms ease",
-          padding: 10,
-          position: "sticky",
-          zIndex: 10,
-          float: "right",
-          // marginRight: -150,
+        role="button"
+        tabIndex={0}
+        onClick={() => onPressButton()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onPressButton();
+          }
         }}
         className={[
-          "hover:opacity-[0.8] top-[80px] h-[80px] w-[80px] lg:h-[90px] lg:w-[90px] lg:top-[40] mt-[-90px] lg:mt-0",
+          "z-10 flex cursor-pointer touch-manipulation items-center justify-center bg-[#3f28c6] text-center text-white transition-opacity duration-250 hover:opacity-80",
+          // Mobile: full-width sticky CTA
+          "sticky top-[72px] mb-4 mt-0 h-12 w-full rounded-xl px-4 text-base font-medium leading-tight",
+          // Desktop: floating circle (legacy layout)
+          "lg:float-right lg:mb-0 lg:mt-[-90px] lg:h-[90px] lg:w-[90px] lg:rounded-full lg:px-2.5 lg:top-10",
           isHomeworkCheck
-            ? "text-[13px] lg:text-[15px] px-1"
-            : "text-[18px] lg:text-[22px]",
+            ? "text-[13px] sm:text-sm lg:text-[15px] lg:leading-[1.15]"
+            : "lg:text-[22px] lg:leading-[22px]",
         ].join(" ")}
-        onClick={() => onPressButton()}
       >
-        <p className="text-center">
-          {isHomeworkCheck ? (
-            <T k="lessons.checkHomework" defaultText="Check homework" />
-          ) : (
-            <T k="lessons.startLesson" defaultText="Начать урок" />
-          )}
-        </p>
+        <p className="text-center">{label}</p>
       </div>
       {!!lesson && (
         <AttachLessonModalForm

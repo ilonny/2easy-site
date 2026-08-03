@@ -73,5 +73,8 @@ export function computeSelectWrapperMinWidth(maxOptionLength: number): number {
   if (!Number.isFinite(minWidth) || minWidth < 70) {
     minWidth = 85;
   }
-  return minWidth;
+  if (typeof window !== "undefined" && window.innerWidth < 640) {
+    return Math.min(minWidth, Math.max(96, window.innerWidth - 64));
+  }
+  return Math.min(minWidth, 360);
 }

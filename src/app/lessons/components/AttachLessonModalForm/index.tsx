@@ -87,7 +87,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
       );
       onSuccess();
     } catch (err) {}
-  }, [chosenIds, lesson.id, onSuccess, status, isCourses]);
+  }, [chosenIds, lesson.id, onSuccess, status, isCourses, hideToast]);
 
   const onClickStudent = useCallback(
     (id: number) => {
@@ -112,12 +112,18 @@ export const AttachLessonModalForm: FC<TProps> = ({
       size="xl"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
-      scrollBehavior="outside"
+      scrollBehavior="inside"
+      placement="center"
       style={{ backgroundColor: "#F9F9F9" }}
+      classNames={{
+        base: "mx-2 my-4 max-h-[min(900px,90dvh)] sm:mx-auto sm:my-8",
+        header: "px-3 pt-4 pb-2 text-base sm:px-6 sm:text-lg",
+        body: "px-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6",
+      }}
     >
       <ModalContent>
         <ModalHeader>
-          <p>
+          <p className="break-words leading-snug">
             {step === 0 ? (
               title ?? (
                 isCourses ? (
@@ -149,7 +155,6 @@ export const AttachLessonModalForm: FC<TProps> = ({
           {step === 0 && (
             <>
               <StudentList
-                // hideAddButton
                 btnSecondary
                 hidePopoverButton
                 onClickStudent={onClickStudent}
@@ -162,10 +167,10 @@ export const AttachLessonModalForm: FC<TProps> = ({
                   skipChoseStatus
                     ? "primary"
                     : !chosenIds?.length
-                    ? "default"
-                    : "primary"
+                      ? "default"
+                      : "primary"
                 }
-                className="w-full"
+                className="mt-2 min-h-12 w-full touch-manipulation"
                 onClick={() => {
                   if (skipChoseStatus) {
                     onSubmit();
@@ -174,7 +179,11 @@ export const AttachLessonModalForm: FC<TProps> = ({
                   }
                 }}
               >
-                {skipChoseStatus ? <T k="lessons.startLesson" /> : <T k="modals.next" />}
+                {skipChoseStatus ? (
+                  <T k="lessons.startLesson" />
+                ) : (
+                  <T k="modals.next" />
+                )}
               </Button>
             </>
           )}
@@ -183,6 +192,9 @@ export const AttachLessonModalForm: FC<TProps> = ({
               <Select
                 defaultSelectedKeys={[status]}
                 size="lg"
+                classNames={{
+                  trigger: "min-h-12 touch-manipulation",
+                }}
                 description={
                   status === "open"
                     ? i18n.t("modals.availableToStudent", {
@@ -191,16 +203,16 @@ export const AttachLessonModalForm: FC<TProps> = ({
                           : "Available to the student",
                       })
                     : isCourses
-                    ? i18n.t("lessons.studentSeesCourseCannotOpen", {
-                        defaultValue: isRu
-                          ? "Ученик будет видеть курс, но не сможет его открыть"
-                          : "The student can see the course, but cannot open it",
-                      })
-                    : i18n.t("lessons.studentSeesLessonCannotOpen", {
-                        defaultValue: isRu
-                          ? "Ученик будет видеть урок, но не сможет его открыть"
-                          : "The student can see the lesson, but cannot open it",
-                      })
+                      ? i18n.t("lessons.studentSeesCourseCannotOpen", {
+                          defaultValue: isRu
+                            ? "Ученик будет видеть курс, но не сможет его открыть"
+                            : "The student can see the course, but cannot open it",
+                        })
+                      : i18n.t("lessons.studentSeesLessonCannotOpen", {
+                          defaultValue: isRu
+                            ? "Ученик будет видеть урок, но не сможет его открыть"
+                            : "The student can see the lesson, but cannot open it",
+                        })
                 }
                 placeholder={
                   isCourses
@@ -212,8 +224,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
                       })
                 }
                 onChange={(e) => {
-                  console.log("e.target.value?", e.target.value);
-                  setStatus(e.target.value);
+                  setStatus(e.target.value as "open" | "close");
                 }}
               >
                 <SelectItem
@@ -237,11 +248,11 @@ export const AttachLessonModalForm: FC<TProps> = ({
                   )}
                 </SelectItem>
               </Select>
-              <div className="h-4"></div>
+              <div className="h-4" />
               <Button
                 size="lg"
                 color="primary"
-                className="w-full"
+                className="min-h-12 w-full touch-manipulation"
                 onClick={onSubmit}
               >
                 <T k="modals.attachButton" />
@@ -251,14 +262,14 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 size="lg"
                 variant="light"
                 color="primary"
-                className="w-full"
+                className="min-h-12 w-full touch-manipulation"
                 onClick={() => setStep(0)}
               >
                 <T k="common.back" />
               </Button>
             </>
           )}
-          <div className="h-4"></div>
+          <div className="h-4" />
         </ModalBody>
       </ModalContent>
     </Modal>

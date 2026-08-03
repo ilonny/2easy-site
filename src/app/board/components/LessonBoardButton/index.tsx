@@ -9,6 +9,7 @@ import { useCheckSubscription } from "@/app/subscription/helpers";
 import { TBoard, TLessonBoardScope } from "@/app/board/types";
 import { useLessonBoard } from "@/app/board/hooks/useLessonBoard";
 import { BoardEditorModal } from "@/app/board/components/BoardEditorModal";
+import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
 
 type TProps = {
   lessonId: number;
@@ -122,7 +123,7 @@ export const LessonBoardButton: FC<TProps> = ({
         onClick={() => void handleOpen()}
         size="lg"
         isLoading={isOpening}
-        style={{ minWidth: 300 }}
+        className={LESSON_FAB_BUTTON_CLASS}
       >
         <T k="boards.lessonBoard" />
       </Button>

@@ -10,6 +10,7 @@ import {
   ICON_DICTIONARY_BUTTON_COMPACT_SIZE_CLASS,
   ICON_DICTIONARY_BUTTON_DEFAULT_SIZE_CLASS,
 } from "../../constants";
+import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
 
 export const LessonDictionaryButton: FC<{ onClick: () => void }> = ({
   onClick,
@@ -20,7 +21,7 @@ export const LessonDictionaryButton: FC<{ onClick: () => void }> = ({
     variant="light"
     onClick={onClick}
     size="lg"
-    className="w-full min-w-0 max-w-full sm:w-auto sm:min-w-[300px] touch-manipulation"
+    className={LESSON_FAB_BUTTON_CLASS}
   >
     <T k="dictionary.tab" defaultText="Словарь" />
   </Button>

@@ -1,6 +1,6 @@
 import type {
   Metadata,
-  // Viewport
+  Viewport,
 } from "next";
 import "./globals.css";
 import { Header } from "@/components";
@@ -25,12 +25,11 @@ export const metadata: Metadata = {
     "Интерактивная платформа с готовыми материалами для создания и проведения языковых уроков",
 };
 
-// export const viewport: Viewport = {
-//   width: "1200",
-//   initialScale: 1,
-//   maximumScale: 1,
-//   userScalable: false,
-// };
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 const manrope = Manrope({ subsets: ["cyrillic-ext", "latin-ext"] });
 

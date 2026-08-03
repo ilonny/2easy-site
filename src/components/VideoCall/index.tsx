@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@nextui-org/react";
 import Image from "next/image";
 import Draggable from "react-draggable";
@@ -11,6 +12,7 @@ import { toast } from "react-toastify";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { TProfile } from "@/auth/types";
+import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
 
 function resolveTeacherUserId(profile?: TProfile): string | null {
   if (!profile) return null;
@@ -267,7 +269,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
         variant="light"
         onClick={onOpen}
         size="lg"
-        style={{ minWidth: 300 }}
+        className={LESSON_FAB_BUTTON_CLASS}
       >
         <T k="videoCall.title" />
       </Button>
@@ -276,7 +278,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
 
   const headerH = 40;
 
-  return (
+  const overlay = (
     <div
       ref={boundsRef}
       style={{
@@ -421,4 +423,10 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") {
+    return overlay;
+  }
+
+  return createPortal(overlay, document.body);
 };

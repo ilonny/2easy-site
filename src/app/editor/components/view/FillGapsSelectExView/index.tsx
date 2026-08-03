@@ -263,6 +263,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
             style={{
               display: "inline-block",
               minWidth,
+              maxWidth: "100%",
             }}
           >
             <AnswerField
@@ -335,8 +336,8 @@ export const FillGapsSelectExView: FC<TProps> = ({
       <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[886px] mx-auto`}>
         <Card className={`p-4 sm:p-6 md:p-8 lg:p-10 min-w-0`}>
           <div
-            style={{ margin: "0 auto", lineHeight: "230%" }}
-            className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10"
+            style={{ margin: "0 auto" }}
+            className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10 leading-[1.8] sm:leading-[2.3]"
           >
             {content}
           </div>

@@ -1,9 +1,11 @@
 .lesson-card {
   cursor: pointer;
 }
+
 .lesson-card:hover .image-bg {
   transform: scale(1.1);
 }
+
 .lesson-card:hover .shadow {
   opacity: 1;
 }
@@ -30,10 +32,26 @@
   right: 0;
   top: 0;
   transition: all 100ms ease;
+  z-index: 2;
 }
 
 .image-bg {
   background-size: cover !important;
   background-position: center !important;
   transition: all 250ms ease;
+}
+
+/* Touch: keep card menu visible without hover */
+@media (hover: none), (pointer: coarse) {
+  .btn-wrapper {
+    transform: translateY(0);
+  }
+
+  .shadow {
+    opacity: 0.12;
+  }
+
+  .lesson-card:hover .image-bg {
+    transform: none;
+  }
 }

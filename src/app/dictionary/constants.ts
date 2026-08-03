@@ -2,14 +2,17 @@ export const DICTIONARY_SEARCH_DEBOUNCE_MS = 500;
 
 export const DICTIONARY_SELECTION_WIDGET_SHOW_DELAY_MS = 200;
 
-export const DICTIONARY_SELECTION_WIDGET_ESTIMATED_WIDTH = 220;
+/** Extra delay on coarse pointers so iOS selection settles before the pill appears. */
+export const DICTIONARY_SELECTION_WIDGET_TOUCH_SHOW_DELAY_MS = 450;
 
-export const DICTIONARY_SELECTION_WIDGET_ESTIMATED_HEIGHT = 40;
+export const DICTIONARY_SELECTION_WIDGET_ESTIMATED_WIDTH = 240;
+
+export const DICTIONARY_SELECTION_WIDGET_ESTIMATED_HEIGHT = 48;
 
 export const DICTIONARY_SELECTION_WIDGET_OFFSET = 6;
 
 export const DICTIONARY_SELECTION_WIDGET_PILL_CLASS =
-  "absolute z-20 flex max-w-[min(240px,calc(100vw-3rem))] items-center gap-2 rounded-lg border border-primary/10 bg-white px-3 py-2 text-sm text-primary font-medium shadow-lg hover:bg-[#faf9ff] touch-manipulation whitespace-nowrap transition-all duration-200 ease-out";
+  "absolute z-20 flex min-h-11 max-w-[min(260px,calc(100vw-2rem))] items-center gap-2 rounded-lg border border-primary/10 bg-white px-3 py-2.5 text-sm text-primary font-medium shadow-lg hover:bg-[#faf9ff] touch-manipulation whitespace-nowrap transition-all duration-200 ease-out";
 
 export const DICTIONARY_SELECTION_WIDGET_PILL_VISIBLE_CLASS =
   "opacity-100 scale-100";

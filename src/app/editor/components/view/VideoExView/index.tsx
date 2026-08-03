@@ -66,7 +66,7 @@ const VideoItemView: FC<{ video: TVideoItem }> = ({ video }) => {
 
   return (
     <div
-      className="w-full min-w-0 [&_.videos-container]:!max-w-none [&_.videos-container]:w-full [&_.video-item]:!w-full [&_.video-item]:!max-w-full [&_.video-item]:min-w-0 md:[&_.video-item]:flex-1 [&_iframe]:block [&_iframe]:w-full [&_iframe]:max-w-full [&_iframe]:min-h-[450px] [&_iframe]:border-0 [&_iframe]:h-auto [&_video]:block [&_video]:w-full [&_video]:max-w-full [&_video]:h-auto"
+      className="w-full min-w-0 [&_.videos-container]:!max-w-none [&_.videos-container]:w-full [&_.video-item]:!w-full [&_.video-item]:!max-w-full [&_.video-item]:min-w-0 md:[&_.video-item]:flex-1 [&_iframe]:block [&_iframe]:h-auto [&_iframe]:w-full [&_iframe]:max-w-full [&_iframe]:min-h-[200px] sm:[&_iframe]:min-h-[280px] md:[&_iframe]:min-h-[450px] [&_iframe]:border-0 [&_video]:block [&_video]:h-auto [&_video]:w-full [&_video]:max-w-full"
       dangerouslySetInnerHTML={{ __html: video.content }}
     />
   );
