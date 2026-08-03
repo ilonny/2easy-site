@@ -12,6 +12,12 @@ type TParams = {
   isPresentationMode?: boolean;
   /** When false, skip background polling (still allows getAnswers / writeAnswer). */
   enablePolling?: boolean;
+  /**
+   * When true, student poll also pushes remote answers into React state.
+   * Needed for live teacher corrections (e.g. free-input rich edits).
+   * Callers must ignore remote updates while the field is focused.
+   */
+  syncRemoteToStudent?: boolean;
 };
 
 const limit = pLimit(1);
@@ -284,6 +290,7 @@ export const useExAnswer = (params: TParams) => {
     sleepDelay,
     isPresentationMode,
     enablePolling = true,
+    syncRemoteToStudent = false,
   } = params;
   const queue = useRef<Promise<Response>[]>([]);
   const [answers, setAnswers] = useState<Record<string, any>>({});
@@ -300,7 +307,10 @@ export const useExAnswer = (params: TParams) => {
 
   const writeAnswer = useCallback(
     async (q_id: number | string, answer: string) => {
-      if (!student_id) {
+      const targetStudentId = Number(
+        isTeacher ? activeStudentId || 0 : student_id || 0
+      );
+      if (!targetStudentId) {
         return;
       }
       queue.current.push(
@@ -313,14 +323,14 @@ export const useExAnswer = (params: TParams) => {
               ex_id,
               q_id,
               answer,
-              student_id,
+              student_id: targetStudentId,
             },
           })
         )
       );
       await Promise.all(queue.current);
     },
-    [lesson_id, ex_id, student_id]
+    [lesson_id, ex_id, student_id, isTeacher, activeStudentId]
   );
 
   const applyAnswers = useCallback(
@@ -473,10 +483,10 @@ export const useExAnswer = (params: TParams) => {
             detectReset: true,
           });
         } else {
-          // Student: only watch for remote reset. Do NOT push poll data into
-          // React state — that remounts inputs and steals focus while typing.
+          // Student: by default only watch for remote reset (don't steal focus).
+          // syncRemoteToStudent: also hydrate state for live teacher corrections.
           applyAnswers(answersMap, sid, {
-            updateState: false,
+            updateState: syncRemoteToStudent,
             detectReset: true,
           });
         }
@@ -496,6 +506,7 @@ export const useExAnswer = (params: TParams) => {
     isPresentationMode,
     sleepDelay,
     enablePolling,
+    syncRemoteToStudent,
     applyAnswers,
     fetchAnswersMap,
   ]);

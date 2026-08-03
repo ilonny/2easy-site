@@ -152,7 +152,7 @@ export const AiLessonConstructorPreview: FC<TProps> = ({
             onSuccessCreate={onSuccessCreate}
             lesson_id={String(lessonId)}
             currentSortIndexToShift={
-              exList[exList.length - 1]?.sortIndex || 0
+              (exList[exList.length - 1] as any)?.sortIndex || 0
             }
           />
         </Card>
@@ -199,7 +199,7 @@ export const AiLessonConstructorPreview: FC<TProps> = ({
               size="lg"
               onClick={async () => {
                 setDeleteModal(false);
-                await deleteEx(deleteId);
+                if (deleteId !== undefined) await deleteEx(deleteId);
                 getExList(lessonId);
               }}
             >

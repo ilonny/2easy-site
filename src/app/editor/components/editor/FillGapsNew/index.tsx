@@ -812,7 +812,7 @@ export const FillGapsNew: FC<TProps> = ({
               id: (data as any)?.id,
               sortIndex: (data as any)?.sortIndex,
             } as any);
-            setImages([]);
+            setImages(Array.isArray(generated.images) ? generated.images : images);
             setSlateMountKey((k) => k + 1);
           }}
         />

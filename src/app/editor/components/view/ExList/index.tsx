@@ -243,6 +243,33 @@ const mapComponent = (type: string, outerProps: never) => {
   }
 };
 
+export const ExerciseComponentPreview: FC<{
+  type: string;
+  data: Record<string, any>;
+}> = ({ type, data }) => {
+  const Preview = mapComponent(type, {
+    id: 0,
+    isView: true,
+    isPresentationMode: false,
+  } as never);
+
+  return (
+    <div className="pointer-events-none select-none" aria-label="Превью задания">
+      <div
+        className={`${styles["wrapper"]} ${styles["is-view"]}`}
+        style={{ fontSize: 18 }}
+      >
+        <Preview
+          data={{ ...data, id: 0 }}
+          activeStudentId={0}
+          isView
+          isPresentationMode={false}
+        />
+      </div>
+    </div>
+  );
+};
+
 export const ExListComp: FC<TProps> = (props) => {
   const {
     list,

@@ -256,6 +256,12 @@ export const TextChecklist: FC<TProps> = ({
               id: (data as any)?.id,
               sortIndex: (data as any)?.sortIndex,
             } as any);
+            setImages(Array.isArray(generated.images) ? generated.images : images);
+            setEditorImages(
+              Array.isArray(generated.editorImages)
+                ? generated.editorImages
+                : editorImages
+            );
           }}
         />
       </div>

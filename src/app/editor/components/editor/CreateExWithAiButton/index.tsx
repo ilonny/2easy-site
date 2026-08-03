@@ -4,6 +4,7 @@ import { checkResponse, fetchPostJson } from "@/api";
 import { canUseAi } from "@/app/ai/canUseAi";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { useEditorLessonId } from "@/app/editor/hooks/useEditorLessonId";
+import { ExerciseComponentPreview } from "@/app/editor/components/view/ExList";
 import { AuthContext } from "@/auth";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
@@ -16,7 +17,14 @@ import {
   Spinner,
   Textarea,
 } from "@nextui-org/react";
-import { FC, useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 export const AI_SUPPORTED_EX_TYPES = [
   "text-default",
@@ -82,6 +90,9 @@ export const CreateExWithAiButton: FC<TProps> = ({
   const [instruction, setInstruction] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingData, setPendingData] = useState<Record<string, any> | null>(
+    null,
+  );
   const [messages, setMessages] = useState<TChatMessage[]>([
     { id: makeId(), role: "assistant", content: WELCOME },
   ]);
@@ -147,8 +158,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
       ]);
 
       if (!json.refused && json.data && typeof json.data === "object") {
-        latestDataRef.current = json.data;
-        onApply(json.data);
+        setPendingData(json.data);
       }
     } catch (e) {
       setError("Ошибка сети");
@@ -201,7 +211,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
       <Modal
         isOpen={open}
         onClose={() => setOpen(false)}
-        size="2xl"
+        size="5xl"
         scrollBehavior="inside"
         classNames={{ base: "max-h-[90dvh]" }}
       >
@@ -216,7 +226,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
             </p>
           </ModalHeader>
           <ModalBody className="pb-6 gap-3">
-            <div className="flex flex-col gap-3 max-h-[45vh] overflow-y-auto overscroll-contain py-1">
+            <div className="flex flex-col gap-3 max-h-[30vh] overflow-y-auto overscroll-contain py-1">
               {messages.map((m) => (
                 <div
                   key={m.id}
@@ -252,7 +262,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
                 defaultValue:
                   "Например: сделай проще для A2 / добавь 2 вопроса / перепиши примеры",
               })}
-              isDisabled={isLoading}
+              isDisabled={isLoading || Boolean(pendingData)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                   e.preventDefault();
@@ -261,16 +271,54 @@ export const CreateExWithAiButton: FC<TProps> = ({
               }}
             />
             {error && <p className="text-sm text-danger">{error}</p>}
-            <Button
-              color="primary"
-              className="w-full"
-              size="lg"
-              isLoading={isLoading}
-              isDisabled={!instruction.trim()}
-              onPress={onSubmit}
-            >
-              <T k="ai.applyChanges" defaultText="Отправить правку AI" />
-            </Button>
+            {pendingData ? (
+              <div className="rounded-xl border border-secondary-200 bg-secondary-50/50 p-3 sm:p-4">
+                <p className="text-sm font-semibold">Превью нового варианта</p>
+                <p className="mt-1 text-xs text-default-500">
+                  Так задание будет выглядеть после применения.
+                </p>
+                <div className="mt-3 max-h-[52vh] overflow-y-auto rounded-xl border border-default-200 bg-content1 p-2 sm:p-4">
+                  <div className="mx-auto max-w-4xl">
+                    <ExerciseComponentPreview
+                      type={type}
+                      data={pendingData}
+                    />
+                  </div>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <Button
+                    variant="flat"
+                    className="flex-1"
+                    onPress={() => setPendingData(null)}
+                  >
+                    Отменить
+                  </Button>
+                  <Button
+                    color="primary"
+                    className="flex-1"
+                    onPress={() => {
+                      latestDataRef.current = pendingData;
+                      onApply(pendingData);
+                      setPendingData(null);
+                      setOpen(false);
+                    }}
+                  >
+                    Применить
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                color="primary"
+                className="w-full"
+                size="lg"
+                isLoading={isLoading}
+                isDisabled={!instruction.trim()}
+                onPress={onSubmit}
+              >
+                Отправить
+              </Button>
+            )}
             <p className="text-xs text-default-400 text-center">
               ⌘/Ctrl + Enter — отправить
             </p>
