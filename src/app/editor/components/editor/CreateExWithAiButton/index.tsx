@@ -213,10 +213,17 @@ export const CreateExWithAiButton: FC<TProps> = ({
         onClose={() => setOpen(false)}
         size="5xl"
         scrollBehavior="inside"
-        classNames={{ base: "max-h-[90dvh]" }}
+        classNames={{
+          wrapper:
+            "items-center justify-center overflow-y-auto overscroll-none p-2 sm:p-3",
+          base:
+            "!max-h-[calc(100dvh-1rem)] !my-0 overflow-hidden",
+          body: "p-0 !overflow-hidden min-h-0 flex-1",
+          header: "shrink-0",
+        }}
       >
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1 border-b border-default-100">
+        <ModalContent className="max-h-[calc(100dvh-1rem)] min-h-0 flex flex-col overflow-hidden">
+          <ModalHeader className="flex flex-col gap-1 border-b border-default-100 shrink-0">
             <T k="ai.editExWithAi" defaultText="Отредактировать с помощью ИИ" />
             <p className="text-sm font-normal text-default-500">
               <T
@@ -225,67 +232,77 @@ export const CreateExWithAiButton: FC<TProps> = ({
               />
             </p>
           </ModalHeader>
-          <ModalBody className="pb-6 gap-3">
-            <div className="flex flex-col gap-3 max-h-[30vh] overflow-y-auto overscroll-contain py-1">
-              {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`flex ${
-                    m.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
+          <ModalBody className="flex-1 min-h-0 overflow-hidden p-0 flex flex-col gap-0">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-3 space-y-3">
+              <div className="flex flex-col gap-3 py-1">
+                {messages.map((m) => (
                   <div
-                    className={`max-w-[90%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap ${
-                      m.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-default-100 text-foreground"
+                    key={m.id}
+                    className={`flex ${
+                      m.role === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
-                    {m.content}
+                    <div
+                      className={`max-w-[90%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap ${
+                        m.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-default-100 text-foreground"
+                      }`}
+                    >
+                      {m.content}
+                    </div>
                   </div>
-                </div>
-              ))}
-              {isLoading && (
-                <div className="flex items-center gap-2 text-sm text-default-500">
-                  <Spinner size="sm" />
-                  <T k="ai.thinking" defaultText="AI думает…" />
+                ))}
+                {isLoading && (
+                  <div className="flex items-center gap-2 text-sm text-default-500">
+                    <Spinner size="sm" />
+                    <T k="ai.thinking" defaultText="AI думает…" />
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
+
+              {pendingData && (
+                <div className="rounded-xl border border-secondary-200 bg-secondary-50/50 p-3 sm:p-4">
+                  <p className="text-sm font-semibold">Превью нового варианта</p>
+                  <p className="mt-1 text-xs text-default-500">
+                    Так задание будет выглядеть после применения.
+                  </p>
+                  <div className="mt-3 rounded-xl border border-default-200 bg-content1 p-2 sm:p-4">
+                    <div className="mx-auto max-w-4xl">
+                      <ExerciseComponentPreview
+                        type={type}
+                        data={pendingData}
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
-              <div ref={chatEndRef} />
             </div>
 
-            <Textarea
-              minRows={3}
-              value={instruction}
-              onValueChange={setInstruction}
-              placeholder={i18n.t("ai.editExPlaceholder", {
-                defaultValue:
-                  "Например: сделай проще для A2 / добавь 2 вопроса / перепиши примеры",
-              })}
-              isDisabled={isLoading || Boolean(pendingData)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                  e.preventDefault();
-                  onSubmit();
-                }
-              }}
-            />
-            {error && <p className="text-sm text-danger">{error}</p>}
-            {pendingData ? (
-              <div className="rounded-xl border border-secondary-200 bg-secondary-50/50 p-3 sm:p-4">
-                <p className="text-sm font-semibold">Превью нового варианта</p>
-                <p className="mt-1 text-xs text-default-500">
-                  Так задание будет выглядеть после применения.
-                </p>
-                <div className="mt-3 max-h-[52vh] overflow-y-auto rounded-xl border border-default-200 bg-content1 p-2 sm:p-4">
-                  <div className="mx-auto max-w-4xl">
-                    <ExerciseComponentPreview
-                      type={type}
-                      data={pendingData}
-                    />
-                  </div>
-                </div>
-                <div className="mt-3 flex gap-2">
+            <div className="shrink-0 border-t border-default-100 px-6 py-3 space-y-3 bg-content1">
+              {!pendingData && (
+                <Textarea
+                  minRows={2}
+                  maxRows={4}
+                  value={instruction}
+                  onValueChange={setInstruction}
+                  placeholder={i18n.t("ai.editExPlaceholder", {
+                    defaultValue:
+                      "Например: сделай проще для A2 / добавь 2 вопроса / перепиши примеры",
+                  })}
+                  isDisabled={isLoading}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault();
+                      onSubmit();
+                    }
+                  }}
+                />
+              )}
+              {error && <p className="text-sm text-danger">{error}</p>}
+              {pendingData ? (
+                <div className="flex gap-2">
                   <Button
                     variant="flat"
                     className="flex-1"
@@ -306,22 +323,24 @@ export const CreateExWithAiButton: FC<TProps> = ({
                     Применить
                   </Button>
                 </div>
-              </div>
-            ) : (
-              <Button
-                color="primary"
-                className="w-full"
-                size="lg"
-                isLoading={isLoading}
-                isDisabled={!instruction.trim()}
-                onPress={onSubmit}
-              >
-                Отправить
-              </Button>
-            )}
-            <p className="text-xs text-default-400 text-center">
-              ⌘/Ctrl + Enter — отправить
-            </p>
+              ) : (
+                <Button
+                  color="primary"
+                  className="w-full"
+                  size="lg"
+                  isLoading={isLoading}
+                  isDisabled={!instruction.trim()}
+                  onPress={onSubmit}
+                >
+                  Отправить
+                </Button>
+              )}
+              {!pendingData && (
+                <p className="text-xs text-default-400 text-center">
+                  ⌘/Ctrl + Enter — отправить
+                </p>
+              )}
+            </div>
           </ModalBody>
         </ModalContent>
       </Modal>

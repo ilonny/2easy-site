@@ -444,11 +444,12 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
       scrollBehavior="inside"
       placement="center"
       classNames={{
-        // size=full forces h-[100dvh] + my-0 (stuck to top). 5xl keeps margins; we widen + cap height.
-        wrapper: "overflow-hidden items-center overscroll-none",
+        // Cap height to viewport so actions never sit below the fold.
+        wrapper:
+          "items-center justify-center overflow-y-auto overscroll-none p-2 sm:p-3",
         backdrop: "overscroll-none",
         base:
-          "!max-w-[min(1400px,96vw)] !w-[min(1400px,96vw)] !h-[min(900px,calc(100dvh-5rem))] !max-h-[min(900px,calc(100dvh-5rem))] !min-h-0 !my-6 sm:!my-10 overflow-hidden overscroll-none",
+          "!max-w-[min(1400px,96vw)] !w-[min(1400px,96vw)] !h-[min(900px,calc(100dvh-1rem))] !max-h-[calc(100dvh-1rem)] !min-h-0 !my-0 overflow-hidden overscroll-none",
         body: "p-0 !overflow-hidden min-h-0 flex-1 overscroll-none",
         header: "shrink-0 py-3 sm:py-4",
       }}
@@ -526,7 +527,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                 <div ref={chatEndRef} />
               </div>
 
-              <div className="p-4 border-t border-default-100 space-y-2">
+              <div className="p-4 border-t border-default-100 space-y-2 shrink-0 max-h-[45%] overflow-y-auto overscroll-contain">
                 {step === "preview" ? (
                   <>
                     {pendingPreview ? (
@@ -612,133 +613,134 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
               </div>
             </div>
 
-            <div
-              className={`flex flex-col px-4 py-4 gap-4 overflow-y-auto overscroll-contain min-h-0 ${
-                step === "preview" ? "h-full" : ""
-              }`}
-            >
+            <div className="flex flex-col min-h-0 h-full overflow-hidden">
               {step === "collect" && (
-                <>
-                  <div>
-                    <p className="text-sm font-medium mb-2">
-                      <T k="ai.level" defaultText="Уровень" />
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {AI_LEVELS.map((l) => (
-                        <Chip
-                          key={l}
-                          variant={level === l ? "solid" : "bordered"}
-                          color={level === l ? "primary" : "default"}
-                          className="cursor-pointer"
-                          onClick={() => setLevel(l)}
-                        >
-                          {l}
-                        </Chip>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium mb-2">
-                      <T k="ai.exerciseTypes" defaultText="Типы заданий" />
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {AI_EXERCISE_TYPE_OPTIONS.map((opt) => {
-                        const selected = selectedTypes.includes(opt.type);
-                        return (
+                <div className="flex flex-col min-h-0 h-full">
+                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-4">
+                    <div>
+                      <p className="text-sm font-medium mb-2">
+                        <T k="ai.level" defaultText="Уровень" />
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {AI_LEVELS.map((l) => (
                           <Chip
-                            key={opt.type}
-                            variant={selected ? "solid" : "bordered"}
-                            color={selected ? "secondary" : "default"}
+                            key={l}
+                            variant={level === l ? "solid" : "bordered"}
+                            color={level === l ? "primary" : "default"}
                             className="cursor-pointer"
-                            onClick={() => toggleType(opt.type)}
+                            onClick={() => setLevel(l)}
                           >
-                            {toCapitalizeLabel(
-                              i18n.t(opt.titleKey, {
-                                defaultValue: opt.titleDefault,
-                              }),
-                            )}
+                            {l}
                           </Chip>
-                        );
-                      })}
+                        ))}
+                      </div>
                     </div>
+
+                    <div>
+                      <p className="text-sm font-medium mb-2">
+                        <T k="ai.exerciseTypes" defaultText="Типы заданий" />
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {AI_EXERCISE_TYPE_OPTIONS.map((opt) => {
+                          const selected = selectedTypes.includes(opt.type);
+                          return (
+                            <Chip
+                              key={opt.type}
+                              variant={selected ? "solid" : "bordered"}
+                              color={selected ? "secondary" : "default"}
+                              className="cursor-pointer"
+                              onClick={() => toggleType(opt.type)}
+                            >
+                              {toCapitalizeLabel(
+                                i18n.t(opt.titleKey, {
+                                  defaultValue: opt.titleDefault,
+                                }),
+                              )}
+                            </Chip>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <Input
+                      label={
+                        <T
+                          k="ai.topic"
+                          defaultText="Тема урока (необязательно)"
+                        />
+                      }
+                      placeholder={i18n.t("ai.topicPlaceholder", {
+                        defaultValue:
+                          "Можно оставить пустым — AI придумает сам",
+                      })}
+                      value={topic}
+                      onValueChange={setTopic}
+                      radius="sm"
+                      size="lg"
+                    />
+                    <Textarea
+                      label={
+                        <T
+                          k="ai.description"
+                          defaultText="Что хочешь видеть в уроке"
+                        />
+                      }
+                      placeholder={i18n.t("ai.descriptionPlaceholder", {
+                        defaultValue:
+                          "Например: разговорный warm-up, новая лексика, грамматика Present Perfect, дискуссия в конце",
+                      })}
+                      value={description}
+                      onValueChange={setDescription}
+                      minRows={3}
+                      radius="sm"
+                      size="lg"
+                    />
+
+                    {error && (
+                      <p className="text-danger text-sm">{error}</p>
+                    )}
                   </div>
-
-                  <Input
-                    label={
-                      <T
-                        k="ai.topic"
-                        defaultText="Тема урока (необязательно)"
-                      />
-                    }
-                    placeholder={i18n.t("ai.topicPlaceholder", {
-                      defaultValue:
-                        "Можно оставить пустым — AI придумает сам",
-                    })}
-                    value={topic}
-                    onValueChange={setTopic}
-                    radius="sm"
-                    size="lg"
-                  />
-                  <Textarea
-                    label={
-                      <T
-                        k="ai.description"
-                        defaultText="Что хочешь видеть в уроке"
-                      />
-                    }
-                    placeholder={i18n.t("ai.descriptionPlaceholder", {
-                      defaultValue:
-                        "Например: разговорный warm-up, новая лексика, грамматика Present Perfect, дискуссия в конце",
-                    })}
-                    value={description}
-                    onValueChange={setDescription}
-                    minRows={3}
-                    radius="sm"
-                    size="lg"
-                  />
-
-                  {error && (
-                    <p className="text-danger text-sm">{error}</p>
-                  )}
-
-                  <Button
-                    color="primary"
-                    size="lg"
-                    className="w-full mt-auto"
-                    isDisabled={!canGenerate}
-                    isLoading={isGenerating}
-                    onPress={handleGenerate}
-                  >
-                    <T k="ai.generate" defaultText="Сгенерировать урок" />
-                  </Button>
-                </>
+                  <div className="shrink-0 border-t border-default-100 px-4 py-3 bg-content1">
+                    <Button
+                      color="primary"
+                      size="lg"
+                      className="w-full"
+                      isDisabled={!canGenerate}
+                      isLoading={isGenerating}
+                      onPress={handleGenerate}
+                    >
+                      <T k="ai.generate" defaultText="Сгенерировать урок" />
+                    </Button>
+                  </div>
+                </div>
               )}
 
               {step === "confirmTopic" && suggestedTopic && (
-                <>
-                  <div className="rounded-xl bg-default-50 p-4 space-y-2">
-                    <p className="text-xs uppercase tracking-wide text-default-400">
-                      <T k="ai.suggestedTopic" defaultText="Предложенная тема" />
-                    </p>
-                    <h3 className="text-xl font-semibold">
-                      {suggestedTopic.title}
-                    </h3>
-                    {suggestedTopic.tags && (
-                      <p className="text-sm text-primary">
-                        {suggestedTopic.tags}
+                <div className="flex flex-col min-h-0 h-full">
+                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-4">
+                    <div className="rounded-xl bg-default-50 p-4 space-y-2">
+                      <p className="text-xs uppercase tracking-wide text-default-400">
+                        <T k="ai.suggestedTopic" defaultText="Предложенная тема" />
                       </p>
-                    )}
-                    {suggestedTopic.description && (
-                      <p className="text-sm text-default-600">
-                        {suggestedTopic.description}
-                      </p>
+                      <h3 className="text-xl font-semibold">
+                        {suggestedTopic.title}
+                      </h3>
+                      {suggestedTopic.tags && (
+                        <p className="text-sm text-primary">
+                          {suggestedTopic.tags}
+                        </p>
+                      )}
+                      {suggestedTopic.description && (
+                        <p className="text-sm text-default-600">
+                          {suggestedTopic.description}
+                        </p>
+                      )}
+                    </div>
+                    {error && (
+                      <p className="text-danger text-sm">{error}</p>
                     )}
                   </div>
-                  {error && (
-                    <p className="text-danger text-sm">{error}</p>
-                  )}
-                  <div className="mt-auto space-y-2 pt-2">
+                  <div className="shrink-0 border-t border-default-100 px-4 py-3 space-y-2 bg-content1">
                     <Button
                       color="primary"
                       size="lg"
@@ -780,11 +782,11 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                       />
                     </Button>
                   </div>
-                </>
+                </div>
               )}
 
               {step === "preview" && draft && savedLessonId && (
-                <div className="h-full min-h-0 flex flex-col">
+                <div className="h-full min-h-0 flex flex-col px-4 py-4">
                   {error && (
                     <p className="text-danger text-sm mb-2 shrink-0">{error}</p>
                   )}
@@ -798,7 +800,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                 </div>
               )}
               {step === "preview" && draft && !savedLessonId && (
-                <div className="h-full min-h-0 overflow-y-auto p-1">
+                <div className="h-full min-h-0 overflow-y-auto overscroll-contain px-4 py-4">
                   <div className="rounded-xl bg-default-50 p-4">
                     <h3 className="text-xl font-semibold">
                       {(pendingPreview || draft).lesson.title}
