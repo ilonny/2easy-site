@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { FC, useCallback, useContext, useEffect } from "react";
-import { Card } from "@nextui-org/react";
+import { Card, Textarea } from "@nextui-org/react";
 import { TFreeInputFormData } from "../../editor/FreeInputFormEx/types";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
@@ -9,6 +9,10 @@ import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
 import { useParams } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { FreeInputAnswerEditor } from "./FreeInputAnswerEditor";
+
+/** Per-student task prompt, separate from the answer HTML for the same question. */
+export const freeInputPromptQId = (questionId: string | number) =>
+  `${questionId}:prompt`;
 
 type TProps = {
   data: TFreeInputFormData;
@@ -43,7 +47,8 @@ export const FreeInputFormExView: FC<TProps> = ({
   const isLocked = isPreview || !!isPresentationMode;
   const canPersist =
     !isLocked && (!!student_id || (isTeacher && !!activeStudentId));
-  const showTeacherToolbar = isTeacher && !isLocked && !!activeStudentId;
+  const canEditPrompt = isTeacher && !isLocked && !!activeStudentId;
+  const showTeacherToolbar = canEditPrompt;
 
   const persistAnswer = useDebouncedCallback(
     (q_id: number | string, answer: string) => {
@@ -75,6 +80,15 @@ export const FreeInputFormExView: FC<TProps> = ({
     [persistAnswer, setAnswers]
   );
 
+  const getPromptText = useCallback(
+    (questionId: string | number, fallback: string) => {
+      const saved = answers[freeInputPromptQId(questionId)]?.answer;
+      if (saved !== undefined && saved !== null) return saved;
+      return fallback || "";
+    },
+    [answers]
+  );
+
   return (
     <div className="exercise-view-shell max-w-[886px]">
       <div className="py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto exercise-view-head">
@@ -100,23 +114,42 @@ export const FreeInputFormExView: FC<TProps> = ({
       )}
 
       <div className="py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[540px] mx-auto min-w-0">
-        {data.questions.map((question) => (
-          <div key={question.id} className="mb-6 min-w-0">
-            {!!question.value && (
-              <p className="text-base sm:text-lg mb-4 sm:mb-5 font-medium whitespace-pre-line break-words">
-                {question.value}
-              </p>
-            )}
-            <Card className="overflow-visible">
-              <FreeInputAnswerEditor
-                value={answers[question.id]?.answer || ""}
-                onChange={(html) => handleChange(question.id, html)}
-                showToolbar={showTeacherToolbar}
-                readOnly={isLocked}
-              />
-            </Card>
-          </div>
-        ))}
+        {data.questions.map((question) => {
+          const promptText = getPromptText(question.id, question.value);
+          return (
+            <div key={question.id} className="mb-6 min-w-0">
+              {canEditPrompt ? (
+                <Textarea
+                  value={promptText}
+                  onValueChange={(val) =>
+                    handleChange(freeInputPromptQId(question.id), val)
+                  }
+                  minRows={1}
+                  className="mb-4 sm:mb-5"
+                  classNames={{
+                    inputWrapper: "bg-transparent shadow-none px-0",
+                    input:
+                      "text-base sm:text-lg font-medium whitespace-pre-line",
+                  }}
+                />
+              ) : (
+                !!promptText && (
+                  <p className="text-base sm:text-lg mb-4 sm:mb-5 font-medium whitespace-pre-line break-words">
+                    {promptText}
+                  </p>
+                )
+              )}
+              <Card className="overflow-visible">
+                <FreeInputAnswerEditor
+                  value={answers[question.id]?.answer || ""}
+                  onChange={(html) => handleChange(question.id, html)}
+                  showToolbar={showTeacherToolbar}
+                  readOnly={isLocked}
+                />
+              </Card>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
