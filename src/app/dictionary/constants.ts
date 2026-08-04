@@ -165,7 +165,7 @@ export const ICON_DICTIONARY_BUTTON_COMPACT_SIZE_CLASS =
   "!h-7 !w-7 !min-h-7 !min-w-7 !max-h-7 !max-w-7 md:!h-9 md:!w-9 md:!min-h-9 md:!min-w-9 md:!max-h-9 md:!max-w-9";
 
 export const LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS =
-  "flex h-7 w-full shrink-0 items-center justify-center md:h-auto md:w-auto md:justify-start";
+  "flex h-7 w-auto shrink-0 items-center justify-center md:h-auto md:justify-start";
 
 export const DICTIONARY_CONFIRM_MODAL_TITLE_CLASS =
   "text-base sm:text-lg break-words";

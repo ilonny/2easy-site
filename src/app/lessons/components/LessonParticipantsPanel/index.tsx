@@ -81,15 +81,15 @@ export const LessonParticipantsPanel: FC<TProps> = ({
                 <div
                   className={
                     compact
-                      ? "flex flex-row items-center gap-2"
+                      ? "flex min-w-0 flex-row items-center gap-3"
                       : "flex flex-col gap-1 sm:gap-1.5 md:flex-row md:items-center md:gap-2"
                   }
                 >
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-0 flex-1 overflow-hidden">
                     <p
                       className={
                         compact
-                          ? "break-words text-sm font-bold uppercase leading-snug text-[#231F20]"
+                          ? "truncate text-sm font-bold leading-snug text-[#231F20]"
                           : "line-clamp-4 break-words text-[8px] font-bold uppercase leading-snug text-[#231F20] sm:text-[10px] md:line-clamp-none md:text-sm"
                       }
                     >
@@ -99,7 +99,7 @@ export const LessonParticipantsPanel: FC<TProps> = ({
                       <p
                         className={
                           compact
-                            ? "mt-0.5 break-all text-xs text-[#767676]"
+                            ? "mt-0.5 truncate text-xs text-[#767676]"
                             : "mt-0.5 hidden break-all text-[#767676] md:mt-1 md:block md:text-sm"
                         }
                       >
@@ -108,7 +108,13 @@ export const LessonParticipantsPanel: FC<TProps> = ({
                     )}
                   </div>
                   {isTeacher && onOpenDictionary && (
-                    <div className={LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS}>
+                    <div
+                      className={
+                        compact
+                          ? "shrink-0"
+                          : LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS
+                      }
+                    >
                       <IconDictionaryButton
                         size="compact"
                         iconSize={20}

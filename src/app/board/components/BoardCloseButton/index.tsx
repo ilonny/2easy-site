@@ -8,7 +8,7 @@ type TProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const baseClassName =
-  "inline-flex appearance-none select-none p-2 text-foreground-500 rounded-full outline-none hover:bg-default-100 active:bg-default-200 tap-highlight-transparent";
+  "inline-flex h-10 w-10 shrink-0 items-center justify-center appearance-none select-none p-0 text-foreground-500 rounded-full outline-none hover:bg-default-100 active:bg-default-200 tap-highlight-transparent touch-manipulation";
 
 export const BoardCloseButton = forwardRef<HTMLButtonElement, TProps>(
   ({ variant = "modal", className = "", type = "button", ...props }, ref) => (
@@ -17,7 +17,7 @@ export const BoardCloseButton = forwardRef<HTMLButtonElement, TProps>(
       type={type}
       className={[
         baseClassName,
-        variant === "header" ? "absolute top-1 right-1 z-20" : "z-20",
+        variant === "header" ? "absolute top-2 right-2 z-20" : "z-20",
         className,
       ]
         .filter(Boolean)
@@ -25,7 +25,7 @@ export const BoardCloseButton = forwardRef<HTMLButtonElement, TProps>(
       aria-label="Close"
       {...props}
     >
-      <CloseIcon />
+      <CloseIcon className="h-5 w-5" />
     </button>
   ),
 );

@@ -60,7 +60,7 @@ export const LessonFloatingTools: FC<TProps> = ({ children }) => {
         {open ? (
           <T k="common.close" defaultText="Закрыть" />
         ) : (
-          <T k="lessons.lessonTools" defaultText="Инструменты" />
+          <T k="lessons.lessonTools" defaultText="Меню урока" />
         )}
       </Button>
     </div>

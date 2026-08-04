@@ -46,6 +46,7 @@ export const Header = () => {
   }
   return (
     <div
+      className="site-header-root"
       style={{
         position: "relative",
         boxShadow: "0px 4px 20px 1px rgb(0 0 0 / 5%)",

@@ -368,3 +368,8 @@ body.site-chat-hidden [class*="talkme"] {
   pointer-events: none !important;
   opacity: 0 !important;
 }
+
+/* Lesson board modal: hide site chrome so it cannot cover toolbar / close */
+body[data-lesson-board-open] .site-header-root {
+  display: none !important;
+}

@@ -119,7 +119,7 @@ export default function BoardRealtimePage() {
             </Button>
           ) : null}
         </div>
-        <div className="flex max-w-[45%] shrink-0 items-center overflow-hidden pr-10 sm:max-w-none">
+        <div className="flex shrink-0 items-center overflow-visible py-0.5 pr-12">
           {!isEditMode ? (
             <BoardParticipantsList
               api={boardApi}
@@ -129,7 +129,11 @@ export default function BoardRealtimePage() {
             />
           ) : null}
         </div>
-        <BoardCloseButton variant="header" onClick={handleClose} />
+        <BoardCloseButton
+          variant="header"
+          className="z-30"
+          onClick={handleClose}
+        />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
