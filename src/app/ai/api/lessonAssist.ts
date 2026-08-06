@@ -1,5 +1,6 @@
 import { checkResponse, fetchPostJson } from "@/api";
 import { TAiLessonDraft } from "@/app/lessons/components/CreateLessonWithAiModal/types";
+import { getAiUiLanguage } from "@/app/ai/uiLanguage";
 
 export type TAiPreviewSummary = {
   exercisesAdded: number;
@@ -45,6 +46,7 @@ export const requestLessonPreview = async (params: {
       instruction: params.instruction,
       current: params.current,
       conversation: params.conversation,
+      ui_language: getAiUiLanguage(),
     },
     signal: params.signal,
   });

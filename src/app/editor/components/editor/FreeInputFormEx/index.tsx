@@ -167,6 +167,17 @@ export const FreeInputFormEx: FC<TProps> = ({
               </div>
             }
           />
+          <CreateExWithAiButton
+            type="free-input-form"
+            currentData={data as any}
+            onApply={(generated) => {
+              resetData({
+                ...generated,
+                id: (data as any)?.id,
+                sortIndex: (data as any)?.sortIndex,
+              } as any);
+            }}
+          />
         </div>
       </div>
       <div className="h-5" />
@@ -242,17 +253,6 @@ export const FreeInputFormEx: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
-        <CreateExWithAiButton
-          type="free-input-form"
-          currentData={data as any}
-          onApply={(generated) => {
-            resetData({
-              ...generated,
-              id: (data as any)?.id,
-              sortIndex: (data as any)?.sortIndex,
-            } as any);
-          }}
-        />
       </div>
       <div className="h-10" />
     </div>

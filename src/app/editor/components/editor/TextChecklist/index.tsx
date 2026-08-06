@@ -166,6 +166,23 @@ export const TextChecklist: FC<TProps> = ({
               </div>
             }
           />
+          <CreateExWithAiButton
+            type="text-checklist"
+            currentData={data as any}
+            onApply={(generated) => {
+              resetData({
+                ...generated,
+                id: (data as any)?.id,
+                sortIndex: (data as any)?.sortIndex,
+              } as any);
+              setImages(Array.isArray(generated.images) ? generated.images : images);
+              setEditorImages(
+                Array.isArray(generated.editorImages)
+                  ? generated.editorImages
+                  : editorImages
+              );
+            }}
+          />
         </div>
       </div>
       <div className="h-5" />
@@ -247,23 +264,6 @@ export const TextChecklist: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
-        <CreateExWithAiButton
-          type="text-checklist"
-          currentData={data as any}
-          onApply={(generated) => {
-            resetData({
-              ...generated,
-              id: (data as any)?.id,
-              sortIndex: (data as any)?.sortIndex,
-            } as any);
-            setImages(Array.isArray(generated.images) ? generated.images : images);
-            setEditorImages(
-              Array.isArray(generated.editorImages)
-                ? generated.editorImages
-                : editorImages
-            );
-          }}
-        />
       </div>
       <div className="h-10" />
     </div>

@@ -264,6 +264,18 @@ export const TestEx: FC<TProps> = ({
               </div>
             }
           />
+          <CreateExWithAiButton
+            type="test"
+            currentData={data as any}
+            onApply={(generated) => {
+              resetData({
+                ...generated,
+                id: (data as any)?.id,
+                sortIndex: (data as any)?.sortIndex,
+              } as any);
+              setImages(Array.isArray(generated.images) ? generated.images : images);
+            }}
+          />
         </div>
       </div>
       <div className="h-5" />
@@ -421,18 +433,6 @@ export const TestEx: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
-        <CreateExWithAiButton
-          type="test"
-          currentData={data as any}
-          onApply={(generated) => {
-            resetData({
-              ...generated,
-              id: (data as any)?.id,
-              sortIndex: (data as any)?.sortIndex,
-            } as any);
-            setImages(Array.isArray(generated.images) ? generated.images : images);
-          }}
-        />
       </div>
       <div className="h-10" />
     </div>

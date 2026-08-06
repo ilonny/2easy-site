@@ -23,6 +23,7 @@ import {
 } from "react";
 import { TAiLessonDraft } from "@/app/lessons/components/CreateLessonWithAiModal/types";
 import { canUseAi } from "@/app/ai/canUseAi";
+import { getAiUiLanguage } from "@/app/ai/uiLanguage";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { AuthContext } from "@/auth";
 import {
@@ -61,8 +62,11 @@ type TChatMessage = {
 const makeId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-const WELCOME =
-  "Привет! Я AI-помощник по этому уроку. Напиши, что изменить: добавить задание, упростить язык, переписать warm-up, заменить тест и т.д.\n\nЕсли правка неудачная — нажми «Отменить последнюю правку» или напиши «верни обратно».";
+const welcomeMessage = () =>
+  i18n.t("ai.welcomeEditorAssist", {
+    defaultValue:
+      "Привет! Я AI-помощник по этому уроку. Напиши, что изменить: добавить задание, упростить язык, переписать warm-up, заменить тест и т.д.\n\nЕсли правка неудачная — нажми «Отменить последнюю правку» или напиши «верни обратно».",
+  });
 
 /** Keep media; only truncate huge strings so the request stays reasonable */
 const prepareExerciseDataForAi = (raw: Record<string, any>) =>
@@ -111,7 +115,7 @@ export const EditorAiAssistModal: FC<TProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<TChatMessage[]>([
-    { id: makeId(), role: "assistant", content: WELCOME },
+    { id: makeId(), role: "assistant", content: welcomeMessage() },
   ]);
   const [history, setHistory] = useState<TAiHistoryEntry[]>([]);
   const [showHistory, setShowHistory] = useState(false);
@@ -272,6 +276,7 @@ export const EditorAiAssistModal: FC<TProps> = ({
           instruction: text,
           lesson_id: Number(lessonId) || undefined,
           current: stripMediaForRefineRequest(snapshotBefore),
+          ui_language: getAiUiLanguage(),
           conversation: messages
             .slice(-6)
             .map((m) => ({
@@ -327,18 +332,28 @@ export const EditorAiAssistModal: FC<TProps> = ({
         : beforeCount;
       let assistantText =
         refined.assistantMessage ||
-        "Готово — обновила урок. Если что-то не так — нажми «Отменить последнюю правку».";
+        i18n.t("ai.doneUpdatedLesson", {
+          defaultValue:
+            "Готово — обновила урок. Если что-то не так — нажми «Отменить последнюю правку».",
+        });
       if (
         /добав|add\b|создай.*задан/i.test(text) &&
         afterCount <= beforeCount
       ) {
         assistantText +=
-          "\n\n⚠️ Количество заданий не увеличилось — попробуй сформулировать точнее, например: «добавь match-word-word с 6 парами слово–определение».";
+          getAiUiLanguage() === "en"
+            ? "\n\n⚠️ Exercise count didn’t increase — try being more specific, e.g.: “add match-word-word with 6 word–definition pairs”."
+            : "\n\n⚠️ Количество заданий не увеличилось — попробуй сформулировать точнее, например: «добавь match-word-word с 6 парами слово–определение».";
       } else if (afterCount > beforeCount) {
-        assistantText += `\n\n(+${afterCount - beforeCount} задание, сейчас ${afterCount})`;
+        assistantText +=
+          getAiUiLanguage() === "en"
+            ? `\n\n(+${afterCount - beforeCount} exercise(s), now ${afterCount})`
+            : `\n\n(+${afterCount - beforeCount} задание, сейчас ${afterCount})`;
       }
       assistantText +=
-        "\n\n↩️ Можно откатить: кнопка «Отменить последнюю правку» или напиши «верни обратно».";
+        getAiUiLanguage() === "en"
+          ? "\n\n↩️ You can undo: “Undo last edit” or write “undo”."
+          : "\n\n↩️ Можно откатить: кнопка «Отменить последнюю правку» или напиши «верни обратно».";
 
       setMessages((prev) => [
         ...prev,
@@ -349,14 +364,21 @@ export const EditorAiAssistModal: FC<TProps> = ({
         },
       ]);
     } catch (e: any) {
-      const msg = e?.message || "Ошибка сети";
+      const msg =
+        e?.message ||
+        i18n.t("ai.networkError", { defaultValue: "Ошибка сети" });
       setError(msg);
       setMessages((prev) => [
         ...prev,
         {
           id: makeId(),
           role: "assistant",
-          content: msg === "Ошибка сети" ? "Ошибка сети. Попробуй ещё раз." : msg,
+          content:
+            msg === "Ошибка сети" || msg === "Network error"
+              ? i18n.t("ai.networkErrorRetry", {
+                  defaultValue: "Ошибка сети. Попробуй ещё раз.",
+                })
+              : msg,
         },
       ]);
     } finally {

@@ -17,6 +17,10 @@ import {
   Spinner,
   Textarea,
 } from "@nextui-org/react";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
+import AiIcon from "@/assets/icons/ai.svg";
+import Image from "next/image";
+import { getAiUiLanguage } from "@/app/ai/uiLanguage";
 import {
   FC,
   useCallback,
@@ -60,12 +64,6 @@ type TProps = {
 const makeId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-const WELCOME_CREATE =
-  "Привет! Опиши тему и что должно быть в задании — я заполню поля. Например: warm-up про travel для A2, 5 вопросов с вариантами.";
-
-const WELCOME_EDIT =
-  "Привет! Я помогу отредактировать это задание. Например: упростить текст, добавить вопросы, поменять тон, переписать примеры.";
-
 /** Keep media; backend slims for the model and restores images/videos after */
 const prepareExerciseDataForAi = (raw: Record<string, any>) =>
   JSON.parse(
@@ -97,13 +95,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
     null,
   );
   const isCreate = !currentData?.id;
-  const [messages, setMessages] = useState<TChatMessage[]>([
-    {
-      id: makeId(),
-      role: "assistant",
-      content: WELCOME_EDIT,
-    },
-  ]);
+  const [messages, setMessages] = useState<TChatMessage[]>([]);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const latestDataRef = useRef<Record<string, any>>(currentData || {});
 
@@ -117,7 +109,14 @@ export const CreateExWithAiButton: FC<TProps> = ({
       {
         id: makeId(),
         role: "assistant",
-        content: isCreate ? WELCOME_CREATE : WELCOME_EDIT,
+        content: i18n.t(
+          isCreate ? "ai.welcomeExCreate" : "ai.welcomeExEdit",
+          {
+            defaultValue: isCreate
+              ? "Привет! Опиши тему и что должно быть в задании — я заполню поля. Например: warm-up про travel для A2, 5 вопросов с вариантами."
+              : "Привет! Я помогу отредактировать это задание. Например: упростить текст, добавить вопросы, поменять тон, переписать примеры.",
+          },
+        ),
       },
     ]);
     setInstruction("");
@@ -151,6 +150,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
           currentData: prepareExerciseDataForAi(latestDataRef.current),
           lesson_id: lessonId ? Number(lessonId) : undefined,
           lessonContext,
+          ui_language: getAiUiLanguage(),
           conversation: messages
             .slice(-8)
             .map((m) => ({ role: m.role, content: m.content })),
@@ -159,7 +159,11 @@ export const CreateExWithAiButton: FC<TProps> = ({
       const json = await res.json();
       if (!json?.success) {
         checkResponse(json);
-        const msg = json?.message || "Не удалось обновить задание";
+        const msg =
+          json?.message ||
+          i18n.t("ai.failedUpdateExercise", {
+            defaultValue: "Не удалось обновить задание",
+          });
         setError(msg);
         setMessages((prev) => [
           ...prev,
@@ -171,8 +175,13 @@ export const CreateExWithAiButton: FC<TProps> = ({
       const assistantText =
         json.assistantMessage ||
         (json.refused
-          ? "Я помогаю только с уроками и упражнениями. Напиши, что изменить в задании."
-          : "Готово — обновил задание.");
+          ? i18n.t("ai.refusedExHelp", {
+              defaultValue:
+                "Я помогаю только с уроками и упражнениями. Напиши, что изменить в задании.",
+            })
+          : i18n.t("ai.doneUpdatedExercise", {
+              defaultValue: "Готово — обновил задание.",
+            }));
 
       setMessages((prev) => [
         ...prev,
@@ -183,13 +192,17 @@ export const CreateExWithAiButton: FC<TProps> = ({
         setPendingData(json.data);
       }
     } catch (e) {
-      setError("Ошибка сети");
+      setError(
+        i18n.t("ai.networkError", { defaultValue: "Ошибка сети" }),
+      );
       setMessages((prev) => [
         ...prev,
         {
           id: makeId(),
           role: "assistant",
-          content: "Ошибка сети. Попробуй ещё раз.",
+          content: i18n.t("ai.networkErrorRetry", {
+            defaultValue: "Ошибка сети. Попробуй ещё раз.",
+          }),
         },
       ]);
     } finally {
@@ -215,23 +228,40 @@ export const CreateExWithAiButton: FC<TProps> = ({
 
   return (
     <>
-      <div className="flex justify-center mt-3">
-        <Button
-          variant="bordered"
-          color="secondary"
-          className="w-full max-w-[310px] min-w-0 lg:min-w-[310px]"
-          size="lg"
-          onPress={() => {
-            if (!requireAiSubscription()) return;
-            setOpen(true);
-          }}
+      <div className="mt-3">
+        <ResponsiveTooltip
+          content={
+            isCreate ? (
+              <T k="ai.createExWithAi" defaultText="Создать с помощью ИИ" />
+            ) : (
+              <T
+                k="ai.editExWithAi"
+                defaultText="Отредактировать с помощью ИИ"
+              />
+            )
+          }
         >
-          {isCreate ? (
-            <T k="ai.createExWithAi" defaultText="Создать с помощью ИИ" />
-          ) : (
-            <T k="ai.editExWithAi" defaultText="Отредактировать с помощью ИИ" />
-          )}
-        </Button>
+          <Button
+            variant="bordered"
+            color="secondary"
+            size="md"
+            className="min-w-0 px-3 gap-1.5 font-semibold"
+            aria-label={
+              isCreate
+                ? "Создать с помощью ИИ"
+                : "Отредактировать с помощью ИИ"
+            }
+            onPress={() => {
+              if (!requireAiSubscription()) return;
+              setOpen(true);
+            }}
+            endContent={
+              <Image src={AiIcon} alt="" width={16} height={16} />
+            }
+          >
+            <T k="ai.exAssistant" defaultText="AI помощник" />
+          </Button>
+        </ResponsiveTooltip>
       </div>
 
       <Modal

@@ -32,6 +32,7 @@ import {
   TAiLessonPreview,
 } from "@/app/ai/api/lessonAssist";
 import { AiDraftPreviewSummary } from "@/app/ai/components/AiDraftPreviewSummary";
+import { getAiUiLanguage } from "@/app/ai/uiLanguage";
 
 type TProps = {
   isVisible: boolean;
@@ -53,8 +54,11 @@ type TSuggestedTopic = {
 const makeId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-const WELCOME_MESSAGE =
-  "Привет! Давай соберём урок в стиле 2easy. Выбери уровень и типы заданий. Тему можно не указывать — я придумаю сам и спрошу, подходит ли она.";
+const welcomeMessage = () =>
+  i18n.t("ai.welcomeLessonCreate", {
+    defaultValue:
+      "Привет! Давай соберём урок в стиле 2easy. Выбери уровень и типы заданий. Тему можно не указывать — я придумаю сам и спрошу, подходит ли она.",
+  });
 
 export const CreateLessonWithAiModal: FC<TProps> = ({
   isVisible,
@@ -73,7 +77,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
   const [topic, setTopic] = useState("");
   const [description, setDescription] = useState("");
   const [messages, setMessages] = useState<TAiChatMessage[]>([
-    { id: makeId(), role: "assistant", content: WELCOME_MESSAGE },
+    { id: makeId(), role: "assistant", content: welcomeMessage() },
   ]);
   const [chatInput, setChatInput] = useState("");
   const [draft, setDraft] = useState<TAiLessonDraft | null>(null);
@@ -101,7 +105,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
     setTopic("");
     setDescription("");
     setMessages([
-      { id: makeId(), role: "assistant", content: WELCOME_MESSAGE },
+      { id: makeId(), role: "assistant", content: welcomeMessage() },
     ]);
     setChatInput("");
     setDraft(null);
@@ -155,7 +159,11 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
       if (!level) return;
       setError(null);
       setIsGenerating(true);
-      appendAssistant("Генерирую урок… это может занять минуту.");
+      appendAssistant(
+        i18n.t("ai.generatingLesson", {
+          defaultValue: "Генерирую урок… это может занять минуту.",
+        }),
+      );
 
       try {
         const res = await fetchPostJson({
@@ -167,6 +175,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
             description: description.trim(),
             exerciseTypes: selectedTypes,
             conversation: conversationPayload(messages),
+            ui_language: getAiUiLanguage(),
           },
         });
         const json = await res.json();
@@ -196,7 +205,12 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
         );
       } catch (e) {
         setError("Ошибка сети при генерации урока");
-        appendAssistant("Ошибка сети. Проверь соединение и попробуй снова.");
+        appendAssistant(
+          i18n.t("ai.networkErrorCheck", {
+            defaultValue:
+              "Ошибка сети. Проверь соединение и попробуй снова.",
+          }),
+        );
       } finally {
         setIsGenerating(false);
       }
@@ -209,7 +223,12 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
       if (!level) return;
       setError(null);
       setIsGenerating(true);
-      appendAssistant("Тему не указали — сейчас придумаю и спрошу, ок ли она.");
+      appendAssistant(
+        i18n.t("ai.suggestingTopic", {
+          defaultValue:
+            "Тему не указали — сейчас придумаю и спрошу, ок ли она.",
+        }),
+      );
 
       try {
         const res = await fetchPostJson({
@@ -220,6 +239,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
             description: description.trim(),
             exerciseTypes: selectedTypes,
             rejectTopics: rejectList,
+            ui_language: getAiUiLanguage(),
           },
         });
         const json = await res.json();
@@ -247,7 +267,12 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
         );
       } catch (e) {
         setError("Ошибка сети при подборе темы");
-        appendAssistant("Ошибка сети. Проверь соединение и попробуй снова.");
+        appendAssistant(
+          i18n.t("ai.networkErrorCheck", {
+            defaultValue:
+              "Ошибка сети. Проверь соединение и попробуй снова.",
+          }),
+        );
       } finally {
         setIsGenerating(false);
       }
