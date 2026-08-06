@@ -1,6 +1,6 @@
 "use client";
 
-import { checkResponse, fetchPostJson } from "@/api";
+import { fetchPostJson } from "@/api";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import {
@@ -24,6 +24,11 @@ import {
 import { TAiLessonDraft } from "@/app/lessons/components/CreateLessonWithAiModal/types";
 import { canUseAi } from "@/app/ai/canUseAi";
 import { getAiUiLanguage } from "@/app/ai/uiLanguage";
+import {
+  fetchAiLimits,
+  formatAiAvailableLimit,
+  handleAiLimitError,
+} from "@/app/ai/aiLimits";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { AuthContext } from "@/auth";
 import {
@@ -119,12 +124,34 @@ export const EditorAiAssistModal: FC<TProps> = ({
   ]);
   const [history, setHistory] = useState<TAiHistoryEntry[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [limitRemaining, setLimitRemaining] = useState<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const draftRef = useRef<TAiLessonDraft | null>(null);
 
   useEffect(() => {
     setHistory(loadHistory(lessonId));
   }, [lessonId]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      const limits = await fetchAiLimits();
+      if (cancelled) return;
+      const remaining = limits?.generate_lesson?.remaining ?? null;
+      setLimitRemaining(remaining);
+      setMessages([
+        {
+          id: makeId(),
+          role: "assistant",
+          content: `${welcomeMessage()}\n\n${formatAiAvailableLimit(remaining)}`,
+        },
+      ]);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -175,7 +202,7 @@ export const EditorAiAssistModal: FC<TProps> = ({
       });
       const applied = await applyRes.json();
       if (!applied?.success) {
-        checkResponse(applied);
+        handleAiLimitError(applied);
         throw new Error(applied?.message || "Не удалось применить правки");
       }
       onApplied();
@@ -287,7 +314,7 @@ export const EditorAiAssistModal: FC<TProps> = ({
       });
       const refined = await refineRes.json();
       if (!refined?.success) {
-        checkResponse(refined);
+        handleAiLimitError(refined);
         const msg = refined?.message || "Не удалось получить правки от AI";
         setError(msg);
         setMessages((prev) => [
@@ -295,6 +322,10 @@ export const EditorAiAssistModal: FC<TProps> = ({
           { id: makeId(), role: "assistant", content: msg },
         ]);
         return;
+      }
+
+      if (typeof refined?.aiLimit?.remaining === "number") {
+        setLimitRemaining(refined.aiLimit.remaining);
       }
 
       // Save state BEFORE apply so we can roll back
@@ -355,6 +386,12 @@ export const EditorAiAssistModal: FC<TProps> = ({
           ? "\n\n↩️ You can undo: “Undo last edit” or write “undo”."
           : "\n\n↩️ Можно откатить: кнопка «Отменить последнюю правку» или напиши «верни обратно».";
 
+      const remaining =
+        typeof refined?.aiLimit?.remaining === "number"
+          ? refined.aiLimit.remaining
+          : limitRemaining;
+      assistantText += `\n\n${formatAiAvailableLimit(remaining)}`;
+
       setMessages((prev) => [
         ...prev,
         {
@@ -393,6 +430,7 @@ export const EditorAiAssistModal: FC<TProps> = ({
     history,
     restoreEntry,
     applyDraft,
+    limitRemaining,
   ]);
 
   if (!canEdit || !canUseAi(profile)) return null;
@@ -528,6 +566,9 @@ export const EditorAiAssistModal: FC<TProps> = ({
             </div>
 
             <div className="shrink-0 border-t border-default-100 px-6 py-3 space-y-3 bg-content1">
+              <p className="text-xs text-default-500">
+                {formatAiAvailableLimit(limitRemaining)}
+              </p>
               <Textarea
                 minRows={2}
                 maxRows={4}

@@ -274,7 +274,10 @@
     "topicAcceptGenerate": "Да, генерировать урок",
     "topicReject": "Нет, придумай другую",
     "doneOpenEditor": "Готово",
-    "previewConstructorHint": "Полный конструктор справа — правь задания как обычно или через чат"
+    "previewConstructorHint": "Полный конструктор справа — правь задания как обычно или через чат",
+    "availableLimit": "Доступный лимит запросов:",
+    "monthlyLimitExceeded": "Лимит в этом месяце превышен",
+    "needPaidSubscription": "AI работает только с активной платной подпиской"
   },
   "lessons": {
     "createLesson": "Создать урок",

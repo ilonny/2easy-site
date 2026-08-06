@@ -274,7 +274,10 @@
     "topicReject": "No, invent another",
     "topicEnterOwn": "I'll enter my own topic",
     "doneOpenEditor": "Done",
-    "previewConstructorHint": "Full constructor on the right — edit tasks as usual or via chat"
+    "previewConstructorHint": "Full constructor on the right — edit tasks as usual or via chat",
+    "availableLimit": "Available request limit:",
+    "monthlyLimitExceeded": "Monthly limit exceeded",
+    "needPaidSubscription": "AI is available only with an active paid subscription"
   },
   "lessons": {
     "createLesson": "Create a Lesson",

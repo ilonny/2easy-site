@@ -1,7 +1,12 @@
 "use client";
 
-import { checkResponse, fetchPostJson } from "@/api";
+import { fetchPostJson } from "@/api";
 import { canUseAi } from "@/app/ai/canUseAi";
+import {
+  fetchAiLimits,
+  formatAiAvailableLimit,
+  handleAiLimitError,
+} from "@/app/ai/aiLimits";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { useEditorLessonId } from "@/app/editor/hooks/useEditorLessonId";
 import { ExerciseComponentPreview } from "@/app/editor/components/view/ExList";
@@ -96,6 +101,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
   );
   const isCreate = !currentData?.id;
   const [messages, setMessages] = useState<TChatMessage[]>([]);
+  const [limitRemaining, setLimitRemaining] = useState<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const latestDataRef = useRef<Record<string, any>>(currentData || {});
 
@@ -105,6 +111,11 @@ export const CreateExWithAiButton: FC<TProps> = ({
 
   useEffect(() => {
     if (!open) return;
+    let cancelled = false;
+    setInstruction("");
+    setError(null);
+    setPendingData(null);
+    setLimitRemaining(null);
     setMessages([
       {
         id: makeId(),
@@ -119,9 +130,29 @@ export const CreateExWithAiButton: FC<TProps> = ({
         ),
       },
     ]);
-    setInstruction("");
-    setError(null);
-    setPendingData(null);
+    (async () => {
+      const limits = await fetchAiLimits();
+      if (cancelled) return;
+      const remaining = limits?.refine_exercise?.remaining ?? null;
+      setLimitRemaining(remaining);
+      setMessages([
+        {
+          id: makeId(),
+          role: "assistant",
+          content: `${i18n.t(
+            isCreate ? "ai.welcomeExCreate" : "ai.welcomeExEdit",
+            {
+              defaultValue: isCreate
+                ? "Привет! Опиши тему и что должно быть в задании — я заполню поля. Например: warm-up про travel для A2, 5 вопросов с вариантами."
+                : "Привет! Я помогу отредактировать это задание. Например: упростить текст, добавить вопросы, поменять тон, переписать примеры.",
+            },
+          )}\n\n${formatAiAvailableLimit(remaining)}`,
+        },
+      ]);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [open, isCreate]);
 
   useEffect(() => {
@@ -158,7 +189,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
       });
       const json = await res.json();
       if (!json?.success) {
-        checkResponse(json);
+        handleAiLimitError(json);
         const msg =
           json?.message ||
           i18n.t("ai.failedUpdateExercise", {
@@ -172,6 +203,10 @@ export const CreateExWithAiButton: FC<TProps> = ({
         return;
       }
 
+      if (typeof json?.aiLimit?.remaining === "number") {
+        setLimitRemaining(json.aiLimit.remaining);
+      }
+
       const assistantText =
         json.assistantMessage ||
         (json.refused
@@ -183,9 +218,18 @@ export const CreateExWithAiButton: FC<TProps> = ({
               defaultValue: "Готово — обновил задание.",
             }));
 
+      const remaining =
+        typeof json?.aiLimit?.remaining === "number"
+          ? json.aiLimit.remaining
+          : limitRemaining;
+
       setMessages((prev) => [
         ...prev,
-        { id: makeId(), role: "assistant", content: assistantText },
+        {
+          id: makeId(),
+          role: "assistant",
+          content: `${assistantText}\n\n${formatAiAvailableLimit(remaining)}`,
+        },
       ]);
 
       if (!json.refused && json.data && typeof json.data === "object") {
@@ -216,6 +260,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
     lessonContext,
     messages,
     onApply,
+    limitRemaining,
   ]);
 
   if (!canUseAi(profile)) {
@@ -351,6 +396,9 @@ export const CreateExWithAiButton: FC<TProps> = ({
             </div>
 
             <div className="shrink-0 border-t border-default-100 px-6 py-3 space-y-3 bg-content1">
+              <p className="text-xs text-default-500">
+                {formatAiAvailableLimit(limitRemaining)}
+              </p>
               {!pendingData && (
                 <Textarea
                   minRows={2}

@@ -33,6 +33,12 @@ import {
 } from "@/app/ai/api/lessonAssist";
 import { AiDraftPreviewSummary } from "@/app/ai/components/AiDraftPreviewSummary";
 import { getAiUiLanguage } from "@/app/ai/uiLanguage";
+import {
+  fetchAiLimits,
+  formatAiAvailableLimit,
+  handleAiLimitError,
+  TAiLimitCategory,
+} from "@/app/ai/aiLimits";
 
 type TProps = {
   isVisible: boolean;
@@ -91,7 +97,28 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
   const [rejectedTopics, setRejectedTopics] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [limitCategory, setLimitCategory] =
+    useState<TAiLimitCategory>("generate_lesson");
+  const [limitRemaining, setLimitRemaining] = useState<number | null>(null);
+  const [topicLimitRemaining, setTopicLimitRemaining] = useState<number | null>(
+    null,
+  );
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+  const applyLimitFromResponse = useCallback(
+    (json: { aiLimit?: { category?: string; remaining?: number } }) => {
+      if (typeof json?.aiLimit?.remaining !== "number") return;
+      const category = (json.aiLimit.category ||
+        "generate_lesson") as TAiLimitCategory;
+      setLimitCategory(category);
+      if (category === "suggest_topic") {
+        setTopicLimitRemaining(json.aiLimit.remaining);
+      } else {
+        setLimitRemaining(json.aiLimit.remaining);
+      }
+    },
+    [],
+  );
 
   const resetState = useCallback(() => {
     setStep("collect");
@@ -115,11 +142,34 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
     setRejectedTopics([]);
     setIsGenerating(false);
     setError(null);
+    setLimitCategory("generate_lesson");
+    setLimitRemaining(null);
+    setTopicLimitRemaining(null);
   }, []);
 
   useEffect(() => {
     if (!isVisible) return;
     resetState();
+    let cancelled = false;
+    (async () => {
+      const limits = await fetchAiLimits();
+      if (cancelled || !limits) return;
+      setLimitRemaining(limits.generate_lesson?.remaining ?? null);
+      setTopicLimitRemaining(limits.suggest_topic?.remaining ?? null);
+      setLimitCategory("generate_lesson");
+      setMessages([
+        {
+          id: makeId(),
+          role: "assistant",
+          content: `${welcomeMessage()}\n\n${formatAiAvailableLimit(
+            limits.generate_lesson?.remaining,
+          )}`,
+        },
+      ]);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [isVisible, resetState]);
 
   useEffect(() => {
@@ -180,28 +230,53 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
         });
         const json = await res.json();
         if (!json?.success) {
-          checkResponse(json);
-          setError(json?.message || "Не удалось сгенерировать урок");
+          handleAiLimitError(json);
+          const msg =
+            json?.code === "AI_MONTHLY_LIMIT_EXCEEDED" || json?.limitExceeded
+              ? i18n.t("ai.monthlyLimitExceeded", {
+                  defaultValue: "Лимит в этом месяце превышен",
+                })
+              : json?.message || "Не удалось сгенерировать урок";
+          setError(msg);
           appendAssistant(
-            json?.message ||
+            msg ||
               "Не получилось сгенерировать урок. Попробуй ещё раз или упрости запрос.",
           );
           return;
         }
 
+        applyLimitFromResponse(json);
+        const remaining =
+          typeof json?.aiLimit?.remaining === "number"
+            ? json.aiLimit.remaining
+            : null;
+
         const nextDraft: TAiLessonDraft = {
           assistantMessage: json.assistantMessage,
           lesson: json.lesson,
-          exercises: json.exercises || [],
+          exercises: (json.exercises || []).map(
+            (exercise: TAiLessonDraft["exercises"][number], index: number) => ({
+              ...exercise,
+              clientKey:
+                exercise.clientKey ||
+                (!exercise.id ? `draft-${index}-${exercise.type}` : undefined),
+              sortIndex: Number.isInteger(exercise.sortIndex)
+                ? exercise.sortIndex
+                : index,
+            }),
+          ),
         };
 
         setDraft(nextDraft);
+        setPendingPreview(null);
         setSavedLessonId(null);
         setTopic(topicToUse.trim() || json.lesson?.title || "");
         setStep("preview");
         appendAssistant(
-          json.assistantMessage ||
-            `Готово: «${json.lesson?.title}». Проверь превью — урок сохранится только по кнопке «Сохранить урок».`,
+          `${
+            json.assistantMessage ||
+            `Готово: «${json.lesson?.title}». Проверь превью — урок сохранится только по кнопке «Сохранить урок».`
+          }\n\n${formatAiAvailableLimit(remaining)}`,
         );
       } catch (e) {
         setError("Ошибка сети при генерации урока");
@@ -215,7 +290,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
         setIsGenerating(false);
       }
     },
-    [level, description, selectedTypes, messages],
+    [level, description, selectedTypes, messages, applyLimitFromResponse],
   );
 
   const runSuggestTopic = useCallback(
@@ -244,13 +319,23 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
         });
         const json = await res.json();
         if (!json?.success) {
-          checkResponse(json);
-          setError(json?.message || "Не удалось придумать тему");
-          appendAssistant(
-            json?.message || "Не получилось придумать тему. Попробуй ещё раз.",
-          );
+          handleAiLimitError(json);
+          const msg =
+            json?.code === "AI_MONTHLY_LIMIT_EXCEEDED" || json?.limitExceeded
+              ? i18n.t("ai.monthlyLimitExceeded", {
+                  defaultValue: "Лимит в этом месяце превышен",
+                })
+              : json?.message || "Не удалось придумать тему";
+          setError(msg);
+          appendAssistant(msg);
           return;
         }
+
+        applyLimitFromResponse(json);
+        const remaining =
+          typeof json?.aiLimit?.remaining === "number"
+            ? json.aiLimit.remaining
+            : topicLimitRemaining;
 
         const suggestion: TSuggestedTopic = {
           topic: json.topic || json.title,
@@ -262,8 +347,10 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
         setSuggestedTopic(suggestion);
         setStep("confirmTopic");
         appendAssistant(
-          json.assistantMessage ||
-            `Я придумал тему «${suggestion.title}». Подходит?`,
+          `${
+            json.assistantMessage ||
+            `Я придумал тему «${suggestion.title}». Подходит?`
+          }\n\n${formatAiAvailableLimit(remaining)}`,
         );
       } catch (e) {
         setError("Ошибка сети при подборе темы");
@@ -277,7 +364,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
         setIsGenerating(false);
       }
     },
-    [level, description, selectedTypes],
+    [level, description, selectedTypes, applyLimitFromResponse, topicLimitRemaining],
   );
 
   const handleGenerate = useCallback(async () => {
@@ -333,7 +420,8 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
   }, [suggestedTopic, rejectedTopics, runSuggestTopic]);
 
   const handleRefine = useCallback(async () => {
-    if (!draft || !chatInput.trim() || isGenerating) return;
+    const baseDraft = pendingPreview || draft;
+    if (!baseDraft || !chatInput.trim() || isGenerating) return;
     const instruction = chatInput.trim();
     setChatInput("");
     setError(null);
@@ -344,13 +432,35 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
       const preview = await requestLessonPreview({
         lessonId: savedLessonId || undefined,
         instruction,
-        current: draft,
+        current: baseDraft,
         conversation: conversationPayload(messages),
       });
-      setPendingPreview(preview);
+      if (preview.aiLimit) {
+        applyLimitFromResponse({ aiLimit: preview.aiLimit });
+      }
+      const withKeys: TAiLessonPreview = {
+        ...preview,
+        exercises: (preview.exercises || []).map((exercise, index) => ({
+          ...exercise,
+          clientKey:
+            exercise.clientKey ||
+            baseDraft.exercises[index]?.clientKey ||
+            (!exercise.id ? `draft-${index}-${exercise.type}` : undefined),
+          sortIndex: Number.isInteger(exercise.sortIndex)
+            ? exercise.sortIndex
+            : index,
+        })),
+      };
+      setPendingPreview(withKeys);
       appendAssistant(
-        preview.assistantMessage ||
-          "Предложение готово. Проверь и сохрани изменения.",
+        `${
+          withKeys.assistantMessage ||
+          "Предложение готово. Проверь и сохрани изменения."
+        }\n\n${formatAiAvailableLimit(
+          typeof preview.aiLimit?.remaining === "number"
+            ? preview.aiLimit.remaining
+            : limitRemaining,
+        )}`,
       );
     } catch (e: any) {
       setError(e?.message || "Ошибка сети при обновлении урока");
@@ -360,7 +470,16 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
     } finally {
       setIsGenerating(false);
     }
-  }, [draft, chatInput, isGenerating, messages, savedLessonId]);
+  }, [
+    draft,
+    pendingPreview,
+    chatInput,
+    isGenerating,
+    messages,
+    savedLessonId,
+    applyLimitFromResponse,
+    limitRemaining,
+  ]);
 
   const savePendingPreview = useCallback(async () => {
     if (!pendingPreview || isGenerating) return;
@@ -550,6 +669,17 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                   </div>
                 )}
                 <div ref={chatEndRef} />
+              </div>
+
+              <div className="px-4 pt-2 shrink-0">
+                <p className="text-xs text-default-500">
+                  {formatAiAvailableLimit(
+                    limitCategory === "suggest_topic" ||
+                      step === "confirmTopic"
+                      ? topicLimitRemaining ?? limitRemaining
+                      : limitRemaining,
+                  )}
+                </p>
               </div>
 
               <div className="p-4 border-t border-default-100 space-y-2 shrink-0 max-h-[45%] overflow-y-auto overscroll-contain">
