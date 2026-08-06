@@ -124,6 +124,9 @@ export const ProfileLessons = (props: TProps) => {
     createLessonModalIsVisible,
     setCreateLessonModalIsVisible,
   } = useContext(AuthContext);
+  // Students auth via studentId/token without login — same as withLogin.
+  const hasAuthSession =
+    isAuthorized || !!profile?.studentId || !!profile?.isStudent;
   const [createCourseModalIsVisible, setCreateCourseModalIsVisible] =
     useState(false);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
@@ -197,7 +200,7 @@ export const ProfileLessons = (props: TProps) => {
   } = useLessons(
     studentId,
     studentId && studentTabIndex !== "lessons" ? "" : searchString,
-    isAuthorized,
+    hasAuthSession,
     includeCourseLessons,
   );
 
@@ -293,18 +296,18 @@ export const ProfileLessons = (props: TProps) => {
       return;
     }
     if (tabIndex === "userCourses" && !courses.some((c) => c.user_id !== 1)) {
-      setTabIndex(isAuthorized ? "userLessons" : "savedLessons");
+      setTabIndex(hasAuthSession ? "userLessons" : "savedLessons");
       return;
     }
     if (tabIndex === "2easyCourses" && !courses.some((c) => c.user_id === 1)) {
-      setTabIndex(isAuthorized ? "userLessons" : "savedLessons");
+      setTabIndex(hasAuthSession ? "userLessons" : "savedLessons");
     }
   }, [
     courses,
     coursesIsLoading,
     currentCourse,
     hideTabs,
-    isAuthorized,
+    hasAuthSession,
     studentId,
     tabIndex,
   ]);
