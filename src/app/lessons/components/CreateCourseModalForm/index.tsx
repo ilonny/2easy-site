@@ -1,5 +1,5 @@
 "use client";
-import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
+import { checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import {
@@ -15,6 +15,25 @@ import {
   Image,
 } from "@nextui-org/react";
 import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  CSSProperties,
   FC,
   useCallback,
   useContext,
@@ -27,8 +46,6 @@ import { Controller, useForm } from "react-hook-form";
 import { TLesson } from "../../types";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
 import Loupe from "@/assets/icons/loupe.svg";
-import { sortableContainer, sortableElement } from "react-sortable-hoc";
-import { arrayMoveImmutable } from "array-move";
 import DragHandleIcon from "@/assets/icons/drag_handle.svg";
 import { TCourse } from "@/app/course/hooks/useCourses";
 import { useLessons } from "../../hooks/useLessons";
@@ -51,151 +68,51 @@ type TFieldList = {
   tags: string;
 };
 
-const SortableContainer = sortableContainer(({ children }) => {
-  return <div style={{ position: "relative", zIndex: 9999 }}>{children}</div>;
-});
-
-export const CreateCourseModalForm: FC<TProps> = ({
-  isVisible,
-  setIsVisible,
-  onSuccess,
-  chosenCourse,
-}) => {
-  const { profile, authIsLoading } = useContext(AuthContext);
-  const isAdmin = profile?.role_id === 1;
-  console.log("profile?", profile);
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<TFieldList>({
-    defaultValues: {
-      ...chosenCourse,
-    },
-  });
-
-  const {
-    lessons: allLessons,
-    getLessons: getAllLessons,
-    courseLessons,
-    getCourseLessons,
-  } = useLessons();
-
-  useEffect(() => {
-    if (isVisible) {
-      getAllLessons();
-      if (chosenCourse?.id) {
-        getCourseLessons(chosenCourse.id);
-      }
-    }
-  }, [getAllLessons, isVisible, chosenCourse?.id]);
-
-  const filteredLessons = useMemo(() => {
-    return (allLessons || []).filter((l) =>
-      isAdmin ? l.user_id === 1 : l.user_id !== 1,
-    );
-  }, [allLessons, isAdmin]);
-
-  console.log("isAdmin?", isAdmin);
-
-  const [images, setImages] = useState(
-    chosenCourse?.image_path
-      ? [
-          {
-            dataURL: getImageUrl(chosenCourse?.image_path),
-          },
-        ]
-      : [],
+/** Match a library lesson against a course membership row. */
+const isLessonLinkedToSource = (lesson: TLesson, sourceId: number): boolean => {
+  return (
+    Number(lesson.id) === sourceId ||
+    Number(lesson.created_from_id) === sourceId
   );
-  const { uploadImages } = useUploadImage();
-  const [isLoading, setIsLoading] = useState(false);
+};
 
-  const [step, setStep] = useState(0);
-  const [chosenLessonIds, setChosenLessonIds] = useState<number[]>([]);
-  const [lessonsSearchString, setLessonsSearchString] = useState("");
+const SortableLessonRow: FC<{
+  id: number;
+  lesson: TLesson;
+}> = ({ id, lesson }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
 
-  useEffect(() => {
-    setChosenLessonIds(courseLessons.map((c) => c.created_from_id || c.id));
-  }, [courseLessons]);
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    touchAction: "none",
+    cursor: isDragging ? "grabbing" : "grab",
+    userSelect: "none",
+    opacity: isDragging ? 0.85 : 1,
+    position: "relative",
+    zIndex: isDragging ? 10 : 0,
+    boxShadow: isDragging ? "0 8px 24px rgba(0,0,0,0.12)" : undefined,
+    borderRadius: isDragging ? 12 : undefined,
+    background: isDragging ? "#fff" : undefined,
+  };
 
-  const modalContentRef = useRef(null);
-
-  const searchedLessons = useMemo(() => {
-    if (!lessonsSearchString) {
-      return filteredLessons;
-    }
-
-    return filteredLessons.filter((f) => {
-      return f.title.toLowerCase().includes(lessonsSearchString.toLowerCase());
-    });
-  }, [lessonsSearchString, filteredLessons]);
-
-  const onSubmit = useCallback(
-    async (_data) => {
-      if (step === 0) {
-        setStep(1);
-        return;
-      }
-
-      if (step === 1 && chosenLessonIds.length) {
-        setStep(2);
-        return;
-      }
-
-      setIsLoading(true);
-
-      const imagesToUpload = images.filter(
-        (image) =>
-          !!image?.file ||
-          !image.dataURL.includes(
-            "608dfa18-3eae-4574-a997-0a7441c16d33.selstorage.ru",
-          ),
-      );
-      let attachments;
-      if (imagesToUpload?.length) {
-        attachments = await uploadImages(imagesToUpload);
-      }
-
-      try {
-        const courseRes = await fetchPostJson({
-          path: chosenCourse?.id ? "/course/edit" : "/course/create",
-          isSecure: true,
-          data: {
-            ..._data,
-            image_id: attachments?.attachments?.[0]?.id,
-            lesson_ids: JSON.stringify(chosenLessonIds || []),
-          },
-        });
-        const course = await courseRes.json();
-        setIsLoading(false);
-        console.log("course?", course);
-        if (course.success) {
-          onSuccess(course.createdCourse.id);
-        }
-        checkResponse(course);
-      } catch (e) {
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [step, chosenLessonIds, images, uploadImages, chosenCourse?.id, onSuccess],
-  );
-
-  const title = watch("title");
-
-  const SortableItem = sortableElement(({ lesson }: { lesson: TLesson }) => {
-    return (
-      <div
-        style={{ cursor: "grab", userSelect: "none" }}
-        className="flex gap-4 items-center"
-      >
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <div className="flex gap-4 items-center">
         <span
           style={{
             display: "flex",
             padding: 6,
             background: "#f4f4f5",
             borderRadius: 8,
+            flexShrink: 0,
           }}
         >
           <Image
@@ -228,10 +145,9 @@ export const CreateCourseModalForm: FC<TProps> = ({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               alt={lesson?.title}
-              src={
-                lesson?.image_path ? getImageUrl(lesson?.image_path) : Bg.src
-              }
+              src={lesson?.image_path ? getImageUrl(lesson?.image_path) : Bg.src}
               style={{ maxWidth: "initial", maxHeight: "100%" }}
+              draggable={false}
             />
           </div>
           <p
@@ -244,27 +160,207 @@ export const CreateCourseModalForm: FC<TProps> = ({
           </p>
         </Card>
       </div>
-    );
+    </div>
+  );
+};
+
+export const CreateCourseModalForm: FC<TProps> = ({
+  isVisible,
+  setIsVisible,
+  onSuccess,
+  chosenCourse,
+}) => {
+  const { profile } = useContext(AuthContext);
+  const isAdmin = profile?.role_id === 1;
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<TFieldList>({
+    defaultValues: {
+      ...chosenCourse,
+    },
   });
 
-  const sortedLessons: TLesson[] = useMemo(() => {
-    return (chosenLessonIds.map((lessonId) => {
-      return (
-        filteredLessons.find((l) => l.id === lessonId) ||
-        courseLessons?.find(
-          (courseLesson) =>
-            courseLesson.created_from_id == lessonId ||
-            courseLesson.id == lessonId,
-        )
-      );
-    }, []) || []) as TLesson[];
-  }, [chosenLessonIds, filteredLessons, courseLessons]);
+  const {
+    lessons: allLessons,
+    getLessons: getAllLessons,
+    getCourseLessons,
+  } = useLessons();
+
+  const [images, setImages] = useState(
+    chosenCourse?.image_path
+      ? [
+          {
+            dataURL: getImageUrl(chosenCourse?.image_path),
+          },
+        ]
+      : [],
+  );
+  const { uploadImages } = useUploadImage();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [step, setStep] = useState(0);
+  // Ordered unique course membership — always keyed by lesson.id (never created_from_id).
+  const [orderedLessons, setOrderedLessons] = useState<TLesson[]>([]);
+  const [lessonsSearchString, setLessonsSearchString] = useState("");
+  const loadRequestIdRef = useRef(0);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 6 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const filteredLessons = useMemo(() => {
+    return (allLessons || []).filter((l) =>
+      isAdmin ? l.user_id === 1 : l.user_id !== 1,
+    );
+  }, [allLessons, isAdmin]);
+
+  const sortableIds = useMemo(
+    () => orderedLessons.map((lesson) => Number(lesson.id)),
+    [orderedLessons],
+  );
 
   useEffect(() => {
     if (!isVisible) {
       setStep(0);
+      setOrderedLessons([]);
+      setLessonsSearchString("");
+      loadRequestIdRef.current += 1;
+      return;
     }
-  }, [isVisible]);
+
+    getAllLessons();
+
+    if (!chosenCourse?.id) {
+      return;
+    }
+
+    const requestId = ++loadRequestIdRef.current;
+    (async () => {
+      const data = await getCourseLessons(chosenCourse.id);
+      if (requestId !== loadRequestIdRef.current) {
+        return;
+      }
+      const lessons: TLesson[] = data?.lessons || [];
+      // Keep unique course lesson rows as-is — id is the only stable identity.
+      setOrderedLessons(lessons.filter((l) => l?.id != null));
+    })();
+  }, [isVisible, chosenCourse?.id, getAllLessons, getCourseLessons]);
+
+  const searchedLessons = useMemo(() => {
+    if (!lessonsSearchString) {
+      return filteredLessons;
+    }
+
+    return filteredLessons.filter((f) => {
+      return f.title.toLowerCase().includes(lessonsSearchString.toLowerCase());
+    });
+  }, [lessonsSearchString, filteredLessons]);
+
+  const isSourceSelected = useCallback(
+    (sourceId: number) =>
+      orderedLessons.some((lesson) => isLessonLinkedToSource(lesson, sourceId)),
+    [orderedLessons],
+  );
+
+  const toggleSourceLesson = useCallback((libraryLesson: TLesson) => {
+    const sourceId = Number(libraryLesson.id);
+    setOrderedLessons((prev) => {
+      const alreadySelected = prev.some((lesson) =>
+        isLessonLinkedToSource(lesson, sourceId),
+      );
+      if (alreadySelected) {
+        return prev.filter(
+          (lesson) => !isLessonLinkedToSource(lesson, sourceId),
+        );
+      }
+      return prev.concat(libraryLesson);
+    });
+  }, []);
+
+  const onSubmit = useCallback(
+    async (_data) => {
+      if (step === 0) {
+        setStep(1);
+        return;
+      }
+
+      if (step === 1 && orderedLessons.length) {
+        setStep(2);
+        return;
+      }
+
+      setIsLoading(true);
+
+      const imagesToUpload = images.filter(
+        (image) =>
+          !!image?.file ||
+          !image.dataURL.includes(
+            "608dfa18-3eae-4574-a997-0a7441c16d33.selstorage.ru",
+          ),
+      );
+      let attachments;
+      if (imagesToUpload?.length) {
+        attachments = await uploadImages(imagesToUpload);
+      }
+
+      // Persist unique lesson row ids in current order.
+      // Backend keeps existing course lessons by id; clones library ids when needed.
+      const lessonIdsToSave = orderedLessons.map((lesson) => Number(lesson.id));
+
+      try {
+        const courseRes = await fetchPostJson({
+          path: chosenCourse?.id ? "/course/edit" : "/course/create",
+          isSecure: true,
+          data: {
+            ..._data,
+            image_id: attachments?.attachments?.[0]?.id,
+            lesson_ids: JSON.stringify(lessonIdsToSave),
+          },
+        });
+        const course = await courseRes.json();
+        setIsLoading(false);
+        if (course.success) {
+          onSuccess(course.createdCourse.id);
+        }
+        checkResponse(course);
+      } catch (e) {
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [step, orderedLessons, images, uploadImages, chosenCourse?.id, onSuccess],
+  );
+
+  const title = watch("title");
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    setOrderedLessons((items) => {
+      const oldIndex = items.findIndex(
+        (lesson) => Number(lesson.id) === Number(active.id),
+      );
+      const newIndex = items.findIndex(
+        (lesson) => Number(lesson.id) === Number(over.id),
+      );
+      if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) {
+        return items;
+      }
+      return arrayMove(items, oldIndex, newIndex);
+    });
+  }, []);
 
   return (
     <Modal
@@ -378,18 +474,11 @@ export const CreateCourseModalForm: FC<TProps> = ({
                 <div style={{ maxHeight: 400, overflow: "auto" }}>
                   <div className="h-5" />
                   {searchedLessons.map((lesson: TLesson) => {
-                    const isSelected = chosenLessonIds.includes(lesson?.id);
+                    const isSelected = isSourceSelected(Number(lesson.id));
                     return (
                       <div
-                        key={lesson?.id}
-                        onClick={() => {
-                          setChosenLessonIds((ids) => {
-                            if (ids.includes(lesson?.id)) {
-                              return ids.filter((id) => id !== lesson?.id);
-                            }
-                            return ids.concat(lesson?.id);
-                          });
-                        }}
+                        key={lesson.id}
+                        onClick={() => toggleSourceLesson(lesson)}
                         style={{ cursor: "pointer" }}
                       >
                         <Card
@@ -445,7 +534,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     size="lg"
                     isLoading={isLoading}
                   >
-                    {chosenLessonIds.length
+                    {orderedLessons.length
                       ? <T k="modals.next" />
                       : <T k="modals.skipLessonChoice" />}
                   </Button>
@@ -472,50 +561,33 @@ export const CreateCourseModalForm: FC<TProps> = ({
               </p>
               </ModalHeader>
               <ModalBody>
-                <div className="w-[100%] lg:w-[525px] m-auto">
-                  {/* <Input
-                    value={lessonsSearchString}
-                    onValueChange={setLessonsSearchString}
-                    placeholder={i18n.t("lessons.searchLessons")}
-                    size="lg"
-                    classNames={{ inputWrapper: "bg-white hove" }}
-                    startContent={
-                      <Image
-                        src={Loupe.src}
-                        alt="search"
-                        style={{ borderRadius: 0 }}
-                      />
-                    }
-                  /> */}
-                </div>
                 <div
                   style={{
                     maxHeight: 400,
                     overflow: "auto",
                     position: "relative",
-                    zIndex: 100000,
                   }}
-                  ref={modalContentRef}
                 >
                   <div className="h-5" />
-                  <SortableContainer
-                    helperContainer={modalContentRef.current}
-                    onSortEnd={({ oldIndex, newIndex }) => {
-                      setChosenLessonIds((ids) =>
-                        arrayMoveImmutable(ids, oldIndex, newIndex),
-                      );
-                    }}
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    modifiers={[restrictToVerticalAxis]}
+                    onDragEnd={handleDragEnd}
                   >
-                    {sortedLessons.map((lesson: TLesson, index) => {
-                      return (
-                        <SortableItem
+                    <SortableContext
+                      items={sortableIds}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {orderedLessons.map((lesson) => (
+                        <SortableLessonRow
+                          key={lesson.id}
+                          id={Number(lesson.id)}
                           lesson={lesson}
-                          key={lesson?.id}
-                          index={index}
                         />
-                      );
-                    })}
-                  </SortableContainer>
+                      ))}
+                    </SortableContext>
+                  </DndContext>
                   <div className="h-5" />
                 </div>
 
@@ -527,7 +599,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     size="lg"
                     isLoading={isLoading}
                   >
-                    {chosenLessonIds.length
+                    {orderedLessons.length
                       ? <T k="modals.next" />
                       : <T k="modals.skipLessonChoice" />}
                   </Button>
@@ -548,15 +620,6 @@ export const CreateCourseModalForm: FC<TProps> = ({
           )}
         </ModalContent>
       </form>
-      {/* <Button
-        color="primary"
-        type="submit"
-        className="w-full"
-        size="lg"
-        isLoading={isLoading}
-      >
-        Создать курс
-      </Button> */}
     </Modal>
   );
 };

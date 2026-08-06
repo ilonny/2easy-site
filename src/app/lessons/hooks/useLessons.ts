@@ -248,13 +248,18 @@ export const useLessons = (
   }, [searchString, lessons]);
 
   const getCourseLessons = useCallback(
-    async (course_id: number, student_id: any) => {
+    async (course_id: number, student_id?: number | string | null) => {
+      setCourseLessons([]);
+      const studentQuery =
+        student_id !== undefined && student_id !== null && student_id !== ""
+          ? `&student_id=${student_id}`
+          : "";
       const res = await fetchGet({
-        path: `/lessons/course?course_id=${course_id}&student_id=${student_id}`,
+        path: `/lessons/course?course_id=${course_id}${studentQuery}`,
         isSecure: true,
       });
       const data = await res?.json();
-      setCourseLessons(data?.lessons);
+      setCourseLessons(data?.lessons || []);
       checkResponse(data);
       return data;
     },
