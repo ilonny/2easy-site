@@ -1,5 +1,5 @@
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { TLesson } from "../types";
 import { parseRouteId } from "@/utils/parseRouteId";
 
@@ -13,6 +13,7 @@ export const useLessons = (
   const [lesson, setLesson] = useState<TLesson | undefined>();
   const [lessonsListIslLoading, setLessonsListIslLoading] = useState(false);
   const [courseLessons, setCourseLessons] = useState<TLesson[]>([]);
+  const lessonsRequestIdRef = useRef(0);
 
   const getMainPageLessons = useCallback(async () => {
     setLessonsListIslLoading(true);
@@ -21,6 +22,9 @@ export const useLessons = (
         path: "/main-page-lessons",
       });
       const data = await res?.json();
+      if (data?.success === false) {
+        return data;
+      }
       if (data) {
         setLessons(data?.lessons || []);
       }
@@ -30,13 +34,15 @@ export const useLessons = (
     }
   }, []);
 
-  const getLessons = useCallback(async () => {
+  const getLessons = useCallback(async (signal?: AbortSignal) => {
+    const requestId = ++lessonsRequestIdRef.current;
     setLessonsListIslLoading(true);
     try {
       let res;
       if (isAuth === false) {
         res = await fetchGet({
           path: "/main-page-lessons?disable_limit=1",
+          signal,
         });
       } else {
         const params = new URLSearchParams();
@@ -45,15 +51,33 @@ export const useLessons = (
         res = await fetchGet({
           path: params.toString() ? `/lessons?${params.toString()}` : "/lessons",
           isSecure: true,
+          signal,
         });
       }
+      if (signal?.aborted || requestId !== lessonsRequestIdRef.current) {
+        return;
+      }
       const data = await res?.json();
+      if (signal?.aborted || requestId !== lessonsRequestIdRef.current) {
+        return;
+      }
+      // Failed responses still have a body — don't wipe a good list with [].
+      if (data?.success === false) {
+        return data;
+      }
       if (data) {
         setLessons(data?.lessons || []);
       }
       return data;
+    } catch (error) {
+      if ((error as DOMException)?.name === "AbortError") {
+        return;
+      }
+      throw error;
     } finally {
-      setLessonsListIslLoading(false);
+      if (!signal?.aborted && requestId === lessonsRequestIdRef.current) {
+        setLessonsListIslLoading(false);
+      }
     }
   }, [isAuth, studentId, includeCourseLessons]);
 

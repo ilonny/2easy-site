@@ -323,7 +323,7 @@ export const fetchPostMultipartWithProgress = (params: {
 };
 
 export const fetchGet = (params: TParams) => {
-  const { path } = params;
+  const { path, signal } = params;
   // if (params.isSecure && !getTokenFromLocalStorage()) {
   //   return;
   // }
@@ -332,6 +332,7 @@ export const fetchGet = (params: TParams) => {
   return safeFetch(url, {
     method: "GET",
     headers,
+    signal,
   });
 };
 

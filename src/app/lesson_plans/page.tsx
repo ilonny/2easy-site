@@ -1,23 +1,15 @@
 "use client";
 
 import { ContentWrapper } from "@/components";
-import { SquareList } from "@/components/SquareList";
-import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
-import { useCheckSubscription } from "@/app/subscription/helpers";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { PageLeftBlock } from "@/components/PageLeftBlock";
+import { BreadcrumbItem, Breadcrumbs, Image } from "@nextui-org/react";
+import { useContext } from "react";
 import { ProfileLessons } from "../lessons/components/ProfileLessons";
 import { T } from "@/i18n/T";
+import { AuthContext } from "@/auth";
+import Dino from "@/assets/images/dino.gif";
 
 export default function LessonPlansPage() {
-  const { checkSubscription } = useCheckSubscription();
-  const router = useRouter();
-  // useEffect(() => {
-  //   if (!checkSubscription()) {
-  //     router.push("/subscription");
-  //   }
-  // }, [checkSubscription, router]);
+  const { authIsLoading } = useContext(AuthContext);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
@@ -36,7 +28,13 @@ export default function LessonPlansPage() {
           <T k="header.lessonPlans" />
         </h1>
         <div className="h-6 sm:h-8 md:h-10" />
-        <ProfileLessons />
+        {authIsLoading ? (
+          <div className="w-full h-[500px] flex justify-center items-center">
+            <Image src={Dino.src} alt="dino animated" width={150} height={150} />
+          </div>
+        ) : (
+          <ProfileLessons />
+        )}
         <div className="h-10" />
         <div className="h-10" />
       </ContentWrapper>

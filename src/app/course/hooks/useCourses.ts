@@ -22,32 +22,38 @@ export type TCourse = {
 };
 
 export const useCourses = () => {
-  const [coursesIsLoading, setCoursesIsLoading] = useState(false);
+  const [coursesIsLoading, setCoursesIsLoading] = useState(true);
   const [courses, setCourses] = useState<TCourse[]>([]);
 
   const getCourses = useCallback(async (student_id?: number) => {
     setCoursesIsLoading(true);
 
-    const res = await fetchGet({
-      path: student_id
-        ? `/course/list?student_id=${student_id}`
-        : "/course/list",
-      isSecure: true,
-    });
+    try {
+      const res = await fetchGet({
+        path: student_id
+          ? `/course/list?student_id=${student_id}`
+          : "/course/list",
+        isSecure: true,
+      });
 
-    const data = await res?.json();
-    if (data) {
-      setCourses(
-        data?.courses?.map((course) => {
-          return {
-            ...course,
-            lesson_ids: course?.lesson_ids ? JSON.parse(course.lesson_ids) : [],
-          };
-        }) || []
-      );
+      const data = await res?.json();
+      if (data?.success === false) {
+        return data;
+      }
+      if (data) {
+        setCourses(
+          data?.courses?.map((course) => {
+            return {
+              ...course,
+              lesson_ids: course?.lesson_ids ? JSON.parse(course.lesson_ids) : [],
+            };
+          }) || []
+        );
+      }
+      return data;
+    } finally {
+      setCoursesIsLoading(false);
     }
-    setCoursesIsLoading(false);
-    return data;
   }, []);
 
   return { coursesIsLoading, courses, getCourses };

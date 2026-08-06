@@ -60,7 +60,10 @@ type TProps = {
 const makeId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-const WELCOME =
+const WELCOME_CREATE =
+  "Привет! Опиши тему и что должно быть в задании — я заполню поля. Например: warm-up про travel для A2, 5 вопросов с вариантами.";
+
+const WELCOME_EDIT =
   "Привет! Я помогу отредактировать это задание. Например: упростить текст, добавить вопросы, поменять тон, переписать примеры.";
 
 /** Keep media; backend slims for the model and restores images/videos after */
@@ -93,8 +96,13 @@ export const CreateExWithAiButton: FC<TProps> = ({
   const [pendingData, setPendingData] = useState<Record<string, any> | null>(
     null,
   );
+  const isCreate = !currentData?.id;
   const [messages, setMessages] = useState<TChatMessage[]>([
-    { id: makeId(), role: "assistant", content: WELCOME },
+    {
+      id: makeId(),
+      role: "assistant",
+      content: WELCOME_EDIT,
+    },
   ]);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const latestDataRef = useRef<Record<string, any>>(currentData || {});
@@ -102,6 +110,20 @@ export const CreateExWithAiButton: FC<TProps> = ({
   useEffect(() => {
     latestDataRef.current = currentData || {};
   }, [currentData]);
+
+  useEffect(() => {
+    if (!open) return;
+    setMessages([
+      {
+        id: makeId(),
+        role: "assistant",
+        content: isCreate ? WELCOME_CREATE : WELCOME_EDIT,
+      },
+    ]);
+    setInstruction("");
+    setError(null);
+    setPendingData(null);
+  }, [open, isCreate]);
 
   useEffect(() => {
     if (!open) return;
@@ -204,7 +226,11 @@ export const CreateExWithAiButton: FC<TProps> = ({
             setOpen(true);
           }}
         >
-          <T k="ai.editExWithAi" defaultText="Отредактировать с помощью ИИ" />
+          {isCreate ? (
+            <T k="ai.createExWithAi" defaultText="Создать с помощью ИИ" />
+          ) : (
+            <T k="ai.editExWithAi" defaultText="Отредактировать с помощью ИИ" />
+          )}
         </Button>
       </div>
 
@@ -224,12 +250,26 @@ export const CreateExWithAiButton: FC<TProps> = ({
       >
         <ModalContent className="max-h-[calc(100dvh-1rem)] min-h-0 flex flex-col overflow-hidden">
           <ModalHeader className="flex flex-col gap-1 border-b border-default-100 shrink-0">
-            <T k="ai.editExWithAi" defaultText="Отредактировать с помощью ИИ" />
-            <p className="text-sm font-normal text-default-500">
+            {isCreate ? (
+              <T k="ai.createExWithAi" defaultText="Создать с помощью ИИ" />
+            ) : (
               <T
-                k="ai.editExWithAiHint"
-                defaultText="Чат по этому заданию — опиши правку, и поля обновятся"
+                k="ai.editExWithAi"
+                defaultText="Отредактировать с помощью ИИ"
               />
+            )}
+            <p className="text-sm font-normal text-default-500">
+              {isCreate ? (
+                <T
+                  k="ai.createExWithAiHint"
+                  defaultText="Опиши тему и что должно быть в задании — AI заполнит поля"
+                />
+              ) : (
+                <T
+                  k="ai.editExWithAiHint"
+                  defaultText="Чат по этому заданию — опиши правку, и поля обновятся"
+                />
+              )}
             </p>
           </ModalHeader>
           <ModalBody className="flex-1 min-h-0 overflow-hidden p-0 flex flex-col gap-0">
