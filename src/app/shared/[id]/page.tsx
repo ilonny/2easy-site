@@ -33,6 +33,7 @@ export default function SharedLessonPage() {
   const getLesson = useCallback(async () => {
     const res = await fetchPostJson({
       path: "/lesson-share/lesson-data",
+      isSecure: true,
       data: {
         hash,
       },
