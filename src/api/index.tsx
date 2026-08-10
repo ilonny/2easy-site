@@ -221,7 +221,49 @@ export const fetchPostJson = (params: TParams) => {
   });
 };
 
-export const fetchPostBlob = (params: TParams) => fetchPostJson(params);
+/**
+ * Binary POST (e.g. audio/mpeg). Must not go through withSafeJson —
+ * that consumes the body as text and strips `.blob()`.
+ */
+export const fetchPostBlob = async (params: TParams): Promise<Response> => {
+  const { path, data, signal } = params;
+  const headers = mapHeaders(params);
+  const url = (API_URL + path).replace("/undefined", "");
+
+  try {
+    return await fetch(url, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers,
+      signal,
+    });
+  } catch (error) {
+    if ((error as DOMException)?.name === "AbortError") {
+      throw error;
+    }
+
+    return {
+      ok: false,
+      status: 0,
+      statusText: "Network Error",
+      headers: new Headers(),
+      url,
+      redirected: false,
+      type: "error",
+      bodyUsed: true,
+      json: async () => ({
+        success: false,
+        status: 0,
+        message: SERVER_UNAVAILABLE_MESSAGE,
+      }),
+      text: async () => "",
+      blob: async () => new Blob(),
+      clone() {
+        return this as unknown as Response;
+      },
+    } as unknown as Response;
+  }
+};
 
 export const fetchPostMultipart = (params: TParams) => {
   const { path, data } = params;

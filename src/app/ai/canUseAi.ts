@@ -1,5 +1,5 @@
 /** Temporary AI allowlist — only these teacher accounts see/use AI features */
-export const AI_ALLOWED_USER_IDS = [18, 3332, 9, 14, 1177] as const;
+export const AI_ALLOWED_USER_IDS = [18, 3332, 9, 14, 1177, 1169] as const;
 
 export const canUseAi = (profile?: {
   id?: number | string | null;

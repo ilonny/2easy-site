@@ -18,7 +18,10 @@ import {
 export const useTextToSpeech = () => {
   const [, setRevision] = useState(0);
 
-  useEffect(() => subscribeToSpeechPlayback(() => setRevision((value) => value + 1)), []);
+  useEffect(
+    () => subscribeToSpeechPlayback(() => setRevision((value) => value + 1)),
+    [],
+  );
 
   useEffect(() => () => stopSpeechPlayback(), []);
 
