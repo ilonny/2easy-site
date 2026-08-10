@@ -83,20 +83,31 @@ export const useDictionary = (studentId: number) => {
     [studentId]
   );
 
-  const translateWord = useCallback(async (text: string) => {
-    const res = await fetchPostJson({
-      path: "/translate",
-      isSecure: true,
-      data: { text },
-    });
+  const translateWord = useCallback(
+    async (
+      text: string,
+      sourceLanguageCode?: string,
+      targetLanguageCode?: string
+    ) => {
+      const res = await fetchPostJson({
+        path: "/translate",
+        isSecure: true,
+        data: {
+          text,
+          ...(sourceLanguageCode ? { sourceLanguageCode } : {}),
+          ...(targetLanguageCode ? { targetLanguageCode } : {}),
+        },
+      });
 
-    if (!res?.ok) {
-      toast(await parseApiErrorMessage(res), { type: "error" });
-      return null;
-    }
+      if (!res?.ok) {
+        toast(await parseApiErrorMessage(res), { type: "error" });
+        return null;
+      }
 
-    return res.json() as Promise<TTranslateResult>;
-  }, []);
+      return res.json() as Promise<TTranslateResult>;
+    },
+    []
+  );
 
   const createWord = useCallback(
     async (data: TCreateWordPayload) => {
