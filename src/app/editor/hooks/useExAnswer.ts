@@ -26,8 +26,8 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export const EX_ANSWERS_RESET_EVENT = "ex-answers-reset";
 
 /** Teachers need live sync; students mainly need reset detection. */
-export const DEFAULT_TEACHER_POLL_MS = 2000;
-export const DEFAULT_STUDENT_POLL_MS = 5000;
+export const DEFAULT_TEACHER_POLL_MS = 3000;
+export const DEFAULT_STUDENT_POLL_MS = 7000;
 
 export type TExAnswersResetDetail = {
   ex_id: number;

@@ -1,0 +1,31 @@
+{
+  "webcredentials": {
+    "apps": [
+      "TXWHC5F645.com.twoeasy.mobile",
+      "KB636673W9.com.twoeasy.mobile",
+      "6WMLTK8628.com.twoeasy.mobile"
+    ]
+  },
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": [
+          "TXWHC5F645.com.twoeasy.mobile",
+          "KB636673W9.com.twoeasy.mobile",
+          "6WMLTK8628.com.twoeasy.mobile"
+        ],
+        "components": [
+          {
+            "/": "/login*",
+            "comment": "Login"
+          },
+          {
+            "/": "/registration*",
+            "comment": "Registration"
+          }
+        ]
+      }
+    ]
+  }
+}
