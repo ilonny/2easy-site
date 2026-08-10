@@ -57,8 +57,16 @@ import {
   LessonDictionaryHandle,
   LessonDictionaryLayer,
 } from "@/app/dictionary/components/LessonDictionaryLayer";
-import { LessonBoardButton } from "@/app/board/components/LessonBoardButton";
+import dynamic from "next/dynamic";
 import { parseRouteId, parseRouteIdNumber } from "@/utils/parseRouteId";
+
+const LessonBoardButton = dynamic(
+  () =>
+    import("@/app/board/components/LessonBoardButton").then(
+      (mod) => mod.LessonBoardButton,
+    ),
+  { ssr: false },
+);
 
 const VIEW_NOOP = () => {};
 const VIEW_ASYNC_NOOP = async () => {};
