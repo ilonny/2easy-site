@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import i18n from "@/i18n/config";
-import { parseApiErrorMessage } from "../utils/apiError";
 import { requestSpeechAudio } from "../utils/requestSpeechAudio";
+import { isYandexTtsLanguageSupported } from "../utils/ttsSupportedLanguages";
 import {
   clearSpeechAbortController,
   createSpeechAbortController,
@@ -25,47 +25,64 @@ export const useTextToSpeech = () => {
 
   useEffect(() => () => stopSpeechPlayback(), []);
 
-  const speak = useCallback(async (id: string, text: string) => {
-    const trimmedText = text.trim();
+  const speak = useCallback(
+    async (id: string, text: string, languageCode?: string) => {
+      const trimmedText = text.trim();
 
-    if (!trimmedText) {
-      return;
-    }
-
-    const abortController = createSpeechAbortController();
-    setSpeechPlaybackState({ activeId: id, isLoading: true });
-
-    try {
-      const res = await requestSpeechAudio(trimmedText, abortController.signal);
-
-      if (abortController.signal.aborted) {
+      if (!trimmedText || !isYandexTtsLanguageSupported(languageCode)) {
         return;
       }
 
-      if (!res?.ok) {
-        toast(await parseApiErrorMessage(res), { type: "error" });
+      const abortController = createSpeechAbortController();
+      setSpeechPlaybackState({ activeId: id, isLoading: true });
+
+      try {
+        const res = await requestSpeechAudio(
+          trimmedText,
+          languageCode,
+          abortController.signal
+        );
+
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        if (!res?.ok) {
+          let message = i18n.t("commonErrors.somethingWentWrong");
+          try {
+            const errorPayload = await res.json();
+            if (errorPayload?.message) {
+              message = errorPayload.message;
+            }
+          } catch {
+            // keep default message
+          }
+
+          toast(message, { type: "error" });
+          stopSpeechPlayback();
+          return;
+        }
+
+        const blob = await res.blob();
+
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        await playSpeechBlob(blob, id);
+      } catch (error) {
+        if (abortController.signal.aborted) {
+          return;
+        }
+
         stopSpeechPlayback();
-        return;
+        toast(i18n.t("dictionary.pronunciationError"), { type: "error" });
+      } finally {
+        clearSpeechAbortController(abortController);
       }
-
-      const blob = await res.blob();
-
-      if (abortController.signal.aborted) {
-        return;
-      }
-
-      await playSpeechBlob(blob, id);
-    } catch (error) {
-      if (abortController.signal.aborted) {
-        return;
-      }
-
-      stopSpeechPlayback();
-      toast(i18n.t("dictionary.pronunciationError"), { type: "error" });
-    } finally {
-      clearSpeechAbortController(abortController);
-    }
-  }, []);
+    },
+    []
+  );
 
   const isLoading = useCallback((id: string) => {
     const { activeId, isLoading: loading } = getSpeechPlaybackState();

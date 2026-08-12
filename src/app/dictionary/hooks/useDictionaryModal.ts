@@ -53,10 +53,12 @@ export const useDictionaryModal = ({
       return Promise.resolve();
     }
 
+    const isTraining = activeTab === "training";
+
     return getDictionary({
-      search: debouncedSearch.trim() || undefined,
+      search: isTraining ? undefined : debouncedSearch.trim() || undefined,
       isLearned: activeTab === "learned",
-      lessonId: lessonFilterId,
+      lessonId: isTraining ? undefined : lessonFilterId,
     });
   }, [activeTab, debouncedSearch, getDictionary, lessonFilterId, studentId]);
 
