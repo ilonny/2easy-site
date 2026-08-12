@@ -276,6 +276,10 @@
     "doneOpenEditor": "Готово",
     "previewConstructorHint": "Полный конструктор справа — правь задания как обычно или через чат",
     "availableLimit": "Доступный лимит запросов:",
+    "availableLimitRemaining": "Осталось запросов {{purpose}}: {{count}} в этом месяце",
+    "limitPurposeLesson": "на создание урока",
+    "limitPurposeTopic": "на придумывание темы",
+    "limitPurposeExercise": "на создание/редактирование упражнения",
     "monthlyLimitExceeded": "Лимит в этом месяце превышен",
     "needPaidSubscription": "AI работает только с активной платной подпиской"
   },

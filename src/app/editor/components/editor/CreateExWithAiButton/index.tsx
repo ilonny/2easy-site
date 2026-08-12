@@ -146,7 +146,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
                 ? "Привет! Опиши тему и что должно быть в задании — я заполню поля. Например: warm-up про travel для A2, 5 вопросов с вариантами."
                 : "Привет! Я помогу отредактировать это задание. Например: упростить текст, добавить вопросы, поменять тон, переписать примеры.",
             },
-          )}\n\n${formatAiAvailableLimit(remaining)}`,
+          )}\n\n${formatAiAvailableLimit(remaining, "refine_exercise")}`,
         },
       ]);
     })();
@@ -228,7 +228,10 @@ export const CreateExWithAiButton: FC<TProps> = ({
         {
           id: makeId(),
           role: "assistant",
-          content: `${assistantText}\n\n${formatAiAvailableLimit(remaining)}`,
+          content: `${assistantText}\n\n${formatAiAvailableLimit(
+            remaining,
+            "refine_exercise",
+          )}`,
         },
       ]);
 
@@ -397,7 +400,7 @@ export const CreateExWithAiButton: FC<TProps> = ({
 
             <div className="shrink-0 border-t border-default-100 px-6 py-3 space-y-3 bg-content1">
               <p className="text-xs text-default-500">
-                {formatAiAvailableLimit(limitRemaining)}
+                {formatAiAvailableLimit(limitRemaining, "refine_exercise")}
               </p>
               {!pendingData && (
                 <Textarea

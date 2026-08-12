@@ -276,6 +276,10 @@
     "doneOpenEditor": "Done",
     "previewConstructorHint": "Full constructor on the right — edit tasks as usual or via chat",
     "availableLimit": "Available request limit:",
+    "availableLimitRemaining": "{{count}} requests left {{purpose}} this month",
+    "limitPurposeLesson": "for lesson creation",
+    "limitPurposeTopic": "for topic invention",
+    "limitPurposeExercise": "for exercise create/edit",
     "monthlyLimitExceeded": "Monthly limit exceeded",
     "needPaidSubscription": "AI is available only with an active paid subscription"
   },

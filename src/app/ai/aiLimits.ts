@@ -18,10 +18,31 @@ export type TAiLimitsMap = Partial<Record<TAiLimitCategory, TAiLimitStatus>>;
 
 export const AI_MONTHLY_LIMIT_CODE = "AI_MONTHLY_LIMIT_EXCEEDED";
 
-export const formatAiAvailableLimit = (remaining: number | null | undefined) =>
-  `${i18n.t("ai.availableLimit", {
-    defaultValue: "Доступный лимит запросов:",
-  })} ${remaining ?? "—"}`;
+const PURPOSE_KEYS: Record<TAiLimitCategory, string> = {
+  generate_lesson: "ai.limitPurposeLesson",
+  suggest_topic: "ai.limitPurposeTopic",
+  refine_exercise: "ai.limitPurposeExercise",
+};
+
+const PURPOSE_DEFAULTS: Record<TAiLimitCategory, string> = {
+  generate_lesson: "на создание урока",
+  suggest_topic: "на придумывание темы",
+  refine_exercise: "на создание/редактирование упражнения",
+};
+
+export const formatAiAvailableLimit = (
+  remaining: number | null | undefined,
+  category: TAiLimitCategory = "generate_lesson",
+) => {
+  const purpose = i18n.t(PURPOSE_KEYS[category], {
+    defaultValue: PURPOSE_DEFAULTS[category],
+  });
+  return i18n.t("ai.availableLimitRemaining", {
+    purpose,
+    count: remaining ?? "—",
+    defaultValue: "Осталось запросов {{purpose}}: {{count}} в этом месяце",
+  });
+};
 
 export const handleAiLimitError = (json: {
   success?: boolean;

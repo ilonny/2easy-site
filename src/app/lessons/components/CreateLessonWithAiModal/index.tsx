@@ -163,6 +163,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
           role: "assistant",
           content: `${welcomeMessage()}\n\n${formatAiAvailableLimit(
             limits.generate_lesson?.remaining,
+            "generate_lesson",
           )}`,
         },
       ]);
@@ -276,7 +277,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
           `${
             json.assistantMessage ||
             `Готово: «${json.lesson?.title}». Проверь превью — урок сохранится только по кнопке «Сохранить урок».`
-          }\n\n${formatAiAvailableLimit(remaining)}`,
+          }\n\n${formatAiAvailableLimit(remaining, "generate_lesson")}`,
         );
       } catch (e) {
         setError("Ошибка сети при генерации урока");
@@ -350,7 +351,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
           `${
             json.assistantMessage ||
             `Я придумал тему «${suggestion.title}». Подходит?`
-          }\n\n${formatAiAvailableLimit(remaining)}`,
+          }\n\n${formatAiAvailableLimit(remaining, "suggest_topic")}`,
         );
       } catch (e) {
         setError("Ошибка сети при подборе темы");
@@ -460,6 +461,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
           typeof preview.aiLimit?.remaining === "number"
             ? preview.aiLimit.remaining
             : limitRemaining,
+          "generate_lesson",
         )}`,
       );
     } catch (e: any) {
@@ -678,6 +680,10 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                       step === "confirmTopic"
                       ? topicLimitRemaining ?? limitRemaining
                       : limitRemaining,
+                    limitCategory === "suggest_topic" ||
+                      step === "confirmTopic"
+                      ? "suggest_topic"
+                      : "generate_lesson",
                   )}
                 </p>
               </div>

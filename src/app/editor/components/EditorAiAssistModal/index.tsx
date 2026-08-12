@@ -144,7 +144,10 @@ export const EditorAiAssistModal: FC<TProps> = ({
         {
           id: makeId(),
           role: "assistant",
-          content: `${welcomeMessage()}\n\n${formatAiAvailableLimit(remaining)}`,
+          content: `${welcomeMessage()}\n\n${formatAiAvailableLimit(
+            remaining,
+            "generate_lesson",
+          )}`,
         },
       ]);
     })();
@@ -390,7 +393,10 @@ export const EditorAiAssistModal: FC<TProps> = ({
         typeof refined?.aiLimit?.remaining === "number"
           ? refined.aiLimit.remaining
           : limitRemaining;
-      assistantText += `\n\n${formatAiAvailableLimit(remaining)}`;
+      assistantText += `\n\n${formatAiAvailableLimit(
+        remaining,
+        "generate_lesson",
+      )}`;
 
       setMessages((prev) => [
         ...prev,
@@ -567,7 +573,7 @@ export const EditorAiAssistModal: FC<TProps> = ({
 
             <div className="shrink-0 border-t border-default-100 px-6 py-3 space-y-3 bg-content1">
               <p className="text-xs text-default-500">
-                {formatAiAvailableLimit(limitRemaining)}
+                {formatAiAvailableLimit(limitRemaining, "generate_lesson")}
               </p>
               <Textarea
                 minRows={2}
