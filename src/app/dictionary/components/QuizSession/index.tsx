@@ -133,8 +133,8 @@ export const QuizSession: FC<TProps> = ({
         }
       />
 
-      <div className="rounded-2xl border border-[#eee] bg-white p-5 sm:p-6 shadow-[0_8px_30px_rgba(35,31,32,0.06)]">
-        <div className="flex items-start gap-2 mb-4">
+      <div className="relative flex min-h-[7.5rem] items-center justify-center rounded-2xl border border-[#eee] bg-white px-12 py-6 sm:min-h-[8.5rem] sm:px-14 shadow-[0_8px_30px_rgba(35,31,32,0.06)]">
+        <div className="absolute left-2 top-2 sm:left-3 sm:top-3">
           <SpeakWordButton
             id={buildSpeakWordId(current.id, "quiz")}
             text={current.sourceWord}
@@ -191,11 +191,14 @@ export const QuizSession: FC<TProps> = ({
             classNames={{
               inputWrapper:
                 answerState === "correct"
-                  ? "border-success bg-success/10"
+                  ? "border-success border-2 bg-success/30"
                   : answerState === "wrong"
                     ? "border-danger bg-danger/10"
                     : "bg-white",
-              input: "text-base",
+              input:
+                answerState === "correct"
+                  ? "text-base text-success font-medium"
+                  : "text-base",
             }}
           />
           {answerState === "wrong" && (
