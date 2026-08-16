@@ -14,6 +14,7 @@ import { SideBar } from "../SIdeBar";
 import { LanguageSwitcher } from "../LanguageSwitcher";
 import { T } from "@/i18n/T";
 import { BOARD_LESSON_PAGE_LEGACY_PATH_PREFIX, BOARD_LESSON_PAGE_PATH_PREFIX } from "@/app/board/constants";
+import { SITE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -54,7 +55,7 @@ export const Header = () => {
     >
       <ContentWrapper>
         <div
-          className="fixed left-0 z-[60] w-[100%] bg-white px-4 lg:static lg:z-auto lg:px-0"
+          className={`fixed left-0 ${SITE_HEADER_Z_CLASS} w-[100%] bg-white px-4 lg:static lg:z-auto lg:px-0`}
         >
           <div
             className={`flex min-h-[80px] flex-row items-center justify-between border-[#D9D9D9] py-4 lg:min-h-[115px] lg:py-8 border-b-[${

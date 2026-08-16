@@ -14,7 +14,6 @@ import {
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { SibscribeContext } from "@/subscribe/context";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useParams, useRouter } from "next/navigation";
@@ -52,10 +51,28 @@ import {
 import dynamic from "next/dynamic";
 import { parseRouteId, parseRouteIdNumber } from "@/utils/parseRouteId";
 import { LessonParticipantsPanel } from "@/app/lessons/components/LessonParticipantsPanel";
+import type { TLessonParticipant } from "@/app/lessons/components/LessonParticipantsPanel";
 import { LessonFloatingTools } from "@/app/lessons/components/LessonFloatingTools";
-import {
-  LESSON_FAB_BUTTON_CLASS,
-} from "@/app/lessons/constants";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
+import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
+import { BELOW_SITE_HEADER_STICKY_TOP_CLASS } from "@/constants/uiLayers";
+
+const ParticipantsIcon = () => (
+  <svg
+    width="22"
+    height="22"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    aria-hidden
+  >
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
 
 const LessonBoardButton = dynamic(
   () =>
@@ -74,7 +91,6 @@ export default function LessonPage() {
   const params = useParams() as { id: string };
   const lessonId = parseRouteId(params.id);
   const lessonIdNum = parseRouteIdNumber(params.id);
-  const { subscription } = (useContext(SibscribeContext as any) as any) || {};
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
@@ -86,11 +102,10 @@ export default function LessonPage() {
   const { lesson, getLesson } = useLessons();
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(1);
-  const [students, setStudents] = useState<any[]>([]);
+  const [students, setStudents] = useState<TLessonParticipant[]>([]);
   const [activeStudentId, setActiveStudentId] = useState(0);
   const lastStudentFocusUpdatedAtRef = useRef<number>(0);
 
-  const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const [dictionaryOnboardingOpen, setDictionaryOnboardingOpen] = useState(false);
   const [boardModalOpen, setBoardModalOpen] = useState(false);
   const [participantsOpen, setParticipantsOpen] = useState(false);
@@ -175,10 +190,14 @@ export default function LessonPage() {
     if (!lessonId) return;
     let selectedIds: number[] = [];
     try {
-      selectedIds = JSON.parse(
-        readFromLocalStorage("start_lesson_selected_ids") || "",
-      )?.map((el: any) => Number(el))?.filter((n: any) => Number(n) > 0);
-    } catch (err) {}
+      selectedIds = (
+        JSON.parse(readFromLocalStorage("start_lesson_selected_ids") || "[]") as unknown[]
+      )
+        ?.map((el) => Number(el))
+        ?.filter((n) => Number(n) > 0);
+    } catch {
+      /* ignore */
+    }
 
     const paramsQs = new URLSearchParams();
     paramsQs.set("lesson_id", lessonId);
@@ -193,15 +212,17 @@ export default function LessonPage() {
     )?.json();
     try {
       const filteredIds = selectedIds?.length
-        ? list?.studentList?.filter((s: any) => {
+        ? (list?.studentList as TLessonParticipant[] | undefined)?.filter((s) => {
             return selectedIds.includes(s.student_id);
           })
         : [];
-      setStudents(filteredIds);
+      setStudents(filteredIds || []);
       if (filteredIds?.length === 1) {
         setActiveStudentId(filteredIds[0]?.student_id);
       }
-    } catch (err) {}
+    } catch {
+      /* ignore */
+    }
   }, [lessonId]);
 
   useEffect(() => {
@@ -230,7 +251,9 @@ export default function LessonPage() {
         lastStudentFocusUpdatedAtRef.current = updatedAt;
         const el = document.getElementById(`ex-${exId}`);
         el?.scrollIntoView({ behavior: "smooth", block: "start" });
-      } catch (err) {}
+      } catch {
+      /* ignore */
+    }
     }, 3000);
 
     return () => {
@@ -304,10 +327,13 @@ export default function LessonPage() {
     }
   }, [tutorialOpen]);
 
-  const onChangePresentationMode = useCallback((e: any) => {
-    e.stopPropagation();
-    setIsPresentationMode((s) => !s);
-  }, []);
+  const onChangePresentationMode = useCallback(
+    (e: { stopPropagation: () => void }) => {
+      e.stopPropagation();
+      setIsPresentationMode((s) => !s);
+    },
+    [],
+  );
 
   const showParticipants = !isStudent && !!students?.length;
 
@@ -328,7 +354,9 @@ export default function LessonPage() {
       });
       const data = await res?.json();
       checkResponse(data, true);
-    } catch (err) {}
+    } catch {
+      /* ignore */
+    }
   }, [getCurrentExerciseIdInView, params.id]);
 
   const handleOpenParticipantDictionary = useCallback((studentId: number) => {
@@ -536,7 +564,7 @@ export default function LessonPage() {
               className="hidden md:flex w-[180px] shrink-0 min-w-0 flex-col self-stretch lg:w-[200px]"
               aria-label={i18n.t("lessons.participantsAriaLabel")}
             >
-              <div className="sticky top-[88px] w-full lg:top-8">
+              <div className={`sticky ${BELOW_SITE_HEADER_STICKY_TOP_CLASS} w-full lg:top-8`}>
                 <LessonParticipantsPanel
                   students={students}
                   activeStudentId={activeStudentId}
@@ -552,16 +580,26 @@ export default function LessonPage() {
         <div className="relative">
           <LessonFloatingTools>
             {showParticipants && (
-              <Button
-                color="primary"
-                variant="light"
-                size="lg"
-                className={`${LESSON_FAB_BUTTON_CLASS} md:hidden`}
-                onClick={() => setParticipantsOpen(true)}
+              <ResponsiveTooltip
+                content={`${i18n.t("lessons.participantsButton")}${
+                  students.length > 0 ? ` (${students.length})` : ""
+                }`}
+                placement="left"
               >
-                <T k="lessons.participantsButton" defaultText="Участники" />
-                {students.length > 0 ? ` (${students.length})` : ""}
-              </Button>
+                <Button
+                  isIconOnly
+                  color="primary"
+                  variant="light"
+                  size="lg"
+                  className={`${LESSON_FAB_BUTTON_CLASS} md:hidden`}
+                  aria-label={`${i18n.t("lessons.participantsButton")}${
+                    students.length > 0 ? ` (${students.length})` : ""
+                  }`}
+                  onClick={() => setParticipantsOpen(true)}
+                >
+                  <ParticipantsIcon />
+                </Button>
+              </ResponsiveTooltip>
             )}
             {isStudent && profile?.studentId && (
               <LessonDictionaryButton onClick={handleOpenStudentDictionary} />
@@ -574,13 +612,11 @@ export default function LessonPage() {
             />
             <VideoCall lessonId={params.id as string} />
             <Chat
-              students={students as any}
               lesson_id={Number(params.id) || lesson?.id || 0}
-              isTeacher={isTeacher}
             />
           </LessonFloatingTools>
         </div>
-        <div className="h-24 sm:h-20" />
+        <div className="h-16" />
       </ContentWrapper>
       {showParticipants && (
         <Modal

@@ -1,3 +1,8 @@
+import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
+
+/** @deprecated use OVERLAY_ABOVE_HEADER_Z_CLASS from @/constants/uiLayers */
+export const DICTIONARY_MODAL_LAYER_CLASS = OVERLAY_ABOVE_HEADER_Z_CLASS;
+
 export const DICTIONARY_SEARCH_DEBOUNCE_MS = 500;
 
 export const DICTIONARY_SELECTION_WIDGET_SHOW_DELAY_MS = 200;
@@ -33,7 +38,7 @@ export const DICTIONARY_MODAL_CLASS_NAMES = {
     "mx-auto w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl",
     DICTIONARY_MODAL_HEIGHT_CLASS,
   ].join(" "),
-  wrapper: `items-center ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
+  wrapper: `items-center ${OVERLAY_ABOVE_HEADER_Z_CLASS} ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
   body: "overflow-hidden py-0",
 };
 
@@ -138,7 +143,7 @@ export const DICTIONARY_ADD_WORD_MODAL_CLASS_NAMES = {
     "mx-auto w-full sm:max-w-md",
     DICTIONARY_SECONDARY_MODAL_MAX_HEIGHT_CLASS,
   ].join(" "),
-  wrapper: `items-center ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
+  wrapper: `items-center ${OVERLAY_ABOVE_HEADER_Z_CLASS} ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
 };
 
 export const DICTIONARY_ADD_WORD_MODAL_FOOTER_CLASS = [
@@ -152,7 +157,7 @@ export const DICTIONARY_CONFIRM_MODAL_CLASS_NAMES = {
     "mx-auto w-full max-w-[calc(100vw-1rem)] sm:max-w-md",
     DICTIONARY_SECONDARY_MODAL_MAX_HEIGHT_CLASS,
   ].join(" "),
-  wrapper: "items-center px-2 sm:px-4",
+  wrapper: `items-center ${OVERLAY_ABOVE_HEADER_Z_CLASS} px-2 sm:px-4`,
 };
 
 export const ICON_DICTIONARY_BUTTON_BASE_CLASS =
@@ -261,7 +266,7 @@ export const DICTIONARY_ONBOARDING_MODAL_CLASS_NAMES = {
     "mx-auto w-full sm:max-w-xl md:max-w-2xl",
     DICTIONARY_SECONDARY_MODAL_MAX_HEIGHT_CLASS,
   ].join(" "),
-  wrapper: `items-center ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
+  wrapper: `items-center ${OVERLAY_ABOVE_HEADER_Z_CLASS} ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
 };
 
 export const DICTIONARY_ONBOARDING_IMAGE_SLOT_CLASS =
@@ -290,7 +295,7 @@ export const DICTIONARY_TRAINING_SESSION_CLASS_NAMES = {
     "mx-auto w-full sm:max-w-xl md:max-w-2xl",
     DICTIONARY_MODAL_HEIGHT_CLASS,
   ].join(" "),
-  wrapper: `items-center ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
+  wrapper: `items-center ${OVERLAY_ABOVE_HEADER_Z_CLASS} ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
   body: "overflow-hidden py-0",
 };
 

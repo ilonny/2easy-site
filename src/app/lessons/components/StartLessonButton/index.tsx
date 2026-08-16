@@ -4,6 +4,7 @@ import { TLesson } from "../../types";
 import { useRouter } from "next/navigation";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { T } from "@/i18n/T";
+import { BELOW_SITE_HEADER_STICKY_TOP_CLASS } from "@/constants/uiLayers";
 
 type TProps = {
   isSkipCreateRealtion?: boolean;
@@ -53,8 +54,8 @@ export const StartLessonButton = (props: TProps) => {
         }}
         className={[
           "z-10 flex cursor-pointer touch-manipulation items-center justify-center bg-[#3f28c6] text-center text-white transition-opacity duration-250 hover:opacity-80",
-          // Mobile: full-width sticky CTA
-          "sticky top-[72px] mb-4 mt-0 h-12 w-full rounded-xl px-4 text-base font-medium leading-tight",
+          // Mobile: full-width sticky CTA below fixed header
+          `sticky ${BELOW_SITE_HEADER_STICKY_TOP_CLASS} mb-4 mt-0 h-12 w-full rounded-xl px-4 text-base font-medium leading-tight`,
           // Desktop: floating circle (legacy layout)
           "lg:float-right lg:mb-0 lg:mt-[-90px] lg:h-[90px] lg:w-[90px] lg:rounded-full lg:px-2.5 lg:top-10",
           isHomeworkCheck

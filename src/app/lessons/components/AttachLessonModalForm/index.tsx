@@ -15,6 +15,7 @@ import { writeToLocalStorage } from "@/auth/utils";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import type { ReactNode } from "react";
+import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
 type TProps = {
   isVisible: boolean;
@@ -86,7 +87,9 @@ export const AttachLessonModalForm: FC<TProps> = ({
         JSON.stringify(chosenIds)
       );
       onSuccess();
-    } catch (err) {}
+    } catch {
+      /* ignore localStorage write errors */
+    }
   }, [chosenIds, lesson.id, onSuccess, status, isCourses, hideToast]);
 
   const onClickStudent = useCallback(
@@ -109,19 +112,28 @@ export const AttachLessonModalForm: FC<TProps> = ({
 
   return (
     <Modal
-      size="xl"
+      size="full"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
       scrollBehavior="inside"
       placement="center"
+      shouldBlockScroll={false}
       style={{ backgroundColor: "#F9F9F9" }}
       classNames={{
-        base: "mx-2 my-4 max-h-[min(900px,90dvh)] sm:mx-auto sm:my-8",
-        header: "px-3 pt-4 pb-2 text-base sm:px-6 sm:text-lg",
-        body: "px-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6",
+        wrapper: `${OVERLAY_ABOVE_HEADER_Z_CLASS} items-stretch sm:items-center p-0 sm:p-4`,
+        base: [
+          "m-0 h-[100dvh] max-h-[100dvh] w-full max-w-full rounded-none",
+          "sm:m-auto sm:my-8 sm:h-auto sm:max-h-[min(900px,90dvh)] sm:w-full sm:max-w-xl sm:rounded-large",
+        ].join(" "),
+        header:
+          "shrink-0 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-2 text-base sm:px-6 sm:pt-4 sm:text-lg",
+        body: [
+          "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain",
+          "px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6",
+        ].join(" "),
       }}
     >
-      <ModalContent>
+      <ModalContent className="flex h-full max-h-[100dvh] flex-col overflow-hidden sm:max-h-[min(900px,90dvh)]">
         <ModalHeader>
           <p className="break-words leading-snug">
             {step === 0 ? (

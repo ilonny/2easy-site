@@ -2,9 +2,9 @@
 
 import { Button } from "@nextui-org/react";
 import { FC, MouseEvent } from "react";
-import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { DictionaryIcon } from "@/components/icons/DictionaryIcon";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import {
   ICON_DICTIONARY_BUTTON_BASE_CLASS,
   ICON_DICTIONARY_BUTTON_COMPACT_SIZE_CLASS,
@@ -14,18 +14,25 @@ import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
 
 export const LessonDictionaryButton: FC<{ onClick: () => void }> = ({
   onClick,
-}) => (
-  <Button
-    endContent={<DictionaryIcon />}
-    color="primary"
-    variant="light"
-    onClick={onClick}
-    size="lg"
-    className={LESSON_FAB_BUTTON_CLASS}
-  >
-    <T k="dictionary.tab" defaultText="Словарь" />
-  </Button>
-);
+}) => {
+  const label = i18n.t("dictionary.tab");
+
+  return (
+    <ResponsiveTooltip content={label} placement="left">
+      <Button
+        isIconOnly
+        color="primary"
+        variant="light"
+        onClick={onClick}
+        size="lg"
+        aria-label={label}
+        className={LESSON_FAB_BUTTON_CLASS}
+      >
+        <DictionaryIcon size={22} />
+      </Button>
+    </ResponsiveTooltip>
+  );
+};
 
 type TIconDictionaryButtonProps = {
   onClick: (e?: MouseEvent<HTMLButtonElement>) => void;

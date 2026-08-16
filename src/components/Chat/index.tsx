@@ -11,11 +11,11 @@ import {
 import { ClipboardEvent, FC, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@nextui-org/react";
-import ChatIcon from "@/assets/icons/chat.svg";
 import CloseIcon from "@/assets/icons/close.svg";
 import Image from "next/image";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
 import { ChatComposerOverlay } from "./ChatComposerOverlay";
 import { ChatMessageItem } from "./ChatMessageItem";
@@ -30,6 +30,24 @@ type TProps = {
   /** @deprecated unused — kept for call-site compatibility */
   isTeacher?: boolean;
 };
+
+const ChatFabIcon = () => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    aria-hidden
+  >
+    <path
+      d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 export const Chat: FC<TProps> = ({ lesson_id }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -107,17 +125,21 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
   }, [replyTo, editing, inputKey]);
 
   if (!isOpen) {
+    const label = i18n.t("lessons.lessonChat");
     return (
-      <Button
-        endContent={<Image src={ChatIcon} alt="ChatIcon" />}
-        color="primary"
-        variant="light"
-        onClick={() => setIsOpen(true)}
-        size="lg"
-        className={LESSON_FAB_BUTTON_CLASS}
-      >
-        <T k="lessons.lessonChat" />
-      </Button>
+      <ResponsiveTooltip content={label} placement="left">
+        <Button
+          isIconOnly
+          color="primary"
+          variant="light"
+          onClick={() => setIsOpen(true)}
+          size="lg"
+          aria-label={label}
+          className={LESSON_FAB_BUTTON_CLASS}
+        >
+          <ChatFabIcon />
+        </Button>
+      </ResponsiveTooltip>
     );
   }
 

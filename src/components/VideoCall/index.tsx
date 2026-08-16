@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { TProfile } from "@/auth/types";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
 
 function resolveTeacherUserId(profile?: TProfile): string | null {
@@ -262,17 +263,21 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
   }, [isResizing]);
 
   if (!isOpen) {
+    const label = i18n.t("videoCall.title");
     return (
-      <Button
-        endContent={<VideoIcon />}
-        color="primary"
-        variant="light"
-        onClick={onOpen}
-        size="lg"
-        className={LESSON_FAB_BUTTON_CLASS}
-      >
-        <T k="videoCall.title" />
-      </Button>
+      <ResponsiveTooltip content={label} placement="left">
+        <Button
+          isIconOnly
+          color="primary"
+          variant="light"
+          onClick={onOpen}
+          size="lg"
+          aria-label={label}
+          className={LESSON_FAB_BUTTON_CLASS}
+        >
+          <VideoIcon />
+        </Button>
+      </ResponsiveTooltip>
     );
   }
 
