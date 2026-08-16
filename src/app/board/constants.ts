@@ -22,9 +22,10 @@ export const BOARD_FORM_MODAL_CLASS_NAMES = {
 };
 
 export const BOARD_EDITOR_MODAL_CLASS_NAMES = {
-  base: "m-0 max-w-full h-[100dvh] min-h-[100dvh] rounded-none",
-  wrapper: "items-center p-0",
-  header: "shrink-0 border-b border-default-200",
+  base: "m-0 max-w-full h-[100dvh] min-h-[100dvh] rounded-none z-[80]",
+  wrapper: "items-center p-0 z-[80]",
+  backdrop: "z-[80]",
+  header: "shrink-0 border-b border-default-200 relative pr-12",
   body: "flex flex-1 min-h-0 flex-col overflow-hidden p-0",
-  closeButton: "z-20",
+  closeButton: "z-[90] top-3 right-3",
 };

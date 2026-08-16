@@ -1,5 +1,8 @@
 "use client";
 
+/* Slate editor nodes are loosely typed throughout this module. */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { uuidv4 } from "@/app/editor/helpers";
 import { ImageUpload } from "@/components/ImageUpload";
 import { Button } from "@nextui-org/react";
@@ -125,6 +128,8 @@ export const FillGapsNew: FC<TProps> = ({
       return (element as any).type === "gap" ? true : isVoid(element);
     };
     return e;
+    // Remount via slateMountKey recreates the editor instance intentionally.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slateMountKey]);
 
   useEffect(() => {
@@ -413,12 +418,71 @@ export const FillGapsNew: FC<TProps> = ({
             contentEditable={false}
             className={styles.gapPill}
             onPointerDown={(e) => {
+              // Gap pill: open only on short tap, not when scrolling starts here
               e.preventDefault();
+              e.stopPropagation();
+              const x = e.clientX ?? 0;
+              const y = e.clientY ?? 0;
+              (e.currentTarget as any).__gapTap = {
+                t: Date.now(),
+                x,
+                y,
+                moved: false,
+              };
+            }}
+            onPointerMove={(e) => {
+              const st = (e.currentTarget as any).__gapTap;
+              if (!st) return;
+              if (
+                Math.abs((e.clientX ?? 0) - st.x) > MOVE_PX ||
+                Math.abs((e.clientY ?? 0) - st.y) > MOVE_PX
+              ) {
+                st.moved = true;
+              }
+            }}
+            onPointerUp={(e) => {
+              e.stopPropagation();
+              const st = (e.currentTarget as any).__gapTap;
+              (e.currentTarget as any).__gapTap = null;
+              if (!st || st.moved) return;
+              if (Date.now() - st.t > 350) return;
               openGapModalFor(gapId);
+            }}
+            onPointerCancel={(e) => {
+              (e.currentTarget as any).__gapTap = null;
             }}
             onTouchStart={(e) => {
               e.preventDefault();
+              e.stopPropagation();
+              const t = e.touches?.[0];
+              (e.currentTarget as any).__gapTap = {
+                t: Date.now(),
+                x: t?.clientX ?? 0,
+                y: t?.clientY ?? 0,
+                moved: false,
+              };
+            }}
+            onTouchMove={(e) => {
+              const st = (e.currentTarget as any).__gapTap;
+              if (!st) return;
+              const t = e.touches?.[0];
+              if (
+                Math.abs((t?.clientX ?? 0) - st.x) > MOVE_PX ||
+                Math.abs((t?.clientY ?? 0) - st.y) > MOVE_PX
+              ) {
+                st.moved = true;
+              }
+            }}
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+              const st = (e.currentTarget as any).__gapTap;
+              (e.currentTarget as any).__gapTap = null;
+              if (!st || st.moved) return;
+              if (Date.now() - st.t > 350) return;
               openGapModalFor(gapId);
+            }}
+            onTouchCancel={(e) => {
+              (e.currentTarget as any).__gapTap = null;
             }}
             style={{ cursor: "pointer" }}
           >
@@ -453,14 +517,23 @@ export const FillGapsNew: FC<TProps> = ({
     scrollY: number;
     scrollElTop: number;
     scrollEl?: Element | null;
+    unbindScroll?: (() => void) | null;
   } | null>(null);
+
+  const MOVE_PX = 10;
 
   const getScrollParent = useCallback((el: Element | null): Element | null => {
     let cur: Element | null = el;
     while (cur) {
       const style = window.getComputedStyle(cur);
       const oy = style.overflowY;
-      if ((oy === "auto" || oy === "scroll") && (cur as HTMLElement).scrollHeight > (cur as HTMLElement).clientHeight) {
+      const ox = style.overflowX;
+      if (
+        ((oy === "auto" || oy === "scroll" || oy === "overlay") ||
+          (ox === "auto" || ox === "scroll" || ox === "overlay")) &&
+        ((cur as HTMLElement).scrollHeight > (cur as HTMLElement).clientHeight ||
+          (cur as HTMLElement).scrollWidth > (cur as HTMLElement).clientWidth)
+      ) {
         return cur;
       }
       cur = cur.parentElement;
@@ -468,30 +541,87 @@ export const FillGapsNew: FC<TProps> = ({
     return document.scrollingElement || document.documentElement;
   }, []);
 
-  const tryFocusOnShortTap = useCallback(() => {
+  const clearTapFocus = useCallback(() => {
     const st = tapFocusRef.current;
+    st?.unbindScroll?.();
     tapFocusRef.current = null;
-    if (!st) return;
-    if (st.moved) return; // selection drag
-    if (Date.now() - st.t > 350) return; // long-press selection
-    // If any scrolling happened (modal body / page), don't focus
-    try {
-      const nowScrollY = window.scrollY;
-      const nowTop =
-        st.scrollEl && "scrollTop" in (st.scrollEl as any) ? Number((st.scrollEl as any).scrollTop || 0) : st.scrollElTop;
-      if (nowScrollY !== st.scrollY) return;
-      if (nowTop !== st.scrollElTop) return;
-    } catch {}
-    try {
-      ReactEditor.focus(editor as any);
-      // iOS Safari: sometimes ReactEditor.focus sets outline but no keyboard;
-      // focusing the underlying DOM node helps.
+  }, []);
+
+  const markTapMoved = useCallback(() => {
+    const st = tapFocusRef.current;
+    if (st) st.moved = true;
+  }, []);
+
+  const beginTapFocus = useCallback(
+    (target: Element | null, x: number, y: number) => {
+      clearTapFocus();
+      const se = getScrollParent(target);
+      const onScroll = () => markTapMoved();
+      se?.addEventListener("scroll", onScroll, { passive: true });
+      // Modal body scroll often bubbles to document on iOS.
+      document.addEventListener("scroll", onScroll, {
+        passive: true,
+        capture: true,
+      });
+      tapFocusRef.current = {
+        t: Date.now(),
+        x,
+        y,
+        moved: false,
+        scrollY: window.scrollY,
+        scrollEl: se,
+        scrollElTop:
+          se && "scrollTop" in (se as any)
+            ? Number((se as any).scrollTop || 0)
+            : 0,
+        unbindScroll: () => {
+          se?.removeEventListener("scroll", onScroll);
+          document.removeEventListener("scroll", onScroll, true);
+        },
+      };
+    },
+    [clearTapFocus, getScrollParent, markTapMoved],
+  );
+
+  const tryFocusOnShortTap = useCallback(
+    (e?: { target?: EventTarget | null }) => {
+      const st = tapFocusRef.current;
+      clearTapFocus();
+      if (!st) return;
+      if (st.moved) return; // scroll / drag
+      if (Date.now() - st.t > 350) return; // long-press selection
+      // Don't steal focus when the gesture ended on a gap pill / control
       try {
-        const dom = ReactEditor.toDOMNode(editor as any, editor as any) as HTMLElement | null;
-        dom?.focus?.();
+        const t = e?.target as Element | null;
+        if (t?.closest?.("[contenteditable=false], button, input, textarea, a")) {
+          return;
+        }
       } catch {}
-    } catch {}
-  }, [editor]);
+      // If any scrolling happened (modal body / page), don't focus
+      try {
+        const nowScrollY = window.scrollY;
+        const nowTop =
+          st.scrollEl && "scrollTop" in (st.scrollEl as any)
+            ? Number((st.scrollEl as any).scrollTop || 0)
+            : st.scrollElTop;
+        if (Math.abs(nowScrollY - st.scrollY) > 1) return;
+        if (Math.abs(nowTop - st.scrollElTop) > 1) return;
+      } catch {}
+      try {
+        ReactEditor.focus(editor as any);
+        // iOS Safari: sometimes ReactEditor.focus sets outline but no keyboard;
+        // focusing the underlying DOM node helps.
+        try {
+          const dom = ReactEditor.toDOMNode(
+            editor as any,
+            editor as any,
+          ) as HTMLElement | null;
+          dom?.focus?.();
+        } catch {}
+      } catch {}
+    },
+    [clearTapFocus, editor],
+  );
 
   return (
     <div>
@@ -685,47 +815,39 @@ export const FillGapsNew: FC<TProps> = ({
                 isPointerSelectingRef.current = true;
                 hideGapFloat();
                 // iOS Safari: first tap sometimes doesn't focus; focus on "short tap"
-                const se = getScrollParent((e as any).target as Element | null);
-                tapFocusRef.current = {
-                  t: Date.now(),
-                  x: (e as any).clientX ?? 0,
-                  y: (e as any).clientY ?? 0,
-                  moved: false,
-                  scrollY: window.scrollY,
-                  scrollEl: se,
-                  scrollElTop: se && "scrollTop" in (se as any) ? Number((se as any).scrollTop || 0) : 0,
-                };
+                beginTapFocus(
+                  e.target as Element | null,
+                  (e as any).clientX ?? 0,
+                  (e as any).clientY ?? 0,
+                );
               }}
               onPointerMove={(e) => {
                 const st = tapFocusRef.current;
                 if (!st) return;
                 const x = (e as any).clientX ?? 0;
                 const y = (e as any).clientY ?? 0;
-                if (Math.abs(x - st.x) > 8 || Math.abs(y - st.y) > 8) st.moved = true;
+                if (Math.abs(x - st.x) > MOVE_PX || Math.abs(y - st.y) > MOVE_PX) {
+                  st.moved = true;
+                }
               }}
-              onPointerUpCapture={tryFocusOnShortTap}
+              onPointerUpCapture={(e) => tryFocusOnShortTap(e)}
               onPointerUp={() => {
                 isPointerSelectingRef.current = false;
                 scheduleUpdateGapFloat();
               }}
               onPointerCancel={() => {
                 isPointerSelectingRef.current = false;
-                tapFocusRef.current = null;
+                clearTapFocus();
               }}
               onTouchStart={(e) => {
                 isPointerSelectingRef.current = true;
                 hideGapFloat();
                 const t = (e as any).touches?.[0];
-                const se = getScrollParent((e as any).target as Element | null);
-                tapFocusRef.current = {
-                  t: Date.now(),
-                  x: t?.clientX ?? 0,
-                  y: t?.clientY ?? 0,
-                  moved: false,
-                  scrollY: window.scrollY,
-                  scrollEl: se,
-                  scrollElTop: se && "scrollTop" in (se as any) ? Number((se as any).scrollTop || 0) : 0,
-                };
+                beginTapFocus(
+                  e.target as Element | null,
+                  t?.clientX ?? 0,
+                  t?.clientY ?? 0,
+                );
               }}
               onTouchMove={(e) => {
                 const st = tapFocusRef.current;
@@ -733,16 +855,18 @@ export const FillGapsNew: FC<TProps> = ({
                 const t = (e as any).touches?.[0];
                 const x = t?.clientX ?? 0;
                 const y = t?.clientY ?? 0;
-                if (Math.abs(x - st.x) > 8 || Math.abs(y - st.y) > 8) st.moved = true;
+                if (Math.abs(x - st.x) > MOVE_PX || Math.abs(y - st.y) > MOVE_PX) {
+                  st.moved = true;
+                }
               }}
-              onTouchEndCapture={tryFocusOnShortTap}
+              onTouchEndCapture={(e) => tryFocusOnShortTap(e)}
               onTouchEnd={() => {
                 isPointerSelectingRef.current = false;
                 scheduleUpdateGapFloat();
               }}
               onTouchCancel={() => {
                 isPointerSelectingRef.current = false;
-                tapFocusRef.current = null;
+                clearTapFocus();
               }}
               onKeyDown={(event) => {
                 if (event.key === "Backspace" || event.key === "Delete") {
@@ -756,7 +880,7 @@ export const FillGapsNew: FC<TProps> = ({
                         }),
                       )[0] as any;
 
-                    let gapEntry =
+                    const gapEntry =
                       findGapEntryAt(sel) ||
                       (sel.anchor
                         ? findGapEntryAt(Editor.before(editor, sel.anchor) || sel)
@@ -801,7 +925,10 @@ export const FillGapsNew: FC<TProps> = ({
         <p className="font-light mb-2">
           <T k="editor.preview" defaultText="Превью" />
         </p>
-        <div style={{ border: "1px solid #3F28C6", borderRadius: 4, background: "#fff" }}>
+        <div
+          style={{ border: "1px solid #3F28C6", borderRadius: 4, background: "#fff" }}
+          className="pointer-events-none select-none"
+        >
           <FillGapsNewExView key={`fg-new-preview-${data.mode}`} data={data} isPreview />
         </div>
         <div className="h-5" />

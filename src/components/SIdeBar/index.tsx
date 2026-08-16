@@ -1,24 +1,30 @@
-import { AuthContext } from "@/auth";
-import { Button, Skeleton } from "@nextui-org/react";
-import { FC, useContext } from "react";
-import { HeaderProfile } from "../HeaderProfile";
-import Link from "next/link";
+"use client";
+
+import { FC } from "react";
 import { HeaderMenuList } from "../HeaderMenuList";
 
 type TProps = {
   isOpened: boolean;
+  onClose?: () => void;
 };
 
-export const SideBar: FC<TProps> = ({ isOpened }) => {
-  const { profile, authIsLoading } = useContext(AuthContext);
+export const SideBar: FC<TProps> = ({ isOpened, onClose }) => {
+  if (!isOpened) {
+    return null;
+  }
+
   return (
     <div
-      className={`top-[80px] left-0 fixed w-full h-[calc(100dvh-80px)] overflow-y-auto overscroll-contain bg-white p-4 pb-8 ${
-        !isOpened && "hidden"
-      }`}
-      style={{ zIndex: 3 }}
+      className="fixed inset-0 z-[50] flex flex-col bg-white"
+      style={{ height: "100dvh" }}
+      role="dialog"
+      aria-modal="true"
     >
-      <HeaderMenuList />
+      {/* Offset under fixed header so burger stays usable; content fills the rest */}
+      <div className="h-[80px] shrink-0 lg:h-0" />
+      <div className="flex min-h-0 flex-1 flex-col">
+        <HeaderMenuList variant="sidebar" onNavigate={onClose} />
+      </div>
     </div>
   );
 };

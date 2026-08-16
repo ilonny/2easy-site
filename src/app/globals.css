@@ -25,6 +25,8 @@
 :root {
   --primary: #3f28c6;
   --danger: #A42929;
+  --site-header-z: 60;
+  --overlay-above-header-z: 70;
   --nextui-box-shadow-medium: 0px 0px 15px 0px rgb(0 0 0 / 0.03), 0px 0px 30px 0px rgb(0 0 0 / 0.08), 0px 0px 0px 0px rgb(0 0 0 / 0.3);
   --nextui-danger: 0 60% 40%;
 }
@@ -367,4 +369,9 @@ body.site-chat-hidden [class*="talkme"] {
   visibility: hidden !important;
   pointer-events: none !important;
   opacity: 0 !important;
+}
+
+/* Lesson board modal: hide site chrome so it cannot cover toolbar / close */
+body[data-lesson-board-open] .site-header-root {
+  display: none !important;
 }

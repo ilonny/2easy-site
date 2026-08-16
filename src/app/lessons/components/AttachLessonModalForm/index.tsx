@@ -15,6 +15,7 @@ import { writeToLocalStorage } from "@/auth/utils";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import type { ReactNode } from "react";
+import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
 type TProps = {
   isVisible: boolean;
@@ -86,8 +87,10 @@ export const AttachLessonModalForm: FC<TProps> = ({
         JSON.stringify(chosenIds)
       );
       onSuccess();
-    } catch (err) {}
-  }, [chosenIds, lesson.id, onSuccess, status, isCourses]);
+    } catch {
+      /* ignore localStorage write errors */
+    }
+  }, [chosenIds, lesson.id, onSuccess, status, isCourses, hideToast]);
 
   const onClickStudent = useCallback(
     (id: number) => {
@@ -109,15 +112,30 @@ export const AttachLessonModalForm: FC<TProps> = ({
 
   return (
     <Modal
-      size="xl"
+      size="full"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
-      scrollBehavior="outside"
+      scrollBehavior="inside"
+      placement="center"
+      shouldBlockScroll={false}
       style={{ backgroundColor: "#F9F9F9" }}
+      classNames={{
+        wrapper: `${OVERLAY_ABOVE_HEADER_Z_CLASS} items-stretch sm:items-center p-0 sm:p-4`,
+        base: [
+          "m-0 h-[100dvh] max-h-[100dvh] w-full max-w-full rounded-none",
+          "sm:m-auto sm:my-8 sm:h-auto sm:max-h-[min(900px,90dvh)] sm:w-full sm:max-w-xl sm:rounded-large",
+        ].join(" "),
+        header:
+          "shrink-0 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-2 text-base sm:px-6 sm:pt-4 sm:text-lg",
+        body: [
+          "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain",
+          "px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6",
+        ].join(" "),
+      }}
     >
-      <ModalContent>
+      <ModalContent className="flex h-full max-h-[100dvh] flex-col overflow-hidden sm:max-h-[min(900px,90dvh)]">
         <ModalHeader>
-          <p>
+          <p className="break-words leading-snug">
             {step === 0 ? (
               title ?? (
                 isCourses ? (
@@ -149,7 +167,6 @@ export const AttachLessonModalForm: FC<TProps> = ({
           {step === 0 && (
             <>
               <StudentList
-                // hideAddButton
                 btnSecondary
                 hidePopoverButton
                 onClickStudent={onClickStudent}
@@ -162,10 +179,10 @@ export const AttachLessonModalForm: FC<TProps> = ({
                   skipChoseStatus
                     ? "primary"
                     : !chosenIds?.length
-                    ? "default"
-                    : "primary"
+                      ? "default"
+                      : "primary"
                 }
-                className="w-full"
+                className="mt-2 min-h-12 w-full touch-manipulation"
                 onClick={() => {
                   if (skipChoseStatus) {
                     onSubmit();
@@ -174,7 +191,11 @@ export const AttachLessonModalForm: FC<TProps> = ({
                   }
                 }}
               >
-                {skipChoseStatus ? <T k="lessons.startLesson" /> : <T k="modals.next" />}
+                {skipChoseStatus ? (
+                  <T k="lessons.startLesson" />
+                ) : (
+                  <T k="modals.next" />
+                )}
               </Button>
             </>
           )}
@@ -183,6 +204,9 @@ export const AttachLessonModalForm: FC<TProps> = ({
               <Select
                 defaultSelectedKeys={[status]}
                 size="lg"
+                classNames={{
+                  trigger: "min-h-12 touch-manipulation",
+                }}
                 description={
                   status === "open"
                     ? i18n.t("modals.availableToStudent", {
@@ -191,16 +215,16 @@ export const AttachLessonModalForm: FC<TProps> = ({
                           : "Available to the student",
                       })
                     : isCourses
-                    ? i18n.t("lessons.studentSeesCourseCannotOpen", {
-                        defaultValue: isRu
-                          ? "Ученик будет видеть курс, но не сможет его открыть"
-                          : "The student can see the course, but cannot open it",
-                      })
-                    : i18n.t("lessons.studentSeesLessonCannotOpen", {
-                        defaultValue: isRu
-                          ? "Ученик будет видеть урок, но не сможет его открыть"
-                          : "The student can see the lesson, but cannot open it",
-                      })
+                      ? i18n.t("lessons.studentSeesCourseCannotOpen", {
+                          defaultValue: isRu
+                            ? "Ученик будет видеть курс, но не сможет его открыть"
+                            : "The student can see the course, but cannot open it",
+                        })
+                      : i18n.t("lessons.studentSeesLessonCannotOpen", {
+                          defaultValue: isRu
+                            ? "Ученик будет видеть урок, но не сможет его открыть"
+                            : "The student can see the lesson, but cannot open it",
+                        })
                 }
                 placeholder={
                   isCourses
@@ -212,8 +236,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
                       })
                 }
                 onChange={(e) => {
-                  console.log("e.target.value?", e.target.value);
-                  setStatus(e.target.value);
+                  setStatus(e.target.value as "open" | "close");
                 }}
               >
                 <SelectItem
@@ -237,11 +260,11 @@ export const AttachLessonModalForm: FC<TProps> = ({
                   )}
                 </SelectItem>
               </Select>
-              <div className="h-4"></div>
+              <div className="h-4" />
               <Button
                 size="lg"
                 color="primary"
-                className="w-full"
+                className="min-h-12 w-full touch-manipulation"
                 onClick={onSubmit}
               >
                 <T k="modals.attachButton" />
@@ -251,14 +274,14 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 size="lg"
                 variant="light"
                 color="primary"
-                className="w-full"
+                className="min-h-12 w-full touch-manipulation"
                 onClick={() => setStep(0)}
               >
                 <T k="common.back" />
               </Button>
             </>
           )}
-          <div className="h-4"></div>
+          <div className="h-4" />
         </ModalBody>
       </ModalContent>
     </Modal>

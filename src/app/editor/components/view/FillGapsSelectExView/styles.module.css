@@ -25,3 +25,18 @@
   max-width: 100%;
   min-width: 72px;
 }
+
+.answer-wrapper {
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+@media (max-width: 639px) {
+  .answer-wrapper :global([data-slot="base"]) {
+    min-width: 0;
+  }
+
+  .answer-wrapper :global([data-slot="trigger"]) {
+    min-height: 44px;
+  }
+}

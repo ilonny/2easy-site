@@ -388,6 +388,8 @@
     },
     "participants": "PARTICIPANTS",
     "participantsShort": "Partic.",
+    "participantsButton": "Participants",
+    "lessonTools": "Lesson menu",
     "participantsAriaLabel": "Lesson participants",
     "resetAnswers": "Reset answers",
     "resetAnswersConfirm": "Reset answers in exercise {{title}}",
