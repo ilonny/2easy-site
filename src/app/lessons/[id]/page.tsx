@@ -53,8 +53,7 @@ import { parseRouteId, parseRouteIdNumber } from "@/utils/parseRouteId";
 import { LessonParticipantsPanel } from "@/app/lessons/components/LessonParticipantsPanel";
 import type { TLessonParticipant } from "@/app/lessons/components/LessonParticipantsPanel";
 import { LessonFloatingTools } from "@/app/lessons/components/LessonFloatingTools";
-import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
-import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
+import { LessonToolTrigger } from "@/app/lessons/components/LessonToolTrigger";
 import { BELOW_SITE_HEADER_STICKY_TOP_CLASS } from "@/constants/uiLayers";
 
 const ParticipantsIcon = () => (
@@ -580,26 +579,20 @@ export default function LessonPage() {
         <div className="relative">
           <LessonFloatingTools>
             {showParticipants && (
-              <ResponsiveTooltip
-                content={`${i18n.t("lessons.participantsButton")}${
+              <LessonToolTrigger
+                mobileOnly
+                label={
+                  <>
+                    {i18n.t("lessons.participantsButton")}
+                    {students.length > 0 ? ` (${students.length})` : ""}
+                  </>
+                }
+                ariaLabel={`${i18n.t("lessons.participantsButton")}${
                   students.length > 0 ? ` (${students.length})` : ""
                 }`}
-                placement="left"
-              >
-                <Button
-                  isIconOnly
-                  color="primary"
-                  variant="light"
-                  size="lg"
-                  className={`${LESSON_FAB_BUTTON_CLASS} md:hidden`}
-                  aria-label={`${i18n.t("lessons.participantsButton")}${
-                    students.length > 0 ? ` (${students.length})` : ""
-                  }`}
-                  onClick={() => setParticipantsOpen(true)}
-                >
-                  <ParticipantsIcon />
-                </Button>
-              </ResponsiveTooltip>
+                icon={<ParticipantsIcon />}
+                onClick={() => setParticipantsOpen(true)}
+              />
             )}
             {isStudent && profile?.studentId && (
               <LessonDictionaryButton onClick={handleOpenStudentDictionary} />

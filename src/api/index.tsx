@@ -26,12 +26,14 @@ export const ApiProvider = ({ children }) => {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
 // console.log("process.env?", process.env);
-// export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.replace(
-//   "/undefined",
-//   ""
-// );
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.replace(
+  "/undefined",
+  ""
+);
 // console.log("BASE_URL", BASE_URL);
-export const BASE_URL = "http://localhost:8888";
+//for mobile
+// export const BASE_URL = "http://192.168.0.48:8888";
+// export const BASE_URL = "http://localhost:8888";
 // export const BASE_URL = "https://beta-api.2easyeng.com";
 
 export const API_URL = BASE_URL + "/api";

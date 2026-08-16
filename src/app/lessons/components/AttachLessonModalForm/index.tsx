@@ -112,30 +112,24 @@ export const AttachLessonModalForm: FC<TProps> = ({
 
   return (
     <Modal
-      size="full"
+      size="xl"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
-      scrollBehavior="inside"
-      placement="center"
-      shouldBlockScroll={false}
+      scrollBehavior="outside"
       style={{ backgroundColor: "#F9F9F9" }}
       classNames={{
-        wrapper: `${OVERLAY_ABOVE_HEADER_Z_CLASS} items-stretch sm:items-center p-0 sm:p-4`,
-        base: [
-          "m-0 h-[100dvh] max-h-[100dvh] w-full max-w-full rounded-none",
-          "sm:m-auto sm:my-8 sm:h-auto sm:max-h-[min(900px,90dvh)] sm:w-full sm:max-w-xl sm:rounded-large",
-        ].join(" "),
+        backdrop: OVERLAY_ABOVE_HEADER_Z_CLASS,
+        wrapper: `${OVERLAY_ABOVE_HEADER_Z_CLASS} max-sm:items-stretch max-sm:p-0`,
+        // Fullscreen shell only on mobile
+        base: "max-sm:!m-0 max-sm:!my-0 max-sm:!h-[100dvh] max-sm:!max-h-[100dvh] max-sm:!w-full max-sm:!max-w-full max-sm:!rounded-none",
         header:
-          "shrink-0 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-2 text-base sm:px-6 sm:pt-4 sm:text-lg",
-        body: [
-          "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain",
-          "px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6",
-        ].join(" "),
+          "max-sm:px-4 max-sm:pt-[max(1rem,env(safe-area-inset-top))] max-sm:pb-2 max-sm:text-base",
+        body: "max-sm:px-4 max-sm:pb-[max(1rem,env(safe-area-inset-bottom))]",
       }}
     >
-      <ModalContent className="flex h-full max-h-[100dvh] flex-col overflow-hidden sm:max-h-[min(900px,90dvh)]">
+      <ModalContent>
         <ModalHeader>
-          <p className="break-words leading-snug">
+          <p>
             {step === 0 ? (
               title ?? (
                 isCourses ? (
@@ -182,7 +176,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
                       ? "default"
                       : "primary"
                 }
-                className="mt-2 min-h-12 w-full touch-manipulation"
+                className="w-full max-sm:min-h-12 max-sm:touch-manipulation"
                 onClick={() => {
                   if (skipChoseStatus) {
                     onSubmit();
@@ -205,7 +199,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 defaultSelectedKeys={[status]}
                 size="lg"
                 classNames={{
-                  trigger: "min-h-12 touch-manipulation",
+                  trigger: "max-sm:min-h-12 max-sm:touch-manipulation",
                 }}
                 description={
                   status === "open"
@@ -264,7 +258,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
               <Button
                 size="lg"
                 color="primary"
-                className="min-h-12 w-full touch-manipulation"
+                className="w-full max-sm:min-h-12 max-sm:touch-manipulation"
                 onClick={onSubmit}
               >
                 <T k="modals.attachButton" />
@@ -274,7 +268,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 size="lg"
                 variant="light"
                 color="primary"
-                className="min-h-12 w-full touch-manipulation"
+                className="w-full max-sm:min-h-12 max-sm:touch-manipulation"
                 onClick={() => setStep(0)}
               >
                 <T k="common.back" />

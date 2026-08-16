@@ -216,13 +216,17 @@ export const EditorRootModal: FC<TProps> = ({
       scrollBehavior="inside"
       placement="center"
       classNames={{
-        wrapper: `${OVERLAY_ABOVE_HEADER_Z_CLASS} items-center overflow-hidden`,
-        base: "max-h-[min(92dvh,100dvh)] max-w-[1280px] w-[min(100%,1280px)] mx-auto my-2 sm:my-4 !overflow-hidden flex flex-col",
-        body: "flex-1 min-h-0 overflow-y-auto overscroll-contain",
+        wrapper: `${OVERLAY_ABOVE_HEADER_Z_CLASS} items-center max-sm:overflow-hidden`,
+        // Desktop shell matches pre-adaptive; tighter flex lock only on mobile
+        base: [
+          "max-h-[92dvh] max-w-[1280px] w-[min(100%,1280px)] mx-auto my-2 sm:my-4",
+          "max-sm:max-h-[min(92dvh,100dvh)] max-sm:!overflow-hidden max-sm:flex max-sm:flex-col",
+        ].join(" "),
+        body: "overflow-y-auto overscroll-contain max-sm:min-h-0 max-sm:flex-1",
       }}
       style={{ background: "#F9F9F9" }}
     >
-      <ModalContent className="flex max-h-[min(92dvh,100dvh)] flex-col overflow-hidden border-0 shadow-2xl">
+      <ModalContent className="border-0 shadow-2xl max-sm:flex max-sm:max-h-[min(92dvh,100dvh)] max-sm:flex-col max-sm:overflow-hidden">
         <ModalHeader className="relative shrink-0 border-b border-default-200 px-4 py-4 pr-12 sm:px-6 sm:py-5">
           <button
             type="button"
@@ -262,7 +266,7 @@ export const EditorRootModal: FC<TProps> = ({
           </div>
         </ModalHeader>
         <ModalBody
-          className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-4 py-4 [-webkit-overflow-scrolling:touch] sm:px-8 sm:py-6"
+          className="flex flex-col gap-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-8 sm:py-6 max-sm:min-h-0 max-sm:flex-1 [-webkit-overflow-scrolling:touch]"
           onScroll={(e) => {
             bodyRef.current = e.currentTarget;
             if (touchRef.current?.moved) {

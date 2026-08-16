@@ -508,7 +508,7 @@ export const LessonCard: FC<TProps> = ({
               }}
             >
               <PopoverTrigger>
-                <Button isIconOnly variant="flat" className="min-h-10 min-w-10 touch-manipulation">
+                <Button isIconOnly variant="flat" className="max-sm:min-h-10 max-sm:min-w-10 max-sm:touch-manipulation">
                   <Image src={Ellipse} alt="icon" />
                 </Button>
               </PopoverTrigger>

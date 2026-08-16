@@ -2,14 +2,13 @@
 
 import { FC, useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { Button } from "@nextui-org/react";
 import { toast } from "react-toastify";
 import i18n from "@/i18n/config";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { TBoard, TLessonBoardScope } from "@/app/board/types";
 import { useLessonBoard } from "@/app/board/hooks/useLessonBoard";
-import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
-import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
+import { T } from "@/i18n/T";
+import { LessonToolTrigger } from "@/app/lessons/components/LessonToolTrigger";
 
 const BoardEditorModal = dynamic(
   () =>
@@ -126,20 +125,13 @@ export const LessonBoardButton: FC<TProps> = ({
 
   return (
     <>
-      <ResponsiveTooltip content={label} placement="left">
-        <Button
-          isIconOnly
-          color="primary"
-          variant="light"
-          onClick={() => void handleOpen()}
-          size="lg"
-          isLoading={isOpening}
-          aria-label={label}
-          className={LESSON_FAB_BUTTON_CLASS}
-        >
-          <BoardIcon />
-        </Button>
-      </ResponsiveTooltip>
+      <LessonToolTrigger
+        label={<T k="boards.lessonBoard" />}
+        ariaLabel={label}
+        icon={<BoardIcon />}
+        onClick={() => void handleOpen()}
+        isLoading={isOpening}
+      />
 
       <BoardEditorModal
         isOpen={isOpen}

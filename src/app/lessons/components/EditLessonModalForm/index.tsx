@@ -107,13 +107,11 @@ export const EditLessonModalForm: FC<TProps> = ({
       size="xl"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
-      shouldBlockScroll={false}
-      scrollBehavior="inside"
-      placement="center"
       classNames={{
+        // Mobile only: above fixed header + compact height/margins
         wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS,
-        base: "max-h-[min(92dvh,100dvh)] mx-2 my-2 sm:mx-auto",
-        body: "max-h-[min(80dvh,100dvh)] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]",
+        base: "max-sm:mx-2 max-sm:my-2 max-sm:max-h-[min(92dvh,100dvh)]",
+        body: "max-sm:max-h-[min(80dvh,100dvh)] max-sm:overflow-y-auto max-sm:overscroll-contain max-sm:[-webkit-overflow-scrolling:touch]",
       }}
     >
       <ModalContent>

@@ -27,7 +27,7 @@ export const CopyLessonLink = () => {
         <Button
           endContent={<img src={LinkIcon.src} alt="icon" />}
           variant="light"
-          className="min-h-10 touch-manipulation"
+          className="max-sm:min-h-10 max-sm:touch-manipulation"
         >
           <T k="lessons.lessonLink" defaultText="Ссылка на урок" />
         </Button>

@@ -126,7 +126,8 @@ export const StudentList = (props: TProps) => {
                         <div className="w-[50px] pl-2">
                           <Checkbox
                             isSelected={isChosen}
-                            onChange={() => onClickStudent(student?.id || 0)}
+                            // Parent row already toggles selection; avoid double-toggle.
+                            classNames={{ base: "pointer-events-none" }}
                           />
                         </div>
                       )}

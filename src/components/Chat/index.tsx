@@ -15,8 +15,7 @@ import CloseIcon from "@/assets/icons/close.svg";
 import Image from "next/image";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
-import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
-import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
+import { LessonToolTrigger } from "@/app/lessons/components/LessonToolTrigger";
 import { ChatComposerOverlay } from "./ChatComposerOverlay";
 import { ChatMessageItem } from "./ChatMessageItem";
 import { useLessonChat } from "./hooks/useLessonChat";
@@ -55,6 +54,15 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
   const [replyTo, setReplyTo] = useState<TChatMessage | null>(null);
   const [editing, setEditing] = useState<TChatMessage | null>(null);
   const [inputKey, setInputKey] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(true);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const sync = () => setIsDesktop(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const { messageList, sendMessage, editMessage, toggleReaction } =
     useLessonChat({
@@ -127,19 +135,12 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
   if (!isOpen) {
     const label = i18n.t("lessons.lessonChat");
     return (
-      <ResponsiveTooltip content={label} placement="left">
-        <Button
-          isIconOnly
-          color="primary"
-          variant="light"
-          onClick={() => setIsOpen(true)}
-          size="lg"
-          aria-label={label}
-          className={LESSON_FAB_BUTTON_CLASS}
-        >
-          <ChatFabIcon />
-        </Button>
-      </ResponsiveTooltip>
+      <LessonToolTrigger
+        label={<T k="lessons.lessonChat" />}
+        ariaLabel={label}
+        icon={<ChatFabIcon />}
+        onClick={() => setIsOpen(true)}
+      />
     );
   }
 
@@ -151,7 +152,11 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
 
   const panel = (
     <div
-      className={`${styles.chatRoot} ${styles.chatRootFixed}`}
+      className={
+        isDesktop
+          ? styles.chatRootDesktop
+          : `${styles.chatRoot} ${styles.chatRootFixed}`
+      }
     >
       <MainContainer>
         <ChatContainer>
@@ -162,7 +167,7 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
                 endContent={<Image src={CloseIcon} alt="ChatIcon" />}
                 color="primary"
                 variant="light"
-                className="touch-manipulation"
+                className={isDesktop ? undefined : "touch-manipulation"}
                 onClick={() => {
                   setIsOpen(false);
                   clearComposerMode();
@@ -208,7 +213,8 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
     </div>
   );
 
-  if (typeof document === "undefined") {
+  // Desktop: in-flow in the tools stack. Mobile: portal above fixed header.
+  if (isDesktop || typeof document === "undefined") {
     return panel;
   }
 
