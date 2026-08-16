@@ -31,8 +31,6 @@ export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.replace(
   ""
 );
 // console.log("BASE_URL", BASE_URL);
-//for mobile
-// export const BASE_URL = "http://192.168.0.48:8888";
 // export const BASE_URL = "http://localhost:8888";
 // export const BASE_URL = "https://beta-api.2easyeng.com";
 
