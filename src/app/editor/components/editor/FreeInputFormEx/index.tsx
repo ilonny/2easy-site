@@ -7,7 +7,7 @@ import { TFreeInputFormData } from "./types";
 import { FC, useCallback, useEffect, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
-import { Button, Textarea } from "@nextui-org/react";
+import { Button, Input } from "@nextui-org/react";
 import { useUploadFreeInputFormEx } from "../hooks/useUploadFreeInputFormEx";
 import Close from "@/assets/icons/close.svg";
 import { uuidv4 } from "@/app/editor/helpers";
@@ -167,16 +167,27 @@ export const FreeInputFormEx: FC<TProps> = ({
               </div>
             }
           />
+          <CreateExWithAiButton
+            type="free-input-form"
+            currentData={data as any}
+            onApply={(generated) => {
+              resetData({
+                ...generated,
+                id: (data as any)?.id,
+                sortIndex: (data as any)?.sortIndex,
+              } as any);
+            }}
+          />
         </div>
       </div>
       <div className="h-5" />
       {data.questions.map((q, qIndex) => {
         return (
           <div className="question-wrapper items-start mb-4" key={q.id}>
-            <div className="w-[100%]">
+            <div className="w-full md:w-1/2 md:pr-2">
               <div className="flex justify-between items-center min-h-[40px]">
                 <p className="font-light mb-2">
-                  <T k="editor.taskText" defaultText="Текст задания" />
+                  <T k="editor.taskTitle" defaultText="Заголовок задания" />
                 </p>
                 {data.questions.length > 1 && (
                   <div className="flex justify-end">
@@ -192,8 +203,9 @@ export const FreeInputFormEx: FC<TProps> = ({
                 )}
               </div>
 
-              <div className="mb-2 w-[100%]">
-                <Textarea
+              <div className="mb-2">
+                <Input
+                  size="lg"
                   value={q.value}
                   classNames={{ inputWrapper: "bg-white" }}
                   onValueChange={(val) => onChangeQuestionValue(qIndex, val)}
@@ -242,17 +254,6 @@ export const FreeInputFormEx: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
-        <CreateExWithAiButton
-          type="free-input-form"
-          currentData={data as any}
-          onApply={(generated) => {
-            resetData({
-              ...generated,
-              id: (data as any)?.id,
-              sortIndex: (data as any)?.sortIndex,
-            } as any);
-          }}
-        />
       </div>
       <div className="h-10" />
     </div>

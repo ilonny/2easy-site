@@ -17,7 +17,7 @@ import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 
 const defaultValuesStub: TTestData = {
-  title: "Let's test yourself!",
+  title: "Let's test your knowledge!",
   titleColor: "#3F28C6",
   subtitle: "Choose the correct option for each question",
   description: "",
@@ -70,7 +70,7 @@ export const TestEx: FC<TProps> = ({
   useEffect(() => {
     !data?.id &&
       resetData({
-        title: "Let's test yourself!",
+        title: "Let's test your knowledge!",
         titleColor: "#3F28C6",
         subtitle: "Choose the correct option for each question",
         description: "",
@@ -264,6 +264,18 @@ export const TestEx: FC<TProps> = ({
               </div>
             }
           />
+          <CreateExWithAiButton
+            type="test"
+            currentData={data as any}
+            onApply={(generated) => {
+              resetData({
+                ...generated,
+                id: (data as any)?.id,
+                sortIndex: (data as any)?.sortIndex,
+              } as any);
+              setImages(Array.isArray(generated.images) ? generated.images : images);
+            }}
+          />
         </div>
       </div>
       <div className="h-5" />
@@ -421,18 +433,6 @@ export const TestEx: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
-        <CreateExWithAiButton
-          type="test"
-          currentData={data as any}
-          onApply={(generated) => {
-            resetData({
-              ...generated,
-              id: (data as any)?.id,
-              sortIndex: (data as any)?.sortIndex,
-            } as any);
-            setImages(Array.isArray(generated.images) ? generated.images : images);
-          }}
-        />
       </div>
       <div className="h-10" />
     </div>

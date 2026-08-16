@@ -548,6 +548,19 @@ export const FillGapsNew: FC<TProps> = ({
               </div>
             }
           />
+          <CreateExWithAiButton
+            type="FILL_GAPS_NEW"
+            currentData={data as any}
+            onApply={(generated) => {
+              resetData({
+                ...generated,
+                id: (data as any)?.id,
+                sortIndex: (data as any)?.sortIndex,
+              } as any);
+              setImages(Array.isArray(generated.images) ? generated.images : images);
+              setSlateMountKey((k) => k + 1);
+            }}
+          />
         </div>
       </div>
 
@@ -803,19 +816,6 @@ export const FillGapsNew: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
-        <CreateExWithAiButton
-          type="FILL_GAPS_NEW"
-          currentData={data as any}
-          onApply={(generated) => {
-            resetData({
-              ...generated,
-              id: (data as any)?.id,
-              sortIndex: (data as any)?.sortIndex,
-            } as any);
-            setImages(Array.isArray(generated.images) ? generated.images : images);
-            setSlateMountKey((k) => k + 1);
-          }}
-        />
       </div>
 
       {portalReady &&

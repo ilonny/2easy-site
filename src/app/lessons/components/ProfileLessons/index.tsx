@@ -79,6 +79,25 @@ type TProps = {
 
 const HOMEWORK_TAG = "Homework";
 
+type TLessonsTabIndex =
+  | "userLessons"
+  | "savedLessons"
+  | "userCourses"
+  | "2easyCourses"
+  | "userBoards";
+
+const LESSONS_TAB_VALUES: TLessonsTabIndex[] = [
+  "userLessons",
+  "savedLessons",
+  "userCourses",
+  "2easyCourses",
+  "userBoards",
+];
+
+const isLessonsTabIndex = (value: unknown): value is TLessonsTabIndex =>
+  typeof value === "string" &&
+  (LESSONS_TAB_VALUES as string[]).includes(value);
+
 export const ProfileLessons = (props: TProps) => {
   const {
     canCreateLesson = true,
@@ -98,21 +117,31 @@ export const ProfileLessons = (props: TProps) => {
     onDictionaryModalChange,
   } = props;
   const router = useRouter();
-  const { profile, createLessonModalIsVisible, setCreateLessonModalIsVisible } =
-    useContext(AuthContext);
+  const {
+    profile,
+    isAuthorized,
+    authIsLoading,
+    createLessonModalIsVisible,
+    setCreateLessonModalIsVisible,
+  } = useContext(AuthContext);
+  // Students auth via studentId/token without login — same as withLogin.
+  const hasAuthSession =
+    isAuthorized || !!profile?.studentId || !!profile?.isStudent;
   const [createCourseModalIsVisible, setCreateCourseModalIsVisible] =
     useState(false);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const { subscription } = useContext(SibscribeContext);
   const [activeFilterTab, setActiveFilterTab] = useState("");
+  // Avoid writing the default tab to localStorage before the saved tab is restored.
+  const [tabHydrated, setTabHydrated] = useState(
+    () => !!studentId || !!hideTabs || !!currentCourse,
+  );
 
   const isFreeTariff = useMemo(() => {
     return subscription?.subscribe_type_id === 1;
   }, [subscription]);
 
-  const [tabIndex, setTabIndex] = useState<
-    "userLessons" | "savedLessons" | "userCourses" | "2easyCourses" | "userBoards"
-  >(
+  const [tabIndex, setTabIndex] = useState<TLessonsTabIndex>(
     currentCourse
       ? "userCourses"
       : !profile?.name
@@ -171,7 +200,7 @@ export const ProfileLessons = (props: TProps) => {
   } = useLessons(
     studentId,
     studentId && studentTabIndex !== "lessons" ? "" : searchString,
-    !!profile?.name,
+    hasAuthSession,
     includeCourseLessons,
   );
 
@@ -212,40 +241,76 @@ export const ProfileLessons = (props: TProps) => {
   const onCreateCourse = useCallback(() => {
     setCreateCourseModalIsVisible(false);
     setTabIndex("userCourses");
-    getCourses(Number(studentId));
+    getCourses(studentId ? Number(studentId) : undefined);
   }, [getCourses, studentId]);
 
   useEffect(() => {
+    if (authIsLoading) return;
+
     if (currentCourse) {
       getCourseLessons(currentCourse.id, studentId);
-    } else {
-      getLessons();
+      return;
     }
-  }, [getLessons, currentCourse, getCourseLessons, studentId]);
+
+    const controller = new AbortController();
+    getLessons(controller.signal);
+    return () => controller.abort();
+  }, [
+    getLessons,
+    currentCourse,
+    getCourseLessons,
+    studentId,
+    authIsLoading,
+  ]);
 
   useEffect(() => {
-    getCourses(Number(studentId));
+    getCourses(studentId ? Number(studentId) : undefined);
   }, [getCourses, studentId]);
 
   const { checkSubscription } = useCheckSubscription();
 
   useEffect(() => {
-    const index = readFromLocalStorage("saved_lessons_tab");
-    console.log("EFFECT?", studentId);
-    if (studentId) {
+    // Course/student embeds shouldn't restore or own the global lessons tab.
+    if (studentId || hideTabs || currentCourse) {
+      setTabHydrated(true);
       return;
     }
 
-    if (index) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+    const index = readFromLocalStorage("saved_lessons_tab");
+    if (isLessonsTabIndex(index)) {
       setTabIndex(index);
     }
-  }, [studentId]);
+    setTabHydrated(true);
+  }, [studentId, hideTabs, currentCourse]);
 
   useEffect(() => {
+    if (!tabHydrated || studentId || hideTabs || currentCourse) {
+      return;
+    }
     writeToLocalStorage("saved_lessons_tab", tabIndex);
-  }, [tabIndex]);
+  }, [tabIndex, tabHydrated, studentId, hideTabs, currentCourse]);
+
+  // Mirror boards: don't stay on a courses tab that has nothing to show.
+  useEffect(() => {
+    if (studentId || hideTabs || currentCourse || coursesIsLoading) {
+      return;
+    }
+    if (tabIndex === "userCourses" && !courses.some((c) => c.user_id !== 1)) {
+      setTabIndex(hasAuthSession ? "userLessons" : "savedLessons");
+      return;
+    }
+    if (tabIndex === "2easyCourses" && !courses.some((c) => c.user_id === 1)) {
+      setTabIndex(hasAuthSession ? "userLessons" : "savedLessons");
+    }
+  }, [
+    courses,
+    coursesIsLoading,
+    currentCourse,
+    hideTabs,
+    hasAuthSession,
+    studentId,
+    tabIndex,
+  ]);
 
   const lessonsToRender = useMemo(() => {
     // 1. Приоритетный режим: просмотр конкретного курса
@@ -257,7 +322,6 @@ export const ProfileLessons = (props: TProps) => {
     // Это условие означает, что мы находимся в "студенческом" представлении,
     // либо пользователь не является учителем
     if (isTeacher && studentId) {
-      console.log("isTeacher && studentId", tabIndex, studentTabIndex);
       if (studentTabIndex === "lessons") {
         return lessons;
       }
@@ -267,7 +331,6 @@ export const ProfileLessons = (props: TProps) => {
       return courses;
     }
     if (!isTeacher && studentId) {
-      console.log("lol?", studentTabIndex, lessons, studentId);
       if (studentTabIndex === "lessons") {
         return lessons;
       }
@@ -279,7 +342,6 @@ export const ProfileLessons = (props: TProps) => {
 
     // 3. Режим для учителя (isTeacher === true && studentId === false/undefined/null)
     // Здесь мы обрабатываем tabIndex для учителя
-    console.log("switch TABINDEX", tabIndex);
     switch (tabIndex) {
       case "userCourses":
         return courses.filter((c) => c.user_id !== 1); // Курсы пользователя (кроме user_id=1)
@@ -300,8 +362,6 @@ export const ProfileLessons = (props: TProps) => {
     courses,
     studentTabIndex,
   ]);
-
-  console.log("lessonsToRender", lessonsToRender);
 
   const hasHomeworkTag = useCallback((lesson: TLesson) => {
     if (!lesson?.tags) return false;
@@ -435,6 +495,16 @@ export const ProfileLessons = (props: TProps) => {
     ((!studentId && tabIndex === "userCourses") ||
       tabIndex === "2easyCourses" ||
       studentTabIndex === "courses");
+
+  const isListLoading =
+    authIsLoading ||
+    (!!currentCourse
+      ? false
+      : isBoardsTabActive
+        ? boardsIsLoading
+        : isCourse
+          ? coursesIsLoading
+          : lessonsListIslLoading);
 
   return (
     <>
@@ -679,8 +749,7 @@ export const ProfileLessons = (props: TProps) => {
           <div className="h-10" />
         </>
       )}
-      {(lessonsListIslLoading && !isBoardsTabActive) ||
-      (boardsIsLoading && isBoardsTabActive) ? (
+      {isListLoading ? (
         <div className="w-full h-[500px] flex justify-center items-center ">
           <Image src={Dino.src} alt="dino animated" width={150} height={150} />
         </div>
@@ -688,7 +757,7 @@ export const ProfileLessons = (props: TProps) => {
       {!currentCourse &&
         !isBoardsTabActive &&
         !filteredLessons.length &&
-        !lessonsListIslLoading && (
+        !isListLoading && (
         <ProfileEmptyLessons
           title={
             (studentId ? searchString : filterSearchString)?.trim() ? (
@@ -794,7 +863,7 @@ export const ProfileLessons = (props: TProps) => {
                 ? () => getCourseLessons(currentCourse.id, studentId)
                 : getLessons
             }
-            getCourses={() => getCourses(Number(studentId))}
+            getCourses={() => getCourses(studentId ? Number(studentId) : undefined)}
             hideAttachButton={hideAttachButton}
             hideContextMenu={tabIndex === "2easyCourses"}
             showChangeStatusButton={showChangeStatusButton}
@@ -808,7 +877,7 @@ export const ProfileLessons = (props: TProps) => {
                 : studentTabIndex === "courses"
                   ? (relation_id, status, course_id, s_id) => {
                       changeCourseStatus(relation_id, status, course_id, s_id).then(() => {
-                        getCourses(Number(studentId));
+                        getCourses(studentId ? Number(studentId) : undefined);
                       });
                     }
                   : (relation_id, status, lesson_id, s_id) => {
@@ -824,7 +893,7 @@ export const ProfileLessons = (props: TProps) => {
                 : studentTabIndex === "courses"
                   ? (relation_id) => {
                       deleteCourseRelation(relation_id).then(() =>
-                        getCourses(Number(studentId)),
+                        getCourses(studentId ? Number(studentId) : undefined),
                       );
                     }
                   : deleteLessonRelation

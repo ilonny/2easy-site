@@ -49,13 +49,21 @@ import {
   LessonDictionaryHandle,
   LessonDictionaryLayer,
 } from "@/app/dictionary/components/LessonDictionaryLayer";
-import { LessonBoardButton } from "@/app/board/components/LessonBoardButton";
+import dynamic from "next/dynamic";
 import { parseRouteId, parseRouteIdNumber } from "@/utils/parseRouteId";
 import { LessonParticipantsPanel } from "@/app/lessons/components/LessonParticipantsPanel";
 import { LessonFloatingTools } from "@/app/lessons/components/LessonFloatingTools";
 import {
   LESSON_FAB_BUTTON_CLASS,
 } from "@/app/lessons/constants";
+
+const LessonBoardButton = dynamic(
+  () =>
+    import("@/app/board/components/LessonBoardButton").then(
+      (mod) => mod.LessonBoardButton,
+    ),
+  { ssr: false },
+);
 
 const VIEW_NOOP = () => {};
 const VIEW_ASYNC_NOOP = async () => {};

@@ -14,7 +14,7 @@ const ACCEPTED_MIME = [
   "video/x-m4v",
 ];
 
-export const MAX_VIDEO_BYTES = 200 * 1024 * 1024;
+export const MAX_VIDEO_BYTES = 300 * 1024 * 1024;
 
 type TProps = {
   fileName?: string;
@@ -67,8 +67,8 @@ export const VideoFileDropzone: FC<TProps> = ({
             defaultValue: (i18n.language || "")
               .toLowerCase()
               .startsWith("ru")
-              ? "Файл слишком большой (макс. 200 МБ)"
-              : "File is too large (max 200 MB)",
+              ? "Файл слишком большой (макс. 300 МБ)"
+              : "File is too large (max 300 MB)",
           }),
         );
         return;
@@ -114,7 +114,7 @@ export const VideoFileDropzone: FC<TProps> = ({
       <p className="mb-2 text-sm text-default-500">
         <T
           k="editor.videoFileHint"
-          defaultText="Видеофайл (не более 200 МБ, форматы: .mp4, .mov, .webm)"
+          defaultText="Видеофайл (не более 300 МБ, форматы: .mp4, .mov, .webm)"
         />
       </p>
       <div

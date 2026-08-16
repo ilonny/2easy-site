@@ -210,6 +210,46 @@ export const Text2ColEx: FC<TProps> = ({
               </div>
             }
           />
+          <CreateExWithAiButton
+            type="text-2-col"
+            currentData={data as any}
+            onApply={(generated) => {
+              const nextContent = String(generated.content || "");
+              const nextSecondContent = String(generated.secondContent || "");
+              resetData({
+                ...generated,
+                id: (data as any)?.id,
+                sortIndex: (data as any)?.sortIndex,
+              } as any);
+              setImages(Array.isArray(generated.images) ? generated.images : images);
+              setEditorImages(
+                Array.isArray(generated.editorImages)
+                  ? generated.editorImages
+                  : editorImages
+              );
+              setSecondEditorImages(
+                Array.isArray(generated.secondEditorImages)
+                  ? generated.secondEditorImages
+                  : secondEditorImages
+              );
+              setEditorState(
+                nextContent
+                  ? EditorState.createWithContent(
+                      ContentState.createFromBlockArray(htmlToDraft(nextContent))
+                    )
+                  : EditorState.createEmpty()
+              );
+              setSecondEditorState(
+                nextSecondContent
+                  ? EditorState.createWithContent(
+                      ContentState.createFromBlockArray(
+                        htmlToDraft(nextSecondContent)
+                      )
+                    )
+                  : EditorState.createEmpty()
+              );
+            }}
+          />
           <div className="h-4" />
         </div>
       </div>
@@ -426,46 +466,6 @@ export const Text2ColEx: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
-        <CreateExWithAiButton
-          type="text-2-col"
-          currentData={data as any}
-          onApply={(generated) => {
-            const nextContent = String(generated.content || "");
-            const nextSecondContent = String(generated.secondContent || "");
-            resetData({
-              ...generated,
-              id: (data as any)?.id,
-              sortIndex: (data as any)?.sortIndex,
-            } as any);
-            setImages(Array.isArray(generated.images) ? generated.images : images);
-            setEditorImages(
-              Array.isArray(generated.editorImages)
-                ? generated.editorImages
-                : editorImages
-            );
-            setSecondEditorImages(
-              Array.isArray(generated.secondEditorImages)
-                ? generated.secondEditorImages
-                : secondEditorImages
-            );
-            setEditorState(
-              nextContent
-                ? EditorState.createWithContent(
-                    ContentState.createFromBlockArray(htmlToDraft(nextContent))
-                  )
-                : EditorState.createEmpty()
-            );
-            setSecondEditorState(
-              nextSecondContent
-                ? EditorState.createWithContent(
-                    ContentState.createFromBlockArray(
-                      htmlToDraft(nextSecondContent)
-                    )
-                  )
-                : EditorState.createEmpty()
-            );
-          }}
-        />
       </div>
       <div className="h-10" />
     </div>

@@ -65,6 +65,7 @@ export const DictionaryWordCard: FC<TProps> = ({
           <SpeakWordButton
             id={buildSpeakWordId(item.id)}
             text={item.sourceWord}
+            languageCode={item.sourceLanguageCode}
             disabled={isLoading}
           />
         </div>

@@ -151,6 +151,18 @@ export const TextSticker: FC<TProps> = ({
               </div>
             }
           />
+          <CreateExWithAiButton
+            type="text-sticker"
+            currentData={data as any}
+            onApply={(generated) => {
+              resetData({
+                ...generated,
+                id: (data as any)?.id,
+                sortIndex: (data as any)?.sortIndex,
+              } as any);
+              setImages(Array.isArray(generated.images) ? generated.images : images);
+            }}
+          />
           <div className="h-4" />
           <div className="flex items-center gap-4 relative w-[150px] justify-between">
             <p><T k="editor.stickerBgColor" defaultText="Цвет стикеров" /></p>{" "}
@@ -272,18 +284,6 @@ export const TextSticker: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
-        <CreateExWithAiButton
-          type="text-sticker"
-          currentData={data as any}
-          onApply={(generated) => {
-            resetData({
-              ...generated,
-              id: (data as any)?.id,
-              sortIndex: (data as any)?.sortIndex,
-            } as any);
-            setImages(Array.isArray(generated.images) ? generated.images : images);
-          }}
-        />
       </div>
       <div className="h-10" />
     </div>

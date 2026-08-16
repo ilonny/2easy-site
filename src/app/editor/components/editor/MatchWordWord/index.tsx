@@ -182,6 +182,17 @@ export const MatchWordWord: FC<TProps> = ({
               </div>
             }
           />
+          <CreateExWithAiButton
+            type="match-word-word"
+            currentData={data as any}
+            onApply={(generated) => {
+              resetData({
+                ...generated,
+                id: (data as any)?.id,
+                sortIndex: (data as any)?.sortIndex,
+              } as any);
+            }}
+          />
         </div>
       </div>
       <div className="h-5" />
@@ -278,17 +289,6 @@ export const MatchWordWord: FC<TProps> = ({
             <T k="common.save" defaultText="Сохранить" />
           </Button>
         </div>
-        <CreateExWithAiButton
-          type="match-word-word"
-          currentData={data as any}
-          onApply={(generated) => {
-            resetData({
-              ...generated,
-              id: (data as any)?.id,
-              sortIndex: (data as any)?.sortIndex,
-            } as any);
-          }}
-        />
       </div>
       <div className="h-10" />
     </div>

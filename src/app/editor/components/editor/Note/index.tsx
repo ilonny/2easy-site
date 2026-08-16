@@ -70,6 +70,17 @@ export const Note: FC<TProps> = ({
             value={data.description}
             setValue={(val) => changeData("description", val)}
           />
+          <CreateExWithAiButton
+            type="note"
+            currentData={data as any}
+            onApply={(generated) => {
+              resetData({
+                ...generated,
+                id: (data as any)?.id,
+                sortIndex: (data as any)?.sortIndex,
+              } as any);
+            }}
+          />
         </div>
       </div>
       <div className="h-10" />
@@ -90,17 +101,6 @@ export const Note: FC<TProps> = ({
           <T k="common.save" defaultText="Сохранить" />
         </Button>
       </div>
-        <CreateExWithAiButton
-          type="note"
-          currentData={data as any}
-          onApply={(generated) => {
-            resetData({
-              ...generated,
-              id: (data as any)?.id,
-              sortIndex: (data as any)?.sortIndex,
-            } as any);
-          }}
-        />
       <div className="h-10" />
     </div>
   );

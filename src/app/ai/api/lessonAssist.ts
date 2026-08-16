@@ -1,5 +1,7 @@
-import { checkResponse, fetchPostJson } from "@/api";
+import { fetchPostJson } from "@/api";
 import { TAiLessonDraft } from "@/app/lessons/components/CreateLessonWithAiModal/types";
+import { getAiUiLanguage } from "@/app/ai/uiLanguage";
+import { handleAiLimitError } from "@/app/ai/aiLimits";
 
 export type TAiPreviewSummary = {
   exercisesAdded: number;
@@ -13,12 +15,18 @@ export type TAiLessonPreview = TAiLessonDraft & {
   baseVersion?: number;
   expiresAt?: string;
   summary?: TAiPreviewSummary;
+  aiLimit?: {
+    category?: string;
+    limit?: number;
+    used?: number;
+    remaining?: number;
+  };
 };
 
 const parseJson = async (response: Response, fallback: string) => {
   const json = await response.json();
   if (!json?.success) {
-    checkResponse(json);
+    handleAiLimitError(json);
     const error = new Error(json?.message || fallback) as Error & {
       code?: string;
       status?: number;
@@ -45,6 +53,7 @@ export const requestLessonPreview = async (params: {
       instruction: params.instruction,
       current: params.current,
       conversation: params.conversation,
+      ui_language: getAiUiLanguage(),
     },
     signal: params.signal,
   });
@@ -57,6 +66,7 @@ export const requestLessonPreview = async (params: {
     baseVersion: json.base_version,
     expiresAt: json.expires_at,
     summary: json.summary,
+    aiLimit: json.aiLimit,
   };
 };
 

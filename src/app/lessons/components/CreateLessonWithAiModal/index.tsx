@@ -32,6 +32,13 @@ import {
   TAiLessonPreview,
 } from "@/app/ai/api/lessonAssist";
 import { AiDraftPreviewSummary } from "@/app/ai/components/AiDraftPreviewSummary";
+import { getAiUiLanguage } from "@/app/ai/uiLanguage";
+import {
+  fetchAiLimits,
+  formatAiAvailableLimit,
+  handleAiLimitError,
+  TAiLimitCategory,
+} from "@/app/ai/aiLimits";
 
 type TProps = {
   isVisible: boolean;
@@ -53,8 +60,11 @@ type TSuggestedTopic = {
 const makeId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-const WELCOME_MESSAGE =
-  "Привет! Давай соберём урок в стиле 2easy. Выбери уровень и типы заданий. Тему можно не указывать — я придумаю сам и спрошу, подходит ли она.";
+const welcomeMessage = () =>
+  i18n.t("ai.welcomeLessonCreate", {
+    defaultValue:
+      "Привет! Давай соберём урок в стиле 2easy. Выбери уровень и типы заданий. Тему можно не указывать — я придумаю сам и спрошу, подходит ли она.",
+  });
 
 export const CreateLessonWithAiModal: FC<TProps> = ({
   isVisible,
@@ -73,7 +83,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
   const [topic, setTopic] = useState("");
   const [description, setDescription] = useState("");
   const [messages, setMessages] = useState<TAiChatMessage[]>([
-    { id: makeId(), role: "assistant", content: WELCOME_MESSAGE },
+    { id: makeId(), role: "assistant", content: welcomeMessage() },
   ]);
   const [chatInput, setChatInput] = useState("");
   const [draft, setDraft] = useState<TAiLessonDraft | null>(null);
@@ -87,7 +97,28 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
   const [rejectedTopics, setRejectedTopics] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [limitCategory, setLimitCategory] =
+    useState<TAiLimitCategory>("generate_lesson");
+  const [limitRemaining, setLimitRemaining] = useState<number | null>(null);
+  const [topicLimitRemaining, setTopicLimitRemaining] = useState<number | null>(
+    null,
+  );
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+  const applyLimitFromResponse = useCallback(
+    (json: { aiLimit?: { category?: string; remaining?: number } }) => {
+      if (typeof json?.aiLimit?.remaining !== "number") return;
+      const category = (json.aiLimit.category ||
+        "generate_lesson") as TAiLimitCategory;
+      setLimitCategory(category);
+      if (category === "suggest_topic") {
+        setTopicLimitRemaining(json.aiLimit.remaining);
+      } else {
+        setLimitRemaining(json.aiLimit.remaining);
+      }
+    },
+    [],
+  );
 
   const resetState = useCallback(() => {
     setStep("collect");
@@ -101,7 +132,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
     setTopic("");
     setDescription("");
     setMessages([
-      { id: makeId(), role: "assistant", content: WELCOME_MESSAGE },
+      { id: makeId(), role: "assistant", content: welcomeMessage() },
     ]);
     setChatInput("");
     setDraft(null);
@@ -111,11 +142,35 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
     setRejectedTopics([]);
     setIsGenerating(false);
     setError(null);
+    setLimitCategory("generate_lesson");
+    setLimitRemaining(null);
+    setTopicLimitRemaining(null);
   }, []);
 
   useEffect(() => {
     if (!isVisible) return;
     resetState();
+    let cancelled = false;
+    (async () => {
+      const limits = await fetchAiLimits();
+      if (cancelled || !limits) return;
+      setLimitRemaining(limits.generate_lesson?.remaining ?? null);
+      setTopicLimitRemaining(limits.suggest_topic?.remaining ?? null);
+      setLimitCategory("generate_lesson");
+      setMessages([
+        {
+          id: makeId(),
+          role: "assistant",
+          content: `${welcomeMessage()}\n\n${formatAiAvailableLimit(
+            limits.generate_lesson?.remaining,
+            "generate_lesson",
+          )}`,
+        },
+      ]);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [isVisible, resetState]);
 
   useEffect(() => {
@@ -155,7 +210,11 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
       if (!level) return;
       setError(null);
       setIsGenerating(true);
-      appendAssistant("Генерирую урок… это может занять минуту.");
+      appendAssistant(
+        i18n.t("ai.generatingLesson", {
+          defaultValue: "Генерирую урок… это может занять минуту.",
+        }),
+      );
 
       try {
         const res = await fetchPostJson({
@@ -167,41 +226,72 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
             description: description.trim(),
             exerciseTypes: selectedTypes,
             conversation: conversationPayload(messages),
+            ui_language: getAiUiLanguage(),
           },
         });
         const json = await res.json();
         if (!json?.success) {
-          checkResponse(json);
-          setError(json?.message || "Не удалось сгенерировать урок");
+          handleAiLimitError(json);
+          const msg =
+            json?.code === "AI_MONTHLY_LIMIT_EXCEEDED" || json?.limitExceeded
+              ? i18n.t("ai.monthlyLimitExceeded", {
+                  defaultValue: "Лимит в этом месяце превышен",
+                })
+              : json?.message || "Не удалось сгенерировать урок";
+          setError(msg);
           appendAssistant(
-            json?.message ||
+            msg ||
               "Не получилось сгенерировать урок. Попробуй ещё раз или упрости запрос.",
           );
           return;
         }
 
+        applyLimitFromResponse(json);
+        const remaining =
+          typeof json?.aiLimit?.remaining === "number"
+            ? json.aiLimit.remaining
+            : null;
+
         const nextDraft: TAiLessonDraft = {
           assistantMessage: json.assistantMessage,
           lesson: json.lesson,
-          exercises: json.exercises || [],
+          exercises: (json.exercises || []).map(
+            (exercise: TAiLessonDraft["exercises"][number], index: number) => ({
+              ...exercise,
+              clientKey:
+                exercise.clientKey ||
+                (!exercise.id ? `draft-${index}-${exercise.type}` : undefined),
+              sortIndex: Number.isInteger(exercise.sortIndex)
+                ? exercise.sortIndex
+                : index,
+            }),
+          ),
         };
 
         setDraft(nextDraft);
+        setPendingPreview(null);
         setSavedLessonId(null);
         setTopic(topicToUse.trim() || json.lesson?.title || "");
         setStep("preview");
         appendAssistant(
-          json.assistantMessage ||
-            `Готово: «${json.lesson?.title}». Проверь превью — урок сохранится только по кнопке «Сохранить урок».`,
+          `${
+            json.assistantMessage ||
+            `Готово: «${json.lesson?.title}». Проверь превью — урок сохранится только по кнопке «Сохранить урок».`
+          }\n\n${formatAiAvailableLimit(remaining, "generate_lesson")}`,
         );
       } catch (e) {
         setError("Ошибка сети при генерации урока");
-        appendAssistant("Ошибка сети. Проверь соединение и попробуй снова.");
+        appendAssistant(
+          i18n.t("ai.networkErrorCheck", {
+            defaultValue:
+              "Ошибка сети. Проверь соединение и попробуй снова.",
+          }),
+        );
       } finally {
         setIsGenerating(false);
       }
     },
-    [level, description, selectedTypes, messages],
+    [level, description, selectedTypes, messages, applyLimitFromResponse],
   );
 
   const runSuggestTopic = useCallback(
@@ -209,7 +299,12 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
       if (!level) return;
       setError(null);
       setIsGenerating(true);
-      appendAssistant("Тему не указали — сейчас придумаю и спрошу, ок ли она.");
+      appendAssistant(
+        i18n.t("ai.suggestingTopic", {
+          defaultValue:
+            "Тему не указали — сейчас придумаю и спрошу, ок ли она.",
+        }),
+      );
 
       try {
         const res = await fetchPostJson({
@@ -220,17 +315,28 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
             description: description.trim(),
             exerciseTypes: selectedTypes,
             rejectTopics: rejectList,
+            ui_language: getAiUiLanguage(),
           },
         });
         const json = await res.json();
         if (!json?.success) {
-          checkResponse(json);
-          setError(json?.message || "Не удалось придумать тему");
-          appendAssistant(
-            json?.message || "Не получилось придумать тему. Попробуй ещё раз.",
-          );
+          handleAiLimitError(json);
+          const msg =
+            json?.code === "AI_MONTHLY_LIMIT_EXCEEDED" || json?.limitExceeded
+              ? i18n.t("ai.monthlyLimitExceeded", {
+                  defaultValue: "Лимит в этом месяце превышен",
+                })
+              : json?.message || "Не удалось придумать тему";
+          setError(msg);
+          appendAssistant(msg);
           return;
         }
+
+        applyLimitFromResponse(json);
+        const remaining =
+          typeof json?.aiLimit?.remaining === "number"
+            ? json.aiLimit.remaining
+            : topicLimitRemaining;
 
         const suggestion: TSuggestedTopic = {
           topic: json.topic || json.title,
@@ -242,17 +348,24 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
         setSuggestedTopic(suggestion);
         setStep("confirmTopic");
         appendAssistant(
-          json.assistantMessage ||
-            `Я придумал тему «${suggestion.title}». Подходит?`,
+          `${
+            json.assistantMessage ||
+            `Я придумал тему «${suggestion.title}». Подходит?`
+          }\n\n${formatAiAvailableLimit(remaining, "suggest_topic")}`,
         );
       } catch (e) {
         setError("Ошибка сети при подборе темы");
-        appendAssistant("Ошибка сети. Проверь соединение и попробуй снова.");
+        appendAssistant(
+          i18n.t("ai.networkErrorCheck", {
+            defaultValue:
+              "Ошибка сети. Проверь соединение и попробуй снова.",
+          }),
+        );
       } finally {
         setIsGenerating(false);
       }
     },
-    [level, description, selectedTypes],
+    [level, description, selectedTypes, applyLimitFromResponse, topicLimitRemaining],
   );
 
   const handleGenerate = useCallback(async () => {
@@ -308,7 +421,8 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
   }, [suggestedTopic, rejectedTopics, runSuggestTopic]);
 
   const handleRefine = useCallback(async () => {
-    if (!draft || !chatInput.trim() || isGenerating) return;
+    const baseDraft = pendingPreview || draft;
+    if (!baseDraft || !chatInput.trim() || isGenerating) return;
     const instruction = chatInput.trim();
     setChatInput("");
     setError(null);
@@ -319,13 +433,36 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
       const preview = await requestLessonPreview({
         lessonId: savedLessonId || undefined,
         instruction,
-        current: draft,
+        current: baseDraft,
         conversation: conversationPayload(messages),
       });
-      setPendingPreview(preview);
+      if (preview.aiLimit) {
+        applyLimitFromResponse({ aiLimit: preview.aiLimit });
+      }
+      const withKeys: TAiLessonPreview = {
+        ...preview,
+        exercises: (preview.exercises || []).map((exercise, index) => ({
+          ...exercise,
+          clientKey:
+            exercise.clientKey ||
+            baseDraft.exercises[index]?.clientKey ||
+            (!exercise.id ? `draft-${index}-${exercise.type}` : undefined),
+          sortIndex: Number.isInteger(exercise.sortIndex)
+            ? exercise.sortIndex
+            : index,
+        })),
+      };
+      setPendingPreview(withKeys);
       appendAssistant(
-        preview.assistantMessage ||
-          "Предложение готово. Проверь и сохрани изменения.",
+        `${
+          withKeys.assistantMessage ||
+          "Предложение готово. Проверь и сохрани изменения."
+        }\n\n${formatAiAvailableLimit(
+          typeof preview.aiLimit?.remaining === "number"
+            ? preview.aiLimit.remaining
+            : limitRemaining,
+          "generate_lesson",
+        )}`,
       );
     } catch (e: any) {
       setError(e?.message || "Ошибка сети при обновлении урока");
@@ -335,7 +472,16 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
     } finally {
       setIsGenerating(false);
     }
-  }, [draft, chatInput, isGenerating, messages, savedLessonId]);
+  }, [
+    draft,
+    pendingPreview,
+    chatInput,
+    isGenerating,
+    messages,
+    savedLessonId,
+    applyLimitFromResponse,
+    limitRemaining,
+  ]);
 
   const savePendingPreview = useCallback(async () => {
     if (!pendingPreview || isGenerating) return;
@@ -444,11 +590,12 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
       scrollBehavior="inside"
       placement="center"
       classNames={{
-        // size=full forces h-[100dvh] + my-0 (stuck to top). 5xl keeps margins; we widen + cap height.
-        wrapper: "overflow-hidden items-center overscroll-none",
+        // Cap height to viewport so actions never sit below the fold.
+        wrapper:
+          "items-center justify-center overflow-y-auto overscroll-none p-2 sm:p-3",
         backdrop: "overscroll-none",
         base:
-          "!max-w-[min(1400px,96vw)] !w-[min(1400px,96vw)] !h-[min(900px,calc(100dvh-5rem))] !max-h-[min(900px,calc(100dvh-5rem))] !min-h-0 !my-6 sm:!my-10 overflow-hidden overscroll-none",
+          "!max-w-[min(1400px,96vw)] !w-[min(1400px,96vw)] !h-[min(900px,calc(100dvh-1rem))] !max-h-[calc(100dvh-1rem)] !min-h-0 !my-0 overflow-hidden overscroll-none",
         body: "p-0 !overflow-hidden min-h-0 flex-1 overscroll-none",
         header: "shrink-0 py-3 sm:py-4",
       }}
@@ -526,7 +673,22 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                 <div ref={chatEndRef} />
               </div>
 
-              <div className="p-4 border-t border-default-100 space-y-2">
+              <div className="px-4 pt-2 shrink-0">
+                <p className="text-xs text-default-500">
+                  {formatAiAvailableLimit(
+                    limitCategory === "suggest_topic" ||
+                      step === "confirmTopic"
+                      ? topicLimitRemaining ?? limitRemaining
+                      : limitRemaining,
+                    limitCategory === "suggest_topic" ||
+                      step === "confirmTopic"
+                      ? "suggest_topic"
+                      : "generate_lesson",
+                  )}
+                </p>
+              </div>
+
+              <div className="p-4 border-t border-default-100 space-y-2 shrink-0 max-h-[45%] overflow-y-auto overscroll-contain">
                 {step === "preview" ? (
                   <>
                     {pendingPreview ? (
@@ -612,133 +774,134 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
               </div>
             </div>
 
-            <div
-              className={`flex flex-col px-4 py-4 gap-4 overflow-y-auto overscroll-contain min-h-0 ${
-                step === "preview" ? "h-full" : ""
-              }`}
-            >
+            <div className="flex flex-col min-h-0 h-full overflow-hidden">
               {step === "collect" && (
-                <>
-                  <div>
-                    <p className="text-sm font-medium mb-2">
-                      <T k="ai.level" defaultText="Уровень" />
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {AI_LEVELS.map((l) => (
-                        <Chip
-                          key={l}
-                          variant={level === l ? "solid" : "bordered"}
-                          color={level === l ? "primary" : "default"}
-                          className="cursor-pointer"
-                          onClick={() => setLevel(l)}
-                        >
-                          {l}
-                        </Chip>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium mb-2">
-                      <T k="ai.exerciseTypes" defaultText="Типы заданий" />
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {AI_EXERCISE_TYPE_OPTIONS.map((opt) => {
-                        const selected = selectedTypes.includes(opt.type);
-                        return (
+                <div className="flex flex-col min-h-0 h-full">
+                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-4">
+                    <div>
+                      <p className="text-sm font-medium mb-2">
+                        <T k="ai.level" defaultText="Уровень" />
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {AI_LEVELS.map((l) => (
                           <Chip
-                            key={opt.type}
-                            variant={selected ? "solid" : "bordered"}
-                            color={selected ? "secondary" : "default"}
+                            key={l}
+                            variant={level === l ? "solid" : "bordered"}
+                            color={level === l ? "primary" : "default"}
                             className="cursor-pointer"
-                            onClick={() => toggleType(opt.type)}
+                            onClick={() => setLevel(l)}
                           >
-                            {toCapitalizeLabel(
-                              i18n.t(opt.titleKey, {
-                                defaultValue: opt.titleDefault,
-                              }),
-                            )}
+                            {l}
                           </Chip>
-                        );
-                      })}
+                        ))}
+                      </div>
                     </div>
+
+                    <div>
+                      <p className="text-sm font-medium mb-2">
+                        <T k="ai.exerciseTypes" defaultText="Типы заданий" />
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {AI_EXERCISE_TYPE_OPTIONS.map((opt) => {
+                          const selected = selectedTypes.includes(opt.type);
+                          return (
+                            <Chip
+                              key={opt.type}
+                              variant={selected ? "solid" : "bordered"}
+                              color={selected ? "secondary" : "default"}
+                              className="cursor-pointer"
+                              onClick={() => toggleType(opt.type)}
+                            >
+                              {toCapitalizeLabel(
+                                i18n.t(opt.titleKey, {
+                                  defaultValue: opt.titleDefault,
+                                }),
+                              )}
+                            </Chip>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <Input
+                      label={
+                        <T
+                          k="ai.topic"
+                          defaultText="Тема урока (необязательно)"
+                        />
+                      }
+                      placeholder={i18n.t("ai.topicPlaceholder", {
+                        defaultValue:
+                          "Можно оставить пустым — AI придумает сам",
+                      })}
+                      value={topic}
+                      onValueChange={setTopic}
+                      radius="sm"
+                      size="lg"
+                    />
+                    <Textarea
+                      label={
+                        <T
+                          k="ai.description"
+                          defaultText="Что хочешь видеть в уроке"
+                        />
+                      }
+                      placeholder={i18n.t("ai.descriptionPlaceholder", {
+                        defaultValue:
+                          "Например: разговорный warm-up, новая лексика, грамматика Present Perfect, дискуссия в конце",
+                      })}
+                      value={description}
+                      onValueChange={setDescription}
+                      minRows={3}
+                      radius="sm"
+                      size="lg"
+                    />
+
+                    {error && (
+                      <p className="text-danger text-sm">{error}</p>
+                    )}
                   </div>
-
-                  <Input
-                    label={
-                      <T
-                        k="ai.topic"
-                        defaultText="Тема урока (необязательно)"
-                      />
-                    }
-                    placeholder={i18n.t("ai.topicPlaceholder", {
-                      defaultValue:
-                        "Можно оставить пустым — AI придумает сам",
-                    })}
-                    value={topic}
-                    onValueChange={setTopic}
-                    radius="sm"
-                    size="lg"
-                  />
-                  <Textarea
-                    label={
-                      <T
-                        k="ai.description"
-                        defaultText="Что хочешь видеть в уроке"
-                      />
-                    }
-                    placeholder={i18n.t("ai.descriptionPlaceholder", {
-                      defaultValue:
-                        "Например: разговорный warm-up, новая лексика, грамматика Present Perfect, дискуссия в конце",
-                    })}
-                    value={description}
-                    onValueChange={setDescription}
-                    minRows={3}
-                    radius="sm"
-                    size="lg"
-                  />
-
-                  {error && (
-                    <p className="text-danger text-sm">{error}</p>
-                  )}
-
-                  <Button
-                    color="primary"
-                    size="lg"
-                    className="w-full mt-auto"
-                    isDisabled={!canGenerate}
-                    isLoading={isGenerating}
-                    onPress={handleGenerate}
-                  >
-                    <T k="ai.generate" defaultText="Сгенерировать урок" />
-                  </Button>
-                </>
+                  <div className="shrink-0 border-t border-default-100 px-4 py-3 bg-content1">
+                    <Button
+                      color="primary"
+                      size="lg"
+                      className="w-full"
+                      isDisabled={!canGenerate}
+                      isLoading={isGenerating}
+                      onPress={handleGenerate}
+                    >
+                      <T k="ai.generate" defaultText="Сгенерировать урок" />
+                    </Button>
+                  </div>
+                </div>
               )}
 
               {step === "confirmTopic" && suggestedTopic && (
-                <>
-                  <div className="rounded-xl bg-default-50 p-4 space-y-2">
-                    <p className="text-xs uppercase tracking-wide text-default-400">
-                      <T k="ai.suggestedTopic" defaultText="Предложенная тема" />
-                    </p>
-                    <h3 className="text-xl font-semibold">
-                      {suggestedTopic.title}
-                    </h3>
-                    {suggestedTopic.tags && (
-                      <p className="text-sm text-primary">
-                        {suggestedTopic.tags}
+                <div className="flex flex-col min-h-0 h-full">
+                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-4">
+                    <div className="rounded-xl bg-default-50 p-4 space-y-2">
+                      <p className="text-xs uppercase tracking-wide text-default-400">
+                        <T k="ai.suggestedTopic" defaultText="Предложенная тема" />
                       </p>
-                    )}
-                    {suggestedTopic.description && (
-                      <p className="text-sm text-default-600">
-                        {suggestedTopic.description}
-                      </p>
+                      <h3 className="text-xl font-semibold">
+                        {suggestedTopic.title}
+                      </h3>
+                      {suggestedTopic.tags && (
+                        <p className="text-sm text-primary">
+                          {suggestedTopic.tags}
+                        </p>
+                      )}
+                      {suggestedTopic.description && (
+                        <p className="text-sm text-default-600">
+                          {suggestedTopic.description}
+                        </p>
+                      )}
+                    </div>
+                    {error && (
+                      <p className="text-danger text-sm">{error}</p>
                     )}
                   </div>
-                  {error && (
-                    <p className="text-danger text-sm">{error}</p>
-                  )}
-                  <div className="mt-auto space-y-2 pt-2">
+                  <div className="shrink-0 border-t border-default-100 px-4 py-3 space-y-2 bg-content1">
                     <Button
                       color="primary"
                       size="lg"
@@ -780,11 +943,11 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                       />
                     </Button>
                   </div>
-                </>
+                </div>
               )}
 
               {step === "preview" && draft && savedLessonId && (
-                <div className="h-full min-h-0 flex flex-col">
+                <div className="h-full min-h-0 flex flex-col px-4 py-4">
                   {error && (
                     <p className="text-danger text-sm mb-2 shrink-0">{error}</p>
                   )}
@@ -798,7 +961,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                 </div>
               )}
               {step === "preview" && draft && !savedLessonId && (
-                <div className="h-full min-h-0 overflow-y-auto p-1">
+                <div className="h-full min-h-0 overflow-y-auto overscroll-contain px-4 py-4">
                   <div className="rounded-xl bg-default-50 p-4">
                     <h3 className="text-xl font-semibold">
                       {(pendingPreview || draft).lesson.title}

@@ -23,6 +23,8 @@ import { CreateLessonWithAiModal } from "../CreateLessonWithAiModal";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { canUseAi } from "@/app/ai/canUseAi";
 import { AuthContext } from "@/auth";
+import AiIcon from "@/assets/icons/ai.svg";
+import Image from "next/image";
 
 type TProps = {
   isVisible: boolean;
@@ -210,6 +212,9 @@ export const CreateLessonModalForm: FC<TProps> = ({
                   className="w-full"
                   size="lg"
                   type="button"
+                  endContent={
+                    <Image src={AiIcon} alt="" width={18} height={18} />
+                  }
                   onPress={() => {
                     if (!requireAiSubscription()) return;
                     setIsVisible(false);

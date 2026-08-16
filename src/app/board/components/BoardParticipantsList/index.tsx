@@ -1,6 +1,5 @@
 "use client";
 
-import { CaptureUpdateAction } from "@excalidraw/excalidraw";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import { FC, ReactNode, useCallback, useMemo } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
@@ -13,6 +12,9 @@ import {
 } from "../../utils/boardParticipants";
 import { getBoardCursorColor } from "../../utils/boardTeacherCursor";
 import styles from "./styles.module.css";
+
+/** Avoid importing @excalidraw/excalidraw here — it touches `navigator` at module load (breaks SSR). */
+const CAPTURE_UPDATE_NEVER = "NEVER" as const;
 
 const MAX_VISIBLE_STUDENT_AVATARS = 3;
 
@@ -135,7 +137,7 @@ export const BoardParticipantsList: FC<TProps> = ({
           scrollX: appState.width / 2 / zoom - participant.x,
           scrollY: appState.height / 2 / zoom - participant.y,
         },
-        captureUpdate: CaptureUpdateAction.NEVER,
+        captureUpdate: CAPTURE_UPDATE_NEVER,
       });
     },
     [api],

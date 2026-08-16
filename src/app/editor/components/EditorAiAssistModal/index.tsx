@@ -1,6 +1,6 @@
 "use client";
 
-import { checkResponse, fetchPostJson } from "@/api";
+import { fetchPostJson } from "@/api";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import {
@@ -23,6 +23,12 @@ import {
 } from "react";
 import { TAiLessonDraft } from "@/app/lessons/components/CreateLessonWithAiModal/types";
 import { canUseAi } from "@/app/ai/canUseAi";
+import { getAiUiLanguage } from "@/app/ai/uiLanguage";
+import {
+  fetchAiLimits,
+  formatAiAvailableLimit,
+  handleAiLimitError,
+} from "@/app/ai/aiLimits";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { AuthContext } from "@/auth";
 import {
@@ -61,8 +67,11 @@ type TChatMessage = {
 const makeId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-const WELCOME =
-  "Привет! Я AI-помощник по этому уроку. Напиши, что изменить: добавить задание, упростить язык, переписать warm-up, заменить тест и т.д.\n\nЕсли правка неудачная — нажми «Отменить последнюю правку» или напиши «верни обратно».";
+const welcomeMessage = () =>
+  i18n.t("ai.welcomeEditorAssist", {
+    defaultValue:
+      "Привет! Я AI-помощник по этому уроку. Напиши, что изменить: добавить задание, упростить язык, переписать warm-up, заменить тест и т.д.\n\nЕсли правка неудачная — нажми «Отменить последнюю правку» или напиши «верни обратно».",
+  });
 
 /** Keep media; only truncate huge strings so the request stays reasonable */
 const prepareExerciseDataForAi = (raw: Record<string, any>) =>
@@ -111,16 +120,41 @@ export const EditorAiAssistModal: FC<TProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [messages, setMessages] = useState<TChatMessage[]>([
-    { id: makeId(), role: "assistant", content: WELCOME },
+    { id: makeId(), role: "assistant", content: welcomeMessage() },
   ]);
   const [history, setHistory] = useState<TAiHistoryEntry[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [limitRemaining, setLimitRemaining] = useState<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const draftRef = useRef<TAiLessonDraft | null>(null);
 
   useEffect(() => {
     setHistory(loadHistory(lessonId));
   }, [lessonId]);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      const limits = await fetchAiLimits();
+      if (cancelled) return;
+      const remaining = limits?.generate_lesson?.remaining ?? null;
+      setLimitRemaining(remaining);
+      setMessages([
+        {
+          id: makeId(),
+          role: "assistant",
+          content: `${welcomeMessage()}\n\n${formatAiAvailableLimit(
+            remaining,
+            "generate_lesson",
+          )}`,
+        },
+      ]);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -171,7 +205,7 @@ export const EditorAiAssistModal: FC<TProps> = ({
       });
       const applied = await applyRes.json();
       if (!applied?.success) {
-        checkResponse(applied);
+        handleAiLimitError(applied);
         throw new Error(applied?.message || "Не удалось применить правки");
       }
       onApplied();
@@ -272,6 +306,7 @@ export const EditorAiAssistModal: FC<TProps> = ({
           instruction: text,
           lesson_id: Number(lessonId) || undefined,
           current: stripMediaForRefineRequest(snapshotBefore),
+          ui_language: getAiUiLanguage(),
           conversation: messages
             .slice(-6)
             .map((m) => ({
@@ -282,7 +317,7 @@ export const EditorAiAssistModal: FC<TProps> = ({
       });
       const refined = await refineRes.json();
       if (!refined?.success) {
-        checkResponse(refined);
+        handleAiLimitError(refined);
         const msg = refined?.message || "Не удалось получить правки от AI";
         setError(msg);
         setMessages((prev) => [
@@ -290,6 +325,10 @@ export const EditorAiAssistModal: FC<TProps> = ({
           { id: makeId(), role: "assistant", content: msg },
         ]);
         return;
+      }
+
+      if (typeof refined?.aiLimit?.remaining === "number") {
+        setLimitRemaining(refined.aiLimit.remaining);
       }
 
       // Save state BEFORE apply so we can roll back
@@ -327,18 +366,37 @@ export const EditorAiAssistModal: FC<TProps> = ({
         : beforeCount;
       let assistantText =
         refined.assistantMessage ||
-        "Готово — обновила урок. Если что-то не так — нажми «Отменить последнюю правку».";
+        i18n.t("ai.doneUpdatedLesson", {
+          defaultValue:
+            "Готово — обновила урок. Если что-то не так — нажми «Отменить последнюю правку».",
+        });
       if (
         /добав|add\b|создай.*задан/i.test(text) &&
         afterCount <= beforeCount
       ) {
         assistantText +=
-          "\n\n⚠️ Количество заданий не увеличилось — попробуй сформулировать точнее, например: «добавь match-word-word с 6 парами слово–определение».";
+          getAiUiLanguage() === "en"
+            ? "\n\n⚠️ Exercise count didn’t increase — try being more specific, e.g.: “add match-word-word with 6 word–definition pairs”."
+            : "\n\n⚠️ Количество заданий не увеличилось — попробуй сформулировать точнее, например: «добавь match-word-word с 6 парами слово–определение».";
       } else if (afterCount > beforeCount) {
-        assistantText += `\n\n(+${afterCount - beforeCount} задание, сейчас ${afterCount})`;
+        assistantText +=
+          getAiUiLanguage() === "en"
+            ? `\n\n(+${afterCount - beforeCount} exercise(s), now ${afterCount})`
+            : `\n\n(+${afterCount - beforeCount} задание, сейчас ${afterCount})`;
       }
       assistantText +=
-        "\n\n↩️ Можно откатить: кнопка «Отменить последнюю правку» или напиши «верни обратно».";
+        getAiUiLanguage() === "en"
+          ? "\n\n↩️ You can undo: “Undo last edit” or write “undo”."
+          : "\n\n↩️ Можно откатить: кнопка «Отменить последнюю правку» или напиши «верни обратно».";
+
+      const remaining =
+        typeof refined?.aiLimit?.remaining === "number"
+          ? refined.aiLimit.remaining
+          : limitRemaining;
+      assistantText += `\n\n${formatAiAvailableLimit(
+        remaining,
+        "generate_lesson",
+      )}`;
 
       setMessages((prev) => [
         ...prev,
@@ -349,14 +407,21 @@ export const EditorAiAssistModal: FC<TProps> = ({
         },
       ]);
     } catch (e: any) {
-      const msg = e?.message || "Ошибка сети";
+      const msg =
+        e?.message ||
+        i18n.t("ai.networkError", { defaultValue: "Ошибка сети" });
       setError(msg);
       setMessages((prev) => [
         ...prev,
         {
           id: makeId(),
           role: "assistant",
-          content: msg === "Ошибка сети" ? "Ошибка сети. Попробуй ещё раз." : msg,
+          content:
+            msg === "Ошибка сети" || msg === "Network error"
+              ? i18n.t("ai.networkErrorRetry", {
+                  defaultValue: "Ошибка сети. Попробуй ещё раз.",
+                })
+              : msg,
         },
       ]);
     } finally {
@@ -371,6 +436,7 @@ export const EditorAiAssistModal: FC<TProps> = ({
     history,
     restoreEntry,
     applyDraft,
+    limitRemaining,
   ]);
 
   if (!canEdit || !canUseAi(profile)) return null;
@@ -397,11 +463,15 @@ export const EditorAiAssistModal: FC<TProps> = ({
         size="2xl"
         scrollBehavior="inside"
         classNames={{
-          base: "max-h-[90dvh]",
+          wrapper:
+            "items-center justify-center overflow-y-auto overscroll-none p-2 sm:p-3",
+          base: "!max-h-[calc(100dvh-1rem)] !my-0 overflow-hidden",
+          body: "p-0 !overflow-hidden min-h-0 flex-1",
+          header: "shrink-0",
         }}
       >
-        <ModalContent>
-          <ModalHeader className="flex flex-col gap-1 border-b border-default-100">
+        <ModalContent className="max-h-[calc(100dvh-1rem)] min-h-0 flex flex-col overflow-hidden">
+          <ModalHeader className="flex flex-col gap-1 border-b border-default-100 shrink-0">
             <T k="ai.editorAssistTitle" defaultText="AI-помощник по уроку" />
             <p className="text-sm font-normal text-default-500">
               {lesson?.title
@@ -412,122 +482,130 @@ export const EditorAiAssistModal: FC<TProps> = ({
                   })}
             </p>
           </ModalHeader>
-          <ModalBody className="pb-6 gap-3">
-            {history.length > 0 && (
-              <div className="flex flex-wrap gap-2 items-center">
-                <Button
-                  size="sm"
-                  variant="flat"
-                  color="warning"
-                  isDisabled={isLoading}
-                  onPress={undoLast}
-                >
-                  ↩️ Отменить последнюю правку
-                </Button>
-                <Button
-                  size="sm"
-                  variant="light"
-                  isDisabled={isLoading}
-                  onPress={() => setShowHistory((v) => !v)}
-                >
-                  {showHistory
-                    ? "Скрыть историю"
-                    : `История (${history.length})`}
-                </Button>
-              </div>
-            )}
-
-            {showHistory && history.length > 0 && (
-              <div className="rounded-xl border border-default-200 bg-default-50 p-2 max-h-[28vh] overflow-y-auto flex flex-col gap-1.5">
-                <p className="text-xs text-default-500 px-1 pb-1">
-                  Состояния до правок AI — можно вернуться к любому
-                </p>
-                {history.map((entry, index) => (
-                  <div
-                    key={entry.id}
-                    className="flex items-start justify-between gap-2 rounded-lg bg-content1 px-2.5 py-2 text-sm"
+          <ModalBody className="flex-1 min-h-0 overflow-hidden p-0 flex flex-col gap-0">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-3 space-y-3">
+              {history.length > 0 && (
+                <div className="flex flex-wrap gap-2 items-center">
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    color="warning"
+                    isDisabled={isLoading}
+                    onPress={undoLast}
                   >
-                    <div className="min-w-0">
-                      <p className="font-medium truncate">
-                        {index === 0 ? "Последняя: " : ""}
-                        {shortInstruction(entry.instruction)}
-                      </p>
-                      <p className="text-xs text-default-400">
-                        {formatHistoryTime(entry.at)} ·{" "}
-                        {entry.draft.exercises?.length || 0} заданий
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      color="secondary"
-                      variant="flat"
-                      isDisabled={isLoading}
-                      onPress={() => restoreEntry(entry)}
-                    >
-                      Вернуть
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="flex flex-col gap-3 max-h-[40vh] overflow-y-auto py-1">
-              {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`flex ${
-                    m.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-[90%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap ${
-                      m.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-default-100 text-foreground"
-                    }`}
+                    ↩️ Отменить последнюю правку
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="light"
+                    isDisabled={isLoading}
+                    onPress={() => setShowHistory((v) => !v)}
                   >
-                    {m.content}
-                  </div>
-                </div>
-              ))}
-              {isLoading && (
-                <div className="flex items-center gap-2 text-sm text-default-500">
-                  <Spinner size="sm" />
-                  <T k="ai.thinking" defaultText="AI думает…" />
+                    {showHistory
+                      ? "Скрыть историю"
+                      : `История (${history.length})`}
+                  </Button>
                 </div>
               )}
-              <div ref={chatEndRef} />
+
+              {showHistory && history.length > 0 && (
+                <div className="rounded-xl border border-default-200 bg-default-50 p-2 flex flex-col gap-1.5">
+                  <p className="text-xs text-default-500 px-1 pb-1">
+                    Состояния до правок AI — можно вернуться к любому
+                  </p>
+                  {history.map((entry, index) => (
+                    <div
+                      key={entry.id}
+                      className="flex items-start justify-between gap-2 rounded-lg bg-content1 px-2.5 py-2 text-sm"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">
+                          {index === 0 ? "Последняя: " : ""}
+                          {shortInstruction(entry.instruction)}
+                        </p>
+                        <p className="text-xs text-default-400">
+                          {formatHistoryTime(entry.at)} ·{" "}
+                          {entry.draft.exercises?.length || 0} заданий
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        color="secondary"
+                        variant="flat"
+                        isDisabled={isLoading}
+                        onPress={() => restoreEntry(entry)}
+                      >
+                        Вернуть
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex flex-col gap-3 py-1">
+                {messages.map((m) => (
+                  <div
+                    key={m.id}
+                    className={`flex ${
+                      m.role === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`max-w-[90%] rounded-2xl px-3.5 py-2.5 text-sm whitespace-pre-wrap ${
+                        m.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-default-100 text-foreground"
+                      }`}
+                    >
+                      {m.content}
+                    </div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex items-center gap-2 text-sm text-default-500">
+                    <Spinner size="sm" />
+                    <T k="ai.thinking" defaultText="AI думает…" />
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
             </div>
 
-            <Textarea
-              minRows={3}
-              value={instruction}
-              onValueChange={setInstruction}
-              placeholder={i18n.t("ai.refinePlaceholder", {
-                defaultValue:
-                  "Например: добавь ещё один тест / сделай проще для A2 / верни обратно",
-              })}
-              isDisabled={isLoading}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                  e.preventDefault();
-                  onSubmit();
-                }
-              }}
-            />
-            {error && <p className="text-sm text-danger">{error}</p>}
-            <Button
-              color="primary"
-              className="w-full"
-              isLoading={isLoading}
-              isDisabled={!instruction.trim()}
-              onPress={onSubmit}
-            >
-              <T k="ai.applyChanges" defaultText="Отправить правку AI" />
-            </Button>
-            <p className="text-xs text-default-400 text-center">
-              ⌘/Ctrl + Enter — отправить
-            </p>
+            <div className="shrink-0 border-t border-default-100 px-6 py-3 space-y-3 bg-content1">
+              <p className="text-xs text-default-500">
+                {formatAiAvailableLimit(limitRemaining, "generate_lesson")}
+              </p>
+              <Textarea
+                minRows={2}
+                maxRows={4}
+                value={instruction}
+                onValueChange={setInstruction}
+                placeholder={i18n.t("ai.refinePlaceholder", {
+                  defaultValue:
+                    "Например: добавь ещё один тест / сделай проще для A2 / верни обратно",
+                })}
+                isDisabled={isLoading}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault();
+                    onSubmit();
+                  }
+                }}
+              />
+              {error && <p className="text-sm text-danger">{error}</p>}
+              <Button
+                color="primary"
+                className="w-full"
+                isLoading={isLoading}
+                isDisabled={!instruction.trim()}
+                onPress={onSubmit}
+              >
+                <T k="ai.applyChanges" defaultText="Отправить правку AI" />
+              </Button>
+              <p className="text-xs text-default-400 text-center">
+                ⌘/Ctrl + Enter — отправить
+              </p>
+            </div>
           </ModalBody>
         </ModalContent>
       </Modal>

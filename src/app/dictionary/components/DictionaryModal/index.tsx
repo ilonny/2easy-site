@@ -1,9 +1,8 @@
 "use client";
 
-import { FC, KeyboardEvent } from "react";
+import { FC } from "react";
 import {
   Button,
-  Checkbox,
   Image,
   Input,
   Modal,
@@ -44,7 +43,6 @@ import {
   DICTIONARY_MODAL_SECTION_PADDING_CLASS,
   DICTIONARY_TEXTAREA_ICON_ALIGN_CLASS,
   DICTIONARY_TEXTAREA_MAX_ROWS,
-  DICTIONARY_MODAL_SELECT_ALL_DIVIDER_CLASS,
   DICTIONARY_MODAL_TABS_CLASS_NAMES,
   DICTIONARY_SEARCH_INPUT_CLASS_NAMES,
   DICTIONARY_TOUCH_BUTTON_CLASS,
@@ -52,7 +50,9 @@ import {
 import { AddWordModal } from "../AddWordModal";
 import { DeleteDictionaryConfirmModal } from "../DeleteDictionaryConfirmModal";
 import { DictionaryWordFilterSegment } from "../DictionaryWordFilterSegment";
+import { DictionarySelectionToolbar } from "../DictionarySelectionToolbar";
 import { DictionaryWordCard } from "./DictionaryWordCard";
+import { TrainingPanel } from "../TrainingPanel";
 
 type TProps = {
   isOpen: boolean;
@@ -76,7 +76,6 @@ export const DictionaryModal: FC<TProps> = ({
     setSearchInput,
     selectedIds,
     setSelectedIds,
-    lessonFilterId,
     actionsPopoverOpen,
     setActionsPopoverOpen,
     deleteConfirmOpen,
@@ -99,16 +98,7 @@ export const DictionaryModal: FC<TProps> = ({
     createWordLessonId,
   } = useDictionaryModal({ isOpen, studentId, initialLessonId });
 
-  const handleSelectAllKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (isLoading || !items.length) {
-      return;
-    }
-
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      toggleSelectAll();
-    }
-  };
+  const isTrainingTab = activeTab === "training";
 
   return (
     <>
@@ -151,240 +141,227 @@ export const DictionaryModal: FC<TProps> = ({
                     <T k="dictionary.learnedTab" defaultText="Изученные слова" />
                   }
                 />
+                <Tab
+                  key="training"
+                  title={
+                    <T
+                      k="dictionary.trainingTab"
+                      defaultText="Тренировка слов"
+                    />
+                  }
+                />
               </Tabs>
             </div>
 
-            <div
-              className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} ${DICTIONARY_MODAL_INPUTS_BLOCK_CLASS}`}
-            >
-              <div className={DICTIONARY_MODAL_INPUT_ROW_START_CLASS}>
-                <Textarea
-                  value={newWordText}
-                  onValueChange={setNewWordText}
-                  placeholder={i18n.t("dictionary.addWordPlaceholder")}
-                  size="md"
-                  minRows={1}
-                  maxRows={DICTIONARY_TEXTAREA_MAX_ROWS}
-                  classNames={DICTIONARY_MODAL_TEXTAREA_CLASS_NAMES}
-                  startContent={
-                    <DictionaryIcon
-                      size={20}
-                      className={`text-[#C4C4C4] ${DICTIONARY_TEXTAREA_ICON_ALIGN_CLASS}`}
-                    />
-                  }
-                  onKeyDown={(event) => {
-                    if (
-                      event.key === "Enter" &&
-                      !event.shiftKey &&
-                      newWordText.trim()
-                    ) {
-                      event.preventDefault();
-                      openAddWordModal();
-                    }
-                  }}
-                />
-                <Button
-                  isIconOnly
-                  color="primary"
-                  radius="lg"
-                  size="md"
-                  className={DICTIONARY_MODAL_ADD_WORD_BUTTON_CLASS}
-                  isDisabled={!newWordText.trim()}
-                  onClick={openAddWordModal}
-                >
-                  <Image
-                    src={ArrowRightIcon.src}
-                    alt={i18n.t("dictionary.addWordAlt")}
-                    style={{ borderRadius: 0 }}
-                  />
-                </Button>
-              </div>
-
-              <div className={DICTIONARY_MODAL_BLOCK_SPACING_CLASS}>
-                <Input
-                  value={searchInput}
-                  onValueChange={setSearchInput}
-                  placeholder={i18n.t("dictionary.searchPlaceholder")}
-                  size="md"
-                  classNames={DICTIONARY_SEARCH_INPUT_CLASS_NAMES}
-                  startContent={
-                    <Image
-                      src={Loupe.src}
-                      alt={i18n.t("dictionary.searchAlt")}
-                      style={{ borderRadius: 0 }}
-                    />
-                  }
-                />
-              </div>
-
-              {hasLessonContext && (
-                <div className={DICTIONARY_MODAL_CENTERED_BLOCK_CLASS}>
-                  <DictionaryWordFilterSegment
-                    isLessonFilterActive={isLessonFilterActive}
-                    onChange={setLessonWordFilterMode}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div
-              className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} py-1 flex flex-wrap items-center gap-x-3 gap-y-2 shrink-0`}
-            >
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
-                <p className={`text-[#767676] ${DICTIONARY_MODAL_RESPONSIVE_TEXT_CLASS}`}>
-                  <T
-                    k="dictionary.wordsCount"
-                    values={{ count: items.length }}
-                    defaultText="Всего слов {{count}}"
-                  />
-                </p>
-                {selectedIds.length > 0 && (
-                  <p className={`text-primary font-medium ${DICTIONARY_MODAL_RESPONSIVE_TEXT_CLASS}`}>
-                    <T
-                      k="dictionary.selectedCount"
-                      values={{ count: selectedIds.length }}
-                      defaultText="Выбрано: {{count}}"
-                    />
-                  </p>
-                )}
-              </div>
-              <div className={DICTIONARY_MODAL_SELECT_ALL_DIVIDER_CLASS} />
+            {isTrainingTab ? (
               <div
-                role="button"
-                tabIndex={isLoading || !items.length ? -1 : 0}
-                onClick={() => {
-                  if (!isLoading && items.length) {
-                    toggleSelectAll();
-                  }
-                }}
-                onKeyDown={handleSelectAllKeyDown}
-                className={`ml-auto flex items-center gap-2 shrink-0 touch-manipulation ${
-                  isLoading || !items.length
-                    ? "pointer-events-none"
-                    : "cursor-pointer"
-                }`}
+                className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} flex flex-col flex-1 min-h-0 pb-2`}
               >
-                <span className={`text-[#767676] ${DICTIONARY_MODAL_RESPONSIVE_TEXT_CLASS}`}>
-                  <T k="dictionary.selectAll" defaultText="Выбрать все" />
-                </span>
-                <div onClick={(event) => event.stopPropagation()}>
-                  <Checkbox
-                    isSelected={allSelected}
-                    onValueChange={toggleSelectAll}
-                    isDisabled={isLoading || !items.length}
-                    aria-label={i18n.t("dictionary.selectAll")}
-                  />
-                </div>
+                <TrainingPanel
+                  key={`${studentId}-${isOpen ? "open" : "closed"}`}
+                  items={items}
+                  isLoading={isLoading}
+                />
               </div>
-            </div>
-
-            <div className={`${DICTIONARY_LIST_SCROLL_CLASS} ${DICTIONARY_MODAL_SECTION_PADDING_CLASS} pb-2`}>
-              {isLoading && (
-                <div className="flex justify-center py-10">
-                  <Spinner color="primary" />
-                </div>
-              )}
-
-              {!isLoading && !items.length && (
-                <p className="text-center text-[#767676] py-10 text-base">
-                  <T k="dictionary.empty" defaultText="Слов пока нет" />
-                </p>
-              )}
-
-              {!isLoading &&
-                groupedItems.map((group) => (
-                  <div key={group.key} className="flex flex-col min-w-0">
-                    {groupedItems.length > 1 && (
-                      <p className={`font-bold text-primary uppercase py-2 break-words ${DICTIONARY_MODAL_RESPONSIVE_TEXT_CLASS}`}>
-                        {group.label}
-                      </p>
-                    )}
-                    <div className="flex flex-col gap-2">
-                      {group.items.map((item) => (
-                        <DictionaryWordCard
-                          key={item.id}
-                          item={item}
-                          isSelected={selectedIds.includes(item.id)}
-                          isLoading={isLoading}
-                          showLessonBadge={!isLessonFilterActive}
-                          onToggle={toggleItem}
+            ) : (
+              <>
+                <div
+                  className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} ${DICTIONARY_MODAL_INPUTS_BLOCK_CLASS}`}
+                >
+                  <div className={DICTIONARY_MODAL_INPUT_ROW_START_CLASS}>
+                    <Textarea
+                      value={newWordText}
+                      onValueChange={setNewWordText}
+                      placeholder={i18n.t("dictionary.addWordPlaceholder")}
+                      size="md"
+                      minRows={1}
+                      maxRows={DICTIONARY_TEXTAREA_MAX_ROWS}
+                      classNames={DICTIONARY_MODAL_TEXTAREA_CLASS_NAMES}
+                      startContent={
+                        <DictionaryIcon
+                          size={20}
+                          className={`text-[#C4C4C4] ${DICTIONARY_TEXTAREA_ICON_ALIGN_CLASS}`}
                         />
-                      ))}
-                    </div>
+                      }
+                      onKeyDown={(event) => {
+                        if (
+                          event.key === "Enter" &&
+                          !event.shiftKey &&
+                          newWordText.trim()
+                        ) {
+                          event.preventDefault();
+                          openAddWordModal();
+                        }
+                      }}
+                    />
+                    <Button
+                      isIconOnly
+                      color="primary"
+                      radius="lg"
+                      size="md"
+                      className={DICTIONARY_MODAL_ADD_WORD_BUTTON_CLASS}
+                      isDisabled={!newWordText.trim()}
+                      onClick={openAddWordModal}
+                    >
+                      <Image
+                        src={ArrowRightIcon.src}
+                        alt={i18n.t("dictionary.addWordAlt")}
+                        style={{ borderRadius: 0 }}
+                      />
+                    </Button>
                   </div>
-                ))}
-            </div>
+
+                  <div className={DICTIONARY_MODAL_BLOCK_SPACING_CLASS}>
+                    <Input
+                      value={searchInput}
+                      onValueChange={setSearchInput}
+                      placeholder={i18n.t("dictionary.searchPlaceholder")}
+                      size="md"
+                      classNames={DICTIONARY_SEARCH_INPUT_CLASS_NAMES}
+                      startContent={
+                        <Image
+                          src={Loupe.src}
+                          alt={i18n.t("dictionary.searchAlt")}
+                          style={{ borderRadius: 0 }}
+                        />
+                      }
+                    />
+                  </div>
+
+                  {hasLessonContext && (
+                    <div className={DICTIONARY_MODAL_CENTERED_BLOCK_CLASS}>
+                      <DictionaryWordFilterSegment
+                        isLessonFilterActive={isLessonFilterActive}
+                        onChange={setLessonWordFilterMode}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <DictionarySelectionToolbar
+                  className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} py-1`}
+                  totalCount={items.length}
+                  selectedCount={selectedIds.length}
+                  allSelected={allSelected}
+                  isDisabled={isLoading}
+                  onToggleAll={toggleSelectAll}
+                />
+
+                <div
+                  className={`${DICTIONARY_LIST_SCROLL_CLASS} ${DICTIONARY_MODAL_SECTION_PADDING_CLASS} pb-2`}
+                >
+                  {isLoading && (
+                    <div className="flex justify-center py-10">
+                      <Spinner color="primary" />
+                    </div>
+                  )}
+
+                  {!isLoading && !items.length && (
+                    <p className="text-center text-[#767676] py-10 text-base">
+                      <T k="dictionary.empty" defaultText="Слов пока нет" />
+                    </p>
+                  )}
+
+                  {!isLoading &&
+                    groupedItems.map((group) => (
+                      <div key={group.key} className="flex flex-col min-w-0">
+                        {groupedItems.length > 1 && (
+                          <p
+                            className={`font-bold text-primary uppercase py-2 break-words ${DICTIONARY_MODAL_RESPONSIVE_TEXT_CLASS}`}
+                          >
+                            {group.label}
+                          </p>
+                        )}
+                        <div className="flex flex-col gap-2">
+                          {group.items.map((item) => (
+                            <DictionaryWordCard
+                              key={item.id}
+                              item={item}
+                              isSelected={selectedIds.includes(item.id)}
+                              isLoading={isLoading}
+                              showLessonBadge={!isLessonFilterActive}
+                              onToggle={toggleItem}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </>
+            )}
           </ModalBody>
-          <ModalFooter className={DICTIONARY_MODAL_FOOTER_CLASS}>
-            <div className={DICTIONARY_MODAL_FOOTER_ACTIONS_CLASS}>
-              <Button
-                variant="light"
-                size="md"
-                className={DICTIONARY_TOUCH_BUTTON_CLASS}
-                onClick={() => setSelectedIds([])}
-                isDisabled={!selectedIds.length}
-              >
-                <T k="dictionary.resetSelection" defaultText="Сбросить" />
-              </Button>
-              <Popover
-                isOpen={actionsPopoverOpen}
-                onOpenChange={setActionsPopoverOpen}
-                placement="top"
-                offset={8}
-              >
-                <PopoverTrigger>
-                  <Button
-                    color="primary"
-                    size="md"
-                    className={DICTIONARY_TOUCH_BUTTON_CLASS}
-                    isDisabled={!selectedIds.length}
-                  >
-                    <T k="dictionary.actions" defaultText="Действия" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className={DICTIONARY_ACTIONS_POPOVER_CLASS}>
-                  {activeTab === "unlearned" && (
+          {!isTrainingTab && (
+            <ModalFooter className={DICTIONARY_MODAL_FOOTER_CLASS}>
+              <div className={DICTIONARY_MODAL_FOOTER_ACTIONS_CLASS}>
+                <Button
+                  variant="light"
+                  size="md"
+                  className={DICTIONARY_TOUCH_BUTTON_CLASS}
+                  onClick={() => setSelectedIds([])}
+                  isDisabled={!selectedIds.length}
+                >
+                  <T k="dictionary.resetSelection" defaultText="Сбросить" />
+                </Button>
+                <Popover
+                  isOpen={actionsPopoverOpen}
+                  onOpenChange={setActionsPopoverOpen}
+                  placement="top"
+                  offset={8}
+                >
+                  <PopoverTrigger>
+                    <Button
+                      color="primary"
+                      size="md"
+                      className={DICTIONARY_TOUCH_BUTTON_CLASS}
+                      isDisabled={!selectedIds.length}
+                    >
+                      <T k="dictionary.actions" defaultText="Действия" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className={DICTIONARY_ACTIONS_POPOVER_CLASS}>
+                    {activeTab === "unlearned" && (
+                      <Button
+                        variant="light"
+                        size="md"
+                        className="justify-start touch-manipulation"
+                        onClick={() => handleMarkLearned(true)}
+                      >
+                        <T
+                          k="dictionary.markLearned"
+                          defaultText="Отметить как выученное"
+                        />
+                      </Button>
+                    )}
+                    {activeTab === "learned" && (
+                      <Button
+                        variant="light"
+                        size="md"
+                        className="justify-start touch-manipulation"
+                        onClick={() => handleMarkLearned(false)}
+                      >
+                        <T
+                          k="dictionary.markUnlearned"
+                          defaultText="Отметить как невыученное"
+                        />
+                      </Button>
+                    )}
                     <Button
                       variant="light"
                       size="md"
-                      className="justify-start touch-manipulation"
-                      onClick={() => handleMarkLearned(true)}
+                      color="danger"
+                      className="w-full justify-start touch-manipulation"
+                      onClick={() => {
+                        setActionsPopoverOpen(false);
+                        setDeleteConfirmOpen(true);
+                      }}
                     >
-                      <T
-                        k="dictionary.markLearned"
-                        defaultText="Отметить как выученное"
-                      />
+                      <T k="common.delete" />
                     </Button>
-                  )}
-                  {activeTab === "learned" && (
-                    <Button
-                      variant="light"
-                      size="md"
-                      className="justify-start touch-manipulation"
-                      onClick={() => handleMarkLearned(false)}
-                    >
-                      <T
-                        k="dictionary.markUnlearned"
-                        defaultText="Отметить как невыученное"
-                      />
-                    </Button>
-                  )}
-                  <Button
-                    variant="light"
-                    size="md"
-                    color="danger"
-                    className="w-full justify-start touch-manipulation"
-                    onClick={() => {
-                      setActionsPopoverOpen(false);
-                      setDeleteConfirmOpen(true);
-                    }}
-                  >
-                    <T k="common.delete" />
-                  </Button>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </ModalFooter>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </ModalFooter>
+          )}
         </ModalContent>
       </Modal>
 

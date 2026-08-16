@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useState } from "react";
 import {
   Button,
   Modal,
@@ -13,6 +13,9 @@ import {
 } from "@nextui-org/react";
 import { T } from "@/i18n/T";
 import { useDictionary, createWordsForLesson } from "../../hooks/useDictionary";
+import { useLanguages } from "../../hooks/useLanguages";
+import { useAddWordLanguagePair } from "../../hooks/useAddWordLanguagePair";
+import { useAutoTranslate } from "../../hooks/useAutoTranslate";
 import { toast } from "react-toastify";
 import i18n from "@/i18n/config";
 import {
@@ -30,6 +33,8 @@ import {
   DICTIONARY_TOUCH_BUTTON_CLASS,
 } from "../../constants";
 import { SpeakWordButton } from "../SpeakWordButton";
+import { LanguageSelect } from "../LanguageSelect";
+import { SwapLanguagesButton } from "../SwapLanguagesButton";
 
 type TProps = {
   isVisible: boolean;
@@ -53,37 +58,36 @@ export const AddWordModal: FC<TProps> = ({
   onSuccess,
 }) => {
   const { translateWord, createWord } = useDictionary(studentId ?? 0);
-  const [translatedWord, setTranslatedWord] = useState("");
-  const [isTranslating, setIsTranslating] = useState(false);
+  const { languages, getLanguages, isLoading: isLanguagesLoading } =
+    useLanguages();
   const [isSaving, setIsSaving] = useState(false);
 
-  useEffect(() => {
-    if (!isVisible || !sourceWord.trim()) {
-      return;
-    }
+  const {
+    sourceLanguageCode,
+    targetLanguageCode,
+    setSourceLanguageCode,
+    setTargetLanguageCode,
+    swapLanguages,
+    persistLanguagePair,
+  } = useAddWordLanguagePair({
+    isVisible,
+    languages,
+    loadLanguages: getLanguages,
+  });
 
-    let cancelled = false;
+  const { translatedWord, setTranslatedWord, isTranslating } = useAutoTranslate({
+    isVisible,
+    sourceWord,
+    sourceLanguageCode,
+    targetLanguageCode,
+    translateWord,
+  });
 
-    const loadTranslation = async () => {
-      setIsTranslating(true);
-      setTranslatedWord("");
-      const result = await translateWord(sourceWord.trim());
-
-      if (!cancelled && result?.translatedWord) {
-        setTranslatedWord(result.translatedWord);
-      }
-
-      if (!cancelled) {
-        setIsTranslating(false);
-      }
-    };
-
-    loadTranslation();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isVisible, sourceWord, translateWord]);
+  const finishSuccess = useCallback(() => {
+    toast(i18n.t("dictionary.wordAdded"), { type: "success" });
+    onSuccess?.();
+    setIsVisible(false);
+  }, [onSuccess, setIsVisible]);
 
   const onSave = useCallback(async () => {
     if (!translatedWord.trim()) {
@@ -91,54 +95,67 @@ export const AddWordModal: FC<TProps> = ({
       return;
     }
 
+    if (!sourceLanguageCode || !targetLanguageCode) {
+      toast(i18n.t("dictionary.languageRequired"), { type: "error" });
+      return;
+    }
+
+    if (sourceLanguageCode === targetLanguageCode) {
+      toast(i18n.t("dictionary.languagesMustDiffer"), { type: "error" });
+      return;
+    }
+
     setIsSaving(true);
+    persistLanguagePair();
 
-    if (bulkLessonId) {
-      const result = await createWordsForLesson(
-        bulkLessonId,
-        {
-          sourceWord: sourceWord.trim(),
-          translatedWord: translatedWord.trim(),
-        },
-        bulkLessonStudentIds
-      );
-      setIsSaving(false);
-
-      if (result) {
-        toast(i18n.t("dictionary.wordAdded"), { type: "success" });
-        onSuccess?.();
-        setIsVisible(false);
-      }
-
-      return;
-    }
-
-    if (!studentId) {
-      setIsSaving(false);
-      return;
-    }
-
-    const created = await createWord({
+    const payload = {
       sourceWord: sourceWord.trim(),
       translatedWord: translatedWord.trim(),
-      lessonId,
-    });
-    setIsSaving(false);
+      sourceLanguageCode,
+      targetLanguageCode,
+    };
 
-    if (created) {
-      toast(i18n.t("dictionary.wordAdded"), { type: "success" });
-      onSuccess?.();
-      setIsVisible(false);
+    try {
+      if (bulkLessonId) {
+        const result = await createWordsForLesson(
+          bulkLessonId,
+          payload,
+          bulkLessonStudentIds
+        );
+
+        if (result) {
+          finishSuccess();
+        }
+
+        return;
+      }
+
+      if (!studentId) {
+        return;
+      }
+
+      const created = await createWord({
+        ...payload,
+        lessonId,
+      });
+
+      if (created) {
+        finishSuccess();
+      }
+    } finally {
+      setIsSaving(false);
     }
   }, [
     bulkLessonId,
     bulkLessonStudentIds,
     createWord,
+    finishSuccess,
     lessonId,
-    onSuccess,
-    setIsVisible,
+    persistLanguagePair,
+    sourceLanguageCode,
     sourceWord,
     studentId,
+    targetLanguageCode,
     translatedWord,
   ]);
 
@@ -158,6 +175,40 @@ export const AddWordModal: FC<TProps> = ({
         <ModalBody
           className={`${DICTIONARY_MODAL_SECTION_PADDING_CLASS} ${DICTIONARY_SECONDARY_MODAL_SCROLL_BODY_CLASS}`}
         >
+          <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-2">
+            <div className="min-w-0 flex-1">
+              <LanguageSelect
+                label={
+                  <T
+                    k="dictionary.sourceLanguage"
+                    defaultText="Язык слова"
+                  />
+                }
+                languages={languages}
+                selectedCode={sourceLanguageCode}
+                onSelect={setSourceLanguageCode}
+                isLoading={isLanguagesLoading}
+              />
+            </div>
+            <SwapLanguagesButton
+              onSwap={swapLanguages}
+              isDisabled={!sourceLanguageCode && !targetLanguageCode}
+            />
+            <div className="min-w-0 flex-1">
+              <LanguageSelect
+                label={
+                  <T
+                    k="dictionary.targetLanguage"
+                    defaultText="Язык перевода"
+                  />
+                }
+                languages={languages}
+                selectedCode={targetLanguageCode}
+                onSelect={setTargetLanguageCode}
+                isLoading={isLanguagesLoading}
+              />
+            </div>
+          </div>
           <Textarea
             size="md"
             labelPlacement="outside"
@@ -168,7 +219,11 @@ export const AddWordModal: FC<TProps> = ({
             maxRows={DICTIONARY_READONLY_SOURCE_WORD_MAX_ROWS}
             classNames={DICTIONARY_READONLY_TEXTAREA_CLASS_NAMES}
             startContent={
-              <SpeakWordButton id={ADD_WORD_SPEAK_ID} text={sourceWord} />
+              <SpeakWordButton
+                id={ADD_WORD_SPEAK_ID}
+                text={sourceWord}
+                languageCode={sourceLanguageCode}
+              />
             }
           />
           <Textarea
@@ -204,7 +259,12 @@ export const AddWordModal: FC<TProps> = ({
             className={DICTIONARY_TOUCH_BUTTON_CLASS}
             onClick={onSave}
             isLoading={isSaving}
-            isDisabled={isTranslating}
+            isDisabled={
+              isTranslating ||
+              !sourceLanguageCode ||
+              !targetLanguageCode ||
+              sourceLanguageCode === targetLanguageCode
+            }
           >
             <T k="common.save" />
           </Button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { FC, useCallback, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@nextui-org/react";
 import { toast } from "react-toastify";
 import { T } from "@/i18n/T";
@@ -8,8 +9,14 @@ import i18n from "@/i18n/config";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { TBoard, TLessonBoardScope } from "@/app/board/types";
 import { useLessonBoard } from "@/app/board/hooks/useLessonBoard";
-import { BoardEditorModal } from "@/app/board/components/BoardEditorModal";
-import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
+
+const BoardEditorModal = dynamic(
+  () =>
+    import("@/app/board/components/BoardEditorModal").then(
+      (mod) => mod.BoardEditorModal,
+    ),
+  { ssr: false },
+);
 
 type TProps = {
   lessonId: number;
@@ -123,7 +130,7 @@ export const LessonBoardButton: FC<TProps> = ({
         onClick={() => void handleOpen()}
         size="lg"
         isLoading={isOpening}
-        className={LESSON_FAB_BUTTON_CLASS}
+        style={{ minWidth: 300 }}
       >
         <T k="boards.lessonBoard" />
       </Button>

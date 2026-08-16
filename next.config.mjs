@@ -23,19 +23,22 @@ const nextConfig = {
       },
     ];
   },
-  // async headers() {
-  //   return [
-  //     {
-  //       source: "/(.*)",
-  //       headers: [
-  //         {
-  //           key: "Content-Security-Policy",
-  //           value: `default-src 'self'; connect-src 'self' https://widget.cloudpayments.ru https://api2.amplitude.com/ https://static.cloudpayments.ru https://static-stage.cloudpayments.ru https://pay.google.com https://google.com https://www.google.com https://pay.yandex.ru https://api-statist.dev-tcsgroup.io https://api-statist.tinkoff.ru https://forma.tinkoff.ru https://intent-api.cloudpayments.ru;`,
-  //         },
-  //       ],
-  //     },
-  //   ];
-  // },
+  async headers() {
+    return [
+      {
+        source: "/.well-known/apple-app-site-association",
+        headers: [
+          { key: "Content-Type", value: "application/json" },
+        ],
+      },
+      {
+        source: "/.well-known/assetlinks.json",
+        headers: [
+          { key: "Content-Type", value: "application/json" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

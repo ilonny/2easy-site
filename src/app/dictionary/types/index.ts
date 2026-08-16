@@ -51,7 +51,11 @@ export type TLessonBulkCreateWordsResult = {
   skipped: Array<{ studentId: number; reason: "duplicate" }>;
 };
 
-export type DictionaryTab = "unlearned" | "learned";
+export type DictionaryTab = "unlearned" | "learned" | "training";
+
+export type TrainingMode = "cards" | "quizOptions" | "quizInput";
+
+export type TrainingStep = "modes" | "words";
 
 export type TSpeechPlaybackState = {
   activeId: string | null;
@@ -60,4 +64,6 @@ export type TSpeechPlaybackState = {
 
 export type TSynthesizeSpeechPayload = {
   text: string;
+  languageCode?: string;
 };
+

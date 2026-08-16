@@ -105,10 +105,10 @@ export const DICTIONARY_WORD_CARD_LESSON_BADGE_CLASS =
 
 export const DICTIONARY_MODAL_TABS_CLASS_NAMES = {
   base: "w-full",
-  tabList: "grid grid-cols-2 w-full border-b border-[#eee] p-0 gap-0",
-  tab: "w-full h-11 justify-center px-2 text-sm sm:text-base",
+  tabList: "grid grid-cols-3 w-full border-b border-[#eee] p-0 gap-0",
+  tab: "w-full h-11 justify-center px-1.5 sm:px-2 text-xs sm:text-base",
   cursor: "w-full bg-primary",
-  tabContent: "w-full text-center whitespace-normal sm:whitespace-nowrap",
+  tabContent: "w-full text-center whitespace-normal leading-tight sm:whitespace-nowrap",
 };
 
 export const DICTIONARY_MODAL_FOOTER_CLASS =
@@ -281,3 +281,52 @@ export const DICTIONARY_ONBOARDING_STEP_COUNTER_CLASS =
 
 export const DICTIONARY_ONBOARDING_ACTIONS_CLASS =
   "flex w-full gap-2";
+
+export const DICTIONARY_TRAINING_MODE_CARD_CLASS =
+  "w-full rounded-xl border border-[#eee] bg-[#fafafa] p-4 text-left transition-colors touch-manipulation hover:border-primary/30 hover:bg-[#eeebff]";
+
+export const DICTIONARY_TRAINING_SESSION_CLASS_NAMES = {
+  base: [
+    "mx-auto w-full sm:max-w-xl md:max-w-2xl",
+    DICTIONARY_MODAL_HEIGHT_CLASS,
+  ].join(" "),
+  wrapper: `items-center ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
+  body: "overflow-hidden py-0",
+};
+
+export const DICTIONARY_TRAINING_FLASHCARD_SCENE_CLASS =
+  "relative mx-auto w-full max-w-[300px] sm:max-w-[340px] flex-1 min-h-[240px] [perspective:1200px]";
+
+export const DICTIONARY_TRAINING_FLASHCARD_INNER_CLASS =
+  "relative h-full w-full transition-transform duration-500 ease-[cubic-bezier(0.4,0.2,0.2,1)] [transform-style:preserve-3d]";
+
+export const DICTIONARY_TRAINING_FLASHCARD_INNER_FLIPPED_CLASS =
+  "[transform:rotateY(180deg)]";
+
+export const DICTIONARY_TRAINING_FLASHCARD_FACE_CLASS = [
+  "absolute inset-0 flex flex-col rounded-2xl border border-[#e8e8e8] bg-white",
+  "shadow-[0_12px_40px_rgba(35,31,32,0.12),0_2px_8px_rgba(35,31,32,0.06)]",
+  "p-4 sm:p-5 text-center cursor-pointer touch-manipulation select-none",
+  "[backface-visibility:hidden] [-webkit-backface-visibility:hidden]",
+].join(" ");
+
+export const DICTIONARY_TRAINING_FLASHCARD_FACE_BACK_CLASS =
+  "[transform:rotateY(180deg)] bg-[#faf9ff] border-primary/15";
+
+export const DICTIONARY_TRAINING_FLASHCARD_TEXT_CLASS =
+  "m-auto text-lg sm:text-xl font-medium text-[#231F20] break-words px-3 max-w-full";
+
+export const DICTIONARY_TRAINING_FLASHCARD_HINT_CLASS =
+  "absolute bottom-3 left-0 right-0 text-xs text-[#B7B7B7]";
+
+export const DICTIONARY_TRAINING_OPTION_BASE_CLASS =
+  "w-full rounded-xl border px-4 py-3 text-base text-left transition-colors touch-manipulation";
+
+export const DICTIONARY_TRAINING_OPTION_DEFAULT_CLASS =
+  "border-[#eee] bg-[#fafafa] hover:border-primary/30 hover:bg-[#eeebff]";
+
+export const DICTIONARY_TRAINING_OPTION_CORRECT_CLASS =
+  "border-success/40 bg-success/10 text-success";
+
+export const DICTIONARY_TRAINING_OPTION_WRONG_CLASS =
+  "border-danger/40 bg-danger/10 text-danger";
