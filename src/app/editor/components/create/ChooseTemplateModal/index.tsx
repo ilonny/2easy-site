@@ -10,7 +10,6 @@ import Image from "next/image";
 import CloseIcon from "@/assets/icons/close.svg";
 import { templates, TTemplate } from "./templates";
 import { T } from "@/i18n/T";
-import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
 type TProps = {
   isVisible: boolean;
@@ -60,7 +59,6 @@ export const ChooseTemplateModal: FC<TProps> = ({
       onClose={() => setIsVisible(false)}
       scrollBehavior="outside"
       hideCloseButton
-      classNames={{ wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS }}
     >
       <ModalContent>
         <ModalHeader className="relative px-4 pr-12 py-3 sm:py-4">

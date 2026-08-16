@@ -27,14 +27,13 @@ export const CopyLessonLink = () => {
         <Button
           endContent={<img src={LinkIcon.src} alt="icon" />}
           variant="light"
-          className="min-h-10 touch-manipulation"
         >
           <T k="lessons.lessonLink" defaultText="Ссылка на урок" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="max-w-[min(100vw-2rem,420px)] items-start bg-white p-3 sm:p-4 cursor-pointer">
+      <PopoverContent className="p-4 bg-white items-start cursor-pointer">
         <div
-          className="w-full min-w-0"
+          className=""
           onClick={() => {
             navigator.clipboard.writeText(window.location.href).then(() => {
               toast.success(
@@ -47,14 +46,14 @@ export const CopyLessonLink = () => {
             });
           }}
         >
-          <div className="flex items-center justify-between gap-3 sm:gap-4">
-            <p className="text-sm sm:text-base">
+          <div className="flex justify-between items-center gap-4">
+            <p>
               <T k="common.copyLink" defaultText="Скопировать ссылку" />
             </p>
-            <img src={CopyIcon.src} alt="" className="shrink-0" />
+            <img src={CopyIcon.src} alt="fds" />
           </div>
-          <div className="mt-2 max-w-full overflow-hidden break-all border border-[#191919] p-2 text-xs sm:text-sm">
-            {typeof window !== "undefined" ? window.location.href : ""}
+          <div className="p-2 mt-2" style={{ border: "1px solid #191919" }}>
+            {window.location.href}
           </div>
         </div>
       </PopoverContent>

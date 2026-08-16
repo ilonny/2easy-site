@@ -27,19 +27,13 @@
   pointer-events: all;
 }
 
-.wrapper .eye-text {
-  opacity: 1;
+.wrapper .eye-text { 
+  opacity: 0;
   transition: all 250ms ease;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .wrapper .eye-text {
-    opacity: 0;
-  }
-
-  .wrapper:hover .eye-text {
-    opacity: 1;
-  }
+.wrapper:hover .eye-text { 
+  opacity: 1;
 }
 
 .dashed {

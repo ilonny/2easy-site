@@ -1,23 +1,15 @@
-import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
-
-/** @deprecated use OVERLAY_ABOVE_HEADER_Z_CLASS from @/constants/uiLayers */
-export const DICTIONARY_MODAL_LAYER_CLASS = OVERLAY_ABOVE_HEADER_Z_CLASS;
-
 export const DICTIONARY_SEARCH_DEBOUNCE_MS = 500;
 
 export const DICTIONARY_SELECTION_WIDGET_SHOW_DELAY_MS = 200;
 
-/** Extra delay on coarse pointers so iOS selection settles before the pill appears. */
-export const DICTIONARY_SELECTION_WIDGET_TOUCH_SHOW_DELAY_MS = 450;
+export const DICTIONARY_SELECTION_WIDGET_ESTIMATED_WIDTH = 220;
 
-export const DICTIONARY_SELECTION_WIDGET_ESTIMATED_WIDTH = 240;
-
-export const DICTIONARY_SELECTION_WIDGET_ESTIMATED_HEIGHT = 48;
+export const DICTIONARY_SELECTION_WIDGET_ESTIMATED_HEIGHT = 40;
 
 export const DICTIONARY_SELECTION_WIDGET_OFFSET = 6;
 
 export const DICTIONARY_SELECTION_WIDGET_PILL_CLASS =
-  "absolute z-20 flex min-h-11 max-w-[min(260px,calc(100vw-2rem))] items-center gap-2 rounded-lg border border-primary/10 bg-white px-3 py-2.5 text-sm text-primary font-medium shadow-lg hover:bg-[#faf9ff] touch-manipulation whitespace-nowrap transition-all duration-200 ease-out";
+  "absolute z-20 flex max-w-[min(240px,calc(100vw-3rem))] items-center gap-2 rounded-lg border border-primary/10 bg-white px-3 py-2 text-sm text-primary font-medium shadow-lg hover:bg-[#faf9ff] touch-manipulation whitespace-nowrap transition-all duration-200 ease-out";
 
 export const DICTIONARY_SELECTION_WIDGET_PILL_VISIBLE_CLASS =
   "opacity-100 scale-100";
@@ -38,7 +30,7 @@ export const DICTIONARY_MODAL_CLASS_NAMES = {
     "mx-auto w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl",
     DICTIONARY_MODAL_HEIGHT_CLASS,
   ].join(" "),
-  wrapper: `items-center ${OVERLAY_ABOVE_HEADER_Z_CLASS} ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
+  wrapper: `items-center ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
   body: "overflow-hidden py-0",
 };
 
@@ -143,7 +135,7 @@ export const DICTIONARY_ADD_WORD_MODAL_CLASS_NAMES = {
     "mx-auto w-full sm:max-w-md",
     DICTIONARY_SECONDARY_MODAL_MAX_HEIGHT_CLASS,
   ].join(" "),
-  wrapper: `items-center ${OVERLAY_ABOVE_HEADER_Z_CLASS} ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
+  wrapper: `items-center ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
 };
 
 export const DICTIONARY_ADD_WORD_MODAL_FOOTER_CLASS = [
@@ -157,7 +149,7 @@ export const DICTIONARY_CONFIRM_MODAL_CLASS_NAMES = {
     "mx-auto w-full max-w-[calc(100vw-1rem)] sm:max-w-md",
     DICTIONARY_SECONDARY_MODAL_MAX_HEIGHT_CLASS,
   ].join(" "),
-  wrapper: `items-center ${OVERLAY_ABOVE_HEADER_Z_CLASS} px-2 sm:px-4`,
+  wrapper: "items-center px-2 sm:px-4",
 };
 
 export const ICON_DICTIONARY_BUTTON_BASE_CLASS =
@@ -170,7 +162,7 @@ export const ICON_DICTIONARY_BUTTON_COMPACT_SIZE_CLASS =
   "!h-7 !w-7 !min-h-7 !min-w-7 !max-h-7 !max-w-7 md:!h-9 md:!w-9 md:!min-h-9 md:!min-w-9 md:!max-h-9 md:!max-w-9";
 
 export const LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS =
-  "flex h-7 w-auto shrink-0 items-center justify-center md:h-auto md:justify-start";
+  "flex h-7 w-full shrink-0 items-center justify-center md:h-auto md:w-auto md:justify-start";
 
 export const DICTIONARY_CONFIRM_MODAL_TITLE_CLASS =
   "text-base sm:text-lg break-words";
@@ -266,7 +258,7 @@ export const DICTIONARY_ONBOARDING_MODAL_CLASS_NAMES = {
     "mx-auto w-full sm:max-w-xl md:max-w-2xl",
     DICTIONARY_SECONDARY_MODAL_MAX_HEIGHT_CLASS,
   ].join(" "),
-  wrapper: `items-center ${OVERLAY_ABOVE_HEADER_Z_CLASS} ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
+  wrapper: `items-center ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
 };
 
 export const DICTIONARY_ONBOARDING_IMAGE_SLOT_CLASS =
@@ -295,7 +287,7 @@ export const DICTIONARY_TRAINING_SESSION_CLASS_NAMES = {
     "mx-auto w-full sm:max-w-xl md:max-w-2xl",
     DICTIONARY_MODAL_HEIGHT_CLASS,
   ].join(" "),
-  wrapper: `items-center ${OVERLAY_ABOVE_HEADER_Z_CLASS} ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
+  wrapper: `items-center ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
   body: "overflow-hidden py-0",
 };
 

@@ -98,9 +98,9 @@ export default function BoardRealtimePage() {
     <div className="fixed inset-0 z-[2] flex flex-col bg-white">
       {isEditMode ? <BoardEditModeBanner /> : null}
 
-      <div className="relative flex shrink-0 flex-wrap items-center gap-2 border-b border-default-200 px-3 py-2.5 sm:gap-3 sm:px-6 sm:py-3 pt-[max(0.625rem,env(safe-area-inset-top))]">
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:gap-3">
-          <p className="min-w-0 max-w-full truncate text-sm font-medium sm:text-base">{title}</p>
+      <div className="relative flex shrink-0 items-center gap-3 border-b border-default-200 px-4 py-3 sm:px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <p className="min-w-0 truncate font-medium">{title}</p>
           {isEditMode && board ? (
             <BoardStartLessonButton
               board={board}
@@ -112,14 +112,14 @@ export default function BoardRealtimePage() {
               color="default"
               size="sm"
               variant="flat"
-              className="shrink-0 touch-manipulation"
+              className="shrink-0"
               onPress={handleBackToEdit}
             >
               <T k="boards.backToEdit" />
             </Button>
           ) : null}
         </div>
-        <div className="flex shrink-0 items-center overflow-visible py-0.5 pr-12">
+        <div className="flex shrink-0 items-center pr-10">
           {!isEditMode ? (
             <BoardParticipantsList
               api={boardApi}
@@ -129,11 +129,7 @@ export default function BoardRealtimePage() {
             />
           ) : null}
         </div>
-        <BoardCloseButton
-          variant="header"
-          className="z-30"
-          onClick={handleClose}
-        />
+        <BoardCloseButton variant="header" onClick={handleClose} />
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">

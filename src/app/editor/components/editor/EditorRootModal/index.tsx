@@ -23,7 +23,6 @@ import { FillGapsNew } from "../FillGapsNew";
 import { T } from "@/i18n/T";
 import Image from "next/image";
 import CloseIcon from "@/assets/icons/close.svg";
-import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
 type TProps = {
   isVisible: boolean;
@@ -32,31 +31,16 @@ type TProps = {
   onBack?: () => void;
   id?: number;
   onSuccess: (id: number) => void;
-  chosenExToEdit?: {
-    id?: number;
-    type?: TTemplate["type"] | string;
-    [key: string]: unknown;
-  };
+  chosenExToEdit?: any;
   lastSortIndex: number;
   currentSortIndexToShift?: number;
-};
-
-const blurActiveField = (root: HTMLElement | null) => {
-  const active = document.activeElement as HTMLElement | null;
-  if (!active || !root?.contains(active)) return;
-  if (
-    active.tagName === "INPUT" ||
-    active.tagName === "TEXTAREA" ||
-    active.isContentEditable
-  ) {
-    active.blur();
-  }
 };
 
 export const EditorRootModal: FC<TProps> = ({
   isVisible,
   setIsVisible,
   type,
+  id,
   onBack,
   onSuccess,
   chosenExToEdit,
@@ -64,8 +48,6 @@ export const EditorRootModal: FC<TProps> = ({
   currentSortIndexToShift,
 }) => {
   const restoreStylesRef = useRef<null | (() => void)>(null);
-  const bodyRef = useRef<HTMLElement | null>(null);
-  const touchRef = useRef<{ y: number; moved: boolean } | null>(null);
 
   // iOS Safari: prevent window scroll jumps when keyboard opens inside modal
   useEffect(() => {
@@ -111,7 +93,7 @@ export const EditorRootModal: FC<TProps> = ({
         } catch {}
       } finally {
         try {
-          delete body.dataset.editorScrollLock;
+          delete (body.dataset as any).editorScrollLock;
         } catch {}
       }
     };
@@ -199,8 +181,6 @@ export const EditorRootModal: FC<TProps> = ({
     }
   }, [type, chosenExToEdit]);
 
-  const titleType = type || chosenExToEdit?.type;
-
   return (
     <Modal
       isDismissable={false}
@@ -211,19 +191,15 @@ export const EditorRootModal: FC<TProps> = ({
         restoreStylesRef.current?.();
         setIsVisible(false);
       }}
-      // Custom body lock above — avoid NextUI double-lock fighting iOS scroll.
-      shouldBlockScroll={false}
+      style={{ background: "#F9F9F9", overflow: "hidden" }}
       scrollBehavior="inside"
       placement="center"
       classNames={{
-        wrapper: `${OVERLAY_ABOVE_HEADER_Z_CLASS} items-center overflow-hidden`,
-        base: "max-h-[min(92dvh,100dvh)] max-w-[1280px] w-[min(100%,1280px)] mx-auto my-2 sm:my-4 !overflow-hidden flex flex-col",
-        body: "flex-1 min-h-0 overflow-y-auto overscroll-contain",
+        base: "max-h-[92dvh] max-w-[1280px] w-[min(100%,1280px)] mx-auto my-2 sm:my-4",
       }}
-      style={{ background: "#F9F9F9" }}
     >
-      <ModalContent className="flex max-h-[min(92dvh,100dvh)] flex-col overflow-hidden border-0 shadow-2xl">
-        <ModalHeader className="relative shrink-0 border-b border-default-200 px-4 py-4 pr-12 sm:px-6 sm:py-5">
+      <ModalContent className="border-0 shadow-2xl">
+        <ModalHeader className="relative px-4 pr-12 py-4 sm:px-6 sm:py-5 shrink-0 border-b border-default-200">
           <button
             type="button"
             onClick={() => {
@@ -241,7 +217,7 @@ export const EditorRootModal: FC<TProps> = ({
                 <button
                   type="button"
                   onClick={() => onBack && onBack()}
-                  className="shrink-0 whitespace-nowrap text-left text-small font-light"
+                  className="shrink-0 text-left text-small font-light whitespace-nowrap"
                   style={{ cursor: "pointer" }}
                 >
                   <T
@@ -255,38 +231,13 @@ export const EditorRootModal: FC<TProps> = ({
             </div>
             <div className="min-w-0 px-1 text-center">
               <p className="break-words text-balance text-base font-semibold [overflow-wrap:anywhere] sm:text-lg">
-                {mapTypeToTitle(titleType)}
+                {mapTypeToTitle(type)}
               </p>
             </div>
             <div className="h-9 w-9 shrink-0" aria-hidden />
           </div>
         </ModalHeader>
-        <ModalBody
-          className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-4 py-4 [-webkit-overflow-scrolling:touch] sm:px-8 sm:py-6"
-          onScroll={(e) => {
-            bodyRef.current = e.currentTarget;
-            if (touchRef.current?.moved) {
-              blurActiveField(e.currentTarget);
-            }
-          }}
-          onTouchStart={(e) => {
-            bodyRef.current = e.currentTarget;
-            const t = e.touches[0];
-            touchRef.current = { y: t?.clientY ?? 0, moved: false };
-          }}
-          onTouchMove={(e) => {
-            const st = touchRef.current;
-            if (!st) return;
-            const y = e.touches[0]?.clientY ?? 0;
-            if (Math.abs(y - st.y) > 8) {
-              st.moved = true;
-              blurActiveField(e.currentTarget);
-            }
-          }}
-          onTouchEnd={() => {
-            touchRef.current = null;
-          }}
-        >
+        <ModalBody className="overflow-y-auto overscroll-contain px-4 py-4 sm:px-8 sm:py-6 gap-6 flex flex-col">
           {!!EditorComponent && (
             <EditorComponent
               onSuccess={onSuccess}

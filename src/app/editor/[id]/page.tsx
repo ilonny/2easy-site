@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useLessons } from "@/app/lessons/hooks/useLessons";
@@ -13,7 +12,7 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { useParams } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 import {
   useCallback,
   useContext,
@@ -28,7 +27,7 @@ import { TTemplate } from "../components/create/ChooseTemplateModal/templates";
 import { EditorRootModal } from "../components/editor/EditorRootModal";
 import { useExList } from "../hooks/useExList";
 import { ExList } from "../components/view/ExList";
-import { checkResponse, fetchPostJson } from "@/api";
+import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { withLogin } from "@/auth/hooks/withLogin";
@@ -55,17 +54,12 @@ export default function EditorPage() {
   const lessonId = parseRouteId(params?.id);
   const { profile } = useContext(AuthContext);
   const { lesson, getLesson } = useLessons();
-  const { exList, getExList, changeSortIndex, deleteEx } =
+  const { exList, getExList, exListIsLoading, changeSortIndex, deleteEx } =
     useExList(lessonId ?? undefined);
   const [exCreateTemplateModal, setExCreateTemplateModal] = useState(false);
   const [editorModal, setEditorModal] = useState(false);
   const [chosenTemplate, setChosenTemplate] = useState<TTemplate | null>(null);
-  const [chosenExToEdit, setChosenExToEdit] = useState<{
-    id?: number;
-    type?: string;
-    sortIndex?: number;
-    [key: string]: unknown;
-  } | null>(null);
+  const [chosenExToEdit, setChosenExToEdit] = useState<any>(null);
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState<number | undefined>();
   const [currentSortIndexToShift, setCurrentSortIndexToShift] = useState<
@@ -385,7 +379,7 @@ export default function EditorPage() {
         <div className="h-6 md:h-8 lg:h-10" />
         <div className="h-6 md:h-8 lg:h-10" />
         {profile?.login === "lessons@2easy.com" && (
-          <div className="flex justify-center pb-[max(5rem,calc(3rem+env(safe-area-inset-bottom,0px)))] sm:pb-20">
+          <div className="justify-center flex">
             <Button
               size="lg"
               color="primary"

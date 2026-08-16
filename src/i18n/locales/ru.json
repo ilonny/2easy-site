@@ -388,8 +388,6 @@
     },
     "participants": "УЧАСТНИКИ",
     "participantsShort": "Участн.",
-    "participantsButton": "Участники",
-    "lessonTools": "Меню урока",
     "participantsAriaLabel": "Участники урока",
     "resetAnswers": "Сбросить ответы",
     "resetAnswersConfirm": "Сбросить ответы в задании {{title}}",

@@ -278,17 +278,17 @@ export const MatchWordWordExView: FC<TProps> = ({
 
             return (
               <div
-                className="mb-3 flex w-full min-w-0 flex-row items-stretch gap-1.5 sm:mb-4 sm:gap-3 md:gap-4"
+                className="flex flex-row items-stretch gap-2 sm:gap-3 md:gap-4 w-full mb-3 sm:mb-4 min-w-0"
                 key={m.id}
               >
                 <div
-                  className="w-1/2 min-w-0 basis-1/2 radius-10 touch-manipulation"
+                  className="w-1/2 min-w-0 basis-1/2 radius-10"
                   onClick={() => onClickLeft(m.id)}
                 >
                   <Card
                     shadow="none"
                     radius="sm"
-                    className="h-full min-h-[3rem] p-1.5 text-xs font-bold [overflow-wrap:anywhere] break-words sm:min-h-[3.5rem] sm:p-3 sm:text-base md:p-4 md:text-[18px]"
+                    className="p-2 sm:p-3 md:p-4 h-full min-h-[3.5rem] text-sm sm:text-base md:text-[18px] font-bold [overflow-wrap:anywhere] break-words"
                     style={{
                       cursor: "pointer",
                       background:
@@ -310,11 +310,11 @@ export const MatchWordWordExView: FC<TProps> = ({
                   </Card>
                 </div>
                 <div
-                  className="w-1/2 min-w-0 basis-1/2 radius-10 touch-manipulation"
+                  className="w-1/2 min-w-0 basis-1/2 radius-10"
                   onClick={() => onClickRight(m.correctId)}
                 >
                   <Card
-                    className="h-full min-h-[3rem] p-1.5 text-xs [overflow-wrap:anywhere] break-words sm:min-h-[3.5rem] sm:p-3 sm:text-base md:p-4"
+                    className="p-2 sm:p-3 md:p-4 h-full min-h-[3.5rem] text-sm sm:text-base [overflow-wrap:anywhere] break-words"
                     radius="sm"
                     style={{
                       cursor: "pointer",
@@ -343,17 +343,17 @@ export const MatchWordWordExView: FC<TProps> = ({
           {incorrectedMatches.map((m) => {
             return (
               <div
-                className="relative mb-3 flex w-full min-w-0 flex-row items-start gap-1.5 sm:mb-4 sm:gap-3 md:gap-4"
+                className="flex flex-row items-start gap-2 sm:gap-3 md:gap-4 w-full mb-3 sm:mb-4 relative min-w-0"
                 key={m.id}
               >
-                <div className="relative w-1/2 min-w-0 basis-1/2 radius-10">
+                <div className="w-1/2 min-w-0 basis-1/2 radius-10 relative">
                   <div
-                    className="pointer-events-none absolute top-1/2 left-full z-0 hidden h-0.5 w-8 -translate-y-1/2 bg-[rgb(33,159,89)] sm:block sm:w-20 md:w-[100px]"
+                    className="pointer-events-none absolute top-1/2 left-full z-0 h-0.5 -translate-y-1/2 bg-[rgb(33,159,89)] w-12 sm:w-20 md:w-[100px]"
                   />
                   <Card
                     shadow="sm"
                     radius="sm"
-                    className="relative z-[1] p-1.5 text-xs font-bold [overflow-wrap:anywhere] break-words sm:p-4 sm:text-base md:p-6 lg:p-8"
+                    className="relative z-[1] p-2 sm:p-4 md:p-6 lg:p-8 text-sm sm:text-base [overflow-wrap:anywhere] break-words font-bold"
                     style={{
                       cursor: "pointer",
                       border: "2px solid rgb(164, 41, 41) ",
@@ -366,7 +366,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                 </div>
                 <div className="w-1/2 min-w-0 basis-1/2 radius-10">
                   <Card
-                    className="p-1.5 text-xs [overflow-wrap:anywhere] break-words sm:p-4 sm:text-base md:p-6 lg:p-8"
+                    className="p-2 sm:p-4 md:p-6 lg:p-8 text-sm sm:text-base [overflow-wrap:anywhere] break-words"
                     shadow="sm"
                     radius="sm"
                     style={{
@@ -384,17 +384,17 @@ export const MatchWordWordExView: FC<TProps> = ({
           {correctedMatches.map((m) => {
             return (
               <div
-                className="relative mb-3 flex w-full min-w-0 flex-row items-start gap-1.5 sm:mb-4 sm:gap-3 md:gap-4"
+                className="flex flex-row items-start gap-2 sm:gap-3 md:gap-4 w-full mb-3 sm:mb-4 relative min-w-0"
                 key={m.id}
               >
-                <div className="relative w-1/2 min-w-0 basis-1/2 radius-10">
+                <div className="w-1/2 min-w-0 basis-1/2 radius-10 relative">
                   <div
-                    className="pointer-events-none absolute top-1/2 left-full z-0 hidden h-0.5 w-8 -translate-y-1/2 bg-[rgb(33,159,89)] sm:block sm:w-20 md:w-[100px]"
+                    className="pointer-events-none absolute top-1/2 left-full z-0 h-0.5 -translate-y-1/2 bg-[rgb(33,159,89)] w-12 sm:w-20 md:w-[100px]"
                   />
                   <Card
                     shadow="sm"
                     radius="sm"
-                    className="relative z-[1] p-1.5 text-xs font-bold [overflow-wrap:anywhere] break-words sm:p-4 sm:text-base md:p-6 lg:p-8"
+                    className="relative z-[1] p-2 sm:p-4 md:p-6 lg:p-8 text-sm sm:text-base [overflow-wrap:anywhere] break-words font-bold"
                     style={{
                       cursor: "pointer",
                       border: "2px solid #219F59",
@@ -407,7 +407,7 @@ export const MatchWordWordExView: FC<TProps> = ({
                 </div>
                 <div className="w-1/2 min-w-0 basis-1/2 radius-10">
                   <Card
-                    className="p-1.5 text-xs [overflow-wrap:anywhere] break-words sm:p-4 sm:text-base md:p-6 lg:p-8"
+                    className="p-2 sm:p-4 md:p-6 lg:p-8 text-sm sm:text-base [overflow-wrap:anywhere] break-words"
                     shadow="sm"
                     radius="sm"
                     style={{

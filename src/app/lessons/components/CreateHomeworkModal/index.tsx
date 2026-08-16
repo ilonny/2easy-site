@@ -14,7 +14,6 @@ import { FC, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
-import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
 const EX_TYPE_TO_TEMPLATE_KEY: Record<string, string> = {
   "text-default": "templates.text",
@@ -160,7 +159,6 @@ export const CreateHomeworkModal: FC<TProps> = ({
       onClose={() => setIsVisible(false)}
       scrollBehavior="outside"
       style={{ backgroundColor: "#F9F9F9" }}
-      classNames={{ wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS }}
     >
       <ModalContent>
         <ModalHeader>

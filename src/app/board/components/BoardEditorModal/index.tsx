@@ -16,7 +16,7 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useState } from "react";
 
 type TProps = {
   isOpen: boolean;
@@ -55,19 +55,11 @@ export const BoardEditorModal: FC<TProps> = ({
     onClose();
   }, [editor, isHost, onClose]);
 
-  // Keep site header (z-60) from covering the board modal/toolbar/close.
-  useEffect(() => {
-    if (!isOpen) return;
-    document.body.dataset.lessonBoardOpen = "1";
-    return () => {
-      delete document.body.dataset.lessonBoardOpen;
-    };
-  }, [isOpen]);
-
   return (
     <Modal
       isDismissable={false}
-      hideCloseButton
+      hideCloseButton={false}
+      closeButton={<BoardCloseButton />}
       size="full"
       radius="none"
       isOpen={isOpen}
@@ -76,14 +68,14 @@ export const BoardEditorModal: FC<TProps> = ({
       placement="center"
       classNames={BOARD_EDITOR_MODAL_CLASS_NAMES}
     >
-      <ModalContent className="flex h-full max-h-[100dvh] flex-col rounded-none">
-        <ModalHeader className="relative px-3 py-2.5 pr-14 pt-[max(0.625rem,env(safe-area-inset-top))] sm:px-6 sm:py-3 sm:pr-14">
-          <div className="flex w-full min-w-0 items-center gap-2 sm:gap-3">
-            <p className="min-w-0 flex-1 truncate text-sm sm:text-base">
+      <ModalContent className="h-full max-h-[100dvh] rounded-none flex flex-col">
+        <ModalHeader className="px-4 py-3 sm:px-6">
+          <div className="flex w-full items-center gap-3">
+            <p className="min-w-0 flex-1 truncate">
               {board?.title || <T k="boards.myBoards" />}
             </p>
             {mode === "realtime" ? (
-              <div className="flex shrink-0 items-center overflow-visible py-0.5">
+              <div className="flex shrink-0 items-center pr-10">
                 <BoardParticipantsList
                   api={boardApi}
                   participants={editor.participants}
@@ -93,15 +85,8 @@ export const BoardEditorModal: FC<TProps> = ({
               </div>
             ) : null}
           </div>
-          <BoardCloseButton
-            variant="header"
-            className="z-[90]"
-            onClick={() => {
-              void handleClose();
-            }}
-          />
         </ModalHeader>
-        <ModalBody className="flex min-h-0 flex-1 flex-col">
+        <ModalBody className="flex flex-1 min-h-0 flex-col">
           {boardId ? (
             <BoardEditorChrome
               boardId={boardId}

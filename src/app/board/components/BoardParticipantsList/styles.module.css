@@ -2,16 +2,12 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  min-width: 0;
-  overflow: visible;
 }
 
 .teacherBlock {
   display: flex;
   align-items: center;
   gap: 1rem;
-  flex-shrink: 0;
-  overflow: visible;
 }
 
 .teacherBlockDivider {
@@ -29,15 +25,12 @@
 .studentsGroup {
   display: flex;
   align-items: center;
-  overflow: visible;
-  padding-left: 2px;
 }
 
 .avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
   width: 2rem;
   height: 2rem;
   border: 2px solid #fff;
@@ -49,12 +42,10 @@
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
-  line-height: 1;
-  overflow: hidden;
   transition: transform 0.12s ease;
 }
 
-.studentsGroup .avatar:not(:first-child) {
+.avatar:not(:first-child) {
   margin-left: -0.5rem;
 }
 
@@ -134,18 +125,5 @@
     width: 1.75rem;
     height: 1.75rem;
     font-size: 0.75rem;
-  }
-
-  .teacherLabel {
-    display: none;
-  }
-
-  .teacherBlock {
-    gap: 0.5rem;
-  }
-
-  .wrap {
-    max-width: 100%;
-    overflow: visible;
   }
 }

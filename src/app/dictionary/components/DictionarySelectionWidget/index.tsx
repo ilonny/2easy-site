@@ -12,7 +12,6 @@ import {
   DICTIONARY_SELECTION_WIDGET_PILL_HIDDEN_CLASS,
   DICTIONARY_SELECTION_WIDGET_PILL_VISIBLE_CLASS,
   DICTIONARY_SELECTION_WIDGET_SHOW_DELAY_MS,
-  DICTIONARY_SELECTION_WIDGET_TOUCH_SHOW_DELAY_MS,
 } from "../../constants";
 import { getSelectionEndRect } from "../../utils/selection";
 import { clampWidgetPosition } from "../../utils/clampWidgetPosition";
@@ -21,18 +20,6 @@ type TProps = {
   wrapperId: string;
   onAddSelection: (selection: string) => void;
 };
-
-function getShowDelayMs() {
-  if (typeof window === "undefined") {
-    return DICTIONARY_SELECTION_WIDGET_SHOW_DELAY_MS;
-  }
-  const coarse =
-    window.matchMedia("(hover: none)").matches ||
-    window.matchMedia("(pointer: coarse)").matches;
-  return coarse
-    ? DICTIONARY_SELECTION_WIDGET_TOUCH_SHOW_DELAY_MS
-    : DICTIONARY_SELECTION_WIDGET_SHOW_DELAY_MS;
-}
 
 export const DictionarySelectionWidget: FC<TProps> = ({
   wrapperId,
@@ -129,7 +116,7 @@ export const DictionarySelectionWidget: FC<TProps> = ({
     clearShowTimeout();
     showTimeoutRef.current = window.setTimeout(() => {
       updateWidgetFromSelection();
-    }, getShowDelayMs());
+    }, DICTIONARY_SELECTION_WIDGET_SHOW_DELAY_MS);
   }, [clearShowTimeout, updateWidgetFromSelection]);
 
   useEffect(() => {
@@ -211,15 +198,9 @@ export const DictionarySelectionWidget: FC<TProps> = ({
         e.stopPropagation();
       }}
       onTouchStart={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }}
-      onPointerDown={(e) => {
-        e.preventDefault();
         e.stopPropagation();
       }}
       onClick={(e) => {
-        e.preventDefault();
         e.stopPropagation();
         onAddSelection(widgetState.selection);
         clearShowTimeout();

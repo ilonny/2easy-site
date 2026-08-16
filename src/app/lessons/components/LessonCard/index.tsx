@@ -508,11 +508,11 @@ export const LessonCard: FC<TProps> = ({
               }}
             >
               <PopoverTrigger>
-                <Button isIconOnly variant="flat" className="min-h-10 min-w-10 touch-manipulation">
+                <Button isIconOnly variant="flat">
                   <Image src={Ellipse} alt="icon" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="max-w-[min(100vw-2rem,280px)] items-start bg-white p-2">
+              <PopoverContent className="bg-white p-2 items-start">
                 {!!onPressEdit && lesson.canEdit && (
                   <Button
                     variant="light"

@@ -157,7 +157,7 @@ const DraggableItem = (props: {
           textAlign: "center",
         }}
         id={"draggable-" + id}
-        className={`handle cursor-pointer text-[18px] ${styles.draggableChip}`}
+        className="handle text-[18px] cursor-pointer"
       >
         {chip}
       </Chip>
@@ -373,7 +373,27 @@ export const MatchWordImageExView: FC<TProps> = ({
           />
         )}
         {data.viewType === "drag" && (
-          <div className={styles.chipPool}>
+          <div
+            className="
+              flex
+              items-center
+              wrap
+              gap-4
+              justify-center
+              m-auto
+              py-4
+              flex-wrap
+              shadow-lg
+              top-[80px]
+              lg:top-[0px]
+            "
+            style={{
+              position: "sticky",
+              zIndex: 2,
+              background: "#fff",
+              borderRadius: 10,
+            }}
+          >
             {sortedChips.map((chip, chipIndex) => {
               return (
                 <DraggableItem
@@ -426,9 +446,10 @@ export const MatchWordImageExView: FC<TProps> = ({
                       }
                     >
                       <Card
-                        className={`answer-wrapper mt-4 flex items-center justify-center p-2 ${styles.dropZone}`}
+                        className="mt-4 flex items-center justify-center p-2 answer-wrapper"
                         id={"answer-wrapper-" + image.id}
                         style={{
+                          minHeight: 40,
                           width: "100%",
                           border: isCorrect
                             ? "2px solid #219F59"

@@ -382,9 +382,9 @@ export const ExListComp: FC<TProps> = (props) => {
           id={`ex-${ex.id}`}
         >
           {isTeacher && !isPresentationMode && (
-            <div className="absolute left-[10px] top-[10px] w-[55px] sm:w-auto">
+            <div className="w-[55px] absolute left-[10px] top-[10px]">
               <div
-                className="flex min-h-11 min-w-11 touch-manipulation flex-col items-start gap-2"
+                className="flex flex-col items-start gap-2"
                 style={{ cursor: "pointer" }}
                 onClick={async () => {
                   if (!canEditEye) {

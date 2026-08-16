@@ -28,13 +28,12 @@
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 10px 8px;
+  gap: 8px;
+  padding: 16px 0;
   margin-left: auto;
   margin-right: auto;
-  max-width: 100%;
   position: sticky;
-  top: 0;
+  top: 80px;
   /* Below NextUI Modal (z-50); above exercise content */
   z-index: 10;
   isolation: isolate;
@@ -43,14 +42,6 @@
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 0.1),
     0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
-@media (min-width: 640px) {
-  .pool {
-    gap: 8px;
-    padding: 16px 0;
-    top: 80px;
-  }
 }
 
 @media (min-width: 1024px) {
@@ -71,9 +62,6 @@
   white-space: break-spaces;
   height: auto;
   text-align: center;
-  touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 .card {
@@ -83,27 +71,9 @@
 .content {
   position: relative;
   z-index: 0;
-  line-height: 180%;
-}
-
-@media (min-width: 640px) {
-  .content {
-    line-height: 230%;
-  }
 }
 
 .answerDrop {
   position: relative;
   z-index: 0;
-  min-width: min(150px, 42vw);
-  max-width: 100%;
-  min-height: 44px;
-  box-sizing: border-box;
-}
-
-@media (min-width: 640px) {
-  .answerDrop {
-    min-width: 150px;
-    min-height: 0;
-  }
 }

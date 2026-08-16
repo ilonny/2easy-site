@@ -7,17 +7,19 @@ import { useExList } from "@/app/editor/hooks/useExList";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { AuthContext } from "@/auth";
 import { ContentWrapper } from "@/components";
-import { Button } from "@nextui-org/react";
+import { BreadcrumbItem, Breadcrumbs, Button } from "@nextui-org/react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useState } from "react";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { T } from "@/i18n/T";
+import i18n from "@/i18n/config";
 
 export default function SharedLessonPage() {
   const { checkSubscription, hasSubscription } = useCheckSubscription();
   const { profile } = useContext(AuthContext);
+  const router = useRouter();
   const params = useParams();
 
   const hash = params?.id;
@@ -83,39 +85,78 @@ export default function SharedLessonPage() {
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
-        <div className="h-8 sm:h-10 md:h-14" />
-        <p className="mx-auto max-w-[600px] px-2 text-center text-base font-medium leading-snug sm:text-xl sm:leading-[26px]">
+        <div className="h-10" />
+        <div className="h-10" />
+        {/* <h1
+          color="primary"
+          style={{
+            fontSize: 44,
+            textAlign: "center",
+            color: "#3f28c6",
+            fontWeight: 700,
+          }}
+        >
+          SHARED LESSON
+        </h1> */}
+        <p
+          className="max-w-[600px] text-center m-auto"
+          style={{ fontSize: 20, fontWeight: 500, lineHeight: "26px" }}
+        >
           <T k="lessons.sharedLessonIntro" />{" "}
-          <Link href="/lesson_plans" className="text-primary hover:underline">
+          <Link href="/lesson_plans" className="hover:underline text-primary">
             &quot;<T k="editor.myLessons" />&quot;
           </Link>{" "}
           <T k="lessons.sharedLessonIntroEnd" />
         </p>
-        <div className="h-8 sm:h-10" />
-        <div className="flex w-full min-w-0 items-start gap-4">
-          <div className="w-full min-w-0">
-            <div className="box-border w-full min-w-0 rounded-[10px] bg-white p-3 sm:p-5 md:p-8 lg:p-10">
-              <h1 className="break-words px-1 text-center text-[26px] font-bold leading-tight text-primary sm:text-[32px] md:text-[38px] lg:text-[44px]">
+        <div className="h-10" />
+        <div className="h-10" />
+        <div className="flex items-start gap-4">
+          <div className="w-[100%]">
+            <div
+              className="p-2 lg:p-10"
+              style={{
+                width: "100%",
+                backgroundColor: "#fff",
+                borderRadius: 10,
+                margin: "none",
+              }}
+            >
+              <h1
+                style={{
+                  fontSize: 44,
+                  textAlign: "center",
+                  color: "#3f28c6",
+                  fontWeight: 700,
+                }}
+              >
                 {lesson?.title}
               </h1>
               {!!lesson?.description && (
-                <h2 className="mx-auto mt-3 max-w-[800px] whitespace-pre-line break-words px-2 text-center text-base font-medium sm:mt-4 sm:text-lg md:text-xl">
+                <h2
+                  style={{
+                    fontSize: 20,
+                    textAlign: "center",
+                    // color: "#3f28c6",
+                    fontWeight: 500,
+                    maxWidth: 800,
+                    margin: "auto",
+                    whiteSpace: "break-spaces",
+                  }}
+                >
                   {lesson?.description}
                 </h2>
               )}
-              <div className="h-6 sm:h-8"></div>
+              <div className="h-8"></div>
               {!!lesson?.image_path && (
-                <div className="mb-8 w-full min-w-0 max-w-full sm:mb-12 md:mb-14">
-                  <Zoom>
-                    <img
-                      src={getImageUrl(lesson.image_path)}
-                      className="mx-auto block h-auto max-h-[min(55vh,400px)] max-w-full object-contain"
-                      alt="image lesson"
-                    />
-                  </Zoom>
-                </div>
+                <Zoom>
+                  <img
+                    src={getImageUrl(lesson.image_path)}
+                    style={{ maxHeight: 400, margin: "auto", marginBottom: 60 }}
+                    alt="image lesson"
+                  />
+                </Zoom>
               )}
-              <div className="h-4 sm:h-8"></div>
+              <div className="h-8"></div>
               <div key={exList.length}>
                 <ExList
                   list={exList}
@@ -126,11 +167,10 @@ export default function SharedLessonPage() {
                 />
               </div>
               {lesson?.user_id !== profile?.id && (
-                <div className="flex justify-center px-1">
+                <div className="flex justify-center">
                   <Button
                     size="lg"
                     color="primary"
-                    className="min-h-12 w-full touch-manipulation sm:w-auto"
                     onClick={async () => {
                       const res = await fetchPostJson({
                         path: "/lessons/copy",
@@ -152,7 +192,6 @@ export default function SharedLessonPage() {
             </div>
           </div>
         </div>
-        <div className="h-16" />
       </ContentWrapper>
     </main>
   );

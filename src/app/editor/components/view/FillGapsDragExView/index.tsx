@@ -71,7 +71,7 @@ const AnswerField: FC<{
         style={{
           display: "inline-block",
           lineHeight: "initial",
-          minWidth: isCorrect ? "initial" : undefined,
+          minWidth: isCorrect ? "initial" : 150,
           borderRadius: 30,
           position: "relative",
           fontSize: 18,
@@ -448,8 +448,8 @@ export const FillGapsDragExView: FC<TProps> = ({
         </div>
         <Card className={`${styles.card} p-4 sm:p-6 md:p-8 lg:p-10 box relative mt-2 min-w-0`}>
           <div
+            style={{ margin: "0 auto", lineHeight: "230%" }}
             className={`${styles.content} flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10`}
-            style={{ margin: "0 auto" }}
           >
             {editableContent}
           </div>

@@ -3,6 +3,7 @@
 "use client";
 import {
   Button,
+  Card,
   Image,
   Link,
   Modal,
@@ -11,9 +12,11 @@ import {
   ModalHeader,
   Switch,
 } from "@nextui-org/react";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { SibscribeContext } from "@/subscribe/context";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useParams, useRouter } from "next/navigation";
@@ -40,8 +43,14 @@ import { CopyLessonLink } from "../components/CopyLessonLink";
 import { getImageUrl } from "@/app/editor/helpers";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
-import { LessonDictionaryButton } from "@/app/dictionary/components/DictionaryButtons";
-import { DICTIONARY_ONBOARDING_STORAGE_KEY } from "@/app/dictionary/constants";
+import {
+  LessonDictionaryButton,
+  IconDictionaryButton,
+} from "@/app/dictionary/components/DictionaryButtons";
+import {
+  DICTIONARY_ONBOARDING_STORAGE_KEY,
+  LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS,
+} from "@/app/dictionary/constants";
 import { DictionarySelectionWidget } from "@/app/dictionary/components/DictionarySelectionWidget";
 import { DictionaryOnboardingModal } from "@/app/dictionary/components/DictionaryOnboardingModal";
 import {
@@ -50,29 +59,6 @@ import {
 } from "@/app/dictionary/components/LessonDictionaryLayer";
 import dynamic from "next/dynamic";
 import { parseRouteId, parseRouteIdNumber } from "@/utils/parseRouteId";
-import { LessonParticipantsPanel } from "@/app/lessons/components/LessonParticipantsPanel";
-import type { TLessonParticipant } from "@/app/lessons/components/LessonParticipantsPanel";
-import { LessonFloatingTools } from "@/app/lessons/components/LessonFloatingTools";
-import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
-import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
-import { BELOW_SITE_HEADER_STICKY_TOP_CLASS } from "@/constants/uiLayers";
-
-const ParticipantsIcon = () => (
-  <svg
-    width="22"
-    height="22"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    aria-hidden
-  >
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-);
 
 const LessonBoardButton = dynamic(
   () =>
@@ -91,6 +77,7 @@ export default function LessonPage() {
   const params = useParams() as { id: string };
   const lessonId = parseRouteId(params.id);
   const lessonIdNum = parseRouteIdNumber(params.id);
+  const { subscription } = (useContext(SibscribeContext as any) as any) || {};
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
@@ -102,13 +89,13 @@ export default function LessonPage() {
   const { lesson, getLesson } = useLessons();
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(1);
-  const [students, setStudents] = useState<TLessonParticipant[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [activeStudentId, setActiveStudentId] = useState(0);
   const lastStudentFocusUpdatedAtRef = useRef<number>(0);
 
+  const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const [dictionaryOnboardingOpen, setDictionaryOnboardingOpen] = useState(false);
   const [boardModalOpen, setBoardModalOpen] = useState(false);
-  const [participantsOpen, setParticipantsOpen] = useState(false);
   const dictionaryRef = useRef<LessonDictionaryHandle>(null);
   const boardModalOpenRef = useRef(false);
 
@@ -190,14 +177,10 @@ export default function LessonPage() {
     if (!lessonId) return;
     let selectedIds: number[] = [];
     try {
-      selectedIds = (
-        JSON.parse(readFromLocalStorage("start_lesson_selected_ids") || "[]") as unknown[]
-      )
-        ?.map((el) => Number(el))
-        ?.filter((n) => Number(n) > 0);
-    } catch {
-      /* ignore */
-    }
+      selectedIds = JSON.parse(
+        readFromLocalStorage("start_lesson_selected_ids") || "",
+      )?.map((el: any) => Number(el))?.filter((n: any) => Number(n) > 0);
+    } catch (err) {}
 
     const paramsQs = new URLSearchParams();
     paramsQs.set("lesson_id", lessonId);
@@ -212,17 +195,15 @@ export default function LessonPage() {
     )?.json();
     try {
       const filteredIds = selectedIds?.length
-        ? (list?.studentList as TLessonParticipant[] | undefined)?.filter((s) => {
+        ? list?.studentList?.filter((s: any) => {
             return selectedIds.includes(s.student_id);
           })
         : [];
-      setStudents(filteredIds || []);
+      setStudents(filteredIds);
       if (filteredIds?.length === 1) {
         setActiveStudentId(filteredIds[0]?.student_id);
       }
-    } catch {
-      /* ignore */
-    }
+    } catch (err) {}
   }, [lessonId]);
 
   useEffect(() => {
@@ -251,9 +232,7 @@ export default function LessonPage() {
         lastStudentFocusUpdatedAtRef.current = updatedAt;
         const el = document.getElementById(`ex-${exId}`);
         el?.scrollIntoView({ behavior: "smooth", block: "start" });
-      } catch {
-      /* ignore */
-    }
+      } catch (err) {}
     }, 3000);
 
     return () => {
@@ -327,67 +306,29 @@ export default function LessonPage() {
     }
   }, [tutorialOpen]);
 
-  const onChangePresentationMode = useCallback(
-    (e: { stopPropagation: () => void }) => {
-      e.stopPropagation();
-      setIsPresentationMode((s) => !s);
-    },
-    [],
-  );
-
-  const showParticipants = !isStudent && !!students?.length;
-
-  const handleFocusScroll = useCallback(async () => {
-    const lessonId = Number(params.id) || 0;
-    const exId = getCurrentExerciseIdInView();
-    if (!lessonId || !exId) {
-      toast(i18n.t("lessons.focusScroll.cantDetectCurrentTask"), {
-        type: "error",
-      });
-      return;
-    }
-    try {
-      const res = await fetchPostJson({
-        path: "/lesson-focus",
-        isSecure: true,
-        data: { lesson_id: lessonId, ex_id: exId },
-      });
-      const data = await res?.json();
-      checkResponse(data, true);
-    } catch {
-      /* ignore */
-    }
-  }, [getCurrentExerciseIdInView, params.id]);
-
-  const handleOpenParticipantDictionary = useCallback((studentId: number) => {
-    dictionaryRef.current?.openDictionary(studentId);
-    setParticipantsOpen(false);
+  const onChangePresentationMode = useCallback((e: any) => {
+    e.stopPropagation();
+    setIsPresentationMode((s) => !s);
   }, []);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
       <ContentWrapper>
         <div className="w-full min-w-0">
-          <div className="h-3 sm:h-6 md:h-10" />
+          <div className="h-8 sm:h-10 md:h-14" />
           {isTeacher && (
-            <div className="flex w-full min-w-0 flex-col gap-1.5 md:flex-row md:items-start md:justify-between md:gap-4">
-              <Link
-                href={`/editor/${params.id}`}
-                className="w-fit shrink-0 text-secondary"
-              >
-                <Button
-                  variant="light"
-                  className="min-h-10 min-w-0 touch-manipulation px-2"
-                >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 w-full min-w-0">
+              <Link href={`/editor/${params.id}`} className="text-secondary shrink-0">
+                <Button variant="light" className="min-w-0">
                   <T k="lessons.backToEdit" />
                 </Button>
               </Link>
-              <div className="flex w-full flex-col items-center gap-1.5 md:w-auto md:flex-row md:flex-wrap md:items-center md:justify-end md:gap-2">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 min-w-0 w-full sm:w-auto sm:justify-end">
                 <div
-                  className="switcher flex min-h-10 w-fit max-w-full cursor-pointer touch-manipulation items-center justify-center gap-2 md:justify-start"
+                  className="switcher flex items-center cursor-pointer"
                   onClick={onChangePresentationMode}
                 >
-                  <p className="text-small">
+                  <p className="text-small mr-2">
                     <T k="lessons.screenDemoMode" />
                   </p>
                   <Switch
@@ -395,35 +336,30 @@ export default function LessonPage() {
                     isSelected={isPresentationMode}
                     style={{ pointerEvents: "none" }}
                   />
-                  <Button
-                    endContent={<img src={InfoIcon.src} alt="icon" />}
-                    variant="light"
-                    className="min-h-9 min-w-9 touch-manipulation"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setTutorialOpen(true);
-                      setTutorialStep(4);
-                    }}
-                    isIconOnly
-                  />
                 </div>
                 <Button
                   endContent={<img src={InfoIcon.src} alt="icon" />}
                   variant="light"
-                  className="h-auto min-h-10 w-fit max-w-full touch-manipulation justify-center whitespace-normal px-2 py-1.5 text-center md:justify-start md:text-left"
+                  onClick={() => {
+                    setTutorialOpen(true);
+                    setTutorialStep(4);
+                  }}
+                  isIconOnly
+                />
+                <Button
+                  endContent={<img src={InfoIcon.src} alt="icon" />}
+                  variant="light"
                   onClick={() => setTutorialOpen(true)}
                 >
                   <T k="lessons.howLessonModeWorks" />
                 </Button>
-                <div className="flex w-full max-w-full justify-center md:w-auto md:justify-end">
-                  <CopyLessonLink />
-                </div>
+                <CopyLessonLink />
               </div>
             </div>
           )}
         </div>
-        <div className="h-3 sm:h-6 md:h-10" />
-        <div className="h-2 sm:h-4 md:h-10" />
+        <div className="h-6 sm:h-8 md:h-10" />
+        <div className="h-4 sm:h-6 md:h-10" />
         <div className="flex flex-row items-stretch gap-2 sm:gap-3 md:gap-4 w-full min-w-0">
           <div className="min-w-0 flex-1">
             <div
@@ -561,46 +497,157 @@ export default function LessonPage() {
           </div>
           {!isStudent && !!students?.length && (
             <aside
-              className="hidden md:flex w-[180px] shrink-0 min-w-0 flex-col self-stretch lg:w-[200px]"
+              className="flex w-[64px] shrink-0 min-w-0 flex-col self-stretch sm:w-[100px] md:w-[180px] lg:w-[200px]"
               aria-label={i18n.t("lessons.participantsAriaLabel")}
             >
-              <div className={`sticky ${BELOW_SITE_HEADER_STICKY_TOP_CLASS} w-full lg:top-8`}>
-                <LessonParticipantsPanel
-                  students={students}
-                  activeStudentId={activeStudentId}
-                  isTeacher={isTeacher}
-                  onSelectStudent={setActiveStudentId}
-                  onOpenDictionary={handleOpenParticipantDictionary}
-                  onFocusScroll={handleFocusScroll}
-                />
+              <div className="sticky top-[88px] w-full lg:top-8">
+                <div className="flex max-h-[calc(100dvh-88px-12rem)] flex-col lg:max-h-[calc(100dvh-2rem-12rem)]">
+                <div className="mb-1.5 shrink-0 sm:mb-3 md:mb-7">
+                  <p className="text-center text-[7px] font-bold uppercase leading-tight text-[#231F20] sm:text-[9px] md:text-left md:text-sm">
+                    <span className="md:hidden">
+                      <T k="lessons.participantsShort" defaultText="Участн." />
+                    </span>
+                    <span className="hidden md:inline">
+                      <T k="lessons.participants" defaultText="УЧАСТНИКИ" />
+                    </span>
+                  </p>
+                </div>
+                <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch] sm:gap-2 md:gap-3">
+                  {students?.map((s) => {
+                    const isActive = s?.student_id === activeStudentId;
+                    return (
+                      <div
+                        key={s.id}
+                        onClick={() => setActiveStudentId(s.student_id)}
+                        className="cursor-pointer min-w-0"
+                      >
+                        <Card
+                          className="w-full min-w-0 p-1 sm:p-2 md:p-4"
+                          shadow="none"
+                          style={{
+                            backgroundColor: isActive ? "#EEEBFF" : "#fff",
+                          }}
+                        >
+                          <div className="flex flex-col gap-1 sm:gap-1.5 md:flex-row md:items-center md:gap-2">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[8px] font-bold uppercase leading-snug text-[#231F20] break-words line-clamp-4 sm:text-[10px] md:text-sm md:line-clamp-none">
+                                {s["student.name"]}
+                              </p>
+                              {!!s["student.email"] && (
+                                <p className="mt-0.5 hidden text-[#767676] break-all md:mt-1 md:block md:text-sm">
+                                  {s["student.email"]}
+                                </p>
+                              )}
+                            </div>
+                            {isTeacher && (
+                              <div className={LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS}>
+                                <IconDictionaryButton
+                                  size="compact"
+                                  iconSize={20}
+                                  onClick={() => {
+                                    dictionaryRef.current?.openDictionary(
+                                      Number(s.student_id)
+                                    );
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </Card>
+                      </div>
+                    );
+                  })}
+                </div>
+                {isTeacher && (
+                  <div className="mt-2 flex shrink-0 flex-col items-stretch gap-1.5 sm:mt-3 sm:flex-row sm:items-center sm:gap-2 md:mt-4">
+                    <Button
+                      variant="flat"
+                      color="default"
+                      className="min-h-0 w-full flex-1 px-0.5 py-1.5 text-[8px] leading-tight sm:min-h-[36px] sm:px-2 sm:py-2 sm:text-[10px] md:min-h-[44px] md:px-3 md:text-xs"
+                      size="sm"
+                      style={{
+                        justifyContent: "center",
+                        whiteSpace: "normal",
+                        height: "auto",
+                        minHeight: 0,
+                        lineHeight: "120%",
+                        textAlign: "center",
+                        backgroundColor: "#F3F4F6",
+                        color: "#111827",
+                        border: "1px solid rgba(17,24,39,0.12)",
+                      }}
+                      onClick={async () => {
+                        const lessonId = Number(params.id) || 0;
+                        const exId = getCurrentExerciseIdInView();
+                        if (!lessonId || !exId) {
+                          toast(i18n.t("lessons.focusScroll.cantDetectCurrentTask"), {
+                            type: "error",
+                          });
+                          return;
+                        }
+                        try {
+                          const res = await fetchPostJson({
+                            path: "/lesson-focus",
+                            isSecure: true,
+                            data: { lesson_id: lessonId, ex_id: exId },
+                          });
+                          const data = await res?.json();
+                          checkResponse(data, true);
+                        } catch (err) {}
+                      }}
+                    >
+                      <T k="lessons.focusScroll.button" />
+                    </Button>
+                    <ResponsiveTooltip
+                      content={
+                        <div
+                          style={{
+                            maxWidth: 320,
+                            whiteSpace: "normal",
+                            lineHeight: "140%",
+                          }}
+                        >
+                          <T k="lessons.focusScroll.tooltip" />
+                        </div>
+                      }
+                      placement="left"
+                      closeDelay={0}
+                    >
+                      <div
+                        role="button"
+                        aria-label="help"
+                        tabIndex={0}
+                        className="shrink-0 mx-auto flex h-7 w-7 items-center justify-center rounded-full sm:mx-0 sm:h-[34px] sm:w-[34px]"
+                        style={{
+                          background: "rgba(63,40,198,0.06)",
+                          border: "1px solid rgba(63,40,198,0.14)",
+                          cursor: "pointer",
+                          userSelect: "none",
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                          }
+                        }}
+                      >
+                        <img
+                          src={InfoIcon.src}
+                          alt="info"
+                          style={{ width: 16, height: 16, opacity: 0.9 }}
+                        />
+                      </div>
+                    </ResponsiveTooltip>
+                  </div>
+                )}
+                </div>
               </div>
             </aside>
           )}
         </div>
         <div className="relative">
-          <LessonFloatingTools>
-            {showParticipants && (
-              <ResponsiveTooltip
-                content={`${i18n.t("lessons.participantsButton")}${
-                  students.length > 0 ? ` (${students.length})` : ""
-                }`}
-                placement="left"
-              >
-                <Button
-                  isIconOnly
-                  color="primary"
-                  variant="light"
-                  size="lg"
-                  className={`${LESSON_FAB_BUTTON_CLASS} md:hidden`}
-                  aria-label={`${i18n.t("lessons.participantsButton")}${
-                    students.length > 0 ? ` (${students.length})` : ""
-                  }`}
-                  onClick={() => setParticipantsOpen(true)}
-                >
-                  <ParticipantsIcon />
-                </Button>
-              </ResponsiveTooltip>
-            )}
+          <div
+            className="fixed right-2 bottom-3 sm:right-4 sm:bottom-4 flex flex-col items-end gap-2 max-w-[calc(100vw-1rem)] z-10"
+          >
             {isStudent && profile?.studentId && (
               <LessonDictionaryButton onClick={handleOpenStudentDictionary} />
             )}
@@ -612,127 +659,107 @@ export default function LessonPage() {
             />
             <VideoCall lessonId={params.id as string} />
             <Chat
+              students={students as any}
               lesson_id={Number(params.id) || lesson?.id || 0}
+              isTeacher={isTeacher}
             />
-          </LessonFloatingTools>
+          </div>
         </div>
-        <div className="h-16" />
+        <div className="h-20"></div>
       </ContentWrapper>
-      {showParticipants && (
-        <Modal
-          isOpen={participantsOpen}
-          onClose={() => setParticipantsOpen(false)}
-          placement="bottom"
-          scrollBehavior="inside"
-          classNames={{
-            base: "md:!hidden m-0 sm:m-0 max-h-[85dvh] rounded-b-none rounded-t-2xl",
-            wrapper: "md:!hidden items-end",
-            body: "px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2",
-            header: "px-4 pb-1 pt-4",
-          }}
-        >
-          <ModalContent>
-            <ModalHeader className="flex flex-col gap-1">
-              <T k="lessons.participants" defaultText="УЧАСТНИКИ" />
-            </ModalHeader>
-            <ModalBody>
-              <LessonParticipantsPanel
-                compact
-                students={students}
-                activeStudentId={activeStudentId}
-                isTeacher={isTeacher}
-                onSelectStudent={(id) => {
-                  setActiveStudentId(id);
-                  setParticipantsOpen(false);
-                }}
-                onOpenDictionary={handleOpenParticipantDictionary}
-                onFocusScroll={() => {
-                  void handleFocusScroll();
-                  setParticipantsOpen(false);
-                }}
-              />
-            </ModalBody>
-          </ModalContent>
-        </Modal>
-      )}
       <Modal
         size="xl"
         isOpen={tutorialOpen}
         onClose={() => setTutorialOpen(false)}
-        scrollBehavior="inside"
-        style={{ background: "#fff" }}
-        classNames={{
-          base: "mx-2 my-4 max-h-[min(900px,92dvh)] sm:mx-auto",
-          body: "relative px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6",
-          header: "px-3 sm:px-6",
-        }}
-        className="relative"
+        style={{ background: "#fff  " }}
+        className=" relative"
       >
         <ModalContent>
           <ModalHeader className="justify-center"></ModalHeader>
-          <ModalBody className="min-h-0 sm:min-h-[420px]">
+          <ModalBody style={{ minHeight: 460 }}>
             {tutorialStep === 1 && (
               <>
-                <div className="hidden h-14 sm:block"></div>
-                <p className="text-center text-lg font-medium sm:text-[22px]">
+                <div className="h-14"></div>
+                <p
+                  style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
+                >
                   Сейчас вы находитесь в режиме урока
                 </p>
-                <p className="mb-2 text-center text-sm sm:text-base">
+                <p className="text-center mb-2">
                   Пролистайте небольшой туториал, который
-                  <br className="hidden sm:block" />
-                  {" "}расскажет, что можно делать в этом режиме
+                  <br />
+                  расскажет, что можно делать в этом режиме
                 </p>
-                <div className="mx-auto w-full max-w-[350px] rounded-[10px] bg-[#F0EEFF] p-3">
-                  <p className="text-center text-primary">
+                <div
+                  style={{
+                    backgroundColor: "#F0EEFF",
+                    padding: 12,
+                    borderRadius: 10,
+                    margin: "auto",
+                    maxWidth: 350,
+                    width: "100%",
+                  }}
+                >
+                  <p className="text-primary text-center">
                     Время на изучение ~ 1 минута
                   </p>
-                  <p className="text-center text-primary">
+                  <p className="text-primary text-center">
                     Польза в работе + 110%
                   </p>
                 </div>
                 <div className="h-4"></div>
                 <Button
                   color="primary"
-                  className="min-h-12 w-full touch-manipulation"
+                  className="w-full"
                   size="lg"
                   onClick={() => setTutorialStep(2)}
                 >
                   <p><T k="lessons.flipNext" /></p>
                 </Button>
-                <div className="pointer-events-none absolute right-0 top-0 z-[-1] hidden w-[140px] sm:block sm:w-[175px]">
+                <div
+                  style={{
+                    width: 175,
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    zIndex: -1,
+                  }}
+                >
                   <Image src={HeartImage.src} alt="heart image" />
                 </div>
               </>
             )}
             {tutorialStep === 2 && (
               <>
-                <p className="text-center text-lg font-medium sm:text-[22px]">
+                <p
+                  style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
+                >
                   Чтобы начать урок, нужно
-                  <br className="hidden sm:block" />
-                  {" "}поделиться им с учеником
+                  <br />
+                  поделиться им с учеником
                 </p>
-                <p className="mb-2 text-center text-sm sm:text-base">
+                <p className="text-center mb-2">
                   Сделать это можно двумя способами:
                 </p>
-                <div className="mx-auto w-full max-w-[500px]">
-                  <div className="mb-2 flex items-start gap-2">
+                <div style={{ maxWidth: 500, margin: "auto" }}>
+                  <div className="flex items-start gap-2 mb-2">
                     <div className="shrink-0 pt-[3px]">
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
-                    <p className="text-sm sm:text-base">
+                    <p>
                       попросить ученика зайти в нужный урок в своем личном
                       кабинете
                     </p>
                   </div>
-                  <div className="mb-2 flex items-start gap-2">
+                  <div className="flex items-start gap-2 mb-2">
                     <div className="shrink-0 pt-[3px]">
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
-                    <p className="text-sm sm:text-base"><T k="lessons.sendLessonLink" /></p>
+                    <p><T k="lessons.sendLessonLink" /></p>
                   </div>
-                  <div className="h-6 sm:h-8"></div>
+                  <div className="h-8"></div>
                   <div className="flex justify-end">
-                    <div className="sm:-mr-[30px]">
+                    <div style={{ marginRight: -30 }}>
                       <CopyLessonLink />
                     </div>
                   </div>
@@ -740,7 +767,7 @@ export default function LessonPage() {
                 <div className="h-4"></div>
                 <Button
                   color="primary"
-                  className="min-h-12 w-full touch-manipulation"
+                  className="w-full"
                   size="lg"
                   onClick={() => setTutorialStep(3)}
                 >
@@ -750,46 +777,47 @@ export default function LessonPage() {
             )}
             {tutorialStep === 3 && (
               <>
-                <p className="text-center text-lg font-medium sm:text-[22px]">
+                <p
+                  style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
+                >
                   Когда ученик присоединился к уроку,
-                  <br className="hidden sm:block" />
-                  {" "}вы можете:
+                  <br />
+                  вы можете:
                 </p>
-                <p className="mb-2 text-center"></p>
-                <div className="mx-auto w-full max-w-[500px]">
-                  <div className="mb-2 flex items-start gap-2">
+                <p className="text-center mb-2"></p>
+                <div style={{ maxWidth: 500, margin: "auto" }}>
+                  <div className="flex items-start gap-2 mb-2">
                     <div className="shrink-0 pt-[3px]">
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
-                    <p className="text-sm sm:text-base"><T k="lessons.seeRealtimeAnswers" /></p>
+                    <p><T k="lessons.seeRealtimeAnswers" /></p>
                   </div>
-                  <div className="mb-2 flex items-start gap-2">
+                  <div className="flex items-start gap-2 mb-2">
                     <div className="shrink-0 pt-[3px]">
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
-                    <p className="text-sm sm:text-base">
+                    <p>
                       менять видимость заданий прямо на уроке с помощью{" "}
                       <img
                         src={EyeIcon.src}
-                        className="mx-1 inline"
-                        alt=""
+                        style={{ display: "inline", margin: "0 5px" }}
                       />{" "}
                       слева от задания
                     </p>
                   </div>
-                  <div className="mb-2 flex items-start gap-2">
+                  <div className="flex items-start gap-2 mb-2">
                     <div className="shrink-0 pt-[3px]">
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
-                    <p className="text-sm sm:text-base">
+                    <p>
                       <T k="lessons.lessonChatNotes" />
                     </p>
                   </div>
-                  <div className="mb-2 flex items-start gap-2">
+                  <div className="flex items-start gap-2 mb-2">
                     <div className="shrink-0 pt-[3px] opacity-0">
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
-                    <p className="text-xs text-[#ACACAC]">
+                    <p style={{ color: "#ACACAC", fontSize: 12 }}>
                       <T k="lessons.lessonChatHistory" />
                     </p>
                   </div>
@@ -797,7 +825,7 @@ export default function LessonPage() {
                 <div className="h-4"></div>
                 <Button
                   color="primary"
-                  className="min-h-12 w-full touch-manipulation"
+                  className="w-full"
                   size="lg"
                   onClick={() => setTutorialStep(4)}
                 >
@@ -807,18 +835,20 @@ export default function LessonPage() {
             )}
             {tutorialStep === 4 && (
               <>
-                <p className="text-center text-lg font-medium sm:text-[22px]">
+                <p
+                  style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
+                >
                   Если ведете урок с помощью
-                  <br className="hidden sm:block" />
-                  {" "}демонстрации экрана или офлайн:
+                  <br />
+                  демонстрации экрана или офлайн:
                 </p>
-                <p className="mb-2 text-center"></p>
-                <div className="mx-auto w-full max-w-[500px]">
-                  <div className="mb-2 flex items-start gap-2">
+                <p className="text-center mb-2"></p>
+                <div style={{ maxWidth: 500, margin: "auto" }}>
+                  <div className="flex items-start gap-2 mb-2">
                     <div className="shrink-0 pt-[3px]">
                       <Image src={CheckedYellow.src} alt="checked" />
                     </div>
-                    <p className="text-sm sm:text-base">
+                    <p>
                       включите опцию “Режим демонстрации экрана”. Она позволит
                       скрыть правильные ответы, подсказки и блоки, которые вы
                       сделали невидимыми для ученика.
@@ -832,7 +862,7 @@ export default function LessonPage() {
                 <div className="h-4"></div>
                 <Button
                   color="primary"
-                  className="min-h-12 w-full touch-manipulation"
+                  className="w-full"
                   size="lg"
                   onClick={() => setTutorialStep(5)}
                 >
@@ -842,45 +872,49 @@ export default function LessonPage() {
             )}
             {tutorialStep === 5 && (
               <>
-                <div className="flex flex-1 flex-col justify-between gap-4">
+                <div className="flex flex-col flex-1 justify-between">
                   <div>
-                    <p className="text-center text-lg font-medium sm:text-[22px]">
+                    <p
+                      style={{
+                        fontSize: 22,
+                        fontWeight: 500,
+                        textAlign: "center",
+                      }}
+                    >
                       Если вы ведете групповой урок:
                     </p>
+                    <p></p>
                     <div className="h-2"></div>
-                    <div className="mx-auto w-full max-w-[500px]">
-                      <div className="mb-2 flex items-start gap-2">
+                    <div style={{ maxWidth: 500, margin: "auto" }}>
+                      <div className="flex items-start gap-2 mb-2">
                         <div className="shrink-0 pt-[3px]">
                           <Image src={CheckedYellow.src} alt="checked" />
                         </div>
-                        <p className="text-sm sm:text-base">
+                        <p>
                           если занятие групповое, вы можете переключаться между
                           учениками на панели справа, чтобы увидеть ответы
                           каждого* из них
                         </p>
                       </div>
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="mb-2 flex items-start gap-2 pt-2 sm:pt-4">
-                          <div className="hidden shrink-0 pt-[3px] opacity-0 sm:block">
+                      <div className="flex items-start justify-between flex-wrap">
+                        <div className="flex items-start gap-2 mb-2 pt-4">
+                          <div className="shrink-0 pt-[3px] opacity-0">
                             <Image src={CheckedYellow.src} alt="checked" />
                           </div>
-                          <p className="text-xs text-[#3F28C6]">
+                          <p style={{ color: "#3F28C6", fontSize: 12 }}>
                             *Светло-фиолетовым отмечен ученик,
-                            <br className="hidden sm:block" />
-                            {" "}ответы которого отображаются на экране
+                            <br />
+                            ответы которого отображаются на экране
                           </p>
                         </div>
-                        <img
-                          src={Tutor2.src}
-                          alt=""
-                          className="mx-auto w-[140px] sm:mx-0 sm:w-[183px]"
-                        />
+                        <img src={Tutor2.src} style={{ width: 183 }} />
                       </div>
+                      {/* <div className="h-6"></div> */}
                     </div>
                   </div>
                   <Button
                     color="primary"
-                    className="min-h-12 w-full touch-manipulation"
+                    className="w-full"
                     size="lg"
                     onClick={() => setTutorialStep(6)}
                   >
@@ -890,30 +924,41 @@ export default function LessonPage() {
 
                 <img
                   src={Tutor1.src}
-                  alt=""
-                  className="pointer-events-none absolute bottom-0 left-0 z-[-1] hidden w-[280px] sm:block sm:w-[370px]"
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    bottom: 0,
+                    zIndex: -1,
+                    width: 370,
+                  }}
                 />
               </>
             )}
             {tutorialStep === 6 && (
               <>
-                <div className="flex flex-1 flex-col justify-between gap-4">
+                <div className="flex flex-col flex-1 justify-between">
                   <div>
-                    <p className="text-center text-lg font-medium sm:text-[22px]">
+                    <p
+                      style={{
+                        fontSize: 22,
+                        fontWeight: 500,
+                        textAlign: "center",
+                      }}
+                    >
                       После завершения урока
                     </p>
-                    <p className="text-center text-sm sm:text-base">
+                    <p className="text-center">
                       Все ответы ученика сохраняются.
                       <br />
                       Посмотреть ответы после завершения урока вы можете,
-                      <br className="hidden sm:block" />
-                      {" "}перейдя в личный кабинет ученика и выбрав нужный урок
+                      <br />
+                      перейдя в личный кабинет ученика и выбрав нужный урок
                     </p>
                     <div className="h-4"></div>
                   </div>
                   <Button
                     color="primary"
-                    className="min-h-12 w-full touch-manipulation"
+                    className="w-full"
                     size="lg"
                     onClick={() => setTutorialOpen(false)}
                   >
@@ -923,20 +968,28 @@ export default function LessonPage() {
 
                 <img
                   src={Tutor3.src}
-                  alt=""
-                  className="pointer-events-none absolute bottom-0 left-0 z-[-1] hidden max-w-[70%] sm:block sm:w-[500px]"
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    bottom: 0,
+                    zIndex: -1,
+                    width: 500,
+                  }}
                 />
               </>
             )}
-            <div className="mt-2 flex items-center justify-between gap-2">
-              <div className="w-[72px] sm:w-[100px]">
+            <div className="flex items-center justify-between">
+              <div className="w-[100px]">
                 {tutorialStep >= 2 && (
                   <div
-                    className={`cursor-pointer touch-manipulation text-sm hover:underline ${
-                      tutorialStep === 5 || tutorialStep === 6
-                        ? "text-white"
-                        : "text-[#B7B7B7]"
-                    }`}
+                    style={{
+                      fontSize: 14,
+                      color:
+                        tutorialStep === 5 || tutorialStep === 6
+                          ? "#fff"
+                          : "#B7B7B7",
+                    }}
+                    className="cursor-pointer hover:underline"
                     onClick={() => setTutorialStep((s) => s - 1)}
                   >
                     ← назад
@@ -944,15 +997,18 @@ export default function LessonPage() {
                 )}
               </div>
               <p
-                className={`text-center text-sm ${
-                  tutorialStep === 5 || tutorialStep === 6
-                    ? "text-white"
-                    : "text-[#B7B7B7]"
-                }`}
+                className="text-center"
+                style={{
+                  fontSize: 14,
+                  color:
+                    tutorialStep === 5 || tutorialStep === 6
+                      ? "#fff"
+                      : "#B7B7B7",
+                }}
               >
                 {tutorialStep} / 6
               </p>
-              <div className="w-[72px] sm:w-[100px]"></div>
+              <div className="w-[100px]"></div>
             </div>
             <div className="h-2"></div>
           </ModalBody>

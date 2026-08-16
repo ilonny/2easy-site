@@ -1,5 +1,5 @@
 "use client";
-import { checkResponse, fetchPostJson } from "@/api";
+import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import {
@@ -9,16 +9,17 @@ import {
   ModalBody,
   ModalContent,
   ModalHeader,
+  Select,
+  SelectItem,
   Textarea,
 } from "@nextui-org/react";
-import { Tag } from "emblor";
+import { Tag, TagInput } from "emblor";
 import { FC, useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { TLesson } from "../../types";
 import { getImageUrl } from "@/app/editor/helpers";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
-import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
 type TProps = {
   isVisible: boolean;
@@ -44,6 +45,7 @@ export const EditLessonModalForm: FC<TProps> = ({
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
     watch,
   } = useForm<TFieldList>({
     defaultValues: {
@@ -91,8 +93,7 @@ export const EditLessonModalForm: FC<TProps> = ({
           onSuccess();
         }
         checkResponse(lesson);
-      } catch {
-        /* network / parse errors already surfaced via checkResponse when possible */
+      } catch (e) {
       } finally {
         setIsLoading(false);
       }
@@ -103,19 +104,7 @@ export const EditLessonModalForm: FC<TProps> = ({
   const title = watch("title");
 
   return (
-    <Modal
-      size="xl"
-      isOpen={isVisible}
-      onClose={() => setIsVisible(false)}
-      shouldBlockScroll={false}
-      scrollBehavior="inside"
-      placement="center"
-      classNames={{
-        wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS,
-        base: "max-h-[min(92dvh,100dvh)] mx-2 my-2 sm:mx-auto",
-        body: "max-h-[min(80dvh,100dvh)] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]",
-      }}
-    >
+    <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
       <ModalContent>
         <ModalHeader>
           <p>{title ? title : <T k="modals.editLesson" />}</p>

@@ -160,9 +160,9 @@ const DraggableItem = (props: {
     >
       <Chip
         color={isHoveredByTeacher ? "success" : isError ? "danger" : "primary"}
-        style={{ zIndex: 1, cursor: "pointer" }}
+        style={{ zIndex: 1, cursor: "pointer", maxWidth: 800 }}
         id={"draggable-" + chip.id}
-        className={`handle chip-handle cursor-pointer text-[18px] ${styles.draggableChip}`}
+        className="handle text-[18px] cursor-pointer max-w-[800px] chip-handle"
       >
         {chip.word}
       </Chip>
@@ -311,7 +311,27 @@ export const MatchWordColumnExView: FC<TProps> = ({
             margin: "0 auto",
           }}
         >
-          <div className={styles.chipPool}>
+          <div
+            className="
+              flex
+              items-center
+              wrap
+              gap-4
+              justify-center
+              m-auto
+              py-4
+              flex-wrap
+              shadow-lg
+              top-[80px]
+              lg:top-[0px]
+            "
+            style={{
+              position: "sticky",
+              zIndex: 2,
+              background: "#fff",
+              borderRadius: 10,
+            }}
+          >
             {sortedChips.map((chip) => {
               return (
                 <DraggableItem
@@ -364,7 +384,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
                 return (
                   <Card
                     key={column.id}
-                    className="answer-wrapper w-full min-w-0 p-3 sm:p-6 md:w-[calc(50%-0.5rem)] lg:w-[47%]"
+                    className="w-full md:w-[calc(50%-0.5rem)] lg:w-[47%] min-w-0 p-4 sm:p-6 answer-wrapper"
                     id={"answer-wrapper-" + column.id}
                     onMouseOver={() => {
                       if (isTeacher && !rest?.isPresentationMode) {
@@ -377,13 +397,14 @@ export const MatchWordColumnExView: FC<TProps> = ({
                       }
                     }}
                   >
-                    <p className="break-words text-center text-base font-semibold sm:text-xl">
+                    <p className="text-center font-semibold text-lg sm:text-xl break-words">
                       {column.title}
                     </p>
                     <Card
                       shadow="none"
-                      className={`mt-4 p-2 ${styles.columnDrop}`}
+                      className="mt-4 p-2"
                       style={{
+                        minHeight: 250,
                         width: "100%",
                         border: isCorrectHover
                           ? "2px solid #219F59"

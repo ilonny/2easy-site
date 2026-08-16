@@ -2,51 +2,8 @@
 
 .chatRoot {
   position: relative;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  height: min(500px, calc(100dvh - 10rem - env(safe-area-inset-bottom, 0px)));
-  overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-}
-
-.chatRoot :global(.cs-main-container),
-.chatRoot :global(.cs-chat-container) {
-  height: 100%;
-  border-radius: 12px;
-}
-
-.chatRootFixed {
-  position: fixed;
-  /* Above site header — see --overlay-above-header-z in globals.css */
-  z-index: var(--overlay-above-header-z);
-  left: 0.5rem;
-  right: 0.5rem;
-  top: max(0.5rem, env(safe-area-inset-top, 0px));
-  bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
-  width: auto;
-  max-width: calc(100vw - 1rem);
-  height: auto;
-  max-height: none;
-}
-
-@media (min-width: 640px) {
-  .chatRoot {
-    width: 360px;
-    min-width: 300px;
-    height: 500px;
-  }
-
-  .chatRootFixed {
-    top: auto;
-    left: auto;
-    right: 1rem;
-    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-    width: 360px;
-    max-width: calc(100vw - 2rem);
-    height: 500px;
-  }
+  height: 500px;
+  min-width: 300px;
 }
 
 .replyQuote {

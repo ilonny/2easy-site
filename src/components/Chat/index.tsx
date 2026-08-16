@@ -9,14 +9,12 @@ import {
   ConversationHeader,
 } from "@chatscope/chat-ui-kit-react";
 import { ClipboardEvent, FC, useCallback, useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { Button } from "@nextui-org/react";
+import ChatIcon from "@/assets/icons/chat.svg";
 import CloseIcon from "@/assets/icons/close.svg";
 import Image from "next/image";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
-import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
-import { LESSON_FAB_BUTTON_CLASS } from "@/app/lessons/constants";
 import { ChatComposerOverlay } from "./ChatComposerOverlay";
 import { ChatMessageItem } from "./ChatMessageItem";
 import { useLessonChat } from "./hooks/useLessonChat";
@@ -30,24 +28,6 @@ type TProps = {
   /** @deprecated unused — kept for call-site compatibility */
   isTeacher?: boolean;
 };
-
-const ChatFabIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    aria-hidden
-  >
-    <path
-      d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 export const Chat: FC<TProps> = ({ lesson_id }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -125,21 +105,17 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
   }, [replyTo, editing, inputKey]);
 
   if (!isOpen) {
-    const label = i18n.t("lessons.lessonChat");
     return (
-      <ResponsiveTooltip content={label} placement="left">
-        <Button
-          isIconOnly
-          color="primary"
-          variant="light"
-          onClick={() => setIsOpen(true)}
-          size="lg"
-          aria-label={label}
-          className={LESSON_FAB_BUTTON_CLASS}
-        >
-          <ChatFabIcon />
-        </Button>
-      </ResponsiveTooltip>
+      <Button
+        endContent={<Image src={ChatIcon} alt="ChatIcon" />}
+        color="primary"
+        variant="light"
+        onClick={() => setIsOpen(true)}
+        size="lg"
+        style={{ minWidth: 300 }}
+      >
+        <T k="lessons.lessonChat" />
+      </Button>
     );
   }
 
@@ -149,10 +125,8 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
       ? `${i18n.t("lessons.chatReplyingTo")} ${replyTo.sender}`
       : i18n.t("lessons.typeMessage");
 
-  const panel = (
-    <div
-      className={`${styles.chatRoot} ${styles.chatRootFixed}`}
-    >
+  return (
+    <div className={styles.chatRoot}>
       <MainContainer>
         <ChatContainer>
           <ConversationHeader>
@@ -162,7 +136,6 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
                 endContent={<Image src={CloseIcon} alt="ChatIcon" />}
                 color="primary"
                 variant="light"
-                className="touch-manipulation"
                 onClick={() => {
                   setIsOpen(false);
                   clearComposerMode();
@@ -207,10 +180,4 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
       />
     </div>
   );
-
-  if (typeof document === "undefined") {
-    return panel;
-  }
-
-  return createPortal(panel, document.body);
 };

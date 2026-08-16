@@ -45,15 +45,22 @@ export const HeaderProfile = (props: TProps) => {
           color="secondary"
           variant="flat"
           style={{ outline: "none" }}
-          className="header-secondary-bg max-w-[46vw] touch-manipulation sm:max-w-[200px] md:max-w-none"
+          className="header-secondary-bg touch-manipulation"
         >
           <p
-            className="header-secondary-btn-text truncate"
+            className="hidden md:block lg:block header-secondary-btn-text"
             style={{ color: "#4031C3 !important" }}
           >
             {profile.name || i18n.t("profile.profileLabel")}
           </p>
-          <Image src={ChevronDown} alt="profile icon" width={14} className="shrink-0" />
+          <p
+            className="block md:hidden lg:hidden header-secondary-btn-text"
+            style={{ color: "#4031C3 !important" }}
+          >
+            {profile.name?.[0] || i18n.t("profile.profileLabel")}
+          </p>
+          <Image src={ChevronDown} alt="profile icon" width={14} />
+          {/* <p className={styles.title}>{profile.name?.[0] || "A"}</p> */}
         </Button>
       </DropdownTrigger>
       {isStudent ? (

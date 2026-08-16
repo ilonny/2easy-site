@@ -59,25 +59,6 @@
   padding-right: 0.5rem;
 }
 
-@media (max-width: 430px) {
-  .editorWrap :global(.App-toolbar-container) {
-    max-width: calc(100vw - 16px);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
-  }
-
-  .editorWrap :global(.App-toolbar-container::-webkit-scrollbar) {
-    display: none;
-  }
-
-  .editorWrap :global(.App-toolbar) {
-    transform: scale(0.92);
-    transform-origin: left center;
-  }
-}
-
 .editorWrap :global(.App-toolbar-container > .Island) {
   margin-left: 0 !important;
   background-color: transparent;
