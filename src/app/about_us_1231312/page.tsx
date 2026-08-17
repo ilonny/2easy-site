@@ -62,7 +62,7 @@ export default function GrammarPage() {
                 className="my-2"
                 style={{ fontSize: 18, color: "#5837dc", fontWeight: 700 }}
               >
-                Ekaterina Lobasenko
+                Ekaterina Gornak
               </p>
               <p style={{ fontSize: 14 }}>
                 <T k="about.role.ekaterina" defaultText="English teacher" />

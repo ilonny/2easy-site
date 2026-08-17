@@ -35,7 +35,7 @@ export function PublicOfferEn() {
       <P indent>
         These Terms of Service (&ldquo;Terms&rdquo;) constitute a legally binding agreement between you
         (&ldquo;User&rdquo;, &ldquo;Customer&rdquo;, &ldquo;you&rdquo;) and Individual Entrepreneur
-        Ekaterina Borisovna Lobasenko, Tax Identification Number (INN): 420553023451, Primary State
+        Ekaterina Borisovna Gornak, Tax Identification Number (INN): 420553023451, Primary State
         Registration Number (OGRNIP): 324547600006209 (&ldquo;Company&rdquo;, &ldquo;we&rdquo;,
         &ldquo;our&rdquo;, &ldquo;us&rdquo;).
       </P>
@@ -74,7 +74,7 @@ export function PublicOfferEn() {
         <br />
         The Services are provided by:
         <br />
-        Individual Entrepreneur Ekaterina Borisovna Lobasenko
+        Individual Entrepreneur Ekaterina Borisovna Gornak
         <br />
         INN: 420553023451
         <br />
@@ -131,7 +131,7 @@ export function PublicOfferEn() {
         &ldquo;Account&rdquo; means a user profile created for access to the Platform and the
         Services.
         <br />
-        &ldquo;Company&rdquo; means Individual Entrepreneur Ekaterina Borisovna Lobasenko, acting as
+        &ldquo;Company&rdquo; means Individual Entrepreneur Ekaterina Borisovna Gornak, acting as
         the provider of the Services under these Terms.
         <br />
         &ldquo;Content&rdquo; means any information, text, graphics, images, videos, audio materials,
@@ -350,7 +350,7 @@ export function PublicOfferEn() {
       <SectionTitle>15. CONTACT INFORMATION</SectionTitle>
       <P indent>15.1. The Services are provided by:</P>
       <P indent>
-        Individual Entrepreneur Ekaterina Borisovna Lobasenko
+        Individual Entrepreneur Ekaterina Borisovna Gornak
         <br />
         INN: 420553023451
         <br />

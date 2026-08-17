@@ -38,7 +38,7 @@ export function PrivacyPolicyEn() {
         This Personal Data Processing Policy has been prepared in accordance with the requirements of
         Federal Law No. 152-FZ of 27 July 2006 &ldquo;On Personal Data&rdquo; (the &ldquo;Personal
         Data Law&rdquo;) and defines the procedure for processing personal data and the security
-        measures taken by Individual Entrepreneur Ekaterina Borisovna Lobasenko (INN: 420553023451,
+        measures taken by Individual Entrepreneur Ekaterina Borisovna Gornak (INN: 420553023451,
         OGRNIP: 324547600006209), hereinafter referred to as the &ldquo;Operator&rdquo;.
       </P>
       <P indent>
@@ -84,7 +84,7 @@ export function PrivacyPolicyEn() {
         blocking, deletion, and destruction of personal data.
       </P>
       <P indent>
-        2.7. Operator — Individual Entrepreneur Ekaterina Borisovna Lobasenko (INN: 420553023451,
+        2.7. Operator — Individual Entrepreneur Ekaterina Borisovna Gornak (INN: 420553023451,
         OGRNIP: 324547600006209), who independently processes personal data and also determines the
         purposes of processing, the composition of data processed, and the actions performed with
         personal data.

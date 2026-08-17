@@ -34,7 +34,7 @@ export function CookiePolicyEn() {
       <P indent>Effective Date: July 7, 2026</P>
       <P indent>
         This Cookie Policy (&ldquo;Policy&rdquo;) explains how Individual Entrepreneur Ekaterina
-        Borisovna Lobasenko, Tax Identification Number (INN): 420553023451, Primary State
+        Borisovna Gornak, Tax Identification Number (INN): 420553023451, Primary State
         Registration Number (OGRNIP): 324547600006209 (&ldquo;Company&rdquo;, &ldquo;we&rdquo;,
         &ldquo;our&rdquo;, &ldquo;us&rdquo;) uses cookies and similar technologies on the website
         located at https://www.2easyeng.com (the &ldquo;Platform&rdquo;).
