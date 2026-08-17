@@ -26,6 +26,7 @@ import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import AiIcon from "@/assets/icons/ai.svg";
 import Image from "next/image";
 import { getAiUiLanguage } from "@/app/ai/uiLanguage";
+import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 import {
   FC,
   useCallback,
@@ -319,14 +320,15 @@ export const CreateExWithAiButton: FC<TProps> = ({
         scrollBehavior="inside"
         classNames={{
           wrapper:
-            "items-center justify-center overflow-y-auto overscroll-none p-2 sm:p-3",
+            `${OVERLAY_ABOVE_HEADER_Z_CLASS} items-center justify-center overflow-y-auto overscroll-none p-2 sm:p-3 max-lg:p-0`,
           base:
-            "!max-h-[calc(100dvh-1rem)] !my-0 overflow-hidden",
-          body: "p-0 !overflow-hidden min-h-0 flex-1",
+            "!max-h-[calc(100dvh-1rem)] !my-0 overflow-hidden max-lg:!h-[100dvh] max-lg:!max-h-[100dvh] max-lg:!rounded-none max-lg:overflow-y-auto",
+          body: "p-0 !overflow-hidden min-h-0 flex-1 max-lg:!overflow-visible max-lg:h-auto max-lg:flex-none",
           header: "shrink-0",
+          closeButton: "z-20",
         }}
       >
-        <ModalContent className="max-h-[calc(100dvh-1rem)] min-h-0 flex flex-col overflow-hidden">
+        <ModalContent className="max-h-[calc(100dvh-1rem)] min-h-0 flex flex-col overflow-hidden max-lg:overflow-y-auto max-lg:overscroll-contain max-lg:max-h-none">
           <ModalHeader className="flex flex-col gap-1 border-b border-default-100 shrink-0">
             {isCreate ? (
               <T k="ai.createExWithAi" defaultText="Создать с помощью ИИ" />
@@ -350,8 +352,8 @@ export const CreateExWithAiButton: FC<TProps> = ({
               )}
             </p>
           </ModalHeader>
-          <ModalBody className="flex-1 min-h-0 overflow-hidden p-0 flex flex-col gap-0">
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-3 space-y-3">
+          <ModalBody className="flex-1 min-h-0 overflow-hidden p-0 flex flex-col gap-0 max-lg:overflow-visible max-lg:h-auto max-lg:flex-none">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-3 space-y-3 max-lg:overflow-visible max-lg:flex-none">
               <div className="flex flex-col gap-3 py-1">
                 {messages.map((m) => (
                   <div
@@ -398,14 +400,14 @@ export const CreateExWithAiButton: FC<TProps> = ({
               )}
             </div>
 
-            <div className="shrink-0 border-t border-default-100 px-6 py-3 space-y-3 bg-content1">
+            <div className="shrink-0 border-t border-default-100 px-6 py-3 space-y-3 bg-content1 max-lg:border-t-0">
               <p className="text-xs text-default-500">
                 {formatAiAvailableLimit(limitRemaining, "refine_exercise")}
               </p>
               {!pendingData && (
                 <Textarea
-                  minRows={2}
-                  maxRows={4}
+                  minRows={4}
+                  maxRows={8}
                   value={instruction}
                   onValueChange={setInstruction}
                   placeholder={i18n.t("ai.editExPlaceholder", {
@@ -413,6 +415,10 @@ export const CreateExWithAiButton: FC<TProps> = ({
                       "Например: сделай проще для A2 / добавь 2 вопроса / перепиши примеры",
                   })}
                   isDisabled={isLoading}
+                  classNames={{
+                    input: "text-base min-h-[120px]",
+                    inputWrapper: "min-h-[120px]",
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                       e.preventDefault();

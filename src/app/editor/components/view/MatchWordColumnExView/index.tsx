@@ -162,7 +162,7 @@ const DraggableItem = (props: {
         color={isHoveredByTeacher ? "success" : isError ? "danger" : "primary"}
         style={{ zIndex: 1, cursor: "pointer" }}
         id={"draggable-" + chip.id}
-        className={`handle chip-handle cursor-pointer text-[18px] ${styles.draggableChip}`}
+        className={`handle chip-handle exercise-chip cursor-pointer text-[18px] ${styles.draggableChip}`}
       >
         {chip.word}
       </Chip>

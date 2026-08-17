@@ -285,13 +285,28 @@ export const FillGapsNew: FC<TProps> = ({
         return;
       }
       const approxH = 48;
-      const margin = 10;
-      let top = rect.top - approxH - margin;
-      if (top < 8) {
+      const isMobile = window.matchMedia("(max-width: 1023px)").matches;
+      const vv = window.visualViewport;
+      const viewportTop = vv?.offsetTop ?? 0;
+      const viewportH = vv?.height ?? window.innerHeight;
+      const viewportBottom = viewportTop + viewportH;
+
+      let top: number;
+      if (isMobile) {
+        const margin = 16;
         top = rect.bottom + margin;
-      }
-      if (top + approxH > window.innerHeight - 8) {
-        top = Math.max(8, window.innerHeight - approxH - 8);
+        if (top + approxH > viewportBottom - 8) {
+          top = Math.max(viewportTop + 8, viewportBottom - approxH - 8);
+        }
+      } else {
+        const margin = 10;
+        top = rect.top - approxH - margin;
+        if (top < 8) {
+          top = rect.bottom + margin;
+        }
+        if (top + approxH > window.innerHeight - 8) {
+          top = Math.max(8, window.innerHeight - approxH - 8);
+        }
       }
       const left = rect.left + rect.width / 2;
       const clampedLeft = Math.max(96, Math.min(left, window.innerWidth - 96));
@@ -351,9 +366,13 @@ export const FillGapsNew: FC<TProps> = ({
     };
     window.addEventListener("scroll", fn, true);
     window.addEventListener("resize", fn);
+    window.visualViewport?.addEventListener("resize", fn);
+    window.visualViewport?.addEventListener("scroll", fn);
     return () => {
       window.removeEventListener("scroll", fn, true);
       window.removeEventListener("resize", fn);
+      window.visualViewport?.removeEventListener("resize", fn);
+      window.visualViewport?.removeEventListener("scroll", fn);
     };
   }, [scheduleUpdateGapFloat]);
 

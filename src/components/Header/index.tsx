@@ -10,11 +10,11 @@ import { ContentWrapper } from "../ContentWrapper";
 import { Button, Skeleton } from "@nextui-org/react";
 import { HeaderMenuList } from "../HeaderMenuList";
 import MenuIcon from "@/assets/icons/menu.svg";
+import CloseIcon from "@/assets/icons/close.svg";
 import { SideBar } from "../SIdeBar";
 import { LanguageSwitcher } from "../LanguageSwitcher";
 import { T } from "@/i18n/T";
 import { BOARD_LESSON_PAGE_LEGACY_PATH_PREFIX, BOARD_LESSON_PAGE_PATH_PREFIX } from "@/app/board/constants";
-import { SITE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -25,8 +25,10 @@ export const Header = () => {
     if (!sidebarIsOpened) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    document.body.classList.add("site-menu-open");
     return () => {
       document.body.style.overflow = previous;
+      document.body.classList.remove("site-menu-open");
     };
   }, [sidebarIsOpened]);
 
@@ -49,13 +51,12 @@ export const Header = () => {
     <div
       className="site-header-root"
       style={{
-        position: "relative",
         boxShadow: "0px 4px 20px 1px rgb(0 0 0 / 5%)",
       }}
     >
       <ContentWrapper>
         <div
-          className={`fixed left-0 ${SITE_HEADER_Z_CLASS} w-[100%] bg-white px-4 lg:static lg:z-auto lg:px-0`}
+          className="site-header-bar fixed left-0 w-[100%] bg-white px-4 lg:static lg:px-0"
         >
           <div
             className={`flex min-h-[80px] flex-row items-center justify-between border-[#D9D9D9] py-4 lg:min-h-[115px] lg:py-8 border-b-[${
@@ -71,7 +72,11 @@ export const Header = () => {
                   aria-expanded={sidebarIsOpened}
                   onClick={() => setSidebarIsOpened((o) => !o)}
                 >
-                  <Image src={MenuIcon} alt="menu" className="w-[40px]" />
+                  <Image
+                    src={sidebarIsOpened ? CloseIcon : MenuIcon}
+                    alt={sidebarIsOpened ? "close" : "menu"}
+                    className="w-[40px]"
+                  />
                 </button>
               )}
               <div className={profile?.isStudent ? "" : "hidden lg:block"}>

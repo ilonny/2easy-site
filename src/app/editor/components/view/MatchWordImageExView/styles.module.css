@@ -12,9 +12,10 @@
   margin-left: auto;
   margin-right: auto;
   max-width: 100%;
+  min-width: 0;
   padding: 0.5rem;
   position: sticky;
-  top: 0;
+  top: 80px;
   z-index: 2;
   background: #fff;
   border-radius: 10px;
@@ -28,7 +29,6 @@
     gap: 1rem;
     padding-top: 1rem;
     padding-bottom: 1rem;
-    top: 80px;
   }
 }
 
@@ -38,11 +38,26 @@
   }
 }
 
+.chipPool > * {
+  max-width: 100%;
+  min-width: 0;
+}
+
 .draggableChip {
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
-  max-width: min(100vw - 2rem, 800px);
+  max-width: 100%;
+  height: auto !important;
+  white-space: normal !important;
+}
+
+.draggableChip :global([data-slot="content"]) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.3;
+  text-align: center;
 }
 
 .dropZone {

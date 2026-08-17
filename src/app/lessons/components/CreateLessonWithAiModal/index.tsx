@@ -39,6 +39,7 @@ import {
   handleAiLimitError,
   TAiLimitCategory,
 } from "@/app/ai/aiLimits";
+import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
 type TProps = {
   isVisible: boolean;
@@ -590,17 +591,16 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
       scrollBehavior="inside"
       placement="center"
       classNames={{
-        // Cap height to viewport so actions never sit below the fold.
-        wrapper:
-          "items-center justify-center overflow-y-auto overscroll-none p-2 sm:p-3",
-        backdrop: "overscroll-none",
+        wrapper: `${OVERLAY_ABOVE_HEADER_Z_CLASS} items-center justify-center overflow-y-auto overscroll-none p-2 sm:p-3 max-lg:p-0`,
+        backdrop: `overscroll-none ${OVERLAY_ABOVE_HEADER_Z_CLASS}`,
         base:
-          "!max-w-[min(1400px,96vw)] !w-[min(1400px,96vw)] !h-[min(900px,calc(100dvh-1rem))] !max-h-[calc(100dvh-1rem)] !min-h-0 !my-0 overflow-hidden overscroll-none",
-        body: "p-0 !overflow-hidden min-h-0 flex-1 overscroll-none",
-        header: "shrink-0 py-3 sm:py-4",
+          "!max-w-[min(1400px,96vw)] !w-[min(1400px,96vw)] !h-[min(900px,calc(100dvh-1rem))] !max-h-[calc(100dvh-1rem)] !min-h-0 !my-0 overflow-hidden overscroll-none max-lg:!w-full max-lg:!max-w-full max-lg:!h-[100dvh] max-lg:!max-h-[100dvh] max-lg:!rounded-none max-lg:overflow-y-auto",
+        body: "p-0 !overflow-hidden min-h-0 flex-1 overscroll-none max-lg:!overflow-visible max-lg:h-auto max-lg:flex-none",
+        header: "shrink-0 py-3 sm:py-4 max-lg:static",
+        closeButton: "z-20",
       }}
     >
-      <ModalContent className="h-full max-h-full min-h-0 flex flex-col overflow-hidden">
+      <ModalContent className="h-full max-h-full min-h-0 flex flex-col overflow-hidden max-lg:overflow-y-auto max-lg:overscroll-contain">
         <ModalHeader className="flex flex-col gap-1 border-b border-default-100 shrink-0">
           <div className="flex items-center justify-between gap-3 w-full pr-8">
             <div className="min-w-0">
@@ -636,14 +636,14 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
         </ModalHeader>
         <ModalBody className="flex-1 min-h-0 overflow-hidden p-0">
           <div
-            className={`grid min-h-0 h-full overflow-hidden ${
+            className={`grid min-h-0 h-full overflow-hidden max-lg:h-auto max-lg:overflow-visible ${
               step === "preview"
                 ? "grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)]"
                 : "grid-cols-1 lg:grid-cols-2"
             }`}
           >
-            <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-default-100 min-h-0 overflow-hidden">
-              <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 space-y-3 min-h-0">
+            <div className="flex flex-col border-b xl:border-b-0 xl:border-r border-default-100 min-h-0 overflow-hidden max-lg:overflow-visible max-lg:min-h-0">
+              <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 space-y-3 min-h-0 max-lg:overflow-visible max-lg:flex-none">
                 {messages.map((m) => (
                   <div
                     key={m.id}
@@ -688,7 +688,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                 </p>
               </div>
 
-              <div className="p-4 border-t border-default-100 space-y-2 shrink-0 max-h-[45%] overflow-y-auto overscroll-contain">
+              <div className="p-4 border-t border-default-100 space-y-2 shrink-0 max-h-[45%] overflow-y-auto overscroll-contain max-lg:max-h-none max-lg:overflow-visible">
                 {step === "preview" ? (
                   <>
                     {pendingPreview ? (
@@ -721,8 +721,12 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                         <Textarea
                           value={chatInput}
                           onValueChange={setChatInput}
-                          minRows={2}
-                          maxRows={4}
+                          minRows={4}
+                          maxRows={8}
+                          classNames={{
+                            input: "text-base min-h-[120px]",
+                            inputWrapper: "min-h-[120px]",
+                          }}
                           placeholder={i18n.t("ai.refinePlaceholder", {
                             defaultValue:
                               "Например: добавь ещё один тест / сделай проще для A2 / перепиши warm-up",
@@ -774,10 +778,10 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
               </div>
             </div>
 
-            <div className="flex flex-col min-h-0 h-full overflow-hidden">
+            <div className="flex flex-col min-h-0 h-full overflow-hidden max-lg:h-auto max-lg:overflow-visible">
               {step === "collect" && (
-                <div className="flex flex-col min-h-0 h-full">
-                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-4">
+                <div className="flex flex-col min-h-0 h-full max-lg:h-auto">
+                  <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-4 max-lg:overflow-visible max-lg:flex-none">
                     <div>
                       <p className="text-sm font-medium mb-2">
                         <T k="ai.level" defaultText="Уровень" />
@@ -838,6 +842,10 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                       onValueChange={setTopic}
                       radius="sm"
                       size="lg"
+                      classNames={{
+                        input: "text-base",
+                        inputWrapper: "min-h-14",
+                      }}
                     />
                     <Textarea
                       label={
@@ -852,16 +860,21 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
                       })}
                       value={description}
                       onValueChange={setDescription}
-                      minRows={3}
+                      minRows={5}
+                      maxRows={10}
                       radius="sm"
                       size="lg"
+                      classNames={{
+                        input: "text-base min-h-[140px]",
+                        inputWrapper: "min-h-[140px]",
+                      }}
                     />
 
                     {error && (
                       <p className="text-danger text-sm">{error}</p>
                     )}
                   </div>
-                  <div className="shrink-0 border-t border-default-100 px-4 py-3 bg-content1">
+                  <div className="shrink-0 border-t border-default-100 px-4 py-3 bg-content1 max-lg:border-t-0">
                     <Button
                       color="primary"
                       size="lg"

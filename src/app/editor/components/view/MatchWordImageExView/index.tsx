@@ -152,12 +152,11 @@ const DraggableItem = (props: {
         style={{
           zIndex: 1,
           cursor: "pointer",
-          whiteSpace: "break-spaces",
           height: "auto",
           textAlign: "center",
         }}
         id={"draggable-" + id}
-        className={`handle cursor-pointer text-[18px] ${styles.draggableChip}`}
+        className={`handle exercise-chip cursor-pointer text-[18px] ${styles.draggableChip}`}
       >
         {chip}
       </Chip>

@@ -233,7 +233,7 @@ const DraggableItem = (props: {
         color={isError ? "danger" : "primary"}
         className={`${
           isActiveDrag && "bg-[#271399]"
-        } handle text-[18px] cursor-pointer ${styles.draggableChip}`}
+        } handle exercise-chip text-[18px] cursor-pointer ${styles.draggableChip}`}
       >
         <span style={{ fontSize: 18, fontWeight: 400 }}>{field.value}</span>
       </Chip>

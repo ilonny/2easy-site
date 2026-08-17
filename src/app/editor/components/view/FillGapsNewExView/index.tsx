@@ -703,7 +703,7 @@ const FillGapsNewExViewImpl: FC<{
                 const chip = (
                   <Chip
                     color="primary"
-                    className={`cursor-pointer select-none ${styles.draggableChip}`}
+                    className={`exercise-chip cursor-pointer select-none ${styles.draggableChip}`}
                     onPointerDown={(e) => onPointerDownChip(e, i)}
                   >
                     {i.value}
@@ -736,7 +736,7 @@ const FillGapsNewExViewImpl: FC<{
                     transform: `translate3d(${dragXY.x - grabOffsetRef.current.dx}px, ${dragXY.y - grabOffsetRef.current.dy}px, 0)`,
                   }}
                 >
-                  <Chip color="primary">{dragValueRef.current}</Chip>
+                  <Chip color="primary" className="exercise-chip">{dragValueRef.current}</Chip>
                 </div>,
                 portalRef.current,
               )}
