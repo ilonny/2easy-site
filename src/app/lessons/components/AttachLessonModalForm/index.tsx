@@ -26,6 +26,7 @@ type TProps = {
   title?: ReactNode;
   hideToast?: boolean;
   isCourses?: boolean;
+  confirmLabel?: ReactNode;
 };
 
 export const AttachLessonModalForm: FC<TProps> = ({
@@ -37,6 +38,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
   title,
   hideToast,
   isCourses,
+  confirmLabel,
 }) => {
   const isRu = (i18n.language || "").toLowerCase().startsWith("ru");
   const courseOpenText = i18n.t("lessons.courseOpen", {
@@ -186,7 +188,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 }}
               >
                 {skipChoseStatus ? (
-                  <T k="lessons.startLesson" />
+                  confirmLabel ?? <T k="lessons.startLesson" />
                 ) : (
                   <T k="modals.next" />
                 )}

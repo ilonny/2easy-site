@@ -82,6 +82,7 @@ export const StartLessonButton = (props: TProps) => {
             onSuccess();
           }}
           lesson={lesson}
+          confirmLabel={label}
         />
       )}
     </>
