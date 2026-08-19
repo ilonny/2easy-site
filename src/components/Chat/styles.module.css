@@ -42,10 +42,16 @@
   right: 0.5rem;
   top: max(0.5rem, env(safe-area-inset-top, 0px));
   bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
-  width: auto;
-  max-width: calc(100vw - 1rem);
+  /* фиксируем ширину, чтобы iOS не пересчитывал её на клавиатуре */
+  width: calc(100% - 1rem);
+  min-width: 0;
+  /* iOS: `100vw` часто рассчитывается криво при появлении клавиатуры,
+     из-за этого появляется горизонтальный скролл. */
+  max-width: 100%;
   height: auto;
   max-height: none;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .replyQuote {
@@ -182,6 +188,12 @@
   flex-direction: column;
   gap: 6px;
   pointer-events: auto;
+}
+
+/* iOS zoom mitigation:
+   если font-size у contenteditable < 16px — Safari может увеличивать масштаб. */
+.chatRootFixed :global(.cs-message-input__content-editor) {
+  font-size: 16px !important;
 }
 
 .replyPreview,
