@@ -2996,7 +2996,7 @@ export default function GrammarPage() {
                 fontSize: "12.0pt",
               }}
             >
-              : +7 911 189-86-37
+              : +7 996 545-52-72
             </span>
           </p>
           <p className="ConsPlusNormal" style={{ textAlign: "justify" }}>

@@ -72,10 +72,17 @@ export const StartLessonButton = (props: TProps) => {
           skipChoseStatus
           hideToast
           title={
-            <T
-              k="lessons.chooseStudentsToStart"
-              defaultText="Выберите учеников, чтобы начать урок"
-            />
+            isHomeworkCheck ? (
+              <T
+                k="lessons.chooseStudentToCheckHomework"
+                defaultText="Выберите ученика, чтобы проверить homework"
+              />
+            ) : (
+              <T
+                k="lessons.chooseStudentsToStart"
+                defaultText="Выберите учеников, чтобы начать урок"
+              />
+            )
           }
           onSuccess={() => {
             setModalVisible(false);
@@ -83,6 +90,7 @@ export const StartLessonButton = (props: TProps) => {
           }}
           lesson={lesson}
           confirmLabel={label}
+          maxSelection={isHomeworkCheck ? 1 : undefined}
         />
       )}
     </>

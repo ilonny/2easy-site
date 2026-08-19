@@ -27,6 +27,8 @@ type TProps = {
   hideToast?: boolean;
   isCourses?: boolean;
   confirmLabel?: ReactNode;
+  /** Для проверки homework — только один ученик */
+  maxSelection?: number;
 };
 
 export const AttachLessonModalForm: FC<TProps> = ({
@@ -39,6 +41,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
   hideToast,
   isCourses,
   confirmLabel,
+  maxSelection,
 }) => {
   const isRu = (i18n.language || "").toLowerCase().startsWith("ru");
   const courseOpenText = i18n.t("lessons.courseOpen", {
@@ -100,10 +103,17 @@ export const AttachLessonModalForm: FC<TProps> = ({
         setChosenIds((ids) => ids?.filter((i) => i !== id));
         return;
       }
+      if (maxSelection === 1) {
+        setChosenIds([id]);
+        return;
+      }
       setChosenIds((ids) => ids?.concat(id));
     },
-    [chosenIds]
+    [chosenIds, maxSelection]
   );
+
+  const needsChosenStudent = maxSelection === 1 || !skipChoseStatus;
+  const canConfirm = !needsChosenStudent || !!chosenIds.length;
 
   useEffect(() => {
     if (!isVisible) {
@@ -169,15 +179,9 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 chosenIds={chosenIds}
               />
               <Button
-                disabled={skipChoseStatus ? false : !chosenIds?.length}
+                disabled={!canConfirm}
                 size="lg"
-                color={
-                  skipChoseStatus
-                    ? "primary"
-                    : !chosenIds?.length
-                      ? "default"
-                      : "primary"
-                }
+                color={canConfirm ? "primary" : "default"}
                 className="w-full max-sm:min-h-12 max-sm:touch-manipulation"
                 onClick={() => {
                   if (skipChoseStatus) {
