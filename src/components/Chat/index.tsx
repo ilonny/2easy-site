@@ -56,6 +56,20 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
   const [inputKey, setInputKey] = useState(0);
   const [isDesktop, setIsDesktop] = useState(true);
 
+  // iOS: после открытия клавиатуры иногда остаётся горизонтальный скролл.
+  // На время работы чата на мобайле жёстко отключаем overflow-x.
+  useEffect(() => {
+    if (isDesktop || !isOpen) return;
+    const prevBodyOverflowX = document.body.style.overflowX;
+    const prevHtmlOverflowX = document.documentElement.style.overflowX;
+    document.body.style.overflowX = "hidden";
+    document.documentElement.style.overflowX = "hidden";
+    return () => {
+      document.body.style.overflowX = prevBodyOverflowX;
+      document.documentElement.style.overflowX = prevHtmlOverflowX;
+    };
+  }, [isDesktop, isOpen]);
+
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
     const sync = () => setIsDesktop(mq.matches);
