@@ -421,6 +421,7 @@ export const ExListComp: FC<TProps> = (props) => {
                     fontSize: 12,
                     textAlign: "left",
                     lineHeight: "100%",
+                    maxWidth: 55,
                   }}
                   className={`${styles["eye-text"]}`}
                 >

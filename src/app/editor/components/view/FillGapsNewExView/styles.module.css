@@ -280,8 +280,8 @@
 
 .gapSelect {
   display: inline-block;
-  width: min(100%, clamp(96px, 42vw, 220px));
-  min-width: 0;
+  width: clamp(96px, 42vw, 220px);
+  min-width: clamp(96px, 42vw, 220px);
   max-width: 100%;
 }
 
