@@ -20,7 +20,7 @@ import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 type TProps = {
   isVisible: boolean;
   setIsVisible: (val: boolean) => void;
-  onSuccess: () => void;
+  onSuccess: (chosenIds?: number[]) => void | Promise<void>;
   lesson: TLesson;
   skipChoseStatus?: boolean;
   title?: ReactNode;
@@ -29,6 +29,8 @@ type TProps = {
   confirmLabel?: ReactNode;
   /** Для проверки homework — только один ученик */
   maxSelection?: number;
+  /** Только выбрать ученика, без lesson_relation (проверка homework) */
+  skipCreateRelation?: boolean;
 };
 
 export const AttachLessonModalForm: FC<TProps> = ({
@@ -42,6 +44,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
   isCourses,
   confirmLabel,
   maxSelection,
+  skipCreateRelation,
 }) => {
   const isRu = (i18n.language || "").toLowerCase().startsWith("ru");
   const courseOpenText = i18n.t("lessons.courseOpen", {
@@ -64,38 +67,49 @@ export const AttachLessonModalForm: FC<TProps> = ({
 
   const onSubmit = useCallback(async () => {
     setIsLoading(true);
-    const allRes = await Promise.all(
-      chosenIds.map(async (student_id) => {
-        const res = await fetchPostJson({
-          path: isCourses
-            ? "/course-relation/create"
-            : "/lesson-relation/create",
-          isSecure: true,
-          data: {
-            lesson_id: lesson.id,
-            student_id,
-            status,
-          },
-        });
-        return await res.json();
-      })
-    );
-    setIsLoading(false);
-    if (!hideToast) {
-      allRes.forEach((res) => {
-        checkResponse(res);
-      });
-    }
     try {
+      if (!skipCreateRelation) {
+        const allRes = await Promise.all(
+          chosenIds.map(async (student_id) => {
+            const res = await fetchPostJson({
+              path: isCourses
+                ? "/course-relation/create"
+                : "/lesson-relation/create",
+              isSecure: true,
+              data: {
+                lesson_id: lesson.id,
+                student_id,
+                status,
+              },
+            });
+            return await res.json();
+          }),
+        );
+        if (!hideToast) {
+          allRes.forEach((res) => {
+            checkResponse(res);
+          });
+        }
+      }
       writeToLocalStorage(
         "start_lesson_selected_ids",
-        JSON.stringify(chosenIds)
+        JSON.stringify(chosenIds),
       );
-      onSuccess();
+      await onSuccess(chosenIds);
     } catch {
-      /* ignore localStorage write errors */
+      /* ignore localStorage / attach errors */
+    } finally {
+      setIsLoading(false);
     }
-  }, [chosenIds, lesson.id, onSuccess, status, isCourses, hideToast]);
+  }, [
+    chosenIds,
+    lesson.id,
+    onSuccess,
+    status,
+    isCourses,
+    hideToast,
+    skipCreateRelation,
+  ]);
 
   const onClickStudent = useCallback(
     (id: number) => {
@@ -179,7 +193,8 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 chosenIds={chosenIds}
               />
               <Button
-                disabled={!canConfirm}
+                disabled={!canConfirm || isLoading}
+                isLoading={isLoading}
                 size="lg"
                 color={canConfirm ? "primary" : "default"}
                 className="w-full max-sm:min-h-12 max-sm:touch-manipulation"

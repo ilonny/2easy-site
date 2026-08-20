@@ -3,6 +3,7 @@ import { AttachLessonModalForm } from "../AttachLessonModalForm";
 import { TLesson } from "../../types";
 import { useRouter } from "next/navigation";
 import { useCheckSubscription } from "@/app/subscription/helpers";
+import { fetchPostJson } from "@/api";
 import { T } from "@/i18n/T";
 
 type TProps = {
@@ -19,9 +20,41 @@ export const StartLessonButton = (props: TProps) => {
   const { checkSubscription } = useCheckSubscription();
   const [modalVisible, setModalVisible] = useState(false);
 
-  const onSuccess = useCallback(() => {
-    router.push(`/lessons/${lesson.id}`);
-  }, [lesson?.id, router]);
+  const onSuccess = useCallback(
+    async (chosenIds?: number[]) => {
+      if (isHomeworkCheck) {
+        const studentId = Number(chosenIds?.[0]);
+        const parentLessonId =
+          Number(lesson.lesson_id_homework) || Number(lesson.id);
+        let homeworkId = Number(lesson.id);
+        if (studentId > 0 && parentLessonId > 0) {
+          try {
+            const res = await fetchPostJson({
+              path: "/lessons/homework/resolve-for-student",
+              isSecure: true,
+              data: {
+                lesson_id: parentLessonId,
+                student_id: studentId,
+              },
+            });
+            const data = await res?.json();
+            const resolvedId = Number(data?.homework_lesson_id);
+            if (data?.success && resolvedId > 0) {
+              homeworkId = resolvedId;
+            }
+          } catch {
+            /* keep current homework lesson */
+          }
+        }
+        setModalVisible(false);
+        router.push(`/lessons/${homeworkId}`);
+        return;
+      }
+      setModalVisible(false);
+      router.push(`/lessons/${lesson.id}`);
+    },
+    [isHomeworkCheck, lesson?.id, lesson?.lesson_id_homework, router],
+  );
 
   const onPressButton = useCallback(() => {
     if (checkSubscription()) {
@@ -84,13 +117,11 @@ export const StartLessonButton = (props: TProps) => {
               />
             )
           }
-          onSuccess={() => {
-            setModalVisible(false);
-            onSuccess();
-          }}
+          onSuccess={onSuccess}
           lesson={lesson}
           confirmLabel={label}
           maxSelection={isHomeworkCheck ? 1 : undefined}
+          skipCreateRelation={isHomeworkCheck}
         />
       )}
     </>
