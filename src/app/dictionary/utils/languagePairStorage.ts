@@ -32,10 +32,10 @@ export const getStoredLanguagePair = (): TLanguagePair => {
 
     return {
       sourceLanguageCode: isNonEmptyString(parsed.sourceLanguageCode)
-        ? parsed.sourceLanguageCode.trim()
+        ? parsed.sourceLanguageCode.trim().toLowerCase()
         : DEFAULT_SOURCE_LANGUAGE_CODE,
       targetLanguageCode: isNonEmptyString(parsed.targetLanguageCode)
-        ? parsed.targetLanguageCode.trim()
+        ? parsed.targetLanguageCode.trim().toLowerCase()
         : DEFAULT_TARGET_LANGUAGE_CODE,
     };
   } catch {

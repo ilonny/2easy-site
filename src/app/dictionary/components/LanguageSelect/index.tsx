@@ -50,7 +50,7 @@ export const LanguageSelect: FC<TProps> = ({
       size="md"
       classNames={{
         base: "w-full min-w-0",
-        listboxWrapper: "max-h-60",
+        listboxWrapper: "max-h-80",
       }}
       inputProps={{
         classNames: {
