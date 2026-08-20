@@ -27,6 +27,30 @@ function shuffleWithSeed<T>(array: T[], seed: number): T[] {
   return result;
 }
 
+/** Saved answers often store numeric ids; exercise matches may keep them as strings. */
+const sameId = (
+  a: string | number | undefined | null,
+  b: string | number | undefined | null
+) => a != null && b != null && String(a) === String(b);
+
+const hasId = (
+  ids: Array<string | number> | undefined,
+  id: string | number | undefined | null
+) => !!ids?.some((x) => sameId(x, id));
+
+const mapVal = (map: Record<string, any> | undefined, id: string | number) =>
+  map?.[id as any] ?? map?.[String(id)];
+
+const parseSavedAnswer = (raw: unknown) => {
+  if (!raw) return {};
+  if (typeof raw === "object") return raw as Record<string, any>;
+  try {
+    return JSON.parse(String(raw));
+  } catch {
+    return {};
+  }
+};
+
 type TProps = {
   data: TMatchWordWordData;
   isPreview?: boolean;
@@ -68,8 +92,8 @@ export const MatchWordWordExView: FC<TProps> = ({
   } | null>(null);
 
   const sortedMatches = useMemo(() => {
-    const initialArr = [...data.matches];
-    const restMatches = initialArr.filter((r) => !correctIds.includes(r.id));
+    const initialArr = [...(data.matches || [])];
+    const restMatches = initialArr.filter((r) => !hasId(correctIds, r.id));
     const isLessonMode =
       rest.isView && lesson_id && Number(lesson_id) > 0;
     const exerciseKey = `${data.id}-${initialArr.map((m) => m.id).join(",")}-${isLessonMode}`;
@@ -102,31 +126,34 @@ export const MatchWordWordExView: FC<TProps> = ({
     const restLeft = leftOrder.filter((id) => restIdsSet.has(id));
     const restRight = rightOrder.filter((id) => restIdsSet.has(id));
 
-    return restLeft.map((leftId, i) => {
-      const rightId = restRight[i];
-      const leftMatch = matchesById[leftId];
-      const rightMatch = matchesById[rightId];
-      return {
-        id: leftMatch.id,
-        value: leftMatch.value,
-        answer: leftMatch.correctValue,
-        correctValue: rightMatch.correctValue,
-        correctId: rightMatch.id,
-      };
-    });
+    return restLeft
+      .map((leftId, i) => {
+        const rightId = restRight[i];
+        const leftMatch = matchesById[leftId];
+        const rightMatch = matchesById[rightId];
+        if (!leftMatch || !rightMatch) return null;
+        return {
+          id: leftMatch.id,
+          value: leftMatch.value,
+          answer: leftMatch.correctValue,
+          correctValue: rightMatch.correctValue,
+          correctId: rightMatch.id,
+        };
+      })
+      .filter(Boolean);
   }, [data.matches, data.id, correctIds, lesson_id, ex_id, rest.isView]);
 
   const correctedMatches = useMemo(() => {
-    const initialArr = [...data.matches];
-    return initialArr.filter((r) => correctIds.includes(r.id));
+    const initialArr = [...(data.matches || [])];
+    return initialArr.filter((r) => hasId(correctIds, r.id));
   }, [data.matches, correctIds]);
 
   const incorrectedMatches = useMemo(() => {
-    const initialArr = [...data.matches];
+    const initialArr = [...(data.matches || [])];
     return initialArr
-      .filter((r) => incorrectIdsMap?.[r.id] && !correctIds.includes(r.id))
+      .filter((r) => mapVal(incorrectIdsMap, r.id) && !hasId(correctIds, r.id))
       .map((el) => {
-        return { ...el, selectedValue: incorrectIdsMap?.[el.id] };
+        return { ...el, selectedValue: mapVal(incorrectIdsMap, el.id) };
       });
   }, [data.matches, correctIds, incorrectIdsMap]);
 
@@ -150,8 +177,10 @@ export const MatchWordWordExView: FC<TProps> = ({
         return;
       }
 
-      const rightM = sortedMatches.find((m) => m?.correctId === selectedRightId);
-      const isCorrect = leftId === selectedRightId;
+      const rightM = sortedMatches.find((m) =>
+        sameId(m?.correctId, selectedRightId)
+      );
+      const isCorrect = sameId(leftId, selectedRightId);
 
       if (isCorrect) {
         setCorrectIds((ids) => ids.concat(leftId));
@@ -172,8 +201,8 @@ export const MatchWordWordExView: FC<TProps> = ({
         return;
       }
 
-      const rightM = sortedMatches.find((m) => m?.correctId === rightId);
-      const isCorrect = selectedLeftId === rightId;
+      const rightM = sortedMatches.find((m) => sameId(m?.correctId, rightId));
+      const isCorrect = sameId(selectedLeftId, rightId);
 
       if (isCorrect) {
         setCorrectIds((ids) => ids.concat(selectedLeftId));
@@ -191,7 +220,9 @@ export const MatchWordWordExView: FC<TProps> = ({
     if (student_id) {
       getAnswers(true).then((a) => {
         try {
-          const parsedIds = JSON.parse(a?.[data.id]?.answer || "{}");
+          const parsedIds = parseSavedAnswer(
+            a?.[data.id]?.answer ?? a?.[String(data.id)]?.answer
+          );
           setCorrectIds(parsedIds?.correctIds || []);
           setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
         } catch {}
@@ -210,13 +241,13 @@ export const MatchWordWordExView: FC<TProps> = ({
       return;
     }
     try {
-      const raw = answers[data.id]?.answer;
+      const raw = answers[data.id]?.answer ?? answers[String(data.id)]?.answer;
       if (!raw) {
         setCorrectIds([]);
         setIncorrectIdsMap({});
         return;
       }
-      const parsedIds = JSON.parse(raw);
+      const parsedIds = parseSavedAnswer(raw);
       setCorrectIds(parsedIds?.correctIds || []);
       setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
     } catch {
@@ -268,11 +299,11 @@ export const MatchWordWordExView: FC<TProps> = ({
         <div className="flex flex-col items-stretch justify-center mx-auto w-full min-w-0">
           {sortedMatches.map((m) => {
             let bgColor = "";
-            if (correctIds.includes(m.correctId)) {
+            if (hasId(correctIds, m.correctId)) {
               bgColor = "#E9FEE8";
             }
 
-            if (String(m.id) === incorrectId) {
+            if (sameId(m.id, incorrectId)) {
               bgColor = "#FBE6E5";
             }
 
@@ -295,11 +326,11 @@ export const MatchWordWordExView: FC<TProps> = ({
                         !rest.isPresentationMode &&
                         (profile?.role_id === 2 || profile?.role_id === 1) &&
                         selectedRightId !== undefined &&
-                        m.id === selectedRightId
+                        sameId(m.id, selectedRightId)
                           ? "#E9FEE8"
                           : undefined,
                       border:
-                        m.id === selectedLeftId
+                        sameId(m.id, selectedLeftId)
                           ? "2px solid #3f28c6"
                           : "2px solid transparent",
                       whiteSpace: "break-spaces",
@@ -322,11 +353,11 @@ export const MatchWordWordExView: FC<TProps> = ({
                         !rest.isPresentationMode &&
                         (profile?.role_id === 2 || profile?.role_id === 1) &&
                         selectedLeftId !== undefined &&
-                        m.correctId === selectedLeftId
+                        sameId(m.correctId, selectedLeftId)
                           ? "#E9FEE8"
                           : bgColor,
                       border:
-                        m.correctId === selectedRightId
+                        sameId(m.correctId, selectedRightId)
                           ? "2px solid #3f28c6"
                           : "2px solid transparent",
                       whiteSpace: "break-spaces",

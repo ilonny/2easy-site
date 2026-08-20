@@ -42,6 +42,19 @@ type TAnswersMap = Record<string, { value?: string; status?: TAnswerStatus }>;
 
 type TPoolItem = { id: string; value: string; used: boolean };
 
+/** Same gapId can appear more than once (copy/paste). First occurrence keeps the legacy key. */
+function gapAnswerKey(gapId: string, occurrence: number) {
+  return occurrence > 0 ? `${gapId}#${occurrence}` : String(gapId);
+}
+
+function parseGapAnswerKey(key: string): { gapId: string; occurrence: number } {
+  const i = String(key).lastIndexOf("#");
+  if (i > 0 && /^\d+$/.test(String(key).slice(i + 1))) {
+    return { gapId: String(key).slice(0, i), occurrence: Number(key.slice(i + 1)) };
+  }
+  return { gapId: String(key), occurrence: 0 };
+}
+
 /** Fisher–Yates; called once per stable drag-pool key, not on every render */
 function shufflePoolItems(items: TPoolItem[]): TPoolItem[] {
   const copy = items.map((x) => ({ ...x }));
@@ -380,8 +393,9 @@ const FillGapsNewExViewImpl: FC<{
       const { x, y } = getClientXY(e);
       const el = document.elementFromPoint(x, y) as HTMLElement | null;
       const drop = el?.closest?.("[data-gap-drop='1']") as HTMLElement | null;
-      const gapId = drop?.dataset?.gapId;
-      if (gapId) {
+      const answerKey = drop?.dataset?.answerKey || drop?.dataset?.gapId;
+      const gapId = drop?.dataset?.gapId || parseGapAnswerKey(answerKey || "").gapId;
+      if (answerKey && gapId) {
         const gap = gapsById.get(gapId);
         const word = dragValueRef.current;
         const ok = !!gap?.options?.some(
@@ -389,7 +403,7 @@ const FillGapsNewExViewImpl: FC<{
             o.isCorrect &&
             normalizeGapAnswer(o.value || "") === normalizeGapAnswer(word),
         );
-        setAnswer(gapId, word, ok ? "correct" : "incorrect");
+        setAnswer(answerKey, word, ok ? "correct" : "incorrect");
         if (ok) {
           setPool((prev) =>
             prev.map((p) => (p.id === dragItemId ? { ...p, used: true } : p)),
@@ -427,11 +441,12 @@ const FillGapsNewExViewImpl: FC<{
   }, [dragItemId, gapsById, setAnswer]);
 
   const renderGap = useCallback(
-    (gapId: string) => {
+    (gapId: string, occurrence = 0) => {
       const gap = gapsById.get(gapId);
-      const currentRaw = String(answersRef.current?.[gapId]?.value || "");
+      const answerKey = gapAnswerKey(gapId, occurrence);
+      const currentRaw = String(answersRef.current?.[answerKey]?.value || "");
       const current = currentRaw.trim();
-      const status = statusByGap?.[gapId] || "neutral";
+      const status = statusByGap?.[answerKey] || "neutral";
       const tooltipContent = gapTooltipText(gap);
       const teacherHintActive =
         isTeacher && !isPresentationMode && !!tooltipContent && !canInteract;
@@ -483,14 +498,16 @@ const FillGapsNewExViewImpl: FC<{
             <Input
               size="sm"
               className={styles.gapInput}
-              key={`${gapId}:${serverHydrationVersion}`}
-              defaultValue={currentRaw}
+              id={`fg-new-${ex_id}-${answerKey}`}
+              name={`fg-new-${ex_id}-${answerKey}`}
+              autoComplete="off"
+              value={currentRaw}
               isDisabled={false}
               onValueChange={(val) => {
                 const raw = val || "";
-                if (!raw.trim()) return setAnswer(gapId, "", "neutral");
+                if (!raw.trim()) return setAnswer(answerKey, "", "neutral");
                 const ok = isCorrectForGap(gap, raw);
-                setAnswer(gapId, raw, ok ? "correct" : "incorrect");
+                setAnswer(answerKey, raw, ok ? "correct" : "incorrect");
               }}
               onKeyDown={(e) => {
                 if ((e as any)?.key !== "Enter") return;
@@ -498,15 +515,15 @@ const FillGapsNewExViewImpl: FC<{
                   e.preventDefault();
                 } catch {}
                 const latestRaw = String((e.target as any)?.value || "");
-                if (!latestRaw.trim()) return setAnswer(gapId, "", "neutral");
+                if (!latestRaw.trim()) return setAnswer(answerKey, "", "neutral");
                 const ok = isCorrectForGap(gap, latestRaw);
-                setAnswer(gapId, latestRaw, ok ? "correct" : "incorrect");
+                setAnswer(answerKey, latestRaw, ok ? "correct" : "incorrect");
               }}
               onBlur={(e) => {
                 const latestRaw = String((e.target as any).value || "");
-                if (!latestRaw.trim()) return setAnswer(gapId, "", "neutral");
+                if (!latestRaw.trim()) return setAnswer(answerKey, "", "neutral");
                 const ok = isCorrectForGap(gap, latestRaw);
-                setAnswer(gapId, latestRaw, ok ? "correct" : "incorrect");
+                setAnswer(answerKey, latestRaw, ok ? "correct" : "incorrect");
               }}
               classNames={{
                 inputWrapper: wrapperClass,
@@ -559,14 +576,14 @@ const FillGapsNewExViewImpl: FC<{
               <Select
                 size="sm"
                 className={styles.gapSelect}
-                key={gapId + ":" + answersVersion}
-                defaultSelectedKeys={current ? [current] : []}
+                key={answerKey + ":" + answersVersion}
+                selectedKeys={current ? [current] : []}
                 isDisabled={!canInteract}
                 onChange={(e) => {
                   if (!canInteract) return;
                   const v = e.target.value;
                   const ok = isCorrectForGap(gap, v);
-                  setAnswer(gapId, v, ok ? "correct" : "incorrect");
+                  setAnswer(answerKey, v, ok ? "correct" : "incorrect");
                 }}
                 classNames={{
                   trigger: triggerClass,
@@ -613,6 +630,7 @@ const FillGapsNewExViewImpl: FC<{
             <span
               data-gap-drop="1"
               data-gap-id={gapId}
+              data-answer-key={answerKey}
               className={`${styles.gapDrop} ${
                 status === "incorrect"
                   ? styles.gapDropIncorrect
@@ -636,6 +654,7 @@ const FillGapsNewExViewImpl: FC<{
     [
       answersVersion,
       canInteract,
+      ex_id,
       gapsById,
       isCorrectForGap,
       isPresentationMode,
@@ -654,6 +673,22 @@ const FillGapsNewExViewImpl: FC<{
       ? v
       : ([{ type: "paragraph", children: [{ text: "" }] }] as any);
   }, [data.content]);
+
+  const contentWithOcc = useMemo(() => {
+    const occ: Record<string, number> = {};
+    return contentToRender.map((p) => ({
+      ...p,
+      children: (p.children || []).map((ch: any) => {
+        if (ch?.type === "gap") {
+          const id = String(ch.gapId || "");
+          const n = occ[id] || 0;
+          occ[id] = n + 1;
+          return { ...ch, occurrence: n };
+        }
+        return ch;
+      }),
+    }));
+  }, [contentToRender]);
 
   const image = (data as any)?.images?.[0];
 
@@ -746,17 +781,22 @@ const FillGapsNewExViewImpl: FC<{
         <div
           className={`${styles.content} text-[16px] sm:text-[17px] md:text-[18px] leading-relaxed break-words [overflow-wrap:anywhere]`}
         >
-          {contentToRender.map((p, pIdx) => {
+          {contentWithOcc.map((p, pIdx) => {
             const children = (p.children || []) as Array<
-              TSlateText | TSlateGapElement
+              TSlateText | TSlateGapElement & { occurrence?: number }
             >;
             return (
               <p key={pIdx} style={{ marginBottom: 10 }}>
                 {children.map((ch: any, idx) => {
                   if (ch?.type === "gap") {
+                    const id = String(ch.gapId || "");
+                    const n = Number(ch.occurrence || 0);
                     return (
-                      <span key={idx} className={styles.gapInline}>
-                        {renderGap(ch.gapId)}
+                      <span
+                        key={`${pIdx}-${idx}-${id}-${n}`}
+                        className={styles.gapInline}
+                      >
+                        {renderGap(id, n)}
                       </span>
                     );
                   }

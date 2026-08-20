@@ -187,25 +187,23 @@ const InputItem = (props: {
   const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
-    if (!inputValue) {
+    if (isCorrect) {
+      setInputValue(chip || "");
+      return;
+    }
+    if (isIncorrectWord) {
+      setInputValue(isIncorrectWord);
+    }
+  }, [isCorrect, isIncorrectWord, chip]);
+
+  useEffect(() => {
+    if (!inputValue || isCorrect) {
       return;
     }
     if (inputValue.toLowerCase() === chip.toLowerCase()) {
       setCorrectIds((ids) => ids.concat(id));
     }
-  }, [inputValue, id, chip, setCorrectIds]);
-
-  // useEffect(() => {
-  //   if (isTeacher) {
-  //     console.log('effect teacher?')
-  //     if (isIncorrectWord && !isCorrect) {
-  //       setInputValue(isIncorrectWord);
-  //       return;
-  //     }
-
-  //     setInputValue(chip);
-  //   }
-  // }, [isIncorrectWord, isCorrect, chip, isTeacher]);
+  }, [inputValue, id, chip, setCorrectIds, isCorrect]);
 
   const onBlur = useCallback(() => {
     if (!inputValue) {
@@ -284,13 +282,13 @@ export const MatchWordImageExView: FC<TProps> = ({
     if (!isSorted.current) {
       return (
         [...data.images]
-          .filter((i) => !!i.text && !correctIds.includes(i.id))
+          .filter((i) => !!i.text && !correctIds.some((id) => String(id) === String(i.id)))
           // .map((img) => img.text)
           .sort(() => 0.5 - Math.random())
       );
     }
     return [...data.images].filter(
-      (i) => !!i.text && !correctIds.includes(i.id)
+      (i) => !!i.text && !correctIds.some((id) => String(id) === String(i.id))
     );
   }, [correctIds.length, data.images]);
 
@@ -395,12 +393,14 @@ export const MatchWordImageExView: FC<TProps> = ({
           <div className="flex flex-wrap justify-center gap-y-3 w-full min-w-0">
             {data?.images?.map((image) => {
               const isCorrect =
-                correctIds.includes(image.id) ||
+                correctIds.some((id) => String(id) === String(image.id)) ||
                 (isTeacher &&
                   !rest?.isPresentationMode &&
                   image.text === activeChip);
               const isIncorrectWord =
-                isTeacher && !isCorrect && incorrectIdsMap?.[image?.id];
+                !isCorrect &&
+                (incorrectIdsMap?.[image?.id] ||
+                  incorrectIdsMap?.[String(image?.id)]);
               return (
                 <div
                   key={image.dataURL}
