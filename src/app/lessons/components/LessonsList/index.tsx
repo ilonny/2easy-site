@@ -13,7 +13,10 @@ import { AttachLessonCourseModalForm } from "../AttachLessonCourseModalForm";
 import { TCourse } from "@/app/course/hooks/useCourses";
 import { AuthContext } from "@/auth";
 import { useRouter } from "next/navigation";
-import { useCheckSubscription } from "@/app/subscription/helpers";
+import {
+  isLessonLockedOnFreeTariff,
+  useCheckSubscription,
+} from "@/app/subscription/helpers";
 import { getImageUrl } from "@/app/editor/helpers";
 import { CopyLessonToModal } from "../CopyLessonToModal";
 import { useCourses } from "@/app/course/hooks/useCourses";
@@ -395,11 +398,7 @@ export const LessonsList: FC<TProps> = ({
             isStudent={isStudent}
             copyLesson={copyLesson}
             hideContextMenu={hideContextMenu}
-            isClosed={
-              isFreeTariff &&
-              !lesson.is_free &&
-              (lesson.user_id === 1 || lesson.created_from_2easy)
-            }
+            isClosed={isLessonLockedOnFreeTariff(lesson, isFreeTariff)}
             currentCourse={currentCourse}
             alwaysOpenLessonMode={alwaysOpenLessonMode}
             onHomeworkCreated={getLessons}

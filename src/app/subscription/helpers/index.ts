@@ -2,8 +2,26 @@ import { AuthContext } from "@/auth";
 import i18n from "@/i18n/config";
 import { SibscribeContext } from "@/subscribe/context";
 import { useRouter } from "next/navigation";
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import { toast } from "react-toastify";
+
+export type TTrialLockLesson = {
+  is_free?: string | boolean | number | null;
+  user_id?: number;
+  created_from_2easy?: number | boolean | null;
+} | null | undefined;
+
+/** Trial (`subscribe_type_id === 1`) cannot open paid 2easy catalog lessons. */
+export const isLessonLockedOnFreeTariff = (
+  lesson: TTrialLockLesson,
+  isFreeTariff?: boolean,
+) =>
+  Boolean(
+    isFreeTariff &&
+      lesson &&
+      !lesson.is_free &&
+      (lesson.user_id === 1 || lesson.created_from_2easy),
+  );
 
 const isPaidActiveSubscription = (subscription: {
   success?: boolean;
@@ -65,4 +83,21 @@ export const useCheckSubscription = () => {
     hasSubscription,
     hasPaidAiSubscription,
   };
+};
+
+export const useRedirectIfLessonLockedOnTrial = (lesson: TTrialLockLesson) => {
+  const { subscription } = useCheckSubscription();
+  const router = useRouter();
+  const isLocked = isLessonLockedOnFreeTariff(
+    lesson,
+    subscription?.subscribe_type_id === 1,
+  );
+
+  useEffect(() => {
+    if (isLocked) {
+      router.replace("/subscription");
+    }
+  }, [isLocked, router]);
+
+  return isLocked;
 };

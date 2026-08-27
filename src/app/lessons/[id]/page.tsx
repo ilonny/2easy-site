@@ -55,6 +55,7 @@ import type { TLessonParticipant } from "@/app/lessons/components/LessonParticip
 import { LessonFloatingTools } from "@/app/lessons/components/LessonFloatingTools";
 import { LessonToolTrigger } from "@/app/lessons/components/LessonToolTrigger";
 import { BELOW_SITE_HEADER_STICKY_TOP_CLASS } from "@/constants/uiLayers";
+import { useRedirectIfLessonLockedOnTrial } from "@/app/subscription/helpers";
 
 const ParticipantsIcon = () => (
   <svg
@@ -362,6 +363,12 @@ export default function LessonPage() {
     dictionaryRef.current?.openDictionary(studentId);
     setParticipantsOpen(false);
   }, []);
+
+  const isLockedOnTrial = useRedirectIfLessonLockedOnTrial(lesson);
+
+  if (isLockedOnTrial) {
+    return null;
+  }
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>

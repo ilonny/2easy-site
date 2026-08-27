@@ -33,7 +33,7 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { StartLessonButton } from "@/app/lessons/components/StartLessonButton";
-import { useCheckSubscription } from "@/app/subscription/helpers";
+import { useCheckSubscription, useRedirectIfLessonLockedOnTrial } from "@/app/subscription/helpers";
 import { EditorContext } from "../context";
 import { AuthContext } from "@/auth";
 import EditIcon from "@/assets/icons/edit_blue.svg";
@@ -76,6 +76,7 @@ export default function EditorPage() {
 
   const { scrollToExId, setScrollToExId } = useContext(EditorContext);
   const exListRef = useRef([]);
+  const isLockedOnTrial = useRedirectIfLessonLockedOnTrial(lesson);
 
   useEffect(() => {
     if (!exListRef.current.length) {
@@ -217,6 +218,10 @@ export default function EditorPage() {
   const onPressEdit = useCallback(() => {
     setEditIsVisible(true);
   }, []);
+
+  if (isLockedOnTrial) {
+    return null;
+  }
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>

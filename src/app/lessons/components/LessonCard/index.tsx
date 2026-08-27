@@ -393,6 +393,11 @@ export const LessonCard: FC<TProps> = ({
       return;
     }
 
+    if (isClosed || (profile?.name && !hasSubscription)) {
+      setLockedModalOpen(true);
+      return;
+    }
+
     if (
       alwaysOpenLessonMode &&
       isTeacher &&
@@ -411,11 +416,6 @@ export const LessonCard: FC<TProps> = ({
           JSON.stringify([sid]),
         );
       }
-      return;
-    }
-    if (isClosed || (profile?.name && !hasSubscription)) {
-      setLockedModalOpen(true);
-      // router.push("/subscription");
       return;
     }
 
@@ -845,7 +845,7 @@ export const LessonCard: FC<TProps> = ({
               </Button>
             </>
           ) : null)}
-        {!!showPrimaryStartLessonButton && (
+        {!!showPrimaryStartLessonButton && !isClosed && (
           <>
             <div className="h-4"></div>
             <Button
