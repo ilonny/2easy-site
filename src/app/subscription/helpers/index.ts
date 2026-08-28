@@ -11,13 +11,24 @@ export type TTrialLockLesson = {
   created_from_2easy?: number | boolean | null;
 } | null | undefined;
 
+type TProfileLike = {
+  isStudent?: boolean;
+  studentId?: number;
+} | null | undefined;
+
+/** Students access lessons via teacher assignment, not subscription. */
+export const isStudentUser = (profile: TProfileLike) =>
+  Boolean(profile?.isStudent || profile?.studentId);
+
 /** Trial (`subscribe_type_id === 1`) cannot open paid 2easy catalog lessons. */
 export const isLessonLockedOnFreeTariff = (
   lesson: TTrialLockLesson,
   isFreeTariff?: boolean,
+  isStudent?: boolean,
 ) =>
   Boolean(
-    isFreeTariff &&
+    !isStudent &&
+      isFreeTariff &&
       lesson &&
       !lesson.is_free &&
       (lesson.user_id === 1 || lesson.created_from_2easy),
@@ -39,6 +50,9 @@ export const useCheckSubscription = () => {
   const router = useRouter();
 
   const checkSubscription = useCallback(() => {
+    if (isStudentUser(profile)) {
+      return true;
+    }
     if (!authIsLoading && !profile?.login && !profile?.studentId) {
       router.push("/subscription");
       return false;
@@ -51,7 +65,7 @@ export const useCheckSubscription = () => {
       return false;
     }
     return true;
-  }, [authIsLoading, profile?.login, profile?.studentId, router, subscription]);
+  }, [authIsLoading, profile, router, subscription]);
 
   const requireAiSubscription = useCallback(() => {
     const message = i18n.t("ai.needPaidSubscription", {
@@ -73,7 +87,8 @@ export const useCheckSubscription = () => {
     return true;
   }, [authIsLoading, profile?.login, profile?.studentId, router, subscription]);
 
-  const hasSubscription = subscription?.success;
+  const hasSubscription =
+    isStudentUser(profile) || Boolean(subscription?.success);
   const hasPaidAiSubscription = isPaidActiveSubscription(subscription);
 
   return {
@@ -87,10 +102,13 @@ export const useCheckSubscription = () => {
 
 export const useRedirectIfLessonLockedOnTrial = (lesson: TTrialLockLesson) => {
   const { subscription } = useCheckSubscription();
+  const { profile } = useContext(AuthContext);
   const router = useRouter();
+  const isStudent = isStudentUser(profile);
   const isLocked = isLessonLockedOnFreeTariff(
     lesson,
     subscription?.subscribe_type_id === 1,
+    isStudent,
   );
 
   useEffect(() => {
