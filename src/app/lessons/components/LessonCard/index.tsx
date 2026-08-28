@@ -393,6 +393,18 @@ export const LessonCard: FC<TProps> = ({
       return;
     }
 
+    if (isStudent) {
+      router.push("/lessons/" + lesson?.id);
+      const sid = studentId ?? profile?.studentId ?? params.id;
+      if (sid != null && String(sid) !== "") {
+        writeToLocalStorage(
+          "start_lesson_selected_ids",
+          JSON.stringify([sid]),
+        );
+      }
+      return;
+    }
+
     if (isClosed || (profile?.name && !hasSubscription)) {
       setLockedModalOpen(true);
       return;
@@ -407,7 +419,7 @@ export const LessonCard: FC<TProps> = ({
       return;
     }
 
-    if (isStudent || alwaysOpenLessonMode) {
+    if (alwaysOpenLessonMode) {
       router.push("/lessons/" + lesson?.id);
       const sid = studentId ?? profile?.studentId ?? params.id;
       if (sid != null && String(sid) !== "") {

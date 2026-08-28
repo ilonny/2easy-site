@@ -173,7 +173,8 @@ export const checkResponse = (
     needRedirect?: boolean | string;
     needSubscription?: boolean;
   },
-  skipToast?: boolean
+  skipToast?: boolean,
+  skipNeedSubscription?: boolean,
 ) => {
   if (res?.status === 401 && window.location.pathname !== "/login") {
     window.location.pathname = "/login";
@@ -192,7 +193,7 @@ export const checkResponse = (
     toast(res?.message ? res?.message : "Что-то пошло не так", {
       type: "error",
     });
-    if (res?.needSubscription) {
+    if (res?.needSubscription && !skipNeedSubscription) {
       window.location.pathname = "/subscription";
       return;
     }

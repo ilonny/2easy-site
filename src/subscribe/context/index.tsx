@@ -35,12 +35,12 @@ export const SibscribeContextProvider = ({
   };
 
   useEffect(() => {
-    if (!profile?.name) {
+    if (!profile?.name || profile?.studentId) {
       return;
     }
 
     getSubscribe();
-  }, [pathname, profile?.name]);
+  }, [pathname, profile?.name, profile?.studentId]);
   return (
     <SibscribeContext.Provider value={{ subscription, getSubscribe }}>
       {children}

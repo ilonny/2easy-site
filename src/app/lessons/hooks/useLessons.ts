@@ -103,7 +103,7 @@ export const useLessons = (
         });
         const data = await res?.json();
         setLesson(data?.lesson);
-        checkResponse(data);
+        checkResponse(data, false, Boolean(studentIdParam));
         return data;
       } finally {
         setLessonsListIslLoading(false);
