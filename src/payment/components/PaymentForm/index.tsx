@@ -3,6 +3,7 @@ import { AuthContext } from "@/auth";
 import { usePayment } from "@/payment/hooks/usePayment";
 import { usePromocode } from "@/payment/hooks/usePromocode";
 import { TSubscribePeriod } from "@/subscribe/types";
+import { tariffs } from "@/subscribe/components/SubscribeTariffs/tariffs";
 import { Button, Checkbox, Input } from "@nextui-org/react";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -27,7 +28,7 @@ export const PaymentForm = (props: TProps) => {
   const { profile } = useContext(AuthContext);
 
   const [price, setPrice] = useState(
-    type === "month" ? 790 : type === "3month" ? 1890 : 6990,
+    tariffs.find((tariff) => tariff.type === type)?.price ?? 990,
   );
 
   const {

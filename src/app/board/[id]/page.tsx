@@ -81,7 +81,7 @@ export default function BoardRealtimePage() {
     [board?.title],
   );
 
-  const showBackToEdit = isTeacher && !isEditMode;
+  const showBackToEdit = isCatalogTeacherFlow && isLessonMode;
 
   if (loadError) {
     return (
