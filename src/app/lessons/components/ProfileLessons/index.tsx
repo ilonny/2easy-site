@@ -1,6 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { Button, Input, Tab, Tabs, Image, Chip } from "@nextui-org/react";
+import { Button, Input, Tab, Tabs, Image } from "@nextui-org/react";
 import {
   Suspense,
   useCallback,
@@ -570,31 +570,17 @@ export const ProfileLessons = (props: TProps) => {
                   <T k="lessons.lessons2Easy" />
                 </Button>
                 {courses.some((c) => c.user_id === 1) && (
-                  <div className="relative">
-                    <Button
-                      radius="full"
-                      color="primary"
-                      variant={tabIndex === "2easyCourses" ? "solid" : "faded"}
-                      onClick={() => {
-                        setTabIndex("2easyCourses");
-                        router.push("/lesson_plans");
-                      }}
-                    >
-                      <T k="lessons.courses2Easy" />
-                    </Button>
-                    <Chip
-                      color="success"
-                      variant="shadow"
-                      className="absolute right-[0%] top-[0%] mt-[-14px] mr-[-10px]"
-                      size="sm"
-                      style={{
-                        transform: "rotate(6deg)",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <span className="text-white">NEW</span>
-                    </Chip>
-                  </div>
+                  <Button
+                    radius="full"
+                    color="primary"
+                    variant={tabIndex === "2easyCourses" ? "solid" : "faded"}
+                    onClick={() => {
+                      setTabIndex("2easyCourses");
+                      router.push("/lesson_plans");
+                    }}
+                  >
+                    <T k="lessons.courses2Easy" />
+                  </Button>
                 )}
               </div>
               <div className="h-6"></div>
