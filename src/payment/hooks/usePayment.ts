@@ -8,6 +8,9 @@ export const usePayment = () => {
   const [paymentStatus, setPaymentStatus] = useState<
     "success" | "error" | undefined
   >();
+  const [paymentErrorReason, setPaymentErrorReason] = useState<
+    string | undefined
+  >();
 
   const createPayment = useCallback(
     async (
@@ -17,13 +20,14 @@ export const usePayment = () => {
       email?: string
     ) => {
       setPaymentIsLoading(true);
+      setPaymentErrorReason(undefined);
       const res = await fetchPostJson({
         path: "/payment/create-payment",
         isSecure: true,
         data: {
           type,
           phone,
-          promocode,
+          promocode: promocode?.trim().toLowerCase(),
           email,
         },
       });
@@ -33,10 +37,12 @@ export const usePayment = () => {
           setPaymentStatus("success");
         } else {
           setPaymentStatus("error");
+          setPaymentErrorReason(data?.reason);
         }
         return data;
       } catch (e) {
         setPaymentStatus("error");
+        setPaymentErrorReason(undefined);
       } finally {
         setPaymentIsLoading(false);
       }
@@ -60,5 +66,11 @@ export const usePayment = () => {
     return res;
   }, []);
 
-  return { paymentIsLoading, paymentStatus, createPayment, createPayTodayBill };
+  return {
+    paymentIsLoading,
+    paymentStatus,
+    paymentErrorReason,
+    createPayment,
+    createPayTodayBill,
+  };
 };

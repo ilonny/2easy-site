@@ -198,6 +198,13 @@
     "noCardRequired": "Не нужно вводить данные карты",
     "startFree": "Начать бесплатно"
   },
+  "payment": {
+    "promocode": "Промокод",
+    "apply": "Применить",
+    "promocodeInvalid": "Промокод не действителен или не существует",
+    "promocodeAlreadyUsed": "Этот промокод уже был использован",
+    "promocodeApplied": "Промокод применен"
+  },
   "modals": {
     "newLesson": "Новый урок",
     "editLesson": "Редактировать урок",

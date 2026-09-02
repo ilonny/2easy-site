@@ -197,6 +197,13 @@
     "noCardRequired": "No card details required",
     "startFree": "Start free"
   },
+  "payment": {
+    "promocode": "Promo code",
+    "apply": "Apply",
+    "promocodeInvalid": "Promo code is invalid or does not exist",
+    "promocodeAlreadyUsed": "This promo code has already been used",
+    "promocodeApplied": "Promo code applied"
+  },
   "modals": {
     "newLesson": "New lesson",
     "editLesson": "Edit lesson",

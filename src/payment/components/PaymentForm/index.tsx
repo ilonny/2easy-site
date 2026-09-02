@@ -45,9 +45,20 @@ export const PaymentForm = (props: TProps) => {
     },
   });
 
-  const { checkPromo, promocodeValue, promocodeStatus } = usePromocode();
-  const { paymentIsLoading, paymentStatus, createPayment, createPayTodayBill } =
-    usePayment();
+  const {
+    checkPromo,
+    promocodeValue,
+    promocodeStatus,
+    promocodeErrorReason,
+    markPromocodeAlreadyUsed,
+  } = usePromocode();
+  const {
+    paymentIsLoading,
+    paymentStatus,
+    paymentErrorReason,
+    createPayment,
+    createPayTodayBill,
+  } = usePayment();
 
   const isRF = useRef(true);
 
@@ -60,7 +71,9 @@ export const PaymentForm = (props: TProps) => {
         getValues().login,
       );
       if (!response.success) {
-        // error
+        if (response.reason === "already_used") {
+          markPromocodeAlreadyUsed();
+        }
         return;
       }
 
@@ -164,6 +177,7 @@ export const PaymentForm = (props: TProps) => {
       createPayment,
       getValues,
       isRF,
+      markPromocodeAlreadyUsed,
       price,
       profile?.login,
       profile?.name,
@@ -298,10 +312,17 @@ export const PaymentForm = (props: TProps) => {
               <div>
                 {promocodeStatus === "error" && (
                   <p className="text-small text-red-500">
-                    <T
-                      k="payment.promocodeInvalid"
-                      defaultText="Промокод не действителен или не существует"
-                    />
+                    {promocodeErrorReason === "already_used" ? (
+                      <T
+                        k="payment.promocodeAlreadyUsed"
+                        defaultText="Этот промокод уже был использован"
+                      />
+                    ) : (
+                      <T
+                        k="payment.promocodeInvalid"
+                        defaultText="Промокод не действителен или не существует"
+                      />
+                    )}
                   </p>
                 )}
                 {promocodeStatus === "success" && (
@@ -456,7 +477,7 @@ export const PaymentForm = (props: TProps) => {
             />
           </Button>
         </div>
-        {paymentStatus === "error" && (
+        {paymentStatus === "error" && paymentErrorReason !== "already_used" && (
           <p className="text-sm text-red-400">
             <T
               k="common.serverErrorTryLater"
