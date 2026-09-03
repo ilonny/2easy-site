@@ -96,6 +96,39 @@ export const PaymentForm = (props: TProps) => {
 
       const cp = new window.cp.CloudPayments();
 
+      const payerEmail = response.email || getValues().login || profile?.login || "";
+      const payerPhone = response.paymentModel?.phone || getValues().phone || "";
+      const paidAmount = Number(response?.amount);
+      const recurrentAmount = Number(price);
+
+      const buildReceipt = (amount: number) => {
+        const amt = Math.round(Number(amount) * 100) / 100;
+        const items = [
+          {
+            label: "Подписка 2EASY",
+            price: amt,
+            quantity: 1,
+            amount: amt,
+            vat: null,
+            method: 4,
+            object: 4,
+          },
+        ];
+        return {
+          items,
+          Items: items,
+          email: payerEmail,
+          phone: payerPhone,
+          isBso: false,
+          amounts: {
+            electronic: amt,
+            advancePayment: 0,
+            credit: 0,
+            provision: 0,
+          },
+        };
+      };
+
       let reccurentData;
 
       if (type === "month") {
@@ -103,8 +136,8 @@ export const PaymentForm = (props: TProps) => {
         reccurentData = {
           period: 1,
           interval: "Month",
-          amount: Number(price),
-          // startDate: new Date(),
+          amount: recurrentAmount,
+          receipt: buildReceipt(recurrentAmount),
         };
       }
 
@@ -113,8 +146,8 @@ export const PaymentForm = (props: TProps) => {
         reccurentData = {
           period: 12,
           interval: "Month",
-          amount: Number(price),
-          // startDate: new Date()
+          amount: recurrentAmount,
+          receipt: buildReceipt(recurrentAmount),
         };
       }
 
@@ -123,8 +156,8 @@ export const PaymentForm = (props: TProps) => {
         reccurentData = {
           period: 3,
           interval: "Month",
-          amount: Number(price),
-          // startDate: new Date()
+          amount: recurrentAmount,
+          receipt: buildReceipt(recurrentAmount),
         };
       }
 
@@ -134,23 +167,24 @@ export const PaymentForm = (props: TProps) => {
         description: i18n.t("payment.subscriptionPayment", {
           defaultValue: "Оплата подписки 2EASY",
         }),
-        amount: Number(response?.amount),
+        amount: paidAmount,
         currency: "RUB",
-        email: response.email || profile?.login,
-        Email: response.email || profile?.login,
-        receiptEmail: response.email || profile?.login,
+        email: payerEmail,
+        Email: payerEmail,
+        receiptEmail: payerEmail,
         emailBehavior: "Required",
         externalId: response.id.toString(),
         userInfo: {
           accountId: response.user_id,
-          email: response?.email || profile?.login,
-          phone: response.paymentModel.phone,
+          email: payerEmail,
+          phone: payerPhone,
           name: profile?.name,
           surname: profile?.surname || "",
         },
         metadata: { response, type },
         paymentSchema: "Single",
         type,
+        receipt: buildReceipt(paidAmount),
         recurrent: reccurentData,
       };
 
