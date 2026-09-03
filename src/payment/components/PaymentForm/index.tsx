@@ -103,20 +103,18 @@ export const PaymentForm = (props: TProps) => {
 
       const buildReceipt = (amount: number) => {
         const amt = Math.round(Number(amount) * 100) / 100;
-        const items = [
-          {
-            label: "Подписка 2EASY",
-            price: amt,
-            quantity: 1,
-            amount: amt,
-            vat: null,
-            method: 4,
-            object: 4,
-          },
-        ];
         return {
-          items,
-          Items: items,
+          Items: [
+            {
+              label: "Подписка 2EASY",
+              price: amt,
+              quantity: 1,
+              amount: amt,
+              vat: null,
+              method: 4,
+              object: 4,
+            },
+          ],
           email: payerEmail,
           phone: payerPhone,
           isBso: false,
