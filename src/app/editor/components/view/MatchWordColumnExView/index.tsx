@@ -41,20 +41,20 @@ const rectsIntersect = (a: DOMRect, b: DOMRect) =>
 const DraggableItem = (props: {
   chip: TSortedWord;
   setCorrectChips: Dispatch<SetStateAction<TSortedWord[]>>;
-  setActiveChip: Dispatch<SetStateAction<TSortedWord | null | undefined>>;
   setHoveredColumnId: Dispatch<SetStateAction<string | null>>;
   setIncorrectIdsMap: any;
   hoveredColumnIdRef: MutableRefObject<string | null>;
   hoveredTeacherColumnId: string | null;
+  onDropResult: (columnId: string | null, correct: boolean) => void;
 }) => {
   const {
     chip,
     setCorrectChips,
-    setActiveChip,
     setHoveredColumnId,
     setIncorrectIdsMap,
     hoveredColumnIdRef,
     hoveredTeacherColumnId,
+    onDropResult,
   } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
@@ -83,7 +83,6 @@ const DraggableItem = (props: {
 
   const handleDrag = useCallback(
     (_chip: TSortedWord, nextX: number, nextY: number) => {
-      setActiveChip(chip);
       setX(nextX);
       setY(nextY);
       try {
@@ -95,14 +94,14 @@ const DraggableItem = (props: {
         setHoveredColumnId(null);
       }
     },
-    [chip, hoveredColumnIdRef, resolveHoveredColumnId, setActiveChip, setHoveredColumnId],
+    [hoveredColumnIdRef, resolveHoveredColumnId, setHoveredColumnId],
   );
 
   const onStart = useCallback(() => {
     hoveredColumnIdRef.current = null;
     setHoveredColumnId(null);
-    setActiveChip(chip);
-  }, [chip, hoveredColumnIdRef, setActiveChip, setHoveredColumnId]);
+    onDropResult(null, false);
+  }, [hoveredColumnIdRef, onDropResult, setHoveredColumnId]);
 
   return (
     <Draggable
@@ -122,9 +121,9 @@ const DraggableItem = (props: {
         const correctId = String(chip.columnId);
         const isCorrectDrop = hoveredId !== null && hoveredId === correctId;
 
-        setActiveChip(null);
         hoveredColumnIdRef.current = null;
         setHoveredColumnId(null);
+        onDropResult(hoveredId, isCorrectDrop);
 
         if (!isCorrectDrop) {
           setIsError(true);
@@ -178,7 +177,6 @@ export const MatchWordColumnExView: FC<TProps> = ({
   const image = data?.images?.[0];
   const { profile } = useContext(AuthContext);
   const [correctChips, setCorrectChips] = useState<TSortedWord[]>([]);
-  const [activeChip, setActiveChip] = useState<TSortedWord | null>();
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
   const lesson_id = useParams()?.id;
@@ -187,6 +185,13 @@ export const MatchWordColumnExView: FC<TProps> = ({
 
   const [hoveredColumnId, setHoveredColumnId] = useState<string | null>(null);
   const hoveredColumnIdRef = useRef<string | null>(null);
+  const [dropFlash, setDropFlash] = useState<{
+    columnId: string;
+    correct: boolean;
+  } | null>(null);
+  const dropFlashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const [hoveredTeacherColumnId, setHoveredTeacherColumnId] = useState<
     string | null
   >(null);
@@ -202,6 +207,33 @@ export const MatchWordColumnExView: FC<TProps> = ({
     isTeacher,
     isPresentationMode: rest?.isPresentationMode,
   });
+
+  const onDropResult = useCallback(
+    (columnId: string | null, correct: boolean) => {
+      if (dropFlashTimeoutRef.current) {
+        clearTimeout(dropFlashTimeoutRef.current);
+        dropFlashTimeoutRef.current = null;
+      }
+      if (!columnId) {
+        setDropFlash(null);
+        return;
+      }
+      setDropFlash({ columnId, correct });
+      dropFlashTimeoutRef.current = setTimeout(() => {
+        setDropFlash(null);
+        dropFlashTimeoutRef.current = null;
+      }, 1200);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    return () => {
+      if (dropFlashTimeoutRef.current) {
+        clearTimeout(dropFlashTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const sortedChips = useMemo(() => {
     const copy = [...data.columns];
@@ -318,11 +350,11 @@ export const MatchWordColumnExView: FC<TProps> = ({
                   chip={chip}
                   key={chip.id}
                   setCorrectChips={setCorrectChips}
-                  setActiveChip={setActiveChip}
                   setHoveredColumnId={setHoveredColumnId}
                   setIncorrectIdsMap={setIncorrectIdsMap}
                   hoveredColumnIdRef={hoveredColumnIdRef}
                   hoveredTeacherColumnId={hoveredTeacherColumnId}
+                  onDropResult={onDropResult}
                 />
               );
             })}
@@ -331,16 +363,11 @@ export const MatchWordColumnExView: FC<TProps> = ({
             <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-2 w-full min-w-0">
               {data?.columns?.map((column) => {
                 const columnKey = String(column.id);
-                // Green = chip is currently over THIS column (valid hover), not "answer key"
                 const isHoveredTarget = hoveredColumnId === columnKey;
-                const isCorrectHover =
-                  isHoveredTarget &&
-                  activeChip &&
-                  String(activeChip.columnId) === columnKey;
-                const isWrongHover =
-                  isHoveredTarget &&
-                  activeChip &&
-                  String(activeChip.columnId) !== columnKey;
+                const isDropFlashOk =
+                  dropFlash?.columnId === columnKey && dropFlash.correct;
+                const isDropFlashBad =
+                  dropFlash?.columnId === columnKey && !dropFlash.correct;
 
                 const correctedChipsToRender = correctChips?.filter(
                   (correctChip) => {
@@ -385,16 +412,20 @@ export const MatchWordColumnExView: FC<TProps> = ({
                       className={`mt-4 p-2 ${styles.columnDrop}`}
                       style={{
                         width: "100%",
-                        border: isCorrectHover
+                        border: isDropFlashOk
                           ? "2px solid #219F59"
-                          : isWrongHover
+                          : isDropFlashBad
                             ? "2px solid rgb(164, 41, 41)"
-                            : "2px solid transparent",
-                        background: isCorrectHover
+                            : isHoveredTarget
+                              ? "2px dashed #006FEE"
+                              : "2px solid transparent",
+                        background: isDropFlashOk
                           ? "#E9FEE8"
-                          : isWrongHover
+                          : isDropFlashBad
                             ? "#fdd0df"
-                            : "transparent",
+                            : isHoveredTarget
+                              ? "#EEF6FF"
+                              : "transparent",
                       }}
                     >
                       {correctedChipsToRender.map((chip) => {
