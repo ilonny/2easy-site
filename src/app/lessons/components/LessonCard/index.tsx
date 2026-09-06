@@ -365,6 +365,30 @@ export const LessonCard: FC<TProps> = ({
 
   const isDisabled =
     isStudent && lesson?.["lesson_relations.status"] === "close";
+
+  const openTeacherLessonForStudent = useCallback(async () => {
+    const selectedStudentId = Number(studentId ?? params?.id);
+    if (!lesson?.id || !selectedStudentId) return;
+
+    writeToLocalStorage(
+      "start_lesson_selected_ids",
+      JSON.stringify([selectedStudentId]),
+    );
+    const response = await fetchPostJson({
+      path: "/lesson/session/start",
+      isSecure: true,
+      data: {
+        lesson_id: Number(lesson.id),
+        student_ids: [selectedStudentId],
+      },
+    });
+    const json = await response?.json();
+    checkResponse(json);
+    const sessionId = Number(json?.session?.id || 0);
+    if (!sessionId) return;
+    router.push(`/lessons/${lesson.id}?session_id=${sessionId}`);
+  }, [lesson?.id, params?.id, router, studentId]);
+
   const onPressLesson = useCallback(() => {
     if (isDisabled || disableClick) {
       return;
@@ -395,7 +419,7 @@ export const LessonCard: FC<TProps> = ({
 
     if (isStudent) {
       router.push("/lessons/" + lesson?.id);
-      const sid = studentId ?? profile?.studentId ?? params.id;
+      const sid = studentId ?? profile?.studentId ?? params?.id;
       if (sid != null && String(sid) !== "") {
         writeToLocalStorage(
           "start_lesson_selected_ids",
@@ -420,14 +444,7 @@ export const LessonCard: FC<TProps> = ({
     }
 
     if (alwaysOpenLessonMode) {
-      router.push("/lessons/" + lesson?.id);
-      const sid = studentId ?? profile?.studentId ?? params.id;
-      if (sid != null && String(sid) !== "") {
-        writeToLocalStorage(
-          "start_lesson_selected_ids",
-          JSON.stringify([sid]),
-        );
-      }
+      void openTeacherLessonForStudent();
       return;
     }
 
@@ -448,7 +465,8 @@ export const LessonCard: FC<TProps> = ({
     router,
     studentId,
     profile?.studentId,
-    params.id,
+    params?.id,
+    openTeacherLessonForStudent,
   ]);
 
   const tags = useMemo(() => {
@@ -885,16 +903,7 @@ export const LessonCard: FC<TProps> = ({
                     router.push(`/editor/${lesson.id}`);
                     return;
                   }
-                  router.push(`/lessons/${lesson.id}`);
-
-                  const selectedStudentId =
-                    studentId != null && String(studentId) !== ""
-                      ? studentId
-                      : params.id;
-                  writeToLocalStorage(
-                    "start_lesson_selected_ids",
-                    JSON.stringify([selectedStudentId]),
-                  );
+                  void openTeacherLessonForStudent();
                   return;
                 }
                 if (isStudent) {
