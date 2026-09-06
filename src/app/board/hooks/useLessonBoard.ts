@@ -17,11 +17,11 @@ export const useLessonBoard = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchLessonBoardScope = useCallback(
-    async (lessonId: number, studentId?: number) => {
+    async (lessonId: number, studentId?: number, sessionId?: number) => {
       setIsLoading(true);
       try {
         const res = await fetchGet({
-          path: `/board/lesson/scope?${buildLessonBoardQuery(lessonId, studentId)}`,
+          path: `/board/lesson/scope?${buildLessonBoardQuery(lessonId, studentId, sessionId)}`,
           isSecure: true,
         });
         const json = await res?.json();
@@ -37,11 +37,11 @@ export const useLessonBoard = () => {
   );
 
   const fetchLessonBoard = useCallback(
-    async (lessonId: number, studentId?: number) => {
+    async (lessonId: number, studentId?: number, sessionId?: number) => {
       setIsLoading(true);
       try {
         const res = await fetchGet({
-          path: `/board/lesson?${buildLessonBoardQuery(lessonId, studentId)}`,
+          path: `/board/lesson?${buildLessonBoardQuery(lessonId, studentId, sessionId)}`,
           isSecure: true,
         });
         const json = await res?.json();

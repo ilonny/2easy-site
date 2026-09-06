@@ -20,7 +20,7 @@ import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 type TProps = {
   isVisible: boolean;
   setIsVisible: (val: boolean) => void;
-  onSuccess: (chosenIds?: number[]) => void | Promise<void>;
+  onSuccess: (chosenIds?: number[], sessionId?: number) => void | Promise<void>;
   lesson: TLesson;
   skipChoseStatus?: boolean;
   title?: ReactNode;
@@ -31,6 +31,7 @@ type TProps = {
   maxSelection?: number;
   /** Только выбрать ученика, без lesson_relation (проверка homework) */
   skipCreateRelation?: boolean;
+  createLessonSession?: boolean;
 };
 
 export const AttachLessonModalForm: FC<TProps> = ({
@@ -45,6 +46,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
   confirmLabel,
   maxSelection,
   skipCreateRelation,
+  createLessonSession,
 }) => {
   const isRu = (i18n.language || "").toLowerCase().startsWith("ru");
   const courseOpenText = i18n.t("lessons.courseOpen", {
@@ -95,7 +97,27 @@ export const AttachLessonModalForm: FC<TProps> = ({
         "start_lesson_selected_ids",
         JSON.stringify(chosenIds),
       );
-      await onSuccess(chosenIds);
+      let sessionId: number | undefined;
+      if (createLessonSession && chosenIds.length) {
+        const sessionRes = await fetchPostJson({
+          path: "/lesson/session/start",
+          isSecure: true,
+          data: {
+            lesson_id: lesson.id,
+            student_ids: chosenIds,
+          },
+        });
+        const sessionJson = await sessionRes.json();
+        if (!sessionJson?.success || !sessionJson?.session?.id) {
+          throw new Error(sessionJson?.message || "Failed to start lesson");
+        }
+        sessionId = Number(sessionJson.session.id);
+        writeToLocalStorage(
+          `lesson_session_${lesson.id}`,
+          String(sessionId),
+        );
+      }
+      await onSuccess(chosenIds, sessionId);
     } catch {
       /* ignore localStorage / attach errors */
     } finally {
@@ -109,6 +131,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
     isCourses,
     hideToast,
     skipCreateRelation,
+    createLessonSession,
   ]);
 
   const onClickStudent = useCallback(

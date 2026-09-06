@@ -7,19 +7,27 @@ import { applyLocalReactionToggle } from "../utils/applyLocalReactionToggle";
 
 type TParams = {
   lessonId: number;
+  studentId?: number;
+  sessionId?: number;
   enabled: boolean;
 };
 
-export const useLessonChat = ({ lessonId, enabled }: TParams) => {
+export const useLessonChat = ({
+  lessonId,
+  studentId,
+  sessionId,
+  enabled,
+}: TParams) => {
   const [messageList, setMessageList] = useState<TChatMessage[]>([]);
   const [connected, setConnected] = useState(false);
   const adapterRef = useRef<ChatWsAdapter | null>(null);
 
   useEffect(() => {
-    if (!enabled || !lessonId) {
+    if (!enabled || !lessonId || (!studentId && !sessionId)) {
       adapterRef.current?.disconnect();
       adapterRef.current = null;
       setConnected(false);
+      setMessageList([]);
       return;
     }
 
@@ -27,7 +35,7 @@ export const useLessonChat = ({ lessonId, enabled }: TParams) => {
     const adapter = new ChatWsAdapter();
     adapterRef.current = adapter;
 
-    void adapter.connect(lessonId, {
+    void adapter.connect(lessonId, studentId, sessionId, {
       onHistory: (messages) => {
         if (!cancelled) setMessageList(messages);
       },
@@ -53,7 +61,9 @@ export const useLessonChat = ({ lessonId, enabled }: TParams) => {
       onReaction: (messageId, reactions) => {
         if (cancelled) return;
         setMessageList((prev) =>
-          prev.map((m) => (m.id === messageId ? { ...m, reactions } : m)),
+          prev.map((m) =>
+            m.id === messageId ? { ...m, reactions } : m,
+          ),
         );
       },
       onConnectionChange: (isConnected) => {
@@ -69,7 +79,7 @@ export const useLessonChat = ({ lessonId, enabled }: TParams) => {
       adapter.disconnect();
       if (adapterRef.current === adapter) adapterRef.current = null;
     };
-  }, [enabled, lessonId]);
+  }, [enabled, lessonId, sessionId, studentId]);
 
   const sendMessage = useCallback((text: string, replyToId?: number | null) => {
     const trimmed = text.trim();

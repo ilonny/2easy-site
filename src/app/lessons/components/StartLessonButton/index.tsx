@@ -21,7 +21,7 @@ export const StartLessonButton = (props: TProps) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const onSuccess = useCallback(
-    async (chosenIds?: number[]) => {
+    async (chosenIds?: number[], sessionId?: number) => {
       if (isHomeworkCheck) {
         const studentId = Number(chosenIds?.[0]);
         const parentLessonId =
@@ -51,7 +51,11 @@ export const StartLessonButton = (props: TProps) => {
         return;
       }
       setModalVisible(false);
-      router.push(`/lessons/${lesson.id}`);
+      router.push(
+        `/lessons/${lesson.id}${
+          sessionId ? `?session_id=${sessionId}` : ""
+        }`,
+      );
     },
     [isHomeworkCheck, lesson?.id, lesson?.lesson_id_homework, router],
   );
@@ -122,6 +126,7 @@ export const StartLessonButton = (props: TProps) => {
           confirmLabel={label}
           maxSelection={isHomeworkCheck ? 1 : undefined}
           skipCreateRelation={isHomeworkCheck}
+          createLessonSession={!isHomeworkCheck}
         />
       )}
     </>

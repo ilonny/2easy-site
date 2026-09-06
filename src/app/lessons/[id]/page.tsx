@@ -16,7 +16,7 @@ import { AuthContext } from "@/auth";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useLessons } from "@/app/lessons/hooks/useLessons";
 import { ExList } from "@/app/editor/components/view/ExList";
 import { useExList } from "@/app/editor/hooks/useExList";
@@ -88,6 +88,7 @@ const VIEW_ASYNC_NOOP = async () => {};
 export default function LessonPage() {
   withLogin();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const params = useParams() as { id: string };
   const lessonId = parseRouteId(params.id);
   const lessonIdNum = parseRouteIdNumber(params.id);
@@ -104,6 +105,10 @@ export default function LessonPage() {
   const [tutorialStep, setTutorialStep] = useState(1);
   const [students, setStudents] = useState<TLessonParticipant[]>([]);
   const [activeStudentId, setActiveStudentId] = useState(0);
+  const [lessonSessionId, setLessonSessionId] = useState<number | undefined>(
+    () => Number(searchParams?.get("session_id") || 0) || undefined,
+  );
+  const [lessonSessionRoster, setLessonSessionRoster] = useState<number[]>([]);
   const lastStudentFocusUpdatedAtRef = useRef<number>(0);
 
   const [dictionaryOnboardingOpen, setDictionaryOnboardingOpen] = useState(false);
@@ -113,6 +118,43 @@ export default function LessonPage() {
   const boardModalOpenRef = useRef(false);
 
   boardModalOpenRef.current = boardModalOpen;
+
+  useEffect(() => {
+    if (authIsLoading || !lessonIdNum) return;
+    let cancelled = false;
+    const requested = Number(searchParams?.get("session_id") || 0);
+    void (async () => {
+      try {
+        const query = new URLSearchParams({
+          lesson_id: String(lessonIdNum),
+        });
+        if (requested) query.set("session_id", String(requested));
+        const res = await fetchGet({
+          path: `/lesson/session/resolve?${query.toString()}`,
+          isSecure: true,
+        });
+        const json = await res?.json();
+        if (!cancelled && json?.success && json?.session?.id) {
+          setLessonSessionId(Number(json.session.id));
+          const roster = Array.isArray(json.session.student_ids)
+            ? json.session.student_ids.map(Number).filter(Boolean)
+            : [];
+          if (roster.length) {
+            setLessonSessionRoster(roster);
+            writeToLocalStorage(
+              "start_lesson_selected_ids",
+              JSON.stringify(roster),
+            );
+          }
+        }
+      } catch {
+        // Legacy lessons without a persisted session keep old per-student scope.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [authIsLoading, lessonIdNum, searchParams]);
 
   const handleAddWordSelection = useCallback(
     (selection: string) => {
@@ -188,15 +230,17 @@ export default function LessonPage() {
 
   const fetchStudents = useCallback(async () => {
     if (!lessonId) return;
-    let selectedIds: number[] = [];
-    try {
-      selectedIds = (
-        JSON.parse(readFromLocalStorage("start_lesson_selected_ids") || "[]") as unknown[]
-      )
-        ?.map((el) => Number(el))
-        ?.filter((n) => Number(n) > 0);
-    } catch {
-      /* ignore */
+    let selectedIds: number[] = lessonSessionRoster;
+    if (!selectedIds.length) {
+      try {
+        selectedIds = (
+          JSON.parse(readFromLocalStorage("start_lesson_selected_ids") || "[]") as unknown[]
+        )
+          ?.map((el) => Number(el))
+          ?.filter((n) => Number(n) > 0);
+      } catch {
+        /* ignore */
+      }
     }
 
     const paramsQs = new URLSearchParams();
@@ -223,7 +267,7 @@ export default function LessonPage() {
     } catch {
       /* ignore */
     }
-  }, [lessonId]);
+  }, [lessonId, lessonSessionRoster]);
 
   useEffect(() => {
     fetchStudents();
@@ -608,11 +652,15 @@ export default function LessonPage() {
               lessonId={Number(params.id) || lesson?.id || 0}
               isTeacher={isTeacher}
               studentIdForBoard={lessonBoardStudentId}
+              lessonSessionId={lessonSessionId}
               onOpenChange={setBoardModalOpen}
             />
             <VideoCall lessonId={params.id as string} />
             <Chat
               lesson_id={Number(params.id) || lesson?.id || 0}
+              studentId={lessonBoardStudentId}
+              lessonSessionId={lessonSessionId}
+              isTeacher={isTeacher}
             />
           </LessonFloatingTools>
         </div>

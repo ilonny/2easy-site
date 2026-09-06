@@ -11,6 +11,7 @@ import {
 import { ClipboardEvent, FC, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@nextui-org/react";
+import { toast } from "react-toastify";
 import CloseIcon from "@/assets/icons/close.svg";
 import Image from "next/image";
 import { T } from "@/i18n/T";
@@ -24,9 +25,9 @@ import styles from "./styles.module.css";
 
 type TProps = {
   lesson_id: number;
-  /** @deprecated unused — kept for call-site compatibility */
-  students?: unknown;
-  /** @deprecated unused — kept for call-site compatibility */
+  /** Active student thread — required for teachers with multiple students. */
+  studentId?: number;
+  lessonSessionId?: number;
   isTeacher?: boolean;
 };
 
@@ -48,7 +49,12 @@ const ChatFabIcon = () => (
   </svg>
 );
 
-export const Chat: FC<TProps> = ({ lesson_id }) => {
+export const Chat: FC<TProps> = ({
+  lesson_id,
+  studentId,
+  lessonSessionId,
+  isTeacher = false,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [replyTo, setReplyTo] = useState<TChatMessage | null>(null);
@@ -81,7 +87,9 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
   const { messageList, sendMessage, editMessage, toggleReaction } =
     useLessonChat({
       lessonId: lesson_id,
-      enabled: isOpen,
+      studentId,
+      sessionId: lessonSessionId,
+      enabled: isOpen && !!(studentId || lessonSessionId),
     });
 
   const bumpInput = useCallback(() => setInputKey((k) => k + 1), []);
@@ -92,6 +100,18 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
     setDraft("");
     bumpInput();
   }, [bumpInput]);
+
+  const handleOpen = useCallback(() => {
+    if (isTeacher && !studentId && !lessonSessionId) {
+      toast(i18n.t("lessons.selectStudentForChat"), { type: "warning" });
+      return;
+    }
+    if (!studentId && !lessonSessionId) {
+      toast(i18n.t("lessons.selectStudentForChat"), { type: "warning" });
+      return;
+    }
+    setIsOpen(true);
+  }, [isTeacher, lessonSessionId, studentId]);
 
   const handleSend = useCallback(
     (_html: string, messageText: string) => {
@@ -146,6 +166,20 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
     return () => window.clearTimeout(timer);
   }, [replyTo, editing, inputKey]);
 
+  useEffect(() => {
+    if (!isOpen || !isTeacher) return;
+    if (!studentId && !lessonSessionId) {
+      setIsOpen(false);
+      clearComposerMode();
+    }
+  }, [
+    clearComposerMode,
+    isOpen,
+    isTeacher,
+    lessonSessionId,
+    studentId,
+  ]);
+
   if (!isOpen) {
     const label = i18n.t("lessons.lessonChat");
     return (
@@ -153,7 +187,7 @@ export const Chat: FC<TProps> = ({ lesson_id }) => {
         label={<T k="lessons.lessonChat" />}
         ariaLabel={label}
         icon={<ChatFabIcon />}
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpen}
       />
     );
   }

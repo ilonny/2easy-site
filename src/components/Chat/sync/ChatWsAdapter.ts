@@ -25,15 +25,24 @@ export class ChatWsAdapter {
   private ws: WebSocket | null = null;
   private callbacks: TChatRealtimeCallbacks = {};
   private lessonId: number | null = null;
+  private studentId: number | null = null;
+  private sessionId: number | null = null;
   private pingTimer: ReturnType<typeof setInterval> | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private shouldReconnect = false;
   private connectionGen = 0;
   private pendingSends: TPendingSend[] = [];
 
-  async connect(lessonId: number, callbacks: TChatRealtimeCallbacks) {
+  async connect(
+    lessonId: number,
+    studentId: number | undefined,
+    sessionId: number | undefined,
+    callbacks: TChatRealtimeCallbacks,
+  ) {
     this.teardownSocket();
     this.lessonId = lessonId;
+    this.studentId = studentId || null;
+    this.sessionId = sessionId || null;
     this.callbacks = callbacks;
     this.shouldReconnect = true;
     this.connectionGen += 1;
@@ -42,8 +51,8 @@ export class ChatWsAdapter {
 
   private openSocket(gen: number): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.lessonId) {
-        reject(new Error("lessonId is required"));
+      if (!this.lessonId || (!this.studentId && !this.sessionId)) {
+        reject(new Error("lessonId and studentId or sessionId are required"));
         return;
       }
       if (gen !== this.connectionGen) {
@@ -51,7 +60,13 @@ export class ChatWsAdapter {
         return;
       }
 
-      const ws = new WebSocket(getChatWsUrl(this.lessonId));
+      const ws = new WebSocket(
+        getChatWsUrl(
+          this.lessonId,
+          this.studentId || undefined,
+          this.sessionId || undefined,
+        ),
+      );
       this.ws = ws;
 
       ws.onopen = () => {
@@ -81,7 +96,11 @@ export class ChatWsAdapter {
         this.stopPing();
         if (gen !== this.connectionGen) return;
         this.callbacks.onConnectionChange?.(false);
-        if (this.shouldReconnect && this.lessonId) {
+        if (
+          this.shouldReconnect &&
+          this.lessonId &&
+          (this.studentId || this.sessionId)
+        ) {
           this.reconnectTimer = setTimeout(() => {
             if (!this.shouldReconnect || gen !== this.connectionGen) return;
             void this.openSocket(this.connectionGen);
@@ -190,7 +209,12 @@ export class ChatWsAdapter {
 
     this.pendingSends.push({ message, replyToId });
     if (this.ws?.readyState === WebSocket.CONNECTING) return;
-    if (this.shouldReconnect && this.lessonId && !this.reconnectTimer) {
+    if (
+      this.shouldReconnect &&
+      this.lessonId &&
+      (this.studentId || this.sessionId) &&
+      !this.reconnectTimer
+    ) {
       this.connectionGen += 1;
       void this.openSocket(this.connectionGen);
     }
@@ -231,6 +255,8 @@ export class ChatWsAdapter {
     this.pendingSends = [];
     this.teardownSocket();
     this.lessonId = null;
+    this.studentId = null;
+    this.sessionId = null;
     this.callbacks = {};
   }
 

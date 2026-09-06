@@ -22,6 +22,7 @@ type TProps = {
   lessonId: number;
   isTeacher: boolean;
   studentIdForBoard?: number;
+  lessonSessionId?: number;
   onOpenChange?: (open: boolean) => void;
 };
 
@@ -38,6 +39,7 @@ export const LessonBoardButton: FC<TProps> = ({
   lessonId,
   isTeacher,
   studentIdForBoard,
+  lessonSessionId,
   onOpenChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,6 +63,7 @@ export const LessonBoardButton: FC<TProps> = ({
         const scopeResponse = await fetchLessonBoardScope(
           lessonId,
           studentIdForBoard,
+          lessonSessionId,
         );
         const lessonScope = scopeResponse.scope;
         setScope(lessonScope);
@@ -72,7 +75,11 @@ export const LessonBoardButton: FC<TProps> = ({
           return null;
         }
 
-        const loadedBoard = await fetchLessonBoard(lessonId, studentIdForBoard);
+        const loadedBoard = await fetchLessonBoard(
+          lessonId,
+          studentIdForBoard,
+          lessonSessionId,
+        );
         setBoard(loadedBoard);
         return loadedBoard;
       } catch {
@@ -91,6 +98,7 @@ export const LessonBoardButton: FC<TProps> = ({
       fetchLessonBoardScope,
       isTeacher,
       lessonId,
+      lessonSessionId,
       studentIdForBoard,
     ],
   );
