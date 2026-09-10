@@ -96,11 +96,7 @@ export class ChatWsAdapter {
         this.stopPing();
         if (gen !== this.connectionGen) return;
         this.callbacks.onConnectionChange?.(false);
-        if (
-          this.shouldReconnect &&
-          this.lessonId &&
-          (this.studentId || this.sessionId)
-        ) {
+        if (this.shouldReconnect && this.lessonId) {
           this.reconnectTimer = setTimeout(() => {
             if (!this.shouldReconnect || gen !== this.connectionGen) return;
             void this.openSocket(this.connectionGen);
@@ -209,12 +205,7 @@ export class ChatWsAdapter {
 
     this.pendingSends.push({ message, replyToId });
     if (this.ws?.readyState === WebSocket.CONNECTING) return;
-    if (
-      this.shouldReconnect &&
-      this.lessonId &&
-      (this.studentId || this.sessionId) &&
-      !this.reconnectTimer
-    ) {
+    if (this.shouldReconnect && this.lessonId && !this.reconnectTimer) {
       this.connectionGen += 1;
       void this.openSocket(this.connectionGen);
     }

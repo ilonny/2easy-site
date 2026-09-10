@@ -162,20 +162,6 @@ export const Chat: FC<TProps> = ({
     return () => window.clearTimeout(timer);
   }, [replyTo, editing, inputKey]);
 
-  useEffect(() => {
-    if (!isOpen || !isTeacher) return;
-    if (!studentId && !lessonSessionId) {
-      setIsOpen(false);
-      clearComposerMode();
-    }
-  }, [
-    clearComposerMode,
-    isOpen,
-    isTeacher,
-    lessonSessionId,
-    studentId,
-  ]);
-
   if (!isOpen) {
     const label = i18n.t("lessons.lessonChat");
     return (
