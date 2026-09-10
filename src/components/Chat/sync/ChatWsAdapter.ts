@@ -51,8 +51,8 @@ export class ChatWsAdapter {
 
   private openSocket(gen: number): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.lessonId || (!this.studentId && !this.sessionId)) {
-        reject(new Error("lessonId and studentId or sessionId are required"));
+      if (!this.lessonId) {
+        reject(new Error("lessonId is required"));
         return;
       }
       if (gen !== this.connectionGen) {

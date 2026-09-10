@@ -23,7 +23,7 @@ export const useLessonChat = ({
   const adapterRef = useRef<ChatWsAdapter | null>(null);
 
   useEffect(() => {
-    if (!enabled || !lessonId || (!studentId && !sessionId)) {
+    if (!enabled || !lessonId) {
       adapterRef.current?.disconnect();
       adapterRef.current = null;
       setConnected(false);

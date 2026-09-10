@@ -89,7 +89,7 @@ export const Chat: FC<TProps> = ({
       lessonId: lesson_id,
       studentId,
       sessionId: lessonSessionId,
-      enabled: isOpen && !!(studentId || lessonSessionId),
+      enabled: isOpen && !!(studentId || lessonSessionId || isTeacher),
     });
 
   const bumpInput = useCallback(() => setInputKey((k) => k + 1), []);
@@ -102,11 +102,7 @@ export const Chat: FC<TProps> = ({
   }, [bumpInput]);
 
   const handleOpen = useCallback(() => {
-    if (isTeacher && !studentId && !lessonSessionId) {
-      toast(i18n.t("lessons.selectStudentForChat"), { type: "warning" });
-      return;
-    }
-    if (!studentId && !lessonSessionId) {
+    if (!isTeacher && !studentId && !lessonSessionId) {
       toast(i18n.t("lessons.selectStudentForChat"), { type: "warning" });
       return;
     }
