@@ -34,10 +34,11 @@ export const snapshotToExcalidrawInitialData = (snapshot: TBoardSnapshot) => ({
 
 export type TExcalidrawInitialData = ReturnType<typeof snapshotToExcalidrawInitialData>;
 
+/** File binaries are immutable per id, so ids are enough to detect changes. */
 export const getBoardSnapshotFingerprint = (snapshot: TBoardSnapshot): string =>
   JSON.stringify({
     format: snapshot.format,
     elements: snapshot.elements,
-    files: snapshot.files,
+    files: Object.keys(snapshot.files).sort(),
     appState: snapshot.appState,
   });

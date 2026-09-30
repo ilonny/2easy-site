@@ -9,9 +9,7 @@ import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import "@excalidraw/excalidraw/index.css";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  augmentRemoteElementsWithDeletions,
   buildBoardSnapshotFromExcalidraw,
-  hasBoardSnapshotChanged,
   initialDataToBoardSnapshot,
 } from "../../utils/excalidrawSnapshot";
 import {
@@ -139,15 +137,9 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
 
       lastAppliedRevisionRef.current = revision;
 
-      const localElements = api.getSceneElementsIncludingDeleted();
-      const remoteElements = augmentRemoteElementsWithDeletions(
-        localElements,
-        remoteSnapshot.elements as never,
-      );
-
       const reconciled = reconcileElements(
-        localElements,
-        remoteElements as never,
+        api.getSceneElementsIncludingDeleted(),
+        remoteSnapshot.elements as never,
         api.getAppState(),
       );
 
@@ -224,11 +216,12 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
       }
 
       const snapshot = buildBoardSnapshotFromExcalidraw(elements, appState, files);
-      if (!hasBoardSnapshotChanged(snapshot, lastFingerprintRef.current)) {
+      const fingerprint = getBoardSnapshotFingerprint(snapshot);
+      if (fingerprint === lastFingerprintRef.current) {
         return;
       }
 
-      lastFingerprintRef.current = getBoardSnapshotFingerprint(snapshot);
+      lastFingerprintRef.current = fingerprint;
       onSceneChange(snapshot);
     },
     [onSceneChange],
