@@ -100,6 +100,27 @@ export const useCheckSubscription = () => {
   };
 };
 
+export type TUserAccess =
+  | "loading"
+  | "guest"
+  | "student"
+  | "noSubscription"
+  | "subscribed";
+
+/** `subscription === undefined` means the teacher's subscription is still being fetched. */
+export const useUserAccess = (): TUserAccess => {
+  const { subscription } = useContext(SibscribeContext) as {
+    subscription?: { success?: boolean } | null;
+  };
+  const { authIsLoading, profile } = useContext(AuthContext);
+
+  if (authIsLoading) return "loading";
+  if (!profile?.name) return "guest";
+  if (isStudentUser(profile)) return "student";
+  if (subscription === undefined) return "loading";
+  return subscription?.success ? "subscribed" : "noSubscription";
+};
+
 export const useRedirectIfLessonLockedOnTrial = (lesson: TTrialLockLesson) => {
   const { subscription } = useCheckSubscription();
   const { profile } = useContext(AuthContext);

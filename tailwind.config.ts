@@ -17,6 +17,17 @@ const config: Config = {
         primary: "#3F28C6",
         pinkSecondary: "#FF7EB3",
         black: "#2D2D2D",
+        brand: {
+          violet: "#5A42D4",
+          orange: "#F7531F",
+          green: "#C6FF75",
+          gray: "#F1F1F4",
+          grayFont: "#6E6E74",
+          black: "#181818",
+        },
+      },
+      letterSpacing: {
+        brand: "-0.01em",
       },
       borderColor: {
         primary: "#3F28C6",

@@ -42,15 +42,11 @@ export const HeaderProfile = (props: TProps) => {
     <Dropdown placement="bottom-end" offset={8}>
       <DropdownTrigger>
         <Button
-          color="secondary"
-          variant="flat"
+          variant="light"
           style={{ outline: "none" }}
-          className="header-secondary-bg max-w-[46vw] touch-manipulation sm:max-w-[200px] md:max-w-none"
+          className="h-10 min-w-0 max-w-[46vw] touch-manipulation gap-2 rounded-[14px] bg-brand-gray px-3.5 text-xs font-bold tracking-brand text-brand-black data-[hover=true]:bg-[#e6e6ea] sm:max-w-[200px] md:h-[46px] md:max-w-none lg:h-12 lg:text-sm"
         >
-          <p
-            className="header-secondary-btn-text truncate"
-            style={{ color: "#4031C3 !important" }}
-          >
+          <p className="truncate">
             {profile.name || i18n.t("profile.profileLabel")}
           </p>
           <Image src={ChevronDown} alt="profile icon" width={14} className="shrink-0" />

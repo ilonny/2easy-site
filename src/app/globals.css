@@ -412,7 +412,8 @@ body.site-menu-open iframe[src*="widget.me-talk.ru"],
 body.site-menu-open [id*="talkme"],
 body.site-menu-open [id*="me-talk"],
 body.site-menu-open [class*="me-talk"],
-body.site-menu-open [class*="talkme"] {
+body.site-menu-open [class*="talkme"],
+body.site-menu-open [id^="widget-root-"] {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;

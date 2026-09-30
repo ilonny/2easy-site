@@ -1,0 +1,2 @@
+export const headerCtaClassName =
+  "flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-[14px] bg-brand-violet px-3.5 text-xs font-bold leading-none tracking-brand text-white transition-opacity hover:opacity-90 max-[374px]:px-2.5 md:h-auto md:gap-[13px] md:py-[7px] md:pr-[7px] lg:gap-2.5 lg:py-2 lg:pl-3 lg:text-sm";
