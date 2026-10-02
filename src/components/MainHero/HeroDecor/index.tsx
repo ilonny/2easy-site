@@ -14,7 +14,7 @@ import PointerIcon from "@/assets/images/hero/pointer.svg";
 import PlusIcon from "@/assets/icons/plus_dark.svg";
 
 const itemClassName =
-  "absolute origin-top-left scale-[0.668] lg:scale-100";
+  "absolute origin-top-left scale-[0.668] lg:scale-[0.869] wide:scale-100";
 
 type TFloatCardProps = {
   title: string;
@@ -40,12 +40,54 @@ const FloatCard = ({ title, tag, tagClassName, children }: TFloatCardProps) => (
 );
 
 const curveLetters = [
-  { char: "т", left: 123.28, top: 13.96, width: 12.701, height: 19.696, rotate: 11.6 },
-  { char: "и", left: 132.37, top: 17.39, width: 16.619, height: 20.807, rotate: 22.83 },
-  { char: "ч", left: 141.95, top: 23.11, width: 18.459, height: 20.626, rotate: 34.37 },
-  { char: "е", left: 150.18, top: 30.93, width: 20.498, height: 20.309, rotate: 46.01 },
-  { char: "р", left: 157.61, top: 40.9, width: 21.161, height: 18.762, rotate: 58.2 },
-  { char: "с", left: 163.28, top: 51.99, width: 20.553, height: 15.663, rotate: 70.17 },
+  {
+    char: "т",
+    left: 123.28,
+    top: 13.96,
+    width: 12.701,
+    height: 19.696,
+    rotate: 11.6,
+  },
+  {
+    char: "и",
+    left: 132.37,
+    top: 17.39,
+    width: 16.619,
+    height: 20.807,
+    rotate: 22.83,
+  },
+  {
+    char: "ч",
+    left: 141.95,
+    top: 23.11,
+    width: 18.459,
+    height: 20.626,
+    rotate: 34.37,
+  },
+  {
+    char: "е",
+    left: 150.18,
+    top: 30.93,
+    width: 20.498,
+    height: 20.309,
+    rotate: 46.01,
+  },
+  {
+    char: "р",
+    left: 157.61,
+    top: 40.9,
+    width: 21.161,
+    height: 18.762,
+    rotate: 58.2,
+  },
+  {
+    char: "с",
+    left: 163.28,
+    top: 51.99,
+    width: 20.553,
+    height: 15.663,
+    rotate: 70.17,
+  },
 ];
 
 const TeachersBadge = () => (
@@ -118,10 +160,46 @@ type TThumb = {
 };
 
 const thumbs: TThumb[] = [
-  { image: Thumb1, left: 5.46, top: 22.77, width: 60.859, height: 68.99, innerWidth: 51.983, innerHeight: 61.73, rotate: 8.85 },
-  { image: Thumb2, left: 32.65, top: 29.15, width: 67.462, height: 75.794, innerWidth: 55.961, innerHeight: 66.454, rotate: -10.84 },
-  { image: Thumb3, left: 58.3, top: 24.48, width: 67.738, height: 76.007, innerWidth: 55.961, innerHeight: 66.454, rotate: 11.13 },
-  { image: Thumb4, left: 93.27, top: 24.48, width: 64.582, height: 73.529, innerWidth: 55.961, innerHeight: 66.454, rotate: -7.92 },
+  {
+    image: Thumb1,
+    left: 5.46,
+    top: 22.77,
+    width: 60.859,
+    height: 68.99,
+    innerWidth: 51.983,
+    innerHeight: 61.73,
+    rotate: 8.85,
+  },
+  {
+    image: Thumb2,
+    left: 32.65,
+    top: 29.15,
+    width: 67.462,
+    height: 75.794,
+    innerWidth: 55.961,
+    innerHeight: 66.454,
+    rotate: -10.84,
+  },
+  {
+    image: Thumb3,
+    left: 58.3,
+    top: 24.48,
+    width: 67.738,
+    height: 76.007,
+    innerWidth: 55.961,
+    innerHeight: 66.454,
+    rotate: 11.13,
+  },
+  {
+    image: Thumb4,
+    left: 93.27,
+    top: 24.48,
+    width: 64.582,
+    height: 73.529,
+    innerWidth: 55.961,
+    innerHeight: 66.454,
+    rotate: -7.92,
+  },
 ];
 
 const LessonsFolder = () => (
@@ -164,7 +242,8 @@ const LessonsFolder = () => (
     ))}
     <div className="absolute left-0 top-[55.41px] h-[56.5px] w-[159.722px] rounded-b-[20.985px] border-t-[1.087px] border-white bg-white/95 shadow-[inset_4.663px_0px_7.695px_0px_rgba(0,0,0,0.02),inset_-4.663px_0px_4.663px_0px_rgba(0,0,0,0.01)] backdrop-blur-[7.823px]" />
     <p className="absolute left-[79.32px] top-[80.4px] w-[102.135px] -translate-x-1/2 text-center text-xs font-bold leading-4 tracking-brand text-[rgba(17,24,28,0.88)]">
-      <T k="hero.lessonsFrom" /> <span className="text-brand-violet">2easy</span>
+      <T k="hero.lessonsFrom" />{" "}
+      <span className="text-brand-violet">2easy</span>
     </p>
     <div className="absolute left-[80.21px] top-[44.5px] flex h-[31.409px] w-[60.458px] -translate-x-1/2 items-center justify-center">
       <p className="rotate-[-6.5deg] whitespace-nowrap text-[23.156px] font-extrabold leading-[1.1] tracking-brand text-[rgba(17,24,28,0.88)] [text-shadow:0px_2.98px_12.665px_rgba(0,0,0,0.15)]">
@@ -181,12 +260,12 @@ export const HeroDecor = () => {
       aria-hidden
     >
       <div
-        className={`${itemClassName} left-[calc(50%-357.6px)] top-[53px] lg:left-[calc(50%-544px)] lg:top-[48.85px]`}
+        className={`${itemClassName} left-[calc(50%-357.6px)] top-[53px] lg:left-[calc(50%-484px)] lg:top-[75px] wide:left-[calc(50%-544px)] wide:top-[48.85px]`}
       >
         <LessonsFolder />
       </div>
       <div
-        className={`${itemClassName} left-[calc(50%-384px)] top-[203.9px] lg:left-[calc(50%-763px)] lg:top-[214.85px]`}
+        className={`${itemClassName} left-[calc(50%-384px)] top-[203.9px] lg:left-[calc(50%-675px)] lg:top-[220px] wide:left-[calc(50%-763px)] wide:top-[214.85px]`}
       >
         <FloatCard
           title="GET INKED"
@@ -205,7 +284,7 @@ export const HeroDecor = () => {
         </FloatCard>
       </div>
       <div
-        className={`${itemClassName} left-[calc(50%+291.3px)] top-[63px] lg:left-[calc(50%+606.5px)] lg:top-[48.85px]`}
+        className={`${itemClassName} left-[calc(50%+291.3px)] top-[63px] lg:left-[calc(50%+519px)] lg:top-[75px] wide:left-[calc(50%+606.5px)] wide:top-[48.85px]`}
       >
         <FloatCard
           title="IS SOCIAL MEDIA FAKE?"
@@ -223,7 +302,7 @@ export const HeroDecor = () => {
         </FloatCard>
       </div>
       <div
-        className={`${itemClassName} left-[calc(50%+248.6px)] top-[264.2px] lg:left-[calc(50%+423px)] lg:top-[349.85px]`}
+        className={`${itemClassName} left-[calc(50%+248.6px)] top-[264.2px] lg:left-[calc(50%+359px)] lg:top-[337px] wide:left-[calc(50%+423px)] wide:top-[349.85px]`}
       >
         <TeachersBadge />
       </div>

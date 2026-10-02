@@ -1,30 +1,77 @@
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import { T } from "@/i18n/T";
 import { Tag } from "@/components/Tag";
-import TryFreeBg from "@/assets/images/content/try_free.jpg";
+import TryFreeSpeaking from "@/assets/images/content/try_free.jpg";
+import TryFreeLessons from "@/assets/images/content/try_free_lessons.jpg";
+import TryFreeCourses from "@/assets/images/content/try_free_courses.jpg";
+import TryFreeDiscussion from "@/assets/images/content/try_free_discussion.jpg";
+import TryFreeGrammar from "@/assets/images/content/try_free_grammar.jpg";
 import FireButtonIcon from "@/assets/icons/fire_button.svg";
 import TagLabelIcon from "@/assets/icons/tag_label.svg";
 import ClockIcon from "@/assets/icons/clock_violet.svg";
 import SavedIcon from "@/assets/icons/saved_violet.svg";
+import { TContentTab } from "../useTabCards";
+
+type TVariant = {
+  image: StaticImageData;
+  titleKey: string;
+  // Keeps the text clear of the pack drawn at the top of the image.
+  paddingClassName: string;
+};
+
+const trialPadding = "pt-[90px] md:pt-[110px] lg:pt-[130px]";
+
+const variants: Record<TContentTab, TVariant> = {
+  speaking: {
+    image: TryFreeSpeaking,
+    titleKey: "content.tryTitle",
+    paddingClassName: "pt-[98px] md:pt-[185px] lg:pt-[251px]",
+  },
+  lessons: {
+    image: TryFreeLessons,
+    titleKey: "content.tryTitleTrial",
+    paddingClassName: trialPadding,
+  },
+  courses: {
+    image: TryFreeCourses,
+    titleKey: "content.tryTitleCourses",
+    paddingClassName: trialPadding,
+  },
+  discussion: {
+    image: TryFreeDiscussion,
+    titleKey: "content.tryTitleTrial",
+    paddingClassName: trialPadding,
+  },
+  grammar: {
+    image: TryFreeGrammar,
+    titleKey: "content.tryTitleTrial",
+    paddingClassName: trialPadding,
+  },
+};
 
 type TProps = {
+  tab: TContentTab;
   href: string;
   buttonKey: string;
 };
 
-export const TryFreeCard = ({ href, buttonKey }: TProps) => {
+// Stretches to the height of the neighbouring cards: the picture stays pinned to the top,
+// the text and the button to the bottom.
+export const TryFreeCard = ({ tab, href, buttonKey }: TProps) => {
+  const variant = variants[tab];
   return (
-    <div className="relative flex w-[260px] shrink-0 snap-start flex-col justify-end gap-[15px] self-stretch overflow-hidden rounded-[20px] p-[15px] pt-[98px] md:w-auto md:pt-[185px] lg:gap-6 lg:rounded-[30px] lg:p-6 lg:pt-[251px]">
+    <div
+      className={`relative flex w-[260px] shrink-0 snap-start flex-col justify-end gap-[15px] self-stretch overflow-hidden rounded-[20px] bg-[#F1F1F3] p-[15px] md:w-auto lg:gap-6 lg:rounded-[30px] lg:p-6 ${variant.paddingClassName}`}
+    >
       <Image
-        src={TryFreeBg}
+        src={variant.image}
         alt=""
-        fill
         sizes="(min-width: 1024px) 315px, 260px"
-        className="pointer-events-none object-cover object-top"
+        className="pointer-events-none absolute inset-x-0 top-0 h-auto w-full"
       />
       <T
-        k="content.tryTitle"
+        k={variant.titleKey}
         as="p"
         className="relative text-sm font-bold leading-[1.3] tracking-brand text-brand-black lg:text-base lg:leading-[22px] lg:tracking-normal"
       />

@@ -72,10 +72,15 @@
     "ifYouCouldDesc": "Students take turns asking each other “If you could…” questions",
     "nameThreeDesc": "Students name 3 things in 5-10-15 seconds (the teacher decides 💅🏼). Great for the last few minutes of a lesson",
     "tryTitle": "Try 140+ cards free for 7 days",
+    "tryTitleTrial": "Try the trial mode free for 7 days",
+    "tryTitleCourses": "Try 3 courses in trial mode free for 7 days",
     "tagFree": "Free",
     "tagDays": "7 days",
     "tagNoCard": "No card required",
-    "tryButton": "Try for free"
+    "tryButton": "Try for free",
+    "lessonsCount_one": "{{count}} lesson",
+    "lessonsCount_other": "{{count}} lessons",
+    "loadError": "Couldn’t load the materials, try reloading the page"
   },
   "prep": {
     "label": "Lesson prep",

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useContext, useState } from "react";
+import { ReactNode, useContext, useRef, useState } from "react";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@nextui-org/react";
@@ -8,6 +8,7 @@ import { T } from "@/i18n/T";
 import { useUserAccess } from "@/app/subscription/helpers";
 import { landingContainerClassName } from "@/constants/layout";
 import { PaymentForm } from "@/payment";
+import { StickerRain } from "@/components/StickerRain";
 import { SibscribeContext } from "@/subscribe/context";
 import { tariffs } from "@/subscribe/components/SubscribeTariffs/tariffs";
 import { TSubscribePeriod } from "@/subscribe/types";
@@ -162,6 +163,7 @@ export const MainTariffs = () => {
   };
   const [periodType, setPeriodType] = useState<TSubscribePeriod>("month");
   const [paymentOpened, setPaymentOpened] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
 
   if (access === "student") return null;
 
@@ -185,9 +187,11 @@ export const MainTariffs = () => {
 
   return (
     <section
+      ref={sectionRef}
       id="tariffs"
       className={`${landingContainerClassName} flex flex-col gap-[30px] lg:gap-[50px]`}
     >
+      <StickerRain targetRef={sectionRef} />
       <h2 className="mx-auto max-w-[460px] text-center text-[25px] font-bold leading-none tracking-brand text-brand-black lg:max-w-[550px] lg:text-[40px]">
         <T k="tariffs.title" />
       </h2>

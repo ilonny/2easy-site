@@ -22,6 +22,11 @@
   }
 }
 
+/* Landing scales the 1440 layout up to 1920 proportionally (set by useLandingZoom). */
+html.landing-zoom body {
+  zoom: var(--landing-zoom, 1);
+}
+
 :root {
   --primary: #3f28c6;
   --danger: #A42929;

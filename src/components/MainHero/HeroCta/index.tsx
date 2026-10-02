@@ -10,7 +10,7 @@ import { TrialChip } from "@/components/TrialChip";
 import NoCardIcon from "@/assets/icons/no_card.svg";
 
 const buttonClassName =
-  "relative flex h-[46px] items-center justify-center whitespace-nowrap rounded-[14px] bg-brand-violet px-3.5 text-xs font-bold leading-none tracking-brand text-white transition-opacity hover:opacity-90 lg:text-sm";
+  "relative flex h-[46px] items-center justify-center whitespace-nowrap min-w-[200px] rounded-[14px] bg-brand-violet px-5 text-xs font-bold leading-none tracking-brand text-white transition-opacity hover:opacity-90 lg:min-w-[240px] lg:px-6 lg:text-sm";
 
 export const HeroCta = () => {
   const { profile } = useContext(AuthContext);
@@ -19,7 +19,7 @@ export const HeroCta = () => {
   if (access === "loading") {
     return (
       <div className="flex flex-col items-center gap-3 pt-2.5">
-        <Skeleton className="h-[46px] w-[172px] rounded-[14px] lg:w-[196px]" />
+        <Skeleton className="h-[46px] w-[200px] rounded-[14px] lg:w-[240px]" />
       </div>
     );
   }
