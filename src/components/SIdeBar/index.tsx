@@ -31,10 +31,10 @@ export const SideBar: FC<TProps> = ({ isOpened, onClose, access }) => {
     return null;
   }
 
-  // Starts below the fixed header (80px mobile / 86px tablet) so the header stays visible.
+  // Starts below the fixed header so the header stays visible.
   return createPortal(
     <div
-      className="site-menu-layer fixed inset-x-0 bottom-0 top-20 flex flex-col overflow-y-auto bg-white md:top-[86px] lg:hidden"
+      className="site-menu-layer fixed inset-x-0 bottom-0 top-[var(--site-header-h)] flex flex-col overflow-y-auto bg-white lg:hidden"
       role="dialog"
       aria-modal="true"
     >
@@ -60,6 +60,13 @@ export const SideBar: FC<TProps> = ({ isOpened, onClose, access }) => {
                 className="flex w-full items-center justify-center rounded-[14px] bg-brand-gray py-3.5 text-sm font-bold leading-[1.3] tracking-brand text-brand-black transition-colors hover:bg-[#e6e6ea]"
               >
                 <T k="header.login" />
+              </Link>
+              <Link
+                href="/login?role=student"
+                onClick={onClose}
+                className="flex w-full items-center justify-center rounded-[14px] py-3.5 text-sm font-bold leading-[1.3] tracking-brand text-brand-violet transition-colors hover:bg-brand-gray"
+              >
+                <T k="header.imStudent" />
               </Link>
             </div>
           )}

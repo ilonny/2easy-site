@@ -6,6 +6,7 @@ import { landingContainerClassName } from "@/constants/layout";
 import { SectionHeading } from "@/components/SectionHeading";
 import { LoopVideo } from "@/components/LoopVideo";
 import { getClientScale, getRenderScale } from "@/hooks/useLandingZoom";
+import { getSiteHeaderHeight } from "@/constants/uiLayers";
 import GraphIcon from "@/assets/icons/graph_violet.svg";
 import Dictionary from "@/assets/images/delivery/dictionary.jpg";
 import Board from "@/assets/images/delivery/board.jpg";
@@ -72,10 +73,9 @@ export const MainDelivery = () => {
       const height = sticky.offsetHeight;
       const viewportHeight =
         window.innerHeight / getClientScale(sticky) / scale;
-      stickyTop =
-        height < viewportHeight
-          ? (viewportHeight - height) / 2
-          : viewportHeight - height;
+      const headerHeight = getSiteHeaderHeight();
+      const freeHeight = viewportHeight - headerHeight;
+      stickyTop = headerHeight + Math.max(0, (freeHeight - height) / 2);
       sticky.style.top = `${stickyTop}px`;
       outer.style.height = `${height + distance}px`;
       update();

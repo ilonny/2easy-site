@@ -3,6 +3,7 @@ import { Panel } from "@/ui";
 import Image from "next/image";
 import Logo from "@/assets/icons/logo.svg";
 import Link from "next/link";
+import { Suspense } from "react";
 import { LoginForm } from "./components";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
@@ -41,7 +42,9 @@ export default function LoginPage() {
       </div>
       <div className="w-[100%] max-w-[460px]">
         <Panel>
-          <LoginForm />
+          <Suspense>
+            <LoginForm />
+          </Suspense>
         </Panel>
       </div>
     </main>

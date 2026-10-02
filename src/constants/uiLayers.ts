@@ -1,18 +1,28 @@
 /**
- * Stacking layers for the fixed mobile header vs overlays (modals, chat, menu).
- * Keep in sync with CSS in globals.css (--site-header-z, --overlay-above-header-z, --site-menu-z).
+ * Stacking layers for the site header vs overlays (modals, chat, menu).
+ * Keep in sync with CSS in globals.css (--site-header-z, --site-header-desktop-z,
+ * --overlay-above-header-z, --site-menu-z).
  *
- * These are real CSS classes (not Tailwind z-[N] strings) so they always apply:
- * Tailwind does not scan src/constants, so z-[60] here would never be generated.
+ * These are real CSS classes (not Tailwind z-[N] strings) so they always apply.
  *
- * Desktop header is static — overlay class only raises z-index below lg.
+ * The header is fixed below lg and sticky from lg up; its height is published
+ * as `--site-header-h` so sticky elements can sit right under it.
  */
 
 /** Fixed site header on mobile (`Header` / `.site-header-bar`). */
 export const SITE_HEADER_Z_CLASS = "site-header-bar";
 
-/** Sticky CTAs that must sit just below the fixed header (min-h ~80px). */
-export const BELOW_SITE_HEADER_STICKY_TOP_CLASS = "top-[88px]";
+/** Sticky CTAs that must sit just below the pinned header. */
+export const BELOW_SITE_HEADER_STICKY_TOP_CLASS =
+  "top-[calc(var(--site-header-h)+8px)]";
+
+/** Height of the pinned site header in layout pixels. */
+export const getSiteHeaderHeight = () =>
+  parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue(
+      "--site-header-h",
+    ),
+  ) || 0;
 
 /**
  * NextUI modal wrappers that must paint above the mobile header.

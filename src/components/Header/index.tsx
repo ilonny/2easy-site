@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { HeaderProfile } from "../HeaderProfile";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "@/auth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,13 +17,15 @@ import { Logo } from "../Logo";
 import { T } from "@/i18n/T";
 import { BOARD_LESSON_PAGE_LEGACY_PATH_PREFIX, BOARD_LESSON_PAGE_PATH_PREFIX } from "@/app/board/constants";
 import { useUserAccess } from "@/app/subscription/helpers";
-import { headerCtaClassName } from "./styles";
+import { headerCtaClassName, headerGhostLinkClassName } from "./styles";
 
 export const Header = () => {
   const pathname = usePathname();
   const { profile, authIsLoading } = useContext(AuthContext);
   const access = useUserAccess();
   const [sidebarIsOpened, setSidebarIsOpened] = useState(false);
+  const rootRef = useRef<HTMLElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!sidebarIsOpened) return;
@@ -40,7 +42,7 @@ export const Header = () => {
     setSidebarIsOpened(false);
   }, [pathname]);
 
-  if (
+  const isHidden =
     [
       "/login",
       "/registration",
@@ -51,19 +53,56 @@ export const Header = () => {
       "/taboo_b1_b2_slang",
     ].includes(pathname) ||
     pathname?.startsWith(BOARD_LESSON_PAGE_PATH_PREFIX) ||
-    pathname?.startsWith(BOARD_LESSON_PAGE_LEGACY_PATH_PREFIX)
-  ) {
+    pathname?.startsWith(BOARD_LESSON_PAGE_LEGACY_PATH_PREFIX);
+
+  useEffect(() => {
+    const docStyle = document.documentElement.style;
+    const root = rootRef.current;
+    const bar = barRef.current;
+    if (isHidden || !root || !bar) {
+      docStyle.setProperty("--site-header-h", "0px");
+      return () => docStyle.removeProperty("--site-header-h");
+    }
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const update = () => {
+      const pinned = desktop.matches ? root : bar;
+      docStyle.setProperty("--site-header-h", `${pinned.offsetHeight}px`);
+    };
+    update();
+    const resizeObserver = new ResizeObserver(update);
+    resizeObserver.observe(root);
+    resizeObserver.observe(bar);
+    desktop.addEventListener("change", update);
+    return () => {
+      resizeObserver.disconnect();
+      desktop.removeEventListener("change", update);
+      docStyle.removeProperty("--site-header-h");
+    };
+  }, [isHidden]);
+
+  if (isHidden) {
     return null;
   }
 
   const isGuest = !authIsLoading && !profile?.name;
 
   return (
-    <header className="site-header-root bg-white">
-      <div className="site-header-bar fixed left-0 top-0 w-full bg-white lg:static">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 pt-10 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-[65px]">
-          <div className="hidden lg:flex">
+    <header ref={rootRef} className="site-header-root bg-white lg:pb-5">
+      <div
+        ref={barRef}
+        className="site-header-bar fixed left-0 top-0 w-full bg-white lg:static"
+      >
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 pb-4 pt-10 lg:grid lg:pb-0 lg:grid-cols-[1fr_auto_1fr] lg:px-[65px]">
+          <div className="hidden items-center gap-3 lg:flex">
             <LanguageSwitcher variant="brand" />
+            {isGuest && (
+              <Link
+                href="/login?role=student"
+                className={`${headerGhostLinkClassName} text-brand-violet`}
+              >
+                <T k="header.imStudent" />
+              </Link>
+            )}
           </div>
           <a
             href={
@@ -85,7 +124,7 @@ export const Header = () => {
               <>
                 <Link
                   href="/login"
-                  className="hidden h-[47px] items-center justify-center rounded-[14px] px-3 text-sm font-bold leading-none tracking-brand text-brand-black transition-colors hover:bg-brand-gray lg:flex"
+                  className={`${headerGhostLinkClassName} text-brand-black`}
                 >
                   <T k="header.login" />
                 </Link>
@@ -127,7 +166,7 @@ export const Header = () => {
           </div>
         </div>
       </div>
-      <div className="h-20 md:h-[86px] lg:hidden"></div>
+      <div className="h-24 md:h-[102px] lg:hidden"></div>
       {!profile?.isStudent && profile?.name && (
         <ContentWrapper>
           <div className="hidden pt-6 lg:block">

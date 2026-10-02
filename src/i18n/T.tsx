@@ -19,6 +19,22 @@ import i18n from "./config";
 import { apiUpdateTranslationKey } from "@/api/translations";
 import { checkResponse } from "@/api";
 
+// "<m>a b</m>" in a translation keeps "a b" on one line below the md breakpoint.
+const MOBILE_NOWRAP = /<m>(.*?)<\/m>/g;
+
+function withMobileNowrap(text: string) {
+  if (!text.includes("<m>")) return text;
+  return text.split(MOBILE_NOWRAP).map((part, i) =>
+    i % 2 ? (
+      <span key={i} className="max-md:whitespace-nowrap">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
+
 type TProps = {
   k: string;
   values?: Record<string, any>;
@@ -36,7 +52,7 @@ export function T({ k, values, defaultText, className, as }: TProps) {
 
   const rendered = useMemo(() => {
     const text = t(k, { ...values, defaultValue: defaultText ?? k });
-    return text;
+    return typeof text === "string" ? withMobileNowrap(text) : text;
   }, [t, k, values, defaultText]);
 
   const [isOpen, setIsOpen] = useState(false);

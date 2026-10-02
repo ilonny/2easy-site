@@ -1,12 +1,13 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { T } from "@/i18n/T";
+import { getClientScale } from "@/hooks/useLandingZoom";
 import Keychain from "@/assets/images/footer/keychain.webp";
 import TelegramIcon from "@/assets/icons/telegram_dark.svg";
-import Wordmark from "@/assets/images/footer/wordmark.svg";
 
 const EMAIL = "double2easy@gmail.com";
 
@@ -15,6 +16,29 @@ const legalLinkClassName =
 
 export const Footer = () => {
   const pathname = usePathname();
+  const footerRef = useRef<HTMLElement>(null);
+  const [canPin, setCanPin] = useState(false);
+
+  // The page slides up and uncovers the footer pinned to the bottom of the screen.
+  // A footer taller than the screen would never show its top, so it is only pinned when it fits.
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
+    const update = () =>
+      setCanPin(
+        footer.getBoundingClientRect().height * getClientScale(footer) <=
+          window.innerHeight,
+      );
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(footer);
+    window.addEventListener("resize", update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, [pathname]);
+
   if (pathname !== "/") {
     return null;
   }
@@ -22,9 +46,12 @@ export const Footer = () => {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
-    <footer className="relative">
+    <footer
+      ref={footerRef}
+      className={`${canPin ? "sticky bottom-0" : "relative"} z-0 -mt-10 lg:-mt-[60px]`}
+    >
       <div
-        className="relative z-[1] -mt-10 overflow-hidden rounded-b-[30px] pt-10 lg:-mt-[60px] lg:rounded-b-[60px] lg:pt-[60px]"
+        className="relative overflow-hidden pt-10 lg:pt-[60px]"
         style={{
           background:
             "linear-gradient(180deg, #C9BBFF 0%, #F1EDFF 91.25%) bottom / 100% 722px no-repeat, #C9BBFF",
@@ -94,15 +121,6 @@ export const Footer = () => {
               </button>
             </div>
           </div>
-        </div>
-      </div>
-      {/* The card scrolls away and uncovers a pinned wordmark through this clipped window. */}
-      <div
-        className="relative -mt-[30px] h-[calc(30vw+30px)] [clip-path:inset(0)] lg:-mt-[60px] lg:h-[calc(30vw+60px)]"
-        aria-hidden
-      >
-        <div className="fixed bottom-0 left-0 flex h-[calc(30vw+30px)] w-full items-end justify-center bg-gradient-to-b from-white to-[#A389FF] pb-[2vw] lg:h-[calc(30vw+60px)]">
-          <Image src={Wordmark} alt="" className="h-auto w-[92%]" />
         </div>
       </div>
     </footer>

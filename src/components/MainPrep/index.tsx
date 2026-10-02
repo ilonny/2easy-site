@@ -77,7 +77,7 @@ export const MainPrep = () => {
     <section
       className={`${landingContainerClassName} flex flex-col items-center gap-[30px] lg:gap-[170px] lg:pt-[100px]`}
     >
-      <div ref={headingRef} className="lg:sticky lg:top-[100px]">
+      <div ref={headingRef} className="lg:sticky lg:top-[calc(var(--site-header-h)+30px)]">
         <SectionHeading
           icon={
             <Image

@@ -7,7 +7,7 @@ import { Button, Input } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useState, useRef, useEffect } from "react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { EyeFilledIcon, EyeSlashFilledIcon } from "../EyeIcon";
@@ -55,7 +55,10 @@ export const LoginForm = () => {
 
   const [responseError, setResponseError] = useState("");
   const [forgotError, setForgotError] = useState("");
-  const [tabKey, setTabKey] = useState<TTabKey | null>(null);
+  const searchParams = useSearchParams();
+  const [tabKey, setTabKey] = useState<TTabKey | null>(
+    searchParams?.get("role") === "student" ? "student" : null,
+  );
   const [studentForgotView, setStudentForgotView] = useState(false);
   const loginInputRef = useRef<HTMLInputElement>(null);
   const { setProfile } = useContext(AuthContext);

@@ -7,6 +7,7 @@ import { landingContainerClassName } from "@/constants/layout";
 import { SectionHeading } from "@/components/SectionHeading";
 import { LoopVideo } from "@/components/LoopVideo";
 import { getClientScale, getRenderScale } from "@/hooks/useLandingZoom";
+import { getSiteHeaderHeight } from "@/constants/uiLayers";
 import ScanIcon from "@/assets/icons/scan_violet.svg";
 import Builder from "@/assets/images/review/builder.jpg";
 import Autocheck from "@/assets/images/review/autocheck.jpg";
@@ -46,14 +47,17 @@ const features: TFeature[] = [
 
 const PANEL_HEIGHT = 570;
 
-// Scroll distance of the pinned stage and its top offset in client-rect units,
-// plus the factor converting those units to screen pixels.
+// Scroll distance of the pinned stage and its top offset in client-rect units
+// (centred below the site header), plus the factor converting those units to screen pixels.
 const measureTrack = (track: HTMLElement) => {
   const scale = getRenderScale(track);
   const clientScale = getClientScale(track);
   return {
     travel: (track.offsetHeight - PANEL_HEIGHT) * scale,
-    stickyTop: (window.innerHeight / clientScale - PANEL_HEIGHT * scale) / 2,
+    stickyTop:
+      (window.innerHeight / clientScale +
+        (getSiteHeaderHeight() - PANEL_HEIGHT) * scale) /
+      2,
     clientScale,
   };
 };
@@ -184,7 +188,7 @@ export const MainReview = () => {
         ref={trackRef}
         className="relative hidden h-[calc(570px+240vh)] lg:block"
       >
-        <div className="sticky top-[calc(50vh/var(--landing-zoom,1)-285px)] flex h-[570px] items-center justify-between gap-[30px]">
+        <div className="sticky top-[calc(50vh/var(--landing-zoom,1)+var(--site-header-h)/2-285px)] flex h-[570px] items-center justify-between gap-[30px]">
           <div className="min-w-0 max-w-[395px] flex-1 wide:max-w-[485px] wide:pl-[90px]">
             <div
               className="relative flex flex-col gap-[41px]"

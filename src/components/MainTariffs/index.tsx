@@ -36,7 +36,7 @@ const periods: TPeriod[] = [
     months: 1,
     pet: PetCat,
     petClassName:
-      "left-[195px] top-[-50px] w-[97px] lg:left-[248px] lg:top-[-62px] lg:w-[126px]",
+      "left-[195px] top-[-40px] w-[97px] lg:left-[248px] lg:top-[-50px] lg:w-[126px]",
   },
   {
     type: "3month",
@@ -296,7 +296,7 @@ export const MainTariffs = () => {
               </div>
               {tariff.oldPrice && period.payForKey && (
                 <p className="flex flex-wrap gap-[3px] text-xs lg:text-sm">
-                  <s className="text-brand-violet">{tariff.oldPrice} ₽</s>
+                  <s className="text-brand-violet">{tariff.oldPrice} ₽</s>
                   <T
                     k={period.payForKey}
                     values={{ price: tariff.price }}

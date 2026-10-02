@@ -31,12 +31,26 @@ html.landing-zoom body {
   --primary: #3f28c6;
   --danger: #A42929;
   --site-header-z: 60;
+  --site-header-desktop-z: 40;
   --overlay-above-header-z: 70;
+  /* Pinned header height; `Header` overwrites it with the measured value. */
+  --site-header-h: 96px;
   --site-menu-z: 80;
   --nextui-box-shadow-medium: 0px 0px 15px 0px rgb(0 0 0 / 0.03), 0px 0px 30px 0px rgb(0 0 0 / 0.08), 0px 0px 0px 0px rgb(0 0 0 / 0.3);
   --nextui-danger: 0 60% 40%;
 }
-/* Stacking: page/chips (1–20) < header (60) < chat/modals (70) < mobile menu (80) */
+@media (min-width: 768px) {
+  :root {
+    --site-header-h: 102px;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --site-header-h: 107px;
+  }
+}
+/* Stacking: page/chips (1–20) < header (60) < chat/modals (70) < mobile menu (80).
+   Desktop header (40) stays under NextUI modals and popovers (50). */
 .site-header-root {
   position: relative;
   z-index: var(--site-header-z);
@@ -46,7 +60,11 @@ html.landing-zoom body {
   isolation: isolate;
 }
 @media (min-width: 1024px) {
-  .site-header-root,
+  .site-header-root {
+    position: sticky;
+    top: 0;
+    z-index: var(--site-header-desktop-z);
+  }
   .site-header-bar {
     z-index: auto;
   }

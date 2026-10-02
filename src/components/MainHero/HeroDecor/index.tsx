@@ -1,14 +1,9 @@
-import Image, { StaticImageData } from "next/image";
-import { T } from "@/i18n/T";
+import Image from "next/image";
 import FloatInked from "@/assets/images/hero/float_inked.jpg";
 import FloatFake from "@/assets/images/hero/float_fake.jpg";
 import Avatar1 from "@/assets/images/hero/avatar_1.png";
 import Avatar2 from "@/assets/images/hero/avatar_2.png";
-import Thumb1 from "@/assets/images/hero/thumb_1.jpg";
-import Thumb2 from "@/assets/images/hero/thumb_2.jpg";
-import Thumb3 from "@/assets/images/hero/thumb_3.jpg";
-import Thumb4 from "@/assets/images/hero/thumb_4.jpg";
-import FolderShape from "@/assets/images/hero/folder.svg";
+import LessonsFolderImage from "@/assets/images/hero/lessons_folder.png";
 import CurveShape from "@/assets/images/hero/curve.svg";
 import PointerIcon from "@/assets/images/hero/pointer.svg";
 import PlusIcon from "@/assets/icons/plus_dark.svg";
@@ -148,108 +143,14 @@ const TeachersBadge = () => (
   </div>
 );
 
-type TThumb = {
-  image: StaticImageData;
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-  innerWidth: number;
-  innerHeight: number;
-  rotate: number;
-};
-
-const thumbs: TThumb[] = [
-  {
-    image: Thumb1,
-    left: 5.46,
-    top: 22.77,
-    width: 60.859,
-    height: 68.99,
-    innerWidth: 51.983,
-    innerHeight: 61.73,
-    rotate: 8.85,
-  },
-  {
-    image: Thumb2,
-    left: 32.65,
-    top: 29.15,
-    width: 67.462,
-    height: 75.794,
-    innerWidth: 55.961,
-    innerHeight: 66.454,
-    rotate: -10.84,
-  },
-  {
-    image: Thumb3,
-    left: 58.3,
-    top: 24.48,
-    width: 67.738,
-    height: 76.007,
-    innerWidth: 55.961,
-    innerHeight: 66.454,
-    rotate: 11.13,
-  },
-  {
-    image: Thumb4,
-    left: 93.27,
-    top: 24.48,
-    width: 64.582,
-    height: 73.529,
-    innerWidth: 55.961,
-    innerHeight: 66.454,
-    rotate: -7.92,
-  },
-];
-
 const LessonsFolder = () => (
   <div className="relative h-[112px] w-[159.72px]">
-    <div className="absolute left-0 top-0 h-[111.922px] w-[159.719px]">
-      <Image
-        src={FolderShape}
-        alt=""
-        className="absolute inset-[-63.68%_-45.99%_-67.57%_-45.99%] max-w-none"
-      />
-    </div>
-    {thumbs.map((thumb, index) => (
-      <div
-        key={index}
-        className="absolute flex items-center justify-center"
-        style={{
-          left: thumb.left,
-          top: thumb.top,
-          width: thumb.width,
-          height: thumb.height,
-        }}
-      >
-        <div
-          className="relative overflow-hidden rounded-[6.995px] border-[2.332px] border-white"
-          style={{
-            width: thumb.innerWidth,
-            height: thumb.innerHeight,
-            transform: `rotate(${thumb.rotate}deg)`,
-          }}
-        >
-          <Image
-            src={thumb.image}
-            alt=""
-            fill
-            sizes="60px"
-            className="object-cover"
-          />
-        </div>
-      </div>
-    ))}
-    <div className="absolute left-0 top-[55.41px] h-[56.5px] w-[159.722px] rounded-b-[20.985px] border-t-[1.087px] border-white bg-white/95 shadow-[inset_4.663px_0px_7.695px_0px_rgba(0,0,0,0.02),inset_-4.663px_0px_4.663px_0px_rgba(0,0,0,0.01)] backdrop-blur-[7.823px]" />
-    <p className="absolute left-[79.32px] top-[80.4px] w-[102.135px] -translate-x-1/2 text-center text-xs font-bold leading-4 tracking-brand text-[rgba(17,24,28,0.88)]">
-      <T k="hero.lessonsFrom" />{" "}
-      <span className="text-brand-violet">2easy</span>
-    </p>
-    <div className="absolute left-[80.21px] top-[44.5px] flex h-[31.409px] w-[60.458px] -translate-x-1/2 items-center justify-center">
-      <p className="rotate-[-6.5deg] whitespace-nowrap text-[23.156px] font-extrabold leading-[1.1] tracking-brand text-[rgba(17,24,28,0.88)] [text-shadow:0px_2.98px_12.665px_rgba(0,0,0,0.15)]">
-        200+
-      </p>
-    </div>
+    <Image
+      src={LessonsFolderImage}
+      alt=""
+      sizes="307px"
+      className="absolute left-[-73.5px] top-[-71.5px] h-[259px] w-[307px] max-w-none"
+    />
   </div>
 );
 

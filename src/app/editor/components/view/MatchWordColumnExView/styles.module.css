@@ -15,7 +15,7 @@
   min-width: 0;
   padding: 0.5rem;
   position: sticky;
-  top: 80px;
+  top: var(--site-header-h);
   z-index: 2;
   background: #fff;
   border-radius: 10px;
@@ -32,11 +32,6 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .chipPool {
-    top: 0;
-  }
-}
 
 .chipPool > * {
   max-width: 100%;

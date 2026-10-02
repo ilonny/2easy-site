@@ -23,6 +23,7 @@
   "header": {
     "register": "Sign up",
     "login": "Log in.",
+    "imStudent": "I'm a student",
     "tryFree": "Try for free",
     "sevenDays": "7 days",
     "chooseTariff": "Choose a plan",
@@ -48,7 +49,6 @@
     "subtitle": "200+ ready-made materials with weekly updates for any lesson format. Bold topics, modern language and slang instead of boring textbook dialogues.",
     "noCard": "no card required",
     "goToLessons": "Go to lessons",
-    "lessonsFrom": "lessons by",
     "cardTemplates": "A big pack of interactive task templates",
     "cardIntegrations": "Integrations with popular services",
     "cardCourses": "Ready-made courses you can fully adapt",
