@@ -4,6 +4,7 @@ import { TLesson } from "../../types";
 import { useRouter } from "next/navigation";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { fetchPostJson } from "@/api";
+import { openHomeworkForStudent } from "../../openHomeworkForStudent";
 import { T } from "@/i18n/T";
 
 type TProps = {
@@ -47,6 +48,10 @@ export const StartLessonButton = (props: TProps) => {
           }
         }
         setModalVisible(false);
+        if (studentId > 0) {
+          await openHomeworkForStudent(router, homeworkId, studentId);
+          return;
+        }
         router.push(`/lessons/${homeworkId}`);
         return;
       }

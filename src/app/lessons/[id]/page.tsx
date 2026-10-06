@@ -18,6 +18,7 @@ import { withLogin } from "@/auth/hooks/withLogin";
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useLessons } from "@/app/lessons/hooks/useLessons";
+import { openHomeworkForStudent } from "@/app/lessons/openHomeworkForStudent";
 import { ExList } from "@/app/editor/components/view/ExList";
 import { useExList } from "@/app/editor/hooks/useExList";
 import Zoom from "react-medium-image-zoom";
@@ -92,6 +93,7 @@ export default function LessonPage() {
   const params = useParams() as { id: string };
   const lessonId = parseRouteId(params.id);
   const lessonIdNum = parseRouteIdNumber(params.id);
+  const lockedStudentId = Number(searchParams?.get("student_id") || 0) || 0;
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
@@ -140,6 +142,9 @@ export default function LessonPage() {
             ? json.session.student_ids.map(Number).filter(Boolean)
             : [];
           if (roster.length) {
+            if (lockedStudentId && !roster.includes(lockedStudentId)) {
+              return;
+            }
             setLessonSessionRoster(roster);
             writeToLocalStorage(
               "start_lesson_selected_ids",
@@ -154,7 +159,7 @@ export default function LessonPage() {
     return () => {
       cancelled = true;
     };
-  }, [authIsLoading, lessonIdNum, searchParams]);
+  }, [authIsLoading, lessonIdNum, lockedStudentId, searchParams]);
 
   const handleAddWordSelection = useCallback(
     (selection: string) => {
@@ -221,16 +226,18 @@ export default function LessonPage() {
     const studentIdForLesson =
       isStudent && profile?.studentId
         ? Number(profile.studentId)
-        : !isStudent && students?.length === 1
-          ? students[0]?.student_id
-          : undefined;
+        : lockedStudentId
+          ? lockedStudentId
+          : !isStudent && students?.length === 1
+            ? students[0]?.student_id
+            : undefined;
     getLesson(lessonId, studentIdForLesson);
     getExList();
-  }, [getExList, getLesson, lessonId, isStudent, students, profile?.studentId]);
+  }, [getExList, getLesson, lessonId, isStudent, students, profile?.studentId, lockedStudentId]);
 
   const fetchStudents = useCallback(async () => {
     if (!lessonId) return;
-    let selectedIds: number[] = lessonSessionRoster;
+    let selectedIds: number[] = lockedStudentId ? [lockedStudentId] : lessonSessionRoster;
     if (!selectedIds.length) {
       try {
         selectedIds = (
@@ -267,7 +274,7 @@ export default function LessonPage() {
     } catch {
       /* ignore */
     }
-  }, [lessonId, lessonSessionRoster]);
+  }, [lessonId, lessonSessionRoster, lockedStudentId]);
 
   useEffect(() => {
     fetchStudents();
@@ -551,12 +558,10 @@ export default function LessonPage() {
                           });
                           const data = await res?.json();
                           if (data?.homework_lesson_id) {
-                            writeToLocalStorage(
-                              "start_lesson_selected_ids",
-                              JSON.stringify([students[0].student_id])
-                            );
-                            router.push(
-                              `/lessons/${data.homework_lesson_id}`
+                            await openHomeworkForStudent(
+                              router,
+                              Number(data.homework_lesson_id),
+                              Number(students[0].student_id),
                             );
                             return;
                           }

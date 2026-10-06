@@ -30,6 +30,7 @@ import { LessonStatus } from "./LessonStatus";
 import { AuthContext } from "@/auth";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { writeToLocalStorage } from "@/auth/utils";
+import { openHomeworkForStudent } from "../../openHomeworkForStudent";
 import LockIcon from "@/assets/icons/lock.svg";
 import HeartImage from "@/assets/images/3d-glassy-fuzzy-pink-heart-with-a-happy-face.png";
 import { SubscribeTariffs } from "@/subscribe";
@@ -735,13 +736,8 @@ export const LessonCard: FC<TProps> = ({
                   size="md"
                   onClick={async (e) => {
                     e.stopPropagation();
-                    const saveSelectedAndNavigate = (hwId: number) => {
-                      writeToLocalStorage(
-                        "start_lesson_selected_ids",
-                        JSON.stringify([studentId])
-                      );
-                      router.push(`/lessons/${hwId}`);
-                    };
+                    const saveSelectedAndNavigate = (hwId: number) =>
+                      openHomeworkForStudent(router, hwId, Number(studentId));
 
                     const resolveRes = await fetchPostJson({
                       path: "/lessons/homework/resolve-for-student",
