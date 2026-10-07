@@ -118,18 +118,21 @@ export const Header = () => {
     };
   }, [isHidden, pathname]);
 
+  const isLanding = pathname === "/";
+
   if (isHidden) {
     return null;
   }
 
   const isGuest = !authIsLoading && !profile?.name;
-  const isLanding = pathname === "/";
 
   return (
     <header
       ref={rootRef}
       className={`site-header-root ${
-        isLanding ? "site-header-overlay" : "bg-white lg:pb-5"
+        isLanding
+          ? "site-header-overlay"
+          : "bg-white lg:pb-5"
       }`}
     >
       <div
