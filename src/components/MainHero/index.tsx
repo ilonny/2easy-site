@@ -10,7 +10,7 @@ export const MainHero = () => {
   return (
     <section className="relative overflow-hidden bg-white">
       <HeroDecor />
-      <div className="relative mx-auto flex max-w-[375px] flex-col items-center gap-5 px-5 pt-[60px] text-center md:max-w-[410px] lg:max-w-[630px] lg:px-0">
+      <div className="relative mx-auto flex max-w-[375px] flex-col items-center gap-5 px-5 pt-[60px] text-center md:max-w-[410px] lg:max-w-[630px] lg:px-0 lg:pt-[108px]">
         <p className="flex items-center gap-[5.118px] px-[8.529px] py-[6.824px] text-xs font-bold leading-4 tracking-brand text-brand-black lg:gap-1.5 lg:px-2.5 lg:py-2 lg:text-sm lg:leading-[19px]">
           <span className="relative size-[13.647px] shrink-0 lg:size-4">
             <Image

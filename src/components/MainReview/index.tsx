@@ -77,14 +77,14 @@ const PanelMedia = ({
       alt=""
       fill
       sizes={sizes}
-      className="object-cover"
+      className="object-cover object-bottom"
     />
     {feature.video && (
       <LoopVideo
         src={feature.video}
         poster={feature.image.src}
         playing={playing}
-        className="absolute inset-0 size-full object-cover"
+        className="absolute inset-0 size-full object-cover object-bottom"
       />
     )}
   </>

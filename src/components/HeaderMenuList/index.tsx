@@ -6,6 +6,7 @@ import { T } from "@/i18n/T";
 type TProps = {
   variant?: "header" | "sidebar";
   onNavigate?: () => void;
+  revealed?: boolean;
 };
 
 const links = [
@@ -20,16 +21,20 @@ const links = [
 export const HeaderMenuList = ({
   variant = "header",
   onNavigate,
+  revealed = true,
 }: TProps) => {
   if (variant === "sidebar") {
     return (
       <nav className="flex flex-col items-center gap-[25px]">
-        {links.map((link) => (
+        {links.map((link, index) => (
           <Link
             key={link.href}
             href={link.href}
             onClick={onNavigate}
-            className="touch-manipulation text-base font-bold leading-[1.2] tracking-brand text-brand-black transition-colors hover:text-brand-violet"
+            style={{ transitionDelay: revealed ? `${70 + index * 45}ms` : "0ms" }}
+            className={`touch-manipulation text-base font-bold leading-[1.2] tracking-brand text-brand-black transition-[opacity,transform,color] duration-500 ease-out-expo hover:text-brand-violet motion-reduce:transition-none motion-reduce:delay-0 ${
+              revealed ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
+            }`}
           >
             <T k={link.menuKey} />
           </Link>

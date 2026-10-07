@@ -57,9 +57,9 @@ const categories: TCategory[] = [
 // Fanned stack of three cards inside a 116×82 box, back card first.
 // On hover the stack spreads out further.
 const stackCards = [
-  "left-[51.2px] top-[5.5px] h-[61.84px] w-[59.68px] rotate-[11.7deg] group-hover:translate-x-[9px] group-hover:translate-y-[3px] group-hover:rotate-[15deg]",
-  "left-[29.97px] top-[5.06px] h-[61.92px] w-[59.6px] rotate-[-4.1deg] group-hover:translate-x-[5px] group-hover:-translate-y-[12px] group-hover:rotate-[-1deg]",
-  "left-[8.85px] top-[10.87px] h-[61.6px] w-[59.92px] rotate-[-22.88deg] group-hover:-translate-x-[3px] group-hover:translate-y-[2px] group-hover:rotate-[-25deg]",
+  "left-[51.2px] top-[5.5px] h-[61.84px] w-[59.68px] rotate-[11.7deg] group-hover:translate-x-[20px] group-hover:translate-y-[8px] group-hover:rotate-[20deg]",
+  "left-[29.97px] top-[5.06px] h-[61.92px] w-[59.6px] rotate-[-4.1deg] group-hover:translate-x-[6px] group-hover:-translate-y-[20px] group-hover:rotate-[3deg]",
+  "left-[8.85px] top-[10.87px] h-[61.6px] w-[59.92px] rotate-[-22.88deg] group-hover:-translate-x-[10px] group-hover:translate-y-[6px] group-hover:rotate-[-30deg]",
 ];
 
 type TProps = {
@@ -137,7 +137,7 @@ export const ContentCategories = ({ active, onChange, panelId }: TProps) => {
                 {category.images.map((image, i) => (
                   <span
                     key={image.src}
-                    className={`absolute overflow-hidden rounded-[9px] border-2 border-white shadow-[0_4px_18.1px_rgba(0,0,0,0.07)] transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none ${stackCards[i]}`}
+                    className={`absolute overflow-hidden rounded-[9px] border-2 border-white shadow-[0_4px_18.1px_rgba(0,0,0,0.07)] transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none ${stackCards[i]}`}
                   >
                     <Image
                       src={image}

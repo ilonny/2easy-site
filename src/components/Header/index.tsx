@@ -8,8 +8,6 @@ import { usePathname } from "next/navigation";
 import { ContentWrapper } from "../ContentWrapper";
 import { Skeleton } from "@nextui-org/react";
 import { HeaderMenuList } from "../HeaderMenuList";
-import BurgerMenuIcon from "@/assets/icons/burger_menu.svg";
-import BurgerCloseIcon from "@/assets/icons/burger_close.svg";
 import FireButtonIcon from "@/assets/icons/fire_button.svg";
 import { SideBar } from "../SIdeBar";
 import { LanguageSwitcher } from "../LanguageSwitcher";
@@ -18,6 +16,29 @@ import { T } from "@/i18n/T";
 import { BOARD_LESSON_PAGE_LEGACY_PATH_PREFIX, BOARD_LESSON_PAGE_PATH_PREFIX } from "@/app/board/constants";
 import { useUserAccess } from "@/app/subscription/helpers";
 import { headerCtaClassName, headerGhostLinkClassName } from "./styles";
+
+const burgerBarClassName =
+  "absolute left-0 h-[1.85px] w-[18.5px] rounded-full bg-brand-black transition-transform duration-300 ease-out-expo motion-reduce:transition-none";
+
+const BurgerIcon = ({ open }: { open: boolean }) => (
+  <span className="relative block h-[13px] w-[18.5px]" aria-hidden>
+    <span
+      className={`${burgerBarClassName} ${
+        open ? "top-[5.6px] rotate-45" : "top-0"
+      }`}
+    />
+    <span
+      className={`${burgerBarClassName} top-[5.6px] ${
+        open ? "scale-x-0" : ""
+      }`}
+    />
+    <span
+      className={`${burgerBarClassName} ${
+        open ? "top-[5.6px] -rotate-45" : "top-[11.15px]"
+      }`}
+    />
+  </span>
+);
 
 export const Header = () => {
   const pathname = usePathname();
@@ -65,6 +86,12 @@ export const Header = () => {
     }
     const desktop = window.matchMedia("(min-width: 1024px)");
     const update = () => {
+      // On the landing page the desktop header scrolls away, so sticky
+      // sections should sit at the top of the viewport.
+      if (pathname === "/" && desktop.matches) {
+        docStyle.setProperty("--site-header-h", "0px");
+        return;
+      }
       const pinned = desktop.matches ? root : bar;
       docStyle.setProperty("--site-header-h", `${pinned.offsetHeight}px`);
     };
@@ -78,21 +105,33 @@ export const Header = () => {
       desktop.removeEventListener("change", update);
       docStyle.removeProperty("--site-header-h");
     };
-  }, [isHidden]);
+  }, [isHidden, pathname]);
 
   if (isHidden) {
     return null;
   }
 
   const isGuest = !authIsLoading && !profile?.name;
+  const isLanding = pathname === "/";
 
   return (
-    <header ref={rootRef} className="site-header-root bg-white lg:pb-5">
+    <header
+      ref={rootRef}
+      className={`site-header-root ${
+        isLanding ? "site-header-overlay" : "bg-white lg:pb-5"
+      }`}
+    >
       <div
         ref={barRef}
-        className="site-header-bar fixed left-0 top-0 w-full bg-white lg:static"
+        className={`site-header-bar fixed left-0 top-0 w-full lg:static ${
+          isLanding ? "bg-transparent" : "bg-white"
+        }`}
       >
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 pb-4 pt-10 lg:grid lg:pb-0 lg:grid-cols-[1fr_auto_1fr] lg:px-[65px]">
+        <div
+          className={`mx-auto flex max-w-[1440px] items-center justify-between px-5 pb-4 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-[65px] lg:pb-0 ${
+            isLanding ? "pt-6 lg:pt-8" : "pt-10"
+          }`}
+        >
           <div className="hidden items-center gap-3 lg:flex">
             <LanguageSwitcher variant="brand" />
             {isGuest && (
@@ -156,17 +195,13 @@ export const Header = () => {
                 aria-expanded={sidebarIsOpened}
                 onClick={() => setSidebarIsOpened((o) => !o)}
               >
-                <Image
-                  src={sidebarIsOpened ? BurgerCloseIcon : BurgerMenuIcon}
-                  alt=""
-                  aria-hidden
-                />
+                <BurgerIcon open={sidebarIsOpened} />
               </button>
             )}
           </div>
         </div>
       </div>
-      <div className="h-24 md:h-[102px] lg:hidden"></div>
+      <div className="h-[var(--site-header-h)] lg:hidden"></div>
       {!profile?.isStudent && profile?.name && (
         <ContentWrapper>
           <div className="hidden pt-6 lg:block">

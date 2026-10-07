@@ -36,22 +36,22 @@ const ribbon = cards.length % 2 ? [...cards, ...cards] : cards;
 
 const HeroCard = ({ card, shifted }: { card: TCard; shifted: boolean }) => (
   <div className={`shrink-0 pr-5 ${shifted ? "pt-5 lg:pt-[70px]" : ""}`}>
-    <div className="relative flex h-[282px] w-[230px] flex-col justify-end overflow-hidden rounded-[20px] p-[25px] lg:h-[409px] lg:w-[333px] lg:rounded-[30px] lg:p-[30px] wide:h-[470px] wide:w-[383px]">
+    <div className="relative isolate flex h-[282px] w-[230px] flex-col justify-end overflow-hidden rounded-[20px] p-[25px] lg:h-[409px] lg:w-[333px] lg:rounded-[30px] lg:p-[30px] wide:h-[470px] wide:w-[383px]">
       <Image
         src={card.image}
         alt=""
         fill
         sizes="(min-width: 1440px) 383px, (min-width: 1024px) 333px, 230px"
-        className="pointer-events-none object-cover"
+        className="pointer-events-none z-0 object-cover"
       />
       {card.video && (
         <LoopVideo
           src={card.video}
-          className="absolute inset-0 size-full object-cover"
+          className="absolute inset-0 z-0 size-full object-cover"
         />
       )}
       <p
-        className={`relative text-sm font-bold leading-[1.3] tracking-brand lg:text-[22px] lg:leading-[1.2] ${
+        className={`relative z-10 text-sm font-bold leading-[1.3] tracking-brand [transform:translateZ(0)] lg:text-[22px] lg:leading-[1.2] ${
           card.lightText ? "text-white" : "text-brand-black"
         }`}
       >

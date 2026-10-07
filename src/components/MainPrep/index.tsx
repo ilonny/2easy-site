@@ -25,7 +25,11 @@ const features: TFeature[] = [
     video: "/video/landing/prep-builder.mp4",
   },
   { titleKey: "prep.readyLessons", image: ReadyLessons },
-  { titleKey: "prep.share", image: Share },
+  {
+    titleKey: "prep.share",
+    image: Share,
+    video: "/video/landing/prep-share.mp4",
+  },
   { titleKey: "prep.ai", image: Ai },
 ];
 
@@ -47,6 +51,9 @@ export const MainPrep = () => {
       if (!desktop.matches || reducedMotion.matches) {
         heading.style.opacity = "";
         heading.style.transform = "";
+        Array.from(cards.children).forEach((node) => {
+          if (node instanceof HTMLElement) node.style.transform = "";
+        });
         return;
       }
       const headingRect = heading.getBoundingClientRect();
@@ -58,6 +65,17 @@ export const MainPrep = () => {
       );
       heading.style.opacity = String(progress);
       heading.style.transform = `scale(${0.94 + 0.06 * progress})`;
+      // Cards grow into place as they reach the middle of the screen, then stay full size.
+      const viewH = window.innerHeight;
+      const focus = viewH * 0.52;
+      Array.from(cards.children).forEach((node) => {
+        if (!(node instanceof HTMLElement)) return;
+        const rect = node.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        const approach = 1 - (center - focus) / (viewH * 0.72);
+        const scale = 0.86 + 0.14 * Math.min(1, Math.max(0, approach));
+        node.style.transform = `scale(${scale})`;
+      });
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -98,26 +116,26 @@ export const MainPrep = () => {
         {features.map((feature) => (
           <div
             key={feature.titleKey}
-            className="relative flex aspect-square flex-col items-center overflow-hidden rounded-[20px] bg-brand-gray px-[25px] pb-[15px] pt-[25px] lg:aspect-auto lg:h-[560px] lg:rounded-[30px] lg:px-[95px] lg:pb-10 lg:pt-[50px]"
+            className="relative isolate flex aspect-square origin-center flex-col items-center overflow-hidden rounded-[20px] bg-brand-gray px-[25px] pb-[15px] pt-[25px] lg:aspect-auto lg:h-[560px] lg:rounded-[30px] lg:px-[95px] lg:pb-10 lg:pt-[50px]"
           >
             <Image
               src={feature.image}
               alt=""
               fill
               sizes="(min-width: 1024px) 570px, (min-width: 768px) 380px, 100vw"
-              className="pointer-events-none object-cover"
+              className="pointer-events-none z-0 object-cover object-bottom"
             />
             {feature.video && (
               <LoopVideo
                 src={feature.video}
                 poster={feature.image.src}
-                className="absolute inset-0 size-full object-cover"
+                className="absolute inset-0 z-0 size-full object-cover object-bottom"
               />
             )}
             <T
               k={feature.titleKey}
               as="p"
-              className="relative w-full text-center text-base font-bold leading-[1.2] tracking-brand text-brand-black lg:text-[22px] lg:leading-[1.2]"
+              className="relative z-10 w-full text-center text-base font-bold leading-[1.2] tracking-brand text-brand-black [transform:translateZ(0)] lg:text-[22px] lg:leading-[1.2]"
             />
           </div>
         ))}

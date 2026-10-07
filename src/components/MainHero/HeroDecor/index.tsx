@@ -161,12 +161,12 @@ export const HeroDecor = () => {
       aria-hidden
     >
       <div
-        className={`${itemClassName} left-[calc(50%-357.6px)] top-[53px] lg:left-[calc(50%-484px)] lg:top-[75px] wide:left-[calc(50%-544px)] wide:top-[48.85px]`}
+        className={`${itemClassName} left-[calc(50%-357.6px)] top-[53px] lg:left-[calc(50%-484px)] lg:top-[123px] wide:left-[calc(50%-544px)] wide:top-[97px]`}
       >
         <LessonsFolder />
       </div>
       <div
-        className={`${itemClassName} left-[calc(50%-384px)] top-[203.9px] lg:left-[calc(50%-675px)] lg:top-[220px] wide:left-[calc(50%-763px)] wide:top-[214.85px]`}
+        className={`${itemClassName} left-[calc(50%-384px)] top-[203.9px] lg:left-[calc(50%-675px)] lg:top-[268px] wide:left-[calc(50%-763px)] wide:top-[263px]`}
       >
         <FloatCard
           title="GET INKED"
@@ -185,7 +185,7 @@ export const HeroDecor = () => {
         </FloatCard>
       </div>
       <div
-        className={`${itemClassName} left-[calc(50%+291.3px)] top-[63px] lg:left-[calc(50%+519px)] lg:top-[75px] wide:left-[calc(50%+606.5px)] wide:top-[48.85px]`}
+        className={`${itemClassName} left-[calc(50%+291.3px)] top-[63px] lg:left-[calc(50%+519px)] lg:top-[123px] wide:left-[calc(50%+606.5px)] wide:top-[97px]`}
       >
         <FloatCard
           title="IS SOCIAL MEDIA FAKE?"
@@ -203,7 +203,7 @@ export const HeroDecor = () => {
         </FloatCard>
       </div>
       <div
-        className={`${itemClassName} left-[calc(50%+248.6px)] top-[264.2px] lg:left-[calc(50%+359px)] lg:top-[337px] wide:left-[calc(50%+423px)] wide:top-[349.85px]`}
+        className={`${itemClassName} left-[calc(50%+248.6px)] top-[264.2px] lg:left-[calc(50%+359px)] lg:top-[385px] wide:left-[calc(50%+423px)] wide:top-[398px]`}
       >
         <TeachersBadge />
       </div>

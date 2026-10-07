@@ -68,6 +68,18 @@ html.landing-zoom body {
   .site-header-bar {
     z-index: auto;
   }
+  /* Landing header sits on the hero instead of reserving a white band. */
+  .site-header-root.site-header-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    padding-bottom: 0;
+    background: transparent;
+  }
+}
+.site-header-overlay .site-header-bar {
+  background: transparent;
 }
 @media (max-width: 1023px) {
   .site-overlay-layer {

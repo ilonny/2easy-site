@@ -129,26 +129,26 @@ export const MainDelivery = () => {
             {features.map((feature) => (
               <div
                 key={feature.titleKey}
-                className="relative h-[370px] shrink-0 overflow-hidden rounded-[20px] bg-brand-gray p-[30px] md:h-[410px] md:w-[380px] lg:h-[470px] lg:w-[424px] lg:rounded-[30px] lg:p-10"
+                className="relative isolate h-[370px] shrink-0 overflow-hidden rounded-[20px] bg-brand-gray p-[30px] md:h-[410px] md:w-[380px] lg:h-[470px] lg:w-[424px] lg:rounded-[30px] lg:p-10"
               >
                 <Image
                   src={feature.image}
                   alt=""
                   fill
                   sizes="(min-width: 1024px) 424px, (min-width: 768px) 380px, 100vw"
-                  className="pointer-events-none object-cover"
+                  className="pointer-events-none z-0 object-cover object-bottom"
                 />
                 {feature.video && (
                   <LoopVideo
                     src={feature.video}
                     poster={feature.image.src}
-                    className="absolute inset-0 size-full object-cover"
+                    className="absolute inset-0 z-0 size-full object-cover object-bottom"
                   />
                 )}
                 <T
                   k={feature.titleKey}
                   as="p"
-                  className="relative text-center text-base font-bold leading-[1.2] tracking-brand text-brand-black lg:text-left lg:text-[22px] lg:leading-[1.2]"
+                  className="relative z-10 text-center text-base font-bold leading-[1.2] tracking-brand text-brand-black [transform:translateZ(0)] lg:text-left lg:text-[22px] lg:leading-[1.2]"
                 />
               </div>
             ))}
