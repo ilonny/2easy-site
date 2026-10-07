@@ -35,7 +35,7 @@
   max-width: 100%;
   min-width: 0;
   position: sticky;
-  top: 80px;
+  top: var(--site-header-h);
   /* Below NextUI Modal (z-50); above exercise content, under fixed mobile header */
   z-index: 10;
   isolation: isolate;
@@ -53,11 +53,6 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .pool {
-    top: 0;
-  }
-}
 
 .pool > * {
   max-width: 100%;

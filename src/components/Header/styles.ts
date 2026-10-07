@@ -1,0 +1,5 @@
+export const headerCtaClassName =
+  "flex h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-[14px] bg-brand-violet px-3.5 text-xs font-bold leading-none tracking-brand text-white transition-opacity hover:opacity-90 min-w-[140px] max-[374px]:min-w-0 max-[374px]:px-2.5 md:h-auto md:min-w-[180px] lg:min-w-[200px] md:gap-[13px] md:py-[7px] md:pr-[7px] lg:gap-2.5 lg:py-2 lg:pl-3 lg:text-sm";
+
+export const headerGhostLinkClassName =
+  "hidden h-[47px] items-center justify-center whitespace-nowrap rounded-[14px] px-3 text-sm font-bold leading-none tracking-brand transition-colors hover:bg-brand-gray lg:flex";

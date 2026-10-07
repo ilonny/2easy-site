@@ -22,16 +22,35 @@
   }
 }
 
+/* Landing scales the 1440 layout up to 1920 proportionally (set by useLandingZoom). */
+html.landing-zoom body {
+  zoom: var(--landing-zoom, 1);
+}
+
 :root {
   --primary: #3f28c6;
   --danger: #A42929;
   --site-header-z: 60;
+  --site-header-desktop-z: 40;
   --overlay-above-header-z: 70;
+  /* Pinned header height; `Header` overwrites it with the measured value. */
+  --site-header-h: 96px;
   --site-menu-z: 80;
   --nextui-box-shadow-medium: 0px 0px 15px 0px rgb(0 0 0 / 0.03), 0px 0px 30px 0px rgb(0 0 0 / 0.08), 0px 0px 0px 0px rgb(0 0 0 / 0.3);
   --nextui-danger: 0 60% 40%;
 }
-/* Stacking: page/chips (1–20) < header (60) < chat/modals (70) < mobile menu (80) */
+@media (min-width: 768px) {
+  :root {
+    --site-header-h: 102px;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --site-header-h: 107px;
+  }
+}
+/* Stacking: page/chips (1–20) < header (60) < chat/modals (70) < mobile menu (80).
+   Desktop header (40) stays under NextUI modals and popovers (50). */
 .site-header-root {
   position: relative;
   z-index: var(--site-header-z);
@@ -41,10 +60,26 @@
   isolation: isolate;
 }
 @media (min-width: 1024px) {
-  .site-header-root,
+  .site-header-root {
+    position: sticky;
+    top: 0;
+    z-index: var(--site-header-desktop-z);
+  }
   .site-header-bar {
     z-index: auto;
   }
+  /* Landing header sits on the hero instead of reserving a white band. */
+  .site-header-root.site-header-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    padding-bottom: 0;
+    background: transparent;
+  }
+}
+.site-header-overlay .site-header-bar {
+  background: transparent;
 }
 @media (max-width: 1023px) {
   .site-overlay-layer {
@@ -412,7 +447,8 @@ body.site-menu-open iframe[src*="widget.me-talk.ru"],
 body.site-menu-open [id*="talkme"],
 body.site-menu-open [id*="me-talk"],
 body.site-menu-open [class*="me-talk"],
-body.site-menu-open [class*="talkme"] {
+body.site-menu-open [class*="talkme"],
+body.site-menu-open [id^="widget-root-"] {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;

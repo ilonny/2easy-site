@@ -619,7 +619,7 @@ export default function LessonPage() {
               className="hidden md:flex w-[180px] shrink-0 min-w-0 flex-col self-stretch lg:w-[200px]"
               aria-label={i18n.t("lessons.participantsAriaLabel")}
             >
-              <div className={`sticky ${BELOW_SITE_HEADER_STICKY_TOP_CLASS} w-full lg:top-8`}>
+              <div className={`sticky ${BELOW_SITE_HEADER_STICKY_TOP_CLASS} w-full lg:top-[calc(var(--site-header-h)+32px)]`}>
                 <LessonParticipantsPanel
                   students={students}
                   activeStudentId={activeStudentId}
