@@ -82,7 +82,10 @@ export const Header = () => {
     const bar = barRef.current;
     if (isHidden || !root || !bar) {
       docStyle.setProperty("--site-header-h", "0px");
-      return () => docStyle.removeProperty("--site-header-h");
+      return () => {
+        docStyle.removeProperty("--site-header-h");
+        docStyle.removeProperty("--site-header-extra-h");
+      };
     }
     const desktop = window.matchMedia("(min-width: 1024px)");
     const update = () => {
@@ -90,8 +93,15 @@ export const Header = () => {
       // sections should sit at the top of the viewport.
       if (pathname === "/" && desktop.matches) {
         docStyle.setProperty("--site-header-h", "0px");
+        // The overlaid header can grow below the bar (teacher menu row);
+        // the hero is pushed down by that extra height.
+        docStyle.setProperty(
+          "--site-header-extra-h",
+          `${Math.max(0, root.offsetHeight - bar.offsetHeight)}px`,
+        );
         return;
       }
+      docStyle.removeProperty("--site-header-extra-h");
       const pinned = desktop.matches ? root : bar;
       docStyle.setProperty("--site-header-h", `${pinned.offsetHeight}px`);
     };
@@ -104,6 +114,7 @@ export const Header = () => {
       resizeObserver.disconnect();
       desktop.removeEventListener("change", update);
       docStyle.removeProperty("--site-header-h");
+      docStyle.removeProperty("--site-header-extra-h");
     };
   }, [isHidden, pathname]);
 
