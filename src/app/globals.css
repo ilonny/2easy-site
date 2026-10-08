@@ -76,6 +76,10 @@ html.landing-zoom body {
     left: 0;
     background: transparent;
   }
+  /* Editor + lesson mode: header scrolls away with the page. */
+  .site-header-root.site-header-unpinned {
+    position: relative;
+  }
 }
 .site-header-overlay .site-header-bar {
   background: transparent;

@@ -5,7 +5,8 @@
  *
  * These are real CSS classes (not Tailwind z-[N] strings) so they always apply.
  *
- * The header is fixed below lg and sticky from lg up; its height is published
+ * The header is fixed below lg and sticky from lg up (except on editor and
+ * lesson mode pages, where it scrolls with the page); its height is published
  * as `--site-header-h` so sticky elements can sit right under it.
  */
 

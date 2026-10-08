@@ -76,6 +76,14 @@ export const Header = () => {
     pathname?.startsWith(BOARD_LESSON_PAGE_PATH_PREFIX) ||
     pathname?.startsWith(BOARD_LESSON_PAGE_LEGACY_PATH_PREFIX);
 
+  // Constructor (/editor) and lesson mode (/lessons/[id]): header scrolls with
+  // the page so it does not cover exercises. While the mobile menu is open,
+  // keep the bar pinned so the close control stays reachable.
+  const isUnpinnedPath =
+    !!pathname?.startsWith("/editor/") ||
+    !!pathname?.startsWith("/lessons/");
+  const headerScrollsAway = isUnpinnedPath && !sidebarIsOpened;
+
   useEffect(() => {
     const docStyle = document.documentElement.style;
     const root = rootRef.current;
@@ -102,6 +110,11 @@ export const Header = () => {
         return;
       }
       docStyle.removeProperty("--site-header-extra-h");
+      // Unpinned editor/lesson header: sticky children sit at the viewport top.
+      if (headerScrollsAway) {
+        docStyle.setProperty("--site-header-h", "0px");
+        return;
+      }
       const pinned = desktop.matches ? root : bar;
       docStyle.setProperty("--site-header-h", `${pinned.offsetHeight}px`);
     };
@@ -116,7 +129,7 @@ export const Header = () => {
       docStyle.removeProperty("--site-header-h");
       docStyle.removeProperty("--site-header-extra-h");
     };
-  }, [isHidden, pathname]);
+  }, [isHidden, pathname, headerScrollsAway]);
 
   const isLanding = pathname === "/";
 
@@ -132,14 +145,14 @@ export const Header = () => {
       className={`site-header-root ${
         isLanding
           ? "site-header-overlay"
-          : "bg-white lg:pb-5"
+          : `bg-white lg:pb-5${isUnpinnedPath ? " site-header-unpinned" : ""}`
       }`}
     >
       <div
         ref={barRef}
-        className={`site-header-bar fixed left-0 top-0 w-full lg:static ${
-          isLanding ? "bg-transparent" : "bg-white"
-        }`}
+        className={`site-header-bar w-full ${
+          headerScrollsAway ? "relative" : "fixed left-0 top-0 lg:static"
+        } ${isLanding ? "bg-transparent" : "bg-white"}`}
       >
         <div
           className={`mx-auto flex max-w-[1440px] items-center justify-between px-5 pb-4 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-[65px] lg:pb-0 ${
