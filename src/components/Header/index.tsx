@@ -145,7 +145,7 @@ export const Header = () => {
       className={`site-header-root ${
         isLanding
           ? "site-header-overlay"
-          : `bg-white lg:pb-5${isUnpinnedPath ? " site-header-unpinned" : ""}`
+          : `bg-white lg:pb-3 min-[1200px]:pb-5${isUnpinnedPath ? " site-header-unpinned" : ""}`
       }`}
     >
       <div
@@ -156,7 +156,9 @@ export const Header = () => {
       >
         <div
           className={`mx-auto flex max-w-[1440px] items-center justify-between px-5 pb-4 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-[65px] lg:pb-0 ${
-            isLanding ? "pt-6 lg:pt-8" : "pt-10"
+            isLanding
+              ? "pt-6 lg:pt-4 min-[1200px]:pt-8"
+              : "pt-10 lg:pt-4 min-[1200px]:pt-10"
           }`}
         >
           <div className="hidden items-center gap-3 lg:flex">
@@ -178,7 +180,10 @@ export const Header = () => {
             }
             className="flex shrink-0"
           >
-            <Logo className="text-[28.45px] md:text-[34.56px] lg:text-[43.2px]" />
+            <Logo
+              animated={isLanding}
+              className="text-[28.45px] md:text-[34.56px] min-[1200px]:text-[43.2px]"
+            />
           </a>
           <div className="flex min-w-0 items-center justify-end gap-3 max-[374px]:gap-2 md:gap-[15px] lg:gap-2">
             {authIsLoading ? (
@@ -231,7 +236,7 @@ export const Header = () => {
       <div className="h-[var(--site-header-h)] lg:hidden"></div>
       {!profile?.isStudent && profile?.name && (
         <ContentWrapper>
-          <div className="hidden pt-6 lg:block">
+          <div className="hidden pt-3 lg:block min-[1200px]:pt-6">
             <HeaderMenuList />
           </div>
         </ContentWrapper>

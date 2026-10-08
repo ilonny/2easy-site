@@ -118,7 +118,7 @@ export const HeaderProfile = (props: TProps) => {
         aria-expanded={isOpen}
         aria-controls={isOpen ? menuId : undefined}
         onClick={() => setIsOpen((open) => !open)}
-        className="flex h-10 min-w-0 max-w-[46vw] touch-manipulation items-center gap-2 rounded-[14px] bg-brand-gray px-3.5 text-xs font-bold tracking-brand text-brand-black outline-none transition-colors hover:bg-[#e6e6ea] focus-visible:ring-2 focus-visible:ring-brand-violet/40 sm:max-w-[200px] md:h-[46px] md:max-w-none lg:h-12 lg:text-sm"
+        className="flex h-10 min-w-0 max-w-[46vw] touch-manipulation items-center gap-2 rounded-[14px] bg-brand-gray px-3.5 text-xs font-bold tracking-brand text-brand-black outline-none transition-colors hover:bg-[#e6e6ea] focus-visible:ring-2 focus-visible:ring-brand-violet/40 sm:max-w-[200px] md:h-[46px] md:max-w-none lg:h-10 lg:text-sm min-[1200px]:h-12"
       >
         <p className="truncate">
           {profile?.name || i18n.t("profile.profileLabel")}

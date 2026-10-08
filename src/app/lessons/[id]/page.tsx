@@ -111,7 +111,7 @@ export default function LessonPage() {
     () => Number(searchParams?.get("session_id") || 0) || undefined,
   );
   const [lessonSessionRoster, setLessonSessionRoster] = useState<number[]>([]);
-  const lastStudentFocusUpdatedAtRef = useRef<number>(0);
+  const lastStudentFocusUpdatedAtRef = useRef<number | null>(null);
 
   const [dictionaryOnboardingOpen, setDictionaryOnboardingOpen] = useState(false);
   const [boardModalOpen, setBoardModalOpen] = useState(false);
@@ -296,6 +296,10 @@ export default function LessonPage() {
         const focus = data?.focus;
         const updatedAt = Number(focus?.updated_at_ms || 0);
         const exId = Number(focus?.ex_id || 0);
+        if (lastStudentFocusUpdatedAtRef.current === null) {
+          lastStudentFocusUpdatedAtRef.current = updatedAt;
+          return;
+        }
         if (!updatedAt || !exId) return;
         if (updatedAt === lastStudentFocusUpdatedAtRef.current) return;
 
@@ -512,12 +516,11 @@ export default function LessonPage() {
                 </div>
               )}
               <div className="h-4 sm:h-8" />
-              <div key={exList.length}>
+              <div>
                 <ExList
                   list={exList}
                   isView
                   activeStudentId={activeStudentId}
-                  key={exList.length}
                   is2easy={lesson?.user_id === 1}
                   isAdmin={profile?.role_id === 1}
                   isPresentationMode={isPresentationMode}
