@@ -76,6 +76,12 @@ export const TestStep = (props: TTestStepProps) => {
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
   useEffect(() => {
+    if (isPresentationMode) {
+      setIsHovered(false);
+    }
+  }, [isPresentationMode]);
+
+  useEffect(() => {
     try {
       const answersParsed = JSON.parse(answers.answer);
       if (!answersParsed) {
@@ -143,9 +149,6 @@ export const TestStep = (props: TTestStepProps) => {
         }
       }}
       onMouseLeave={() => {
-        if (isPresentationMode) {
-          return;
-        }
         setIsHovered(false);
       }}
     >
@@ -186,7 +189,12 @@ export const TestStep = (props: TTestStepProps) => {
               : isSelected
               ? "chosen"
               : "default";
-            if (isTeacher && isHovered && !isSubmitted) {
+            if (
+              isTeacher &&
+              isHovered &&
+              !isSubmitted &&
+              !isPresentationMode
+            ) {
               if (option.isCorrect) {
                 color = "success-hovered";
               } else {
@@ -265,7 +273,12 @@ export const TestStep = (props: TTestStepProps) => {
             ? "chosen"
             : "default";
 
-          if (isTeacher && isHovered && !isSubmitted) {
+          if (
+            isTeacher &&
+            isHovered &&
+            !isSubmitted &&
+            !isPresentationMode
+          ) {
             if (option.isCorrect) {
               color = "success-hovered";
             } else {

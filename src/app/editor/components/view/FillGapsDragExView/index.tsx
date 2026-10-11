@@ -53,11 +53,15 @@ const AnswerField: FC<{
   const hasIncorrectAnswerForTeacher =
     isTeacher && !!incorrectIdsMap?.[field.id];
 
+  const hideAnswerHints = !isTeacher || !!isPresentationMode;
+
   return (
     <ResponsiveTooltip
-      isDisabled={!isTeacher || isPresentationMode}
+      isDisabled={hideAnswerHints}
       content={
-        isTeacher && <div className="teacher-placeholer">{field.value}</div>
+        !hideAnswerHints ? (
+          <div className="teacher-placeholer">{field.value}</div>
+        ) : null
       }
     >
       <div
@@ -371,8 +375,7 @@ export const FillGapsDragExView: FC<TProps> = ({
 
   useEffect(() => {
     renderContent();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.dataText, correctIds, errorAnswerId]);
+  }, [renderContent]);
 
   const editableContent = useMemo(() => {
     return (

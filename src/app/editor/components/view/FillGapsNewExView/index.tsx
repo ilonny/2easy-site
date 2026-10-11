@@ -448,10 +448,11 @@ const FillGapsNewExViewImpl: FC<{
       const current = currentRaw.trim();
       const status = statusByGap?.[answerKey] || "neutral";
       const tooltipContent = gapTooltipText(gap);
+      const hideAnswerHints =
+        !isTeacher || isPresentationMode || !tooltipContent;
       const teacherHintActive =
         isTeacher && !isPresentationMode && !!tooltipContent && !canInteract;
-      const tooltipDisabled =
-        !isTeacher || isPresentationMode || !tooltipContent;
+      const tooltipDisabled = hideAnswerHints;
 
       if (!gap) return <span style={{ padding: "0 6px" }} />;
 
@@ -536,7 +537,9 @@ const FillGapsNewExViewImpl: FC<{
         return (
           <Tooltip
             isDisabled={tooltipDisabled}
-            content={<div>{tooltipContent}</div>}
+            content={
+              hideAnswerHints ? null : <div>{tooltipContent}</div>
+            }
           >
             <span className={`relative ${styles.gapInputWrap}`}>
               {gapBody}
@@ -570,7 +573,9 @@ const FillGapsNewExViewImpl: FC<{
         return (
           <Tooltip
             isDisabled={tooltipDisabled}
-            content={<div>{tooltipContent}</div>}
+            content={
+              hideAnswerHints ? null : <div>{tooltipContent}</div>
+            }
           >
             <span className="relative inline-flex min-w-0 max-w-full">
               <Select
@@ -624,7 +629,9 @@ const FillGapsNewExViewImpl: FC<{
       return (
         <ResponsiveTooltip
           isDisabled={tooltipDisabled}
-          content={<div>{tooltipContent}</div>}
+          content={
+            hideAnswerHints ? null : <div>{tooltipContent}</div>
+          }
         >
           <span className="relative inline-flex">
             <span
