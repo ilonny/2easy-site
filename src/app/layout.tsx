@@ -55,6 +55,7 @@ export default function RootLayout({
                       <Footer />
                       <CookieConsent />
                       <ToastWrapper />
+                      <TalkMeSite />
                     </ErrorBoundary>
                   </EditorContextProvider>
                 </SibscribeContextProvider>
@@ -94,7 +95,6 @@ export default function RootLayout({
         (d.head ? d.head : d.body).appendChild(s);
       })(document,window,'TalkMe')})();`}
         </Script>
-        <TalkMeSite />
         <noscript>
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}

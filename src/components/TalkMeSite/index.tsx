@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useContext, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
+import { AuthContext } from "@/auth";
 
 const TALK_ME_DOM_SELECTORS = [
   'iframe[src*="site-chat.me"]',
@@ -22,7 +23,7 @@ type TalkMeWindow = Window & {
   TalkMe?: TalkMeApi;
 };
 
-function shouldHideSiteChat(pathname: string | null) {
+function shouldHideSiteChatOnPath(pathname: string | null) {
   return (
     !!pathname?.includes("/lessons/") || !!pathname?.includes("/grammar/")
   );
@@ -79,7 +80,15 @@ function showTalkMeElements() {
 
 export const TalkMeSite = () => {
   const path = usePathname();
-  const hideChat = useMemo(() => shouldHideSiteChat(path), [path]);
+  const { profile, authIsLoading } = useContext(AuthContext);
+  const isStudent = Boolean(profile?.isStudent || profile?.studentId);
+
+  const hideChat = useMemo(
+    () =>
+      // Wait for auth so students never briefly see the widget.
+      authIsLoading || isStudent || shouldHideSiteChatOnPath(path),
+    [authIsLoading, isStudent, path],
+  );
 
   const applyVisibility = useCallback(() => {
     if (hideChat) {
