@@ -199,6 +199,12 @@ export const MatchWordColumnExView: FC<TProps> = ({
     Record<string, string[]>
   >({});
 
+  useEffect(() => {
+    if (rest?.isPresentationMode) {
+      setHoveredTeacherColumnId(null);
+    }
+  }, [rest?.isPresentationMode]);
+
   const { writeAnswer, answers, getAnswers } = useExAnswer({
     student_id,
     lesson_id,
@@ -399,9 +405,7 @@ export const MatchWordColumnExView: FC<TProps> = ({
                       }
                     }}
                     onMouseLeave={() => {
-                      if (isTeacher && !rest?.isPresentationMode) {
-                        setHoveredTeacherColumnId(null);
-                      }
+                      setHoveredTeacherColumnId(null);
                     }}
                   >
                     <p className="break-words text-center text-base font-semibold sm:text-xl">

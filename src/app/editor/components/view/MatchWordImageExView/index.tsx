@@ -219,11 +219,17 @@ const InputItem = (props: {
     }
   }, [chip, id, inputValue, setIncorrectIdsMap]);
 
+  const hideAnswerHints = !isTeacher || !!isPresentationMode;
+
   return (
     <>
       <Tooltip
-        isDisabled={!isTeacher || isPresentationMode}
-        content={isTeacher && <div className="teacher-placeholer">{chip}</div>}
+        isDisabled={hideAnswerHints}
+        content={
+          !hideAnswerHints ? (
+            <div className="teacher-placeholer">{chip}</div>
+          ) : null
+        }
       >
         <Input
           color={inputValue && !isCorrect ? "danger" : "default"}
@@ -417,11 +423,13 @@ export const MatchWordImageExView: FC<TProps> = ({
                   </div>
                   {data.viewType === "drag" && (
                     <ResponsiveTooltip
-                      isDisabled={!isTeacher || rest?.isPresentationMode}
+                      isDisabled={
+                        !isTeacher || !!rest?.isPresentationMode
+                      }
                       content={
-                        isTeacher && (
+                        isTeacher && !rest?.isPresentationMode ? (
                           <div className="teacher-placeholer">{image.text}</div>
-                        )
+                        ) : null
                       }
                     >
                       <Card

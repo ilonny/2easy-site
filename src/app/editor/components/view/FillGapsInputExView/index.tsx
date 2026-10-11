@@ -162,10 +162,14 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
           root = ReactDOM.createRoot(el);
           rootsMapRef.current.set(el, root);
         }
-        const toolTipContent = field.options
-          .filter((o) => o.isCorrect)
-          .map((o) => o.value)
-          .join(", ");
+        const isPresentationMode = !!(rest as any)?.isPresentationMode;
+        const hideAnswerHints = !isTeacher || isPresentationMode;
+        const toolTipContent = hideAnswerHints
+          ? ""
+          : field.options
+              .filter((o) => o.isCorrect)
+              .map((o) => o.value)
+              .join(", ");
         root.render(
           <div
             className="answer-wrapper mx-2 !bg-transparent"
@@ -183,7 +187,7 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
             }}
           >
             <ResponsiveTooltip
-              isDisabled={!isTeacher || (rest as any)?.isPresentationMode}
+              isDisabled={hideAnswerHints}
               content={toolTipContent}
             >
               <div className="">
@@ -191,7 +195,7 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
                   field={field}
                   key={field?.id}
                   isTeacher={isTeacher}
-                  isPresentationMode={(rest as any)?.isPresentationMode}
+                  isPresentationMode={isPresentationMode}
                   activeStudentId={(rest as any)?.activeStudentId}
                   answers={answers}
                   writeAnswer={writeAnswer}
@@ -206,7 +210,8 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
     data?.id,
     data.fields,
     isTeacher,
-    rest,
+    (rest as any)?.isPresentationMode,
+    (rest as any)?.activeStudentId,
     answers,
     writeAnswer,
   ]);
