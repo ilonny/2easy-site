@@ -1,6 +1,7 @@
 export type TProfile = {
   name?: string;
   login?: string;
+  email?: string;
   phone?: string;
   surname?: string;
   role_id?: number;
@@ -8,4 +9,5 @@ export type TProfile = {
   studentId?: number;
   id?: number;
   user_id?: string | number;
+  avatar?: string | null;
 };

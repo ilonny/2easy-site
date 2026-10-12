@@ -7,6 +7,7 @@ import { CHAT_ALLOWED_EMOJIS } from "./constants";
 import type { TChatMessage } from "./types";
 import { T } from "@/i18n/T";
 import { formatChatEditedAt } from "./utils/formatChatEditedAt";
+import { UserAvatar } from "@/components/UserAvatar";
 import styles from "./styles.module.css";
 
 type TProps = {
@@ -42,7 +43,16 @@ export const ChatMessageItem: FC<TProps> = ({
           sender: message.sender,
         }}
       >
-        <Message.Header sender={message.sender} />
+        <Message.Header>
+          <span className={styles.senderRow}>
+            <UserAvatar
+              name={message.sender}
+              avatar={message.sender_avatar}
+              size={22}
+            />
+            <span>{message.sender}</span>
+          </span>
+        </Message.Header>
         <Message.CustomContent>
           {message.reply_to ? (
             <div className={styles.replyQuote}>

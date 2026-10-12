@@ -9,6 +9,7 @@ import ChevronDown from "@/assets/icons/chevron_down.svg";
 import Image from "next/image";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { UserAvatar } from "@/components/UserAvatar";
 
 type TProps = {
   isStudent?: boolean;
@@ -73,12 +74,14 @@ export const HeaderProfile = (props: TProps) => {
   const items: TMenuItem[] = isStudent
     ? [
         {
-          key: "profile",
+          key: "cabinet",
           content: (
             <>
               <span className="header-secondary-btn-text block">{profile?.name}</span>
-              {!!profile?.email && (
-                <span className="block text-sm text-default-500">{profile.email}</span>
+              {!!(profile?.email || profile?.login) && (
+                <span className="block text-sm text-default-500">
+                  {profile.email || profile.login}
+                </span>
               )}
             </>
           ),
@@ -87,6 +90,11 @@ export const HeaderProfile = (props: TProps) => {
               router.push(`/student-account/${profile.studentId}`);
             }
           },
+        },
+        {
+          key: "profile",
+          content: <T k="profile.personalData" />,
+          onSelect: () => router.push("/profile"),
         },
         { key: "logout", content: <T k="auth.logout" />, onSelect: logout },
       ]
@@ -120,6 +128,11 @@ export const HeaderProfile = (props: TProps) => {
         onClick={() => setIsOpen((open) => !open)}
         className="flex h-10 min-w-0 max-w-[46vw] touch-manipulation items-center gap-2 rounded-[14px] bg-brand-gray px-3.5 text-xs font-bold tracking-brand text-brand-black outline-none transition-colors hover:bg-[#e6e6ea] focus-visible:ring-2 focus-visible:ring-brand-violet/40 sm:max-w-[200px] md:h-[46px] md:max-w-none lg:h-10 lg:text-sm min-[1200px]:h-12"
       >
+        <UserAvatar
+          name={profile?.name}
+          avatar={profile?.avatar}
+          size={28}
+        />
         <p className="truncate">
           {profile?.name || i18n.t("profile.profileLabel")}
         </p>

@@ -53,6 +53,7 @@ export type TBoardParticipant = {
   id: string;
   username: string;
   isStudent: boolean;
+  avatar?: string | null;
 };
 
 export type TBoardSnapshot = {

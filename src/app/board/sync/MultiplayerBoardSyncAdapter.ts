@@ -20,6 +20,7 @@ type TWsMessage = {
     is_student?: boolean;
     displayName?: string;
     display_name?: string;
+    avatar?: string | null;
   }>;
   session_id?: number;
   message?: string;
@@ -43,6 +44,7 @@ const normalizeParticipants = (
       participant.displayName ||
       participant.display_name ||
       (participant.isStudent ?? participant.is_student ? "Ученик" : "Учитель"),
+    avatar: participant.avatar || null,
   }));
 };
 

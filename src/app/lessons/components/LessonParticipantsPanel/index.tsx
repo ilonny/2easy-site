@@ -8,12 +8,14 @@ import i18n from "@/i18n/config";
 import { IconDictionaryButton } from "@/app/dictionary/components/DictionaryButtons";
 import { LESSON_PARTICIPANT_DICTIONARY_ICON_WRAPPER_CLASS } from "@/app/dictionary/constants";
 import InfoIcon from "@/assets/icons/info.svg";
+import { UserAvatar } from "@/components/UserAvatar";
 
 export type TLessonParticipant = {
   id: number | string;
   student_id: number;
   "student.name"?: string;
   "student.email"?: string;
+  "student.avatar"?: string | null;
 };
 
 type TProps = {
@@ -85,6 +87,12 @@ export const LessonParticipantsPanel: FC<TProps> = ({
                       : "flex flex-col gap-1 sm:gap-1.5 md:flex-row md:items-center md:gap-2"
                   }
                 >
+                  <UserAvatar
+                    name={s["student.name"]}
+                    avatar={s["student.avatar"]}
+                    size={compact ? 36 : 28}
+                    className="shrink-0"
+                  />
                   <div className="min-w-0 flex-1 overflow-hidden">
                     <p
                       className={

@@ -1,25 +1,93 @@
+"use client";
+
 import { AuthContext } from "@/auth";
-import { useContext } from "react";
+import { UserAvatar } from "@/components/UserAvatar";
+import { useCallback, useContext, useRef, useState } from "react";
+import { checkResponse, fetchPostMultipart } from "@/api";
+import { writeToLocalStorage } from "@/auth/utils";
+import { toast } from "react-toastify";
+import i18n from "@/i18n/config";
+import { T } from "@/i18n/T";
 import styles from "./styles.module.css";
 
-export const ProfileImagePicker = () => {
-  const { profile } = useContext(AuthContext);
-  console.log("4fghf99tf", profile);
+type TProps = {
+  onAvatarChange?: (avatar: string) => void;
+};
+
+export const ProfileImagePicker = ({ onAvatarChange }: TProps) => {
+  const { profile, setProfile } = useContext(AuthContext);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const onPick = useCallback(() => {
+    if (uploading) return;
+    inputRef.current?.click();
+  }, [uploading]);
+
+  const onFile = useCallback(
+    async (file?: File | null) => {
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        toast.error(i18n.t("profile.avatarInvalidType"));
+        return;
+      }
+      setUploading(true);
+      try {
+        const fd = new FormData();
+        fd.append("image", file);
+        const res = await fetchPostMultipart({
+          path: "/profile/avatar",
+          data: fd,
+          isSecure: true,
+        });
+        const json = await res.json();
+        checkResponse(json);
+        if (json?.profile && setProfile) {
+          setProfile(json.profile);
+          writeToLocalStorage("profile", JSON.stringify(json.profile));
+        }
+        if (json?.avatar) {
+          onAvatarChange?.(json.avatar);
+        }
+        toast.success(i18n.t("profile.avatarUpdated"));
+      } catch {
+        toast.error(i18n.t("commonErrors.somethingWentWrong"));
+      } finally {
+        setUploading(false);
+        if (inputRef.current) inputRef.current.value = "";
+      }
+    },
+    [onAvatarChange, setProfile],
+  );
+
   return (
-    <div className="flex">
-      <button className={styles["header-profile-short-wrapper"]}>
-        {profile?.id === 1864 ? (
-          // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
-          <img
-            src={
-              "https://608dfa18-3eae-4574-a997-0a7441c16d33.selstorage.ru/uploads/1/IMG_8359%20(1).jpg"
-            }
-            style={{ borderRadius: 300 }}
-          />
-        ) : (
-          <p className={styles.title}>{profile.name?.[0] || "A"}</p>
-        )}
+    <div className="flex flex-col items-center gap-3">
+      <button
+        type="button"
+        className={styles["header-profile-short-wrapper"]}
+        onClick={onPick}
+        disabled={uploading}
+        aria-label={i18n.t("profile.changeAvatar")}
+      >
+        <UserAvatar
+          name={profile?.name}
+          avatar={profile?.avatar}
+          size={140}
+        />
+        <span className={styles.avatarOverlay}>
+          {uploading ? "…" : <T k="profile.changePhoto" />}
+        </span>
       </button>
+      <p className="text-sm text-default-500 text-center max-w-[200px]">
+        <T k="profile.avatarHint" />
+      </p>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/gif,image/webp"
+        className="hidden"
+        onChange={(e) => onFile(e.target.files?.[0])}
+      />
     </div>
   );
 };

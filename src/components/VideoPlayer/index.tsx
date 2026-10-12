@@ -8,6 +8,7 @@ import {
   useState,
   PointerEvent as ReactPointerEvent,
 } from "react";
+import styles from "./styles.module.css";
 
 type TProps = {
   src: string;
@@ -62,6 +63,7 @@ export const VideoPlayer: FC<TProps> = ({ src, title, className }) => {
   const [volume, setVolume] = useState(1);
   const [seeking, setSeeking] = useState(false);
   const [showControls, setShowControls] = useState(true);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearHideTimer = () => {
@@ -163,7 +165,7 @@ export const VideoPlayer: FC<TProps> = ({ src, title, className }) => {
   };
 
   const toggleFullscreen = async () => {
-    const wrap = videoRef.current?.parentElement;
+    const wrap = wrapRef.current;
     if (!wrap) return;
     if (document.fullscreenElement) {
       await document.exitFullscreen();
@@ -176,7 +178,8 @@ export const VideoPlayer: FC<TProps> = ({ src, title, className }) => {
 
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-xl bg-[#1a1530] group ${className || ""}`}
+      ref={wrapRef}
+      className={`${styles.root} relative w-full overflow-hidden rounded-xl bg-[#1a1530] group ${className || ""}`}
       onMouseMove={revealControls}
       onMouseLeave={() => {
         if (playing) setShowControls(false);

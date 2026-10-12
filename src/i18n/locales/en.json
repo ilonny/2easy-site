@@ -789,7 +789,16 @@
     "myStudents": "My students",
     "change": "Change",
     "changePassword": "Change password",
-    "name": "Name"
+    "name": "Name",
+    "namePlaceholder": "How should we call you",
+    "friendlyIntro": "Update your name and photo — they show up in chat, on boards, and in lessons.",
+    "save": "Save",
+    "saved": "Profile saved",
+    "changeAvatar": "Change avatar",
+    "changePhoto": "Change photo",
+    "avatarHint": "Tap the photo to choose a new one",
+    "avatarUpdated": "Avatar updated",
+    "avatarInvalidType": "Please choose a JPG, PNG, GIF, or WebP image"
   },
   "students": {
     "noStudents": "You don't have any students yet",
@@ -805,7 +814,13 @@
     "noteLabel": "Note (e.g. proficiency level)",
     "addStudent": "Add student",
     "allStudents": "← all students",
-    "studentCabinet": "Student account"
+    "studentCabinet": "Student account",
+    "showPassword": "Show password",
+    "hidePassword": "Hide",
+    "showPasswordHint": "If the password email didn’t arrive — we’ll show it here",
+    "copyPassword": "Copy password",
+    "passwordCopied": "Password copied. Share it with your student",
+    "passwordNotFound": "Password not found"
   },
   "subscriptionStatus": {
     "trialUntil": "Trial period until",

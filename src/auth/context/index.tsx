@@ -30,8 +30,8 @@ export const AuthContextProvider = ({
     useState(false);
 
   const isAuthorized = useMemo(() => {
-    return !!profile?.login;
-  }, [profile?.login]);
+    return !!(profile?.login || profile?.studentId || profile?.email);
+  }, [profile?.login, profile?.studentId, profile?.email]);
 
   useEffect(() => {
     const profile = readFromLocalStorage("profile");

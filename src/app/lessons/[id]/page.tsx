@@ -687,7 +687,7 @@ export default function LessonPage() {
               lessonSessionId={lessonSessionId}
               onOpenChange={setBoardModalOpen}
             />
-            <VideoCall lessonId={params.id as string} />
+            <VideoCall />
             <Chat
               lesson_id={Number(params.id) || lesson?.id || 0}
               studentId={lessonBoardStudentId}

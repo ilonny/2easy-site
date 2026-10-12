@@ -11,6 +11,7 @@ import {
   TBoardParticipantView,
 } from "../../utils/boardParticipants";
 import { getBoardCursorColor } from "../../utils/boardTeacherCursor";
+import { UserAvatar } from "@/components/UserAvatar";
 import styles from "./styles.module.css";
 
 /** Avoid importing @excalidraw/excalidraw here — it touches `navigator` at module load (breaks SSR). */
@@ -25,14 +26,6 @@ type TProps = {
   /** Teachers see everyone; students only see the teacher to follow. */
   variant?: "teacher" | "student";
 };
-
-const getInitials = (username: string) =>
-  username
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word.charAt(0))
-    .join("");
 
 type TParticipantAvatarProps = {
   participant: TBoardParticipantView;
@@ -55,7 +48,11 @@ const ParticipantAvatar: FC<TParticipantAvatarProps> = ({
         type="button"
         className={`${styles.avatar} ${!canFocus ? styles.avatarInactive : ""} ${className || ""}`}
         style={{
-          backgroundColor: getBoardCursorColor(participant.isStudent),
+          backgroundColor: participant.avatar
+            ? "transparent"
+            : getBoardCursorColor(participant.isStudent),
+          padding: 0,
+          overflow: "hidden",
         }}
         aria-label={
           typeof tooltip === "string"
@@ -65,7 +62,17 @@ const ParticipantAvatar: FC<TParticipantAvatarProps> = ({
         disabled={!canFocus}
         onClick={() => onFocus(participant)}
       >
-        {getInitials(participant.username)}
+        <UserAvatar
+          name={participant.username}
+          avatar={participant.avatar}
+          size={36}
+          style={{
+            backgroundColor: participant.avatar
+              ? undefined
+              : getBoardCursorColor(participant.isStudent),
+            color: "#fff",
+          }}
+        />
       </button>
     </ResponsiveTooltip>
   );

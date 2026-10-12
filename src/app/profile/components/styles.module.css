@@ -3,10 +3,33 @@
     height: 140px;
     border-radius: 140px;
     background-color: #EBE8FF;
+    position: relative;
+    overflow: hidden;
     @apply
     flex
     items-center
     justify-center
+}
+
+.header-profile-short-wrapper:hover .avatarOverlay,
+.header-profile-short-wrapper:focus-visible .avatarOverlay {
+    opacity: 1;
+}
+
+.avatarOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(40, 30, 90, 0.55);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    padding: 8px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
 }
 
 .title {

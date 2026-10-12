@@ -80,6 +80,12 @@
   max-width: 220px;
 }
 
+.senderRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .messageWrap {
   border-radius: 10px;
   transition: background-color 0.15s ease, box-shadow 0.15s ease;

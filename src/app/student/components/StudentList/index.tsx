@@ -16,12 +16,13 @@ import {
 } from "@nextui-org/react";
 import { useStudentList } from "../../hooks/useStudentList";
 import { CreateStudentModalForm } from "../CreateStudentModalForm";
-import styles from "./styles.module.css";
 import Image from "next/image";
 import Ellipse from "@/assets/icons/ellipse.svg";
 import { useRouter } from "next/navigation";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { T } from "@/i18n/T";
+import { UserAvatar } from "@/components/UserAvatar";
+import { StudentPasswordReveal } from "../StudentPasswordReveal";
 type TProps = {
   hideAddButton?: boolean;
   hidePopoverButton?: boolean;
@@ -76,16 +77,6 @@ export const StudentList = (props: TProps) => {
     setDeleteIsVisible(true);
   }, []);
 
-  const getShortName = (name) => {
-    return name
-      .split(" ")
-      ?.map((l) => {
-        return l[0] || "";
-      })
-      ?.slice(0, 2)
-      ?.filter(Boolean);
-  };
-
   const { checkSubscription } = useCheckSubscription();
   return (
     <>
@@ -132,14 +123,11 @@ export const StudentList = (props: TProps) => {
                         </div>
                       )}
                       <div className="flex items-center gap-4">
-                        <button
-                          className={styles["header-profile-short-wrapper"]}
-                          style={{ flexShrink: 0 }}
-                        >
-                          <p className={styles.title}>
-                            {getShortName(student.name) || "A"}
-                          </p>
-                        </button>
+                        <UserAvatar
+                          name={student.name}
+                          avatar={student.avatar}
+                          size={48}
+                        />
                         <div className="">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-bold">{student.name}</p>
@@ -155,6 +143,9 @@ export const StudentList = (props: TProps) => {
                                 </Chip>
                               </p>
                             </div>
+                          )}
+                          {!hidePopoverButton && !onClickStudent && (
+                            <StudentPasswordReveal studentId={student.id} />
                           )}
                         </div>
                       </div>

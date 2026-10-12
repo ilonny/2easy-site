@@ -1,0 +1,18 @@
+/* When the player wrapper is fullscreen, the video must fill it.
+   Otherwise max-h-[min(70vh,560px)] leaves a large empty purple block below. */
+.root:fullscreen,
+.root:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  background: #000;
+}
+
+.root:fullscreen > video,
+.root:-webkit-full-screen > video {
+  /* Beat Tailwind max-h-[min(70vh,560px)] which caused the purple gap */
+  max-height: none !important;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

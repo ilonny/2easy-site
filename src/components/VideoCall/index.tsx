@@ -36,10 +36,6 @@ declare global {
   }
 }
 
-type TProps = {
-  lessonId: string | string[];
-};
-
 const JITSI_DOMAIN = "meet.2easyeng.com";
 const MIN_W = 280;
 const MIN_H = 200;
@@ -50,6 +46,11 @@ const DEFAULT_H = 380;
 const MOBILE_BREAKPOINT = 640;
 const DEFAULT_W_MOBILE = 320;
 const DEFAULT_H_MOBILE = 300;
+
+/** Stable per-teacher room so switching lesson ↔ homework stays on the same call. */
+function buildTeacherRoomName(teacherUserId: string) {
+  return `2easy-t-${teacherUserId}`;
+}
 
 function getDefaultVideoSize(): { w: number; h: number } {
   if (typeof window === "undefined") return { w: DEFAULT_W, h: DEFAULT_H };
@@ -74,7 +75,7 @@ const ResizeIcon = () => (
   </svg>
 );
 
-export const VideoCall: FC<TProps> = ({ lessonId }) => {
+export const VideoCall: FC = () => {
   const { profile } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -86,13 +87,11 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
   const apiRef = useRef<JitsiApi | null>(null);
   const boundsRef = useRef<HTMLDivElement>(null);
 
-  const roomId = Array.isArray(lessonId) ? lessonId[0] : lessonId;
   const teacherUserId = resolveTeacherUserId(profile);
   const roomName = useMemo(() => {
-    if (!roomId) return "";
-    if (!teacherUserId) return `2easy-lesson-${roomId}`;
-    return `2easy-lesson-${roomId}-teacher-${teacherUserId}`;
-  }, [roomId, teacherUserId]);
+    if (!teacherUserId) return "";
+    return buildTeacherRoomName(teacherUserId);
+  }, [teacherUserId]);
   const displayName =
     [profile?.name, profile?.surname].filter(Boolean).join(" ") ||
     profile?.login ||
@@ -113,7 +112,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
   }, []);
 
   const onOpen = useCallback(() => {
-    if (!roomId) return;
+    if (!teacherUserId) return;
     const { w, h } = getDefaultVideoSize();
     setPosition({
       x: typeof window !== "undefined" ? Math.max(0, window.innerWidth - w - 16) : 100,
@@ -122,7 +121,7 @@ export const VideoCall: FC<TProps> = ({ lessonId }) => {
     setSize({ w, h });
     setIsReady(false);
     setIsOpen(true);
-  }, [roomId]);
+  }, [teacherUserId]);
 
   useEffect(() => {
     if (!isOpen || !containerRef.current) return;

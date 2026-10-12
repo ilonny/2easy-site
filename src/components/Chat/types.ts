@@ -2,6 +2,7 @@ export type TChatReply = {
   id: number;
   message: string;
   sender: string;
+  sender_avatar?: string | null;
 };
 
 export type TChatReaction = {
@@ -14,6 +15,7 @@ export type TChatMessage = {
   id: number;
   message: string;
   sender: string;
+  sender_avatar?: string | null;
   direction: "incoming" | "outgoing";
   is_mine?: boolean;
   position?: "normal" | "single" | "first" | "last";

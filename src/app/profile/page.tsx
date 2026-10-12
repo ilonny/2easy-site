@@ -3,7 +3,6 @@ import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
 import { useContext, useEffect, useState } from "react";
-import { SibscribeContext } from "@/subscribe/context";
 import { ProfileInfoForm } from "./components/ProfileInfoForm";
 import { ProfileSubscribeInformer } from "../subscription/components/ProfileSubscribeInformer";
 import { ProfileLessons } from "../lessons/components/ProfileLessons";
@@ -13,16 +12,18 @@ import { T } from "@/i18n/T";
 
 export default function ProfilePage() {
   withLogin();
-  const { authIsLoading } = useContext(AuthContext);
-  const { subscription } = useContext(SibscribeContext);
-  const hasTariff =
-    subscription?.subscribe_type_id && subscription?.subscribe_type_id !== 1;
+  const { authIsLoading, profile } = useContext(AuthContext);
+  const isStudent = !!profile?.isStudent;
 
   const [tabIndex, setTabIndex] = useState<"profile" | "lessons" | "students">(
-    "lessons"
+    isStudent ? "profile" : "lessons",
   );
 
   useEffect(() => {
+    if (isStudent) {
+      setTabIndex("profile");
+      return;
+    }
     if (window.location.search?.includes("lessons")) {
       setTabIndex("lessons");
     }
@@ -32,17 +33,7 @@ export default function ProfilePage() {
     if (window.location.search?.includes("students")) {
       setTabIndex("students");
     }
-  }, []);
-
-  // useEffect(() => {
-  //   console.log('')
-  //   if (!authIsLoading && !profile?.id) {
-  //     toast("Ошибка авторизации", {
-  //       type: "success",
-  //     });
-  //     router.push("/login");
-  //   }
-  // }, [authIsLoading && !profile]);
+  }, [isStudent]);
 
   return (
     <main style={{ backgroundColor: "#f9f9f9" }}>
@@ -51,57 +42,72 @@ export default function ProfilePage() {
           <div className="h-8 md:h-10 lg:h-14" />
           <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
             <Breadcrumbs>
-            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
-            <BreadcrumbItem><T k="profile.profileLabel" /></BreadcrumbItem>
-          </Breadcrumbs>
+              <BreadcrumbItem href="/">
+                <T k="editor.home" />
+              </BreadcrumbItem>
+              <BreadcrumbItem>
+                <T k="profile.profileLabel" />
+              </BreadcrumbItem>
+            </Breadcrumbs>
           </div>
         </div>
         <div className="h-6 md:h-8 lg:h-10" />
         <div className="h-6 md:h-8 lg:h-10" />
         <div className="flex flex-col items-center w-full max-w-full min-w-0 px-0">
           <h1 className="text-primary font-bold text-xl sm:text-2xl md:text-3xl uppercase text-center px-1">
-            <T k="profile.personalCabinet" />
+            <T
+              k={
+                isStudent
+                  ? "profile.personalData"
+                  : "profile.personalCabinet"
+              }
+            />
           </h1>
           <div className="h-4 md:h-5" />
-          <Tabs
-            selectedKey={tabIndex}
-            onSelectionChange={setTabIndex}
-            variant="underlined"
-            color="primary"
-            classNames={{
-              base: "w-full max-w-full min-w-0",
-              tabList:
-                "w-full max-w-full min-w-0 flex-nowrap gap-1 sm:gap-2 justify-center overflow-x-auto [-webkit-overflow-scrolling:touch] pb-0.5",
-              /* theme задаёт tab:w-full — из‑за этого каждая вкладка = 100% ширины, видна только первая */
-              tab: "w-auto shrink-0 px-2 sm:px-3 text-xs sm:text-sm md:text-base",
-            }}
-          >
-            <Tab
-              key="lessons"
-              title={<T k="profile.lessonsAndCourses" />}
-              className="uppercase font-bold"
-            />
-            <Tab
-              key="students"
-              title={<T k="profile.studentsTab" />}
-              className="uppercase font-bold"
-            />
-            <Tab
-              key="profile"
-              title={<T k="profile.profileLabel" />}
-              className="uppercase font-bold"
-            />
-          </Tabs>
+          {!isStudent && (
+            <Tabs
+              selectedKey={tabIndex}
+              onSelectionChange={setTabIndex}
+              variant="underlined"
+              color="primary"
+              classNames={{
+                base: "w-full max-w-full min-w-0",
+                tabList:
+                  "w-full max-w-full min-w-0 flex-nowrap gap-1 sm:gap-2 justify-center overflow-x-auto [-webkit-overflow-scrolling:touch] pb-0.5",
+                tab: "w-auto shrink-0 px-2 sm:px-3 text-xs sm:text-sm md:text-base",
+              }}
+            >
+              <Tab
+                key="lessons"
+                title={<T k="profile.lessonsAndCourses" />}
+                className="uppercase font-bold"
+              />
+              <Tab
+                key="students"
+                title={<T k="profile.studentsTab" />}
+                className="uppercase font-bold"
+              />
+              <Tab
+                key="profile"
+                title={<T k="profile.profileLabel" />}
+                className="uppercase font-bold"
+              />
+            </Tabs>
+          )}
           <div className="h-6 md:h-8 lg:h-10" />
           <div className="h-6 md:h-8 lg:h-10" />
-          {tabIndex === "profile" && !authIsLoading && (
+          {(tabIndex === "profile" || isStudent) && !authIsLoading && (
             <div className="flex flex-col xl:flex-row items-stretch xl:items-start justify-center w-full max-w-full min-w-0 gap-8 md:gap-12 xl:gap-24 2xl:gap-40 px-1">
               <ProfileInfoForm />
-              <ProfileSubscribeInformer />
+              {!isStudent && <ProfileSubscribeInformer />}
             </div>
           )}
-          {tabIndex === "lessons" && !authIsLoading && <ProfileLessons />}
-          {tabIndex === "students" && !authIsLoading && <ProfileStudents />}
+          {tabIndex === "lessons" && !isStudent && !authIsLoading && (
+            <ProfileLessons />
+          )}
+          {tabIndex === "students" && !isStudent && !authIsLoading && (
+            <ProfileStudents />
+          )}
           <div className="h-12 md:h-16 lg:h-20" />
         </div>
       </ContentWrapper>

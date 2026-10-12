@@ -791,7 +791,16 @@
     "myStudents": "Мои ученики",
     "change": "Изменить",
     "changePassword": "Изменить пароль",
-    "name": "Имя"
+    "name": "Имя",
+    "namePlaceholder": "Как к вам обращаться",
+    "friendlyIntro": "Здесь можно обновить имя и фото — они появятся в чате, на доске и в уроках.",
+    "save": "Сохранить",
+    "saved": "Профиль сохранён",
+    "changeAvatar": "Изменить аватар",
+    "changePhoto": "Сменить фото",
+    "avatarHint": "Нажмите на фото, чтобы выбрать новое",
+    "avatarUpdated": "Аватар обновлён",
+    "avatarInvalidType": "Выберите изображение JPG, PNG, GIF или WebP"
   },
   "students": {
     "noStudents": "У вас пока нет учеников",
@@ -807,7 +816,13 @@
     "noteLabel": "Заметка (например, уровень подготовки)",
     "addStudent": "Добавить ученика",
     "allStudents": "← все ученики",
-    "studentCabinet": "Кабинет ученика"
+    "studentCabinet": "Кабинет ученика",
+    "showPassword": "Показать пароль",
+    "hidePassword": "Скрыть",
+    "showPasswordHint": "Если письмо с паролем не дошло — покажем его здесь",
+    "copyPassword": "Скопировать пароль",
+    "passwordCopied": "Пароль скопирован в буфер обмена. Поделитесь им с учеником",
+    "passwordNotFound": "Пароль не найден"
   },
   "subscriptionStatus": {
     "trialUntil": "Пробный период до",
