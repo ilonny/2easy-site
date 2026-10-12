@@ -155,7 +155,7 @@ export const Header = () => {
         } ${isLanding ? "bg-transparent" : "bg-white"}`}
       >
         <div
-          className={`mx-auto flex max-w-[1440px] items-center justify-between px-5 pb-4 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-[65px] lg:pb-0 ${
+          className={`mx-auto flex max-w-[1440px] items-center justify-between gap-3 px-5 pb-4 max-[374px]:gap-2 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-0 lg:px-[65px] lg:pb-0 ${
             isLanding
               ? "pt-6 lg:pt-4 min-[1200px]:pt-8"
               : "pt-10 lg:pt-4 min-[1200px]:pt-10"
@@ -185,7 +185,7 @@ export const Header = () => {
               className="text-[28.45px] md:text-[34.56px] min-[1200px]:text-[43.2px]"
             />
           </a>
-          <div className="flex min-w-0 items-center justify-end gap-3 max-[374px]:gap-2 md:gap-[15px] lg:gap-2">
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-3 max-[374px]:gap-2 md:gap-[15px] lg:flex-none lg:gap-2">
             {authIsLoading ? (
               <div className="flex items-center gap-3">
                 <Skeleton className="h-10 w-24 rounded-[14px]" />
@@ -212,7 +212,7 @@ export const Header = () => {
             ) : (
               <>
                 {profile?.isStudent && (
-                  <div className="lg:hidden">
+                  <div className="shrink-0 lg:hidden">
                     <LanguageSwitcher variant="brand" />
                   </div>
                 )}

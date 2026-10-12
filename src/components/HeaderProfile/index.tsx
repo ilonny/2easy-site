@@ -40,9 +40,9 @@ export const HeaderProfile = (props: TProps) => {
   const openCreateLesson = useOpenCreateLesson();
 
   return (
-    <div className="flex flex-row items-center gap-3 max-[374px]:gap-2 md:gap-[15px] lg:gap-2">
+    <div className="flex min-w-0 flex-row items-center gap-3 max-[374px]:gap-2 md:gap-[15px] lg:gap-2">
       {!isStudent && (
-        <div className="hidden md:block">
+        <div className="hidden shrink-0 md:block">
           {access === "loading" && (
             <Skeleton className="h-[46px] w-[180px] rounded-[14px] lg:h-12" />
           )}
@@ -65,7 +65,7 @@ export const HeaderProfile = (props: TProps) => {
           {/* <SubscribeCounter /> */}
         </div>
       )}
-      <div>
+      <div className="min-w-0">
         <HeaderProfileShort isStudent={isStudent} />
         <CreateLessonModalForm
           isVisible={createLessonModalIsVisible}
