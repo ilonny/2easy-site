@@ -88,10 +88,10 @@ const UnscrambleWordsExViewImpl: FC<{
 
   const sentences = useMemo(
     () =>
-      (data.sentences || []).filter(
-        (s) => Array.isArray(s.tokens) && s.tokens.length >= 2,
+      (data?.sentences || []).filter(
+        (s) => Array.isArray(s?.tokens) && s.tokens.length >= 2,
       ),
-    [data.sentences],
+    [data?.sentences],
   );
 
   const sentencesById = useMemo(() => {

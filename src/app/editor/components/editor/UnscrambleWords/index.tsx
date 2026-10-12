@@ -72,8 +72,7 @@ export const UnscrambleWords: FC<TProps> = ({
     return defaultValuesStub;
   }, [defaultValues]);
 
-  const { data, changeData, resetData } =
-    useExData<TUnscrambleWordsData>(initialData);
+  const { data, changeData } = useExData<TUnscrambleWordsData>(initialData);
 
   const [images, setImages] = useState<TUnscrambleWordsData["images"]>(
     defaultValues?.images || [],
@@ -85,11 +84,12 @@ export const UnscrambleWords: FC<TProps> = ({
   }, [changeData, images]);
 
   useEffect(() => {
-    if (success) {
-      onSuccess?.((data as any)?.id || 0);
-      resetData({ ...defaultValuesStub, sentences: [makeSentence()] });
-    }
-  }, [data, onSuccess, resetData, success]);
+    if (!success) return;
+    // Do not depend on `data` here: resetData would retrigger an infinite loop
+    // (Maximum update depth) because makeSentence() always allocates new ids.
+    onSuccess?.((data as any)?.id || 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to success
+  }, [success, onSuccess]);
 
   const updateSentenceRaw = useCallback(
     (sentenceId: string, raw: string) => {
