@@ -642,7 +642,7 @@
     "startTyping": "Start writing",
     "unscrambleHowTitle": "How do I build this exercise?",
     "unscrambleHowHint": "Students drag the shuffled fragments into empty slots in the correct order.",
-    "unscrambleHowSteps": "1) Type a sentence. 2) Put \"/\" where it should split into chips (e.g. She / is / a / teacher.). 3) Add more sentences if needed. Each sentence must include at least one \"/\".",
+    "unscrambleHowSteps": "1) Type a sentence. 2) Put \"/\" where it should split into gaps (e.g. She / is / a / teacher.). 3) Add more sentences if needed. Each sentence must include at least one \"/\".",
     "unscrambleSentenceN": "Sentence {{n}}",
     "unscramblePlaceholder": "She / is / a / teacher.",
     "unscrambleAddSentence": "+ Add sentence",
