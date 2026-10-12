@@ -16,11 +16,17 @@ import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import type { ReactNode } from "react";
 import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
+import { toast } from "react-toastify";
+import { relationAttached } from "../../helpers/ensureTeacherLessonCopy";
 
 type TProps = {
   isVisible: boolean;
   setIsVisible: (val: boolean) => void;
-  onSuccess: (chosenIds?: number[], sessionId?: number) => void | Promise<void>;
+  onSuccess: (
+    chosenIds?: number[],
+    sessionId?: number,
+    startedLessonId?: number,
+  ) => void | Promise<void>;
   lesson: TLesson;
   skipChoseStatus?: boolean;
   title?: ReactNode;
@@ -70,6 +76,10 @@ export const AttachLessonModalForm: FC<TProps> = ({
   const onSubmit = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Always start on the same lesson id (incl. 2easy catalog).
+      // Copying would desync teacher/student cabinets.
+      const startedLessonId = Number(lesson.id);
+
       if (!skipCreateRelation) {
         const allRes = await Promise.all(
           chosenIds.map(async (student_id) => {
@@ -79,7 +89,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 : "/lesson-relation/create",
               isSecure: true,
               data: {
-                lesson_id: lesson.id,
+                lesson_id: startedLessonId,
                 student_id,
                 status,
               },
@@ -91,35 +101,56 @@ export const AttachLessonModalForm: FC<TProps> = ({
           allRes.forEach((res) => {
             checkResponse(res);
           });
+        } else if (!isCourses) {
+          const allOk = allRes.every((res) => relationAttached(res));
+          if (!allOk) {
+            throw new Error(
+              i18n.t("lessons.startLessonAttachFailed", {
+                defaultValue: "Не удалось прикрепить учеников к уроку",
+              }),
+            );
+          }
         }
       }
+
       writeToLocalStorage(
         "start_lesson_selected_ids",
         JSON.stringify(chosenIds),
       );
+
       let sessionId: number | undefined;
       if (createLessonSession && chosenIds.length) {
         const sessionRes = await fetchPostJson({
           path: "/lesson/session/start",
           isSecure: true,
           data: {
-            lesson_id: lesson.id,
+            lesson_id: startedLessonId,
             student_ids: chosenIds,
           },
         });
         const sessionJson = await sessionRes.json();
         if (!sessionJson?.success || !sessionJson?.session?.id) {
-          throw new Error(sessionJson?.message || "Failed to start lesson");
+          // Still open lesson mode — session is best-effort for isolation.
+          console.warn(
+            "[start lesson] session failed",
+            sessionJson?.message || sessionJson,
+          );
+        } else {
+          sessionId = Number(sessionJson.session.id);
+          writeToLocalStorage(
+            `lesson_session_${startedLessonId}`,
+            String(sessionId),
+          );
         }
-        sessionId = Number(sessionJson.session.id);
-        writeToLocalStorage(
-          `lesson_session_${lesson.id}`,
-          String(sessionId),
-        );
       }
-      await onSuccess(chosenIds, sessionId);
-    } catch {
-      /* ignore localStorage / attach errors */
+
+      await onSuccess(chosenIds, sessionId, startedLessonId);
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : i18n.t("commonErrors.somethingWentWrong");
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -146,7 +177,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
       }
       setChosenIds((ids) => ids?.concat(id));
     },
-    [chosenIds, maxSelection]
+    [chosenIds, maxSelection],
   );
 
   const needsChosenStudent = maxSelection === 1 || !skipChoseStatus;
@@ -169,7 +200,6 @@ export const AttachLessonModalForm: FC<TProps> = ({
       classNames={{
         backdrop: OVERLAY_ABOVE_HEADER_Z_CLASS,
         wrapper: `${OVERLAY_ABOVE_HEADER_Z_CLASS} max-sm:items-stretch max-sm:p-0`,
-        // Fullscreen shell only on mobile
         base: "max-sm:!m-0 max-sm:!my-0 max-sm:!h-[100dvh] max-sm:!max-h-[100dvh] max-sm:!w-full max-sm:!max-w-full max-sm:!rounded-none",
         header:
           "max-sm:px-4 max-sm:pt-[max(1rem,env(safe-area-inset-top))] max-sm:pb-2 max-sm:text-base",
@@ -302,6 +332,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
               <Button
                 size="lg"
                 color="primary"
+                isLoading={isLoading}
                 className="w-full max-sm:min-h-12 max-sm:touch-manipulation"
                 onClick={onSubmit}
               >

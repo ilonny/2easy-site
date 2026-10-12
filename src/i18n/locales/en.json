@@ -425,6 +425,7 @@
     "addToMyCourses": "Add to \"My courses\"",
     "open": "Open",
     "startLesson": "Start lesson",
+    "startLessonAttachFailed": "Failed to attach students to the lesson",
     "checkHomework": "Check homework",
     "openWithSubscription": "Open with subscription",
     "chooseTariffToOpen": "Choose a plan to get access",

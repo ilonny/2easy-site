@@ -427,6 +427,7 @@
     "addToMyCourses": "Добавить в \"Мои курсы\"",
     "open": "Открыть",
     "startLesson": "Начать урок",
+    "startLessonAttachFailed": "Не удалось прикрепить учеников к уроку",
     "checkHomework": "Проверить homework",
     "openWithSubscription": "Открыть по подписке",
     "chooseTariffToOpen": "Выберите тариф, чтобы открыть доступ",

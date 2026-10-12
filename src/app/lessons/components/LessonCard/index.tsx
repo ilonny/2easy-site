@@ -371,23 +371,35 @@ export const LessonCard: FC<TProps> = ({
     const selectedStudentId = Number(studentId ?? params?.id);
     if (!lesson?.id || !selectedStudentId) return;
 
+    // Keep the same lesson id the student already has (incl. 2easy catalog).
+    // Do not copy here — that would desync teacher/student lesson ids.
+    const targetLessonId = Number(lesson.id);
+
     writeToLocalStorage(
       "start_lesson_selected_ids",
       JSON.stringify([selectedStudentId]),
     );
-    const response = await fetchPostJson({
-      path: "/lesson/session/start",
-      isSecure: true,
-      data: {
-        lesson_id: Number(lesson.id),
-        student_ids: [selectedStudentId],
-      },
-    });
-    const json = await response?.json();
-    checkResponse(json);
-    const sessionId = Number(json?.session?.id || 0);
-    if (!sessionId) return;
-    router.push(`/lessons/${lesson.id}?session_id=${sessionId}`);
+
+    try {
+      const response = await fetchPostJson({
+        path: "/lesson/session/start",
+        isSecure: true,
+        data: {
+          lesson_id: targetLessonId,
+          student_ids: [selectedStudentId],
+        },
+      });
+      const json = await response?.json();
+      checkResponse(json);
+      const sessionId = Number(json?.session?.id || 0);
+      if (sessionId) {
+        router.push(`/lessons/${targetLessonId}?session_id=${sessionId}`);
+        return;
+      }
+    } catch {
+      /* open lesson mode even if session start fails */
+    }
+    router.push(`/lessons/${targetLessonId}`);
   }, [lesson?.id, params?.id, router, studentId]);
 
   const onPressLesson = useCallback(() => {

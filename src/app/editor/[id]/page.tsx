@@ -220,7 +220,20 @@ export default function EditorPage() {
   }, []);
 
   if (isLockedOnTrial) {
-    return null;
+    return (
+      <main style={{ backgroundColor: "#f9f9f9" }}>
+        <ContentWrapper>
+          <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center">
+            <p className="text-lg font-semibold text-primary">
+              <T k="subscriptionStatus.subscribeToContinue" />
+            </p>
+            <a href="/subscription" className="text-secondary underline">
+              <T k="profile.personalCabinet" />
+            </a>
+          </div>
+        </ContentWrapper>
+      </main>
+    );
   }
 
   return (

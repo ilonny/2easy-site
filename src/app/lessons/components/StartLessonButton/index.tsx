@@ -22,7 +22,11 @@ export const StartLessonButton = (props: TProps) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const onSuccess = useCallback(
-    async (chosenIds?: number[], sessionId?: number) => {
+    async (
+      chosenIds?: number[],
+      sessionId?: number,
+      startedLessonId?: number,
+    ) => {
       if (isHomeworkCheck) {
         const studentId = Number(chosenIds?.[0]);
         const parentLessonId =
@@ -55,9 +59,10 @@ export const StartLessonButton = (props: TProps) => {
         router.push(`/lessons/${homeworkId}`);
         return;
       }
+      const targetLessonId = Number(startedLessonId || lesson.id);
       setModalVisible(false);
       router.push(
-        `/lessons/${lesson.id}${
+        `/lessons/${targetLessonId}${
           sessionId ? `?session_id=${sessionId}` : ""
         }`,
       );
