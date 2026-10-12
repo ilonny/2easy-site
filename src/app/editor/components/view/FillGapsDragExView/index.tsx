@@ -109,8 +109,14 @@ const DraggableItem = (props: {
   setErrorAnswerId: Dispatch<SetStateAction<number>>;
   isCorrect: boolean;
   activeDragId: number | null;
-  setIncorrectIdsMap: any;
+  setIncorrectIdsMap: Dispatch<SetStateAction<Record<string, string>>>;
   fields: TField[];
+  correctIds: number[];
+  incorrectIdsMap: Record<string, string>;
+  onPersist: (
+    nextCorrect: number[],
+    nextIncorrect: Record<string, string>
+  ) => void;
 }) => {
   const {
     field,
@@ -124,6 +130,9 @@ const DraggableItem = (props: {
     setErrorAnswerId,
     setIncorrectIdsMap,
     fields,
+    correctIds,
+    incorrectIdsMap,
+    onPersist,
   } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
@@ -199,9 +208,11 @@ const DraggableItem = (props: {
             (f) => f.id == isMissedIntersectedId.current
           )?.value;
           if (isMissedIntersectValue === field.value) {
-            setCorrectIds((ids) =>
-              ids.concat(Number(isMissedIntersectedId.current))
-            );
+            setCorrectIds((ids) => {
+              const next = ids.concat(Number(isMissedIntersectedId.current));
+              onPersist(next, incorrectIdsMap);
+              return next;
+            });
             setX(0);
             setY(0);
             return;
@@ -216,10 +227,12 @@ const DraggableItem = (props: {
 
           //
           setIncorrectIdsMap((m) => {
-            return {
+            const next = {
               ...m,
               [isMissedIntersectedId.current]: field.value,
             };
+            onPersist(correctIds, next);
+            return next;
           });
           // return
         }
@@ -228,7 +241,11 @@ const DraggableItem = (props: {
           setY(0);
           return;
         }
-        setCorrectIds((ids) => ids.concat(field?.id));
+        setCorrectIds((ids) => {
+          const next = ids.concat(field?.id);
+          onPersist(next, incorrectIdsMap);
+          return next;
+        });
       }}
     >
       <Chip
@@ -237,9 +254,15 @@ const DraggableItem = (props: {
         color={isError ? "danger" : "primary"}
         className={`${
           isActiveDrag && "bg-[#271399]"
-        } handle exercise-chip text-[18px] cursor-pointer ${styles.draggableChip}`}
+        } handle exercise-chip cursor-pointer ${styles.draggableChip} ${
+          (field.value || "").trim().length > 36
+            ? styles.chipSizeXLong
+            : (field.value || "").trim().length > 20
+            ? styles.chipSizeLong
+            : styles.chipSizeDefault
+        }`}
       >
-        <span style={{ fontSize: 18, fontWeight: 400 }}>{field.value}</span>
+        {field.value}
       </Chip>
     </Draggable>
   );
@@ -257,7 +280,9 @@ export const FillGapsDragExView: FC<TProps> = ({
   const isMissedIntersectedId = useRef<number>(0);
   const [errorAnswerId, setErrorAnswerId] = useState<number>(0);
   const [correctIds, setCorrectIds] = useState<number[]>([]);
-  const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
+  const [incorrectIdsMap, setIncorrectIdsMap] = useState<Record<string, string>>(
+    {}
+  );
   const rootsMapRef = useRef(
     new Map<Element, ReturnType<typeof ReactDOM.createRoot>>()
   );
@@ -267,7 +292,7 @@ export const FillGapsDragExView: FC<TProps> = ({
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
   const ex_id = data?.id;
-  const { writeAnswer, answers, getAnswers } = useExAnswer({
+  const { writeAnswer, answers, getAnswers, resetSeq } = useExAnswer({
     student_id,
     lesson_id,
     ex_id,
@@ -275,6 +300,23 @@ export const FillGapsDragExView: FC<TProps> = ({
     isTeacher,
     isPresentationMode: rest?.isPresentationMode
   });
+
+  const persist = useCallback(
+    (nextCorrect: number[], nextIncorrect: Record<string, string>) => {
+      if (isPreview) return;
+      if (!nextCorrect.length && !Object.keys(nextIncorrect).length) return;
+      void writeAnswer(
+        data.id,
+        JSON.stringify({ correctIds: nextCorrect, incorrectIdsMap: nextIncorrect })
+      );
+    },
+    [data.id, isPreview, writeAnswer]
+  );
+
+  useEffect(() => {
+    setCorrectIds([]);
+    setIncorrectIdsMap({});
+  }, [resetSeq]);
 
   const renderContent = useCallback(() => {
     document
@@ -367,13 +409,6 @@ export const FillGapsDragExView: FC<TProps> = ({
   }, [answers, isTeacher, rest.activeStudentId]);
 
   useEffect(() => {
-    if (correctIds.length || Object.keys(incorrectIdsMap)?.length) {
-      writeAnswer(data.id, JSON.stringify({ correctIds, incorrectIdsMap }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [correctIds, writeAnswer, incorrectIdsMap]);
-
-  useEffect(() => {
     renderContent();
   }, [renderContent]);
 
@@ -444,6 +479,9 @@ export const FillGapsDragExView: FC<TProps> = ({
                   setErrorAnswerId={setErrorAnswerId}
                   setIncorrectIdsMap={setIncorrectIdsMap}
                   fields={data.fields}
+                  correctIds={correctIds}
+                  incorrectIdsMap={incorrectIdsMap}
+                  onPersist={persist}
                 />
               </div>
             );

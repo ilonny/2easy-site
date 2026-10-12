@@ -322,6 +322,15 @@ export default function LessonPage() {
       return;
     }
     let canGetList = true;
+    const contentFingerprint = (list: any[]) =>
+      (Array.isArray(list) ? list : [])
+        .map(
+          (l) =>
+            `${l?.id}:${l?.sortIndex}:${l?.is_visible}:${typeof l?.data === "string" ? l.data : JSON.stringify(l?.data || "")}`
+        )
+        .join("\n");
+    let lastFp = "";
+
     const getList = async () => {
       if (!canGetList || boardModalOpenRef.current) {
         if (canGetList) {
@@ -332,30 +341,36 @@ export default function LessonPage() {
         return;
       }
       if (!lessonId) return;
-      const res = await fetchGet({
-        path: `/ex/list?lesson_id=${lessonId}`,
-        isSecure: true,
-      });
-      const list = await res?.json();
-      if (exList.length && list.length && list.length !== exList.length) {
-        getExList();
-        // setExList(list);
+      try {
+        const res = await fetchGet({
+          path: `/ex/list?lesson_id=${lessonId}`,
+          isSecure: true,
+        });
+        const list = await res?.json();
+        if (!Array.isArray(list)) {
+          setTimeout(() => getList(), 4000);
+          return;
+        }
+        const nextFp = contentFingerprint(list);
+        if (!lastFp) {
+          lastFp = nextFp;
+        } else if (nextFp !== lastFp) {
+          lastFp = nextFp;
+          getExList();
+        }
+      } catch {
+        /* ignore poll errors */
       }
 
       setTimeout(() => {
         getList();
       }, 4000);
-      return list;
     };
     getList();
     return () => {
       canGetList = false;
     };
-    // const interval = setInterval(() => {
-    //   getExList();
-    // }, 1000);
-    // return () => clearInterval(interval);
-  }, [getExList, isStudent, lessonId, exList, setExList]);
+  }, [getExList, isStudent, lessonId]);
 
   useEffect(() => {
     if (authIsLoading || !profile) {
@@ -516,6 +531,15 @@ export default function LessonPage() {
                 </div>
               )}
               <div className="h-4 sm:h-8" />
+              {isTeacher &&
+                !!students?.length &&
+                students.length > 1 &&
+                !activeStudentId &&
+                !isPresentationMode && (
+                  <div className="mb-4 rounded-lg border border-[#D9D4FF] bg-[#F6F4FF] px-4 py-3 text-sm text-[#3F28C6]">
+                    <T k="lessons.selectStudentToSeeAnswersBanner" />
+                  </div>
+                )}
               <div>
                 <ExList
                   list={exList}

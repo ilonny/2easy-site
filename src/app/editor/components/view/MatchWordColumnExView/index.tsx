@@ -19,6 +19,7 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { useParams } from "next/navigation";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { T } from "@/i18n/T";
 import styles from "./styles.module.css";
 
 type TProps = {
@@ -26,6 +27,7 @@ type TProps = {
   isPreview?: boolean;
   activeStudentId?: number | string | null;
   isPresentationMode?: boolean;
+  isView?: boolean;
 };
 
 type TSortedWord = { word: string; id: string; columnId: number | string };
@@ -42,10 +44,16 @@ const DraggableItem = (props: {
   chip: TSortedWord;
   setCorrectChips: Dispatch<SetStateAction<TSortedWord[]>>;
   setHoveredColumnId: Dispatch<SetStateAction<string | null>>;
-  setIncorrectIdsMap: any;
+  setIncorrectIdsMap: Dispatch<SetStateAction<Record<string, string[]>>>;
   hoveredColumnIdRef: MutableRefObject<string | null>;
   hoveredTeacherColumnId: string | null;
   onDropResult: (columnId: string | null, correct: boolean) => void;
+  correctChips: TSortedWord[];
+  incorrectIdsMap: Record<string, string[]>;
+  onPersist: (
+    nextCorrect: TSortedWord[],
+    nextIncorrect: Record<string, string[]>
+  ) => void;
 }) => {
   const {
     chip,
@@ -55,6 +63,9 @@ const DraggableItem = (props: {
     hoveredColumnIdRef,
     hoveredTeacherColumnId,
     onDropResult,
+    correctChips,
+    incorrectIdsMap,
+    onPersist,
   } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
@@ -135,23 +146,28 @@ const DraggableItem = (props: {
 
           if (hoveredId) {
             setIncorrectIdsMap((m) => {
-              const missedWords = m?.[hoveredId] || [];
+              const missedWords = [...(m?.[hoveredId] || [])];
               if (!missedWords.includes(chip.word)) {
                 missedWords.push(chip.word);
               }
-              return {
+              const next = {
                 ...m,
                 [hoveredId]: missedWords,
               };
+              onPersist(correctChips, next);
+              return next;
             });
           }
           return;
         }
         setCorrectChips((chips) => {
           if (chips.some((c) => c.id === chip.id || c.word === chip.word)) {
+            onPersist(chips, incorrectIdsMap);
             return chips;
           }
-          return chips.concat(chip);
+          const next = chips.concat(chip);
+          onPersist(next, incorrectIdsMap);
+          return next;
         });
         setX(0);
         setY(0);
@@ -205,7 +221,8 @@ export const MatchWordColumnExView: FC<TProps> = ({
     }
   }, [rest?.isPresentationMode]);
 
-  const { writeAnswer, answers, getAnswers } = useExAnswer({
+  const { writeAnswer, answers, getAnswers, resetSeq } = useExAnswer({
+
     student_id,
     lesson_id,
     ex_id,
@@ -213,6 +230,29 @@ export const MatchWordColumnExView: FC<TProps> = ({
     isTeacher,
     isPresentationMode: rest?.isPresentationMode,
   });
+
+  const persist = useCallback(
+    (
+      nextCorrect: TSortedWord[],
+      nextIncorrect: Record<string, string[]>
+    ) => {
+      if (isPreview) return;
+      if (!nextCorrect.length && !Object.keys(nextIncorrect).length) return;
+      void writeAnswer(
+        data.id,
+        JSON.stringify({
+          correctIds: nextCorrect,
+          incorrectIdsMap: nextIncorrect,
+        })
+      );
+    },
+    [data.id, isPreview, writeAnswer]
+  );
+
+  useEffect(() => {
+    setCorrectChips([]);
+    setIncorrectIdsMap({});
+  }, [resetSeq]);
 
   const onDropResult = useCallback(
     (columnId: string | null, correct: boolean) => {
@@ -302,21 +342,19 @@ export const MatchWordColumnExView: FC<TProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher, rest.activeStudentId]);
 
-  useEffect(() => {
-    if (correctChips.length || Object.keys(incorrectIdsMap)?.length) {
-      writeAnswer(
-        data.id,
-        JSON.stringify({ correctIds: correctChips, incorrectIdsMap }),
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [correctChips.length, writeAnswer, incorrectIdsMap]);
-
   return (
     <div
       className={`${styles.root} py-4 sm:py-6 md:py-7 lg:py-8 w-full exercise-view-shell max-w-[886px] mx-auto exercise-view-head match-word-column`}
       id={`ex-${ex_id}`}
     >
+      {isTeacher &&
+        rest.isView &&
+        !rest?.isPresentationMode &&
+        !rest.activeStudentId && (
+          <p className="mb-3 text-sm text-[#767676]">
+            <T k="lessons.selectStudentToSeeAnswers" />
+          </p>
+        )}
       <p
         className="exercise-view-title"
         style={{
@@ -361,6 +399,9 @@ export const MatchWordColumnExView: FC<TProps> = ({
                   hoveredColumnIdRef={hoveredColumnIdRef}
                   hoveredTeacherColumnId={hoveredTeacherColumnId}
                   onDropResult={onDropResult}
+                  correctChips={correctChips}
+                  incorrectIdsMap={incorrectIdsMap}
+                  onPersist={persist}
                 />
               );
             })}

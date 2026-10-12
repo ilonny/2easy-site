@@ -191,7 +191,7 @@ export const FillGapsSelectExView: FC<TProps> = ({
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
   const ex_id = data?.id;
-  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+  const { writeAnswer, answers, getAnswers, resetSeq } = useExAnswer({
     student_id,
     lesson_id,
     ex_id,
@@ -200,10 +200,18 @@ export const FillGapsSelectExView: FC<TProps> = ({
     isPresentationMode: rest?.isPresentationMode
   });
 
+  const skipPersistRef = useRef(false);
+
+  useEffect(() => {
+    skipPersistRef.current = true;
+    setLocalAnswers([]);
+  }, [resetSeq]);
+
   useEffect(() => {
     if (student_id) {
       getAnswers(true).then((a) => {
         try {
+          skipPersistRef.current = true;
           setLocalAnswers(JSON.parse(a[data.id].answer));
         } catch (err) {}
       });
@@ -222,20 +230,26 @@ export const FillGapsSelectExView: FC<TProps> = ({
     }
     try {
       const raw = answers[data.id]?.answer;
+      skipPersistRef.current = true;
       if (!raw) {
         setLocalAnswers([]);
         return;
       }
       setLocalAnswers(JSON.parse(raw));
     } catch (err) {
+      skipPersistRef.current = true;
       setLocalAnswers([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher, rest.activeStudentId]);
 
   useEffect(() => {
+    if (skipPersistRef.current) {
+      skipPersistRef.current = false;
+      return;
+    }
     if (localAnswers.length) {
-      writeAnswer(data.id, JSON.stringify(localAnswers));
+      void writeAnswer(data.id, JSON.stringify(localAnswers));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localAnswers, writeAnswer]);

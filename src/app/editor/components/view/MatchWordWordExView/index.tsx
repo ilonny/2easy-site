@@ -15,6 +15,7 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
 import { useParams } from "next/navigation";
+import { T } from "@/i18n/T";
 
 /** Детерминированная перестановка: одинаковый seed даёт одинаковый порядок */
 function shuffleWithSeed<T>(array: T[], seed: number): T[] {
@@ -69,7 +70,7 @@ export const MatchWordWordExView: FC<TProps> = ({
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const ex_id = data?.id;
 
-  const { writeAnswer, answers, getAnswers } = useExAnswer({
+  const { writeAnswer, answers, getAnswers, resetSeq } = useExAnswer({
     student_id,
     lesson_id,
     ex_id,
@@ -83,7 +84,28 @@ export const MatchWordWordExView: FC<TProps> = ({
 
   const [incorrectId, setIncorrectId] = useState<string | undefined>(undefined);
   const [correctIds, setCorrectIds] = useState<Array<string | number>>([]);
-  const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
+  const [incorrectIdsMap, setIncorrectIdsMap] = useState<Record<string, any>>({});
+
+  const persist = useCallback(
+    (
+      nextCorrect: Array<string | number>,
+      nextIncorrect: Record<string, any>
+    ) => {
+      if (!nextCorrect.length && !Object.keys(nextIncorrect).length) return;
+      void writeAnswer(
+        data.id,
+        JSON.stringify({ correctIds: nextCorrect, incorrectIdsMap: nextIncorrect })
+      );
+    },
+    [data.id, writeAnswer]
+  );
+
+  useEffect(() => {
+    setCorrectIds([]);
+    setIncorrectIdsMap({});
+    setSelectedLeftId(undefined);
+    setSelectedRightId(undefined);
+  }, [resetSeq]);
 
   const sortOrderRef = useRef<{
     leftOrder: string[];
@@ -157,18 +179,23 @@ export const MatchWordWordExView: FC<TProps> = ({
       });
   }, [data.matches, correctIds, incorrectIdsMap]);
 
-  const showIncorrect = useCallback((leftId: string | number, selectedValue: string | undefined) => {
-    setIncorrectId(String(leftId));
-    setTimeout(() => {
-      setIncorrectId(undefined);
-    }, 2000);
-    setIncorrectIdsMap((incorrectIds) => {
-      return {
-        ...incorrectIds,
-        [leftId]: selectedValue,
-      };
-    });
-  }, []);
+  const showIncorrect = useCallback(
+    (leftId: string | number, selectedValue: string | undefined) => {
+      setIncorrectId(String(leftId));
+      setTimeout(() => {
+        setIncorrectId(undefined);
+      }, 2000);
+      setIncorrectIdsMap((incorrectIds) => {
+        const next = {
+          ...incorrectIds,
+          [leftId]: selectedValue,
+        };
+        persist(correctIds, next);
+        return next;
+      });
+    },
+    [correctIds, persist]
+  );
 
   const onClickLeft = useCallback(
     (leftId: string | number) => {
@@ -183,7 +210,11 @@ export const MatchWordWordExView: FC<TProps> = ({
       const isCorrect = sameId(leftId, selectedRightId);
 
       if (isCorrect) {
-        setCorrectIds((ids) => ids.concat(leftId));
+        setCorrectIds((ids) => {
+          const next = hasId(ids, leftId) ? ids : ids.concat(leftId);
+          persist(next, incorrectIdsMap);
+          return next;
+        });
       } else {
         showIncorrect(leftId, rightM?.correctValue);
       }
@@ -191,7 +222,7 @@ export const MatchWordWordExView: FC<TProps> = ({
       setSelectedLeftId(undefined);
       setSelectedRightId(undefined);
     },
-    [selectedRightId, sortedMatches, showIncorrect]
+    [selectedRightId, sortedMatches, showIncorrect, incorrectIdsMap, persist]
   );
 
   const onClickRight = useCallback(
@@ -205,7 +236,13 @@ export const MatchWordWordExView: FC<TProps> = ({
       const isCorrect = sameId(selectedLeftId, rightId);
 
       if (isCorrect) {
-        setCorrectIds((ids) => ids.concat(selectedLeftId));
+        setCorrectIds((ids) => {
+          const next = hasId(ids, selectedLeftId)
+            ? ids
+            : ids.concat(selectedLeftId);
+          persist(next, incorrectIdsMap);
+          return next;
+        });
       } else {
         showIncorrect(selectedLeftId, rightM?.correctValue);
       }
@@ -213,7 +250,7 @@ export const MatchWordWordExView: FC<TProps> = ({
       setSelectedLeftId(undefined);
       setSelectedRightId(undefined);
     },
-    [selectedLeftId, sortedMatches, showIncorrect]
+    [selectedLeftId, sortedMatches, showIncorrect, incorrectIdsMap, persist]
   );
 
   useEffect(() => {
@@ -257,16 +294,17 @@ export const MatchWordWordExView: FC<TProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, isTeacher, rest.activeStudentId]);
 
-  useEffect(() => {
-    if (correctIds.length || Object.keys(incorrectIdsMap)?.length) {
-      writeAnswer(data.id, JSON.stringify({ correctIds, incorrectIdsMap }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [correctIds, writeAnswer, incorrectIdsMap]);
-
   return (
     <div className="exercise-view-shell max-w-[886px]">
       <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto exercise-view-head`}>
+        {isTeacher &&
+          rest.isView &&
+          !rest?.isPresentationMode &&
+          !rest.activeStudentId && (
+            <p className="mb-3 text-sm text-[#767676]">
+              <T k="lessons.selectStudentToSeeAnswers" />
+            </p>
+          )}
         <p
           className="exercise-view-title"
           style={{

@@ -6,6 +6,8 @@ import {
 import { useUploadImage } from "@/hooks/useUploadImage";
 import { useEditorLessonId } from "@/app/editor/hooks/useEditorLessonId";
 import { useCallback, useState } from "react";
+import { toast } from "react-toastify";
+import i18n from "@/i18n/config";
 
 export const useUploadImageEx = (
   lastSortIndex: number,
@@ -32,6 +34,16 @@ export const useUploadImageEx = (
         data?.images,
         savedAttachments,
       );
+
+      const expectedCount = (data?.images || []).length;
+      if (expectedCount > 0 && exAttachments.length < expectedCount) {
+        toast.error(
+          i18n.t("editor.imagesUploadPartialFail", {
+            saved: exAttachments.length,
+            total: expectedCount,
+          })
+        );
+      }
 
       const exData = {
         ...data,

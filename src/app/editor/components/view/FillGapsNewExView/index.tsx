@@ -55,6 +55,14 @@ function parseGapAnswerKey(key: string): { gapId: string; occurrence: number } {
   return { gapId: String(key), occurrence: 0 };
 }
 
+/** Pool chip type scale: readable by default, tighter for long phrases. */
+function poolChipSizeClass(value: string) {
+  const len = (value || "").trim().length;
+  if (len > 36) return styles.chipSizeXLong;
+  if (len > 20) return styles.chipSizeLong;
+  return styles.chipSizeDefault;
+}
+
 /** Fisher–Yates; called once per stable drag-pool key, not on every render */
 function shufflePoolItems(items: TPoolItem[]): TPoolItem[] {
   const copy = items.map((x) => ({ ...x }));
@@ -138,7 +146,7 @@ const FillGapsNewExViewImpl: FC<{
   );
   const saveTimerRef = useRef<number | null>(null);
 
-  const { writeAnswer, answers, getAnswers } = useExAnswer({
+  const { writeAnswer, answers, getAnswers, resetSeq } = useExAnswer({
     student_id,
     lesson_id,
     ex_id,
@@ -146,6 +154,17 @@ const FillGapsNewExViewImpl: FC<{
     isTeacher,
     isPresentationMode,
   });
+
+  useEffect(() => {
+    if (saveTimerRef.current) {
+      window.clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+    answersRef.current = {};
+    setStatusByGap({});
+    setServerHydrationVersion((v) => v + 1);
+    setAnswersVersion((v) => v + 1);
+  }, [resetSeq]);
 
   // initial load for lesson mode
   useEffect(() => {
@@ -745,7 +764,7 @@ const FillGapsNewExViewImpl: FC<{
                 const chip = (
                   <Chip
                     color="primary"
-                    className={`exercise-chip cursor-pointer select-none ${styles.draggableChip}`}
+                    className={`exercise-chip cursor-pointer select-none ${styles.draggableChip} ${poolChipSizeClass(i.value)}`}
                     onPointerDown={(e) => onPointerDownChip(e, i)}
                   >
                     {i.value}
@@ -778,7 +797,12 @@ const FillGapsNewExViewImpl: FC<{
                     transform: `translate3d(${dragXY.x - grabOffsetRef.current.dx}px, ${dragXY.y - grabOffsetRef.current.dy}px, 0)`,
                   }}
                 >
-                  <Chip color="primary" className="exercise-chip">{dragValueRef.current}</Chip>
+                  <Chip
+                    color="primary"
+                    className={`exercise-chip ${styles.draggableChip} ${poolChipSizeClass(dragValueRef.current || "")}`}
+                  >
+                    {dragValueRef.current}
+                  </Chip>
                 </div>,
                 portalRef.current,
               )}

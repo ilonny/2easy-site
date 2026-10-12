@@ -527,7 +527,11 @@
     "resetAnswers": "Reset answers",
     "resetAnswersConfirm": "Reset answers in exercise {{title}}",
     "resetAnswersCancel": "Cancel",
-    "resetAnswersUntitled": "untitled"
+    "resetAnswersUntitled": "untitled",
+    "selectStudentToSeeAnswers": "Select a student in the participants list to see their answers.",
+    "selectStudentToSeeAnswersBanner": "Select a student in the participants list to see their answers in real time.",
+    "dragCloserToImage": "Drag the word closer to the image",
+    "answersResetStale": "Answers were reset. The exercise was refreshed."
   },
   "editor": {
     "home": "Home",
@@ -563,6 +567,8 @@
     "threeColumns": "three columns",
     "matchWordToImage": "match word to image",
     "typeWord": "type word",
+    "viewTypeChangeResetsAnswers": "After changing the mode, have students answer again: previous answers do not apply to the new mode. We recommend resetting answers.",
+    "imagesUploadPartialFail": "Not all images were saved ({{saved}} of {{total}}). Check the exercise and upload the missing ones again.",
     "embedCode": "Embed code",
     "embedCodeHint": "Please use the special embed link (embed link / embed code). You can find it in the 'Share' section on the original service (it should start with <iframe ...>). A direct link from the browser may not work correctly or may not display.",
     "clickOrDragImages": "Click this block or drag images here",

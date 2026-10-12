@@ -57,6 +57,7 @@ export const ResetAnswersControl: FC<TProps> = ({
           lesson_id: Number(lesson_id),
           ex_id: Number(exId),
           student_id: Number(studentId),
+          sync_v: Number(data?.sync_v) || undefined,
         });
         setModalOpen(false);
         onSuccess?.();

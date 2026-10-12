@@ -2,7 +2,6 @@
 import {
   Dispatch,
   FC,
-  MutableRefObject,
   SetStateAction,
   useCallback,
   useContext,
@@ -11,8 +10,6 @@ import {
   useRef,
   useState,
 } from "react";
-import Image from "next/image";
-import { TMatchWordImageData } from "../../editor/MatchWordImage/types";
 import { Card, Chip, Input, Tooltip } from "@nextui-org/react";
 import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import Draggable from "react-draggable";
@@ -21,6 +18,8 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { useParams } from "next/navigation";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { TMatchWordImageData } from "../../editor/MatchWordImage/types";
+import { T } from "@/i18n/T";
 import styles from "./styles.module.css";
 
 type TProps = {
@@ -28,81 +27,146 @@ type TProps = {
   isPreview?: boolean;
 };
 
+const sameId = (
+  a: string | number | undefined | null,
+  b: string | number | undefined | null
+) => a != null && b != null && String(a) === String(b);
+
+const hasId = (
+  ids: Array<string | number> | undefined,
+  id: string | number | undefined | null
+) => !!ids?.some((x) => sameId(x, id));
+
+const parseSavedAnswer = (raw: unknown, viewType?: string) => {
+  if (!raw) return { correctIds: [] as Array<string | number>, incorrectIdsMap: {} as Record<string, string> };
+  try {
+    const parsed =
+      typeof raw === "string" ? JSON.parse(raw || "{}") : (raw as Record<string, any>);
+    // Ignore answers saved under a different interaction mode.
+    if (
+      parsed?.viewType != null &&
+      viewType != null &&
+      String(parsed.viewType) !== String(viewType)
+    ) {
+      return { correctIds: [], incorrectIdsMap: {} };
+    }
+    return {
+      correctIds: (parsed?.correctIds || []) as Array<string | number>,
+      incorrectIdsMap: (parsed?.incorrectIdsMap || {}) as Record<string, string>,
+    };
+  } catch {
+    return { correctIds: [], incorrectIdsMap: {} };
+  }
+};
+
 const DraggableItem = (props: {
-  id: any;
+  id: string | number;
   chip: string;
-  isIntersected: MutableRefObject<boolean>;
-  setCorrectIds: Dispatch<SetStateAction<number[]>>;
+  setCorrectIds: Dispatch<SetStateAction<Array<string | number>>>;
   setActiveChip: Dispatch<SetStateAction<string>>;
-  setIncorrectIdsMap: any;
-  isMissedIntersectedId: MutableRefObject<number>;
-  fields: any;
+  setIncorrectIdsMap: Dispatch<SetStateAction<Record<string, string>>>;
+  onPersist: (
+    nextCorrect: Array<string | number>,
+    nextIncorrect: Record<string, string>
+  ) => void;
+  fields: TMatchWordImageData["images"];
+  correctIds: Array<string | number>;
+  incorrectIdsMap: Record<string, string>;
+  onDropMiss?: () => void;
 }) => {
   const {
     chip,
-    isIntersected,
     setCorrectIds,
     setActiveChip,
     setIncorrectIdsMap,
-    isMissedIntersectedId,
     id,
     fields,
+    onPersist,
+    correctIds,
+    incorrectIdsMap,
+    onDropMiss,
   } = props;
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
   const [isError, setIsError] = useState(false);
+  const isIntersected = useRef(false);
+  const missedIntersectedId = useRef<string | number | null>(null);
+
+  const findDropTargetId = useCallback(
+    (draggableRect: DOMRect): string | number | null => {
+      const root = document
+        ?.getElementById("draggable-" + id)
+        ?.closest(".match-word-image");
+      const wrappers = root?.querySelectorAll(".answer-wrapper");
+      if (!wrappers?.length) return null;
+
+      let bestId: string | number | null = null;
+      let bestArea = 0;
+
+      Array.from(wrappers).forEach((w) => {
+        const droppableRect = w.getBoundingClientRect();
+        const overlapX = Math.max(
+          0,
+          Math.min(draggableRect.right, droppableRect.right) -
+            Math.max(draggableRect.left, droppableRect.left)
+        );
+        const overlapY = Math.max(
+          0,
+          Math.min(draggableRect.bottom, droppableRect.bottom) -
+            Math.max(draggableRect.top, droppableRect.top)
+        );
+        const area = overlapX * overlapY;
+        if (area <= 0) return;
+        const rawId = (w.id || "").replace(/^answer-wrapper-/, "");
+        if (!rawId) return;
+        // Prefer largest overlap so edge drops still register.
+        if (area > bestArea) {
+          bestArea = area;
+          bestId = fields.find((f) => sameId(f.id, rawId))?.id ?? rawId;
+        }
+      });
+
+      return bestId;
+    },
+    [fields, id]
+  );
 
   const handleDrag = useCallback(
-    (chip: string, x: number, y: number) => {
-      setActiveChip(chip);
-      setX(x);
-      setY(y);
+    (chipText: string, nextX: number, nextY: number) => {
+      setActiveChip(chipText);
+      setX(nextX);
+      setY(nextY);
 
-      if (Math.abs(x) < 50 || Math.abs(y) < 50) {
-        return;
-      }
       try {
-        //@ts-ignore
-        const draggableRect = document
-          ?.getElementById("draggable-" + id)
-          .getBoundingClientRect();
-        //@ts-ignore
-        const droppableRect = document
-          ?.getElementById("answer-wrapper-" + id)
-          .getBoundingClientRect();
-
-        const intersects = !(
-          draggableRect.top > droppableRect.bottom ||
-          draggableRect.bottom < droppableRect.top ||
-          draggableRect.right < droppableRect.left ||
-          draggableRect.left > droppableRect.right
-        );
-        isIntersected.current = intersects;
-        if (!intersects) {
-          isMissedIntersectedId.current = 0;
-          //@ts-ignore
-          const allWrappers = document
-            ?.getElementById("draggable-" + id)
-            ?.closest(".match-word-image")
-            .querySelectorAll(".answer-wrapper");
-
-          const isAnyIntersects = Array.from(allWrappers)?.some((w) => {
-            const droppableRect = w.getBoundingClientRect();
-            const intersects = !(
-              draggableRect.top > droppableRect.bottom ||
-              draggableRect.bottom < droppableRect.top ||
-              draggableRect.right < droppableRect.left ||
-              draggableRect.left > droppableRect.right
-            );
-            if (intersects) {
-              isMissedIntersectedId.current = w?.id?.split("-")?.reverse()[0];
-            }
-            return intersects;
-          });
-        }
-      } catch (err) {}
+        const el = document.getElementById("draggable-" + id);
+        if (!el) return;
+        const draggableRect = el.getBoundingClientRect();
+        const targetId = findDropTargetId(draggableRect);
+        missedIntersectedId.current = targetId;
+        isIntersected.current = targetId != null && sameId(targetId, id);
+      } catch {
+        isIntersected.current = false;
+        missedIntersectedId.current = null;
+      }
     },
-    [id, isIntersected, isMissedIntersectedId, setActiveChip]
+    [findDropTargetId, id, setActiveChip]
+  );
+
+  const applyCorrect = useCallback(
+    (targetId: string | number) => {
+      setCorrectIds((ids) => {
+        if (hasId(ids, targetId)) {
+          onPersist(ids, incorrectIdsMap);
+          return ids;
+        }
+        const next = ids.concat(targetId);
+        onPersist(next, incorrectIdsMap);
+        return next;
+      });
+      setX(0);
+      setY(0);
+    },
+    [incorrectIdsMap, onPersist, setCorrectIds]
   );
 
   return (
@@ -114,37 +178,42 @@ const DraggableItem = (props: {
       onDrag={(_e, data) => handleDrag(chip, data.x, data.y)}
       onStop={() => {
         setActiveChip("");
-        if (!isIntersected.current) {
-          //maybe word is correct, but id is missed
-          const isMissedIntersectValue = fields.find(
-            (f) => f.id == isMissedIntersectedId.current
-          )?.text;
-          if (isMissedIntersectValue === chip) {
-            setCorrectIds((ids) =>
-              ids.concat(Number(isMissedIntersectedId.current))
-            );
-            setX(0);
-            setY(0);
+        const ownHit = isIntersected.current;
+        const missedId = missedIntersectedId.current;
+        isIntersected.current = false;
+        missedIntersectedId.current = null;
+
+        if (ownHit) {
+          applyCorrect(id);
+          return;
+        }
+
+        if (missedId != null) {
+          const expected = fields.find((f) => sameId(f.id, missedId))?.text;
+          if (expected === chip) {
+            applyCorrect(missedId);
             return;
           }
-          //
+
           setX(0);
           setY(0);
           setIsError(true);
-          setTimeout(() => {
-            setIsError(false);
-          }, 2000);
+          onDropMiss?.();
+          setTimeout(() => setIsError(false), 1600);
 
-          //
           setIncorrectIdsMap((m) => {
-            return {
-              ...m,
-              [isMissedIntersectedId.current]: chip,
-            };
+            const next = { ...m, [String(missedId)]: chip };
+            onPersist(correctIds, next);
+            return next;
           });
           return;
         }
-        setCorrectIds((ids) => ids.concat(id));
+
+        setX(0);
+        setY(0);
+        setIsError(true);
+        onDropMiss?.();
+        setTimeout(() => setIsError(false), 1600);
       }}
     >
       <Chip
@@ -166,13 +235,19 @@ const DraggableItem = (props: {
 
 const InputItem = (props: {
   chip: string;
-  setCorrectIds: Dispatch<SetStateAction<string[]>>;
+  setCorrectIds: Dispatch<SetStateAction<Array<string | number>>>;
   isCorrect: boolean;
   isTeacher: boolean;
   isIncorrectWord?: string;
-  id: string;
-  setIncorrectIdsMap: any;
+  id: string | number;
+  setIncorrectIdsMap: Dispatch<SetStateAction<Record<string, string>>>;
   isPresentationMode?: boolean;
+  correctIds: Array<string | number>;
+  incorrectIdsMap: Record<string, string>;
+  onPersist: (
+    nextCorrect: Array<string | number>,
+    nextIncorrect: Record<string, string>
+  ) => void;
 }) => {
   const {
     chip,
@@ -183,6 +258,9 @@ const InputItem = (props: {
     id,
     setIncorrectIdsMap,
     isPresentationMode,
+    correctIds,
+    incorrectIdsMap,
+    onPersist,
   } = props;
   const [inputValue, setInputValue] = useState("");
 
@@ -193,7 +271,9 @@ const InputItem = (props: {
     }
     if (isIncorrectWord) {
       setInputValue(isIncorrectWord);
+      return;
     }
+    setInputValue("");
   }, [isCorrect, isIncorrectWord, chip]);
 
   useEffect(() => {
@@ -201,23 +281,46 @@ const InputItem = (props: {
       return;
     }
     if (inputValue.toLowerCase() === chip.toLowerCase()) {
-      setCorrectIds((ids) => ids.concat(id));
+      setCorrectIds((ids) => {
+        if (hasId(ids, id)) {
+          onPersist(ids, incorrectIdsMap);
+          return ids;
+        }
+        const next = ids.concat(id);
+        onPersist(next, incorrectIdsMap);
+        return next;
+      });
     }
-  }, [inputValue, id, chip, setCorrectIds, isCorrect]);
+  }, [
+    inputValue,
+    id,
+    chip,
+    setCorrectIds,
+    isCorrect,
+    incorrectIdsMap,
+    onPersist,
+  ]);
 
   const onBlur = useCallback(() => {
-    if (!inputValue) {
+    if (!inputValue || isCorrect) {
       return;
     }
     if (inputValue.toLowerCase() !== chip.toLowerCase()) {
       setIncorrectIdsMap((m) => {
-        return {
-          ...m,
-          [id]: inputValue,
-        };
+        const next = { ...m, [String(id)]: inputValue };
+        onPersist(correctIds, next);
+        return next;
       });
     }
-  }, [chip, id, inputValue, setIncorrectIdsMap]);
+  }, [
+    chip,
+    id,
+    inputValue,
+    setIncorrectIdsMap,
+    isCorrect,
+    correctIds,
+    onPersist,
+  ]);
 
   const hideAnswerHints = !isTeacher || !!isPresentationMode;
 
@@ -257,25 +360,28 @@ export const MatchWordImageExView: FC<TProps> = ({
   ...rest
 }) => {
   const { profile } = useContext(AuthContext);
-  const isIntersected = useRef(false);
-  const [correctIds, setCorrectIds] = useState<number[]>([]);
-  const [incorrectIdsMap, setIncorrectIdsMap] = useState({});
-  const isMissedIntersectedId = useRef<number>(0);
+  const [correctIds, setCorrectIds] = useState<Array<string | number>>([]);
+  const [incorrectIdsMap, setIncorrectIdsMap] = useState<Record<string, string>>(
+    {}
+  );
   const [activeChip, setActiveChip] = useState("");
+  const [dropHint, setDropHint] = useState(false);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
   const ex_id = data?.id;
+  const viewType = data?.viewType === "input" ? "input" : "drag";
 
   const isSorted = useRef(false);
   useEffect(() => {
-    setTimeout(() => {
+    const t = setTimeout(() => {
       isSorted.current = true;
     }, 300);
+    return () => clearTimeout(t);
   }, []);
 
-  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+  const { writeAnswer, answers, getAnswers, resetSeq } = useExAnswer({
     student_id,
     lesson_id,
     ex_id,
@@ -284,28 +390,62 @@ export const MatchWordImageExView: FC<TProps> = ({
     isPresentationMode: rest?.isPresentationMode,
   });
 
-  const sortedChips = useMemo(() => {
-    if (!isSorted.current) {
-      return (
-        [...data.images]
-          .filter((i) => !!i.text && !correctIds.some((id) => String(id) === String(i.id)))
-          // .map((img) => img.text)
-          .sort(() => 0.5 - Math.random())
+  const persist = useCallback(
+    (
+      nextCorrect: Array<string | number>,
+      nextIncorrect: Record<string, string>
+    ) => {
+      if (isPreview) return;
+      if (!nextCorrect.length && !Object.keys(nextIncorrect).length) {
+        return;
+      }
+      void writeAnswer(
+        data.id,
+        JSON.stringify({
+          correctIds: nextCorrect,
+          incorrectIdsMap: nextIncorrect,
+          viewType,
+        })
       );
-    }
-    return [...data.images].filter(
-      (i) => !!i.text && !correctIds.some((id) => String(id) === String(i.id))
+    },
+    [data.id, isPreview, viewType, writeAnswer]
+  );
+
+  const applyParsed = useCallback(
+    (raw: unknown) => {
+      const parsed = parseSavedAnswer(raw, viewType);
+      setCorrectIds(parsed.correctIds || []);
+      setIncorrectIdsMap(parsed.incorrectIdsMap || {});
+    },
+    [viewType]
+  );
+
+  const clearLocal = useCallback(() => {
+    setCorrectIds([]);
+    setIncorrectIdsMap({});
+    setActiveChip("");
+  }, []);
+
+  useEffect(() => {
+    clearLocal();
+  }, [resetSeq, clearLocal]);
+
+  const sortedChips = useMemo(() => {
+    const available = [...(data.images || [])].filter(
+      (i) => !!i.text && !hasId(correctIds, i.id)
     );
-  }, [correctIds.length, data.images]);
+    if (!isSorted.current) {
+      return available.sort(() => 0.5 - Math.random());
+    }
+    return available;
+  }, [correctIds, data.images]);
 
   useEffect(() => {
     if (student_id) {
       getAnswers(true).then((a) => {
         try {
-          const parsedIds = JSON.parse(a?.[data.id]?.answer || "{}");
-          setCorrectIds(parsedIds?.correctIds || []);
-          setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
-        } catch (err) {}
+          applyParsed(a?.[data.id]?.answer ?? a?.[String(data.id)]?.answer);
+        } catch {}
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -320,51 +460,42 @@ export const MatchWordImageExView: FC<TProps> = ({
     if (!rest.activeStudentId) {
       return;
     }
-    try {
-      const raw = answers[data.id]?.answer;
-      if (!raw) {
-        setCorrectIds([]);
-        setIncorrectIdsMap({});
-        return;
-      }
-      const parsedIds = JSON.parse(raw);
-      setCorrectIds(parsedIds?.correctIds || []);
-      setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
-    } catch (err) {
-      setCorrectIds([]);
-      setIncorrectIdsMap({});
+    const raw = answers[data.id]?.answer ?? answers[String(data.id)]?.answer;
+    if (!raw) {
+      clearLocal();
+      return;
     }
+    applyParsed(raw);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers, isTeacher, rest.activeStudentId]);
+  }, [answers, isTeacher, rest.activeStudentId, viewType]);
 
-  useEffect(() => {
-    if (correctIds.length || Object.keys(incorrectIdsMap)?.length) {
-      writeAnswer(
-        data.id,
-        JSON.stringify({ correctIds: correctIds, incorrectIdsMap })
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [correctIds?.length, writeAnswer, incorrectIdsMap]);
-
-  // console.log('data', data)
-  // console.log("correctIds", correctIds);
   return (
-    <div className={`${styles.root} py-4 sm:py-6 md:py-7 lg:py-8 w-full exercise-view-shell max-w-[886px] mx-auto exercise-view-head match-word-image`}>
+    <div
+      className={`${styles.root} py-4 sm:py-6 md:py-7 lg:py-8 w-full exercise-view-shell max-w-[886px] mx-auto exercise-view-head match-word-image`}
+    >
       <p
-          className="exercise-view-title"
-          style={{
-            color: data.titleColor,
-          }}
-        >
+        className="exercise-view-title"
+        style={{
+          color: data.titleColor,
+        }}
+      >
         {data.title}
       </p>
-      <p className="exercise-view-subtitle">
-        {data.subtitle}
-      </p>
+      <p className="exercise-view-subtitle">{data.subtitle}</p>
       {!!data.description && (
-        <p className="exercise-view-desc">
-          {data.description}
+        <p className="exercise-view-desc">{data.description}</p>
+      )}
+      {isTeacher &&
+        rest.isView &&
+        !rest?.isPresentationMode &&
+        !rest.activeStudentId && (
+          <p className="mt-3 text-sm text-[#767676]">
+            <T k="lessons.selectStudentToSeeAnswers" />
+          </p>
+        )}
+      {dropHint && viewType === "drag" && (
+        <p className="mt-2 text-sm text-[#a42929]">
+          <T k="lessons.dragCloserToImage" />
         </p>
       )}
       <div className="h-10" />
@@ -375,21 +506,25 @@ export const MatchWordImageExView: FC<TProps> = ({
             style={{ backgroundColor: "#D9D9D9" }}
           />
         )}
-        {data.viewType === "drag" && (
+        {viewType === "drag" && (
           <div className={styles.chipPool}>
-            {sortedChips.map((chip, chipIndex) => {
+            {sortedChips.map((chip) => {
               return (
                 <DraggableItem
                   id={chip.id}
                   chip={chip.text}
                   key={chip.id}
-                  // id={data.images.find((i) => i.text === chip)?.id}
-                  isIntersected={isIntersected}
                   setCorrectIds={setCorrectIds}
                   setActiveChip={setActiveChip}
                   setIncorrectIdsMap={setIncorrectIdsMap}
-                  isMissedIntersectedId={isMissedIntersectedId}
                   fields={data.images}
+                  onPersist={persist}
+                  correctIds={correctIds}
+                  incorrectIdsMap={incorrectIdsMap}
+                  onDropMiss={() => {
+                    setDropHint(true);
+                    setTimeout(() => setDropHint(false), 1800);
+                  }}
                 />
               );
             })}
@@ -397,31 +532,36 @@ export const MatchWordImageExView: FC<TProps> = ({
         )}
         {!!data?.images?.length && (
           <div className="flex flex-wrap justify-center gap-y-3 w-full min-w-0">
-            {data?.images?.map((image) => {
+            {data?.images?.map((image, imageIndex) => {
               const isCorrect =
-                correctIds.some((id) => String(id) === String(image.id)) ||
+                hasId(correctIds, image.id) ||
                 (isTeacher &&
                   !rest?.isPresentationMode &&
                   image.text === activeChip);
               const isIncorrectWord =
                 !isCorrect &&
-                (incorrectIdsMap?.[image?.id] ||
-                  incorrectIdsMap?.[String(image?.id)]);
+                (incorrectIdsMap?.[String(image?.id)] ||
+                  incorrectIdsMap?.[image?.id as any]);
               return (
                 <div
-                  key={image.dataURL}
+                  key={image.path || image.id || image.dataURL || imageIndex}
                   className="w-full min-w-0 sm:w-1/2 lg:w-1/3 p-2 sm:p-3 lg:p-4 box-border"
                 >
                   <div className="min-h-[160px] sm:h-[220px] flex items-center justify-center overflow-hidden rounded-lg bg-neutral-50">
-                    <Zoom>
-                      <img
-                        src={image.dataURL}
-                        alt=""
-                        className="mx-auto max-h-full max-w-full w-auto object-contain"
-                      />
-                    </Zoom>
+                    {image.dataURL ? (
+                      <Zoom>
+                        <img
+                          src={image.dataURL}
+                          alt={image.text || ""}
+                          loading="lazy"
+                          className="mx-auto max-h-full max-w-full w-auto object-contain"
+                        />
+                      </Zoom>
+                    ) : (
+                      <div className="w-full h-full min-h-[120px] bg-[#EDEDED] rounded-lg" />
+                    )}
                   </div>
-                  {data.viewType === "drag" && (
+                  {viewType === "drag" && (
                     <ResponsiveTooltip
                       isDisabled={
                         !isTeacher || !!rest?.isPresentationMode
@@ -437,11 +577,12 @@ export const MatchWordImageExView: FC<TProps> = ({
                         id={"answer-wrapper-" + image.id}
                         style={{
                           width: "100%",
+                          minHeight: 48,
                           border: isCorrect
                             ? "2px solid #219F59"
                             : isIncorrectWord
                             ? "2px solid rgb(164, 41, 41)"
-                            : "2px solid transparent",
+                            : "2px dashed #C9C9C9",
                           background: isCorrect
                             ? "#E9FEE8"
                             : isIncorrectWord
@@ -454,16 +595,13 @@ export const MatchWordImageExView: FC<TProps> = ({
                       </Card>
                     </ResponsiveTooltip>
                   )}
-                  {data.viewType === "input" && (
+                  {viewType === "input" && (
                     <Card
                       className="mt-4 flex items-center justify-center"
-                      id={"answer-wrapper-" + image.text}
+                      id={"answer-wrapper-" + image.id}
                       style={{
                         height: 40,
                         width: "100%",
-                        // border: isCorrect
-                        //   ? "2px solid #219F59"
-                        //   : "2px solid transparent",
                         background: isCorrect
                           ? "#E9FEE8"
                           : isIncorrectWord
@@ -474,12 +612,15 @@ export const MatchWordImageExView: FC<TProps> = ({
                       <InputItem
                         id={image.id}
                         isTeacher={isTeacher}
-                        isCorrect={isCorrect}
+                        isCorrect={!!hasId(correctIds, image.id)}
                         chip={image.text}
                         setCorrectIds={setCorrectIds}
                         isIncorrectWord={isIncorrectWord}
                         setIncorrectIdsMap={setIncorrectIdsMap}
                         isPresentationMode={rest?.isPresentationMode}
+                        correctIds={correctIds}
+                        incorrectIdsMap={incorrectIdsMap}
+                        onPersist={persist}
                       />
                     </Card>
                   )}

@@ -18,6 +18,7 @@ import {
 import { arrayMoveImmutable } from "array-move";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { toast } from "react-toastify";
 
 const DragHandle = sortableHandle(() => {
   return (
@@ -240,7 +241,15 @@ export const MatchWordImage: FC<TProps> = ({
           <div>
             <RadioGroup
               value={data.viewType}
-              onChange={(e) => changeData("viewType", e.target.value)}
+              onChange={(e) => {
+                const next = e.target.value as TMatchWordImageData["viewType"];
+                if (next !== data.viewType) {
+                  toast.info(i18n.t("editor.viewTypeChangeResetsAnswers"), {
+                    autoClose: 5000,
+                  });
+                }
+                changeData("viewType", next);
+              }}
             >
               <label className="flex gap-2 items-center">
                 <Radio color="primary" value={"drag"} />
