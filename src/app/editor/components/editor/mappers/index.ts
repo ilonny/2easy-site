@@ -60,6 +60,10 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return i18n.t("templates.fillGapsNew", {
         defaultValue: "ЗАПОЛНИТЬ ПРОПУСКИ",
       });
+    case "UNSCRAMBLE_WORDS":
+      return i18n.t("templates.unscrambleWords", {
+        defaultValue: "UNSCRAMBLE WORDS",
+      });
     default:
       return type;
   }

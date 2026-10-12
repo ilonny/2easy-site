@@ -28,6 +28,8 @@ const EX_TYPE_TO_TEMPLATE_KEY: Record<string, string> = {
   "fill-gaps-drag": "templates.fillGapsDrag",
   "fill-gaps-select": "templates.fillGapsSelect",
   "fill-gaps-input": "templates.fillGapsInput",
+  FILL_GAPS_NEW: "templates.fillGapsNew",
+  UNSCRAMBLE_WORDS: "templates.unscrambleWords",
   "match-word-word": "templates.matchWordWord",
   "match-word-image": "templates.matchWordImage",
   "match-word-column": "templates.matchWordColumn",

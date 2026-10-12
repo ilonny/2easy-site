@@ -37,6 +37,7 @@ import { FillGapsSelectExView } from "../FillGapsSelectExView";
 import { FillGapsInputExView } from "../FillGapsInputExView";
 import { FillGapsDragExView } from "../FillGapsDragExView";
 import { FillGapsNewExView } from "../FillGapsNewExView";
+import { UnscrambleWordsExView } from "../UnscrambleWordsExView";
 import { MatchWordWordExView } from "../MatchWordWordExView";
 import { MatchWordImageExView } from "../MatchWordImageExView";
 import { MatchWordColumnExView } from "../MatchWordColumnExView";
@@ -70,6 +71,7 @@ const ANSWER_EX_TYPES = new Set([
   "fill-gaps-input",
   "fill-gaps-drag",
   "FILL_GAPS_NEW",
+  "UNSCRAMBLE_WORDS",
   "match-word-word",
   "match-word-image",
   "match-word-column",
@@ -118,6 +120,7 @@ const VIEWS_WITH_ID: Record<string, ComponentType<any>> = {
   "fill-gaps-input": FillGapsInputExView,
   "fill-gaps-drag": FillGapsDragExView,
   FILL_GAPS_NEW: FillGapsNewExView,
+  UNSCRAMBLE_WORDS: UnscrambleWordsExView,
   "match-word-word": MatchWordWordExView,
   "match-word-image": MatchWordImageExView,
   "match-word-column": MatchWordColumnExView,

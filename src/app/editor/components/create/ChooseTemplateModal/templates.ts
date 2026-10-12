@@ -14,6 +14,7 @@ import VideoBg from "@/assets/images/video_template_bg.png";
 import AudioBg from "@/assets/images/audio_template_bg.png";
 import NoteBg from "@/assets/images/note_template_bg.png";
 import FillGapsBg from "@/assets/images/fill_gaps_template_bg.png";
+import UnscrambleWordsBg from "@/assets/images/unscramble_words_template_bg.jpg";
 import TextBg from "@/assets/images/text_template_bg.png";
 import MatchBg from "@/assets/images/match_template_bg.png";
 import TestBg from "@/assets/images/test_template_bg.png";
@@ -131,6 +132,15 @@ export const templates: TTemplate[] = [
     descriptionDefault:
       "Пропуски с вариантами ответов, форматированием и тремя режимами",
     bgImage: FillGapsBg,
+  },
+  {
+    type: "UNSCRAMBLE_WORDS",
+    titleKey: "templates.unscrambleWords",
+    titleDefault: "UNSCRAMBLE WORDS",
+    descriptionKey: "templates.unscrambleWordsDesc",
+    descriptionDefault:
+      "Расставить перемешанные фрагменты предложения в правильном порядке",
+    bgImage: UnscrambleWordsBg,
   },
   {
     type: "test",

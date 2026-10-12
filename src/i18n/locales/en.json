@@ -639,7 +639,16 @@
     "fillGapsModeInputDesc": "Student types the answer manually",
     "fillGapsModeDrag": "Drag",
     "fillGapsModeDragDesc": "Drag from a list",
-    "startTyping": "Start writing"
+    "startTyping": "Start writing",
+    "unscrambleHowTitle": "How do I build this exercise?",
+    "unscrambleHowHint": "Students drag the shuffled fragments into empty slots in the correct order.",
+    "unscrambleHowSteps": "1) Type a sentence. 2) Put \"/\" where it should split into chips (e.g. She / is / a / teacher.). 3) Add more sentences if needed. Each sentence must include at least one \"/\".",
+    "unscrambleSentenceN": "Sentence {{n}}",
+    "unscramblePlaceholder": "She / is / a / teacher.",
+    "unscrambleAddSentence": "+ Add sentence",
+    "unscrambleNeedSlash": "Each sentence needs at least one \"/\" (minimum 2 fragments)",
+    "unscrambleNeedSlashShort": "Need \"/\" and at least 2 fragments",
+    "unscramblePreviewEmpty": "Add at least one sentence with \"/\" to see the preview"
   },
   "templates": {
     "text": "Text",
@@ -662,6 +671,8 @@
     "fillGapsInput": "Type word in gap",
     "fillGapsNew": "FILL IN THE GAPS",
     "fillGapsNewDesc": "Gaps with answer options, formatting, and three modes",
+    "unscrambleWords": "UNSCRAMBLE WORDS",
+    "unscrambleWordsDesc": "Put shuffled sentence fragments into the correct order",
     "test": "Test",
     "testDesc": "Select the correct option from the given choices",
     "match": "Match",
