@@ -196,11 +196,10 @@ export const AttachLessonModalForm: FC<TProps> = ({
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
       scrollBehavior="outside"
-      style={{ backgroundColor: "#F9F9F9" }}
       classNames={{
         backdrop: OVERLAY_ABOVE_HEADER_Z_CLASS,
         wrapper: `${OVERLAY_ABOVE_HEADER_Z_CLASS} max-sm:items-stretch max-sm:p-0`,
-        base: "max-sm:!m-0 max-sm:!my-0 max-sm:!h-[100dvh] max-sm:!max-h-[100dvh] max-sm:!w-full max-sm:!max-w-full max-sm:!rounded-none",
+        base: "bg-white rounded-[20px] lg:rounded-[30px] max-sm:!m-0 max-sm:!my-0 max-sm:!h-[100dvh] max-sm:!max-h-[100dvh] max-sm:!w-full max-sm:!max-w-full max-sm:!rounded-none",
         header:
           "max-sm:px-4 max-sm:pt-[max(1rem,env(safe-area-inset-top))] max-sm:pb-2 max-sm:text-base",
         body: "max-sm:px-4 max-sm:pb-[max(1rem,env(safe-area-inset-bottom))]",

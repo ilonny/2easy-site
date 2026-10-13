@@ -438,13 +438,16 @@ export default function LessonPage() {
 
   if (isLockedOnTrial) {
     return (
-      <main style={{ backgroundColor: "#f9f9f9" }}>
+      <main className="bg-white">
         <ContentWrapper>
           <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center">
-            <p className="text-lg font-semibold text-primary">
+            <p className="text-lg font-bold tracking-brand text-brand-black">
               <T k="subscriptionStatus.subscribeToContinue" />
             </p>
-            <Link href="/subscription" className="text-secondary underline">
+            <Link
+              href="/subscription"
+              className="font-bold tracking-brand text-brand-violet underline"
+            >
               <T k="profile.personalCabinet" />
             </Link>
           </div>
@@ -454,7 +457,7 @@ export default function LessonPage() {
   }
 
   return (
-    <main style={{ backgroundColor: "#f9f9f9" }}>
+    <main className="bg-white">
       <ContentWrapper>
         <div className="w-full min-w-0">
           <div className="h-3 sm:h-6 md:h-10" />
@@ -462,11 +465,11 @@ export default function LessonPage() {
             <div className="flex w-full min-w-0 flex-col gap-1.5 md:flex-row md:items-start md:justify-between md:gap-4">
               <Link
                 href={`/editor/${params.id}`}
-                className="w-fit shrink-0 text-secondary"
+                className="w-fit shrink-0 font-bold tracking-brand text-brand-violet"
               >
                 <Button
                   variant="light"
-                  className="min-h-10 min-w-0 touch-manipulation px-2"
+                  className="min-h-10 min-w-0 touch-manipulation px-2 font-bold tracking-brand text-brand-violet"
                 >
                   <T k="lessons.backToEdit" />
                 </Button>
@@ -516,14 +519,14 @@ export default function LessonPage() {
         <div className="flex flex-row items-stretch gap-2 sm:gap-3 md:gap-4 w-full min-w-0">
           <div className="min-w-0 flex-1">
             <div
-              className="p-3 sm:p-5 md:p-8 lg:p-10 w-full max-w-[1160px] mx-auto bg-white rounded-[10px] box-border min-w-0 relative"
+              className="relative mx-auto box-border min-w-0 w-full max-w-[1160px] rounded-[20px] bg-white p-3 sm:p-5 md:p-8 lg:rounded-[30px] lg:p-10"
               id="lessonContentWrapper"
               style={{
                 marginLeft: isStudent ? "auto" : undefined,
                 marginRight: isStudent ? "auto" : undefined,
               }}
             >
-              <h1 className="text-center text-[26px] sm:text-[32px] md:text-[38px] lg:text-[44px] leading-tight text-primary font-bold px-1 break-words">
+              <h1 className="break-words px-1 text-center text-[26px] font-bold leading-tight tracking-brand text-primary sm:text-[32px] md:text-[38px] lg:text-[44px]">
                 {lesson?.title}
               </h1>
               {!!lesson?.description && (
@@ -549,7 +552,7 @@ export default function LessonPage() {
                 students.length > 1 &&
                 !activeStudentId &&
                 !isPresentationMode && (
-                  <div className="mb-4 rounded-lg border border-[#D9D4FF] bg-[#F6F4FF] px-4 py-3 text-sm text-[#3F28C6]">
+                  <div className="mb-4 rounded-[14px] border border-[#F0EDFD] bg-[#F0EDFD] px-4 py-3 text-sm font-bold tracking-brand text-brand-violet">
                     <T k="lessons.selectStudentToSeeAnswersBanner" />
                   </div>
                 )}
@@ -957,7 +960,7 @@ export default function LessonPage() {
                           <div className="hidden shrink-0 pt-[3px] opacity-0 sm:block">
                             <Image src={CheckedYellow.src} alt="checked" />
                           </div>
-                          <p className="text-xs text-[#3F28C6]">
+                          <p className="text-xs font-bold tracking-brand text-brand-violet">
                             *Светло-фиолетовым отмечен ученик,
                             <br className="hidden sm:block" />
                             {" "}ответы которого отображаются на экране

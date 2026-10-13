@@ -1,8 +1,8 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
-import { ContentWrapper } from "@/components";
+
+import { CatalogPageShell } from "@/components";
 import { AuthContext } from "@/auth";
 import { useContext, useEffect, useMemo } from "react";
 import { withLogin } from "@/auth/hooks/withLogin";
@@ -30,40 +30,24 @@ export default function StudentCoursePage() {
     isStudent && profile?.studentId != null ? String(profile.studentId) : "";
 
   return (
-    <main style={{ backgroundColor: "#f9f9f9" }}>
-      <ContentWrapper>
-        <div className="w-full min-w-0">
-          <div className="h-8 sm:h-10 md:h-14" />
-          <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
-            <Breadcrumbs>
-              <BreadcrumbItem href={`/`}>
-                <T k="profile.personalCabinetBreadcrumb" />
-              </BreadcrumbItem>
-              <BreadcrumbItem href="/course"><T k="lessons.course" /></BreadcrumbItem>
-            </Breadcrumbs>
-          </div>
-        </div>
-        <div className="h-6 sm:h-8 md:h-10" />
-        {!authIsLoading &&
-          !!currentCourse &&
-          !!studentIdStr && (
-            <ProfileLessons
-              currentCourse={currentCourse}
-              canCreateLesson={false}
-              studentId={studentIdStr}
-              hideTabs
-              hideAttachButton
-              showChangeStatusButton
-              hideDeleteLessonButton
-              showStartLessonButton
-              isStudent={!!isStudent}
-              alwaysOpenLessonMode
-              includeCourseLessons
-            />
-          )}
-        <div className="h-10" />
-        <div className="h-10" />
-      </ContentWrapper>
-    </main>
+    <CatalogPageShell
+      title={currentCourse?.title || <T k="lessons.course" />}
+    >
+      {!authIsLoading && !!currentCourse && !!studentIdStr && (
+        <ProfileLessons
+          currentCourse={currentCourse}
+          canCreateLesson={false}
+          studentId={studentIdStr}
+          hideTabs
+          hideAttachButton
+          showChangeStatusButton
+          hideDeleteLessonButton
+          showStartLessonButton
+          isStudent={!!isStudent}
+          alwaysOpenLessonMode
+          includeCourseLessons
+        />
+      )}
+    </CatalogPageShell>
   );
 }

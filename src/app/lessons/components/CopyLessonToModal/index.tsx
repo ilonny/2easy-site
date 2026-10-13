@@ -160,7 +160,7 @@ export const CopyLessonToModal: FC<TProps> = ({
           "justify-between",
           "gap-3",
           "cursor-pointer",
-          params.selected ? "border-[#3F28C6]" : "border-default-200",
+          params.selected ? "border-brand-violet" : "border-default-200",
         ].join(" ")}
         style={{
           boxShadow: params.selected

@@ -1,13 +1,7 @@
 "use client";
-import {
-  BreadcrumbItem,
-  Breadcrumbs,
-  Button,
-  Image,
-  Input,
-  Link,
-} from "@nextui-org/react";
-import { ContentWrapper } from "@/components";
+
+import { Button, Image, Input } from "@nextui-org/react";
+import { CatalogPageShell } from "@/components";
 import { AuthContext } from "@/auth";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { withLogin } from "@/auth/hooks/withLogin";
@@ -18,6 +12,8 @@ import Loupe from "@/assets/icons/loupe.svg";
 import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import Link from "next/link";
+import { brandInputClassNames } from "@/components/brandUi";
 
 export default function StudentAccountPage() {
   withLogin();
@@ -62,105 +58,79 @@ export default function StudentAccountPage() {
   const [dictionaryModalOpen, setDictionaryModalOpen] = useState(false);
 
   return (
-    <main style={{ backgroundColor: "#f9f9f9" }}>
-      <ContentWrapper>
-        <div className="w-full min-w-0">
-          <div className="h-8 sm:h-10 md:h-14" />
-          {isTeacher && (
-            <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
-              <Breadcrumbs>
-                <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
-                <BreadcrumbItem href="/profile?students">
-                  <T k="profile.myStudents" />
-                </BreadcrumbItem>
-                {!!studentInfo && (
-                  <BreadcrumbItem>{studentInfo.name}</BreadcrumbItem>
-                )}
-              </Breadcrumbs>
-            </div>
+    <CatalogPageShell
+      title={<T k="students.studentCabinet" />}
+      subtitle={
+        isTeacher ? (
+          <Link
+            href="/profile?students"
+            className="text-sm font-bold tracking-brand text-brand-violet hover:opacity-80"
+          >
+            <T k="students.allStudents" />
+          </Link>
+        ) : undefined
+      }
+    >
+      {(isLoading || authIsLoading) && (
+        <div className="flex h-[225px] w-full items-center justify-center">
+          <Button
+            isIconOnly
+            isLoading={isLoading}
+            color="primary"
+            variant="light"
+            size="lg"
+          />
+        </div>
+      )}
+      <div className="flex w-full min-w-0 flex-col items-stretch gap-4 lg:flex-row lg:gap-6">
+        <div className="w-full min-w-0 shrink-0 lg:w-[415px]">
+          {!!studentInfo && isTeacher && (
+            <StudentList
+              onSuccessEditCallback={fetchStudentInfo}
+              onSuccessDeleteCallback={() => router.push("/profile?students")}
+              hideAccountButton
+              studentsList={[studentInfo]}
+              hideAddButton
+            />
           )}
         </div>
-        <div className="h-6 sm:h-8 md:h-10" />
-        <div className="flex flex-col items-center gap-3 w-full min-w-0 px-1">
-          <h1 className="text-primary text-center font-bold text-xl sm:text-2xl md:text-3xl uppercase px-2 break-words w-full">
-            <T k="students.studentCabinet" />
-          </h1>
-          {isTeacher ? (
-            <Link
-              href="/profile?students"
-              className="text-sm sm:text-base text-primary underline-offset-2 hover:underline self-center sm:self-start"
-            >
-              <T k="students.allStudents" />
-            </Link>
-          ) : null}
-        </div>
-        {isStudent && <div className="h-1" />}
-        <div className="h-4 sm:h-5" />
-        {(isLoading || authIsLoading) && (
-          <div className="w-full h-[225px] flex justify-center items-center ">
-            <Button
-              isIconOnly
-              isLoading={isLoading}
-              color="primary"
-              variant="light"
-              size="lg"
-            />
-          </div>
-        )}
-        <div className="flex flex-col lg:flex-row items-stretch gap-4 lg:gap-6 w-full min-w-0">
-          <div className="w-full lg:w-[415px] min-w-0 shrink-0">
-            {!!studentInfo && isTeacher && (
-              <StudentList
-                onSuccessEditCallback={fetchStudentInfo}
-                onSuccessDeleteCallback={() => router.push("/profile?students")}
-                hideAccountButton
-                studentsList={[studentInfo]}
-                hideAddButton
-              />
-            )}
-          </div>
-          <div className="w-full lg:flex-1 lg:max-w-[525px] min-w-0">
-            <Input
-              value={searchString}
-              onValueChange={setSearchString}
-              placeholder={
-                isBoardsTab
-                  ? i18n.t("boards.searchBoards")
-                  : isCoursesTab
-                    ? i18n.t("lessons.searchCourses")
-                    : i18n.t("lessons.searchLessons")
-              }
-              size="lg"
-              classNames={{ inputWrapper: "bg-white hove min-w-0" }}
-              startContent={
-                <Image
-                  src={Loupe.src}
-                  alt="search"
-                  style={{ borderRadius: 0 }}
-                />
-              }
-            />
-          </div>
-        </div>
-        {!!studentInfo && (
-          <ProfileLessons
-            searchString={searchString}
-            canCreateLesson={false}
-            //@ts-ignore
-            studentId={studentId}
-            hideTabs
-            hideAttachButton
-            showChangeStatusButton
-            hideDeleteLessonButton
-            showStartLessonButton
-            isStudent={isStudent}
-            alwaysOpenLessonMode={true}
-            includeCourseLessons
-            dictionaryModalOpen={dictionaryModalOpen}
-            onDictionaryModalChange={setDictionaryModalOpen}
+        <div className="w-full min-w-0 lg:max-w-[525px] lg:flex-1">
+          <Input
+            value={searchString}
+            onValueChange={setSearchString}
+            placeholder={
+              isBoardsTab
+                ? i18n.t("boards.searchBoards")
+                : isCoursesTab
+                  ? i18n.t("lessons.searchCourses")
+                  : i18n.t("lessons.searchLessons")
+            }
+            size="md"
+            classNames={brandInputClassNames}
+            startContent={
+              <Image src={Loupe.src} alt="search" style={{ borderRadius: 0 }} />
+            }
           />
-        )}
-      </ContentWrapper>
-    </main>
+        </div>
+      </div>
+      {!!studentInfo && (
+        <ProfileLessons
+          searchString={searchString}
+          canCreateLesson={false}
+          //@ts-ignore
+          studentId={studentId}
+          hideTabs
+          hideAttachButton
+          showChangeStatusButton
+          hideDeleteLessonButton
+          showStartLessonButton
+          isStudent={isStudent}
+          alwaysOpenLessonMode={true}
+          includeCourseLessons
+          dictionaryModalOpen={dictionaryModalOpen}
+          onDictionaryModalChange={setDictionaryModalOpen}
+        />
+      )}
+    </CatalogPageShell>
   );
 }

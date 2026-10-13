@@ -7,12 +7,17 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { isOutlookEmail } from "@/utils/isOutlookEmail";
 import { toast } from "react-toastify";
+import {
+  brandInputClassNames,
+  brandModalClassNames,
+  brandPrimaryBtnClassName,
+} from "@/components/brandUi";
 
 type TProps = {
   isVisible: boolean;
@@ -69,7 +74,12 @@ export const CreateStudentModalForm: FC<TProps> = ({
   const title = watch("name");
 
   return (
-    <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
+    <Modal
+      size="xl"
+      isOpen={isVisible}
+      onClose={() => setIsVisible(false)}
+      classNames={brandModalClassNames}
+    >
       <ModalContent>
         <ModalHeader>
           <p>{title ? title : <T k="students.newStudent" />}</p>
@@ -85,8 +95,10 @@ export const CreateStudentModalForm: FC<TProps> = ({
                   {...field}
                   label={<T k="students.fullName" />}
                   className="mb-5"
-                  radius="sm"
+                  radius="lg"
                   size="lg"
+                  variant="flat"
+                  classNames={brandInputClassNames}
                   errorMessage={errors?.name?.message}
                   isInvalid={!!errors.name?.message}
                 />
@@ -107,8 +119,10 @@ export const CreateStudentModalForm: FC<TProps> = ({
                   {...field}
                   label="E-mail*"
                   className="mb-5"
-                  radius="sm"
+                  radius="lg"
                   size="lg"
+                  variant="flat"
+                  classNames={brandInputClassNames}
                   errorMessage={errors?.email?.message}
                   isInvalid={!!errors.email?.message}
                   description={<T k="students.emailHint" />}
@@ -123,15 +137,21 @@ export const CreateStudentModalForm: FC<TProps> = ({
                   {...field}
                   label={<T k="students.noteLabel" />}
                   className="mb-5"
-                  radius="sm"
+                  radius="lg"
                   size="lg"
+                  variant="flat"
+                  classNames={brandInputClassNames}
                   errorMessage={errors?.tag?.message}
                   isInvalid={!!errors.tag?.message}
                 />
               )}
             />
             <div className="h-5" />
-            <Button color="primary" type="submit" className="w-full" size="lg">
+            <Button
+              type="submit"
+              className={`w-full ${brandPrimaryBtnClassName}`}
+              size="lg"
+            >
               {chosenStudent?.id ? <T k="common.save" /> : <T k="students.addStudent" />}
             </Button>
             <div className="h-10" />

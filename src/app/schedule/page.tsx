@@ -3,14 +3,13 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/ru";
-import { Button, Spinner, Tab, Tabs } from "@nextui-org/react";
-import { ContentWrapper } from "@/components";
+import { Button, Spinner } from "@nextui-org/react";
+import { BrandPill, CatalogPageShell } from "@/components";
 import { AuthContext } from "@/auth";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { checkResponse, fetchGet } from "@/api";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { T } from "@/i18n/T";
-import i18n from "@/i18n/config";
 import { useStudentList } from "@/app/student/hooks/useStudentList";
 import { useScheduleEvents } from "./hooks/useScheduleEvents";
 import { usePaymentPlans } from "./hooks/usePaymentPlans";
@@ -176,163 +175,154 @@ export default function SchedulePage() {
 
   if (isTeacher && !teacherAllowed) {
     return (
-      <main className={styles.page}>
-        <ContentWrapper>
-          <div className="flex h-[50vh] items-center justify-center">
-            <Spinner color="primary" />
-          </div>
-        </ContentWrapper>
-      </main>
+      <CatalogPageShell title={<T k="schedule.titlePage" />}>
+        <div className="flex h-[50vh] items-center justify-center">
+          <Spinner color="primary" />
+        </div>
+      </CatalogPageShell>
     );
   }
 
   return (
-    <main className={styles.page}>
-      <ContentWrapper>
-        <div className="h-4 sm:h-6" />
-        <div className={styles.headerBlock}>
-          <div>
-            <h1 className={styles.pageTitle}>
-              <T k="schedule.titlePage" />
-            </h1>
-            <p className={styles.pageSubtitle}>
-              {isStudent ? (
-                <T k="schedule.studentSubtitle" />
-              ) : (
-                <T k="schedule.teacherSubtitle" />
-              )}
-            </p>
-          </div>
-          {isTeacher && (
-            <Tabs
-              selectedKey={tab}
-              onSelectionChange={(key) =>
-                setTab(key === "payments" ? "payments" : "calendar")
-              }
-              size="sm"
-              aria-label="schedule tabs"
-              classNames={{
-                tabList: "bg-[#f2f2f7] p-1 rounded-xl",
-                cursor: "bg-white shadow-sm",
-                tab: "text-sm font-medium",
-              }}
-            >
-              <Tab key="calendar" title={i18n.t("schedule.tabCalendar")} />
-              <Tab key="payments" title={i18n.t("schedule.tabPayments")} />
-            </Tabs>
-          )}
-        </div>
-
-        {tab === "payments" && isTeacher ? (
-          <div className="pb-10">
-            <PaymentControlTab
-              plans={plans}
-              stats={stats}
-              loading={paymentsLoading}
-              statsLoading={statsLoading}
-              students={students}
-              onRefreshPlans={loadPlans}
-              onLoadStats={loadStats}
-              onCreate={async (data) => {
-                await createPlan(data);
-              }}
-              onUpdate={async (id, data) => {
-                await updatePlan(id, data);
-                await refreshRange();
-              }}
-              onRecord={async (id) => {
-                await recordPayment(id);
-                await refreshRange();
-              }}
-              onDeactivate={async (id) => {
-                await deletePlan(id);
-                await refreshRange();
-              }}
-            />
-          </div>
+    <CatalogPageShell
+      fillHeight={tab === "calendar"}
+      className={styles.page}
+      title={<T k="schedule.titlePage" />}
+      subtitle={
+        isStudent ? (
+          <T k="schedule.studentSubtitle" />
         ) : (
-          <div className={styles.shell}>
+          <T k="schedule.teacherSubtitle" />
+        )
+      }
+    >
+      {isTeacher && (
+        <div className={styles.tabRow} role="tablist" aria-label="schedule tabs">
+          <BrandPill
+            active={tab === "calendar"}
+            onClick={() => setTab("calendar")}
+          >
+            <T k="schedule.tabCalendar" />
+          </BrandPill>
+          <BrandPill
+            active={tab === "payments"}
+            onClick={() => setTab("payments")}
+          >
+            <T k="schedule.tabPayments" />
+          </BrandPill>
+        </div>
+      )}
+
+      {tab === "payments" && isTeacher ? (
+        <div className="pb-4">
+          <PaymentControlTab
+            plans={plans}
+            stats={stats}
+            loading={paymentsLoading}
+            statsLoading={statsLoading}
+            students={students}
+            onRefreshPlans={loadPlans}
+            onLoadStats={loadStats}
+            onCreate={async (data) => {
+              await createPlan(data);
+            }}
+            onUpdate={async (id, data) => {
+              await updatePlan(id, data);
+              await refreshRange();
+            }}
+            onRecord={async (id) => {
+              await recordPayment(id);
+              await refreshRange();
+            }}
+            onDeactivate={async (id) => {
+              await deletePlan(id);
+              await refreshRange();
+            }}
+          />
+        </div>
+      ) : (
+        <div className={styles.shell}>
+          {isTeacher && (
+            <div className={styles.mobileBar}>
+              <Button
+                size="sm"
+                className="rounded-[14px] bg-brand-violet text-xs font-bold tracking-brand text-white"
+                onPress={() => openCreate(dayjs())}
+              >
+                <T k="schedule.newLesson" />
+              </Button>
+              <Button
+                size="sm"
+                variant="flat"
+                className="rounded-[14px] bg-brand-gray text-xs font-bold tracking-brand text-brand-black"
+                onPress={() => setSidebarOpen((v) => !v)}
+              >
+                <T k="schedule.studentsFilter" />
+              </Button>
+            </div>
+          )}
+
+          <div className={styles.mainRow}>
             {isTeacher && (
-              <div className={styles.mobileBar}>
-                <Button
-                  size="sm"
-                  color="primary"
-                  onPress={() => openCreate(dayjs())}
-                >
-                  <T k="schedule.newLesson" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="flat"
-                  onPress={() => setSidebarOpen((v) => !v)}
-                >
-                  <T k="schedule.studentsFilter" />
-                </Button>
-              </div>
+              <StudentSidebar
+                students={students}
+                filterStudentId={filterStudentId}
+                onFilter={setFilterStudentId}
+                onCreate={() => openCreate(dayjs())}
+                canCreate
+                open={sidebarOpen}
+              />
             )}
 
-            <div className={styles.mainRow}>
-              {isTeacher && (
-                <StudentSidebar
-                  students={students}
-                  filterStudentId={filterStudentId}
-                  onFilter={setFilterStudentId}
-                  onCreate={() => openCreate(dayjs())}
-                  canCreate
-                  open={sidebarOpen}
-                />
-              )}
-
-              <section className={styles.calendarPane}>
-                <CalendarToolbar
-                  cursor={cursor}
-                  view={view}
-                  title={titleLabel}
-                  onViewChange={setView}
-                  onToday={() => setCursor(dayjs())}
-                  onPrev={() => setCursor((c) => c.subtract(1, shiftUnit))}
-                  onNext={() => setCursor((c) => c.add(1, shiftUnit))}
-                />
-                <div className={styles.viewBody}>
-                  {loading ? (
-                    <div className="flex h-full items-center justify-center">
-                      <Spinner color="primary" />
-                    </div>
-                  ) : view === "month" ? (
-                    <MonthView
-                      cursor={cursor}
-                      events={visibleEvents}
-                      detailed={isTeacher}
-                      onDayClick={(day) => {
-                        setCursor(day);
-                        if (isTeacher) openCreate(day);
-                        else setView("day");
-                      }}
-                      onEventClick={openEvent}
-                    />
-                  ) : view === "week" ? (
-                    <WeekView
-                      cursor={cursor}
-                      events={visibleEvents}
-                      detailed={isTeacher}
-                      onSlotClick={openCreate}
-                      onEventClick={openEvent}
-                    />
-                  ) : (
-                    <DayView
-                      cursor={cursor}
-                      events={visibleEvents}
-                      detailed={isTeacher}
-                      onSlotClick={openCreate}
-                      onEventClick={openEvent}
-                    />
-                  )}
-                </div>
-              </section>
-            </div>
+            <section className={styles.calendarPane}>
+              <CalendarToolbar
+                cursor={cursor}
+                view={view}
+                title={titleLabel}
+                onViewChange={setView}
+                onToday={() => setCursor(dayjs())}
+                onPrev={() => setCursor((c) => c.subtract(1, shiftUnit))}
+                onNext={() => setCursor((c) => c.add(1, shiftUnit))}
+              />
+              <div className={styles.viewBody}>
+                {loading ? (
+                  <div className="flex h-full items-center justify-center">
+                    <Spinner color="primary" />
+                  </div>
+                ) : view === "month" ? (
+                  <MonthView
+                    cursor={cursor}
+                    events={visibleEvents}
+                    detailed={isTeacher}
+                    onDayClick={(day) => {
+                      setCursor(day);
+                      if (isTeacher) openCreate(day);
+                      else setView("day");
+                    }}
+                    onEventClick={openEvent}
+                  />
+                ) : view === "week" ? (
+                  <WeekView
+                    cursor={cursor}
+                    events={visibleEvents}
+                    detailed={isTeacher}
+                    onSlotClick={openCreate}
+                    onEventClick={openEvent}
+                  />
+                ) : (
+                  <DayView
+                    cursor={cursor}
+                    events={visibleEvents}
+                    detailed={isTeacher}
+                    onSlotClick={openCreate}
+                    onEventClick={openEvent}
+                  />
+                )}
+              </div>
+            </section>
           </div>
-        )}
-      </ContentWrapper>
+        </div>
+      )}
 
       {sidebarOpen && (
         <button
@@ -373,6 +363,6 @@ export default function SchedulePage() {
           await loadPlans();
         }}
       />
-    </main>
+    </CatalogPageShell>
   );
 }

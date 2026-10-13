@@ -5,12 +5,7 @@ import dayjs, { Dayjs } from "dayjs";
 import type { ScheduleEvent } from "../types";
 import { backgroundForColors, colorsForEvent } from "../types";
 import { eventsOnDay, HOURS, nowScrollTop } from "../utils/calendar";
-import {
-  eventChipText,
-  eventMinHeight,
-  eventPlaceLabel,
-  eventStudentLabel,
-} from "./eventUi";
+import { eventChipText, eventMinHeight } from "./eventUi";
 import styles from "../styles.module.css";
 
 type TProps = {
@@ -80,7 +75,7 @@ export const DayView = ({
 
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain"
       >
         <div className="relative pb-5" style={{ height: gridHeight + 20 }}>
           {HOURS.map((hour) => (
@@ -124,11 +119,9 @@ export const DayView = ({
               );
               if (top >= gridHeight || height <= 0) return null;
               const colors = colorsForEvent(event);
-              const students = eventStudentLabel(event);
-              const place = eventPlaceLabel(event);
               const chip = eventChipText(event, {
-                detailed,
-                time: start.format("HH:mm"),
+                detailed: true,
+                time: `${start.format("HH:mm")} – ${end.format("HH:mm")}`,
               });
               const minH = eventMinHeight(event, hourHeight);
               const isPayment = event.type === "payment";
@@ -149,39 +142,14 @@ export const DayView = ({
                   onClick={() => onEventClick(event)}
                   title={chip.titleAttr}
                 >
-                  {isPayment ? (
-                    <>
-                      <div className="text-sm font-semibold truncate">
-                        {chip.primary}
-                      </div>
-                      {chip.secondary ? (
-                        <div className="text-xs opacity-90 truncate">
-                          {chip.secondary}
-                        </div>
-                      ) : null}
-                    </>
-                  ) : detailed ? (
-                    <>
-                      <div className="text-sm font-semibold truncate">
-                        {students || event.title}
-                      </div>
-                      <div className="text-xs opacity-90 truncate">
-                        {start.format("HH:mm")} – {end.format("HH:mm")}
-                        {place
-                          ? ` · ${place}`
-                          : event.title
-                            ? ` · ${event.title}`
-                            : ""}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-sm font-semibold">{event.title}</div>
-                      <div className="text-xs opacity-90">
-                        {start.format("HH:mm")} – {end.format("HH:mm")}
-                      </div>
-                    </>
-                  )}
+                  <div className="text-sm font-semibold truncate">
+                    {chip.primary}
+                  </div>
+                  {chip.secondary ? (
+                    <div className="text-xs opacity-90 truncate">
+                      {chip.secondary}
+                    </div>
+                  ) : null}
                 </button>
               );
             })}

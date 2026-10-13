@@ -182,7 +182,7 @@ export const AiLessonConstructorPreview: FC<TProps> = ({
         size="xl"
         isOpen={deleteModal}
         onClose={() => setDeleteModal(false)}
-        style={{ background: "#F9F9F9" }}
+        className="bg-white"
         className="p-12"
       >
         <ModalContent>

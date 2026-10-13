@@ -1,6 +1,6 @@
 "use client";
-import { BreadcrumbItem, Breadcrumbs, Tab, Tabs } from "@nextui-org/react";
-import { ContentWrapper } from "@/components";
+
+import { CatalogPageShell, BrandPill } from "@/components";
 import { AuthContext } from "@/auth";
 import { useContext, useEffect, useState } from "react";
 import { ProfileInfoForm } from "./components/ProfileInfoForm";
@@ -36,81 +36,47 @@ export default function ProfilePage() {
   }, [isStudent]);
 
   return (
-    <main style={{ backgroundColor: "#f9f9f9" }}>
-      <ContentWrapper>
-        <div className="w-full min-w-0">
-          <div className="h-8 md:h-10 lg:h-14" />
-          <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
-            <Breadcrumbs>
-              <BreadcrumbItem href="/">
-                <T k="editor.home" />
-              </BreadcrumbItem>
-              <BreadcrumbItem>
-                <T k="profile.profileLabel" />
-              </BreadcrumbItem>
-            </Breadcrumbs>
-          </div>
+    <CatalogPageShell
+      title={
+        <T
+          k={isStudent ? "profile.personalData" : "profile.personalCabinet"}
+        />
+      }
+    >
+      {!isStudent && (
+        <div className="flex flex-wrap justify-center gap-1.5 min-[1200px]:gap-3">
+          <BrandPill
+            active={tabIndex === "lessons"}
+            onClick={() => setTabIndex("lessons")}
+          >
+            <T k="profile.lessonsAndCourses" />
+          </BrandPill>
+          <BrandPill
+            active={tabIndex === "students"}
+            onClick={() => setTabIndex("students")}
+          >
+            <T k="profile.studentsTab" />
+          </BrandPill>
+          <BrandPill
+            active={tabIndex === "profile"}
+            onClick={() => setTabIndex("profile")}
+          >
+            <T k="profile.profileLabel" />
+          </BrandPill>
         </div>
-        <div className="h-6 md:h-8 lg:h-10" />
-        <div className="h-6 md:h-8 lg:h-10" />
-        <div className="flex flex-col items-center w-full max-w-full min-w-0 px-0">
-          <h1 className="text-primary font-bold text-xl sm:text-2xl md:text-3xl uppercase text-center px-1">
-            <T
-              k={
-                isStudent
-                  ? "profile.personalData"
-                  : "profile.personalCabinet"
-              }
-            />
-          </h1>
-          <div className="h-4 md:h-5" />
-          {!isStudent && (
-            <Tabs
-              selectedKey={tabIndex}
-              onSelectionChange={setTabIndex}
-              variant="underlined"
-              color="primary"
-              classNames={{
-                base: "w-full max-w-full min-w-0",
-                tabList:
-                  "w-full max-w-full min-w-0 flex-nowrap gap-1 sm:gap-2 justify-center overflow-x-auto [-webkit-overflow-scrolling:touch] pb-0.5",
-                tab: "w-auto shrink-0 px-2 sm:px-3 text-xs sm:text-sm md:text-base",
-              }}
-            >
-              <Tab
-                key="lessons"
-                title={<T k="profile.lessonsAndCourses" />}
-                className="uppercase font-bold"
-              />
-              <Tab
-                key="students"
-                title={<T k="profile.studentsTab" />}
-                className="uppercase font-bold"
-              />
-              <Tab
-                key="profile"
-                title={<T k="profile.profileLabel" />}
-                className="uppercase font-bold"
-              />
-            </Tabs>
-          )}
-          <div className="h-6 md:h-8 lg:h-10" />
-          <div className="h-6 md:h-8 lg:h-10" />
-          {(tabIndex === "profile" || isStudent) && !authIsLoading && (
-            <div className="flex flex-col xl:flex-row items-stretch xl:items-start justify-center w-full max-w-full min-w-0 gap-8 md:gap-12 xl:gap-24 2xl:gap-40 px-1">
-              <ProfileInfoForm />
-              {!isStudent && <ProfileSubscribeInformer />}
-            </div>
-          )}
-          {tabIndex === "lessons" && !isStudent && !authIsLoading && (
-            <ProfileLessons />
-          )}
-          {tabIndex === "students" && !isStudent && !authIsLoading && (
-            <ProfileStudents />
-          )}
-          <div className="h-12 md:h-16 lg:h-20" />
+      )}
+      {(tabIndex === "profile" || isStudent) && !authIsLoading && (
+        <div className="flex w-full min-w-0 max-w-full flex-col items-stretch justify-center gap-8 px-1 md:gap-12 xl:flex-row xl:items-start xl:gap-24 2xl:gap-40">
+          <ProfileInfoForm />
+          {!isStudent && <ProfileSubscribeInformer />}
         </div>
-      </ContentWrapper>
-    </main>
+      )}
+      {tabIndex === "lessons" && !isStudent && !authIsLoading && (
+        <ProfileLessons />
+      )}
+      {tabIndex === "students" && !isStudent && !authIsLoading && (
+        <ProfileStudents />
+      )}
+    </CatalogPageShell>
   );
 }

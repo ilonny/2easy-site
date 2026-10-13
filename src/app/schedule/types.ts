@@ -42,7 +42,7 @@ export type EventFormValues = {
   lesson_id: number | "";
   location_text: string;
   notes: string;
-  recurrence: "" | "daily" | "weekly";
+  recurrence: "" | "daily" | "weekly" | "biweekly" | "monthly";
 };
 
 export type PaymentPlan = {

@@ -1,79 +1,96 @@
-/* eslint-disable jsx-a11y/alt-text */
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { ContentWrapper } from "@/components";
-import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
-import { data } from "./data";
-import Link from "next/link";
+import { CatalogPageShell } from "@/components";
+import {
+  catalogGridClassName,
+  GameCard,
+  TGameCard,
+} from "@/components/MainContent/GameCard";
+import { TTagTone } from "@/components/Tag";
 import { T } from "@/i18n/T";
+import { data } from "./data";
 
-export default function GrammarPage() {
+const metaByKey: Record<
+  string,
+  {
+    count?: number | string;
+    countKey?: string;
+    isVideo?: boolean;
+    level?: string;
+    levelTone?: TTagTone;
+  }
+> = {
+  "games.bingo": {
+    count: 5,
+    countKey: "content.cardsCount",
+    level: "A2+",
+    levelTone: "green",
+  },
+  "games.taboo": {
+    count: 90,
+    countKey: "content.cardsCount",
+    level: "A2-B2+ SLANG",
+    levelTone: "blue",
+  },
+  "games.neverHaveIEver": {
+    count: 130,
+    countKey: "content.cardsCount",
+    level: "A2-B2",
+    levelTone: "mint",
+  },
+  "games.wouldYouRather": {
+    count: 50,
+    countKey: "content.cardsCount",
+    level: "A2+",
+    levelTone: "green",
+  },
+  "games.ifYouCould": {
+    count: 30,
+    countKey: "content.cardsCount",
+    level: "A2+",
+    levelTone: "green",
+  },
+  "games.whatHappensNext": {
+    count: 30,
+    countKey: "content.videosCount",
+    isVideo: true,
+    level: "A2-B2",
+    levelTone: "mint",
+  },
+  "games.whatHappensNextFilms": {
+    count: 30,
+    countKey: "content.videosCount",
+    isVideo: true,
+    level: "A2-B2",
+    levelTone: "mint",
+  },
+  "games.nameThree": {
+    count: 90,
+    countKey: "content.cardsCount",
+    level: "A2+",
+    levelTone: "green",
+  },
+};
+
+const cards: TGameCard[] = data.map((el) => ({
+  titleKey: `${el.key}.title`,
+  descriptionKey: `${el.key}.description`,
+  href: el.link,
+  image: el.img,
+  ...metaByKey[el.key],
+}));
+
+export default function SpeakingGamesPage() {
   return (
-    <main style={{ backgroundColor: "#f9f9f9" }}>
-      <ContentWrapper>
-        <div className="w-full min-w-0">
-          <div className="h-8 md:h-10 lg:h-14" />
-          <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
-            <Breadcrumbs>
-            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
-            <BreadcrumbItem href="/speaking_games">
-              <T k="header.speakingGames" />
-            </BreadcrumbItem>
-          </Breadcrumbs>
-          </div>
-        </div>
-        <div className="h-6 md:h-8 lg:h-10" />
-        <div className="h-6 md:h-8 lg:h-10" />
-        <h1 className="text-center text-[#3f28c6] font-bold text-[26px] leading-tight px-2 sm:text-[32px] md:text-[38px] lg:text-[44px]">
-          <T k="home.speakingGamesSection" />
-        </h1>
-        <p
-          className="max-w-[675px] text-center m-auto px-3 text-base sm:text-lg md:text-xl font-medium leading-relaxed"
-        >
-          <T k="home.speakingGamesSectionDesc" />
-        </p>
-        <div className="h-10" />
-        <div className="h-10" />
-        <div className="flex items-start flex-wrap wrap">
-          {data.map((el) => {
-            return (
-              <Link
-                className="w-full md:w-1/2 lg:w-[33.33333%] p-2 mb-4"
-                key={el.id}
-                href={el.link}
-              >
-                <div>
-                  <img src={el.img.src} className="w-full h-auto rounded-t-lg" alt="" />
-                  <div
-                    className="mt-4 p-4 bg-white"
-                    style={{ borderRadius: 12 }}
-                  >
-                    <p
-                      className="uppercase mb-2"
-                      style={{
-                        fontSize: 18,
-                        color: "#5837dc",
-                        fontWeight: 700,
-                      }}
-                    >
-                      <T k={`${el.key}.title`} />
-                    </p>
-                    <p>
-                      <T k={`${el.key}.description`} />
-                    </p>
-                    <div className="flex justify-end mt-2">
-                      <span style={{ color: "#5837dc" }}>
-                        <T k="games.open" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </ContentWrapper>
-    </main>
+    <CatalogPageShell
+      title={<T k="home.speakingGamesSection" />}
+      subtitle={<T k="home.speakingGamesSectionDesc" />}
+    >
+      <div className={catalogGridClassName}>
+        {cards.map((card) => (
+          <GameCard key={card.href} card={card} />
+        ))}
+      </div>
+    </CatalogPageShell>
   );
 }

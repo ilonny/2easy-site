@@ -100,14 +100,14 @@ export const StartLessonButton = (props: TProps) => {
         }}
         className={[
           // Desktop (default): same circle as pre-adaptive
-          "z-10 float-right flex cursor-pointer items-center justify-center bg-[#3f28c6] text-center text-white transition-opacity duration-250 hover:opacity-80",
+          "z-10 float-right flex cursor-pointer items-center justify-center bg-brand-violet text-center font-bold tracking-brand text-white transition-opacity duration-250 hover:opacity-90",
           "sticky top-[80px] mt-[-90px] h-[80px] w-[80px] rounded-full p-2.5",
           "lg:top-[calc(var(--site-header-h)+40px)] lg:mt-0 lg:h-[90px] lg:w-[90px]",
           isHomeworkCheck
             ? "px-1 text-[13px] leading-[1.15] lg:text-[15px]"
             : "text-[18px] leading-[22px] lg:text-[22px]",
           // Mobile adaptive only
-          "max-lg:float-none max-lg:mb-4 max-lg:mt-0 max-lg:h-12 max-lg:w-full max-lg:rounded-xl max-lg:px-4 max-lg:text-base max-lg:font-medium max-lg:leading-tight max-lg:top-[calc(var(--site-header-h)+8px)]",
+          "max-lg:float-none max-lg:mb-4 max-lg:mt-0 max-lg:h-12 max-lg:w-full max-lg:rounded-[14px] max-lg:px-4 max-lg:text-base max-lg:leading-tight max-lg:top-[calc(var(--site-header-h)+8px)]",
         ].join(" ")}
       >
         <p className="text-center">{label}</p>

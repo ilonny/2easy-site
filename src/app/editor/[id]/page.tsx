@@ -4,8 +4,6 @@
 import { useLessons } from "@/app/lessons/hooks/useLessons";
 import { ContentWrapper } from "@/components";
 import {
-  BreadcrumbItem,
-  Breadcrumbs,
   Button,
   Card,
   Modal,
@@ -13,7 +11,13 @@ import {
   ModalContent,
   ModalHeader,
 } from "@nextui-org/react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
+import {
+  brandDangerBtnClassName,
+  brandModalClassNames,
+  brandPrimaryBtnClassName,
+} from "@/components/brandUi";
 import {
   useCallback,
   useContext,
@@ -221,13 +225,16 @@ export default function EditorPage() {
 
   if (isLockedOnTrial) {
     return (
-      <main style={{ backgroundColor: "#f9f9f9" }}>
+      <main className="bg-white">
         <ContentWrapper>
           <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center">
-            <p className="text-lg font-semibold text-primary">
+            <p className="text-lg font-bold tracking-brand text-brand-black">
               <T k="subscriptionStatus.subscribeToContinue" />
             </p>
-            <a href="/subscription" className="text-secondary underline">
+            <a
+              href="/subscription"
+              className="font-bold tracking-brand text-brand-violet underline"
+            >
               <T k="profile.personalCabinet" />
             </a>
           </div>
@@ -237,17 +244,18 @@ export default function EditorPage() {
   }
 
   return (
-    <main style={{ backgroundColor: "#f9f9f9" }}>
+    <main className="bg-white">
       <ContentWrapper>
         <div className="w-full min-w-0">
           <div className="h-8 md:h-10 lg:h-14" />
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="overflow-x-auto max-w-full min-w-0 [-webkit-overflow-scrolling:touch] pb-0.5">
-            <Breadcrumbs>
-              <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
-              <BreadcrumbItem href="/profile?lessons"><T k="editor.myLessons" /></BreadcrumbItem>
-              <BreadcrumbItem>{lesson?.title}</BreadcrumbItem>
-            </Breadcrumbs>
+            <div className="max-w-full min-w-0 overflow-x-auto pb-0.5 [-webkit-overflow-scrolling:touch]">
+              <Link
+                href="/lesson_plans"
+                className="text-sm font-bold tracking-brand text-brand-violet hover:opacity-80"
+              >
+                ← <T k="editor.myLessons" />
+              </Link>
             </div>
             {lesson?.user_id === profile?.id && !lesson?.lesson_id_homework && (
               <ShareLessonLink />
@@ -255,15 +263,7 @@ export default function EditorPage() {
           </div>
         </div>
         <div className="h-5 md:h-6 lg:h-10" />
-        <div className="h-5 md:h-6 lg:h-10" />
-        <div
-          className="p-3 sm:p-4 md:p-6 w-[100%] lg:p-10 lg:max-w-[1160px]"
-          style={{
-            margin: "0 auto",
-            backgroundColor: "#fff",
-            borderRadius: 10,
-          }}
-        >
+        <div className="mx-auto w-full rounded-[20px] bg-white p-3 sm:p-4 md:p-6 lg:max-w-[1160px] lg:rounded-[30px] lg:p-10">
           {lesson?.lesson_id_homework && lesson?.user_id === profile?.id ? (
             <StartLessonButton lesson={lesson} mode="homeworkCheck" />
           ) : (
@@ -275,13 +275,7 @@ export default function EditorPage() {
             {" "}
             {/* Добавляем класс 'group' сюда */}
             <div className="w-[100%] lg:pl-[90px] text-[22px] sm:text-[28px] md:text-[32px] lg:text-[44px] leading-tight px-1">
-              <h1
-                className="text-center"
-                style={{
-                  color: "#3f28c6",
-                  fontWeight: 700,
-                }}
-              >
+              <h1 className="text-center font-bold tracking-brand text-primary">
                 {lesson?.title}
               </h1>
             </div>
@@ -309,13 +303,7 @@ export default function EditorPage() {
               >
                 <Image src={EditIcon} alt="edit" style={{ fill: "blue" }} />
                 <div className="h-2"></div>
-                <p
-                  style={{
-                    color: "#3f28c6",
-                    fontSize: 12,
-                    textAlign: "center",
-                  }}
-                >
+                <p className="text-center text-xs font-bold tracking-brand text-brand-violet">
                   <T k="editor.editShort" />
                 </p>
               </div>
@@ -461,20 +449,18 @@ export default function EditorPage() {
         size="xl"
         isOpen={deleteModal}
         onClose={() => setDeleteModal(false)}
-        style={{ background: "#F9F9F9" }}
-        className="p-12"
+        classNames={brandModalClassNames}
       >
         <ModalContent>
           <ModalHeader className="justify-center">
-            <p style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}>
+            <p className="text-center text-[22px] font-bold tracking-brand text-brand-black">
               <T k="editor.confirmDeleteEx" />
             </p>
           </ModalHeader>
           <ModalBody>
             <Button
               variant="light"
-              color="danger"
-              className="w-full"
+              className={`w-full ${brandDangerBtnClassName}`}
               size="lg"
               onClick={async () => {
                 setDeleteModal(false);
@@ -482,11 +468,10 @@ export default function EditorPage() {
                 getExList();
               }}
             >
-              <p style={{ color: "#A42929" }}><T k="editor.confirmDelete" /></p>
+              <T k="editor.confirmDelete" />
             </Button>
             <Button
-              color="primary"
-              className="w-full"
+              className={`w-full ${brandPrimaryBtnClassName}`}
               size="lg"
               onClick={() => setDeleteModal(false)}
             >

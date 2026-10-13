@@ -172,6 +172,13 @@ export const EventModal = ({
     });
   };
 
+  const studentNamesLabel = useMemo(() => {
+    return form.student_ids
+      .map((id) => students.find((s) => s.id === id)?.name || `#${id}`)
+      .filter(Boolean)
+      .join(", ");
+  }, [form.student_ids, students]);
+
   const handleSave = async () => {
     if (
       !form.student_ids.length ||
@@ -192,11 +199,15 @@ export const EventModal = ({
         `${form.date}T${form.start_time}`,
       ).toISOString();
       const ends_at = dayjs(`${form.date}T${form.end_time}`).toISOString();
+      const title =
+        form.title.trim() ||
+        studentNamesLabel ||
+        i18n.t("schedule.defaultLessonTitle");
       await onSave(
         {
           student_ids: form.student_ids,
           student_id: form.student_ids[0],
-          title: form.title || i18n.t("schedule.defaultLessonTitle"),
+          title,
           starts_at,
           ends_at,
           location_type: form.location_type,
@@ -316,12 +327,28 @@ export const EventModal = ({
             <div className="space-y-4">
               <div>
                 <div className="text-xs font-medium uppercase tracking-wide text-[#86868b]">
-                  <T k="schedule.title" />
+                  <T k="schedule.students" />
                 </div>
                 <div className="mt-1 text-[17px] font-semibold text-[#1d1d1f]">
-                  {form.title || i18n.t("schedule.defaultLessonTitle")}
+                  {studentNamesLabel ||
+                    event?.student_name ||
+                    form.title ||
+                    i18n.t("schedule.defaultLessonTitle")}
                 </div>
               </div>
+              {form.title &&
+              form.title.trim().toLowerCase() !==
+                studentNamesLabel.trim().toLowerCase() &&
+              form.title !== i18n.t("schedule.defaultLessonTitle") ? (
+                <div>
+                  <div className="text-xs font-medium uppercase tracking-wide text-[#86868b]">
+                    <T k="schedule.title" />
+                  </div>
+                  <div className="mt-1 text-[15px] text-[#1d1d1f]">
+                    {form.title}
+                  </div>
+                </div>
+              ) : null}
               <div>
                 <div className="text-xs font-medium uppercase tracking-wide text-[#86868b]">
                   <T k="schedule.date" />
@@ -378,14 +405,6 @@ export const EventModal = ({
             </div>
           ) : (
             <>
-              <Input
-                label={i18n.t("schedule.title")}
-                value={form.title}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, title: e.target.value }))
-                }
-              />
-
               <div className="rounded-xl border border-[#e8e8ed] p-3">
                 <div className="mb-2 text-sm font-medium text-[#1d1d1f]">
                   <T k="schedule.students" />
@@ -477,6 +496,17 @@ export const EventModal = ({
                   }
                 />
               </div>
+
+              <Input
+                label={i18n.t("schedule.titleOptional")}
+                placeholder={
+                  studentNamesLabel || i18n.t("schedule.titleOptionalHint")
+                }
+                value={form.title}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, title: e.target.value }))
+                }
+              />
 
               <div>
                 <div className="mb-2 text-sm font-medium text-[#1d1d1f]">
@@ -592,7 +622,11 @@ export const EventModal = ({
                       recurrence:
                         e.target.value === "none"
                           ? ""
-                          : (e.target.value as "daily" | "weekly"),
+                          : (e.target.value as
+                              | "daily"
+                              | "weekly"
+                              | "biweekly"
+                              | "monthly"),
                     }))
                   }
                 >
@@ -604,6 +638,12 @@ export const EventModal = ({
                   </SelectItem>
                   <SelectItem key="weekly" value="weekly">
                     {i18n.t("schedule.repeatWeekly")}
+                  </SelectItem>
+                  <SelectItem key="biweekly" value="biweekly">
+                    {i18n.t("schedule.repeatBiweekly")}
+                  </SelectItem>
+                  <SelectItem key="monthly" value="monthly">
+                    {i18n.t("schedule.repeatMonthly")}
                   </SelectItem>
                 </Select>
               )}

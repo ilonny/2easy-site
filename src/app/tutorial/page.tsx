@@ -1,23 +1,22 @@
 "use client";
 
-import { ContentWrapper } from "@/components";
+import { CatalogPageShell } from "@/components";
 import {
-  BreadcrumbItem,
-  Breadcrumbs,
+  catalogGridClassName,
+  GameCard,
+} from "@/components/MainContent/GameCard";
+import {
   Button,
   Modal,
   ModalBody,
   ModalContent,
-  ModalHeader,
 } from "@nextui-org/react";
 import { data } from "./data";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { useLessons } from "../lessons/hooks/useLessons";
 import { useExList } from "../editor/hooks/useExList";
-import { Zoom } from "react-toastify";
 import { ExList } from "../editor/components/view/ExList";
-import { BASE_URL } from "@/api";
 import Dino from "@/assets/images/dino.gif";
 import { getImageUrl } from "../editor/helpers";
 import { T } from "@/i18n/T";
@@ -43,167 +42,107 @@ export default function TutorialPage() {
   }, [activeLessonId, getExList, getLesson, setLesson]);
 
   return (
-    <main style={{ backgroundColor: "#f9f9f9" }}>
-      <ContentWrapper>
-        <div className="h-10" />
-        <div className="h-10" />
-        <h1 style={{ fontWeight: "600", fontSize: 38, textAlign: "center" }}>
+    <CatalogPageShell
+      title={
+        <>
           <T k="tutorial.hero.titleLine1" />
           <br />
           <T k="tutorial.hero.titleLine2" />
-        </h1>
-        <p className="text-center mt-6" style={{ fontSize: 18 }}>
+        </>
+      }
+      subtitle={
+        <>
           <T k="tutorial.hero.subtitleLine1" />
           <br />
           <T k="tutorial.hero.subtitleLine2" />
-        </p>
-        <div className="h-10" />
-        <div className="h-10" />
-        <div className="flex flex-wrap items-stretch">
-          {data.map((block) => {
-            return (
-              <div
-                key={block.id}
-                className="w-[100%] h-[100%] lg:w-[33.3333%] lg:grayscale hover:grayscale-0"
-                style={{ padding: 10, cursor: "pointer" }}
-                onClick={() => onClickTotur(block.lesson_id)}
-              >
-                <div
-                  className="w-[100%] h-[100%]  text-center lg:min-h-[470px]"
-                  style={{ borderRadius: 10, background: "#fff" }}
-                >
-                  <div className="w-[100%] h-[300px] flex items-center justify-center">
-                    <Image
-                      src={block.img}
-                      alt="img"
-                      className="max-h-[100%] m-auto w-auto"
+        </>
+      }
+    >
+      <div className={catalogGridClassName}>
+        {data.map((block) => (
+          <GameCard
+            key={block.id}
+            card={{
+              titleKey: (block as { titleKey: string }).titleKey,
+              descriptionKey: (block as { descKey: string }).descKey,
+              image: block.img,
+            }}
+            onClick={() => onClickTotur(block.lesson_id)}
+          />
+        ))}
+      </div>
+      <Modal
+        size="5xl"
+        isOpen={isVisible}
+        onClose={() => setIsVisible(false)}
+        style={{ background: "#fff", overflow: "hidden" }}
+        scrollBehavior="inside"
+        isDismissable={false}
+      >
+        <ModalContent>
+          <ModalBody className="py-6">
+            {!lesson && !exList?.length ? (
+              <div className="flex h-[500px] w-full items-center justify-center">
+                <Image
+                  src={Dino.src}
+                  alt="dino animated"
+                  width={150}
+                  height={150}
+                />
+              </div>
+            ) : (
+              <div className="w-full">
+                <div className="mx-auto w-full max-w-[1160px] rounded-[20px] bg-white p-2 lg:rounded-[30px] lg:p-10">
+                  <h1 className="text-center text-[25px] font-bold tracking-brand text-primary lg:text-[40px]">
+                    {lesson?.title}
+                  </h1>
+                  {!!lesson?.description && (
+                    <h2 className="mx-auto mt-3 max-w-[800px] whitespace-pre-wrap text-center text-base font-bold tracking-brand text-brand-grayFont lg:text-xl">
+                      {lesson?.description}
+                    </h2>
+                  )}
+                  <div className="h-8" />
+                  {!!lesson?.image_path && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={getImageUrl(lesson.image_path)}
+                      className="mx-auto mb-[60px] max-h-[400px]"
+                      alt="image lesson"
                     />
-                  </div>
-                  <div style={{ padding: 20, marginTop: 0 }}>
-                    <p
-                      style={{
-                        textTransform: "uppercase",
-                        fontWeight: "700",
-                        fontSize: 22,
-                        ...(block.titleStyle ? { ...block.titleStyle } : {}), // Spread outside
+                  )}
+                  <div className="h-8" />
+                  <div key={exList.length}>
+                    <ExList
+                      list={exList}
+                      isView
+                      key={exList.length}
+                      is2easy={true}
+                      isAdmin={false}
+                      isPresentationMode={true}
+                      onPressCreate={() => {}}
+                      onSuccessCreate={() => {}}
+                      onPressDelete={() => {}}
+                      onPressEdit={() => {}}
+                      changeSortIndex={async () => {}}
+                      onChangeIsVisible={() => {}}
+                    />
+                    <Button
+                      variant="flat"
+                      className="mt-4 w-full rounded-[14px] bg-brand-gray text-sm font-bold tracking-brand text-brand-black"
+                      size="lg"
+                      onClick={() => {
+                        setIsVisible(false);
                       }}
                     >
-                      <T k={(block as any).titleKey} />
-                    </p>
-                    <p style={{ marginTop: -12, padding: 20 }}>
-                      <T k={(block as any).descKey} />
-                    </p>
+                      <T k="common.close" />
+                    </Button>
                   </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
-        <div className="h-10" />
-        <div className="h-10" />
-        <Modal
-          size="5xl"
-          isOpen={isVisible}
-          onClose={() => setIsVisible(false)}
-          style={{ background: "#F9F9F9", overflow: "hidden" }}
-          scrollBehavior="inside"
-          isDismissable={false}
-        >
-          <ModalContent>
-            <ModalBody className="py-6">
-              {!lesson && !exList?.length ? (
-                <div className="w-full h-[500px] flex justify-center items-center ">
-                  <Image
-                    src={Dino.src}
-                    alt="dino animated"
-                    width={150}
-                    height={150}
-                  />
-                </div>
-              ) : (
-                <div className="w-[100%]">
-                  <div
-                    className="p-2 lg:p-10"
-                    style={{
-                      width: "100%",
-                      maxWidth: 1160,
-                      backgroundColor: "#fff",
-                      borderRadius: 10,
-                      margin: "auto",
-                    }}
-                  >
-                    <h1
-                      style={{
-                        fontSize: 44,
-                        textAlign: "center",
-                        color: "#3f28c6",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {lesson?.title}
-                    </h1>
-                    {!!lesson?.description && (
-                      <h2
-                        style={{
-                          fontSize: 20,
-                          textAlign: "center",
-                          // color: "#3f28c6",
-                          fontWeight: 500,
-                          maxWidth: 800,
-                          margin: "auto",
-                          whiteSpace: "break-spaces",
-                        }}
-                      >
-                        {lesson?.description}
-                      </h2>
-                    )}
-                    <div className="h-8"></div>
-                    {!!lesson?.image_path && (
-                      <img
-                        src={getImageUrl(lesson.image_path)}
-                        style={{
-                          maxHeight: 400,
-                          margin: "auto",
-                          marginBottom: 60,
-                        }}
-                        alt="image lesson"
-                      />
-                    )}
-                    <div className="h-8"></div>
-                    <div key={exList.length}>
-                      <ExList
-                        list={exList}
-                        isView
-                        key={exList.length}
-                        is2easy={true}
-                        isAdmin={false}
-                        isPresentationMode={true}
-                        onPressCreate={() => {}}
-                        onSuccessCreate={() => {}}
-                        onPressDelete={() => {}}
-                        onPressEdit={() => {}}
-                        changeSortIndex={async () => {}}
-                        onChangeIsVisible={() => {}}
-                      />
-                      <Button
-                        variant="flat"
-                        className="w-full"
-                        size="lg"
-                        onClick={() => {
-                          setIsVisible(false);
-                        }}
-                      >
-                        <T k="common.close" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div className="h-10" />
-            </ModalBody>
-          </ModalContent>
-        </Modal>
-      </ContentWrapper>
-    </main>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </CatalogPageShell>
   );
 }

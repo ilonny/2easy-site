@@ -42,7 +42,15 @@ export const DeleteLessonModalForm: FC<TProps> = ({
   }, [isCourses, lesson.id, onSuccess]);
 
   return (
-    <Modal size="xl" isOpen={isVisible} onClose={() => setIsVisible(false)}>
+    <Modal
+      size="xl"
+      isOpen={isVisible}
+      onClose={() => setIsVisible(false)}
+      classNames={{
+        base: "rounded-[20px] bg-white lg:rounded-[30px]",
+        header: "border-b border-black/5 font-bold tracking-brand text-brand-black",
+      }}
+    >
       <ModalContent>
         <ModalHeader>
           <p>
@@ -58,12 +66,15 @@ export const DeleteLessonModalForm: FC<TProps> = ({
           </p>
         </ModalHeader>
         <ModalBody>
-          <Button color="danger" variant="light" onClick={onSubmit}>
+          <Button
+            variant="light"
+            className="rounded-[14px] text-xs font-bold tracking-brand text-danger lg:text-sm"
+            onClick={onSubmit}
+          >
             <T k="editor.confirmDelete" />
           </Button>
           <Button
-            color="primary"
-            className="w-full"
+            className="w-full rounded-[14px] bg-brand-violet text-xs font-bold tracking-brand text-white lg:text-sm"
             onClick={() => setIsVisible(false)}
           >
             <T k="common.cancel" />

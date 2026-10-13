@@ -162,8 +162,11 @@ export const CreateHomeworkModal: FC<TProps> = ({
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
       scrollBehavior="outside"
-      style={{ backgroundColor: "#F9F9F9" }}
-      classNames={{ wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS }}
+      classNames={{
+        wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS,
+        base: "rounded-[20px] bg-white lg:rounded-[30px]",
+        header: "border-b border-black/5 font-bold tracking-brand text-brand-black",
+      }}
     >
       <ModalContent>
         <ModalHeader>
@@ -224,7 +227,7 @@ export const CreateHomeworkModal: FC<TProps> = ({
                           }}
                           className="p-3 rounded-lg border cursor-pointer hover:bg-default-100 select-none"
                           style={{
-                            borderColor: isChosen ? "#3f28c6" : "#e4e4e7",
+                            borderColor: isChosen ? "#5A42D4" : "#e4e4e7",
                             backgroundColor: isChosen ? "#eeebff" : undefined,
                           }}
                         >

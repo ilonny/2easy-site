@@ -156,7 +156,16 @@ const TariffCard = ({ titleKey, isFull, pet, children, footer }: TCardProps) => 
   </div>
 );
 
-export const MainTariffs = () => {
+type TMainTariffsProps = {
+  /** Skip outer landing container — use inside CatalogPageShell. */
+  embedded?: boolean;
+  hideTitle?: boolean;
+};
+
+export const MainTariffs = ({
+  embedded = false,
+  hideTitle = false,
+}: TMainTariffsProps = {}) => {
   const access = useUserAccess();
   const { subscription } = useContext(SibscribeContext) as {
     subscription?: { success?: boolean; subscribe_type_id?: number } | null;
@@ -189,12 +198,16 @@ export const MainTariffs = () => {
     <section
       ref={sectionRef}
       id="tariffs"
-      className={`${landingContainerClassName} flex flex-col gap-[30px] lg:gap-[50px]`}
+      className={`${
+        embedded ? "w-full" : landingContainerClassName
+      } relative flex flex-col gap-[30px] lg:gap-[50px]`}
     >
-      <StickerRain targetRef={sectionRef} />
-      <h2 className="mx-auto max-w-[460px] text-center text-[25px] font-bold leading-none tracking-brand text-brand-black lg:max-w-[550px] lg:text-[40px]">
-        <T k="tariffs.title" />
-      </h2>
+      {!embedded && <StickerRain targetRef={sectionRef} />}
+      {!hideTitle && (
+        <h2 className="mx-auto max-w-[460px] text-center text-[25px] font-bold leading-none tracking-brand text-brand-black lg:max-w-[550px] lg:text-[40px]">
+          <T k="tariffs.title" />
+        </h2>
+      )}
       <div className="flex flex-col items-center gap-[30px] lg:gap-10">
         <div className="flex gap-1 rounded-[10px] bg-brand-gray p-2 lg:rounded-[20px]">
           {periods.map((item) => {

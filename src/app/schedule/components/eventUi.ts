@@ -32,6 +32,13 @@ export const eventPlaceLabel = (event: ScheduleEvent) => {
   return String(event.location_text || "").trim();
 };
 
+const isGenericTitle = (title?: string | null) => {
+  const t = String(title || "").trim();
+  if (!t) return true;
+  const generic = i18n.t("schedule.defaultLessonTitle");
+  return t === generic || /^Занятие$/i.test(t) || /^Lesson$/i.test(t);
+};
+
 /** Primary/secondary lines for calendar event plaques. */
 export const eventChipText = (
   event: ScheduleEvent,
@@ -59,15 +66,26 @@ export const eventChipText = (
     return { primary, secondary, titleAttr };
   }
 
+  const students = eventStudentLabel(event);
+  const rawTitle = String(event.title || "").trim();
+  const customTitle =
+    isGenericTitle(rawTitle) ||
+    (students && rawTitle.toLowerCase() === students.toLowerCase())
+      ? ""
+      : rawTitle;
+  const place = eventPlaceLabel(event);
+  const nameOrTitle =
+    students || customTitle || i18n.t("schedule.defaultLessonTitle");
+
   if (!opts?.detailed) {
-    const primary = [time, event.title].filter(Boolean).join(" ");
+    const primary = [time, nameOrTitle].filter(Boolean).join(" ");
     return { primary, secondary: "", titleAttr: primary };
   }
 
-  const students = eventStudentLabel(event);
-  const place = eventPlaceLabel(event);
-  const primary = [time, students || event.title].filter(Boolean).join(" ");
-  const secondary = place || (students ? event.title : "");
+  const primary = [time, nameOrTitle].filter(Boolean).join(" ");
+  const secondary = [students ? customTitle : "", place]
+    .filter(Boolean)
+    .join(" · ");
   const titleAttr = [primary, secondary].filter(Boolean).join(" · ");
   return { primary, secondary, titleAttr };
 };

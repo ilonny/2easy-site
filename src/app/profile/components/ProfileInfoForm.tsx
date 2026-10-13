@@ -19,6 +19,12 @@ import i18n from "@/i18n/config";
 import { checkResponse, fetchPostJson } from "@/api";
 import { writeToLocalStorage } from "@/auth/utils";
 import { toast } from "react-toastify";
+import {
+  brandInputClassNames,
+  brandModalClassNames,
+  brandPrimaryBtnClassName,
+  brandSecondaryBtnClassName,
+} from "@/components/brandUi";
 
 type TFieldList = {
   name: string;
@@ -82,15 +88,15 @@ export const ProfileInfoForm = () => {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center lg:items-start w-full max-w-full min-w-0">
-      <div className="flex justify-center w-full lg:w-auto shrink-0">
+    <div className="flex w-full max-w-full min-w-0 flex-col items-center gap-8 lg:flex-row lg:items-start lg:gap-16">
+      <div className="flex w-full shrink-0 justify-center lg:w-auto">
         <ProfileImagePicker />
       </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-full lg:min-w-0 lg:flex-1 lg:max-w-[min(100%,520px)]"
+        className="w-full max-w-full lg:min-w-0 lg:max-w-[min(100%,520px)] lg:flex-1"
       >
-        <p className="text-default-500 text-sm mb-5">
+        <p className="mb-5 text-sm font-bold tracking-brand text-brand-grayFont">
           <T k="profile.friendlyIntro" />
         </p>
         <Controller
@@ -102,13 +108,13 @@ export const ProfileInfoForm = () => {
               {...field}
               label={<T k="profile.name" />}
               className="mb-5"
-              radius="sm"
+              radius="lg"
               size="lg"
               errorMessage={errors?.name?.message}
               isInvalid={!!errors.name?.message}
-              variant="bordered"
+              variant="flat"
               labelPlacement="outside"
-              color="primary"
+              classNames={brandInputClassNames}
               placeholder={i18n.t("profile.namePlaceholder")}
             />
           )}
@@ -123,18 +129,18 @@ export const ProfileInfoForm = () => {
               isDisabled
               label={<T k="auth.email" />}
               className="mb-5"
-              radius="sm"
+              radius="lg"
               size="lg"
-              variant="bordered"
+              variant="flat"
               labelPlacement="outside"
-              color="primary"
+              classNames={brandInputClassNames}
             />
           )}
         />
         {!isStudent && (
           <>
             <div className="h-2" />
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-baseline">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline">
               <Controller
                 name="password"
                 control={control}
@@ -144,11 +150,11 @@ export const ProfileInfoForm = () => {
                     isDisabled
                     label={<T k="auth.password" />}
                     className="mb-5"
-                    radius="sm"
+                    radius="lg"
                     size="lg"
-                    variant="bordered"
+                    variant="flat"
                     labelPlacement="outside"
-                    color="primary"
+                    classNames={brandInputClassNames}
                     type="password"
                     value="*************"
                   />
@@ -157,7 +163,7 @@ export const ProfileInfoForm = () => {
               <Button
                 size="lg"
                 type="button"
-                className="text-small bg-black text-white"
+                className={brandSecondaryBtnClassName}
                 onClick={() => setChangePasswordIsVisible(true)}
               >
                 <T k="profile.change" />
@@ -166,6 +172,7 @@ export const ProfileInfoForm = () => {
                 size="lg"
                 isOpen={changePasswordIsVisible}
                 onClose={() => setChangePasswordIsVisible(false)}
+                classNames={brandModalClassNames}
               >
                 <ModalContent>
                   <ModalHeader></ModalHeader>
@@ -181,9 +188,8 @@ export const ProfileInfoForm = () => {
         )}
         <Button
           type="submit"
-          color="primary"
           size="lg"
-          className="mt-2 w-full sm:w-auto min-w-[180px]"
+          className={`mt-2 w-full min-w-[180px] sm:w-auto ${brandPrimaryBtnClassName}`}
           isLoading={saving}
           isDisabled={!isDirty || saving}
         >

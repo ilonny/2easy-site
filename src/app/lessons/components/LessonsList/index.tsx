@@ -31,7 +31,7 @@ type TProps = {
   canAttachLesson?: boolean;
   onPressCreate?: () => void;
   getLessons: () => void;
-  getCourses: () => void;
+  getCourses?: () => void;
   hideAttachButton?: boolean;
   showChangeStatusButton?: boolean;
   changeLessonStatus?: (relation_id?: number, status?: string) => void;
@@ -66,7 +66,7 @@ export const LessonsList: FC<TProps> = ({
   onPressCreateCourse,
   onPressCreateBoard,
   isCourses,
-  getCourses,
+  getCourses = () => {},
   openCourseModal,
   currentCourse,
   hideContextMenu,
@@ -250,59 +250,34 @@ export const LessonsList: FC<TProps> = ({
     router.push(`/course/${data.id}`);
   }, [checkSubscription, currentCourse?.id, router]);
 
-  const createCardFooterHeight = useMemo(() => {
-    if (currentCourse) {
-      return undefined;
-    }
-    return onPressCreateBoard ? 196 : 140;
-  }, [currentCourse, onPressCreateBoard]);
-
-  const createActionButtonClass =
-    "w-full flex-shrink-0 min-h-12 h-12";
+  const createPrimaryBtn =
+    "w-full min-h-10 rounded-[14px] bg-brand-violet text-xs font-bold tracking-brand text-white lg:min-h-11 lg:text-sm";
+  const createSecondaryBtn =
+    "w-full min-h-10 rounded-[14px] bg-brand-gray text-xs font-bold tracking-brand text-brand-violet lg:min-h-11 lg:text-sm";
 
   return (
-    <div className="flex items-start justify-start w-full flex-wrap">
+    <div className="mx-auto grid w-full max-w-full grid-cols-1 gap-x-3 gap-y-6 max-[1199px]:w-[80%] md:grid-cols-3 md:gap-x-4 md:gap-y-8 min-[1200px]:w-full min-[1200px]:grid-cols-4 min-[1200px]:gap-x-[30px] min-[1200px]:gap-y-10">
       {canCreateLesson && (
-        <div className="p-2 w-[100%] md:w-1/2 lg:w-[25%]">
-          <div
-            className="image-wrapper"
-            style={{
-              width: "100%",
-              height: 317,
-              position: "relative",
-              overflow: "hidden",
-              borderTopLeftRadius: 4,
-              borderTopRightRadius: 4,
-            }}
-          >
+        <div className="flex w-full min-w-0 flex-col gap-3.5">
+          <div className="relative aspect-square w-full overflow-hidden rounded-[20px] bg-brand-gray lg:rounded-[30px]">
             <div
+              className="absolute inset-0 bg-cover bg-center"
               style={{
-                width: "104%",
-                height: "104%",
-                background: `url(${
+                backgroundImage: `url(${
                   currentCourse?.image_path
                     ? getImageUrl(currentCourse?.image_path)
                     : Bg.src
-                }) center center no-repeat #fff`,
-                backgroundSize: "cover",
+                })`,
               }}
             />
           </div>
-          <div
-            className="p-4 bg-white flex items-center justify-center flex-col gap-2"
-            style={{
-              height: createCardFooterHeight,
-              minHeight: createCardFooterHeight,
-              borderBottomLeftRadius: 4,
-              borderBottomRightRadius: 4,
-            }}
-          >
+          <div className="flex flex-col gap-2">
             {(profile?.role_id === 1 || profile?.role_id === 2) &&
               currentCourse?.user_id === 1 &&
               subscription?.subscribe_type_id !== 1 && (
                 <Button
                   color="primary"
-                  className={createActionButtonClass}
+                  className={createPrimaryBtn}
                   size="lg"
                   onClick={copyCourse}
                   isLoading={copyCourseIsLoading}
@@ -314,7 +289,7 @@ export const LessonsList: FC<TProps> = ({
               (currentCourse && currentCourse?.user_id === profile?.id)) && (
               <Button
                 color="primary"
-                className={createActionButtonClass}
+                className={createPrimaryBtn}
                 size="lg"
                 onClick={onPressCreate}
               >
@@ -325,50 +300,46 @@ export const LessonsList: FC<TProps> = ({
               <Button
                 color="secondary"
                 variant="flat"
-                style={{ outline: "none" }}
-                className={`btn-secondary-bg ${createActionButtonClass}`}
+                className={createSecondaryBtn}
                 size="lg"
                 onClick={() => {
                   setCoursePageEditVisible(true);
                 }}
               >
-                <span style={{ color: "#3F28C6" }}><T k="lessons.editCourse" /></span>
+                <T k="lessons.editCourse" />
               </Button>
             )}
             {currentCourse && currentCourse?.user_id === profile?.id && (
               <Button
                 color="secondary"
                 variant="flat"
-                style={{ outline: "none" }}
-                className={`btn-secondary-bg ${createActionButtonClass}`}
+                className={createSecondaryBtn}
                 size="lg"
                 onClick={() => setCoursePageAttachLessonModal(true)}
               >
-                <span style={{ color: "#3F28C6" }}><T k="lessons.attachStudents" /></span>
+                <T k="lessons.attachStudents" />
               </Button>
             )}
             {!currentCourse && (
               <Button
                 color="secondary"
                 variant="flat"
-                style={{ outline: "none" }}
-                className={`btn-secondary-bg ${createActionButtonClass}`}
+                className={createSecondaryBtn}
                 size="lg"
                 onClick={onPressCreateCourse}
               >
-                <span style={{ color: "#3F28C6" }}><T k="lessons.createCourse" /></span>
+                <T k="lessons.createCourse" />
               </Button>
             )}
             {!currentCourse && onPressCreateBoard && (
               <Button
                 color="secondary"
                 variant="flat"
-                style={{ outline: "none" }}
-                className={`btn-secondary-bg ${createActionButtonClass}`}
+                className={createSecondaryBtn}
                 size="lg"
                 onClick={onPressCreateBoard}
               >
-                <span style={{ color: "#3F28C6" }}><T k="boards.createBoard" /></span>
+                <T k="boards.createBoard" />
               </Button>
             )}
           </div>

@@ -1,8 +1,8 @@
 "use client";
 
 import { fetchGet } from "@/api";
-import { ContentWrapper } from "@/components";
-import { BreadcrumbItem, Breadcrumbs, Input, Image } from "@nextui-org/react";
+import { CatalogPageShell } from "@/components";
+import { Input, Image } from "@nextui-org/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCheckSubscription } from "../subscription/helpers";
 import { useRouter } from "next/navigation";
@@ -60,65 +60,42 @@ export default function GrammarPage() {
   }, [lessonsSearchString, lessons]);
 
   return (
-    <main style={{ backgroundColor: "#f9f9f9" }}>
-      <ContentWrapper>
-        <div className="w-full min-w-0">
-          <div className="h-8 md:h-10 lg:h-14" />
-          <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
-            <Breadcrumbs>
-            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
-            <BreadcrumbItem href="/grammar"><T k="grammarPage.breadcrumb" /></BreadcrumbItem>
-          </Breadcrumbs>
-          </div>
+    <CatalogPageShell
+      title={<T k="grammarPage.title" />}
+      subtitle={<T k="grammarPage.subtitle" />}
+    >
+      {isLoading && (
+        <div className="flex h-[500px] w-full items-center justify-center">
+          <Image src={Dino.src} alt="dino animated" width={150} height={150} />
         </div>
-        <div className="h-6 md:h-8 lg:h-10" />
-        <div className="h-6 md:h-8 lg:h-10" />
-        <h1 className="text-center text-[#3f28c6] font-bold text-[26px] leading-tight px-2 sm:text-[32px] md:text-[38px] lg:text-[44px]">
-          <T k="grammarPage.title" />
-        </h1>
-        <p
-          className="max-w-[600px] text-center m-auto px-2 text-base sm:text-lg md:text-xl font-medium leading-relaxed"
-        >
-          <T k="grammarPage.subtitle" />
-        </p>
-        <div className="h-6 md:h-8 lg:h-10" />
-        <div className="h-6 md:h-8 lg:h-10" />
-        {isLoading && (
-          <div className="w-full h-[500px] flex justify-center items-center ">
-            <Image
-              src={Dino.src}
-              alt="dino animated"
-              width={150}
-              height={150}
-            />
-          </div>
-        )}
-        <div className="w-full max-w-[525px] m-auto">
-          <Input
-            value={lessonsSearchString}
-            onValueChange={setLessonsSearchString}
-            placeholder={i18n.t("lessons.searchLessons")}
-            size="lg"
-            classNames={{ inputWrapper: "bg-white hove" }}
-            startContent={
-              <Image src={Loupe.src} alt="search" style={{ borderRadius: 0 }} />
-            }
-          />
-        </div>
-        <div className="h-10" />
-        <LessonsList
-          canCreateLesson={false}
-          lessons={searchedLessons}
-          getLessons={getLessons}
-          hideAttachButton={true}
-          hideContextMenu={false}
-          showChangeStatusButton={false}
-          hideDeleteLessonButton={true}
-          isStudent={false}
+      )}
+      <div className="mx-auto w-full max-w-[525px]">
+        <Input
+          value={lessonsSearchString}
+          onValueChange={setLessonsSearchString}
+          placeholder={i18n.t("lessons.searchLessons")}
+          size="lg"
+          classNames={{
+            inputWrapper:
+              "rounded-[14px] bg-brand-gray shadow-none hover:bg-[#e6e6ea] group-data-[focus=true]:bg-brand-gray",
+            input: "font-bold tracking-brand text-brand-black",
+          }}
+          startContent={
+            <Image src={Loupe.src} alt="search" style={{ borderRadius: 0 }} />
+          }
         />
-        <div className="h-10" />
-        <div className="h-10" />
-      </ContentWrapper>
-    </main>
+      </div>
+      <LessonsList
+        canCreateLesson={false}
+        lessons={searchedLessons}
+        getLessons={getLessons}
+        getCourses={() => {}}
+        hideAttachButton={true}
+        hideContextMenu={false}
+        showChangeStatusButton={false}
+        hideDeleteLessonButton={true}
+        isStudent={false}
+      />
+    </CatalogPageShell>
   );
 }

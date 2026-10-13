@@ -3,36 +3,36 @@
 }
 
 .boardCard:hover .imageBg {
-  transform: scale(1.1);
+  transform: scale(1.03);
 }
 
-.boardCard:hover .shadow {
+.boardCard:hover .menuShadow {
   opacity: 1;
 }
 
 .boardCard:hover .btnWrapper {
-  transform: translateY(0);
+  opacity: 1;
 }
 
-.shadow {
+.menuShadow {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.12);
   opacity: 0;
-  transition: opacity 500ms ease;
+  transition: opacity 300ms ease;
   position: absolute;
-  left: 0;
-  top: 0;
+  inset: 0;
+  z-index: 1;
 }
 
 .btnWrapper {
-  transform: translateY(-100%);
+  opacity: 0;
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 10px;
+  top: 10px;
   z-index: 20;
-  transition: all 100ms ease;
+  transition: opacity 150ms ease;
 }
 
 .imageBg {
@@ -40,5 +40,19 @@
   height: 100%;
   background-size: cover !important;
   background-position: center !important;
-  transition: all 250ms ease;
+  transition: transform 300ms ease;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .btnWrapper {
+    opacity: 1;
+  }
+
+  .menuShadow {
+    opacity: 0;
+  }
+
+  .boardCard:hover .imageBg {
+    transform: none;
+  }
 }

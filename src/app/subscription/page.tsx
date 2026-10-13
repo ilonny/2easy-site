@@ -1,61 +1,43 @@
 "use client";
-import Link from "next/link";
-import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
-import { ContentWrapper } from "@/components";
-import { SubscribeTariffs } from "@/subscribe/components/SubscribeTariffs";
-import { SubscribeFreeBlock } from "@/subscribe";
+
+import { CatalogPageShell } from "@/components";
+import { MainTariffs } from "@/components/MainTariffs";
 import { AuthContext } from "@/auth";
 import { useContext } from "react";
 import { SibscribeContext } from "@/subscribe/context";
+import { SubscribeCancel } from "@/subscribe/components/SubscribeCancel";
 import { T } from "@/i18n/T";
 
-export default function StartRegistrationPage() {
-  const { isAuthorized, authIsLoading } = useContext(AuthContext);
+export default function SubscriptionPage() {
+  const { isAuthorized } = useContext(AuthContext);
   const { subscription } = useContext(SibscribeContext);
 
   const hasTariff =
     subscription?.subscribe_type_id && subscription?.subscribe_type_id !== 1;
 
   return (
-    <main style={{ backgroundColor: "#f9f9f9" }}>
-      <ContentWrapper>
-        <div className="w-full max-w-[771px] min-w-0">
-          <div className="h-8 md:h-10 lg:h-14" />
-          <div className="overflow-x-auto max-w-full [-webkit-overflow-scrolling:touch] pb-0.5">
-            <Breadcrumbs>
-            <BreadcrumbItem href="/"><T k="editor.home" /></BreadcrumbItem>
-            <BreadcrumbItem><T k="header.subscription" /></BreadcrumbItem>
-          </Breadcrumbs>
-          </div>
-        </div>
-        <div className="h-6 md:h-8 lg:h-10" />
-        <div className="h-6 md:h-8 lg:h-10" />
-        <div className="flex flex-col items-center w-full max-w-full px-0">
-          <h1 className="text-primary font-bold text-xl sm:text-2xl md:text-3xl uppercase text-center px-1">
-            <T k="subscription.title" />
-          </h1>
-          <div className="h-3" />
-          <h2 className="font-medium text-base sm:text-lg text-center px-2">
-            <T k="subscription.page.subtitle" />
-          </h2>
-          <div className="h-5" />
-          <p className="text-center max-w-[750px] px-2 text-sm sm:text-base leading-relaxed">
+    <CatalogPageShell
+      title={<T k="subscription.title" />}
+      subtitle={
+        <>
+          <T k="subscription.page.subtitle" />
+          <br />
+          <br />
+          <span className="font-bold text-brand-grayFont">
             <T k="subscription.page.description1" />
             <br />
             <br />
             <T k="subscription.page.description2" />
-          </p>
-          <div className="h-10" />
-          <div className="h-10" />
-
-          <SubscribeTariffs hideTitle />
-          <div className="h-10" />
-          <div className="h-10" />
-          <div className="h-10" />
-          <div className="h-10" />
-          <div className="h-10" />
+          </span>
+        </>
+      }
+    >
+      <MainTariffs embedded hideTitle />
+      {isAuthorized && hasTariff ? (
+        <div className="flex justify-center">
+          <SubscribeCancel />
         </div>
-      </ContentWrapper>
-    </main>
+      ) : null}
+    </CatalogPageShell>
   );
 }

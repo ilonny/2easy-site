@@ -1,21 +1,14 @@
 .page {
-  min-height: calc(100dvh - 72px);
-  background: #f5f5f7;
+  background: #fff;
 }
 
 .shell {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 12px;
-  height: calc(100dvh - 140px);
-  min-height: 560px;
-}
-
-@media (max-width: 1023px) {
-  .shell {
-    height: calc(100dvh - 160px);
-    min-height: 480px;
-  }
+  min-height: 0;
+  overflow: hidden;
 }
 
 .mainRow {
@@ -31,9 +24,9 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: #fff;
-  border: 1px solid #d2d2d7;
-  border-radius: 14px;
+  background: #f1f1f4;
+  border: none;
+  border-radius: 20px;
   padding: 12px;
   overflow: auto;
 }
@@ -49,7 +42,8 @@
     z-index: 40;
     inset: auto 12px 12px 12px;
     max-height: 55dvh;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+    background: #fff;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -59,9 +53,9 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border: 1px solid #d2d2d7;
-  border-radius: 14px;
+  background: #f1f1f4;
+  border: none;
+  border-radius: 20px;
   overflow: hidden;
 }
 
@@ -71,8 +65,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 10px 14px;
-  border-bottom: 1px solid #e8e8ed;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(24, 24, 24, 0.06);
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
 }
@@ -87,71 +81,75 @@
 
 .title {
   font-size: 17px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  color: #1d1d1f;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #181818;
   text-transform: capitalize;
   min-width: 0;
 }
 
 .segment {
   display: inline-flex;
-  padding: 2px;
-  border-radius: 9px;
-  background: #f2f2f7;
+  padding: 4px;
+  border-radius: 14px;
+  background: #fff;
 }
 
 .segmentBtn {
   border: 0;
   background: transparent;
-  color: #1d1d1f;
+  color: #181818;
   font-size: 13px;
-  font-weight: 550;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   padding: 6px 12px;
-  border-radius: 7px;
+  border-radius: 10px;
   cursor: pointer;
 }
 
 .segmentBtnActive {
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  background: #5a42d4;
+  color: #fff;
 }
 
 .navBtn {
   width: 30px;
   height: 30px;
-  border-radius: 8px;
-  border: 1px solid #d2d2d7;
+  border-radius: 10px;
+  border: none;
   background: #fff;
-  color: #1d1d1f;
+  color: #181818;
   font-size: 16px;
   line-height: 1;
   cursor: pointer;
 }
 
 .navBtn:hover {
-  background: #f5f5f7;
+  background: #e6e6ea;
 }
 
 .todayBtn {
   height: 30px;
   padding: 0 12px;
-  border-radius: 8px;
-  border: 1px solid #d2d2d7;
+  border-radius: 10px;
+  border: none;
   background: #fff;
   font-size: 13px;
-  font-weight: 550;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #181818;
   cursor: pointer;
 }
 
 .todayBtn:hover {
-  background: #f5f5f7;
+  background: #e6e6ea;
 }
 
 .viewBody {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  background: #fff;
 }
 
 @media (max-width: 1023px) {
@@ -168,19 +166,22 @@
   border: 0;
   background: transparent;
   text-align: left;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 8px 10px;
   font-size: 13px;
-  color: #1d1d1f;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #181818;
   cursor: pointer;
 }
 
 .studentItem:hover {
-  background: #f5f5f7;
+  background: #fff;
 }
 
 .studentItemActive {
-  background: #eef5ff;
+  background: #f0edfd;
+  color: #5a42d4;
 }
 
 .dot {
@@ -195,7 +196,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: #ff3b30;
+  background: #f7531f;
   z-index: 2;
   pointer-events: none;
 }
@@ -208,7 +209,7 @@
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: #ff3b30;
+  background: #f7531f;
 }
 
 .mobileBar {
@@ -226,7 +227,7 @@
 .headerBlock {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
   margin-bottom: 8px;
 }
 
@@ -239,15 +240,30 @@
 }
 
 .pageTitle {
-  font-size: 28px;
+  font-size: 25px;
   font-weight: 700;
-  letter-spacing: -0.03em;
-  color: #1d1d1f;
+  letter-spacing: -0.01em;
+  color: #181818;
   margin: 0;
 }
 
+@media (min-width: 1024px) {
+  .pageTitle {
+    font-size: 40px;
+  }
+}
+
 .pageSubtitle {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: #86868b;
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #6e6e74;
+}
+
+.tabRow {
+  display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  gap: 8px;
 }

@@ -2,10 +2,8 @@ import { ProfileEmptyLessons } from "@/app/lessons/components/ProfileEmptyLesson
 import { useCallback, useEffect, useState } from "react";
 import {
   Button,
-  Card,
   Checkbox,
   Chip,
-  Divider,
   Modal,
   ModalBody,
   ModalContent,
@@ -23,6 +21,13 @@ import { useCheckSubscription } from "@/app/subscription/helpers";
 import { T } from "@/i18n/T";
 import { UserAvatar } from "@/components/UserAvatar";
 import { StudentPasswordReveal } from "../StudentPasswordReveal";
+import {
+  brandDangerBtnClassName,
+  brandModalClassNames,
+  brandPrimaryBtnClassName,
+  brandSecondaryBtnClassName,
+} from "@/components/brandUi";
+
 type TProps = {
   hideAddButton?: boolean;
   hidePopoverButton?: boolean;
@@ -51,12 +56,10 @@ export const StudentList = (props: TProps) => {
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
   const { students, getStudents, deleteStudent } = useStudentList(studentsList);
   const [chosenStudent, setChosenStudent] = useState(null);
-  const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     getStudents();
-    setPopoverIsOpen(false);
   }, [createIsVisible, deleteIsVisible, getStudents]);
 
   const onPressCreateGroup = useCallback((student) => {
@@ -88,10 +91,7 @@ export const StudentList = (props: TProps) => {
         />
       )}
       {!!students?.length && (
-        <div
-          className="w-[100%] max-w-[600px] gap-5 flex flex-wrap flex-col"
-          style={{ cursor: "pointer" }}
-        >
+        <div className="mx-auto flex w-full max-w-[600px] cursor-pointer flex-col flex-wrap gap-3">
           {students?.map((student) => {
             const isChosen = chosenIds?.includes(student?.id);
             return (
@@ -105,19 +105,19 @@ export const StudentList = (props: TProps) => {
                   router.push("/student-account/" + student?.id);
                 }}
               >
-                <Card
-                  radius="md"
-                  className="p-4"
-                  style={{ backgroundColor: isChosen ? "#eeebff" : "#fff" }}
-                  shadow="none"
+                <div
+                  className={`rounded-[20px] p-4 transition-colors lg:rounded-[24px] ${
+                    isChosen
+                      ? "bg-[#F0EDFD]"
+                      : "bg-brand-gray hover:bg-[#e6e6ea]"
+                  }`}
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="flex items-start justify-between">
                     <div className="flex items-center">
                       {onClickStudent && (
                         <div className="w-[50px] pl-2">
                           <Checkbox
                             isSelected={isChosen}
-                            // Parent row already toggles selection; avoid double-toggle.
                             classNames={{ base: "pointer-events-none" }}
                           />
                         </div>
@@ -128,20 +128,22 @@ export const StudentList = (props: TProps) => {
                           avatar={student.avatar}
                           size={48}
                         />
-                        <div className="">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-bold">{student.name}</p>
-                            <p className="font-light">{student.email}</p>
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-bold tracking-brand text-brand-black">
+                              {student.name}
+                            </p>
+                            <p className="text-sm font-bold tracking-brand text-brand-grayFont">
+                              {student.email}
+                            </p>
                           </div>
                           {!!student.tag && (
-                            <div className="flex items-center">
-                              <p className="mt-4">
-                                <Chip color="warning">
-                                  <span className="text-white">
-                                    {student.tag}
-                                  </span>
-                                </Chip>
-                              </p>
+                            <div className="mt-2 flex items-center">
+                              <Chip className="rounded-2xl bg-[#E9FFCA] text-[#5F8E1C]">
+                                <span className="text-[10px] font-bold tracking-brand lg:text-xs">
+                                  {student.tag}
+                                </span>
+                              </Chip>
                             </div>
                           )}
                           {!hidePopoverButton && !onClickStudent && (
@@ -157,11 +159,13 @@ export const StudentList = (props: TProps) => {
                           color="foreground"
                           placement="bottom-end"
                           key={chosenStudent?.id}
-                          // isOpen={popoverIsOpen}
-                          // onOpenChange={(open) => setPopoverIsOpen(open)}
                         >
                           <PopoverTrigger>
-                            <Button isIconOnly>
+                            <Button
+                              isIconOnly
+                              className="rounded-[14px] bg-brand-black/40 text-white backdrop-blur-md hover:!bg-brand-black/55"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <Image src={Ellipse} alt="icon" />
                             </Button>
                           </PopoverTrigger>
@@ -170,10 +174,10 @@ export const StudentList = (props: TProps) => {
                               <>
                                 <Button
                                   fullWidth
-                                  color="primary"
+                                  className={brandPrimaryBtnClassName}
                                   onClick={() => {
                                     router.push(
-                                      "/student-account/" + student?.id
+                                      "/student-account/" + student?.id,
                                     );
                                   }}
                                 >
@@ -184,7 +188,7 @@ export const StudentList = (props: TProps) => {
                             )}
                             <Button
                               fullWidth
-                              color="primary"
+                              className={brandPrimaryBtnClassName}
                               onClick={(e) => {
                                 if (checkSubscription()) {
                                   e.preventDefault();
@@ -199,7 +203,7 @@ export const StudentList = (props: TProps) => {
                             <div className="h-2" />
                             <Button
                               fullWidth
-                              color="danger"
+                              className={brandDangerBtnClassName}
                               variant="light"
                               onClick={() => {
                                 if (checkSubscription()) {
@@ -214,16 +218,17 @@ export const StudentList = (props: TProps) => {
                       </div>
                     )}
                   </div>
-                </Card>
+                </div>
               </div>
             );
           })}
           {!hideAddButton && (
             <Button
-              radius="md"
-              color="primary"
-              variant={btnSecondary ? "bordered" : undefined}
-              className="px-10"
+              className={`px-10 ${
+                btnSecondary
+                  ? brandSecondaryBtnClassName
+                  : brandPrimaryBtnClassName
+              }`}
               onClick={() => {
                 if (checkSubscription()) {
                   onPressCreateGroup(null);
@@ -236,7 +241,6 @@ export const StudentList = (props: TProps) => {
           )}
         </div>
       )}
-      {/* <div className="h-10" /> */}
       <CreateStudentModalForm
         key={chosenStudent?.id}
         chosenStudent={chosenStudent}
@@ -248,6 +252,7 @@ export const StudentList = (props: TProps) => {
         size="xl"
         isOpen={deleteIsVisible}
         onClose={() => setDeleteIsVisible(false)}
+        classNames={brandModalClassNames}
       >
         <ModalContent>
           <ModalHeader>
@@ -260,7 +265,7 @@ export const StudentList = (props: TProps) => {
           </ModalHeader>
           <ModalBody>
             <Button
-              color="danger"
+              className={brandDangerBtnClassName}
               variant="light"
               onClick={() => {
                 deleteStudent(chosenStudent.id).then(() => {

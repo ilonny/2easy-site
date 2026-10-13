@@ -41,6 +41,30 @@ import { getImageUrl } from "@/app/editor/helpers";
 import { CreateHomeworkModal } from "../CreateHomeworkModal";
 import { CreateIndividualHomeworkModal } from "../CreateIndividualHomeworkModal";
 import { T } from "@/i18n/T";
+import { LevelIcon, Tag, TTagTone } from "@/components/Tag";
+
+const normalizeLevel = (tag: string) =>
+  tag
+    .replace(
+      /[АВС]/g,
+      (letter) => ({ А: "A", В: "B", С: "C" })[letter] ?? letter,
+    )
+    .replace(/\s+/g, "")
+    .replace(/[–—]+|-{2,}/g, "-")
+    .replaceAll("[", "")
+    .replaceAll("]", "")
+    .toUpperCase();
+
+const LEVEL_PATTERN = /^[ABC][12]\+?(-[ABC]?[12]\+?)?$/;
+
+const levelTone = (level: string): TTagTone =>
+  level.startsWith("A") ? "green" : level.startsWith("B") ? "mint" : "blue";
+
+const actionBtnClassName =
+  "w-full min-h-10 rounded-[14px] text-xs font-bold tracking-brand lg:text-sm";
+const primaryActionClassName = `${actionBtnClassName} bg-brand-violet text-white`;
+const secondaryActionClassName = `${actionBtnClassName} border border-brand-violet/30 bg-white text-brand-violet`;
+
 
 type TProps = {
   lesson: TLesson;
@@ -482,62 +506,44 @@ export const LessonCard: FC<TProps> = ({
     openTeacherLessonForStudent,
   ]);
 
-  const tags = useMemo(() => {
-    if (isStudent) {
-      return <></>;
+  const tagMeta = useMemo(() => {
+    if (isStudent || !lesson?.tags) {
+      return { level: undefined as string | undefined, topic: undefined as string | undefined, extras: [] as string[] };
     }
-    if (lesson?.tags) {
-      return (
-        <div className="flex flex-wrap gap-2 items-center">
-          {lesson?.tags?.split(",")?.map((tag) => {
-            return (
-              <Button
-                size="sm"
-                color="primary"
-                radius="full"
-                className="text-white"
-                key={tag}
-                onPress={onPressLesson}
-              >
-                {tag.replaceAll("[", "").replaceAll("]", "")}
-              </Button>
-            );
-          }, [])}
-        </div>
-      );
-    }
-  }, [lesson?.tags, isStudent, onPressLesson]);
+    const list = lesson.tags
+      .split(",")
+      .map((tag) => tag.trim().replaceAll("[", "").replaceAll("]", ""))
+      .filter(Boolean);
+    const level = list.map(normalizeLevel).find((tag) => LEVEL_PATTERN.test(tag));
+    const topic = list.find(
+      (tag) => tag !== "18+" && !LEVEL_PATTERN.test(normalizeLevel(tag)),
+    );
+    const extras = list.filter(
+      (tag) =>
+        tag !== topic &&
+        normalizeLevel(tag) !== level &&
+        !LEVEL_PATTERN.test(normalizeLevel(tag)),
+    );
+    return { level, topic, extras };
+  }, [lesson?.tags, isStudent]);
 
   return (
     <div
-      className={`p-2 w-[100%] md:w-1/2 lg:w-[25%] snap-start ${styles["lesson-card"]} flex-shrink-0`}
+      className={`group flex w-full min-w-0 flex-col gap-3.5 snap-start ${styles["lesson-card"]}`}
     >
       <div
         onClick={onPressLesson}
-        className="image-wrapper"
-        style={{
-          width: "100%",
-          height: 317,
-          position: "relative",
-          overflow: "hidden",
-          borderTopLeftRadius: 4,
-          borderTopRightRadius: 4,
-        }}
+        className="relative aspect-square w-full overflow-hidden rounded-[20px] bg-brand-gray lg:rounded-[30px]"
       >
         <div
-          className={styles["image-bg"]}
+          className={`absolute inset-0 ${styles["image-bg"]}`}
           style={{
-            width: "100%",
-            height: "100%",
-            background: `url(${
+            backgroundImage: `url(${
               lesson.image_path ? getImageUrl(lesson.image_path) : Bg.src
             })`,
-            // backgroundPosition: "center",
-            transition: "all 500ms ease",
-            // backgroundSize: "cover",
           }}
         />
-        <div className={styles["shadow"]} />
+        <div className={styles["menu-shadow"]} />
         {!isStudent && !disableClick && !hideContextMenu && (
           <div className={styles["btn-wrapper"]}>
             <Popover
@@ -551,7 +557,12 @@ export const LessonCard: FC<TProps> = ({
               }}
             >
               <PopoverTrigger>
-                <Button isIconOnly variant="flat" className="max-sm:min-h-10 max-sm:min-w-10 max-sm:touch-manipulation">
+                <Button
+                  isIconOnly
+                  variant="flat"
+                  className="rounded-[14px] bg-brand-black/40 text-white backdrop-blur-md hover:!bg-brand-black/55 max-sm:min-h-10 max-sm:min-w-10 max-sm:touch-manipulation"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Image src={Ellipse} alt="icon" />
                 </Button>
               </PopoverTrigger>
@@ -688,63 +699,56 @@ export const LessonCard: FC<TProps> = ({
           </div>
         )}
         {isClosed && (
-          <div
-            style={{
-              position: "absolute",
-              background: "rgba(255, 255, 255, 0.5)",
-              width: "100%",
-              height: "100%",
-              top: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <div className="absolute inset-0 z-[1] flex items-center justify-center bg-white/50">
             <Image src={LockIcon} alt="locked" />
           </div>
         )}
       </div>
-      <div
-        onClick={onPressLesson}
-        className="p-4 bg-white "
-        style={{
-          borderBottomLeftRadius: 4,
-          borderBottomRightRadius: 4,
-          // height: "135px",
-        }}
-      >
-        <p className="text-black font-bold" style={{ fontSize: 18 }}>
+      <div onClick={onPressLesson} className="flex flex-col gap-3">
+        {(tagMeta.level || tagMeta.topic || tagMeta.extras.length > 0) && (
+          <div className="flex min-w-0 flex-wrap items-center gap-[5px]">
+            {tagMeta.level && (
+              <Tag tone={levelTone(tagMeta.level)} icon={<LevelIcon />}>
+                {tagMeta.level}
+              </Tag>
+            )}
+            {tagMeta.topic && (
+              <Tag className="min-w-0 !shrink">
+                <span className="min-w-0 truncate">{tagMeta.topic}</span>
+              </Tag>
+            )}
+            {tagMeta.extras.map((tag) => (
+              <Tag key={tag} tone="white" className="bg-brand-gray">
+                {tag}
+              </Tag>
+            ))}
+          </div>
+        )}
+        <p className="text-sm font-bold leading-[1.3] tracking-brand text-brand-black lg:text-base lg:leading-[22px]">
           {lesson.title}
         </p>
-        <div className="h-2" />
-        {!!tags && tags}
-        <div className="h-2" />
         {!!lesson?.["lesson_relations.status"] && (
-          <>
-            <LessonStatus
-              status={lesson?.["lesson_relations.status"]}
-              isCourses={isCourses}
-            />
-            <div className="h-2" />
-          </>
+          <LessonStatus
+            status={lesson?.["lesson_relations.status"]}
+            isCourses={isCourses}
+          />
         )}
         {!!lesson.description && (
-          <div style={{ whiteSpace: "break-spaces", fontSize: 14 }}>
+          <p className="line-clamp-2 whitespace-pre-wrap text-sm font-bold leading-[1.3] tracking-brand text-brand-grayFont lg:line-clamp-3 lg:leading-[19px]">
             {lesson.description.length > 100
               ? lesson.description.slice(0, 110) + "..."
               : lesson.description}
-          </div>
+          </p>
         )}
         {!!showLessonBottomActions &&
           !isCourses &&
           (isTeacher && studentId ? (
             <>
-              <div className="h-4"></div>
               {homeworkAlreadyExists ? (
                 <Button
                   color="secondary"
                   variant="bordered"
-                  className="w-full"
+                  className={secondaryActionClassName}
                   size="md"
                   onClick={async (e) => {
                     e.stopPropagation();
@@ -796,7 +800,7 @@ export const LessonCard: FC<TProps> = ({
                 <Button
                   color="secondary"
                   variant="bordered"
-                  className="w-full"
+                  className={secondaryActionClassName}
                   size="md"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -809,14 +813,13 @@ export const LessonCard: FC<TProps> = ({
             </>
           ) : isTeacher && !studentId && currentCourse ? (
             <>
-              <div className="h-4"></div>
               {courseHomeworkCheck.loaded &&
               courseHomeworkCheck.exists &&
               courseHomeworkCheck.homeworkId ? (
                 <Button
                   color="secondary"
                   variant="bordered"
-                  className="w-full"
+                  className={secondaryActionClassName}
                   size="md"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -829,7 +832,7 @@ export const LessonCard: FC<TProps> = ({
                 <Button
                   color="secondary"
                   variant="bordered"
-                  className="w-full"
+                  className={secondaryActionClassName}
                   size="md"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -842,11 +845,10 @@ export const LessonCard: FC<TProps> = ({
             </>
           ) : isStudent && (homeworkAlreadyExists || is2easyLesson) ? (
             <>
-              <div className="h-4"></div>
               <Button
                 color="secondary"
                 variant="bordered"
-                className="w-full"
+                className={secondaryActionClassName}
                 size="md"
                 onClick={async (e) => {
                   e.stopPropagation();
@@ -885,10 +887,9 @@ export const LessonCard: FC<TProps> = ({
           ) : null)}
         {!!showPrimaryStartLessonButton && !isClosed && (
           <>
-            <div className="h-4"></div>
             <Button
               color="primary"
-              className="w-full"
+              className={primaryActionClassName}
               size="md"
               isDisabled={isDisabled}
               onClick={() => {
@@ -932,10 +933,9 @@ export const LessonCard: FC<TProps> = ({
         )}
         {isClosed && (
           <>
-            <div className="h-4"></div>
             <Button
               color="primary"
-              className="w-full"
+              className={primaryActionClassName}
               size="md"
               isDisabled={isDisabled}
               onClick={onPressLesson}
@@ -1044,7 +1044,7 @@ export const LessonCard: FC<TProps> = ({
               </Button>
               <Link
                 href="/login"
-                className="text-[#3F28C6] underline w-[100%] text-center block"
+                className="block w-full text-center font-bold tracking-brand text-brand-violet underline"
               >
                 <T
                   k="auth.alreadyHaveAccount"
@@ -1059,7 +1059,7 @@ export const LessonCard: FC<TProps> = ({
         size="xl"
         isOpen={regModal}
         onClose={() => setRegModal(false)}
-        style={{ background: "#F9F9F9" }}
+        className="bg-white"
         className="p-12"
         scrollBehavior="inside"
       >

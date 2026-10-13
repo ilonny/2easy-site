@@ -3,52 +3,52 @@
 }
 
 .lesson-card:hover .image-bg {
-  transform: scale(1.1);
+  transform: scale(1.03);
 }
 
-.lesson-card:hover .shadow {
+.lesson-card:hover .menu-shadow {
   opacity: 1;
 }
 
 .lesson-card:hover .btn-wrapper {
-  transform: translateY(0);
+  opacity: 1;
 }
 
-.shadow {
+.menu-shadow {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.12);
   opacity: 0;
-  transition: opacity 500ms ease;
+  transition: opacity 300ms ease;
   position: absolute;
-  left: 0;
-  top: 0;
+  inset: 0;
+  z-index: 1;
 }
 
 .btn-wrapper {
-  transform: translateY(-100%);
+  opacity: 0;
   position: absolute;
-  right: 0;
-  top: 0;
-  transition: all 100ms ease;
+  right: 10px;
+  top: 10px;
+  transition: opacity 150ms ease;
   z-index: 2;
 }
 
 .image-bg {
   background-size: cover !important;
   background-position: center !important;
-  transition: all 250ms ease;
+  transition: transform 300ms ease;
 }
 
 /* Touch: keep card menu visible without hover */
 @media (hover: none), (pointer: coarse) {
   .btn-wrapper {
-    transform: translateY(0);
+    opacity: 1;
   }
 
-  .shadow {
-    opacity: 0.12;
+  .menu-shadow {
+    opacity: 0;
   }
 
   .lesson-card:hover .image-bg {

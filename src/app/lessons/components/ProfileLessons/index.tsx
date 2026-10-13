@@ -1,6 +1,6 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { Button, Input, Tab, Tabs, Image } from "@nextui-org/react";
+import { Input, Image } from "@nextui-org/react";
 import {
   Suspense,
   useCallback,
@@ -29,6 +29,7 @@ import { T } from "@/i18n/T";
 import { DictionaryModal } from "@/app/dictionary/components/DictionaryModal";
 import { useBoardsTab } from "@/app/board/hooks/useBoardsTab";
 import { BoardsTabPanel } from "@/app/board/components/BoardsTabPanel";
+import { BrandPill } from "@/components/BrandPill";
 
 const StudentCabinetTabSync = ({
   studentId,
@@ -507,7 +508,7 @@ export const ProfileLessons = (props: TProps) => {
           : lessonsListIslLoading);
 
   return (
-    <>
+    <div className="relative z-0 flex w-full min-w-0 flex-col gap-6 lg:gap-8">
       {!!studentId && (
         <Suspense fallback={null}>
           <StudentCabinetTabSync
@@ -517,135 +518,104 @@ export const ProfileLessons = (props: TProps) => {
         </Suspense>
       )}
       {!hideTabs && (
-        <>
+        <div className="relative z-0 flex flex-col gap-4 min-[1200px]:gap-6">
           {!!profile?.name ? (
-            <>
-              <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-5 justify-center px-1">
-                <Button
-                  radius="full"
-                  color="primary"
-                  variant={tabIndex === "userLessons" ? "solid" : "faded"}
+            <div className="flex flex-wrap justify-center gap-1.5 px-1 min-[1200px]:gap-3">
+              <BrandPill
+                active={tabIndex === "userLessons"}
+                onClick={() => {
+                  setTabIndex("userLessons");
+                  router.push("/lesson_plans");
+                }}
+              >
+                <T k="lessons.myLessons" />
+              </BrandPill>
+              {!!courses.some((c) => c.user_id !== 1) && (
+                <BrandPill
+                  active={tabIndex === "userCourses"}
                   onClick={() => {
-                    setTabIndex("userLessons");
+                    setTabIndex("userCourses");
                     router.push("/lesson_plans");
                   }}
                 >
-                  <T k="lessons.myLessons" />
-                </Button>
-                {!!courses.some((c) => c.user_id !== 1) && (
-                  <Button
-                    radius="full"
-                    color="primary"
-                    variant={tabIndex === "userCourses" ? "solid" : "faded"}
-                    onClick={() => {
-                      setTabIndex("userCourses");
-                      router.push("/lesson_plans");
-                    }}
-                  >
-                    <T k="lessons.myCourses" />
-                  </Button>
-                )}
-                {showBoardsTabButton ? (
-                  <Button
-                    radius="full"
-                    color="primary"
-                    variant={tabIndex === "userBoards" ? "solid" : "faded"}
-                    onClick={() => {
-                      setTabIndex("userBoards");
-                      router.push("/lesson_plans");
-                    }}
-                  >
-                    <T k="boards.myBoards" />
-                  </Button>
-                ) : null}
-                <Button
-                  radius="full"
-                  color="primary"
-                  variant={tabIndex === "savedLessons" ? "solid" : "faded"}
+                  <T k="lessons.myCourses" />
+                </BrandPill>
+              )}
+              {showBoardsTabButton ? (
+                <BrandPill
+                  active={tabIndex === "userBoards"}
                   onClick={() => {
-                    setTabIndex("savedLessons");
+                    setTabIndex("userBoards");
                     router.push("/lesson_plans");
                   }}
                 >
-                  <T k="lessons.lessons2Easy" />
-                </Button>
-                {courses.some((c) => c.user_id === 1) && (
-                  <Button
-                    radius="full"
-                    color="primary"
-                    variant={tabIndex === "2easyCourses" ? "solid" : "faded"}
-                    onClick={() => {
-                      setTabIndex("2easyCourses");
-                      router.push("/lesson_plans");
-                    }}
-                  >
-                    <T k="lessons.courses2Easy" />
-                  </Button>
-                )}
-                <Button
-                  radius="full"
-                  color="primary"
-                  variant="faded"
+                  <T k="boards.myBoards" />
+                </BrandPill>
+              ) : null}
+              <BrandPill
+                active={tabIndex === "savedLessons"}
+                onClick={() => {
+                  setTabIndex("savedLessons");
+                  router.push("/lesson_plans");
+                }}
+              >
+                <T k="lessons.lessons2Easy" />
+              </BrandPill>
+              {courses.some((c) => c.user_id === 1) && (
+                <BrandPill
+                  active={tabIndex === "2easyCourses"}
                   onClick={() => {
-                    if (checkSubscription()) router.push("/schedule");
+                    setTabIndex("2easyCourses");
+                    router.push("/lesson_plans");
                   }}
                 >
-                  <T k="headerMenu.schedule" />
-                </Button>
-              </div>
-              <div className="h-6"></div>
-            </>
+                  <T k="lessons.courses2Easy" />
+                </BrandPill>
+              )}
+            </div>
           ) : (
-            <>
-              <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-5 justify-center px-1">
-                <Button
-                  radius="full"
-                  color="primary"
-                  variant={tabIndex === "savedLessons" ? "solid" : "faded"}
+            <div className="flex flex-wrap justify-center gap-1.5 px-1 min-[1200px]:gap-3">
+              <BrandPill
+                active={tabIndex === "savedLessons"}
+                onClick={() => {
+                  setTabIndex("savedLessons");
+                  router.push("/lesson_plans");
+                }}
+              >
+                <T k="lessons.lessons2Easy" />
+              </BrandPill>
+              {courses.some((c) => c.user_id === 1) && (
+                <BrandPill
+                  active={tabIndex === "2easyCourses"}
                   onClick={() => {
-                    setTabIndex("savedLessons");
+                    setTabIndex("2easyCourses");
                     router.push("/lesson_plans");
                   }}
                 >
-                  <T k="lessons.lessons2Easy" />
-                </Button>
-                {courses.some((c) => c.user_id === 1) && (
-                  <Button
-                    radius="full"
-                    color="primary"
-                    variant={tabIndex === "2easyCourses" ? "solid" : "faded"}
-                    onClick={() => {
-                      setTabIndex("2easyCourses");
-                      router.push("/lesson_plans");
-                    }}
-                  >
-                    <T k="lessons.courses2Easy" />
-                  </Button>
-                )}
-              </div>
-              <div className="h-6"></div>
-            </>
+                  <T k="lessons.courses2Easy" />
+                </BrandPill>
+              )}
+            </div>
           )}
           {(tabIndex === "savedLessons" || tabIndex === "userLessons") &&
             tabsToRender?.length >= 2 && (
-            <>
-              <Tabs
-                color="primary"
-                size="lg"
-                aria-label="Tabs"
-                radius={"none"}
-                selectedKey={activeFilterTab}
-                onSelectionChange={(val) => setActiveFilterTab(val)}
-                fullWidth
+              <div
+                role="tablist"
+                aria-label="Filters"
+                className="flex flex-wrap justify-center gap-1.5 min-[1200px]:gap-2"
               >
-                {tabsToRender.map((t) => {
-                  return <Tab key={t} title={t} />;
-                })}
-              </Tabs>
-            </>
-          )}
-          <div className="h-6"></div>
-          <div className="w-full max-w-[525px] m-auto min-w-0 px-0">
+                {tabsToRender.map((filterTab) => (
+                  <BrandPill
+                    key={filterTab}
+                    active={activeFilterTab === filterTab}
+                    onClick={() => setActiveFilterTab(filterTab)}
+                  >
+                    {filterTab}
+                  </BrandPill>
+                ))}
+              </div>
+            )}
+          <div className="relative z-0 mx-auto w-full min-w-0 max-w-[525px] px-0">
             <Input
               value={filterSearchString}
               onValueChange={setFilterSearchString}
@@ -656,8 +626,13 @@ export const ProfileLessons = (props: TProps) => {
                     ? t("lessons.searchCourses")
                     : t("lessons.searchLessons")
               }
-              size="lg"
-              classNames={{ inputWrapper: "bg-white hove min-w-0" }}
+              size="md"
+              classNames={{
+                base: "relative z-0",
+                inputWrapper:
+                  "min-w-0 rounded-[14px] bg-brand-gray shadow-none data-[hover=true]:bg-[#e6e6ea] group-data-[focus=true]:bg-brand-gray group-data-[focus=true]:shadow-none",
+                input: "font-bold tracking-brand text-brand-black",
+              }}
               startContent={
                 <Image
                   src={Loupe.src}
@@ -667,84 +642,63 @@ export const ProfileLessons = (props: TProps) => {
               }
             />
           </div>
-        </>
+        </div>
       )}
       {studentId && (
-        <>
-          <div className="h-10" />
-          <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-5 justify-center px-1">
-            <Button
-              radius="full"
-              color="primary"
-              variant={studentTabIndex === "lessons" ? "solid" : "faded"}
+        <div className="flex flex-wrap justify-center gap-1.5 px-1 min-[1200px]:gap-3">
+          <BrandPill
+            active={studentTabIndex === "lessons"}
+            onClick={() => {
+              setStudentTabIndex("lessons");
+              router.push(`/student-account/${studentId}`);
+            }}
+          >
+            <T k="lessons.lessonsTab" />
+          </BrandPill>
+          <BrandPill
+            active={studentTabIndex === "courses"}
+            onClick={() => {
+              setStudentTabIndex("courses");
+              router.push(`/student-account/${studentId}?tab=courses`);
+            }}
+          >
+            <T k="lessons.coursesTab" />
+          </BrandPill>
+          {boards.length > 0 && (
+            <BrandPill
+              active={studentTabIndex === "boards"}
               onClick={() => {
-                setStudentTabIndex("lessons");
-                router.push(`/student-account/${studentId}`);
+                setStudentTabIndex("boards");
+                router.push(`/student-account/${studentId}?tab=boards`);
               }}
             >
-              <T k="lessons.lessonsTab" />
-            </Button>
-            <Button
-              radius="full"
-              color="primary"
-              variant={studentTabIndex === "courses" ? "solid" : "faded"}
-              onClick={() => {
-                setStudentTabIndex("courses");
-                router.push(`/student-account/${studentId}?tab=courses`);
-              }}
-            >
-              <T k="lessons.coursesTab" />
-            </Button>
-            {boards.length > 0 && (
-              <Button
-                radius="full"
-                color="primary"
-                variant={studentTabIndex === "boards" ? "solid" : "faded"}
-                onClick={() => {
-                  setStudentTabIndex("boards");
-                  router.push(`/student-account/${studentId}?tab=boards`);
-                }}
-              >
-                <T k="boards.boardsTab" />
-              </Button>
-            )}
-            <Button
-              radius="full"
-              color="primary"
-              variant="faded"
-              onClick={() => setDictionaryModalOpen(true)}
-            >
-              <T k="dictionary.tab" defaultText="Словарь" />
-            </Button>
-            <Button
-              radius="full"
-              color="primary"
-              variant="faded"
-              onClick={() => router.push("/schedule")}
-            >
-              <T k="headerMenu.schedule" />
-            </Button>
-          </div>
-        </>
+              <T k="boards.boardsTab" />
+            </BrandPill>
+          )}
+          <BrandPill onClick={() => setDictionaryModalOpen(true)}>
+            <T k="dictionary.tab" defaultText="Словарь" />
+          </BrandPill>
+        </div>
       )}
-      <div className="h-10" />
       {currentCourse && (
         <>
-          <div className="flex flex-col sm:flex-row sm:justify-center gap-2 sm:gap-4 items-center sm:items-baseline text-center sm:text-left px-1">
+          <div className="flex flex-col items-center gap-2 px-1 text-center sm:flex-row sm:justify-center sm:gap-4 sm:text-left sm:items-baseline">
             {studentId ? (
               <Link
                 href={"/student-account/" + studentId}
-                style={{ color: "#3F28C6" }}
-                className="shrink-0 text-sm sm:text-base"
+                className="shrink-0 text-sm font-bold tracking-brand text-brand-violet sm:text-base"
               >
                 <T k="lessons.backToStudentAccount" />
               </Link>
             ) : (
-              <Link href="/lesson_plans" style={{ color: "#3F28C6" }} className="shrink-0 text-sm sm:text-base">
+              <Link
+                href="/lesson_plans"
+                className="shrink-0 text-sm font-bold tracking-brand text-brand-violet sm:text-base"
+              >
                 <T k="lessons.allCourses" />
               </Link>
             )}
-            <h2 className="font-medium text-xl sm:text-2xl lg:text-[28px] leading-snug max-w-full break-words">
+            <h2 className="max-w-full break-words text-xl font-bold leading-snug tracking-brand text-brand-black sm:text-2xl lg:text-[28px]">
               {currentCourse.title}
             </h2>
           </div>
@@ -835,7 +789,11 @@ export const ProfileLessons = (props: TProps) => {
                   onValueChange={setFilterSearchString}
                   placeholder={t("lessons.searchLessons")}
                   size="lg"
-                  classNames={{ inputWrapper: "bg-white hove min-w-0" }}
+                  classNames={{
+                    inputWrapper:
+                      "min-w-0 rounded-[14px] bg-brand-gray shadow-none hover:bg-[#e6e6ea] group-data-[focus=true]:bg-brand-gray",
+                    input: "font-bold tracking-brand text-brand-black",
+                  }}
                   startContent={
                     <Image
                       src={Loupe.src}
@@ -845,7 +803,6 @@ export const ProfileLessons = (props: TProps) => {
                   }
                 />
               </div>
-              <div className="h-10"></div>
             </>
           )}
           <LessonsList
@@ -931,6 +888,6 @@ export const ProfileLessons = (props: TProps) => {
           studentId={Number(studentId)}
         />
       )}
-    </>
+    </div>
   );
 };

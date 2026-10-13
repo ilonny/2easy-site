@@ -1,6 +1,5 @@
 "use client";
 
-import { BOARD_CARD_FOOTER_MIN_HEIGHT, BOARD_CARD_IMAGE_HEIGHT } from "@/app/board/constants";
 import { TBoard } from "@/app/board/types";
 import { getImageUrl } from "@/app/editor/helpers";
 import Ellipse from "@/assets/icons/ellipse.svg";
@@ -15,6 +14,7 @@ import {
 import Image from "next/image";
 import { FC, useState } from "react";
 import { T } from "@/i18n/T";
+import { brandPrimaryBtnClassName } from "@/components/brandUi";
 import styles from "./styles.module.css";
 
 type TProps = {
@@ -47,28 +47,22 @@ export const BoardCard: FC<TProps> = ({
       !!(onPressEdit || onPressDelete || (onPressAttach && showAttachAction)));
 
   return (
-    <div className={`p-2 w-[100%] md:w-1/2 lg:w-[25%] ${styles.boardCard}`}>
+    <div
+      className={`group flex w-full min-w-0 flex-col gap-3.5 ${styles.boardCard}`}
+    >
       <div
         onClick={() => onPress(board)}
-        className="image-wrapper"
-        style={{
-          width: "100%",
-          height: BOARD_CARD_IMAGE_HEIGHT,
-          position: "relative",
-          overflow: "hidden",
-          borderTopLeftRadius: 4,
-          borderTopRightRadius: 4,
-        }}
+        className="relative aspect-square w-full overflow-hidden rounded-[20px] bg-brand-gray lg:rounded-[30px]"
       >
         <div
-          className={styles.imageBg}
+          className={`absolute inset-0 ${styles.imageBg}`}
           style={{
-            background: `url(${
+            backgroundImage: `url(${
               board?.image_path ? getImageUrl(board.image_path) : Bg.src
             })`,
           }}
         />
-        <div className={styles.shadow} />
+        <div className={styles.menuShadow} />
         {showMenu && (
           <div
             className={styles.btnWrapper}
@@ -80,16 +74,19 @@ export const BoardCard: FC<TProps> = ({
               onOpenChange={setPopoverIsOpen}
             >
               <PopoverTrigger>
-                <Button isIconOnly variant="flat">
+                <Button
+                  isIconOnly
+                  variant="flat"
+                  className="rounded-[14px] bg-brand-black/40 text-white backdrop-blur-md hover:!bg-brand-black/55"
+                >
                   <Image src={Ellipse} alt="icon" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="bg-white p-2 items-start">
+              <PopoverContent className="items-start bg-white p-2">
                 {showStudentCabinetMenu && !!onPressEdit && (
                   <Button
                     variant="light"
-                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
-                    style={{ fontSize: 14 }}
+                    className="w-full justify-start px-2 py-1 text-left text-sm text-default-foreground"
                     onPress={() => {
                       setPopoverIsOpen(false);
                       onPressEdit(board);
@@ -102,8 +99,7 @@ export const BoardCard: FC<TProps> = ({
                   <Button
                     size="sm"
                     variant="light"
-                    className="w-full text-default-foreground py-1 px-2 justify-start"
-                    style={{ fontSize: 14 }}
+                    className="w-full justify-start px-2 py-1 text-left text-sm text-default-foreground"
                     endContent={<Image src={DeleteIcon} alt="icon" />}
                     onPress={() => {
                       setPopoverIsOpen(false);
@@ -113,24 +109,24 @@ export const BoardCard: FC<TProps> = ({
                     <T k="lessons.deleteFromStudent" />
                   </Button>
                 )}
-                {!showStudentCabinetMenu && !!onPressAttach && showAttachAction && (
-                  <Button
-                    variant="light"
-                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
-                    style={{ fontSize: 14 }}
-                    onPress={() => {
-                      setPopoverIsOpen(false);
-                      onPressAttach(board);
-                    }}
-                  >
-                    <T k="boards.attachToStudent" />
-                  </Button>
-                )}
+                {!showStudentCabinetMenu &&
+                  !!onPressAttach &&
+                  showAttachAction && (
+                    <Button
+                      variant="light"
+                      className="w-full justify-start px-2 py-1 text-left text-sm text-default-foreground"
+                      onPress={() => {
+                        setPopoverIsOpen(false);
+                        onPressAttach(board);
+                      }}
+                    >
+                      <T k="boards.attachToStudent" />
+                    </Button>
+                  )}
                 {!showStudentCabinetMenu && !!onPressEdit && (
                   <Button
                     variant="light"
-                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
-                    style={{ fontSize: 14 }}
+                    className="w-full justify-start px-2 py-1 text-left text-sm text-default-foreground"
                     onPress={() => {
                       setPopoverIsOpen(false);
                       onPressEdit(board);
@@ -143,8 +139,7 @@ export const BoardCard: FC<TProps> = ({
                   <Button
                     size="sm"
                     variant="light"
-                    className="w-full text-default-foreground py-1 px-2 justify-start"
-                    style={{ fontSize: 14 }}
+                    className="w-full justify-start px-2 py-1 text-left text-sm text-default-foreground"
                     endContent={<Image src={DeleteIcon} alt="icon" />}
                     onPress={() => {
                       setPopoverIsOpen(false);
@@ -159,30 +154,22 @@ export const BoardCard: FC<TProps> = ({
           </div>
         )}
       </div>
-      <div
-        className="p-4 bg-white flex flex-col gap-3"
-        style={{
-          minHeight: BOARD_CARD_FOOTER_MIN_HEIGHT,
-          borderBottomLeftRadius: 4,
-          borderBottomRightRadius: 4,
-        }}
-      >
+      <div className="flex flex-col gap-3">
         <div onClick={() => onPress(board)} className="cursor-pointer">
-          <p className="text-black font-bold" style={{ fontSize: 18 }}>
+          <p className="text-sm font-bold leading-[1.3] tracking-brand text-brand-black lg:text-base lg:leading-[22px]">
             {board.title}
           </p>
           {!!board.description && (
-            <div className="mt-2" style={{ whiteSpace: "break-spaces", fontSize: 14 }}>
+            <p className="mt-2 line-clamp-2 whitespace-pre-wrap text-sm font-bold leading-[1.3] tracking-brand text-brand-grayFont lg:line-clamp-3">
               {board.description.length > 100
                 ? `${board.description.slice(0, 110)}...`
                 : board.description}
-            </div>
+            </p>
           )}
         </div>
         {!!onPressStartLesson ? (
           <Button
-            color="primary"
-            className="w-full"
+            className={brandPrimaryBtnClassName}
             size="md"
             onPress={() => onPressStartLesson(board)}
           >
@@ -193,4 +180,3 @@ export const BoardCard: FC<TProps> = ({
     </div>
   );
 };
-

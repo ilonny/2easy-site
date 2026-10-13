@@ -113,6 +113,10 @@ export const CreateLessonModalForm: FC<TProps> = ({
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
       scrollBehavior="outside"
+      classNames={{
+        base: "rounded-[20px] bg-white lg:rounded-[30px]",
+        header: "border-b border-black/5 font-bold tracking-brand text-brand-black",
+      }}
     >
       <ModalContent>
         <ModalHeader>

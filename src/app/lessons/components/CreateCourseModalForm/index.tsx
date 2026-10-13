@@ -368,7 +368,10 @@ export const CreateCourseModalForm: FC<TProps> = ({
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
       scrollBehavior="outside"
-      style={{ backgroundColor: step !== 0 ? "#F9F9F9" : "#fff" }}
+      classNames={{
+        base: "rounded-[20px] bg-white lg:rounded-[30px]",
+        header: "border-b border-black/5 font-bold tracking-brand text-brand-black",
+      }}
     >
       <form onSubmit={handleSubmit(onSubmit)}>
         <ModalContent>

@@ -2,7 +2,7 @@
     width: 140px;
     height: 140px;
     border-radius: 140px;
-    background-color: #EBE8FF;
+    background-color: #F0EDFD;
     position: relative;
     overflow: hidden;
     @apply
@@ -33,7 +33,7 @@
 }
 
 .title {
-    color: #3F28C699;
+    color: #5A42D499;
     font-weight: 800;
     font-size: 100px;
     position: relative;

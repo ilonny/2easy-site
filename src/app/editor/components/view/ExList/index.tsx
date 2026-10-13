@@ -332,7 +332,7 @@ const ExListItem: FC<TExListItemProps> = ({
               </div>
               <p
                 style={{
-                  color: isVisible ? "#3F28C6" : "#B3B3B3",
+                  color: isVisible ? "#5A42D4" : "#B3B3B3",
                   fontSize: 12,
                   textAlign: "left",
                   lineHeight: "100%",
