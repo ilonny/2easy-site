@@ -57,6 +57,7 @@
     "react-slick": "^0.30.3",
     "react-sortable-hoc": "^2.0.0",
     "react-toastify": "^11.0.5",
+    "recharts": "^2.15.0",
     "sass": "^1.85.1",
     "slate": "^0.124.0",
     "slate-dom": "^0.124.0",

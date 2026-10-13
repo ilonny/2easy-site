@@ -205,7 +205,7 @@ export const Header = () => {
                     src={FireButtonIcon}
                     alt=""
                     aria-hidden
-                    className="hidden md:block"
+                    className="hidden size-8 shrink-0 md:block"
                   />
                 </Link>
               </>

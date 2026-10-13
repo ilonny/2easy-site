@@ -10,6 +10,8 @@ import Image from "next/image";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { UserAvatar } from "@/components/UserAvatar";
+import { useCheckSubscription } from "@/app/subscription/helpers";
+import { headerControlHeightClassName } from "@/components/Header/styles";
 
 type TProps = {
   isStudent?: boolean;
@@ -29,6 +31,7 @@ const menuItemClassName =
 export const HeaderProfile = (props: TProps) => {
   const { isStudent } = props;
   const { profile, setProfile } = useContext(AuthContext);
+  const { checkSubscription } = useCheckSubscription();
   const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
@@ -92,6 +95,11 @@ export const HeaderProfile = (props: TProps) => {
           },
         },
         {
+          key: "schedule",
+          content: <T k="headerMenu.schedule" />,
+          onSelect: () => router.push("/schedule"),
+        },
+        {
           key: "profile",
           content: <T k="profile.personalData" />,
           onSelect: () => router.push("/profile"),
@@ -103,6 +111,13 @@ export const HeaderProfile = (props: TProps) => {
           key: "lessons",
           content: <T k="profile.lessonsAndCourses" />,
           onSelect: () => router.push("/lesson_plans"),
+        },
+        {
+          key: "schedule",
+          content: <T k="headerMenu.schedule" />,
+          onSelect: () => {
+            if (checkSubscription()) router.push("/schedule");
+          },
         },
         {
           key: "students",
@@ -129,7 +144,7 @@ export const HeaderProfile = (props: TProps) => {
         aria-controls={isOpen ? menuId : undefined}
         title={displayName}
         onClick={() => setIsOpen((open) => !open)}
-        className="flex h-10 min-w-0 max-w-full touch-manipulation items-center gap-2 rounded-[14px] bg-brand-gray px-2.5 text-xs font-bold tracking-brand text-brand-black outline-none transition-colors hover:bg-[#e6e6ea] focus-visible:ring-2 focus-visible:ring-brand-violet/40 max-[374px]:gap-1.5 max-[374px]:px-2 sm:max-w-[200px] sm:px-3.5 md:h-[46px] md:max-w-[240px] lg:h-10 lg:max-w-none lg:text-sm min-[1200px]:h-12"
+        className={`flex ${headerControlHeightClassName} min-w-0 max-w-full touch-manipulation items-center gap-2 rounded-[14px] bg-brand-gray px-2.5 text-xs font-bold leading-none tracking-brand text-brand-black outline-none transition-colors hover:bg-[#e6e6ea] focus-visible:ring-2 focus-visible:ring-brand-violet/40 max-[374px]:gap-1.5 max-[374px]:px-2 sm:max-w-[200px] sm:px-3.5 md:max-w-[240px] lg:max-w-none lg:text-sm`}
       >
         <UserAvatar
           name={profile?.name}

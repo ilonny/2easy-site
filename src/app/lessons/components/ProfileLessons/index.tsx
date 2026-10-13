@@ -582,6 +582,16 @@ export const ProfileLessons = (props: TProps) => {
                     <T k="lessons.courses2Easy" />
                   </Button>
                 )}
+                <Button
+                  radius="full"
+                  color="primary"
+                  variant="faded"
+                  onClick={() => {
+                    if (checkSubscription()) router.push("/schedule");
+                  }}
+                >
+                  <T k="headerMenu.schedule" />
+                </Button>
               </div>
               <div className="h-6"></div>
             </>
@@ -705,6 +715,14 @@ export const ProfileLessons = (props: TProps) => {
               onClick={() => setDictionaryModalOpen(true)}
             >
               <T k="dictionary.tab" defaultText="Словарь" />
+            </Button>
+            <Button
+              radius="full"
+              color="primary"
+              variant="faded"
+              onClick={() => router.push("/schedule")}
+            >
+              <T k="headerMenu.schedule" />
             </Button>
           </div>
         </>

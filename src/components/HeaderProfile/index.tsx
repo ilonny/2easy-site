@@ -44,12 +44,17 @@ export const HeaderProfile = (props: TProps) => {
       {!isStudent && (
         <div className="hidden shrink-0 md:block">
           {access === "loading" && (
-            <Skeleton className="h-[46px] w-[180px] rounded-[14px] lg:h-12" />
+            <Skeleton className="h-10 w-[180px] rounded-[14px] md:h-[46px] lg:h-10 min-[1200px]:h-12" />
           )}
           {access === "noSubscription" && (
             <Link href="/subscription" className={headerCtaClassName}>
               <T k="header.chooseTariff" />
-              <Image src={FireButtonIcon} alt="" aria-hidden />
+              <Image
+                src={FireButtonIcon}
+                alt=""
+                aria-hidden
+                className="size-8 shrink-0"
+              />
             </Link>
           )}
           {access === "subscribed" && (
@@ -59,7 +64,12 @@ export const HeaderProfile = (props: TProps) => {
               onClick={openCreateLesson}
             >
               <T k="lessons.createLesson" />
-              <Image src={FireButtonIcon} alt="" aria-hidden />
+              <Image
+                src={FireButtonIcon}
+                alt=""
+                aria-hidden
+                className="size-8 shrink-0"
+              />
             </button>
           )}
           {/* <SubscribeCounter /> */}
