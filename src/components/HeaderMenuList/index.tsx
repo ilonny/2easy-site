@@ -10,11 +10,11 @@ type TProps = {
 };
 
 const links = [
+  { href: "/schedule", menuKey: "headerMenu.schedule" },
   { href: "/lesson_plans", menuKey: "headerMenu.lessonPlans" },
   { href: "/speaking_games", menuKey: "headerMenu.speakingGames" },
   { href: "/cards", menuKey: "headerMenu.discussionCards" },
   { href: "/grammar", menuKey: "headerMenu.grammar" },
-  { href: "/schedule", menuKey: "headerMenu.schedule" },
   { href: "/subscription", menuKey: "headerMenu.subscription" },
   { href: "/tutorial", menuKey: "headerMenu.tutorial" },
 ];
