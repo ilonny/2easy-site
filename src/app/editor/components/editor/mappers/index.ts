@@ -64,6 +64,10 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return i18n.t("templates.unscrambleWords", {
         defaultValue: "UNSCRAMBLE WORDS",
       });
+    case "TRUE_FALSE":
+      return i18n.t("templates.trueFalse", {
+        defaultValue: "TRUE / FALSE",
+      });
     default:
       return type;
   }

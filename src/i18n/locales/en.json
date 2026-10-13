@@ -756,7 +756,17 @@
     "unscrambleAddSentence": "+ Add sentence",
     "unscrambleNeedSlash": "Each sentence needs at least one \"/\" (minimum 2 fragments)",
     "unscrambleNeedSlashShort": "Need \"/\" and at least 2 fragments",
-    "unscramblePreviewEmpty": "Add at least one sentence with \"/\" to see the preview"
+    "unscramblePreviewEmpty": "Add at least one sentence with \"/\" to see the preview",
+    "trueFalseHowTitle": "How do I build this exercise?",
+    "trueFalseHowHint": "Students read each sentence and choose True or False.",
+    "trueFalseHowSteps": "1) Type a sentence. 2) Mark the correct answer — True or False. 3) Add more sentences if needed.",
+    "trueFalseSentenceN": "Sentence {{n}}",
+    "trueFalsePlaceholder": "The sun rises in the east.",
+    "trueFalseAddSentence": "+ Add sentence",
+    "trueFalseCorrectAnswer": "Correct answer:",
+    "trueFalseNeedText": "Each sentence needs text",
+    "trueFalseNeedTextShort": "Enter the sentence text",
+    "trueFalsePreviewEmpty": "Add at least one sentence with text to see the preview"
   },
   "templates": {
     "text": "Text",
@@ -781,6 +791,8 @@
     "fillGapsNewDesc": "Gaps with answer options, formatting, and three modes",
     "unscrambleWords": "UNSCRAMBLE WORDS",
     "unscrambleWordsDesc": "Put shuffled sentence fragments into the correct order",
+    "trueFalse": "TRUE / FALSE",
+    "trueFalseDesc": "Read a sentence and choose True or False",
     "test": "Test",
     "testDesc": "Select the correct option from the given choices",
     "match": "Match",

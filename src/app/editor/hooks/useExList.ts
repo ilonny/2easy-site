@@ -182,6 +182,8 @@ const getDataMapper = (type: string) => {
       return mapFillGapsNewExData;
     case "UNSCRAMBLE_WORDS":
       return mapFillGapsNewExData;
+    case "TRUE_FALSE":
+      return mapFillGapsNewExData;
     case "free-input-form":
     case "test":
       return mapImageExData;

@@ -25,6 +25,7 @@ import i18n from "@/i18n/config";
 import type { EventFormValues, ScheduleEvent } from "../types";
 import { colorForStudent, eventStudentIds } from "./eventUi";
 import { formatMoney } from "../utils/calendar";
+import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
 type StudentOption = { id: number; name?: string };
 type LessonOption = { id: number; title?: string; user_id?: number };
@@ -251,7 +252,8 @@ export const EventModal = ({
       scrollBehavior="inside"
       placement="center"
       classNames={{
-        base: "mx-2 sm:mx-0",
+        wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS,
+        base: "mx-2 sm:mx-0 max-h-[min(90dvh,calc(100dvh-var(--site-header-h)-16px))] lg:max-h-[90vh]",
         header: "border-b border-[#e8e8ed] text-[17px] font-semibold",
         footer: "border-t border-[#e8e8ed]",
       }}

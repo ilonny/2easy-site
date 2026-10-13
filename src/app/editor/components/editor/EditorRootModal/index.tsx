@@ -21,6 +21,7 @@ import { FreeInputFormEx } from "../FreeInputFormEx";
 import { IntEx } from "../Int";
 import { FillGapsNew } from "../FillGapsNew";
 import { UnscrambleWords } from "../UnscrambleWords";
+import { TrueFalse } from "../TrueFalse";
 import { T } from "@/i18n/T";
 import Image from "next/image";
 import CloseIcon from "@/assets/icons/close.svg";
@@ -198,6 +199,8 @@ export const EditorRootModal: FC<TProps> = ({
         return FillGapsNew;
       case "UNSCRAMBLE_WORDS":
         return UnscrambleWords;
+      case "TRUE_FALSE":
+        return TrueFalse;
       default:
     }
   }, [type, chosenExToEdit]);

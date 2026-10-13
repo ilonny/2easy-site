@@ -39,6 +39,7 @@ import type {
 } from "../types";
 import { formatMoney } from "../utils/calendar";
 import type { LoadStatsParams } from "../hooks/usePaymentPlans";
+import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
 dayjs.extend(isoWeek);
 
@@ -779,7 +780,16 @@ export const PaymentControlTab = ({
         )}
       </div>
 
-      <Modal isOpen={open} onClose={closeModal} size="lg">
+      <Modal
+        isOpen={open}
+        onClose={closeModal}
+        size="lg"
+        scrollBehavior="inside"
+        classNames={{
+          wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS,
+          base: "mx-2 sm:mx-0 max-h-[min(90dvh,calc(100dvh-var(--site-header-h)-16px))] lg:max-h-[90vh]",
+        }}
+      >
         <ModalContent>
           <ModalHeader>
             {editing ? (

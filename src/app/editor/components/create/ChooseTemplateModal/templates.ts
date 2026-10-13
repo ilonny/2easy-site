@@ -15,6 +15,7 @@ import AudioBg from "@/assets/images/audio_template_bg.png";
 import NoteBg from "@/assets/images/note_template_bg.png";
 import FillGapsBg from "@/assets/images/fill_gaps_template_bg.png";
 import UnscrambleWordsBg from "@/assets/images/unscramble_words_template_bg.jpg";
+import TrueFalseBg from "@/assets/images/true_false_template_bg.jpg";
 import TextBg from "@/assets/images/text_template_bg.png";
 import MatchBg from "@/assets/images/match_template_bg.png";
 import TestBg from "@/assets/images/test_template_bg.png";
@@ -141,6 +142,15 @@ export const templates: TTemplate[] = [
     descriptionDefault:
       "Расставить перемешанные фрагменты предложения в правильном порядке",
     bgImage: UnscrambleWordsBg,
+  },
+  {
+    type: "TRUE_FALSE",
+    titleKey: "templates.trueFalse",
+    titleDefault: "TRUE / FALSE",
+    descriptionKey: "templates.trueFalseDesc",
+    descriptionDefault:
+      "Прочитать предложение и выбрать True или False",
+    bgImage: TrueFalseBg,
   },
   {
     type: "test",

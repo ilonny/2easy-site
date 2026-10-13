@@ -758,7 +758,17 @@
     "unscrambleAddSentence": "+ Добавить предложение",
     "unscrambleNeedSlash": "В каждом предложении нужен хотя бы один «/» (минимум 2 фрагмента)",
     "unscrambleNeedSlashShort": "Нужен «/» и минимум 2 фрагмента",
-    "unscramblePreviewEmpty": "Добавьте хотя бы одно предложение с «/», чтобы увидеть превью"
+    "unscramblePreviewEmpty": "Добавьте хотя бы одно предложение с «/», чтобы увидеть превью",
+    "trueFalseHowTitle": "Как собрать упражнение?",
+    "trueFalseHowHint": "Ученик прочитает предложение и выберет True или False.",
+    "trueFalseHowSteps": "1) Введите предложение. 2) Отметьте правильный ответ — True или False. 3) При необходимости добавьте ещё предложения.",
+    "trueFalseSentenceN": "Предложение {{n}}",
+    "trueFalsePlaceholder": "The sun rises in the east.",
+    "trueFalseAddSentence": "+ Добавить предложение",
+    "trueFalseCorrectAnswer": "Правильный ответ:",
+    "trueFalseNeedText": "В каждом предложении нужен текст",
+    "trueFalseNeedTextShort": "Введите текст предложения",
+    "trueFalsePreviewEmpty": "Добавьте хотя бы одно предложение с текстом, чтобы увидеть превью"
   },
   "templates": {
     "text": "Текст",
@@ -783,6 +793,8 @@
     "fillGapsNewDesc": "Пропуски с вариантами ответов, форматированием и тремя режимами",
     "unscrambleWords": "UNSCRAMBLE WORDS",
     "unscrambleWordsDesc": "Расставить перемешанные фрагменты предложения в правильном порядке",
+    "trueFalse": "TRUE / FALSE",
+    "trueFalseDesc": "Прочитать предложение и выбрать True или False",
     "test": "Тест",
     "testDesc": "Выбрать правильный вариант из предложенных",
     "match": "Мэтч",

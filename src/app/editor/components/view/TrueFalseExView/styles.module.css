@@ -1,0 +1,109 @@
+.root {
+  padding: 20px 0 28px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.root:global(.exercise-view-shell) {
+  overflow: visible !important;
+}
+
+@media (min-width: 640px) {
+  .root {
+    padding: 28px 0;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow: 0px 8px 24px 0px #908ba826;
+  overflow: visible !important;
+  background: #f7f7ff;
+}
+
+@media (min-width: 640px) {
+  .card {
+    gap: 14px;
+    padding: 16px;
+  }
+}
+
+.sentenceWrap {
+  min-width: 0;
+}
+
+.sentenceBlock {
+  padding: 14px 14px 16px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(63, 40, 198, 0.1);
+  box-shadow: 0 4px 14px rgba(63, 40, 198, 0.06);
+}
+
+@media (min-width: 640px) {
+  .sentenceBlock {
+    padding: 16px 18px 18px;
+  }
+}
+
+.sentenceText {
+  font-size: 17px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.45;
+  margin-bottom: 14px;
+  word-break: break-word;
+}
+
+@media (min-width: 640px) {
+  .sentenceText {
+    font-size: 18px;
+  }
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.choiceBtn {
+  min-width: 110px;
+  min-height: 44px;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+}
+
+.choiceNeutral {
+  background: #eeebff !important;
+  border: 1px dashed #3f28c6 !important;
+  color: #3f28c6 !important;
+}
+
+.choiceSelected {
+  background: #3f28c6 !important;
+  border: 1px solid #3f28c6 !important;
+  color: #fff !important;
+}
+
+.choiceCorrect {
+  background: #a7f3d0 !important;
+  border: 1px solid rgba(22, 163, 74, 0.95) !important;
+  color: #166534 !important;
+}
+
+.choiceIncorrect {
+  background: #fee2e2 !important;
+  border: 1px solid rgba(220, 38, 38, 0.75) !important;
+  color: #991b1b !important;
+}
+
+.choiceHint {
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.55);
+}
