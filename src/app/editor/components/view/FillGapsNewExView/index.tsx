@@ -110,6 +110,130 @@ function getClientXY(e: any): { x: number; y: number } {
   return { x: 0, y: 0 };
 }
 
+/**
+ * Local draft while typing so parent re-renders (status / sizer / persist)
+ * do not wipe mobile keyboard mid-keystroke.
+ */
+const GapTextInput: FC<{
+  answerKey: string;
+  exId: string | number | undefined;
+  committedValue: string;
+  isCorrectForGap: (raw: string) => boolean;
+  buildWrapperClass: (status: TAnswerStatus) => string;
+  buildInputTextClass: (status: TAnswerStatus) => string;
+  onCommit: (raw: string, status: TAnswerStatus) => void;
+  onDraftPersist: (raw: string, status: TAnswerStatus) => void;
+}> = ({
+  answerKey,
+  exId,
+  committedValue,
+  isCorrectForGap,
+  buildWrapperClass,
+  buildInputTextClass,
+  onCommit,
+  onDraftPersist,
+}) => {
+  const [localValue, setLocalValue] = useState(committedValue);
+  const [localStatus, setLocalStatus] = useState<TAnswerStatus>(() => {
+    if (!committedValue.trim()) return "neutral";
+    return isCorrectForGap(committedValue) ? "correct" : "incorrect";
+  });
+  const focusedRef = useRef(false);
+  const dirtyRef = useRef(false);
+  const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (focusedRef.current || dirtyRef.current) return;
+    setLocalValue(committedValue);
+    setLocalStatus(
+      !committedValue.trim()
+        ? "neutral"
+        : isCorrectForGap(committedValue)
+          ? "correct"
+          : "incorrect",
+    );
+  }, [committedValue, isCorrectForGap]);
+
+  useEffect(() => {
+    return () => {
+      if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+    };
+  }, []);
+
+  const evaluate = (raw: string): TAnswerStatus => {
+    if (!raw.trim()) return "neutral";
+    return isCorrectForGap(raw) ? "correct" : "incorrect";
+  };
+
+  const commit = (raw: string) => {
+    const nextStatus = evaluate(raw);
+    setLocalValue(raw);
+    setLocalStatus(nextStatus);
+    dirtyRef.current = false;
+    if (draftTimerRef.current) {
+      clearTimeout(draftTimerRef.current);
+      draftTimerRef.current = null;
+    }
+    onCommit(raw, nextStatus);
+  };
+
+  const isEmptyAnswer = !localValue.trim();
+  const wrapperClass = buildWrapperClass(localStatus);
+  const inputTextClass = buildInputTextClass(localStatus);
+
+  return (
+    <span
+      className={`${styles.gapInputSizer} ${isEmptyAnswer ? styles.gapInputSizerEmpty : ""} ${
+        localStatus === "correct"
+          ? styles.gapInputSizerBold
+          : localStatus === "incorrect"
+            ? styles.gapInputSizerSemibold
+            : ""
+      }`}
+      data-value={localValue || "\u00a0"}
+    >
+      <Input
+        size="sm"
+        className={styles.gapInput}
+        id={`fg-new-${exId}-${answerKey}`}
+        name={`fg-new-${exId}-${answerKey}`}
+        autoComplete="off"
+        value={localValue}
+        isDisabled={false}
+        onFocus={() => {
+          focusedRef.current = true;
+        }}
+        onValueChange={(val) => {
+          const raw = val || "";
+          dirtyRef.current = true;
+          const nextStatus = evaluate(raw);
+          setLocalValue(raw);
+          setLocalStatus(nextStatus);
+          if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+          draftTimerRef.current = setTimeout(() => {
+            onDraftPersist(raw, nextStatus);
+          }, 400);
+        }}
+        onKeyDown={(e) => {
+          if ((e as any)?.key !== "Enter") return;
+          try {
+            e.preventDefault();
+          } catch {}
+          commit(String((e.target as any)?.value || localValue || ""));
+        }}
+        onBlur={(e) => {
+          focusedRef.current = false;
+          commit(String((e.target as any).value || localValue || ""));
+        }}
+        classNames={{
+          inputWrapper: wrapperClass,
+          input: "text-[16px] leading-5 " + inputTextClass,
+        }}
+      />
+    </span>
+  );
+};
+
 const FillGapsNewExViewImpl: FC<{
   data: TFillGapsNewData;
   isPreview?: boolean;
@@ -141,6 +265,7 @@ const FillGapsNewExViewImpl: FC<{
   const [answersVersion, setAnswersVersion] = useState(0);
   const [serverHydrationVersion, setServerHydrationVersion] = useState(0);
   const answersRef = useRef<TAnswersMap>({});
+  const userEditedRef = useRef(false);
   const [statusByGap, setStatusByGap] = useState<Record<string, TAnswerStatus>>(
     {},
   );
@@ -161,6 +286,7 @@ const FillGapsNewExViewImpl: FC<{
       saveTimerRef.current = null;
     }
     answersRef.current = {};
+    userEditedRef.current = false;
     setStatusByGap({});
     setServerHydrationVersion((v) => v + 1);
     setAnswersVersion((v) => v + 1);
@@ -171,6 +297,8 @@ const FillGapsNewExViewImpl: FC<{
     if (isPreview || !student_id) return;
     getAnswers(true).then((a) => {
       try {
+        // Don't overwrite in-progress typing if the student already started
+        if (userEditedRef.current) return;
         const raw = a?.[data.id]?.answer;
         if (!raw) return;
         const parsedRaw = JSON.parse(raw);
@@ -260,6 +388,7 @@ const FillGapsNewExViewImpl: FC<{
 
   const setAnswer = useCallback(
     (gapId: string, value: string, status: TAnswerStatus) => {
+      userEditedRef.current = true;
       answersRef.current = {
         ...answersRef.current,
         [gapId]: { value, status },
@@ -267,6 +396,19 @@ const FillGapsNewExViewImpl: FC<{
       setStatusByGap((m) => ({ ...m, [gapId]: status }));
       schedulePersist();
       setAnswersVersion((v) => v + 1);
+    },
+    [schedulePersist],
+  );
+
+  /** Persist draft without forcing a full tree re-render (mobile keyboard safe). */
+  const persistDraftQuiet = useCallback(
+    (gapId: string, value: string, status: TAnswerStatus) => {
+      userEditedRef.current = true;
+      answersRef.current = {
+        ...answersRef.current,
+        [gapId]: { value, status },
+      };
+      schedulePersist();
     },
     [schedulePersist],
   );
@@ -477,25 +619,27 @@ const FillGapsNewExViewImpl: FC<{
 
       if (mode === "input") {
         const isTeacherView = isTeacher && !canInteract && !isPresentationMode;
-        const wrapperClass =
-          status === "correct"
+        const buildWrapperClass = (s: TAnswerStatus) =>
+          s === "correct"
             ? isTeacherView
               ? "bg-[#6EE7B7] border-2 border-[#16A34A] ring-2 ring-[#16A34A]/30"
               : "bg-[#A7F3D0] border border-[rgba(22,163,74,0.95)]"
-            : status === "incorrect"
+            : s === "incorrect"
               ? isTeacherView
                 ? "bg-[#FCA5A5] border-2 border-[#DC2626] ring-2 ring-[#DC2626]/25"
                 : "bg-[#FEE2E2] border border-[rgba(220,38,38,0.75)]"
               : isTeacherView
                 ? "bg-[#E0E7FF] border-2 border-[#4F46E5] ring-2 ring-[#4F46E5]/15"
                 : "bg-white border border-[rgba(63,40,198,0.25)]";
-        const inputTextClass =
-          status === "correct"
+        const buildInputTextClass = (s: TAnswerStatus) =>
+          s === "correct"
             ? "!text-[#3F2A1D] font-bold"
-            : status === "incorrect"
+            : s === "incorrect"
               ? "text-[#991B1B] font-semibold"
               : "text-[#111827]";
 
+        const wrapperClass = buildWrapperClass(status);
+        const inputTextClass = buildInputTextClass(status);
         const isEmptyAnswer = !current;
 
         const gapBody = !canInteract ? (
@@ -505,52 +649,18 @@ const FillGapsNewExViewImpl: FC<{
             {currentRaw || "\u00A0"}
           </span>
         ) : (
-          <span
-            className={`${styles.gapInputSizer} ${isEmptyAnswer ? styles.gapInputSizerEmpty : ""} ${
-              status === "correct"
-                ? styles.gapInputSizerBold
-                : status === "incorrect"
-                  ? styles.gapInputSizerSemibold
-                  : ""
-            }`}
-            data-value={currentRaw || "\u00a0"}
-          >
-            <Input
-              size="sm"
-              className={styles.gapInput}
-              id={`fg-new-${ex_id}-${answerKey}`}
-              name={`fg-new-${ex_id}-${answerKey}`}
-              autoComplete="off"
-              value={currentRaw}
-              isDisabled={false}
-              onValueChange={(val) => {
-                const raw = val || "";
-                if (!raw.trim()) return setAnswer(answerKey, "", "neutral");
-                const ok = isCorrectForGap(gap, raw);
-                setAnswer(answerKey, raw, ok ? "correct" : "incorrect");
-              }}
-              onKeyDown={(e) => {
-                if ((e as any)?.key !== "Enter") return;
-                try {
-                  e.preventDefault();
-                } catch {}
-                const latestRaw = String((e.target as any)?.value || "");
-                if (!latestRaw.trim()) return setAnswer(answerKey, "", "neutral");
-                const ok = isCorrectForGap(gap, latestRaw);
-                setAnswer(answerKey, latestRaw, ok ? "correct" : "incorrect");
-              }}
-              onBlur={(e) => {
-                const latestRaw = String((e.target as any).value || "");
-                if (!latestRaw.trim()) return setAnswer(answerKey, "", "neutral");
-                const ok = isCorrectForGap(gap, latestRaw);
-                setAnswer(answerKey, latestRaw, ok ? "correct" : "incorrect");
-              }}
-              classNames={{
-                inputWrapper: wrapperClass,
-                input: "text-[16px] leading-5 " + inputTextClass,
-              }}
-            />
-          </span>
+          <GapTextInput
+            answerKey={answerKey}
+            exId={ex_id}
+            committedValue={currentRaw}
+            isCorrectForGap={(raw) => isCorrectForGap(gap, raw)}
+            buildWrapperClass={buildWrapperClass}
+            buildInputTextClass={buildInputTextClass}
+            onCommit={(raw, nextStatus) => setAnswer(answerKey, raw, nextStatus)}
+            onDraftPersist={(raw, nextStatus) =>
+              persistDraftQuiet(answerKey, raw, nextStatus)
+            }
+          />
         );
 
         return (
@@ -600,7 +710,7 @@ const FillGapsNewExViewImpl: FC<{
               <Select
                 size="sm"
                 className={styles.gapSelect}
-                key={answerKey + ":" + answersVersion}
+                key={answerKey}
                 selectedKeys={current ? [current] : []}
                 isDisabled={!canInteract}
                 onChange={(e) => {
@@ -687,6 +797,7 @@ const FillGapsNewExViewImpl: FC<{
       isPreview,
       isTeacher,
       mode,
+      persistDraftQuiet,
       serverHydrationVersion,
       setAnswer,
       statusByGap,

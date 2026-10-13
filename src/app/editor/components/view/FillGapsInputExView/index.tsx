@@ -30,26 +30,38 @@ type TProps = {
   isPreview?: boolean;
 };
 
+const PERSIST_DEBOUNCE_MS = 450;
+
 const AnswerField: FC<{
   field: TField;
   isTeacher: boolean;
   isPresentationMode?: boolean;
   activeStudentId?: number | string | null;
-  answers: Record<string, any>;
-  writeAnswer: (q_id: number | string, answer: string) => Promise<void>;
-  initialAnswer?: string;
+  /** Snapshot / live map — student typing must not remount via parent portal churn */
+  getAnswer: (fieldId: string | number) => string;
+  writeAnswer: (q_id: number | string, answer: string) => Promise<any>;
+  /** Bumps when teacher poll / remote reset should overwrite local value */
+  syncToken?: string | number;
 }> = ({
   field,
   isTeacher,
   isPresentationMode,
   activeStudentId,
-  answers,
+  getAnswer,
   writeAnswer,
-  initialAnswer,
+  syncToken,
 }) => {
-  const [selectedValue, setSelectedValue] = useState(initialAnswer || "");
+  const [selectedValue, setSelectedValue] = useState(
+    () => getAnswer(field?.id) || "",
+  );
   const [isIncorrect] = useState(false);
-  const hydratedRef = useRef(false);
+  const focusedRef = useRef(false);
+  const dirtyRef = useRef(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestValueRef = useRef(selectedValue);
+  const writeAnswerRef = useRef(writeAnswer);
+  writeAnswerRef.current = writeAnswer;
+  latestValueRef.current = selectedValue;
 
   const isCorrect = useMemo(() => {
     return !!field?.options?.find((o) => {
@@ -62,50 +74,107 @@ const AnswerField: FC<{
     })?.isCorrect;
   }, [selectedValue, field?.options]);
 
-  const onChangeSelection = useCallback((val: string) => {
-    setSelectedValue(val);
-  }, []);
-
-  // Student: hydrate once from parent-loaded answers
-  useEffect(() => {
-    if (isTeacher || hydratedRef.current) return;
-    const fromServer = answers?.[field?.id]?.answer || initialAnswer;
-    if (fromServer) {
-      setSelectedValue(fromServer);
-      hydratedRef.current = true;
+  const flushPersist = useCallback(() => {
+    if (isTeacher) return;
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
     }
-  }, [answers, field?.id, initialAnswer, isTeacher]);
+    const val = latestValueRef.current;
+    void writeAnswerRef.current(field.id, val);
+  }, [field.id, isTeacher]);
 
-  // Student: persist
+  const schedulePersist = useCallback(
+    (val: string) => {
+      if (isTeacher) return;
+      latestValueRef.current = val;
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        saveTimerRef.current = null;
+        void writeAnswerRef.current(field.id, latestValueRef.current);
+      }, PERSIST_DEBOUNCE_MS);
+    },
+    [field.id, isTeacher],
+  );
+
+  const onChangeSelection = useCallback(
+    (val: string) => {
+      dirtyRef.current = true;
+      setSelectedValue(val);
+      schedulePersist(val);
+    },
+    [schedulePersist],
+  );
+
+  // Student: apply remote value only when not editing locally
   useEffect(() => {
     if (isTeacher) return;
-    if (selectedValue) {
-      writeAnswer(field.id, selectedValue);
+    if (focusedRef.current || dirtyRef.current) return;
+    const fromServer = getAnswer(field?.id);
+    if (fromServer !== undefined && fromServer !== latestValueRef.current) {
+      setSelectedValue(fromServer);
     }
-  }, [field.id, isTeacher, selectedValue, writeAnswer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [syncToken, field?.id, getAnswer, isTeacher]);
 
   // Teacher: live sync only when viewing a student (don't wipe solo practice)
   useEffect(() => {
     if (!isTeacher || isPresentationMode) return;
     if (!activeStudentId) return;
-    setSelectedValue(answers?.[field?.id]?.answer || "");
-  }, [isTeacher, answers, field?.id, isPresentationMode, activeStudentId]);
+    setSelectedValue(getAnswer(field?.id) || "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isTeacher,
+    syncToken,
+    field?.id,
+    isPresentationMode,
+    activeStudentId,
+    getAnswer,
+  ]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+        if (!isTeacher && dirtyRef.current) {
+          void writeAnswerRef.current(field.id, latestValueRef.current);
+        }
+      }
+    };
+  }, [field.id, isTeacher]);
+
   return (
-    <>
-      <Input
-        variant="flat"
-        className={`${styles["answer-wrapper"]} inputcustom ${
-          isCorrect && "isCorrect"
-        } ${isIncorrect && "isIncorrect"}`}
-        size="sm"
-        classNames={{
-          inputWrapper: isCorrect ? "bg-[#EBFFEE]" : "bg-[#eeebfe]",
-        }}
-        color={isCorrect ? "success" : selectedValue ? "danger" : "primary"}
-        value={selectedValue}
-        onValueChange={onChangeSelection}
-      />
-    </>
+    <Input
+      variant="flat"
+      className={`${styles["answer-wrapper"]} inputcustom ${
+        isCorrect && "isCorrect"
+      } ${isIncorrect && "isIncorrect"}`}
+      size="sm"
+      classNames={{
+        inputWrapper: isCorrect ? "bg-[#EBFFEE]" : "bg-[#eeebfe]",
+      }}
+      color={isCorrect ? "success" : selectedValue ? "danger" : "primary"}
+      value={selectedValue}
+      onValueChange={onChangeSelection}
+      autoComplete="off"
+      name={`fg-input-${field?.id}`}
+      onFocus={() => {
+        focusedRef.current = true;
+      }}
+      onBlur={() => {
+        focusedRef.current = false;
+        flushPersist();
+        // Allow later boot/reset sync; ExList remount covers teacher reset.
+        dirtyRef.current = false;
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          flushPersist();
+        }
+      }}
+    />
   );
 };
 
@@ -117,37 +186,75 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
   const image = data?.images?.[0];
   const { profile } = useContext(AuthContext);
   const rootsMapRef = useRef(
-    new Map<Element, ReturnType<typeof ReactDOM.createRoot>>()
+    new Map<Element, ReturnType<typeof ReactDOM.createRoot>>(),
   );
 
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
+  const isPresentationMode = !!(rest as any)?.isPresentationMode;
+  const activeStudentId = (rest as any)?.activeStudentId;
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
   const ex_id = data?.id;
 
-  const { writeAnswer, answers, getAnswers } = useExAnswer({
+  const { writeAnswer, answers, getAnswers, resetSeq } = useExAnswer({
     ex_id,
     lesson_id,
     student_id,
     isTeacher,
-    activeStudentId: (rest as any)?.activeStudentId,
-    isPresentationMode: (rest as any)?.isPresentationMode,
+    activeStudentId,
+    isPresentationMode,
   });
 
-  // One initial fetch for the whole exercise (not per gap)
+  const answersRef = useRef(answers);
+  answersRef.current = answers;
+  const writeAnswerRef = useRef(writeAnswer);
+  writeAnswerRef.current = writeAnswer;
+
+  const getAnswer = useCallback((fieldId: string | number) => {
+    return String(answersRef.current?.[fieldId]?.answer ?? "");
+  }, []);
+
+  const stableWriteAnswer = useCallback(
+    (q_id: number | string, answer: string) => {
+      return writeAnswerRef.current(q_id, answer);
+    },
+    [],
+  );
+
+  /** Student: bump once after first answers load. Teacher: follow poll/reset. */
+  const [bootVersion, setBootVersion] = useState(0);
+  const teacherSyncToken =
+    isTeacher && activeStudentId
+      ? `${resetSeq}:${JSON.stringify(
+          Object.keys(answers || {})
+            .sort()
+            .map((k) => [k, answers?.[k]?.answer]),
+        )}`
+      : `${resetSeq}:${bootVersion}`;
+
   useEffect(() => {
     if (isPreview) return;
-    const targetId = student_id || (rest as any)?.activeStudentId;
+    const targetId = student_id || activeStudentId;
     if (!targetId) return;
-    getAnswers(true);
+    let cancelled = false;
+    getAnswers(true).finally(() => {
+      if (!cancelled) setBootVersion((v) => v + 1);
+    });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [student_id, isPreview, (rest as any)?.activeStudentId]);
+  }, [student_id, isPreview, activeStudentId]);
+
+  useEffect(() => {
+    setBootVersion((v) => v + 1);
+  }, [resetSeq]);
 
   const renderContent = useCallback(() => {
     document
       .querySelectorAll(
-        `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`
+        `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`,
       )
       .forEach((el) => {
         const id = el.id;
@@ -162,7 +269,6 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
           root = ReactDOM.createRoot(el);
           rootsMapRef.current.set(el, root);
         }
-        const isPresentationMode = !!(rest as any)?.isPresentationMode;
         const hideAnswerHints = !isTeacher || isPresentationMode;
         const toolTipContent = hideAnswerHints
           ? ""
@@ -190,37 +296,38 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
               isDisabled={hideAnswerHints}
               content={toolTipContent}
             >
-              <div className="">
+              <div>
                 <AnswerField
                   field={field}
                   key={field?.id}
                   isTeacher={isTeacher}
                   isPresentationMode={isPresentationMode}
-                  activeStudentId={(rest as any)?.activeStudentId}
-                  answers={answers}
-                  writeAnswer={writeAnswer}
-                  initialAnswer={answers?.[field?.id]?.answer}
+                  activeStudentId={activeStudentId}
+                  getAnswer={getAnswer}
+                  writeAnswer={stableWriteAnswer}
+                  syncToken={teacherSyncToken}
                 />
               </div>
             </ResponsiveTooltip>
-          </div>
+          </div>,
         );
       });
   }, [
     data?.id,
     data.fields,
     isTeacher,
-    (rest as any)?.isPresentationMode,
-    (rest as any)?.activeStudentId,
-    answers,
-    writeAnswer,
+    isPresentationMode,
+    activeStudentId,
+    getAnswer,
+    stableWriteAnswer,
+    teacherSyncToken,
   ]);
 
   useEffect(() => {
-    const t = setTimeout(() => {
+    const frame = requestAnimationFrame(() => {
       renderContent();
-    }, 300);
-    return () => clearTimeout(t);
+    });
+    return () => cancelAnimationFrame(frame);
   }, [renderContent]);
 
   useEffect(() => {
