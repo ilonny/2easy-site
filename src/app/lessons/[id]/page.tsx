@@ -309,7 +309,7 @@ export default function LessonPage() {
       } catch {
       /* ignore */
     }
-    }, 3000);
+    }, 8000);
 
     return () => {
       active = false;
@@ -336,7 +336,7 @@ export default function LessonPage() {
         if (canGetList) {
           setTimeout(() => {
             getList();
-          }, 4000);
+          }, 10000);
         }
         return;
       }
@@ -348,7 +348,7 @@ export default function LessonPage() {
         });
         const list = await res?.json();
         if (!Array.isArray(list)) {
-          setTimeout(() => getList(), 4000);
+          setTimeout(() => getList(), 10000);
           return;
         }
         const nextFp = contentFingerprint(list);
@@ -364,7 +364,7 @@ export default function LessonPage() {
 
       setTimeout(() => {
         getList();
-      }, 4000);
+      }, 10000);
     };
     getList();
     return () => {

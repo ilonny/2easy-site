@@ -22,28 +22,31 @@ const enrichLessonTitles = async (events: ScheduleEvent[]) => {
   ];
   if (!missingIds.length) return events;
 
+  // One catalog fetch instead of N× GET /lesson?id=
   const titles = new Map<number, string>();
-  await Promise.all(
-    missingIds.map(async (id) => {
-      try {
-        const res = await fetchGet({
-          path: `/lesson?id=${id}`,
-          isSecure: true,
-        });
-        const json = await res?.json();
-        const title = String(json?.lesson?.title || "").trim();
-        if (title) titles.set(id, title);
-      } catch {
-        /* ignore single lesson fetch errors */
-      }
-    }),
-  );
+  try {
+    const res = await fetchGet({
+      path: "/lessons",
+      isSecure: true,
+    });
+    const json = await res?.json();
+    const lessons = Array.isArray(json?.lessons) ? json.lessons : [];
+    for (const row of lessons) {
+      const id = Number(row?.id);
+      const title = String(row?.title || "").trim();
+      if (id > 0 && title) titles.set(id, title);
+    }
+  } catch {
+    return events;
+  }
   if (!titles.size) return events;
 
   return events.map((e) => {
     const lid = Number(e.lesson_id);
-    if (!lid || !titles.has(lid)) return e;
-    return { ...e, lesson_title: titles.get(lid) };
+    if (!lid || !missingIds.includes(lid) || !titles.has(lid)) return e;
+    const title = titles.get(lid);
+    if (!title || isMissingTitle(title)) return e;
+    return { ...e, lesson_title: title };
   });
 };
 

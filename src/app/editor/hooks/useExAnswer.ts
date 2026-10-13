@@ -29,8 +29,8 @@ export const ANSWER_SYNC_Q_ID = "__sync__";
 export const EX_ANSWERS_RESET_EVENT = "ex-answers-reset";
 
 /** Teachers need live sync; students need timely reset detection. */
-export const DEFAULT_TEACHER_POLL_MS = 2500;
-export const DEFAULT_STUDENT_POLL_MS = 3500;
+export const DEFAULT_TEACHER_POLL_MS = 5000;
+export const DEFAULT_STUDENT_POLL_MS = 7000;
 
 export type TExAnswersResetDetail = {
   ex_id: number;
