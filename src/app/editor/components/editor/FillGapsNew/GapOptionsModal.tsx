@@ -38,7 +38,14 @@ export const GapOptionsModal: FC<TProps> = ({
 }) => {
   const isInputMode = mode === "input";
   const initialGap = useMemo<TFillGapsNewGap>(() => {
-    if (currentGap) return currentGap;
+    if (currentGap) {
+      // Deep clone so editing one gap never mutates another gap's options
+      return {
+        ...currentGap,
+        id: gapId || currentGap.id,
+        options: (currentGap.options || []).map((o) => ({ ...o })),
+      };
+    }
     return {
       id: gapId,
       options: [
@@ -65,7 +72,10 @@ export const GapOptionsModal: FC<TProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setLocalGap(initialGap);
+      setLocalGap({
+        ...initialGap,
+        options: (initialGap.options || []).map((o) => ({ ...o })),
+      });
     }
   }, [initialGap, isOpen]);
 

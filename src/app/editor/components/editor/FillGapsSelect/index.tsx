@@ -3,7 +3,7 @@
 import { ImageUpload } from "@/components/ImageUpload";
 import { useExData } from "../hooks/useExData";
 import { TitleExInput } from "../TitleExInput";
-import { TField, TFillGapsSelectData } from "./types";
+import { TField, TFieldOption, TFillGapsSelectData } from "./types";
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
@@ -20,6 +20,7 @@ import { FillGapsSelectExView } from "../../view/FillGapsSelectExView";
 import InfoIcon from "@/assets/icons/info.svg";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { uuidv4 } from "@/app/editor/helpers";
 
 const defaultValuesStub: TFillGapsSelectData = {
   title: "Let's practice!",
@@ -109,9 +110,10 @@ export const FillGapsSelect: FC<TProps> = ({
 
   const onClickAddSelection = useCallback(
     (addItemState: { selection: string }) => {
-      const id = new Date().getTime();
+      // Unique id per gap — same word twice must not share options state
+      const id = uuidv4();
       pasteHtmlAtCaret(
-        `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
+        `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id="${id}" answer='[${addItemState.selection}]' />&nbsp;`
       );
       const contentEditableWrapper = document.getElementById(
         "contentEditableWrapper"
@@ -142,7 +144,9 @@ export const FillGapsSelect: FC<TProps> = ({
   const onSaveOptions = useCallback(
     (fieldId: number | string, options: TFieldOption[]) => {
       const dataFields = data.fields.map((f) =>
-        f.id == fieldId ? { ...f, options } : f
+        String(f.id) === String(fieldId)
+          ? { ...f, options: options.map((o) => ({ ...o })) }
+          : f
       );
       changeData("fields", dataFields);
     },
@@ -158,7 +162,36 @@ export const FillGapsSelect: FC<TProps> = ({
     if (data.dataText && wrapper) {
       wrapper.innerHTML = data.dataText;
     }
+    // Repair legacy exercises with duplicate gap ids (same word twice)
+    if (wrapper) {
+      const seen = new Set<string>();
+      let fields = [...(data.fields || [])];
+      let dirty = false;
+      wrapper.querySelectorAll(".answerWrapper").forEach((node) => {
+        const el = node as HTMLElement;
+        const oldId = String(el.id || "");
+        if (!oldId || !seen.has(oldId)) {
+          if (oldId) seen.add(oldId);
+          return;
+        }
+        const newId = uuidv4();
+        const source = fields.find((f) => String(f.id) === oldId);
+        el.id = newId;
+        fields = fields.concat({
+          ...(source as TField),
+          id: newId,
+          options: (source?.options || []).map((o) => ({ ...o })),
+        });
+        seen.add(newId);
+        dirty = true;
+      });
+      if (dirty) {
+        changeData("fields", fields);
+        changeData("dataText", wrapper.innerHTML);
+      }
+    }
     renderGapTriggers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

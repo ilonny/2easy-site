@@ -29,29 +29,21 @@ const PopoverInput = ({
   onBlur: (val: string) => void;
   initialValue: string;
 }) => {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(initialValue || "");
 
   useEffect(() => {
-    setInputValue(initialValue);
-  }, []);
+    setInputValue(initialValue || "");
+  }, [initialValue]);
 
-  useEffect(() => {
-    return () => {
-      if (!inputValue) {
-        return;
-      }
-      onBlur(inputValue);
-    };
-  }, [inputValue]);
   return (
     <Input
       value={inputValue}
       onChange={(e) => setInputValue(e.target.value)}
-      onBlur={(e) => onBlur(inputValue)}
-      // onChange={(e) => onBlur(inputValue)}
+      onBlur={() => onBlur(inputValue)}
       size="sm"
       variant="underlined"
       color="primary"
+      autoComplete="off"
       onKeyDown={(e) => {
         if (e.key.toLowerCase() === "enter") {
           onBlur(inputValue);
@@ -129,8 +121,13 @@ export const PopoverFields: FC<TProps> = ({
             return (
               <div
                 className="flex items-center gap-1"
-                key={optionIndex.toString() + option.isCorrect}
+                key={`field-${id}-opt-${optionIndex}`}
               >
+                <Checkbox
+                  isSelected={!!option.isCorrect}
+                  onValueChange={() => onChangeFieldOption(id, optionIndex)}
+                  size="sm"
+                />
                 <PopoverInput
                   initialValue={option.value}
                   onBlur={(val) => {
@@ -156,13 +153,6 @@ export const PopoverFields: FC<TProps> = ({
                     <Image src={Close} alt="delete option" />
                   </Button>
                 )}
-
-                {/* <Input
-                  value={option.value}
-                  onChange={(e) =>
-                    onChangeFieldValue(id, optionIndex, e.target.value)
-                  }
-                /> */}
               </div>
             );
           })}

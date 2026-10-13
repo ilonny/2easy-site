@@ -17,6 +17,7 @@ import { FillGapsDragExView } from "../../view/FillGapsDragExView";
 import InfoIcon from "@/assets/icons/info.svg";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { uuidv4 } from "@/app/editor/helpers";
 
 const defaultValuesStub: TFillGapsDragData = {
   title: "Let's practice!",
@@ -113,9 +114,9 @@ export const FillGapsDrag: FC<TProps> = ({
 
   const onClickAddSelection = useCallback(
     (addItemState: any) => {
-      const id = new Date().getTime();
+      const id = uuidv4();
       pasteHtmlAtCaret(
-        `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
+        `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id="${id}" answer='[${addItemState.selection}]' />&nbsp;`
       );
       const contentEditableWrapper = document.getElementById(
         "contentEditableWrapper"

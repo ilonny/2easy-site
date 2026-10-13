@@ -17,6 +17,7 @@ import { FillGapsInputExView } from "../../view/FillGapsInputExView";
 import InfoIcon from "@/assets/icons/info.svg";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { uuidv4 } from "@/app/editor/helpers";
 
 const defaultValuesStub: TFillGapsInputData = {
   title: "Let's practice!",
@@ -76,37 +77,113 @@ export const FillGapsInput: FC<TProps> = ({
     }
   }, [onSuccess, success, resetData]);
 
+  const rootsMapRef = useRef(
+    new Map<Element, ReturnType<typeof ReactDOM.createRoot>>(),
+  );
+
+  const updateFieldOptions = useCallback(
+    (
+      fieldId: number | string,
+      updater: (options: TField["options"]) => TField["options"],
+    ) => {
+      const dataFields = (data.fields || []).map((f) => {
+        if (String(f.id) !== String(fieldId)) return f;
+        const options = Array.isArray(f.options)
+          ? f.options.map((o) => ({ ...o }))
+          : [];
+        return { ...f, options: updater(options as TField["options"]) };
+      });
+      changeData("fields", dataFields);
+    },
+    [changeData, data.fields],
+  );
+
+  const onChangeFieldOption = useCallback(
+    (fieldId: number, optionIndex: number) => {
+      updateFieldOptions(fieldId, (options) =>
+        options.map((o, i) =>
+          i === optionIndex ? { ...o, isCorrect: !o.isCorrect } : o,
+        ) as TField["options"],
+      );
+    },
+    [updateFieldOptions],
+  );
+
+  const onChangeFieldValue = useCallback(
+    (fieldId: number, optionIndex: number, value: string) => {
+      updateFieldOptions(fieldId, (options) =>
+        options.map((o, i) =>
+          i === optionIndex ? { ...o, value } : o,
+        ) as TField["options"],
+      );
+    },
+    [updateFieldOptions],
+  );
+
+  const onAddFieldOption = useCallback(
+    (fieldId: number) => {
+      updateFieldOptions(fieldId, (options) =>
+        [
+          ...options,
+          { value: "", isCorrect: false },
+        ] as unknown as TField["options"],
+      );
+    },
+    [updateFieldOptions],
+  );
+
+  const deleteOption = useCallback(
+    (fieldId: number, optionIndex: number) => {
+      updateFieldOptions(fieldId, (options) =>
+        options.filter((_o, i) => i !== optionIndex) as TField["options"],
+      );
+    },
+    [updateFieldOptions],
+  );
+
   const renderContent = useCallback(() => {
     document
       .querySelectorAll(".contentEditable .answerWrapper")
-      .forEach((el, index) => {
+      .forEach((el) => {
         const id = el.id;
-        const field = data.fields.find((f) => f.id == id);
-        el.setAttribute("index", field?.id?.toString());
-        const root = ReactDOM.createRoot(el);
+        const field = data.fields.find((f) => String(f.id) === String(id));
+        if (!field) return;
+        el.setAttribute("index", String(field.id));
+        let root = rootsMapRef.current.get(el);
+        if (!root) {
+          root = ReactDOM.createRoot(el);
+          rootsMapRef.current.set(el, root);
+        }
         root.render(
-          <div className="popover-wrapper" id={"popover-wrapper-" + field?.id}>
+          <div className="popover-wrapper" id={"popover-wrapper-" + field.id}>
             <PopoverFields
-              id={id}
+              id={id as any}
               field={field}
               onChangeFieldOption={onChangeFieldOption}
               onChangeFieldValue={onChangeFieldValue}
               onAddFieldOption={onAddFieldOption}
               deleteOption={deleteOption}
             />
-          </div>
+          </div>,
         );
       });
-  }, [data]);
+  }, [
+    data.fields,
+    onChangeFieldOption,
+    onChangeFieldValue,
+    onAddFieldOption,
+    deleteOption,
+  ]);
 
   const onClickAddSelection = useCallback(
     (addItemState: any) => {
-      const id = new Date().getTime();
+      // UUID — same word twice must not share an id (Date.now can collide)
+      const id = uuidv4();
       pasteHtmlAtCaret(
-        `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id=${id} answer='[${addItemState.selection}]' />&nbsp;`
+        `<div style="display: inline-block;" contenteditable="false" class="answerWrapper" id="${id}" answer='[${addItemState.selection}]' />&nbsp;`,
       );
       const contentEditableWrapper = document.getElementById(
-        "contentEditableWrapper"
+        "contentEditableWrapper",
       );
       const selection = window.getSelection();
       if (selection) {
@@ -123,77 +200,70 @@ export const FillGapsInput: FC<TProps> = ({
         ],
       } as unknown as TField;
 
-      const dataFields = [...data.fields];
-      dataFields.push(field);
-
-      changeData("fields", [...dataFields]);
+      changeData("fields", [...(data.fields || []), field]);
       changeData("dataText", contentEditableWrapper?.innerHTML);
       contentEditableWrapper?.blur();
-      // setTimeout(() => {
-      //   renderContent();
-      // }, 100);
     },
-    [changeData, data]
+    [changeData, data.fields],
   );
 
   const onChangeText = useCallback(
     (text: string) => {
       changeData("dataText", text);
     },
-    [changeData]
-  );
-
-  const onChangeFieldOption = useCallback(
-    (fieldId: number, optionIndex: number) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options[optionIndex].isCorrect =
-        !field.options[optionIndex].isCorrect;
-      changeData("fields", dataFields);
-    },
-    [data.fields, changeData]
-  );
-
-  const onChangeFieldValue = useCallback(
-    (fieldId: number, optionIndex: number, value: string) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options[optionIndex].value = value;
-      changeData("fields", dataFields);
-    },
-    [data.fields, changeData]
-  );
-
-  const onAddFieldOption = useCallback(
-    (fieldId: number) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options.push({ value: "", isCorrect: true });
-      changeData("fields", dataFields);
-    },
-    [data.fields, changeData]
-  );
-
-  const deleteOption = useCallback(
-    (fieldId: number, optionIndex: number) => {
-      const dataFields = [...data.fields];
-      const field = dataFields.find((f) => f.id == fieldId);
-      field.options = field.options.filter((_o, i) => i !== optionIndex);
-      changeData("fields", dataFields);
-    },
-    [changeData, data.fields]
+    [changeData],
   );
 
   useEffect(() => {
     renderContent();
-  }, [data.fields]);
+  }, [renderContent]);
 
   useEffect(() => {
-    if (data.dataText) {
-      document.getElementById("contentEditableWrapper").innerHTML =
-        data.dataText;
+    const el = document.getElementById("contentEditableWrapper");
+    if (data.dataText && el) {
+      el.innerHTML = data.dataText;
+    }
+    // Repair legacy exercises where the same word got the same Date.now id twice
+    if (el) {
+      const seen = new Set<string>();
+      let fields = [...(data.fields || [])];
+      let dirty = false;
+      el.querySelectorAll(".answerWrapper").forEach((node) => {
+        const wrapper = node as HTMLElement;
+        const oldId = String(wrapper.id || "");
+        if (!oldId || !seen.has(oldId)) {
+          if (oldId) seen.add(oldId);
+          return;
+        }
+        const newId = uuidv4();
+        const source = fields.find((f) => String(f.id) === oldId);
+        wrapper.id = newId;
+        fields = fields.concat({
+          ...(source || { options: [] }),
+          id: newId as any,
+          options: (source?.options || []).map((o) => ({ ...o })) as any,
+        });
+        seen.add(newId);
+        dirty = true;
+      });
+      if (dirty) {
+        changeData("fields", fields);
+        changeData("dataText", el.innerHTML);
+      }
     }
     renderContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      rootsMapRef.current.forEach((root) => {
+        try {
+          root.unmount();
+        } catch {}
+      });
+      rootsMapRef.current.clear();
+    };
   }, []);
 
   const contentEditableRef = useRef(null);

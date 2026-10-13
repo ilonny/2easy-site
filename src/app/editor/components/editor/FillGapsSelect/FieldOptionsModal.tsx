@@ -205,7 +205,7 @@ export const FieldOptionsModal: FC<TProps> = ({
               >
                 {localOptions.map((option, index) => (
                   <SortableOptionItem
-                    key={index}
+                    key={`opt-${field.id}-${index}`}
                     index={index}
                     option={option}
                     optionIndex={index}

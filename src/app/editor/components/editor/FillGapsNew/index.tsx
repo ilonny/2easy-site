@@ -79,7 +79,7 @@ export const FillGapsNew: FC<TProps> = ({
     currentSortIndexToShift,
   );
 
-  const { data, changeData, resetData } = useExData<TFillGapsNewData>(
+  const { data, changeData, resetData, setData } = useExData<TFillGapsNewData>(
     defaultValues || defaultValuesStub,
   );
 
@@ -410,10 +410,75 @@ export const FillGapsNew: FC<TProps> = ({
 
   const onSaveGap = useCallback(
     (gap: TFillGapsNewGap) => {
-      const next = (data.gaps || []).filter((g) => g.id !== gap.id).concat(gap);
+      const next = (data.gaps || [])
+        .filter((g) => g.id !== gap.id)
+        .concat({
+          ...gap,
+          options: (gap.options || []).map((o) => ({
+            ...o,
+            id: o.id || uuidv4(),
+          })),
+        });
       changeData("gaps", next);
     },
     [changeData, data.gaps],
+  );
+
+  /**
+   * Same word can appear as a gap more than once. Copy/paste used to keep the
+   * same gapId → shared options. Re-assign unique ids and deep-clone options.
+   * Only handles duplicates — does not invent/drop gap records (makeGap owns that).
+   */
+  const ensureUniqueGapIds = useCallback(
+    (content: TFillGapsNewContent, gaps: TFillGapsNewGap[]) => {
+      const byId = new Map(
+        (gaps || []).map((g) => [String(g.id), g] as const),
+      );
+      const seen = new Set<string>();
+      const clonedGaps: TFillGapsNewGap[] = [];
+      let mutated = false;
+
+      const gapEntries = Array.from(
+        Editor.nodes(editor, {
+          at: [],
+          match: (n) => Element.isElement(n) && (n as any).type === "gap",
+        }),
+      );
+
+      for (const [node, path] of gapEntries) {
+        let gapId = String((node as any).gapId || "");
+        if (!gapId) {
+          gapId = uuidv4();
+          Transforms.setNodes(editor, { gapId } as any, { at: path });
+          mutated = true;
+        }
+        if (seen.has(gapId)) {
+          const source = byId.get(gapId);
+          const newId = uuidv4();
+          const cloned: TFillGapsNewGap = {
+            id: newId,
+            originalText: source?.originalText || "",
+            options: (source?.options || []).map((o) => ({
+              ...o,
+              id: uuidv4(),
+            })),
+          };
+          clonedGaps.push(cloned);
+          byId.set(newId, cloned);
+          Transforms.setNodes(editor, { gapId: newId } as any, { at: path });
+          seen.add(newId);
+          mutated = true;
+        } else {
+          seen.add(gapId);
+        }
+      }
+
+      const contentOut = (mutated
+        ? (editor.children as TFillGapsNewContent)
+        : content) as TFillGapsNewContent;
+      return { content: contentOut, clonedGaps, mutated };
+    },
+    [editor],
   );
 
   const activeGap = useMemo(() => {
@@ -819,7 +884,27 @@ export const FillGapsNew: FC<TProps> = ({
             scheduleUpdateGapFloat();
           }}
           onChange={(val: any) => {
-            changeData("content", val as TFillGapsNewContent);
+            const { content, clonedGaps, mutated } = ensureUniqueGapIds(
+              val as TFillGapsNewContent,
+              data.gaps || [],
+            );
+            if (mutated) {
+              setData((prev) => {
+                const existingIds = new Set(
+                  (prev.gaps || []).map((g) => String(g.id)),
+                );
+                const extras = clonedGaps.filter(
+                  (g) => !existingIds.has(String(g.id)),
+                );
+                return {
+                  ...prev,
+                  content,
+                  gaps: (prev.gaps || []).concat(extras),
+                };
+              });
+            } else {
+              changeData("content", content);
+            }
           }}
         >
           <div className={styles.draftArea}>
