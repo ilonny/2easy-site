@@ -23,7 +23,7 @@ import {
   GlobalVideoCallShell,
   VideoCallProvider,
 } from "@/components/VideoCall";
-import NextTopLoader from "nextjs-toploader";
+import { NavigationProgress } from "@/components/NavigationProgress";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
@@ -53,16 +53,11 @@ export default function RootLayout({
           <NextUIProvider>
             <I18nProvider>
               <AuthContextProvider>
-                <VideoCallProvider>
-                  <SibscribeContextProvider>
-                    <EditorContextProvider>
-                      <ErrorBoundary>
-                        <NextTopLoader
-                          color="#20107D"
-                          height={3}
-                          showSpinner={false}
-                          crawl
-                        />
+                <SibscribeContextProvider>
+                  <EditorContextProvider>
+                    <ErrorBoundary>
+                      <NavigationProgress />
+                      <VideoCallProvider>
                         <AppInstallBanner />
                         <Header />
                         <BodyContainer>{children}</BodyContainer>
@@ -71,10 +66,10 @@ export default function RootLayout({
                         <ToastWrapper />
                         <TalkMeSite />
                         <GlobalVideoCallShell />
-                      </ErrorBoundary>
-                    </EditorContextProvider>
-                  </SibscribeContextProvider>
-                </VideoCallProvider>
+                      </VideoCallProvider>
+                    </ErrorBoundary>
+                  </EditorContextProvider>
+                </SibscribeContextProvider>
               </AuthContextProvider>
             </I18nProvider>
           </NextUIProvider>

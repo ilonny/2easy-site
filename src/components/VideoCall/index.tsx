@@ -1,3 +1,5 @@
+"use client";
+
 export { VideoCallProvider, useVideoCall } from "./VideoCallContext";
 export { GlobalVideoCallShell } from "./GlobalVideoCallShell";
 export { VideoCallTrigger } from "./VideoCallTrigger";
