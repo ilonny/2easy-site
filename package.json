@@ -38,6 +38,7 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "immutable": "^5.1.5",
     "next": "14.2.14",
+    "nextjs-toploader": "^3.9.17",
     "npm": "^11.1.0",
     "p-limit": "^6.2.0",
     "photoswipe": "^5.4.4",

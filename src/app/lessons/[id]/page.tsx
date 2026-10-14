@@ -36,7 +36,7 @@ import Tutor3 from "@/assets/images/tutor_3.png";
 import HeartImage from "@/assets/images/3d-glassy-fuzzy-pink-heart-with-a-happy-face.png";
 import { toast } from "react-toastify";
 import { Chat } from "@/components/Chat";
-import { VideoCall } from "@/components/VideoCall";
+import { VideoCallTrigger } from "@/components/VideoCall";
 import { CopyLessonLink } from "../components/CopyLessonLink";
 import { getImageUrl } from "@/app/editor/helpers";
 import { T } from "@/i18n/T";
@@ -703,7 +703,7 @@ export default function LessonPage() {
               lessonSessionId={lessonSessionId}
               onOpenChange={setBoardModalOpen}
             />
-            <VideoCall />
+            <VideoCallTrigger />
             <Chat
               lesson_id={Number(params.id) || lesson?.id || 0}
               studentId={lessonBoardStudentId}

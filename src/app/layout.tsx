@@ -19,6 +19,11 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { AppInstallBanner } from "@/components/AppInstallBanner";
 import { I18nProvider } from "@/i18n/I18nProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import {
+  GlobalVideoCallShell,
+  VideoCallProvider,
+} from "@/components/VideoCall";
+import NextTopLoader from "nextjs-toploader";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
@@ -48,19 +53,28 @@ export default function RootLayout({
           <NextUIProvider>
             <I18nProvider>
               <AuthContextProvider>
-                <SibscribeContextProvider>
-                  <EditorContextProvider>
-                    <ErrorBoundary>
-                      <AppInstallBanner />
-                      <Header />
-                      <BodyContainer>{children}</BodyContainer>
-                      <Footer />
-                      <CookieConsent />
-                      <ToastWrapper />
-                      <TalkMeSite />
-                    </ErrorBoundary>
-                  </EditorContextProvider>
-                </SibscribeContextProvider>
+                <VideoCallProvider>
+                  <SibscribeContextProvider>
+                    <EditorContextProvider>
+                      <ErrorBoundary>
+                        <NextTopLoader
+                          color="#20107D"
+                          height={3}
+                          showSpinner={false}
+                          crawl
+                        />
+                        <AppInstallBanner />
+                        <Header />
+                        <BodyContainer>{children}</BodyContainer>
+                        <Footer />
+                        <CookieConsent />
+                        <ToastWrapper />
+                        <TalkMeSite />
+                        <GlobalVideoCallShell />
+                      </ErrorBoundary>
+                    </EditorContextProvider>
+                  </SibscribeContextProvider>
+                </VideoCallProvider>
               </AuthContextProvider>
             </I18nProvider>
           </NextUIProvider>
