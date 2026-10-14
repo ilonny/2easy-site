@@ -18,11 +18,42 @@ export const formatMoneySafe = (
     maximumFractionDigits: 0,
   }).format(amount || 0);
 
-export const eventStudentLabel = (event: ScheduleEvent) =>
-  (event.student_names?.filter(Boolean).join(", ") ||
-    event.student_name ||
-    "")
-    .trim();
+/** Placeholder labels like "Ученик #51" / "Ученик 51" / "#51" — not a real FIO. */
+export const isPlaceholderStudentName = (name?: string | null) => {
+  const t = String(name || "").trim();
+  if (!t) return true;
+  return /^(ученик|student)\s*#?\s*\d+$/i.test(t) || /^#\d+$/.test(t);
+};
+
+export const eventStudentLabel = (
+  event: ScheduleEvent,
+  nameById?: Map<number, string>,
+) => {
+  const ids =
+    Array.isArray(event.student_ids) && event.student_ids.length
+      ? event.student_ids
+      : event.student_id
+        ? [event.student_id]
+        : [];
+
+  if (nameById?.size && ids.length) {
+    const resolved = ids
+      .map((id) => {
+        const fromMap = String(nameById.get(Number(id)) || "").trim();
+        if (fromMap && !isPlaceholderStudentName(fromMap)) return fromMap;
+        return "";
+      })
+      .filter(Boolean);
+    if (resolved.length) return resolved.join(", ");
+  }
+
+  const fromApi = (
+    event.student_names?.filter((n) => !isPlaceholderStudentName(n)).join(", ") ||
+    (isPlaceholderStudentName(event.student_name) ? "" : event.student_name) ||
+    ""
+  ).trim();
+  return fromApi;
+};
 
 export const eventPlaceLabel = (event: ScheduleEvent) => {
   if (event.type === "payment") return "";
@@ -42,11 +73,15 @@ const isGenericTitle = (title?: string | null) => {
 /** Primary/secondary lines for calendar event plaques. */
 export const eventChipText = (
   event: ScheduleEvent,
-  opts?: { detailed?: boolean; time?: string },
+  opts?: {
+    detailed?: boolean;
+    time?: string;
+    nameById?: Map<number, string>;
+  },
 ) => {
   const time = opts?.time || "";
   if (event.type === "payment") {
-    const student = eventStudentLabel(event);
+    const student = eventStudentLabel(event, opts?.nameById);
     const amount =
       event.amount != null
         ? formatMoneySafe(Number(event.amount), event.currency || "RUB")
@@ -66,10 +101,11 @@ export const eventChipText = (
     return { primary, secondary, titleAttr };
   }
 
-  const students = eventStudentLabel(event);
+  const students = eventStudentLabel(event, opts?.nameById);
   const rawTitle = String(event.title || "").trim();
   const customTitle =
     isGenericTitle(rawTitle) ||
+    isPlaceholderStudentName(rawTitle) ||
     (students && rawTitle.toLowerCase() === students.toLowerCase())
       ? ""
       : rawTitle;

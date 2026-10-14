@@ -131,6 +131,16 @@ export default function SchedulePage() {
     })();
   }, [isTeacher, teacherAllowed]);
 
+  const studentNameById = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const s of students as Array<{ id?: number; name?: string }>) {
+      const id = Number(s?.id);
+      const name = String(s?.name || "").trim();
+      if (id > 0 && name) map.set(id, name);
+    }
+    return map;
+  }, [students]);
+
   const visibleEvents = useMemo(() => {
     if (!filterStudentId) return events;
     return events.filter((e) =>
@@ -185,7 +195,6 @@ export default function SchedulePage() {
 
   return (
     <CatalogPageShell
-      fillHeight={tab === "calendar"}
       className={styles.page}
       title={<T k="schedule.titlePage" />}
       subtitle={
@@ -294,6 +303,7 @@ export default function SchedulePage() {
                     cursor={cursor}
                     events={visibleEvents}
                     detailed={isTeacher}
+                    nameById={studentNameById}
                     onDayClick={(day) => {
                       setCursor(day);
                       if (isTeacher) openCreate(day);
@@ -306,6 +316,7 @@ export default function SchedulePage() {
                     cursor={cursor}
                     events={visibleEvents}
                     detailed={isTeacher}
+                    nameById={studentNameById}
                     onSlotClick={openCreate}
                     onEventClick={openEvent}
                   />
@@ -314,6 +325,7 @@ export default function SchedulePage() {
                     cursor={cursor}
                     events={visibleEvents}
                     detailed={isTeacher}
+                    nameById={studentNameById}
                     onSlotClick={openCreate}
                     onEventClick={openEvent}
                   />

@@ -201,11 +201,11 @@ const TrueFalseExViewImpl: FC<{
     const teacherHint =
       isTeacher &&
       !isPresentationMode &&
-      !canInteract &&
       hoveredSentenceId === sentenceId &&
       sentencesById.get(sentenceId)?.answer === option;
 
-    if (teacherHint) return `${styles.choiceBtn} ${styles.choiceHint} ${styles.choiceCorrect}`;
+    if (teacherHint)
+      return `${styles.choiceBtn} ${styles.choiceHint} ${styles.choiceCorrect}`;
     if (status === "correct" && isSelected)
       return `${styles.choiceBtn} ${styles.choiceCorrect}`;
     if (status === "incorrect" && isSelected)
@@ -253,8 +253,7 @@ const TrueFalseExViewImpl: FC<{
 
       <Card className={styles.card}>
         {sentences.map((sentence) => {
-          const teacherHintActive =
-            isTeacher && !isPresentationMode && !canInteract;
+          const teacherHintActive = isTeacher && !isPresentationMode;
           const inner = (
             <div
               className={styles.sentenceBlock}
@@ -262,8 +261,9 @@ const TrueFalseExViewImpl: FC<{
                 if (teacherHintActive) setHoveredSentenceId(sentence.id);
               }}
               onMouseLeave={() => {
-                if (hoveredSentenceId === sentence.id)
-                  setHoveredSentenceId(null);
+                setHoveredSentenceId((id) =>
+                  id === sentence.id ? null : id,
+                );
               }}
             >
               <p className={styles.sentenceText}>{sentence.text}</p>

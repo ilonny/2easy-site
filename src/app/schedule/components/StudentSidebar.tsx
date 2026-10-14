@@ -5,7 +5,7 @@ import { T } from "@/i18n/T";
 import { colorForStudent } from "../types";
 import styles from "../styles.module.css";
 
-type Student = { id: number; name?: string };
+type Student = { id: number; name?: string; email?: string };
 
 type TProps = {
   students: Student[];
@@ -60,7 +60,11 @@ export const StudentSidebar = ({
               className={styles.dot}
               style={{ background: colorForStudent(s.id) }}
             />
-            <span className="truncate">{s.name || `#${s.id}`}</span>
+            <span className="truncate">
+              {String(s.name || "").trim() ||
+                String(s.email || "").trim() ||
+                "—"}
+            </span>
           </button>
         ))}
       </div>

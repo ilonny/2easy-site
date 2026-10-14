@@ -100,7 +100,7 @@ export const StartLessonButton = (props: TProps) => {
         }}
         className={[
           // Desktop (default): same circle as pre-adaptive
-          "z-10 float-right flex cursor-pointer items-center justify-center bg-brand-violet text-center font-bold tracking-brand text-white transition-opacity duration-250 hover:opacity-90",
+          "z-10 float-right flex cursor-pointer items-center justify-center bg-brand-violet text-center font-medium text-white transition-opacity duration-250 hover:opacity-90",
           "sticky top-[80px] mt-[-90px] h-[80px] w-[80px] rounded-full p-2.5",
           "lg:top-[calc(var(--site-header-h)+40px)] lg:mt-0 lg:h-[90px] lg:w-[90px]",
           isHomeworkCheck

@@ -110,7 +110,7 @@ export const EditLessonModalForm: FC<TProps> = ({
       classNames={{
         wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS,
         base: "rounded-[20px] bg-white max-sm:mx-2 max-sm:my-2 max-sm:max-h-[min(92dvh,100dvh)] lg:rounded-[30px]",
-        header: "border-b border-black/5 font-bold tracking-brand text-brand-black",
+        header: "border-b border-black/5 font-medium text-brand-black",
         body: "max-sm:max-h-[min(80dvh,100dvh)] max-sm:overflow-y-auto max-sm:overscroll-contain max-sm:[-webkit-overflow-scrolling:touch]",
       }}
     >

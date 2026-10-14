@@ -4,11 +4,17 @@
 
 .shell {
   display: flex;
-  flex: 1;
   flex-direction: column;
   gap: 12px;
-  min-height: 0;
-  overflow: hidden;
+  height: calc(100dvh - 140px);
+  min-height: 560px;
+}
+
+@media (max-width: 1023px) {
+  .shell {
+    height: calc(100dvh - 160px);
+    min-height: 480px;
+  }
 }
 
 .mainRow {

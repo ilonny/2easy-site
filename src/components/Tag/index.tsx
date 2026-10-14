@@ -14,7 +14,8 @@ const toneClassNames: Record<TTagTone, string> = {
   green: "bg-[#E9FFCA] text-[#5F8E1C]",
   mint: "bg-[#D0F2E5] text-[#229167]",
   blue: "bg-[#DFEDFF] text-[#1E79EE]",
-  white: "bg-white text-[#7561DB]",
+  // Soft gray fill — plain white disappears on white lesson cards (e.g. 18+).
+  white: "bg-brand-gray text-[#7561DB]",
 };
 
 export const Tag = ({ tone = "violet", icon, children, className = "" }: TProps) => {

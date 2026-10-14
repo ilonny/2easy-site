@@ -64,7 +64,7 @@ export default function StudentAccountPage() {
         isTeacher ? (
           <Link
             href="/profile?students"
-            className="text-sm font-bold tracking-brand text-brand-violet hover:opacity-80"
+            className="text-sm text-brand-violet hover:opacity-80"
           >
             <T k="students.allStudents" />
           </Link>

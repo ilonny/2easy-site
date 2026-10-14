@@ -6,7 +6,6 @@ import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useContext, useMemo } from "react";
 import { T } from "@/i18n/T";
-import { brandPrimaryBtnClassName } from "@/components/brandUi";
 
 export const ProfileSubscribeInformer = () => {
   const router = useRouter();
@@ -15,13 +14,14 @@ export const ProfileSubscribeInformer = () => {
     if (subscription?.subscribe_type_id === 1) {
       return (
         <>
-          <p className="mb-1 text-sm font-bold tracking-brand text-brand-black">
+          <p className="mb-1 text-sm">
             <T k="subscriptionStatus.trialUntil" />{" "}
             {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
           </p>
           <Link
             href="/subscription"
-            className="text-sm font-bold tracking-brand text-brand-violet underline"
+            color="primary"
+            className="underline"
             size="sm"
           >
             <T k="lessons.chooseTariff" />
@@ -35,7 +35,7 @@ export const ProfileSubscribeInformer = () => {
       subscription?.subscribe_type_id === 4
     ) {
       return (
-        <p className="mb-1 text-sm font-bold tracking-brand text-brand-black">
+        <p className="mb-1 text-sm">
           <T k="subscriptionStatus.activeUntil" />{" "}
           {dayjs(subscription?.dateEnd)?.format("DD.MM.YYYY")}
         </p>
@@ -43,16 +43,17 @@ export const ProfileSubscribeInformer = () => {
     }
     return (
       <div>
-        <p className="font-bold tracking-brand text-brand-black">
+        <p className="font-medium">
           <T k="subscriptionStatus.noActiveSubscription" />
         </p>
         <div className="h-1" />
-        <p className="text-sm font-bold tracking-brand text-brand-grayFont">
+        <p className="text-sm text-default-500">
           <T k="subscriptionStatus.subscribeToContinue" />
         </p>
         <div className="h-3" />
         <Button
-          className={`w-full ${brandPrimaryBtnClassName}`}
+          color="primary"
+          className="w-full"
           onClick={() => {
             router.push("/subscription");
           }}

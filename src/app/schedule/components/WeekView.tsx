@@ -12,6 +12,7 @@ type TProps = {
   cursor: Dayjs;
   events: ScheduleEvent[];
   detailed?: boolean;
+  nameById?: Map<number, string>;
   onSlotClick: (day: Dayjs, hour: number) => void;
   onEventClick: (event: ScheduleEvent) => void;
 };
@@ -20,6 +21,7 @@ export const WeekView = ({
   cursor,
   events,
   detailed,
+  nameById,
   onSlotClick,
   onEventClick,
 }: TProps) => {
@@ -52,48 +54,44 @@ export const WeekView = ({
   }, [now, hourHeight, showNowLine]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
-      {/* Horizontal scroll only — day headers stay synced with columns. */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-x-auto overflow-y-hidden overscroll-x-contain">
-        <div className="flex h-full min-h-0 min-w-[680px] flex-col">
-          <div
-            className="grid shrink-0 border-b border-[#e8e8ed] bg-white"
-            style={{ gridTemplateColumns: "52px repeat(7, minmax(0, 1fr))" }}
-          >
-            <div />
-            {days.map((day) => {
-              const isToday = day.isSame(today, "day");
-              return (
-                <div
-                  key={day.toISOString()}
-                  className="border-l border-[#e8e8ed] px-1 py-2 text-center"
-                >
-                  <div
-                    className={`text-[11px] font-semibold uppercase tracking-wide ${
-                      isToday ? "text-[#007AFF]" : "text-[#86868b]"
-                    }`}
-                  >
-                    {day.format("dd")}
-                  </div>
-                  <div
-                    className={`mx-auto mt-1 flex h-8 w-8 items-center justify-center rounded-full text-[17px] font-semibold ${
-                      isToday ? "bg-[#007AFF] text-white" : "text-[#1d1d1f]"
-                    }`}
-                  >
-                    {day.date()}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+    <div className="flex h-full min-h-0 flex-col bg-white">
+      <div
+        className="grid shrink-0 border-b border-[#e8e8ed] bg-white"
+        style={{ gridTemplateColumns: "52px repeat(7, minmax(0, 1fr))" }}
+      >
+        <div />
+        {days.map((day) => {
+          const isToday = day.isSame(today, "day");
+          return (
+            <div
+              key={day.toISOString()}
+              className="border-l border-[#e8e8ed] px-1 py-2 text-center"
+            >
+              <div
+                className={`text-[11px] font-semibold uppercase tracking-wide ${
+                  isToday ? "text-[#007AFF]" : "text-[#86868b]"
+                }`}
+              >
+                {day.format("dd")}
+              </div>
+              <div
+                className={`mx-auto mt-1 flex h-8 w-8 items-center justify-center rounded-full text-[17px] font-semibold ${
+                  isToday ? "bg-[#007AFF] text-white" : "text-[#1d1d1f]"
+                }`}
+              >
+                {day.date()}
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-          {/* Vertical scroll only for hours — no page scroll chaining. */}
-          <div
-            ref={scrollRef}
-            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain"
-          >
+      <div
+        ref={scrollRef}
+        className="min-h-0 flex-1 overflow-auto overscroll-contain"
+      >
         <div
-          className="relative pb-5"
+          className="relative min-w-[680px] pb-5"
           style={{
             display: "grid",
             gridTemplateColumns: "52px repeat(7, minmax(0, 1fr))",
@@ -105,7 +103,10 @@ export const WeekView = ({
               <div
                 key={hour}
                 className="absolute right-0 left-0 border-t border-[#f0f0f5] pr-2 text-right text-[11px] text-[#aeaeb2]"
-                style={{ top: (hour - HOURS[0]) * hourHeight, height: hourHeight }}
+                style={{
+                  top: (hour - HOURS[0]) * hourHeight,
+                  height: hourHeight,
+                }}
               >
                 <span className="relative -top-2">
                   {`${String(hour).padStart(2, "0")}:00`}
@@ -156,6 +157,7 @@ export const WeekView = ({
                 const chip = eventChipText(event, {
                   detailed: detailed || event.type === "payment",
                   time: start.format("HH:mm"),
+                  nameById,
                 });
                 const minH = eventMinHeight(event, hourHeight);
                 const boxH = Math.max(height, minH);
@@ -196,8 +198,6 @@ export const WeekView = ({
               style={{ top: nowTop, left: 52 }}
             />
           )}
-        </div>
-          </div>
         </div>
       </div>
     </div>

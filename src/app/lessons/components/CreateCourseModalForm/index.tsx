@@ -370,7 +370,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
       scrollBehavior="outside"
       classNames={{
         base: "rounded-[20px] bg-white lg:rounded-[30px]",
-        header: "border-b border-black/5 font-bold tracking-brand text-brand-black",
+        header: "border-b border-black/5 font-medium text-brand-black",
       }}
     >
       <form onSubmit={handleSubmit(onSubmit)}>

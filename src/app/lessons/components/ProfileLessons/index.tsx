@@ -631,7 +631,7 @@ export const ProfileLessons = (props: TProps) => {
                 base: "relative z-0",
                 inputWrapper:
                   "min-w-0 rounded-[14px] bg-brand-gray shadow-none data-[hover=true]:bg-[#e6e6ea] group-data-[focus=true]:bg-brand-gray group-data-[focus=true]:shadow-none",
-                input: "font-bold tracking-brand text-brand-black",
+                input: "font-normal text-brand-black",
               }}
               startContent={
                 <Image
@@ -686,19 +686,19 @@ export const ProfileLessons = (props: TProps) => {
             {studentId ? (
               <Link
                 href={"/student-account/" + studentId}
-                className="shrink-0 text-sm font-bold tracking-brand text-brand-violet sm:text-base"
+                className="shrink-0 text-sm text-brand-violet sm:text-base"
               >
                 <T k="lessons.backToStudentAccount" />
               </Link>
             ) : (
               <Link
                 href="/lesson_plans"
-                className="shrink-0 text-sm font-bold tracking-brand text-brand-violet sm:text-base"
+                className="shrink-0 text-sm text-brand-violet sm:text-base"
               >
                 <T k="lessons.allCourses" />
               </Link>
             )}
-            <h2 className="max-w-full break-words text-xl font-bold leading-snug tracking-brand text-brand-black sm:text-2xl lg:text-[28px]">
+            <h2 className="max-w-full break-words text-xl font-medium leading-snug text-brand-black sm:text-2xl lg:text-[28px]">
               {currentCourse.title}
             </h2>
           </div>
@@ -792,7 +792,7 @@ export const ProfileLessons = (props: TProps) => {
                   classNames={{
                     inputWrapper:
                       "min-w-0 rounded-[14px] bg-brand-gray shadow-none hover:bg-[#e6e6ea] group-data-[focus=true]:bg-brand-gray",
-                    input: "font-bold tracking-brand text-brand-black",
+                    input: "font-normal text-brand-black",
                   }}
                   startContent={
                     <Image

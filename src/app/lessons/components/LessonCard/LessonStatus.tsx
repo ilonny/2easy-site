@@ -20,7 +20,7 @@ export const LessonStatus = ({
             alt="checked icon"
             style={{ borderRadius: 0 }}
           />
-          <p className="text-sm font-bold tracking-brand text-brand-violet">
+          <p className="text-[#3F28C6]" style={{ fontSize: 14 }}>
             {isCourses ? <T k="lessons.courseOpen" /> : <T k="lessons.lessonOpen" />}
           </p>
         </div>
@@ -29,7 +29,7 @@ export const LessonStatus = ({
       return (
         <div className="flex items-center gap-2">
           <Image src={CheckedIcon.src} alt="checked icon" />
-          <p className="text-sm font-bold tracking-brand text-[#229167]">
+          <p className="text-[#219F59]" style={{ fontSize: 14 }}>
             <T k="lessons.lessonComplete" />
           </p>
         </div>
@@ -38,7 +38,7 @@ export const LessonStatus = ({
       return (
         <div className="flex items-center gap-2">
           <Image src={LessonCloseIcon.src} alt="checked icon" />
-          <p className="text-sm font-bold tracking-brand text-brand-grayFont">
+          <p className="text-[#C4C4C4]" style={{ fontSize: 14 }}>
             {isCourses ? <T k="lessons.courseClosed" /> : <T k="lessons.lessonClosed" />}
           </p>
         </div>

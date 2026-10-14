@@ -21,12 +21,7 @@ import { useCheckSubscription } from "@/app/subscription/helpers";
 import { T } from "@/i18n/T";
 import { UserAvatar } from "@/components/UserAvatar";
 import { StudentPasswordReveal } from "../StudentPasswordReveal";
-import {
-  brandDangerBtnClassName,
-  brandModalClassNames,
-  brandPrimaryBtnClassName,
-  brandSecondaryBtnClassName,
-} from "@/components/brandUi";
+import { brandModalClassNames } from "@/components/brandUi";
 
 type TProps = {
   hideAddButton?: boolean;
@@ -130,19 +125,13 @@ export const StudentList = (props: TProps) => {
                         />
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-bold tracking-brand text-brand-black">
-                              {student.name}
-                            </p>
-                            <p className="text-sm font-bold tracking-brand text-brand-grayFont">
-                              {student.email}
-                            </p>
+                            <p className="font-bold">{student.name}</p>
+                            <p className="font-light">{student.email}</p>
                           </div>
                           {!!student.tag && (
                             <div className="mt-2 flex items-center">
-                              <Chip className="rounded-2xl bg-[#E9FFCA] text-[#5F8E1C]">
-                                <span className="text-[10px] font-bold tracking-brand lg:text-xs">
-                                  {student.tag}
-                                </span>
+                              <Chip color="warning">
+                                <span className="text-white">{student.tag}</span>
                               </Chip>
                             </div>
                           )}
@@ -174,7 +163,7 @@ export const StudentList = (props: TProps) => {
                               <>
                                 <Button
                                   fullWidth
-                                  className={brandPrimaryBtnClassName}
+                                  color="primary"
                                   onClick={() => {
                                     router.push(
                                       "/student-account/" + student?.id,
@@ -188,7 +177,7 @@ export const StudentList = (props: TProps) => {
                             )}
                             <Button
                               fullWidth
-                              className={brandPrimaryBtnClassName}
+                              color="primary"
                               onClick={(e) => {
                                 if (checkSubscription()) {
                                   e.preventDefault();
@@ -203,7 +192,7 @@ export const StudentList = (props: TProps) => {
                             <div className="h-2" />
                             <Button
                               fullWidth
-                              className={brandDangerBtnClassName}
+                              color="danger"
                               variant="light"
                               onClick={() => {
                                 if (checkSubscription()) {
@@ -224,11 +213,10 @@ export const StudentList = (props: TProps) => {
           })}
           {!hideAddButton && (
             <Button
-              className={`px-10 ${
-                btnSecondary
-                  ? brandSecondaryBtnClassName
-                  : brandPrimaryBtnClassName
-              }`}
+              radius="md"
+              color="primary"
+              variant={btnSecondary ? "bordered" : undefined}
+              className="px-10"
               onClick={() => {
                 if (checkSubscription()) {
                   onPressCreateGroup(null);
@@ -265,7 +253,7 @@ export const StudentList = (props: TProps) => {
           </ModalHeader>
           <ModalBody>
             <Button
-              className={brandDangerBtnClassName}
+              color="danger"
               variant="light"
               onClick={() => {
                 deleteStudent(chosenStudent.id).then(() => {

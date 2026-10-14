@@ -165,7 +165,7 @@ export const CreateHomeworkModal: FC<TProps> = ({
       classNames={{
         wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS,
         base: "rounded-[20px] bg-white lg:rounded-[30px]",
-        header: "border-b border-black/5 font-bold tracking-brand text-brand-black",
+        header: "border-b border-black/5 font-medium text-brand-black",
       }}
     >
       <ModalContent>

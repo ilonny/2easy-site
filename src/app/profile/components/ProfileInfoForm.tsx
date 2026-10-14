@@ -96,7 +96,7 @@ export const ProfileInfoForm = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full max-w-full lg:min-w-0 lg:max-w-[min(100%,520px)] lg:flex-1"
       >
-        <p className="mb-5 text-sm font-bold tracking-brand text-brand-grayFont">
+        <p className="mb-5 text-sm text-default-500">
           <T k="profile.friendlyIntro" />
         </p>
         <Controller

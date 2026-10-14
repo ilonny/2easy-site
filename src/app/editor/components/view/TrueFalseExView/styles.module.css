@@ -42,7 +42,6 @@
   border-radius: 14px;
   background: #fff;
   border: 1px solid rgba(63, 40, 198, 0.1);
-  box-shadow: 0 4px 14px rgba(63, 40, 198, 0.06);
 }
 
 @media (min-width: 640px) {
@@ -69,15 +68,15 @@
 .buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 9px;
 }
 
 .choiceBtn {
-  min-width: 110px;
-  min-height: 44px;
+  min-width: 99px;
+  min-height: 40px;
   border-radius: 999px !important;
   font-weight: 700 !important;
-  font-size: 16px !important;
+  font-size: 14px !important;
 }
 
 .choiceNeutral {
@@ -104,6 +103,14 @@
   color: #991b1b !important;
 }
 
-.choiceHint {
-  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.55);
+/* Teacher hover hint — keep green even on disabled NextUI buttons */
+.choiceHint,
+.choiceHint[disabled],
+.choiceHint[aria-disabled="true"],
+.choiceHint:disabled {
+  background: #a7f3d0 !important;
+  border: 1px solid rgba(22, 163, 74, 0.95) !important;
+  color: #166534 !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.45);
 }

@@ -32,14 +32,23 @@ import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { checkResponse, fetchGet } from "@/api";
 import type {
   PaymentPlan,
   PaymentStats,
   PaymentStatsGranularity,
+  ScheduleEvent,
 } from "../types";
+import { eventStudentIds } from "../types";
 import { formatMoney } from "../utils/calendar";
 import type { LoadStatsParams } from "../hooks/usePaymentPlans";
 import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
+
+type AnchorOption = {
+  id: number;
+  label: string;
+  ends_at: string;
+};
 
 dayjs.extend(isoWeek);
 
@@ -68,6 +77,7 @@ type PlanForm = {
   lessons_total: string;
   lessons_remaining: string;
   notes: string;
+  anchor_event_id: number | "";
 };
 
 const emptyPlanForm = (): PlanForm => ({
@@ -79,6 +89,7 @@ const emptyPlanForm = (): PlanForm => ({
   lessons_total: "8",
   lessons_remaining: "8",
   notes: "",
+  anchor_event_id: "",
 });
 
 const formFromPlan = (plan: PaymentPlan): PlanForm => ({
@@ -94,6 +105,7 @@ const formFromPlan = (plan: PaymentPlan): PlanForm => ({
     plan.lessons_remaining ?? plan.lessons_total ?? 8,
   ),
   notes: plan.notes || "",
+  anchor_event_id: plan.anchor_event_id || "",
 });
 
 const defaultRange = (granularity: PaymentStatsGranularity) => {
@@ -174,6 +186,8 @@ export const PaymentControlTab = ({
   const [editing, setEditing] = useState<PaymentPlan | null>(null);
   const [form, setForm] = useState<PlanForm>(emptyPlanForm());
   const [busy, setBusy] = useState(false);
+  const [anchorOptions, setAnchorOptions] = useState<AnchorOption[]>([]);
+  const [anchorsLoading, setAnchorsLoading] = useState(false);
   const [granularity, setGranularity] =
     useState<PaymentStatsGranularity>("month");
   const initial = defaultRange("month");
@@ -196,6 +210,54 @@ export const PaymentControlTab = ({
     reloadStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!open || !form.student_id) {
+      setAnchorOptions([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setAnchorsLoading(true);
+      try {
+        const rangeFrom = dayjs().subtract(14, "day").toISOString();
+        const rangeTo = dayjs().add(6, "month").toISOString();
+        const res = await fetchGet({
+          path: `/schedule/events?from=${encodeURIComponent(rangeFrom)}&to=${encodeURIComponent(rangeTo)}`,
+          isSecure: true,
+        });
+        const json = await res?.json();
+        checkResponse(json);
+        if (cancelled || !json?.success) return;
+        const list = (json.events || []) as ScheduleEvent[];
+        const studentId = Number(form.student_id);
+        const options = list
+          .filter((e) => e.type !== "payment")
+          .filter((e) => eventStudentIds(e).includes(studentId))
+          .map((e) => {
+            const when = dayjs(e.starts_at);
+            const title =
+              String(e.title || "").trim() ||
+              i18n.t("schedule.defaultLessonTitle");
+            return {
+              id: Number(e.id),
+              ends_at: e.ends_at,
+              label: `${when.format("DD.MM.YYYY HH:mm")} · ${title}`,
+            };
+          })
+          .filter((o) => Number.isFinite(o.id) && o.id > 0)
+          .sort((a, b) => dayjs(a.ends_at).valueOf() - dayjs(b.ends_at).valueOf());
+        setAnchorOptions(options);
+      } catch {
+        if (!cancelled) setAnchorOptions([]);
+      } finally {
+        if (!cancelled) setAnchorsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, form.student_id]);
 
   const studentById = useMemo(() => {
     const map = new Map<number, { name?: string; email?: string }>();
@@ -240,10 +302,6 @@ export const PaymentControlTab = ({
     } else if (preset === "year") {
       nextFrom = now.startOf("year").format("YYYY-MM-DD");
       nextTo = now.endOf("year").format("YYYY-MM-DD");
-    } else if (preset === "surround") {
-      const range = defaultRange(granularity);
-      nextFrom = range.from;
-      nextTo = range.to;
     }
     setFrom(nextFrom);
     setTo(nextTo);
@@ -288,6 +346,9 @@ export const PaymentControlTab = ({
             ? Number(form.lessons_remaining)
             : null,
         notes: form.notes || null,
+        anchor_event_id: form.anchor_event_id
+          ? Number(form.anchor_event_id)
+          : null,
       };
       if (editing) await onUpdate(editing.id, payload);
       else await onCreate(payload);
@@ -480,9 +541,6 @@ export const PaymentControlTab = ({
               onPress={() => reloadStats()}
             >
               <T k="schedule.applyRange" />
-            </Button>
-            <Button size="sm" variant="light" onPress={() => applyPreset("surround")}>
-              <T k="schedule.presetSurround" />
             </Button>
             <Button size="sm" variant="light" onPress={() => applyPreset("past3m")}>
               <T k="schedule.presetPast3m" />
@@ -717,6 +775,11 @@ export const PaymentControlTab = ({
                             <T k="schedule.overdueBadge" />
                           </span>
                         ) : null}
+                        {plan.anchor_event_id ? (
+                          <span className="text-[11px] text-[#86868b]">
+                            <T k="schedule.linkedToLesson" />
+                          </span>
+                        ) : null}
                       </div>
                     ) : (
                       "—"
@@ -806,6 +869,7 @@ export const PaymentControlTab = ({
                 setForm((f) => ({
                   ...f,
                   student_id: e.target.value ? Number(e.target.value) : "",
+                  anchor_event_id: "",
                 }))
               }
             >
@@ -815,24 +879,30 @@ export const PaymentControlTab = ({
                 </SelectItem>
               ))}
             </Select>
-            <Select
-              label={i18n.t("schedule.planType")}
-              selectedKeys={[form.plan_type]}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  plan_type:
-                    (e.target.value as "recurring" | "package") || "recurring",
-                }))
-              }
-            >
-              <SelectItem key="recurring" value="recurring">
-                {i18n.t("schedule.planRecurring")}
-              </SelectItem>
-              <SelectItem key="package" value="package">
-                {i18n.t("schedule.planPackage")}
-              </SelectItem>
-            </Select>
+            <div className="space-y-1.5">
+              <p className="text-[11px] leading-snug text-[#86868b]">
+                <T k="schedule.planTypeHints" />
+              </p>
+              <Select
+                label={i18n.t("schedule.planType")}
+                selectedKeys={[form.plan_type]}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    plan_type:
+                      (e.target.value as "recurring" | "package") ||
+                      "recurring",
+                  }))
+                }
+              >
+                <SelectItem key="recurring" value="recurring">
+                  {i18n.t("schedule.planRecurring")}
+                </SelectItem>
+                <SelectItem key="package" value="package">
+                  {i18n.t("schedule.planPackage")}
+                </SelectItem>
+              </Select>
+            </div>
             <Input
               type="number"
               label={i18n.t("schedule.amount")}
@@ -894,10 +964,58 @@ export const PaymentControlTab = ({
                 ) : null}
               </>
             )}
+            <div className="space-y-1.5">
+              <p className="text-[11px] leading-snug text-[#86868b]">
+                <T k="schedule.linkToLessonHint" />
+              </p>
+              <Select
+                label={i18n.t("schedule.linkToLesson")}
+                isLoading={anchorsLoading}
+                isDisabled={!form.student_id}
+                selectedKeys={
+                  form.anchor_event_id
+                    ? [String(form.anchor_event_id)]
+                    : ["none"]
+                }
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  if (!raw || raw === "none") {
+                    setForm((f) => ({ ...f, anchor_event_id: "" }));
+                    return;
+                  }
+                  const id = Number(raw);
+                  const opt = anchorOptions.find((o) => o.id === id);
+                  setForm((f) => ({
+                    ...f,
+                    anchor_event_id: id,
+                    next_payment_date: opt
+                      ? dayjs(opt.ends_at).format("YYYY-MM-DD")
+                      : f.next_payment_date,
+                  }));
+                }}
+              >
+                <SelectItem key="none" value="none">
+                  {i18n.t("schedule.linkToLessonNone")}
+                </SelectItem>
+                {anchorOptions.map((o) => (
+                  <SelectItem key={String(o.id)} value={String(o.id)}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </Select>
+              {form.student_id &&
+              !anchorsLoading &&
+              anchorOptions.length === 0 ? (
+                <p className="text-[11px] text-[#86868b]">
+                  <T k="schedule.linkToLessonEmpty" />
+                </p>
+              ) : null}
+            </div>
             <Input
               type="date"
               label={i18n.t("schedule.nextPayment")}
               value={form.next_payment_date}
+              isDisabled={Boolean(form.anchor_event_id)}
               onChange={(e) =>
                 setForm((f) => ({
                   ...f,

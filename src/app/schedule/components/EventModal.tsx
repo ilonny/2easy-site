@@ -25,9 +25,10 @@ import i18n from "@/i18n/config";
 import type { EventFormValues, ScheduleEvent } from "../types";
 import { colorForStudent, eventStudentIds } from "./eventUi";
 import { formatMoney } from "../utils/calendar";
+import { getLocalTimeZone, getLocalTimeZoneLabel } from "../utils/timezone";
 import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
-type StudentOption = { id: number; name?: string };
+type StudentOption = { id: number; name?: string; email?: string };
 type LessonOption = { id: number; title?: string; user_id?: number };
 
 type TProps = {
@@ -174,7 +175,11 @@ export const EventModal = ({
 
   const studentNamesLabel = useMemo(() => {
     return form.student_ids
-      .map((id) => students.find((s) => s.id === id)?.name || `#${id}`)
+      .map((id) => {
+        const s = students.find((x) => Number(x.id) === Number(id));
+        const name = String(s?.name || "").trim();
+        return name || null;
+      })
       .filter(Boolean)
       .join(", ");
   }, [form.student_ids, students]);
@@ -189,16 +194,15 @@ export const EventModal = ({
       toast(i18n.t("schedule.fillRequired"), { type: "warning" });
       return;
     }
-    if (form.location_type === "lesson" && !form.lesson_id) {
-      toast(i18n.t("schedule.pickLesson"), { type: "warning" });
-      return;
-    }
     setBusy(true);
     try {
+      // Local wall-clock → absolute UTC instant. Each viewer then sees their local time.
       const starts_at = dayjs(
         `${form.date}T${form.start_time}`,
       ).toISOString();
       const ends_at = dayjs(`${form.date}T${form.end_time}`).toISOString();
+      const hasLesson =
+        form.location_type === "lesson" && Boolean(form.lesson_id);
       const title =
         form.title.trim() ||
         studentNamesLabel ||
@@ -210,13 +214,13 @@ export const EventModal = ({
           title,
           starts_at,
           ends_at,
-          location_type: form.location_type,
-          lesson_id:
-            form.location_type === "lesson"
-              ? Number(form.lesson_id) || null
-              : null,
+          timezone: getLocalTimeZone(),
+          location_type: hasLesson ? "lesson" : "text",
+          lesson_id: hasLesson ? Number(form.lesson_id) : null,
           location_text:
-            form.location_type === "text" ? form.location_text : null,
+            !hasLesson && form.location_type === "text"
+              ? form.location_text
+              : null,
           notes: form.notes || null,
           recurrence: !isEdit && form.recurrence ? form.recurrence : null,
           scope: isEdit ? scope : undefined,
@@ -364,6 +368,12 @@ export const EventModal = ({
                 <div className="mt-1 text-[15px] text-[#1d1d1f]">
                   {form.start_time} – {form.end_time}
                 </div>
+                <div className="mt-1 text-xs text-[#86868b]">
+                  <T
+                    k="schedule.localTimezoneHint"
+                    values={{ tz: getLocalTimeZoneLabel() }}
+                  />
+                </div>
               </div>
               <div>
                 <div className="text-xs font-medium uppercase tracking-wide text-[#86868b]">
@@ -436,7 +446,9 @@ export const EventModal = ({
                             backgroundColor: selected ? "#fff" : color,
                           }}
                         />
-                        {s.name || `#${s.id}`}
+                        {String(s.name || "").trim() ||
+                          String(s.email || "").trim() ||
+                          "—"}
                       </button>
                     );
                   })}
@@ -456,7 +468,9 @@ export const EventModal = ({
                             color: colorForStudent(id),
                           }}
                         >
-                          {s?.name || `#${id}`}
+                          {String(s?.name || "").trim() ||
+                            String(s?.email || "").trim() ||
+                            "—"}
                         </Chip>
                       );
                     })}
@@ -496,6 +510,12 @@ export const EventModal = ({
                   }
                 />
               </div>
+              <p className="text-xs text-[#86868b]">
+                <T
+                  k="schedule.timeTimezoneHint"
+                  values={{ tz: getLocalTimeZoneLabel() }}
+                />
+              </p>
 
               <Input
                 label={i18n.t("schedule.titleOptional")}
@@ -546,6 +566,9 @@ export const EventModal = ({
                 <div className="rounded-xl border border-[#e8e8ed] p-3">
                   <div className="mb-2 text-sm font-medium text-[#1d1d1f]">
                     <T k="schedule.lessonSource" />
+                    <span className="ml-1 text-xs font-normal text-[#86868b]">
+                      (<T k="schedule.linkedLessonOptional" />)
+                    </span>
                   </div>
                   <Tabs
                     selectedKey={form.lesson_source}
@@ -571,17 +594,19 @@ export const EventModal = ({
                   <Select
                     label={i18n.t("schedule.lesson")}
                     selectedKeys={
-                      form.lesson_id ? [String(form.lesson_id)] : []
+                      form.lesson_id ? [String(form.lesson_id)] : ["none"]
                     }
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const v = e.target.value;
                       setForm((f) => ({
                         ...f,
-                        lesson_id: e.target.value
-                          ? Number(e.target.value)
-                          : "",
-                      }))
-                    }
+                        lesson_id: !v || v === "none" ? "" : Number(v),
+                      }));
+                    }}
                   >
+                    <SelectItem key="none" value="none">
+                      {i18n.t("schedule.lessonNone")}
+                    </SelectItem>
                     {filteredLessons.map((l) => (
                       <SelectItem key={String(l.id)} value={String(l.id)}>
                         {l.title || `#${l.id}`}

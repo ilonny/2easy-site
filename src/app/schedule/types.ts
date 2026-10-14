@@ -60,6 +60,7 @@ export type PaymentPlan = {
   lessons_remaining?: number | null;
   is_active: number;
   notes?: string | null;
+  anchor_event_id?: number | null;
   is_overdue?: boolean;
 };
 

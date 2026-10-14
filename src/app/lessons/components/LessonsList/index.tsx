@@ -251,9 +251,9 @@ export const LessonsList: FC<TProps> = ({
   }, [checkSubscription, currentCourse?.id, router]);
 
   const createPrimaryBtn =
-    "w-full min-h-10 rounded-[14px] bg-brand-violet text-xs font-bold tracking-brand text-white lg:min-h-11 lg:text-sm";
+    "w-full min-h-10 rounded-[14px] bg-brand-violet text-sm font-medium text-white lg:min-h-11 lg:text-base";
   const createSecondaryBtn =
-    "w-full min-h-10 rounded-[14px] bg-brand-gray text-xs font-bold tracking-brand text-brand-violet lg:min-h-11 lg:text-sm";
+    "w-full min-h-10 rounded-[14px] bg-brand-gray text-sm font-medium text-brand-violet lg:min-h-11 lg:text-base";
 
   return (
     <div className="mx-auto grid w-full max-w-full grid-cols-1 gap-x-3 gap-y-6 max-[1199px]:w-[80%] md:grid-cols-3 md:gap-x-4 md:gap-y-8 min-[1200px]:w-full min-[1200px]:grid-cols-4 min-[1200px]:gap-x-[30px] min-[1200px]:gap-y-10">

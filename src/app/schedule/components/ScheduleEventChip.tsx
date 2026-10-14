@@ -9,6 +9,7 @@ type TProps = {
   event: ScheduleEvent;
   compact?: boolean;
   detailed?: boolean;
+  nameById?: Map<number, string>;
   onClick?: (event: ScheduleEvent) => void;
 };
 
@@ -16,6 +17,7 @@ export const ScheduleEventChip = ({
   event,
   compact,
   detailed,
+  nameById,
   onClick,
 }: TProps) => {
   const colors = colorsForEvent(event);
@@ -23,6 +25,7 @@ export const ScheduleEventChip = ({
   const { primary, secondary, titleAttr } = eventChipText(event, {
     detailed,
     time,
+    nameById,
   });
 
   const overdue = event.type === "payment" && event.is_overdue;

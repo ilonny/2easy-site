@@ -61,7 +61,7 @@ const levelTone = (level: string): TTagTone =>
   level.startsWith("A") ? "green" : level.startsWith("B") ? "mint" : "blue";
 
 const actionBtnClassName =
-  "w-full min-h-10 rounded-[14px] text-xs font-bold tracking-brand lg:text-sm";
+  "w-full min-h-10 rounded-[14px] text-sm font-medium lg:text-base";
 const primaryActionClassName = `${actionBtnClassName} bg-brand-violet text-white`;
 const secondaryActionClassName = `${actionBtnClassName} border border-brand-violet/30 bg-white text-brand-violet`;
 
@@ -718,13 +718,13 @@ export const LessonCard: FC<TProps> = ({
               </Tag>
             )}
             {tagMeta.extras.map((tag) => (
-              <Tag key={tag} tone="white" className="bg-brand-gray">
+              <Tag key={tag} tone="white">
                 {tag}
               </Tag>
             ))}
           </div>
         )}
-        <p className="text-sm font-bold leading-[1.3] tracking-brand text-brand-black lg:text-base lg:leading-[22px]">
+        <p className="text-black font-bold" style={{ fontSize: 18 }}>
           {lesson.title}
         </p>
         {!!lesson?.["lesson_relations.status"] && (
@@ -734,7 +734,7 @@ export const LessonCard: FC<TProps> = ({
           />
         )}
         {!!lesson.description && (
-          <p className="line-clamp-2 whitespace-pre-wrap text-sm font-bold leading-[1.3] tracking-brand text-brand-grayFont lg:line-clamp-3 lg:leading-[19px]">
+          <p className="line-clamp-2 whitespace-pre-wrap text-sm leading-[1.3] text-brand-black lg:line-clamp-3 lg:leading-[19px]">
             {lesson.description.length > 100
               ? lesson.description.slice(0, 110) + "..."
               : lesson.description}
@@ -1044,7 +1044,7 @@ export const LessonCard: FC<TProps> = ({
               </Button>
               <Link
                 href="/login"
-                className="block w-full text-center font-bold tracking-brand text-brand-violet underline"
+                className="block w-full text-center font-medium text-brand-violet underline"
               >
                 <T
                   k="auth.alreadyHaveAccount"

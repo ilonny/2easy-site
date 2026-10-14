@@ -34,7 +34,7 @@ export const CatalogPageShell = ({
       >
         <div className="mx-auto flex max-w-[675px] shrink-0 flex-col items-center gap-2 px-1 lg:gap-3">
           <h1
-            className={`text-center font-bold leading-none tracking-brand text-brand-black ${
+            className={`text-center font-bold leading-none text-brand-black ${
               fillHeight
                 ? "text-[22px] lg:text-[32px]"
                 : "text-[25px] lg:text-[40px]"
@@ -43,7 +43,7 @@ export const CatalogPageShell = ({
             {title}
           </h1>
           {subtitle ? (
-            <p className="text-center text-sm font-bold leading-[1.3] tracking-brand text-brand-grayFont lg:text-base">
+            <p className="text-center text-sm leading-[1.3] text-brand-grayFont lg:text-base">
               {subtitle}
             </p>
           ) : null}

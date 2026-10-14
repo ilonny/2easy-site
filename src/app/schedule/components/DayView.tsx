@@ -12,6 +12,7 @@ type TProps = {
   cursor: Dayjs;
   events: ScheduleEvent[];
   detailed?: boolean;
+  nameById?: Map<number, string>;
   onSlotClick: (day: Dayjs, hour: number) => void;
   onEventClick: (event: ScheduleEvent) => void;
 };
@@ -20,6 +21,7 @@ export const DayView = ({
   cursor,
   events,
   detailed,
+  nameById,
   onSlotClick,
   onEventClick,
 }: TProps) => {
@@ -75,7 +77,7 @@ export const DayView = ({
 
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain"
+        className="min-h-0 flex-1 overflow-auto overscroll-contain"
       >
         <div className="relative pb-5" style={{ height: gridHeight + 20 }}>
           {HOURS.map((hour) => (
@@ -122,6 +124,7 @@ export const DayView = ({
               const chip = eventChipText(event, {
                 detailed: true,
                 time: `${start.format("HH:mm")} – ${end.format("HH:mm")}`,
+                nameById,
               });
               const minH = eventMinHeight(event, hourHeight);
               const isPayment = event.type === "payment";

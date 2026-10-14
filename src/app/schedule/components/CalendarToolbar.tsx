@@ -5,6 +5,7 @@ import type { ScheduleView } from "../types";
 import styles from "../styles.module.css";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { getLocalTimeZoneLabel } from "../utils/timezone";
 
 type TProps = {
   cursor: Dayjs;
@@ -30,6 +31,7 @@ export const CalendarToolbar = ({
     week: i18n.t("schedule.viewWeek"),
     month: i18n.t("schedule.viewMonth"),
   };
+  const tzLabel = getLocalTimeZoneLabel();
 
   return (
     <div className={styles.toolbar}>
@@ -43,7 +45,12 @@ export const CalendarToolbar = ({
         <button type="button" className={styles.navBtn} onClick={onNext} aria-label="next">
           ›
         </button>
-        <h2 className={styles.title}>{title}</h2>
+        <div className="min-w-0">
+          <h2 className={styles.title}>{title}</h2>
+          <p className="mt-0.5 truncate text-[11px] font-medium text-[#86868b]">
+            <T k="schedule.localTimezoneHint" values={{ tz: tzLabel }} />
+          </p>
+        </div>
       </div>
       <div className={styles.toolbarRight}>
         <div className={styles.segment} role="tablist">
