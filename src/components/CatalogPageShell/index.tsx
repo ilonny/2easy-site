@@ -21,7 +21,7 @@ export const CatalogPageShell = ({
     <main
       className={`bg-white ${
         fillHeight
-          ? "flex h-[calc(100dvh-var(--site-header-h,0px))] flex-col overflow-hidden"
+          ? "flex h-[calc(100dvh-var(--site-header-h,0px)-var(--app-install-banner-h,0px))] flex-col overflow-hidden"
           : ""
       } ${className}`}
     >

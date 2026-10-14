@@ -151,7 +151,9 @@ export const Header = () => {
       <div
         ref={barRef}
         className={`site-header-bar w-full ${
-          headerScrollsAway ? "relative" : "fixed left-0 top-0 lg:static"
+          headerScrollsAway
+            ? "relative"
+            : "fixed left-0 top-[var(--app-install-banner-h,0px)] lg:static"
         } ${isLanding ? "bg-transparent" : "bg-white"}`}
       >
         <div

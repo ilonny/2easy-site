@@ -59,7 +59,7 @@ export const SideBar: FC<TProps> = ({ isOpened, onClose, access }) => {
   // Starts below the fixed header so the header stays visible.
   return createPortal(
     <div
-      className={`site-menu-layer fixed inset-x-0 bottom-0 top-[var(--site-header-h)] flex flex-col overflow-y-auto bg-white transition-opacity duration-300 ease-out-expo motion-reduce:transition-none lg:hidden ${
+      className={`site-menu-layer fixed inset-x-0 bottom-0 top-[var(--site-chrome-h)] flex flex-col overflow-y-auto bg-white transition-opacity duration-300 ease-out-expo motion-reduce:transition-none lg:hidden ${
         shown ? "opacity-100" : "pointer-events-none opacity-0"
       }`}
       role="dialog"

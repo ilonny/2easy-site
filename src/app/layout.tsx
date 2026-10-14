@@ -16,6 +16,7 @@ import Script from "next/script";
 import { EditorContextProvider } from "./editor/context";
 import { TalkMeSite } from "@/components/TalkMeSite";
 import { CookieConsent } from "@/components/CookieConsent";
+import { AppInstallBanner } from "@/components/AppInstallBanner";
 import { I18nProvider } from "@/i18n/I18nProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
@@ -50,6 +51,7 @@ export default function RootLayout({
                 <SibscribeContextProvider>
                   <EditorContextProvider>
                     <ErrorBoundary>
+                      <AppInstallBanner />
                       <Header />
                       <BodyContainer>{children}</BodyContainer>
                       <Footer />

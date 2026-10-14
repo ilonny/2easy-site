@@ -35,6 +35,8 @@ html.landing-zoom body {
   --overlay-above-header-z: 70;
   /* Pinned header height; `Header` overwrites it with the measured value. */
   --site-header-h: 96px;
+  --app-install-banner-h: 0px;
+  --site-chrome-h: calc(var(--site-header-h, 0px) + var(--app-install-banner-h, 0px));
   --site-menu-z: 80;
   --nextui-box-shadow-medium: 0px 0px 15px 0px rgb(0 0 0 / 0.03), 0px 0px 30px 0px rgb(0 0 0 / 0.08), 0px 0px 0px 0px rgb(0 0 0 / 0.3);
   --nextui-danger: 0 60% 40%;
@@ -62,7 +64,7 @@ html.landing-zoom body {
 @media (min-width: 1024px) {
   .site-header-root {
     position: sticky;
-    top: 0;
+    top: var(--app-install-banner-h, 0px);
     z-index: var(--site-header-desktop-z);
   }
   .site-header-bar {
@@ -71,7 +73,7 @@ html.landing-zoom body {
   /* Landing header sits on the hero instead of reserving a white band. */
   .site-header-root.site-header-overlay {
     position: absolute;
-    top: 0;
+    top: var(--app-install-banner-h, 0px);
     right: 0;
     left: 0;
     background: transparent;

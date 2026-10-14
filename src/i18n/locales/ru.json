@@ -20,6 +20,14 @@
     "accept": "Окей",
     "ariaLabel": "Согласие на cookie"
   },
+  "appInstallBanner": {
+    "ariaLabel": "Скачать приложение 2EASY",
+    "title": "2EASY",
+    "subtitle": "Откройте в приложении — удобнее на телефоне",
+    "open": "Открыть",
+    "googlePlay": "Google Play",
+    "apk": "APK"
+  },
   "header": {
     "register": "Зарегистрироваться",
     "login": "Войти",

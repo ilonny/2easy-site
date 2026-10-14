@@ -1,27 +1,41 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AuthContext } from "@/auth";
 import { T } from "@/i18n/T";
 import { getClientScale } from "@/hooks/useLandingZoom";
+import { landingContainerClassName } from "@/constants/layout";
 import Keychain from "@/assets/images/footer/keychain.webp";
 import TelegramIcon from "@/assets/icons/telegram_dark.svg";
+import { StoreBadges } from "./StoreBadges";
 
 const EMAIL = "double2easy@gmail.com";
 
 const legalLinkClassName =
   "whitespace-nowrap transition-colors hover:text-brand-black";
 
+const isStudentAppPath = (pathname: string) =>
+  pathname.startsWith("/student-account") ||
+  pathname === "/schedule" ||
+  pathname.startsWith("/profile");
+
 export const Footer = () => {
   const pathname = usePathname();
+  const { profile } = useContext(AuthContext);
   const footerRef = useRef<HTMLElement>(null);
   const [canPin, setCanPin] = useState(false);
+
+  const isLanding = pathname === "/";
+  const isStudentFooter =
+    Boolean(profile?.isStudent) && isStudentAppPath(pathname);
 
   // The page slides up and uncovers the footer pinned to the bottom of the screen.
   // A footer taller than the screen would never show its top, so it is only pinned when it fits.
   useEffect(() => {
+    if (!isLanding) return;
     const footer = footerRef.current;
     if (!footer) return;
     const update = () =>
@@ -37,9 +51,43 @@ export const Footer = () => {
       observer.disconnect();
       window.removeEventListener("resize", update);
     };
-  }, [pathname]);
+  }, [pathname, isLanding]);
 
-  if (pathname !== "/") {
+  if (isStudentFooter) {
+    return (
+      <footer className="relative z-0 border-t border-brand-gray/60 bg-white">
+        <div
+          className={`${landingContainerClassName} flex flex-col items-center gap-4 py-6 md:flex-row md:items-center md:justify-between md:gap-6 lg:py-8`}
+        >
+          <StoreBadges />
+          <div className="flex flex-col items-center gap-2 text-[11px] font-bold leading-[1.09] tracking-brand text-brand-grayFont md:items-end lg:flex-row lg:items-center lg:gap-5 lg:text-sm lg:leading-normal">
+            <Link
+              href="/privacy_policy"
+              target="_blank"
+              className={legalLinkClassName}
+            >
+              <T k="footer.privacyPolicy" />
+            </Link>
+            <Link
+              href="/public_offer"
+              target="_blank"
+              className={legalLinkClassName}
+            >
+              <T k="footer.publicOffer" />
+            </Link>
+            <a
+              href={`mailto:${EMAIL}`}
+              className="text-sm text-brand-violet transition-opacity hover:opacity-80 lg:text-sm"
+            >
+              {EMAIL}
+            </a>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
+  if (!isLanding) {
     return null;
   }
 
@@ -83,22 +131,25 @@ export const Footer = () => {
               </span>
             </Link>
           </div>
-          <div className="relative flex w-full flex-col items-center gap-2.5 text-[11px] font-bold leading-[1.09] tracking-brand text-brand-grayFont md:grid md:grid-cols-3 md:items-center lg:text-sm lg:leading-normal">
-            <div className="order-2 flex flex-col items-center gap-2.5 md:order-none md:items-start md:gap-[5px] lg:flex-row lg:gap-5">
-              <Link
-                href="/privacy_policy"
-                target="_blank"
-                className={legalLinkClassName}
-              >
-                <T k="footer.privacyPolicy" />
-              </Link>
-              <Link
-                href="/public_offer"
-                target="_blank"
-                className={legalLinkClassName}
-              >
-                <T k="footer.publicOffer" />
-              </Link>
+          <div className="relative flex w-full flex-col items-center gap-2.5 text-[11px] font-bold leading-[1.09] tracking-brand text-brand-grayFont md:grid md:grid-cols-3 md:items-end lg:items-center lg:text-sm lg:leading-normal">
+            <div className="order-2 flex w-full flex-col items-center gap-4 md:order-none md:items-start">
+              <StoreBadges />
+              <div className="flex flex-col items-center gap-2.5 md:items-start md:gap-[5px] lg:flex-row lg:gap-5">
+                <Link
+                  href="/privacy_policy"
+                  target="_blank"
+                  className={legalLinkClassName}
+                >
+                  <T k="footer.privacyPolicy" />
+                </Link>
+                <Link
+                  href="/public_offer"
+                  target="_blank"
+                  className={legalLinkClassName}
+                >
+                  <T k="footer.publicOffer" />
+                </Link>
+              </div>
             </div>
             <T
               k="footer.copyright"
