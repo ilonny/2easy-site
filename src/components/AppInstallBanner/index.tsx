@@ -8,6 +8,7 @@ import {
   APK_URL,
   GOOGLE_PLAY_URL,
 } from "@/components/Footer/StoreBadges";
+import { MOBILE_APP_PROMO_ENABLED } from "@/constants/mobileAppPromo";
 
 const STORAGE_KEY = "2easy-app-install-banner-dismissed";
 
@@ -47,6 +48,10 @@ export const AppInstallBanner = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    if (!MOBILE_APP_PROMO_ENABLED) {
+      setIsVisible(false);
+      return;
+    }
     if (isImmersivePath(pathname) || isStandaloneApp()) {
       setIsVisible(false);
       return;
