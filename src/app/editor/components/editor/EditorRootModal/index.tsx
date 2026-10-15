@@ -55,6 +55,23 @@ const blurActiveField = (root: HTMLElement | null) => {
   }
 };
 
+/** Native color pickers on touch can leave modal overflow-y dead until nudged. */
+const recoverOverflowScroll = (el: HTMLElement | null) => {
+  if (!el) return;
+  const y = el.scrollTop;
+  const prevY = el.style.overflowY;
+  const style = el.style as CSSStyleDeclaration & {
+    webkitOverflowScrolling?: string;
+  };
+  const prevWebkit = style.webkitOverflowScrolling;
+  el.style.overflowY = "hidden";
+  style.webkitOverflowScrolling = "auto";
+  void el.offsetHeight;
+  el.style.overflowY = prevY;
+  style.webkitOverflowScrolling = prevWebkit || "touch";
+  el.scrollTop = y;
+};
+
 export const EditorRootModal: FC<TProps> = ({
   isVisible,
   setIsVisible,
@@ -295,6 +312,15 @@ export const EditorRootModal: FC<TProps> = ({
           }}
           onTouchEnd={() => {
             touchRef.current = null;
+          }}
+          onBlurCapture={(e) => {
+            const t = e.target as HTMLElement | null;
+            if (t?.getAttribute?.("type") !== "color") return;
+            const body = e.currentTarget;
+            bodyRef.current = body;
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => recoverOverflowScroll(body));
+            });
           }}
         >
           {!!EditorComponent && (
