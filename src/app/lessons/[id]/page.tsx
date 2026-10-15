@@ -18,7 +18,10 @@ import { withLogin } from "@/auth/hooks/withLogin";
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useLessons } from "@/app/lessons/hooks/useLessons";
-import { openHomeworkForStudent } from "@/app/lessons/openHomeworkForStudent";
+import {
+  openHomeworkForStudent,
+  openLessonForStudents,
+} from "@/app/lessons/openHomeworkForStudent";
 import { ExList } from "@/app/editor/components/view/ExList";
 import { useExList } from "@/app/editor/hooks/useExList";
 import Zoom from "react-medium-image-zoom";
@@ -412,6 +415,34 @@ export default function LessonPage() {
     setParticipantsOpen(false);
   }, []);
 
+  const handleOpenParentLesson = useCallback(async () => {
+    const parentLessonId = Number(lesson?.lesson_id_homework || 0);
+    if (!parentLessonId) return;
+
+    if (isStudent) {
+      if (profile?.studentId) {
+        writeToLocalStorage(
+          "start_lesson_selected_ids",
+          JSON.stringify([profile.studentId]),
+        );
+      }
+      router.push(`/lessons/${parentLessonId}`);
+      return;
+    }
+
+    const studentIds = lockedStudentId
+      ? [lockedStudentId]
+      : students.map((s) => Number(s.student_id));
+    await openLessonForStudents(router, parentLessonId, studentIds);
+  }, [
+    isStudent,
+    lesson?.lesson_id_homework,
+    lockedStudentId,
+    profile?.studentId,
+    router,
+    students,
+  ]);
+
   const isLockedOnTrial = useRedirectIfLessonLockedOnTrial(lesson);
 
   if (isLockedOnTrial) {
@@ -633,6 +664,17 @@ export default function LessonPage() {
                     </Button>
                   </div>
                 )}
+              {!!lesson?.lesson_id_homework && (
+                <div className="mt-8 flex justify-center">
+                  <Button
+                    color="primary"
+                    size="lg"
+                    onClick={handleOpenParentLesson}
+                  >
+                    <T k="lessons.toLesson" defaultText="К уроку" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
           {!isStudent && !!students?.length && (
