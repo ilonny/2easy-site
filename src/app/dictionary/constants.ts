@@ -254,39 +254,6 @@ export const SPEAK_WORD_BUTTON_CLASS =
 
 export const ADD_WORD_SPEAK_ID = "add-word-source";
 
-export const DICTIONARY_ONBOARDING_STORAGE_KEY = "dictionary_onboarding_seen";
-
-export const DICTIONARY_ONBOARDING_IMAGE_BASE_PATH =
-  "/images/dictionary-onboarding";
-
-export const DICTIONARY_ONBOARDING_IMAGE_EXTENSION = "png";
-
-export const DICTIONARY_ONBOARDING_MODAL_CLASS_NAMES = {
-  base: [
-    "mx-auto w-full sm:max-w-xl md:max-w-2xl",
-    DICTIONARY_SECONDARY_MODAL_MAX_HEIGHT_CLASS,
-  ].join(" "),
-  wrapper: `items-center ${OVERLAY_ABOVE_HEADER_Z_CLASS} ${DICTIONARY_MODAL_ADAPTIVE_SIDE_PADDING_CLASS}`,
-};
-
-export const DICTIONARY_ONBOARDING_IMAGE_SLOT_CLASS =
-  "relative w-full overflow-hidden rounded-xl border border-dashed border-[#D4D4D8] bg-[#FAFAFA] aspect-[16/9]";
-
-export const DICTIONARY_ONBOARDING_IMAGE_CLASS =
-  "h-full w-full object-contain object-center";
-
-export const DICTIONARY_ONBOARDING_TITLE_CLASS =
-  "text-center text-lg sm:text-xl font-medium text-[#231F20]";
-
-export const DICTIONARY_ONBOARDING_DESCRIPTION_CLASS =
-  "text-center text-sm sm:text-base text-[#767676]";
-
-export const DICTIONARY_ONBOARDING_STEP_COUNTER_CLASS =
-  "text-center text-sm text-[#B7B7B7]";
-
-export const DICTIONARY_ONBOARDING_ACTIONS_CLASS =
-  "flex w-full gap-2";
-
 export const DICTIONARY_TRAINING_MODE_CARD_CLASS =
   "w-full rounded-xl border border-[#eee] bg-[#fafafa] p-4 text-left transition-colors touch-manipulation hover:border-primary/30 hover:bg-[#eeebff]";
 

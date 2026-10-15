@@ -90,25 +90,36 @@ function I18nLoadingSkeleton() {
   );
 }
 
+// Max time the skeleton blocks the page; slower remote translations are merged in later.
+const REMOTE_TRANSLATIONS_WAIT_MS = 3500;
+
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const run = async () => {
       try {
         // Ensure language is set before loading translations.
         detectAndSetLanguage();
-        await loadRemoteTranslationsIntoI18n();
+        await Promise.race([
+          loadRemoteTranslationsIntoI18n(),
+          new Promise<void>((resolve) => {
+            timer = setTimeout(resolve, REMOTE_TRANSLATIONS_WAIT_MS);
+          }),
+        ]);
       } catch {
         // If API is temporarily unavailable, we still render with bundled dictionary.
       } finally {
+        if (timer) clearTimeout(timer);
         if (!cancelled) setReady(true);
       }
     };
     run();
     return () => {
       cancelled = true;
+      if (timer) clearTimeout(timer);
     };
   }, []);
 

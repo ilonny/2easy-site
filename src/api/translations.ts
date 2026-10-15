@@ -11,34 +11,59 @@ export type TranslationsPayload = {
   message?: string;
 };
 
+// Slow or filtered routes (e.g. from abroad) can leave a TCP connection hanging forever.
+const TRANSLATIONS_ATTEMPT_TIMEOUT_MS = 6000;
+
+async function withTimeout<T>(
+  run: (signal: AbortSignal) => Promise<T>,
+  timeoutMs = TRANSLATIONS_ATTEMPT_TIMEOUT_MS,
+): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await run(controller.signal);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function apiGetTranslations(): Promise<TranslationsPayload> {
   // Prefer public endpoint without /api to avoid proxy auth rules.
 
   try {
     const base = (BASE_URL || "").replace("/undefined", "");
     if (base) {
-      const res = await fetch(`${base}/translations`, {
-        method: "GET",
-        cache: "no-store",
+      const payload = await withTimeout(async (signal) => {
+        const res = await fetch(`${base}/translations`, {
+          method: "GET",
+          cache: "no-store",
+          signal,
+        });
+        // If it's blocked (401/403), fallback to /api/translations below.
+        return res.ok ? await res.json() : null;
       });
-      // If it's blocked (401/403), fallback to /api/translations below.
-      if (res.ok) {
-        return await res.json();
+      if (payload) {
+        return payload;
       }
     }
   } catch {}
 
   // Fallback to /api/translations (also no-store to avoid stale cache)
   try {
-    const res = await fetch(`${API_URL}/translations`, {
-      method: "GET",
-      cache: "no-store",
+    return await withTimeout(async (signal) => {
+      const res = await fetch(`${API_URL}/translations`, {
+        method: "GET",
+        cache: "no-store",
+        signal,
+      });
+      return await res.json();
     });
-    return await res.json();
   } catch {}
 
-  const res = await fetchGet({ path: "/translations" });
-  return await res.json();
+  return await withTimeout(async (signal) => {
+    const res = await fetchGet({ path: "/translations", signal });
+    return await res.json();
+  });
 }
 
 export async function apiUpdateTranslationKey(params: {

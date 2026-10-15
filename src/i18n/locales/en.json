@@ -1048,33 +1048,6 @@
       "correctAnswerIs": "Correct answer: {{answer}}",
       "nextQuestion": "Next",
       "showResults": "See results"
-    },
-    "onboarding": {
-      "title": "We added a new feature — Dictionary. Take a quick tour to learn how to use it",
-      "next": "Next",
-      "done": "Got it",
-      "slides": {
-        "addWords": {
-          "title": "Adding words from the lesson",
-          "description": "Select a word or phrase from the lesson content and tap \"Add to the dictionary\"."
-        },
-        "addWordModal": {
-          "title": "Check the translation",
-          "description": "In the dialog, check the translation and save the word to the dictionary."
-        },
-        "openDictionaryTeacher": {
-          "title": "Student dictionary",
-          "description": "Tap the dictionary icon next to the name to open your student's dictionary."
-        },
-        "openDictionaryStudent": {
-          "title": "Opening the dictionary",
-          "description": "Tap the Dictionary button in the bottom-right corner to open your dictionary."
-        },
-        "markLearned": {
-          "title": "Marking words as learned",
-          "description": "In the dictionary, select words and mark them as learned using the actions menu."
-        }
-      }
     }
   },
   "boards": {

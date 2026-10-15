@@ -5,11 +5,22 @@ import { usePromocode } from "@/payment/hooks/usePromocode";
 import { TSubscribePeriod } from "@/subscribe/types";
 import { tariffs } from "@/subscribe/components/SubscribeTariffs/tariffs";
 import { Button, Checkbox, Input } from "@nextui-org/react";
-import { useCallback, useContext, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Controller, useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import {
+  createCloudPaymentsWidget,
+  loadCloudPayments,
+} from "@/payment/lib/cloudpayments";
 
 type TProps = {
   type: TSubscribePeriod;
@@ -61,9 +72,15 @@ export const PaymentForm = (props: TProps) => {
   } = usePayment();
 
   const isRF = useRef(true);
+  const [widgetLoadFailed, setWidgetLoadFailed] = useState(false);
+
+  useEffect(() => {
+    loadCloudPayments().catch(() => {});
+  }, []);
 
   const onSubmit = useCallback(
     async (_data) => {
+      setWidgetLoadFailed(false);
       const response = await createPayment(
         type,
         getValues().phone,
@@ -94,7 +111,13 @@ export const PaymentForm = (props: TProps) => {
         return false;
       }
 
-      const cp = new window.cp.CloudPayments();
+      let cp;
+      try {
+        cp = await createCloudPaymentsWidget();
+      } catch {
+        setWidgetLoadFailed(true);
+        return;
+      }
 
       const payerEmail = response.email || getValues().login || profile?.login || "";
       const payerPhone = response.paymentModel?.phone || getValues().phone || "";
@@ -514,6 +537,14 @@ export const PaymentForm = (props: TProps) => {
             <T
               k="common.serverErrorTryLater"
               defaultText="Внутренняя ошибка сервера. Попробуйте позже, или свяжитесь с техподдержкой"
+            />
+          </p>
+        )}
+        {widgetLoadFailed && (
+          <p className="text-sm text-red-400">
+            <T
+              k="payment.widgetLoadFailed"
+              defaultText="Не удалось загрузить платёжный виджет. Проверьте подключение или попробуйте оплатить картой не РФ"
             />
           </p>
         )}

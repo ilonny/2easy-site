@@ -46,8 +46,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
-      <Script src="https://widget.cloudpayments.ru/bundles/cloudpayments.js" />
       <body className={`${manrope.className} antialiased`}>
         <ApiProvider>
           <NextUIProvider>
@@ -74,17 +72,20 @@ export default function RootLayout({
             </I18nProvider>
           </NextUIProvider>
         </ApiProvider>
-        <Script id="metrica-script">
+        {/* Third-party scripts below are hosted in RU and may stall from abroad,
+            so they load after window "load" to keep the tab from spinning. */}
+        <Script id="metrica-script" strategy="afterInteractive">
           {`
-            (function(m,e,t,r,i,k,a){
-              m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-              m[i].l=1*new Date();
-              for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-                k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-            })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=103955671', 'ym');
+            window.ym=window.ym||function(){(window.ym.a=window.ym.a||[]).push(arguments)};
+            window.ym.l=1*new Date();
             ym(103955671, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
           `}
         </Script>
+        <Script
+          id="metrica-tag"
+          src="https://mc.yandex.ru/metrika/tag.js?id=103955671"
+          strategy="lazyOnload"
+        />
         <Script id="talk-me-setup" strategy="afterInteractive">
           {`window.TalkMeSetup = {
             domain: window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
@@ -93,7 +94,7 @@ export default function RootLayout({
             disableTimeouts: true
           };`}
         </Script>
-        <Script id="talk-me-script" strategy="afterInteractive">
+        <Script id="talk-me-script" strategy="lazyOnload">
           {`(function(){(function c(d,w,m,i) {
         window.supportAPIMethod = m;
         var s = d.createElement('script');
@@ -116,7 +117,7 @@ export default function RootLayout({
             />
           </div>
         </noscript>
-        <Script id="vk-pixel" strategy="afterInteractive">
+        <Script id="vk-pixel" strategy="lazyOnload">
           {`var _tmr = window._tmr || (window._tmr = []);
 _tmr.push({id: "3710431", type: "pageView", start: (new Date()).getTime()});
 (function (d, w, id) {

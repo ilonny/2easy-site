@@ -11,6 +11,19 @@
   max-width: 100%;
 }
 
+.gapSlot {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.2rem;
+  max-width: 100%;
+  min-width: 4.5rem;
+}
+
+.gapSlot :global([data-slot="base"]) {
+  width: 100%;
+  min-width: 0;
+}
+
 @media (min-width: 640px) {
   .answer-wrapper .inner-wrapper input {
     min-height: 36px;

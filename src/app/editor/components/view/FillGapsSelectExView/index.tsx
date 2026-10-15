@@ -5,14 +5,12 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { TField, TFillGapsSelectData } from "../../editor/FillGapsSelect/types";
 import { Card, Select, SelectItem } from "@nextui-org/react";
-import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
 import Zoom from "react-medium-image-zoom";
@@ -20,10 +18,13 @@ import "react-medium-image-zoom/dist/styles.css";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
 import { useParams } from "next/navigation";
 import {
+  collectGapIds,
   computeSelectWrapperMinWidth,
   maxOptionTextLength,
   normalizeField,
+  parseLegacyGapHtml,
 } from "@/app/editor/helpers/fillGapsLegacy";
+import { LegacyGapHtml } from "../LegacyGapHtml";
 
 type TProps = {
   data: TFillGapsSelectData;
@@ -182,10 +183,6 @@ export const FillGapsSelectExView: FC<TProps> = ({
     }[]
   >([]);
 
-  const rootsMapRef = useRef(new Map<Element, ReturnType<typeof ReactDOM.createRoot>>());
-  const wrapperId = useId().replace(/:/g, "") || "fill-gaps-preview";
-  const areaClass = "answerWrapperArea-" + (data?.id ?? wrapperId);
-
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
 
   const lesson_id = useParams()?.id;
@@ -254,67 +251,53 @@ export const FillGapsSelectExView: FC<TProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localAnswers, writeAnswer]);
 
-  const renderContent = useCallback(() => {
-    const areaClassCurrent = "answerWrapperArea-" + (data?.id ?? wrapperId);
-    const wrappers = document.querySelectorAll(`.${areaClassCurrent} .answerWrapper`);
-    wrappers.forEach((el) => {
-      const id = el.id;
-      const rawField = data.fields?.find((f) => f.id == id);
-      const field = normalizeField(rawField);
-      if (!field) return;
-      const maxLen = maxOptionTextLength(field.options);
-      const minWidth = computeSelectWrapperMinWidth(maxLen);
-      el.setAttribute("index", field?.id?.toString());
-      let root = rootsMapRef.current.get(el);
-      if (!root) {
-        root = ReactDOM.createRoot(el);
-        rootsMapRef.current.set(el, root);
-      }
-        root.render(
-          <div
-            className="answer-wrapper mx-2 select-answer-wrapper"
-            id={"answer-wrapper-" + field?.id}
-            style={{
-              display: "inline-block",
-              minWidth,
-              maxWidth: "100%",
-            }}
-          >
-            <AnswerField
-              field={field}
-              key={field?.id}
-              isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
-              localAnswers={localAnswers}
-              setLocalAnswers={setLocalAnswers}
-              isPresentationMode={rest?.isPresentationMode}
-            />
-          </div>
-        );
+  const fields = data.fields || [];
+  const fieldsById = useMemo(() => {
+    const map = new Map<string, TField>();
+    fields.forEach((field) => {
+      const normalized = normalizeField(field);
+      if (normalized?.id != null) map.set(String(normalized.id), normalized);
     });
-  }, [
-    data.fields,
-    data?.id,
-    wrapperId,
-    profile?.role_id,
-    localAnswers,
-    rest?.isPresentationMode,
-  ]);
+    return map;
+  }, [fields]);
 
-  useEffect(() => {
-    const timer = requestAnimationFrame(() => {
-      renderContent();
-    });
-    return () => cancelAnimationFrame(timer);
-  }, [renderContent]);
+  const gapNodes = useMemo(
+    () => parseLegacyGapHtml(data.dataText || ""),
+    [data.dataText],
+  );
+  const usedGapIds = useMemo(() => new Set(collectGapIds(gapNodes)), [gapNodes]);
+  const missingFields = fields.filter(
+    (field) => field?.id != null && !usedGapIds.has(String(field.id)),
+  );
 
-  const content = useMemo(() => {
-    return (
-      <div
-        className={`answerWrapperArea ${areaClass}`}
-        dangerouslySetInnerHTML={{ __html: data.dataText || "" }}
-      />
+  const renderGap = (id: string, key: string) => {
+    const field = fieldsById.get(String(id));
+    if (!field) return null;
+    const minWidth = computeSelectWrapperMinWidth(
+      maxOptionTextLength(field.options),
     );
-  }, [data.dataText, areaClass]);
+    return (
+      <span
+        key={key}
+        className={`${styles["answer-wrapper"]} answer-wrapper mx-2 select-answer-wrapper`}
+        id={"answer-wrapper-" + field.id}
+        style={{
+          display: "inline-block",
+          width: minWidth,
+          maxWidth: "100%",
+          verticalAlign: "middle",
+        }}
+      >
+        <AnswerField
+          field={field}
+          isTeacher={isTeacher}
+          localAnswers={localAnswers}
+          setLocalAnswers={setLocalAnswers}
+          isPresentationMode={rest?.isPresentationMode}
+        />
+      </span>
+    );
+  };
 
   return (
     <div className="exercise-view-shell max-w-[886px]">
@@ -353,7 +336,18 @@ export const FillGapsSelectExView: FC<TProps> = ({
             style={{ margin: "0 auto" }}
             className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10 leading-[1.8] sm:leading-[2.3]"
           >
-            {content}
+            <div className="answerWrapperArea">
+              <LegacyGapHtml html={data.dataText || ""} renderGap={renderGap} />
+              {missingFields.map((raw) => {
+                const field = normalizeField(raw);
+                if (!field) return null;
+                return (
+                  <div key={String(field.id)} className="mt-2">
+                    {renderGap(String(field.id), `missing-${field.id}`)}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </Card>
       </div>

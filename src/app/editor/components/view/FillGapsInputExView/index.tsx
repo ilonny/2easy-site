@@ -13,7 +13,6 @@ import {
 import { TField, TFillGapsSelectData } from "../../editor/FillGapsSelect/types";
 import { Card, Input } from "@nextui-org/react";
 import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
-import ReactDOM from "react-dom/client";
 import styles from "./styles.module.css";
 import { AuthContext } from "@/auth";
 import Zoom from "react-medium-image-zoom";
@@ -21,9 +20,12 @@ import "react-medium-image-zoom/dist/styles.css";
 import { useParams } from "next/navigation";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
 import {
+  collectGapIds,
   maxOptionTextLength,
   normalizeField,
+  parseLegacyGapHtml,
 } from "@/app/editor/helpers/fillGapsLegacy";
+import { LegacyGapHtml } from "../LegacyGapHtml";
 
 type TProps = {
   data: TFillGapsSelectData;
@@ -185,9 +187,6 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
 }) => {
   const image = data?.images?.[0];
   const { profile } = useContext(AuthContext);
-  const rootsMapRef = useRef(
-    new Map<Element, ReturnType<typeof ReactDOM.createRoot>>(),
-  );
 
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isPresentationMode = !!(rest as any)?.isPresentationMode;
@@ -251,99 +250,61 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
     setBootVersion((v) => v + 1);
   }, [resetSeq]);
 
-  const renderContent = useCallback(() => {
-    document
-      .querySelectorAll(
-        `${".answerWrapperArea-" + (data?.id || 0).toString()} .answerWrapper`,
-      )
-      .forEach((el) => {
-        const id = el.id;
-        const rawField = data.fields.find((f) => f.id == id);
-        const field = normalizeField(rawField);
-        if (!field) return;
-        const maxOptionLength = maxOptionTextLength(field.options);
-        const safeLen = Number.isFinite(maxOptionLength) ? maxOptionLength : 8;
-        el.setAttribute("index", field?.id?.toString());
-        let root = rootsMapRef.current.get(el);
-        if (!root) {
-          root = ReactDOM.createRoot(el);
-          rootsMapRef.current.set(el, root);
-        }
-        const hideAnswerHints = !isTeacher || isPresentationMode;
-        const toolTipContent = hideAnswerHints
-          ? ""
-          : field.options
-              .filter((o) => o.isCorrect)
-              .map((o) => o.value)
-              .join(", ");
-        root.render(
-          <div
-            className="answer-wrapper mx-2 !bg-transparent"
-            id={"answer-wrapper-" + field?.id}
-            style={{
-              display: "inline-block",
-              maxWidth: Math.min(
-                safeLen * (safeLen < 5 ? 30 : 15),
-                typeof window !== "undefined" && window.innerWidth < 640
-                  ? Math.max(120, window.innerWidth - 64)
-                  : 400,
-              ),
-              width: "100%",
-              lineHeight: "initial",
-            }}
-          >
-            <ResponsiveTooltip
-              isDisabled={hideAnswerHints}
-              content={toolTipContent}
-            >
-              <div>
-                <AnswerField
-                  field={field}
-                  key={field?.id}
-                  isTeacher={isTeacher}
-                  isPresentationMode={isPresentationMode}
-                  activeStudentId={activeStudentId}
-                  getAnswer={getAnswer}
-                  writeAnswer={stableWriteAnswer}
-                  syncToken={teacherSyncToken}
-                />
-              </div>
-            </ResponsiveTooltip>
-          </div>,
-        );
-      });
-  }, [
-    data?.id,
-    data.fields,
-    isTeacher,
-    isPresentationMode,
-    activeStudentId,
-    getAnswer,
-    stableWriteAnswer,
-    teacherSyncToken,
-  ]);
-
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      renderContent();
+  const fields = data.fields || [];
+  const fieldsById = useMemo(() => {
+    const map = new Map<string, NonNullable<ReturnType<typeof normalizeField>>>();
+    fields.forEach((field) => {
+      const normalized = normalizeField(field);
+      if (normalized?.id != null) map.set(String(normalized.id), normalized);
     });
-    return () => cancelAnimationFrame(frame);
-  }, [renderContent]);
+    return map;
+  }, [fields]);
 
-  useEffect(() => {
-    return () => {
-      rootsMapRef.current.forEach((root) => {
-        try {
-          root.unmount();
-        } catch {}
-      });
-      rootsMapRef.current.clear();
-    };
-  }, []);
+  const gapNodes = useMemo(
+    () => parseLegacyGapHtml(data.dataText || ""),
+    [data.dataText],
+  );
+  const usedGapIds = useMemo(() => new Set(collectGapIds(gapNodes)), [gapNodes]);
+  const missingFields = fields.filter(
+    (field) => field?.id != null && !usedGapIds.has(String(field.id)),
+  );
 
-  const textHtml = useMemo(() => {
-    return data.dataText;
-  }, [data]);
+  const hideAnswerHints = !isTeacher || isPresentationMode;
+
+  const renderGap = (id: string, key: string) => {
+    const field = fieldsById.get(String(id));
+    if (!field) return null;
+    const safeLen = maxOptionTextLength(field.options);
+    const ch = Math.min(Math.max(Number.isFinite(safeLen) ? safeLen : 8, 6), 24);
+    const toolTipContent = hideAnswerHints
+      ? ""
+      : field.options
+          .filter((o) => o.isCorrect)
+          .map((o) => o.value)
+          .join(", ");
+    return (
+      <span
+        key={key}
+        className={`${styles.gapSlot} answer-wrapper mx-2 !bg-transparent`}
+        id={"answer-wrapper-" + field.id}
+        style={{ width: `${ch + 2}ch` }}
+      >
+        <ResponsiveTooltip isDisabled={hideAnswerHints} content={toolTipContent}>
+          <div>
+            <AnswerField
+              field={field}
+              isTeacher={isTeacher}
+              isPresentationMode={isPresentationMode}
+              activeStudentId={activeStudentId}
+              getAnswer={getAnswer}
+              writeAnswer={stableWriteAnswer}
+              syncToken={teacherSyncToken}
+            />
+          </div>
+        </ResponsiveTooltip>
+      </span>
+    );
+  };
 
   return (
     <div className="exercise-view-shell max-w-[886px]">
@@ -387,8 +348,18 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
                 "fill-gaps-input-area answerWrapperArea answerWrapperArea-" +
                 (data?.id || 0).toString()
               }
-              dangerouslySetInnerHTML={{ __html: textHtml }}
-            ></div>
+            >
+              <LegacyGapHtml html={data.dataText || ""} renderGap={renderGap} />
+              {missingFields.map((raw) => {
+                const field = normalizeField(raw);
+                if (!field) return null;
+                return (
+                  <div key={String(field.id)} className="mt-2">
+                    {renderGap(String(field.id), `missing-${field.id}`)}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </Card>
       </div>
