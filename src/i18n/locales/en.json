@@ -672,6 +672,7 @@
     "confirmDeleteEx": "Are you sure you want to delete this task?",
     "editShort": "edit",
     "taskTitle": "Task title",
+    "titleColor": "Title color",
     "taskSubtitle": "Task subtitle",
     "description": "Description",
     "imageCaption": "Image caption",

@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { TitleColorPicker } from "../TitleColorPicker";
 
 type TProps = {
   value: string;
@@ -18,15 +19,13 @@ type TProps = {
   selectedColor?: string;
 };
 
-const isColorControl = (target: EventTarget | null) =>
-  target instanceof Element &&
-  (!!target.closest('input[type="color"]') ||
-    !!target.closest("[data-title-color-swatch]"));
-
 /**
  * On mobile, a scroll gesture that starts on an input focuses it and opens the
  * keyboard instead of scrolling the editor modal. Keep fields read-only until
  * an intentional tap, then unlock + focus.
+ *
+ * Title color lives in a sibling `TitleColorPicker` — never overlay a native
+ * color input on the text field (that freezes modal scroll on touch devices).
  */
 export const TitleExInput: FC<TProps> = ({
   value,
@@ -45,20 +44,13 @@ export const TitleExInput: FC<TProps> = ({
     requestAnimationFrame(() => {
       const root = wrapRef.current;
       const el = root?.querySelector(
-        isTextarea ? "textarea" : "input:not([type='color'])",
+        isTextarea ? "textarea" : "input",
       ) as HTMLElement | null;
-      // preventScroll: avoid jumping the editor modal to this field on mobile.
       el?.focus?.({ preventScroll: true });
     });
   }, [isTextarea]);
 
   const onPointerDownCapture = (e: React.PointerEvent) => {
-    // Color picker must not unlock/focus the text field — that fights the
-    // native picker and jumps/freezes modal scroll on touch devices.
-    if (isColorControl(e.target)) {
-      tapRef.current = null;
-      return;
-    }
     tapRef.current = {
       x: e.clientX,
       y: e.clientY,
@@ -74,74 +66,62 @@ export const TitleExInput: FC<TProps> = ({
     }
   };
 
-  const onPointerUpCapture = (e: React.PointerEvent) => {
-    if (isColorControl(e.target)) {
-      tapRef.current = null;
-      return;
-    }
+  const onPointerUpCapture = () => {
     const st = tapRef.current;
     tapRef.current = null;
     if (!st || st.moved) return;
     if (!editable) unlockAndFocus();
   };
 
+  const field = isTextarea ? (
+    <Textarea
+      isReadOnly={!editable}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={() => setEditable(false)}
+      classNames={{ inputWrapper: "bg-white", input: "min-h-[118px]" }}
+      size="lg"
+    />
+  ) : (
+    <Input
+      isReadOnly={!editable}
+      size="lg"
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={() => setEditable(false)}
+      classNames={{ inputWrapper: "bg-white" }}
+    />
+  );
+
   return (
     <>
       <div className="mb-2 font-light">{label}</div>
-      <div
-        ref={wrapRef}
-        onPointerDownCapture={onPointerDownCapture}
-        onPointerMoveCapture={onPointerMoveCapture}
-        onPointerUpCapture={onPointerUpCapture}
-      >
-        {isTextarea ? (
-          <Textarea
-            isReadOnly={!editable}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onBlur={() => setEditable(false)}
-            classNames={{ inputWrapper: "bg-white", input: "min-h-[118px]" }}
-            size="lg"
-          />
-        ) : (
-          <div className="relative">
-            <Input
-              isReadOnly={!editable}
-              size="lg"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onBlur={() => setEditable(false)}
-              classNames={{ inputWrapper: "bg-white" }}
-            />
-            {!!onColorChange && (
-              <div
-                data-title-color-swatch
-                style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: 5,
-                  overflow: "hidden",
-                  position: "absolute",
-                  top: 5,
-                  right: 10,
-                }}
-              >
-                <input
-                  value={selectedColor}
-                  type="color"
-                  onChange={(e) => onColorChange(e.target.value)}
-                  style={{
-                    height: 70,
-                    width: 70,
-                    marginTop: -15,
-                    marginLeft: -15,
-                  }}
-                />
-              </div>
-            )}
+      {onColorChange ? (
+        <div className="flex items-start gap-2">
+          <div
+            ref={wrapRef}
+            className="min-w-0 flex-1"
+            onPointerDownCapture={onPointerDownCapture}
+            onPointerMoveCapture={onPointerMoveCapture}
+            onPointerUpCapture={onPointerUpCapture}
+          >
+            {field}
           </div>
-        )}
-      </div>
+          <TitleColorPicker
+            value={selectedColor}
+            onChange={onColorChange}
+          />
+        </div>
+      ) : (
+        <div
+          ref={wrapRef}
+          onPointerDownCapture={onPointerDownCapture}
+          onPointerMoveCapture={onPointerMoveCapture}
+          onPointerUpCapture={onPointerUpCapture}
+        >
+          {field}
+        </div>
+      )}
     </>
   );
 };
