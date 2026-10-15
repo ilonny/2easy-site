@@ -175,6 +175,29 @@ export const EditorRootModal: FC<TProps> = ({
     };
   }, [isVisible]);
 
+  // Native OS color pickers can take over the screen; on return, modal overflow
+  // scroll sometimes stays dead until the scroll container is nudged.
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const nudge = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => recoverOverflowScroll(bodyRef.current));
+      });
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") nudge();
+    };
+
+    window.addEventListener("focus", nudge);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", nudge);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isVisible]);
+
   const EditorComponent = useMemo(() => {
     const exType = type || chosenExToEdit?.type;
     switch (exType) {
