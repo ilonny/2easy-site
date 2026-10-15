@@ -55,6 +55,23 @@ const blurActiveField = (root: HTMLElement | null) => {
   }
 };
 
+/** Native color pickers on touch can leave modal overflow-y dead until nudged. */
+const recoverOverflowScroll = (el: HTMLElement | null) => {
+  if (!el) return;
+  const y = el.scrollTop;
+  const prevY = el.style.overflowY;
+  const style = el.style as CSSStyleDeclaration & {
+    webkitOverflowScrolling?: string;
+  };
+  const prevWebkit = style.webkitOverflowScrolling;
+  el.style.overflowY = "hidden";
+  style.webkitOverflowScrolling = "auto";
+  void el.offsetHeight;
+  el.style.overflowY = prevY;
+  style.webkitOverflowScrolling = prevWebkit || "touch";
+  el.scrollTop = y;
+};
+
 export const EditorRootModal: FC<TProps> = ({
   isVisible,
   setIsVisible,
@@ -155,6 +172,29 @@ export const EditorRootModal: FC<TProps> = ({
     return () => {
       unlock();
       restoreStylesRef.current = null;
+    };
+  }, [isVisible]);
+
+  // Native OS color pickers can take over the screen; on return, modal overflow
+  // scroll sometimes stays dead until the scroll container is nudged.
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const nudge = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => recoverOverflowScroll(bodyRef.current));
+      });
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") nudge();
+    };
+
+    window.addEventListener("focus", nudge);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", nudge);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [isVisible]);
 
@@ -295,6 +335,15 @@ export const EditorRootModal: FC<TProps> = ({
           }}
           onTouchEnd={() => {
             touchRef.current = null;
+          }}
+          onBlurCapture={(e) => {
+            const t = e.target as HTMLElement | null;
+            if (t?.getAttribute?.("type") !== "color") return;
+            const body = e.currentTarget;
+            bodyRef.current = body;
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => recoverOverflowScroll(body));
+            });
           }}
         >
           {!!EditorComponent && (
