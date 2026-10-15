@@ -8,11 +8,19 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
 } from "react";
 import { AuthContext } from "@/auth";
 import { TProfile } from "@/auth/types";
 import i18n from "@/i18n/config";
+import { hangupJitsiSession } from "./jitsiSession";
+import {
+  getVideoCallOpen,
+  getVideoCallServerSnapshot,
+  hydrateVideoCallStore,
+  setVideoCallOpen,
+  subscribeVideoCall,
+} from "./videoCallStore";
 
 export function resolveTeacherUserId(profile?: TProfile): string | null {
   if (!profile) return null;
@@ -53,8 +61,17 @@ export const useVideoCall = () => useContext(VideoCallContext);
 export const VideoCallProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { profile, isAuthorized } = useContext(AuthContext);
-  const [isOpen, setIsOpen] = useState(false);
+  const { profile, isAuthorized, authIsLoading } = useContext(AuthContext);
+
+  useEffect(() => {
+    hydrateVideoCallStore();
+  }, []);
+
+  const isOpen = useSyncExternalStore(
+    subscribeVideoCall,
+    getVideoCallOpen,
+    getVideoCallServerSnapshot
+  );
 
   const teacherUserId = resolveTeacherUserId(profile);
   const roomName = useMemo(() => {
@@ -70,24 +87,31 @@ export const VideoCallProvider: FC<{ children: ReactNode }> = ({
 
   const open = useCallback(() => {
     if (!teacherUserId) return;
-    setIsOpen(true);
+    setVideoCallOpen(true);
   }, [teacherUserId]);
 
   const close = useCallback(() => {
-    setIsOpen(false);
+    hangupJitsiSession();
+    setVideoCallOpen(false);
   }, []);
 
+  // Close only after auth has resolved — avoid wiping sessionStorage-open
+  // while profile is still the initial `{}` during localStorage hydrate.
   useEffect(() => {
-    if (!isAuthorized || !profile) {
-      setIsOpen(false);
+    if (authIsLoading) return;
+    if (!isAuthorized) {
+      hangupJitsiSession();
+      setVideoCallOpen(false);
     }
-  }, [isAuthorized, profile]);
+  }, [authIsLoading, isAuthorized]);
 
   useEffect(() => {
+    if (authIsLoading) return;
     if (isOpen && !teacherUserId) {
-      setIsOpen(false);
+      hangupJitsiSession();
+      setVideoCallOpen(false);
     }
-  }, [isOpen, teacherUserId]);
+  }, [authIsLoading, isOpen, teacherUserId]);
 
   const value = useMemo(
     () => ({

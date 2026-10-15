@@ -9,23 +9,12 @@ import { toast } from "react-toastify";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { useVideoCall } from "./VideoCallContext";
+import {
+  attachJitsiHost,
+  ensureJitsiSession,
+  parkJitsiHost,
+} from "./jitsiSession";
 
-type JitsiApi = {
-  dispose: () => void;
-  executeCommand?: (cmd: string) => void;
-  getIFrame?: () => HTMLIFrameElement;
-};
-
-declare global {
-  interface Window {
-    JitsiMeetExternalAPI?: new (
-      domain: string,
-      options: Record<string, unknown>
-    ) => JitsiApi;
-  }
-}
-
-const JITSI_DOMAIN = "meet.2easyeng.com";
 const MIN_W = 280;
 const MIN_H = 200;
 const MAX_W = 600;
@@ -65,25 +54,9 @@ const ResizeIcon = () => (
   </svg>
 );
 
-function loadJitsiScript(): Promise<void> {
-  if (typeof window === "undefined") return Promise.reject(new Error("no_window"));
-  const scriptUrl = `https://${JITSI_DOMAIN}/external_api.js`;
-  if (document.querySelector(`script[src="${scriptUrl}"]`)) {
-    return Promise.resolve();
-  }
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = scriptUrl;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("script_load_failed"));
-    document.body.appendChild(script);
-  });
-}
-
 /**
- * App-scoped floating Jitsi window. Stays mounted across route changes
- * while VideoCallProvider.isOpen is true.
+ * Floating chrome around the persistent Jitsi host.
+ * Remounts of this component must NOT hang up — only close() does.
  */
 export const GlobalVideoCallShell: FC = () => {
   const { isOpen, roomName, displayName, close } = useVideoCall();
@@ -101,25 +74,23 @@ export const GlobalVideoCallShell: FC = () => {
     posY: 0,
   });
   const containerRef = useRef<HTMLDivElement>(null);
-  const apiRef = useRef<JitsiApi | null>(null);
   const boundsRef = useRef<HTMLDivElement>(null);
   const displayNameRef = useRef(displayName);
   displayNameRef.current = displayName;
+  const placedRef = useRef(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Place the window once when the call opens (not on every re-render).
-  const wasOpenRef = useRef(false);
   useEffect(() => {
     if (!isOpen) {
       setIsReady(false);
-      wasOpenRef.current = false;
+      placedRef.current = false;
       return;
     }
-    if (wasOpenRef.current) return;
-    wasOpenRef.current = true;
+    if (placedRef.current) return;
+    placedRef.current = true;
     const { w, h } = getDefaultVideoSize();
     setPosition({
       x: Math.max(0, window.innerWidth - w - 16),
@@ -128,89 +99,41 @@ export const GlobalVideoCallShell: FC = () => {
     setSize({ w, h });
   }, [isOpen]);
 
+  // Join / reuse singleton Jitsi session; never dispose on unmount.
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !roomName) return;
+
     let cancelled = false;
-    loadJitsiScript()
+
+    ensureJitsiSession({
+      roomName,
+      displayName: displayNameRef.current,
+    })
       .then(() => {
-        if (!cancelled) setIsReady(true);
+        if (cancelled) return;
+        if (containerRef.current) {
+          attachJitsiHost(containerRef.current);
+        }
+        setIsReady(true);
       })
       .catch(() => {
         if (cancelled) return;
         toast.error(i18n.t("videoCall.loadError"));
         close();
       });
+
     return () => {
       cancelled = true;
+      // Park the host so a remount can re-attach without hangup.
+      parkJitsiHost();
     };
-  }, [isOpen, close]);
+  }, [isOpen, roomName, close]);
 
+  // After paint, attach host into the visible container.
   useEffect(() => {
-    if (!isOpen || !isReady || !roomName) return;
-
-    let cancelled = false;
-    let api: JitsiApi | null = null;
-    let raf = 0;
-    let attempts = 0;
-
-    const start = () => {
-      const parent = containerRef.current;
-      if (!parent || !window.JitsiMeetExternalAPI) {
-        attempts += 1;
-        if (!cancelled && attempts < 60) raf = requestAnimationFrame(start);
-        return;
-      }
-
-      api = new window.JitsiMeetExternalAPI!(JITSI_DOMAIN, {
-        roomName,
-        width: "100%",
-        height: "100%",
-        parentNode: parent,
-        userInfo: { displayName: displayNameRef.current },
-        configOverwrite: {
-          startWithAudioMuted: false,
-          startWithVideoMuted: false,
-          prejoinPageEnabled: false,
-          enableLobby: false,
-          disableDeepLinking: true,
-          p2p: { enabled: false },
-        },
-        interfaceConfigOverwrite: {
-          SHOW_JITSI_WATERMARK: false,
-          SHOW_WATERMARK_FOR_GUESTS: false,
-          TOOLBAR_ALWAYS_VISIBLE: false,
-          MOBILE_APP_PROMO: false,
-        },
-        onApiReady: (readyApi: JitsiApi) => {
-          const iframe = readyApi.getIFrame?.();
-          if (iframe) {
-            iframe.setAttribute(
-              "allow",
-              "camera; microphone; fullscreen; display-capture"
-            );
-            iframe.setAttribute("allowfullscreen", "true");
-            iframe.setAttribute("webkitallowfullscreen", "true");
-            iframe.setAttribute("playsinline", "true");
-            iframe.style.width = "100%";
-            iframe.style.height = "100%";
-          }
-        },
-      });
-      apiRef.current = api;
-    };
-
-    raf = requestAnimationFrame(start);
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(raf);
-      if (api) {
-        api.executeCommand?.("hangup");
-        api.dispose();
-        if (apiRef.current === api) apiRef.current = null;
-      }
-    };
-  }, [isOpen, isReady, roomName]);
+    if (!isOpen || !isReady || !containerRef.current) return;
+    attachJitsiHost(containerRef.current);
+  }, [isOpen, isReady]);
 
   const onClose = useCallback(() => {
     close();
