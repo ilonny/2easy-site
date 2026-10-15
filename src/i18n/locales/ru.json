@@ -674,6 +674,7 @@
     "confirmDeleteEx": "Вы уверены, что хотите удалить задание?",
     "editShort": "ред.",
     "taskTitle": "Заголовок задания",
+    "titleColor": "Цвет заголовка",
     "taskSubtitle": "Подзаголовок задания",
     "description": "Описание",
     "imageCaption": "Подпись к изображению",

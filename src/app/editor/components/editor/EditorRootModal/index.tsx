@@ -68,10 +68,6 @@ export const EditorRootModal: FC<TProps> = ({
   const restoreStylesRef = useRef<null | (() => void)>(null);
   const bodyRef = useRef<HTMLElement | null>(null);
   const touchRef = useRef<{ y: number; moved: boolean } | null>(null);
-  // Native color picker focus/blur scrolls the focused swatch into view and
-  // jumps the modal to the title input — remember & restore scrollTop instead.
-  const colorScrollYRef = useRef<number | null>(null);
-  const colorRestoreTimersRef = useRef<number[]>([]);
 
   // iOS Safari: prevent window scroll jumps when keyboard opens inside modal
   useEffect(() => {
@@ -160,48 +156,6 @@ export const EditorRootModal: FC<TProps> = ({
       unlock();
       restoreStylesRef.current = null;
     };
-  }, [isVisible]);
-
-  const restoreColorScroll = () => {
-    const y = colorScrollYRef.current;
-    const body = bodyRef.current;
-    if (y == null || !body) return;
-    // Accidental focus on the title text field after the picker closes scrolls
-    // the modal up to that input — blur it and pin scrollTop.
-    const active = document.activeElement as HTMLElement | null;
-    if (
-      active &&
-      body.contains(active) &&
-      active.getAttribute("type") !== "color" &&
-      (active.tagName === "INPUT" ||
-        active.tagName === "TEXTAREA" ||
-        active.isContentEditable)
-    ) {
-      active.blur();
-    }
-    body.scrollTop = y;
-  };
-
-  const scheduleColorScrollRestore = () => {
-    colorRestoreTimersRef.current.forEach((id) => window.clearTimeout(id));
-    colorRestoreTimersRef.current = [];
-    restoreColorScroll();
-    requestAnimationFrame(() => {
-      restoreColorScroll();
-      requestAnimationFrame(restoreColorScroll);
-    });
-    for (const ms of [0, 50, 100, 200]) {
-      colorRestoreTimersRef.current.push(
-        window.setTimeout(restoreColorScroll, ms),
-      );
-    }
-  };
-
-  useEffect(() => {
-    if (isVisible) return;
-    colorScrollYRef.current = null;
-    colorRestoreTimersRef.current.forEach((id) => window.clearTimeout(id));
-    colorRestoreTimersRef.current = [];
   }, [isVisible]);
 
   const EditorComponent = useMemo(() => {
@@ -325,19 +279,6 @@ export const EditorRootModal: FC<TProps> = ({
               blurActiveField(e.currentTarget);
             }
           }}
-          onPointerDownCapture={(e) => {
-            bodyRef.current = e.currentTarget;
-            const t = e.target as HTMLElement | null;
-            if (
-              !(t instanceof Element) ||
-              (!t.closest('input[type="color"]') &&
-                t.getAttribute("type") !== "color")
-            ) {
-              return;
-            }
-            // Save BEFORE focus — focus already scrolls the swatch into view.
-            colorScrollYRef.current = e.currentTarget.scrollTop;
-          }}
           onTouchStart={(e) => {
             bodyRef.current = e.currentTarget;
             const t = e.touches[0];
@@ -354,23 +295,6 @@ export const EditorRootModal: FC<TProps> = ({
           }}
           onTouchEnd={() => {
             touchRef.current = null;
-          }}
-          onFocusCapture={(e) => {
-            bodyRef.current = e.currentTarget;
-            const t = e.target as HTMLElement | null;
-            if (t?.getAttribute?.("type") !== "color") return;
-            scheduleColorScrollRestore();
-          }}
-          onBlurCapture={(e) => {
-            const t = e.target as HTMLElement | null;
-            if (t?.getAttribute?.("type") !== "color") return;
-            bodyRef.current = e.currentTarget;
-            scheduleColorScrollRestore();
-            colorRestoreTimersRef.current.push(
-              window.setTimeout(() => {
-                colorScrollYRef.current = null;
-              }, 250),
-            );
           }}
         >
           {!!EditorComponent && (
