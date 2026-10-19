@@ -194,6 +194,176 @@
   flex-direction: column;
   gap: 6px;
   pointer-events: auto;
+  max-height: min(240px, 40%);
+  overflow-y: auto;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.pendingAttachments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pendingCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.pendingImage,
+.pendingPdf,
+.pendingVideo {
+  width: 100%;
+  max-height: 140px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #0f172a0a;
+}
+
+.pendingPdf {
+  border: none;
+  min-height: 120px;
+}
+
+.pendingAudio {
+  width: 100%;
+}
+
+.pendingFileFallback {
+  font-size: 12px;
+  color: #334155;
+  word-break: break-word;
+}
+
+.pendingMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pendingName {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.pendingSize {
+  font-size: 11px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.pendingRemove {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  border: none;
+  background: rgba(15, 23, 42, 0.65);
+  color: #fff;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  cursor: pointer;
+  line-height: 1;
+  font-size: 14px;
+}
+
+.pendingRemove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.messageAttachments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+
+.messageImageLink {
+  display: block;
+  max-width: 100%;
+}
+
+.messageImage {
+  display: block;
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #0f172a0a;
+}
+
+.messagePdfWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.messagePdf {
+  width: 100%;
+  min-height: 180px;
+  max-height: 240px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.messageMediaWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.messageAudio {
+  width: 100%;
+  max-width: 280px;
+}
+
+.messageVideo {
+  width: 100%;
+  max-height: 220px;
+  border-radius: 8px;
+  background: #000;
+}
+
+.attachmentLink {
+  font-size: 12px;
+  color: #1d4ed8;
+  text-decoration: underline;
+  word-break: break-word;
+}
+
+.attachmentCaption {
+  font-size: 11px;
+  opacity: 0.75;
+  word-break: break-word;
+}
+
+/* Paperclip attach button — keep chatscope FA paperclip visible and tappable */
+.chatRootDesktop :global(.cs-button--attachment),
+.chatRoot :global(.cs-button--attachment) {
+  color: #475569;
+}
+
+.chatRootDesktop :global(.cs-button--attachment:hover),
+.chatRoot :global(.cs-button--attachment:hover) {
+  color: #0f172a;
 }
 
 /* iOS zoom mitigation:

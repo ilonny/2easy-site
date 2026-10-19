@@ -2,6 +2,11 @@ export const CHAT_WS_PATH = "/api/chat/ws";
 export const CHAT_REALTIME_PING_MS = 25000;
 export const CHAT_RECONNECT_MS = 2000;
 
+export const CHAT_ATTACHMENT_MAX_BYTES = 50 * 1024 * 1024;
+export const CHAT_ATTACHMENT_MAX_COUNT = 10;
+export const CHAT_ATTACHMENT_ACCEPT =
+  "image/*,audio/*,video/*,application/pdf,.pdf";
+
 export const CHAT_ALLOWED_EMOJIS = [
   "👍",
   "❤️",

@@ -2,23 +2,30 @@
 
 import { FC } from "react";
 import { T } from "@/i18n/T";
-import type { TChatMessage } from "./types";
+import { ChatPendingAttachments } from "./ChatAttachments";
+import type { TChatMessage, TChatPendingAttachment } from "./types";
 import styles from "./styles.module.css";
 
 type TProps = {
   replyTo: TChatMessage | null;
   editing: TChatMessage | null;
+  pendingAttachments: TChatPendingAttachment[];
+  uploading?: boolean;
   onCancelReply: () => void;
   onCancelEdit: () => void;
+  onRemoveAttachment: (localId: string) => void;
 };
 
 export const ChatComposerOverlay: FC<TProps> = ({
   replyTo,
   editing,
+  pendingAttachments,
+  uploading = false,
   onCancelReply,
   onCancelEdit,
+  onRemoveAttachment,
 }) => {
-  if (!replyTo && !editing) return null;
+  if (!replyTo && !editing && !pendingAttachments.length) return null;
 
   return (
     <div className={styles.composerOverlay}>
@@ -58,6 +65,11 @@ export const ChatComposerOverlay: FC<TProps> = ({
           </button>
         </div>
       ) : null}
+      <ChatPendingAttachments
+        items={pendingAttachments}
+        onRemove={onRemoveAttachment}
+        uploading={uploading}
+      />
     </div>
   );
 };

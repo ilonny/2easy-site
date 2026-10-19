@@ -3,6 +3,7 @@
 import { FC, useState } from "react";
 import { Message } from "@chatscope/chat-ui-kit-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
+import { ChatMessageAttachments } from "./ChatAttachments";
 import { CHAT_ALLOWED_EMOJIS } from "./constants";
 import type { TChatMessage } from "./types";
 import { T } from "@/i18n/T";
@@ -59,10 +60,15 @@ export const ChatMessageItem: FC<TProps> = ({
               <span className={styles.replySender}>
                 {message.reply_to.sender}
               </span>
-              <span className={styles.replyText}>{message.reply_to.message}</span>
+              <span className={styles.replyText}>
+                {message.reply_to.message || "📎"}
+              </span>
             </div>
           ) : null}
-          <div className={styles.text}>{message.message}</div>
+          <ChatMessageAttachments attachments={message.attachments} />
+          {message.message ? (
+            <div className={styles.text}>{message.message}</div>
+          ) : null}
           {message.edited_at ? (
             <div className={styles.edited}>
               <T k="lessons.chatEdited" />

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatWsAdapter } from "../sync/ChatWsAdapter";
-import type { TChatMessage } from "../types";
+import type { TChatAttachment, TChatMessage } from "../types";
 import { applyLocalReactionToggle } from "../utils/applyLocalReactionToggle";
 
 type TParams = {
@@ -81,11 +81,22 @@ export const useLessonChat = ({
     };
   }, [enabled, lessonId, sessionId, studentId]);
 
-  const sendMessage = useCallback((text: string, replyToId?: number | null) => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-    adapterRef.current?.sendMessage(trimmed, replyToId || null);
-  }, []);
+  const sendMessage = useCallback(
+    (
+      text: string,
+      replyToId?: number | null,
+      attachments?: TChatAttachment[],
+    ) => {
+      const trimmed = text.trim();
+      if (!trimmed && !attachments?.length) return;
+      adapterRef.current?.sendMessage(
+        trimmed,
+        replyToId || null,
+        attachments,
+      );
+    },
+    [],
+  );
 
   const editMessage = useCallback((id: number, text: string) => {
     const trimmed = text.trim();

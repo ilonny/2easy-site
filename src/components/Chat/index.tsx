@@ -8,7 +8,15 @@ import {
   MessageInput,
   ConversationHeader,
 } from "@chatscope/chat-ui-kit-react";
-import { ClipboardEvent, FC, useCallback, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  ClipboardEvent,
+  FC,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@nextui-org/react";
 import { toast } from "react-toastify";
@@ -17,10 +25,17 @@ import Image from "next/image";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { LessonToolTrigger } from "@/app/lessons/components/LessonToolTrigger";
+import { uploadChatFiles } from "./api/uploadChatFiles";
 import { ChatComposerOverlay } from "./ChatComposerOverlay";
 import { ChatMessageItem } from "./ChatMessageItem";
+import {
+  CHAT_ATTACHMENT_ACCEPT,
+  CHAT_ATTACHMENT_MAX_BYTES,
+  CHAT_ATTACHMENT_MAX_COUNT,
+} from "./constants";
 import { useLessonChat } from "./hooks/useLessonChat";
-import type { TChatMessage } from "./types";
+import type { TChatMessage, TChatPendingAttachment } from "./types";
+import { chatAttachmentKindFromMime } from "./utils/attachmentKind";
 import styles from "./styles.module.css";
 
 type TProps = {
@@ -59,8 +74,13 @@ export const Chat: FC<TProps> = ({
   const [draft, setDraft] = useState("");
   const [replyTo, setReplyTo] = useState<TChatMessage | null>(null);
   const [editing, setEditing] = useState<TChatMessage | null>(null);
+  const [pendingAttachments, setPendingAttachments] = useState<
+    TChatPendingAttachment[]
+  >([]);
+  const [uploading, setUploading] = useState(false);
   const [inputKey, setInputKey] = useState(0);
   const [isDesktop, setIsDesktop] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // iOS: после открытия клавиатуры иногда остаётся горизонтальный скролл.
   // На время работы чата на мобайле жёстко отключаем overflow-x.
@@ -84,6 +104,15 @@ export const Chat: FC<TProps> = ({
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      pendingAttachments.forEach((item) => {
+        URL.revokeObjectURL(item.previewUrl);
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- revoke only on unmount
+  }, []);
+
   const { messageList, sendMessage, editMessage, toggleReaction } =
     useLessonChat({
       lessonId: lesson_id,
@@ -94,12 +123,20 @@ export const Chat: FC<TProps> = ({
 
   const bumpInput = useCallback(() => setInputKey((k) => k + 1), []);
 
+  const clearPendingAttachments = useCallback(() => {
+    setPendingAttachments((prev) => {
+      prev.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      return [];
+    });
+  }, []);
+
   const clearComposerMode = useCallback(() => {
     setReplyTo(null);
     setEditing(null);
     setDraft("");
+    clearPendingAttachments();
     bumpInput();
-  }, [bumpInput]);
+  }, [bumpInput, clearPendingAttachments]);
 
   const handleOpen = useCallback(() => {
     if (!isTeacher && !studentId && !lessonSessionId) {
@@ -109,27 +146,133 @@ export const Chat: FC<TProps> = ({
     setIsOpen(true);
   }, [isTeacher, lessonSessionId, studentId]);
 
-  const handleSend = useCallback(
-    (_html: string, messageText: string) => {
-      const text = (messageText || _html || draft || "").trim();
-      if (!text) return;
+  const addFiles = useCallback((files: FileList | File[]) => {
+    const list = Array.from(files || []);
+    if (!list.length) return;
 
-      if (editing) {
-        editMessage(editing.id, text);
-      } else {
-        sendMessage(text, replyTo?.id || null);
+    setPendingAttachments((prev) => {
+      const next = [...prev];
+      for (const file of list) {
+        if (next.length >= CHAT_ATTACHMENT_MAX_COUNT) {
+          toast(i18n.t("lessons.chatAttachMaxCount"), { type: "warning" });
+          break;
+        }
+        if (file.size > CHAT_ATTACHMENT_MAX_BYTES) {
+          toast(i18n.t("lessons.chatAttachTooLarge"), { type: "error" });
+          continue;
+        }
+        const kind = chatAttachmentKindFromMime(file.type, file.name);
+        if (
+          kind === "file" &&
+          !file.type.startsWith("image/") &&
+          !file.type.startsWith("audio/") &&
+          !file.type.startsWith("video/") &&
+          file.type !== "application/pdf" &&
+          !file.name.toLowerCase().endsWith(".pdf")
+        ) {
+          toast(i18n.t("lessons.chatAttachInvalidType"), { type: "error" });
+          continue;
+        }
+        next.push({
+          localId: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          file,
+          previewUrl: URL.createObjectURL(file),
+          name: file.name,
+          mime: file.type || "application/octet-stream",
+          size: file.size,
+          kind:
+            kind === "file" && file.name.toLowerCase().endsWith(".pdf")
+              ? "pdf"
+              : kind,
+        });
       }
-      clearComposerMode();
+      return next;
+    });
+  }, []);
+
+  const handleAttachClick = useCallback(() => {
+    if (editing) {
+      toast(i18n.t("lessons.chatAttachWhileEditing"), { type: "info" });
+      return;
+    }
+    fileInputRef.current?.click();
+  }, [editing]);
+
+  const handleFileChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const files = event.target.files;
+      if (files?.length) addFiles(files);
+      event.target.value = "";
     },
-    [clearComposerMode, draft, editMessage, editing, replyTo?.id, sendMessage],
+    [addFiles],
   );
 
-  const handlePaste = useCallback((evt: ClipboardEvent) => {
-    evt.preventDefault();
-    const text = evt.clipboardData.getData("text/plain").trim();
-    if (!text) return;
-    document.execCommand("insertText", false, text);
-  }, []);
+  const handleSend = useCallback(
+    async (_html: string, messageText: string) => {
+      // chatscope requires non-empty input to fire onSend; we may use ZWSP for file-only
+      const text = (messageText || _html || draft || "")
+        .replace(/\u200b/g, "")
+        .trim();
+      if (editing) {
+        if (!text) return;
+        editMessage(editing.id, text);
+        clearComposerMode();
+        return;
+      }
+
+      if (!text && !pendingAttachments.length) return;
+      if (uploading) return;
+
+      let uploaded = undefined as Awaited<ReturnType<typeof uploadChatFiles>>;
+      if (pendingAttachments.length) {
+        setUploading(true);
+        try {
+          uploaded = await uploadChatFiles(
+            pendingAttachments.map((item) => item.file),
+          );
+          if (!uploaded.length) {
+            toast(i18n.t("lessons.chatAttachUploadFailed"), { type: "error" });
+            return;
+          }
+        } catch (error) {
+          console.error("[lesson-chat] upload", error);
+          toast(i18n.t("lessons.chatAttachUploadFailed"), { type: "error" });
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
+
+      sendMessage(text, replyTo?.id || null, uploaded);
+      clearComposerMode();
+    },
+    [
+      clearComposerMode,
+      draft,
+      editMessage,
+      editing,
+      pendingAttachments,
+      replyTo?.id,
+      sendMessage,
+      uploading,
+    ],
+  );
+
+  const handlePaste = useCallback(
+    (evt: ClipboardEvent) => {
+      const files = Array.from(evt.clipboardData?.files || []);
+      if (files.length && !editing) {
+        evt.preventDefault();
+        addFiles(files);
+        return;
+      }
+      evt.preventDefault();
+      const text = evt.clipboardData.getData("text/plain").trim();
+      if (!text) return;
+      document.execCommand("insertText", false, text);
+    },
+    [addFiles, editing],
+  );
 
   const startReply = useCallback(
     (message: TChatMessage) => {
@@ -144,15 +287,16 @@ export const Chat: FC<TProps> = ({
   const startEdit = useCallback(
     (message: TChatMessage) => {
       setReplyTo(null);
+      clearPendingAttachments();
       setEditing(message);
       setDraft(message.message);
       bumpInput();
     },
-    [bumpInput],
+    [bumpInput, clearPendingAttachments],
   );
 
   useEffect(() => {
-    if (!replyTo && !editing) return;
+    if (!replyTo && !editing && !pendingAttachments.length) return;
     const timer = window.setTimeout(() => {
       const el = document.querySelector(
         ".cs-message-input__content-editor",
@@ -160,7 +304,7 @@ export const Chat: FC<TProps> = ({
       el?.focus();
     }, 50);
     return () => window.clearTimeout(timer);
-  }, [replyTo, editing, inputKey]);
+  }, [replyTo, editing, inputKey, pendingAttachments.length]);
 
   if (!isOpen) {
     const label = i18n.t("lessons.lessonChat");
@@ -180,6 +324,17 @@ export const Chat: FC<TProps> = ({
       ? `${i18n.t("lessons.chatReplyingTo")} ${replyTo.sender}`
       : i18n.t("lessons.typeMessage");
 
+  const canSend =
+    !uploading &&
+    (editing
+      ? !!draft.trim()
+      : !!draft.trim() || pendingAttachments.length > 0);
+
+  // chatscope MessageInput only fires onSend when value.length > 0
+  const inputValue =
+    draft ||
+    (!editing && pendingAttachments.length > 0 ? "\u200b" : "");
+
   const panel = (
     <div
       className={
@@ -188,6 +343,14 @@ export const Chat: FC<TProps> = ({
           : `${styles.chatRoot} ${styles.chatRootFixed}`
       }
     >
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={CHAT_ATTACHMENT_ACCEPT}
+        multiple
+        className={styles.hiddenFileInput}
+        onChange={handleFileChange}
+      />
       <MainContainer>
         <ChatContainer>
           <ConversationHeader>
@@ -222,11 +385,16 @@ export const Chat: FC<TProps> = ({
           <MessageInput
             key={inputKey}
             placeholder={placeholder}
-            attachButton={false}
-            value={draft}
-            onChange={(_html, textContent) => setDraft(textContent || "")}
+            attachButton
+            sendDisabled={!canSend}
+            disabled={uploading}
+            value={inputValue}
+            onChange={(_html, textContent) =>
+              setDraft((textContent || "").replace(/\u200b/g, ""))
+            }
             onSend={handleSend}
             onPaste={handlePaste}
+            onAttachClick={handleAttachClick}
           />
         </ChatContainer>
       </MainContainer>
@@ -234,11 +402,20 @@ export const Chat: FC<TProps> = ({
       <ChatComposerOverlay
         replyTo={replyTo}
         editing={editing}
+        pendingAttachments={pendingAttachments}
+        uploading={uploading}
         onCancelReply={() => {
           setReplyTo(null);
           bumpInput();
         }}
         onCancelEdit={clearComposerMode}
+        onRemoveAttachment={(localId) => {
+          setPendingAttachments((prev) => {
+            const target = prev.find((item) => item.localId === localId);
+            if (target) URL.revokeObjectURL(target.previewUrl);
+            return prev.filter((item) => item.localId !== localId);
+          });
+        }}
       />
     </div>
   );

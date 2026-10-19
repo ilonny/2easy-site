@@ -3,6 +3,7 @@
 import { getChatWsUrl } from "../api/chatWs";
 import { CHAT_REALTIME_PING_MS, CHAT_RECONNECT_MS } from "../constants";
 import type {
+  TChatAttachment,
   TChatMessage,
   TChatReaction,
   TChatRealtimeCallbacks,
@@ -19,6 +20,7 @@ type TWsIncoming = {
 type TPendingSend = {
   message: string;
   replyToId?: number | null;
+  attachments?: TChatAttachment[];
 };
 
 export class ChatWsAdapter {
@@ -137,6 +139,9 @@ export class ChatWsAdapter {
         type: "send",
         message: item.message,
         ...(item.replyToId ? { reply_to_id: item.replyToId } : {}),
+        ...(item.attachments?.length
+          ? { attachments: item.attachments }
+          : {}),
       });
       if (!ok) {
         this.pendingSends.push(item);
@@ -195,15 +200,20 @@ export class ChatWsAdapter {
     }
   }
 
-  sendMessage(message: string, replyToId?: number | null) {
+  sendMessage(
+    message: string,
+    replyToId?: number | null,
+    attachments?: TChatAttachment[],
+  ) {
     const payload = {
       type: "send",
       message,
       ...(replyToId ? { reply_to_id: replyToId } : {}),
+      ...(attachments?.length ? { attachments } : {}),
     };
     if (this.sendRaw(payload)) return;
 
-    this.pendingSends.push({ message, replyToId });
+    this.pendingSends.push({ message, replyToId, attachments });
     if (this.ws?.readyState === WebSocket.CONNECTING) return;
     if (this.shouldReconnect && this.lessonId && !this.reconnectTimer) {
       this.connectionGen += 1;
