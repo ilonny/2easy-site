@@ -58,6 +58,7 @@ import { LessonFloatingTools } from "@/app/lessons/components/LessonFloatingTool
 import { LessonToolTrigger } from "@/app/lessons/components/LessonToolTrigger";
 import { BELOW_SITE_HEADER_STICKY_TOP_CLASS } from "@/constants/uiLayers";
 import { useRedirectIfLessonLockedOnTrial } from "@/app/subscription/helpers";
+import { LessonModeBanner } from "@/app/lessons/components/LessonModeBanner";
 
 const ParticipantsIcon = () => (
   <svg
@@ -472,18 +473,24 @@ export default function LessonPage() {
           <div className="h-3 sm:h-6 md:h-10" />
           {isTeacher && (
             <div className="flex w-full min-w-0 flex-col gap-1.5 md:flex-row md:items-start md:justify-between md:gap-4">
-              <Link
-                href={`/editor/${params.id}`}
-                className="w-fit shrink-0 font-bold tracking-brand text-brand-violet"
-              >
-                <Button
-                  variant="light"
-                  className="min-h-10 min-w-0 touch-manipulation px-2 font-bold tracking-brand text-brand-violet"
+              {!lesson?.lesson_id_homework && (
+                <Link
+                  href={`/editor/${params.id}`}
+                  className="w-fit shrink-0 font-bold tracking-brand text-brand-violet"
                 >
-                  <T k="lessons.backToEdit" />
-                </Button>
-              </Link>
-              <div className="flex w-full flex-col items-center gap-1.5 md:w-auto md:flex-row md:flex-wrap md:items-center md:justify-end md:gap-2">
+                  <Button
+                    variant="light"
+                    className="min-h-10 min-w-0 touch-manipulation px-2 font-bold tracking-brand text-brand-violet"
+                  >
+                    <T k="lessons.backToEdit" />
+                  </Button>
+                </Link>
+              )}
+              <div
+                className={`flex w-full flex-col items-center gap-1.5 md:w-auto md:flex-row md:flex-wrap md:items-center md:justify-end md:gap-2 ${
+                  lesson?.lesson_id_homework ? "md:ml-auto" : ""
+                }`}
+              >
                 <div
                   className="switcher flex min-h-10 w-fit max-w-full cursor-pointer touch-manipulation items-center justify-center gap-2 md:justify-start"
                   onClick={onChangePresentationMode}
@@ -520,6 +527,37 @@ export default function LessonPage() {
                   <CopyLessonLink />
                 </div>
               </div>
+            </div>
+          )}
+          {isTeacher && !!lesson?.lesson_id_homework && (
+            <div className="mt-3 sm:mt-4 md:mt-5">
+              <LessonModeBanner
+                mode="homework-check"
+                sticky
+                studentName={
+                  (
+                    students.find(
+                      (s) =>
+                        Number(s.student_id) ===
+                        Number(activeStudentId || lockedStudentId),
+                    ) || students[0]
+                  )?.["student.name"]
+                }
+                studentEmail={
+                  (
+                    students.find(
+                      (s) =>
+                        Number(s.student_id) ===
+                        Number(activeStudentId || lockedStudentId),
+                    ) || students[0]
+                  )?.["student.email"]
+                }
+                editHref={`/editor/${params.id}${
+                  Number(activeStudentId || lockedStudentId || students[0]?.student_id || 0)
+                    ? `?student_id=${Number(activeStudentId || lockedStudentId || students[0]?.student_id)}`
+                    : ""
+                }`}
+              />
             </div>
           )}
         </div>

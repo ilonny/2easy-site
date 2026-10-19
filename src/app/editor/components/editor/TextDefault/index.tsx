@@ -15,6 +15,7 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import dynamic from "next/dynamic";
 import draftToHtml from "draftjs-to-html";
 import { T } from "@/i18n/T";
+import richTextStyles from "../richTextEditor.module.css";
 
 let htmlToDraft = null;
 if (typeof window === "object") {
@@ -209,7 +210,7 @@ export const TextDefaultEx: FC<TProps> = ({
         </div>
       </div>
       <div className="h-5" />
-      <div style={{ background: "#fff" }}>
+      <div className={richTextStyles.shell}>
         <Editor
           editorState={editorState}
           stripPastedStyles={true}
@@ -280,9 +281,9 @@ export const TextDefaultEx: FC<TProps> = ({
               ],
             },
           }}
-          toolbarClassName="toolbarClassName"
-          wrapperClassName="wrapperClassName"
-          editorClassName="editorClassName"
+          toolbarClassName={richTextStyles.toolbar}
+          wrapperClassName={richTextStyles.wrapper}
+          editorClassName={`${richTextStyles.body} editorClassName`}
           onEditorStateChange={setEditorState}
         />
       </div>

@@ -394,9 +394,11 @@ export const fetchDelete = (params: TParams) => {
   const { path, data } = params;
   const headers = mapHeaders(params);
   const url = (API_URL + path).replace("/undefined", "");
+  // Always send a JSON object — Content-Type is application/json, and
+  // JSON.stringify(undefined) would omit the body (parser edge cases).
   return safeFetch(url, {
     method: "DELETE",
-    body: JSON.stringify(data),
+    body: JSON.stringify(data ?? {}),
     headers,
   });
 };

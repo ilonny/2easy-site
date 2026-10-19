@@ -66,15 +66,22 @@ export type PaymentPlan = {
 
 export type PaymentStatsGranularity = "day" | "week" | "month";
 
+export type MoneyByCurrency = {
+  currency: string;
+  amount: number;
+};
+
 export type PaymentStats = {
   granularity?: PaymentStatsGranularity;
   from?: string;
   to?: string;
-  actual_total: number;
-  actual_past?: number;
-  actual_today?: number;
-  projected_total: number;
-  expected_total?: number;
+  currencies?: string[];
+  /** Multi-currency totals (preferred). Legacy clients may still send a number. */
+  actual_total: number | MoneyByCurrency[];
+  actual_past?: number | MoneyByCurrency[];
+  actual_today?: number | MoneyByCurrency[];
+  projected_total: number | MoneyByCurrency[];
+  expected_total?: number | MoneyByCurrency[];
   chart: Array<{
     period?: string;
     label?: string;
@@ -82,6 +89,10 @@ export type PaymentStats = {
     actual: number;
     projected: number;
     total?: number;
+    by_currency?: Record<
+      string,
+      { actual: number; projected: number; total?: number }
+    >;
   }>;
   by_student: Array<{
     student_id: number;
@@ -89,10 +100,16 @@ export type PaymentStats = {
     student_email?: string | null;
     actual: number;
     projected: number;
+    amounts?: Array<{
+      currency: string;
+      actual: number;
+      projected: number;
+    }>;
   }>;
   upcoming?: Array<{
     date: string;
     amount: number;
+    currency?: string;
     student_id: number;
     student_name?: string | null;
     student_email?: string | null;

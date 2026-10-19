@@ -376,8 +376,85 @@ blockquote {
 
 
 
-ol, ul {
-  list-style-position: inside !important;
+/*
+ * Lists: Draft.js puts a block div inside each <li>, so native list-style markers
+ * (especially with position:inside) end up on their own line above the text.
+ * Use absolute custom bullets for Draft; keep compact outside markers for saved HTML.
+ */
+ol,
+ul {
+  list-style-position: outside !important;
+}
+
+.public-DraftStyleDefault-ul {
+  list-style: none !important;
+  margin: 0.45em 0 !important;
+  padding-left: 0 !important;
+}
+
+.public-DraftStyleDefault-unorderedListItem {
+  list-style: none !important;
+  position: relative !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 1.35em !important;
+}
+
+.public-DraftStyleDefault-unorderedListItem.public-DraftStyleDefault-depth0 {
+  margin-left: 0 !important;
+}
+
+.public-DraftStyleDefault-unorderedListItem::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.2em;
+  text-align: center;
+  line-height: inherit;
+  font-size: 1.05em;
+  pointer-events: none;
+}
+
+.public-DraftStyleDefault-unorderedListItem.public-DraftStyleDefault-depth1 {
+  padding-left: 2.7em !important;
+}
+
+.public-DraftStyleDefault-unorderedListItem.public-DraftStyleDefault-depth1::before {
+  left: 1.35em;
+  content: "◦";
+}
+
+.public-DraftStyleDefault-unorderedListItem.public-DraftStyleDefault-depth2 {
+  padding-left: 4.05em !important;
+}
+
+.public-DraftStyleDefault-unorderedListItem.public-DraftStyleDefault-depth2::before {
+  left: 2.7em;
+  content: "▪";
+}
+
+/* Saved HTML / preview — tight gap between marker and text */
+.editorClassName ul,
+.editor-view ul {
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+  padding-left: 1.25em !important;
+  margin: 0.4em 0;
+}
+
+.editorClassName ol,
+.editor-view ol {
+  list-style-type: decimal !important;
+  list-style-position: outside !important;
+  padding-left: 1.25em !important;
+  margin: 0.4em 0;
+}
+
+.editorClassName li,
+.editor-view li {
+  margin: 0.15em 0;
+  padding-left: 0.2em;
 }
 
 @media (min-width: 1024px) {

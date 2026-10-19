@@ -2,8 +2,17 @@ import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { getTokenFromLocalStorage } from "@/auth/utils";
 import { useCallback, useState } from "react";
 
-export const useStudentList = (localStudents?: Array<any>) => {
+type UseStudentListOptions = {
+  /** When true, load archived students (`GET /student?archived=1`). */
+  archived?: boolean;
+};
+
+export const useStudentList = (
+  localStudents?: Array<any>,
+  options?: UseStudentListOptions,
+) => {
   const [students, setStudents] = useState([]);
+  const archived = Boolean(options?.archived);
 
   const getStudents = useCallback(async () => {
     if (!!localStudents) {
@@ -15,13 +24,13 @@ export const useStudentList = (localStudents?: Array<any>) => {
       return;
     }
     const res = await fetchGet({
-      path: "/student",
+      path: archived ? "/student?archived=1" : "/student",
       isSecure: true,
     });
     const data = await res?.json();
     // API returns an array on success; on 401 it returns an object
     setStudents(Array.isArray(data) ? data : []);
-  }, [localStudents]);
+  }, [localStudents, archived]);
 
   const deleteStudent = useCallback(async (id) => {
     const res = await fetchPostJson({
@@ -34,5 +43,19 @@ export const useStudentList = (localStudents?: Array<any>) => {
     return student;
   }, []);
 
-  return { students, getStudents, deleteStudent };
+  const setStudentArchived = useCallback(
+    async (id: number, is_archived: boolean) => {
+      const res = await fetchPostJson({
+        path: "/student/archive",
+        isSecure: true,
+        data: { id, is_archived: is_archived ? 1 : 0 },
+      });
+      const student = await res?.json();
+      checkResponse(student);
+      return student;
+    },
+    [],
+  );
+
+  return { students, getStudents, deleteStudent, setStudentArchived };
 };

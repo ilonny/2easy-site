@@ -21,17 +21,22 @@
 }
 
 .toolbar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 40 !important;
   display: flex !important;
   flex-wrap: wrap !important;
   align-items: center !important;
   gap: 6px !important;
   border: none !important;
   border-bottom: 1px solid rgba(63, 40, 198, 0.12) !important;
-  background: #f7f7ff !important;
+  background: rgba(247, 247, 255, 0.97) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   margin-bottom: 0 !important;
   padding: 8px 10px !important;
   border-radius: 8px 8px 0 0;
-  box-shadow: none !important;
+  box-shadow: 0 1px 0 rgba(63, 40, 198, 0.06) !important;
 }
 
 .toolbar :global(.rdw-inline-wrapper),

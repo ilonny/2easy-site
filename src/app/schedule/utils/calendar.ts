@@ -58,9 +58,44 @@ export const weekDays = (cursor: Dayjs) => {
   return Array.from({ length: 7 }, (_, i) => start.add(i, "day"));
 };
 
-export const formatMoney = (amount: number, currency = "RUB") =>
-  new Intl.NumberFormat("ru-RU", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  }).format(amount || 0);
+export const formatMoney = (amount: number, currency = "RUB") => {
+  try {
+    return new Intl.NumberFormat("ru-RU", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    }).format(amount || 0);
+  } catch {
+    return `${amount || 0} ${currency}`;
+  }
+};
+
+export type MoneyByCurrency = { currency: string; amount: number };
+
+/** Normalize API money field (array or legacy number) into a list. */
+export const asMoneyList = (
+  value: number | MoneyByCurrency[] | null | undefined,
+  fallbackCurrency = "RUB",
+): MoneyByCurrency[] => {
+  if (Array.isArray(value)) {
+    return value
+      .map((row) => ({
+        currency: String(row?.currency || fallbackCurrency).toUpperCase(),
+        amount: Number(row?.amount) || 0,
+      }))
+      .filter((row) => row.amount !== 0);
+  }
+  if (typeof value === "number" && value !== 0) {
+    return [{ currency: fallbackCurrency, amount: value }];
+  }
+  return [];
+};
+
+export const formatMoneyList = (
+  value: number | MoneyByCurrency[] | null | undefined,
+  fallbackCurrency = "RUB",
+) => {
+  const list = asMoneyList(value, fallbackCurrency);
+  if (!list.length) return formatMoney(0, fallbackCurrency);
+  return list.map((row) => formatMoney(row.amount, row.currency)).join(" · ");
+};

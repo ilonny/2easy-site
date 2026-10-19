@@ -27,7 +27,7 @@ export const ProfileStudents = () => {
         </Button>
       </div>
       <div className="h-10" /> */}
-      <StudentList />
+      <StudentList showArchiveToggle />
       {/* {tabIndex === "students" && <StudentList />}
       {tabIndex === "groups" && <GroupList />} */}
     </>

@@ -40,7 +40,13 @@ import type {
   ScheduleEvent,
 } from "../types";
 import { eventStudentIds } from "../types";
-import { formatMoney } from "../utils/calendar";
+import { formatMoney, formatMoneyList } from "../utils/calendar";
+import {
+  DEFAULT_PAYMENT_CURRENCY,
+  PAYMENT_CURRENCIES,
+  PAYMENT_CURRENCY_LABELS,
+  type PaymentCurrency,
+} from "../utils/currencies";
 import type { LoadStatsParams } from "../hooks/usePaymentPlans";
 import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 
@@ -72,6 +78,7 @@ type PlanForm = {
   student_id: number | "";
   plan_type: "recurring" | "package";
   amount: string;
+  currency: PaymentCurrency;
   frequency: "weekly" | "biweekly" | "monthly";
   next_payment_date: string;
   lessons_total: string;
@@ -84,6 +91,7 @@ const emptyPlanForm = (): PlanForm => ({
   student_id: "",
   plan_type: "recurring",
   amount: "",
+  currency: DEFAULT_PAYMENT_CURRENCY,
   frequency: "monthly",
   next_payment_date: dayjs().add(7, "day").format("YYYY-MM-DD"),
   lessons_total: "8",
@@ -92,21 +100,55 @@ const emptyPlanForm = (): PlanForm => ({
   anchor_event_id: "",
 });
 
-const formFromPlan = (plan: PaymentPlan): PlanForm => ({
-  student_id: plan.student_id,
-  plan_type: plan.plan_type,
-  amount: String(plan.amount ?? ""),
-  frequency: (plan.frequency as PlanForm["frequency"]) || "monthly",
-  next_payment_date: plan.next_payment_date
-    ? dayjs(plan.next_payment_date).format("YYYY-MM-DD")
-    : dayjs().format("YYYY-MM-DD"),
-  lessons_total: String(plan.lessons_total ?? 8),
-  lessons_remaining: String(
-    plan.lessons_remaining ?? plan.lessons_total ?? 8,
-  ),
-  notes: plan.notes || "",
-  anchor_event_id: plan.anchor_event_id || "",
-});
+const formFromPlan = (plan: PaymentPlan): PlanForm => {
+  const raw = String(plan.currency || DEFAULT_PAYMENT_CURRENCY)
+    .trim()
+    .toUpperCase();
+  const currency = (
+    PAYMENT_CURRENCIES.includes(raw as PaymentCurrency)
+      ? raw
+      : DEFAULT_PAYMENT_CURRENCY
+  ) as PaymentCurrency;
+  return {
+    student_id: plan.student_id,
+    plan_type: plan.plan_type,
+    amount: String(plan.amount ?? ""),
+    currency,
+    frequency: (plan.frequency as PlanForm["frequency"]) || "monthly",
+    next_payment_date: plan.next_payment_date
+      ? dayjs(plan.next_payment_date).format("YYYY-MM-DD")
+      : dayjs().format("YYYY-MM-DD"),
+    lessons_total: String(plan.lessons_total ?? 8),
+    lessons_remaining: String(
+      plan.lessons_remaining ?? plan.lessons_total ?? 8,
+    ),
+    notes: plan.notes || "",
+    anchor_event_id: plan.anchor_event_id || "",
+  };
+};
+
+const formatStudentAmounts = (
+  amounts:
+    | Array<{ currency: string; actual: number; projected: number }>
+    | undefined,
+  actual: number,
+  projected: number,
+) => {
+  if (amounts?.length) {
+    return {
+      earned: amounts
+        .map((a) => formatMoney(a.actual, a.currency))
+        .join(" · "),
+      projected: amounts
+        .map((a) => formatMoney(a.projected, a.currency))
+        .join(" · "),
+    };
+  }
+  return {
+    earned: formatMoney(actual),
+    projected: formatMoney(projected),
+  };
+};
 
 const defaultRange = (granularity: PaymentStatsGranularity) => {
   const now = dayjs();
@@ -193,6 +235,9 @@ export const PaymentControlTab = ({
   const initial = defaultRange("month");
   const [from, setFrom] = useState(initial.from);
   const [to, setTo] = useState(initial.to);
+  const [chartCurrency, setChartCurrency] = useState<string>(
+    DEFAULT_PAYMENT_CURRENCY,
+  );
 
   const reloadStats = async (
     g = granularity,
@@ -337,6 +382,7 @@ export const PaymentControlTab = ({
         student_id: Number(form.student_id),
         plan_type: form.plan_type,
         amount: Number(form.amount),
+        currency: form.currency,
         frequency: form.plan_type === "recurring" ? form.frequency : null,
         next_payment_date: form.next_payment_date || null,
         lessons_total:
@@ -362,8 +408,57 @@ export const PaymentControlTab = ({
 
   const activePlans = plans.filter((p) => p.is_active);
 
+  const statsCurrencies = useMemo(() => {
+    const fromStats = (stats?.currencies || []).map((c) =>
+      String(c).toUpperCase(),
+    );
+    if (fromStats.length) return fromStats;
+    const fromPlans = [
+      ...new Set(
+        activePlans.map((p) =>
+          String(p.currency || DEFAULT_PAYMENT_CURRENCY).toUpperCase(),
+        ),
+      ),
+    ];
+    return fromPlans.length ? fromPlans : [DEFAULT_PAYMENT_CURRENCY];
+  }, [stats?.currencies, activePlans]);
+
+  useEffect(() => {
+    if (!statsCurrencies.includes(chartCurrency)) {
+      setChartCurrency(statsCurrencies[0] || DEFAULT_PAYMENT_CURRENCY);
+    }
+  }, [statsCurrencies, chartCurrency]);
+
   const chartData = useMemo(() => {
     const rows = stats?.chart || [];
+    const pickAmounts = (row: (typeof rows)[number]) => {
+      const byCur = row.by_currency?.[chartCurrency];
+      if (byCur) {
+        return {
+          actual: Number(byCur.actual || 0),
+          projected: Number(byCur.projected || 0),
+          total: Number(
+            byCur.total != null
+              ? byCur.total
+              : Number(byCur.actual || 0) + Number(byCur.projected || 0),
+          ),
+        };
+      }
+      // Legacy: single-currency charts without by_currency
+      if (statsCurrencies.length <= 1) {
+        return {
+          actual: Number(row.actual || 0),
+          projected: Number(row.projected || 0),
+          total: Number(
+            row.total != null
+              ? row.total
+              : Number(row.actual || 0) + Number(row.projected || 0),
+          ),
+        };
+      }
+      return { actual: 0, projected: 0, total: 0 };
+    };
+
     if (!rows.length) {
       // still draw an empty axis across the selected range
       const empty: Array<{
@@ -406,19 +501,14 @@ export const PaymentControlTab = ({
     }
     return rows.map((row) => {
       const period = row.period || row.month || "";
+      const amounts = pickAmounts(row);
       return {
         period,
         label: formatPeriodLabel(period, granularity),
-        actual: Number(row.actual || 0),
-        projected: Number(row.projected || 0),
-        total: Number(
-          row.total != null
-            ? row.total
-            : Number(row.actual || 0) + Number(row.projected || 0),
-        ),
+        ...amounts,
       };
     });
-  }, [stats?.chart, from, to, granularity]);
+  }, [stats?.chart, from, to, granularity, chartCurrency, statsCurrencies]);
 
   const yMax = Math.max(
     1000,
@@ -447,8 +537,10 @@ export const PaymentControlTab = ({
             <div className="text-sm text-[#86868b]">
               <T k="schedule.earnedPast" />
             </div>
-            <div className="text-2xl font-bold text-[#1d1d1f]">
-              {formatMoney(stats?.actual_past ?? stats?.actual_total ?? 0)}
+            <div className="text-xl font-bold leading-snug text-[#1d1d1f] sm:text-2xl">
+              {formatMoneyList(
+                stats?.actual_past ?? stats?.actual_total ?? 0,
+              )}
             </div>
           </CardBody>
         </Card>
@@ -457,8 +549,8 @@ export const PaymentControlTab = ({
             <div className="text-sm text-[#86868b]">
               <T k="schedule.earnedToday" />
             </div>
-            <div className="text-2xl font-bold text-[#1d1d1f]">
-              {formatMoney(stats?.actual_today ?? 0)}
+            <div className="text-xl font-bold leading-snug text-[#1d1d1f] sm:text-2xl">
+              {formatMoneyList(stats?.actual_today ?? 0)}
             </div>
           </CardBody>
         </Card>
@@ -467,8 +559,8 @@ export const PaymentControlTab = ({
             <div className="text-sm text-[#86868b]">
               <T k="schedule.projected" />
             </div>
-            <div className="text-2xl font-bold text-[#007AFF]">
-              {formatMoney(stats?.projected_total || 0)}
+            <div className="text-xl font-bold leading-snug text-[#007AFF] sm:text-2xl">
+              {formatMoneyList(stats?.projected_total || 0)}
             </div>
           </CardBody>
         </Card>
@@ -477,11 +569,8 @@ export const PaymentControlTab = ({
             <div className="text-sm text-[#86868b]">
               <T k="schedule.expectedTotal" />
             </div>
-            <div className="text-2xl font-bold text-[#34C759]">
-              {formatMoney(
-                stats?.expected_total ??
-                  (stats?.actual_total || 0) + (stats?.projected_total || 0),
-              )}
+            <div className="text-xl font-bold leading-snug text-[#34C759] sm:text-2xl">
+              {formatMoneyList(stats?.expected_total ?? [])}
             </div>
           </CardBody>
         </Card>
@@ -498,23 +587,42 @@ export const PaymentControlTab = ({
                 <T k="schedule.statsChartHint" />
               </p>
             </div>
-            <Tabs
-              size="sm"
-              selectedKey={granularity}
-              onSelectionChange={(key) =>
-                applyGranularity(
-                  key === "day" || key === "week" ? key : "month",
-                )
-              }
-              classNames={{
-                tabList: "bg-[#f2f2f7] p-1 rounded-xl",
-                cursor: "bg-white shadow-sm",
-              }}
-            >
-              <Tab key="day" title={i18n.t("schedule.viewDay")} />
-              <Tab key="week" title={i18n.t("schedule.viewWeek")} />
-              <Tab key="month" title={i18n.t("schedule.viewMonth")} />
-            </Tabs>
+            <div className="flex flex-wrap items-center gap-2">
+              {statsCurrencies.length > 1 ? (
+                <Tabs
+                  size="sm"
+                  selectedKey={chartCurrency}
+                  onSelectionChange={(key) =>
+                    setChartCurrency(String(key || DEFAULT_PAYMENT_CURRENCY))
+                  }
+                  classNames={{
+                    tabList: "bg-[#f2f2f7] p-1 rounded-xl",
+                    cursor: "bg-white shadow-sm",
+                  }}
+                >
+                  {statsCurrencies.map((code) => (
+                    <Tab key={code} title={code} />
+                  ))}
+                </Tabs>
+              ) : null}
+              <Tabs
+                size="sm"
+                selectedKey={granularity}
+                onSelectionChange={(key) =>
+                  applyGranularity(
+                    key === "day" || key === "week" ? key : "month",
+                  )
+                }
+                classNames={{
+                  tabList: "bg-[#f2f2f7] p-1 rounded-xl",
+                  cursor: "bg-white shadow-sm",
+                }}
+              >
+                <Tab key="day" title={i18n.t("schedule.viewDay")} />
+                <Tab key="week" title={i18n.t("schedule.viewWeek")} />
+                <Tab key="month" title={i18n.t("schedule.viewMonth")} />
+              </Tabs>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-end gap-2">
@@ -580,7 +688,7 @@ export const PaymentControlTab = ({
                   />
                   <Tooltip
                     formatter={(value: number, name: string) => [
-                      formatMoney(Number(value || 0)),
+                      formatMoney(Number(value || 0), chartCurrency),
                       name,
                     ]}
                   />
@@ -632,6 +740,11 @@ export const PaymentControlTab = ({
                       row.student_name,
                       row.student_email,
                     );
+                    const money = formatStudentAmounts(
+                      row.amounts,
+                      row.actual,
+                      row.projected,
+                    );
                     return (
                     <tr key={row.student_id} className="border-t border-[#f0f0f5]">
                       <td className="py-2 font-medium">
@@ -642,9 +755,9 @@ export const PaymentControlTab = ({
                           </div>
                         ) : null}
                       </td>
-                      <td className="py-2">{formatMoney(row.actual)}</td>
+                      <td className="py-2">{money.earned}</td>
                       <td className="py-2 text-[#007AFF]">
-                        {formatMoney(row.projected)}
+                        {money.projected}
                       </td>
                     </tr>
                     );
@@ -691,7 +804,10 @@ export const PaymentControlTab = ({
                     </div>
                   </div>
                   <div className="font-semibold text-[#007AFF]">
-                    {formatMoney(item.amount)}
+                    {formatMoney(
+                      item.amount,
+                      item.currency || DEFAULT_PAYMENT_CURRENCY,
+                    )}
                   </div>
                 </div>
                 );
@@ -903,14 +1019,37 @@ export const PaymentControlTab = ({
                 </SelectItem>
               </Select>
             </div>
-            <Input
-              type="number"
-              label={i18n.t("schedule.amount")}
-              value={form.amount}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, amount: e.target.value }))
-              }
-            />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Input
+                type="number"
+                label={i18n.t("schedule.amount")}
+                value={form.amount}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, amount: e.target.value }))
+                }
+              />
+              <Select
+                label={i18n.t("schedule.currency")}
+                selectedKeys={[form.currency]}
+                onChange={(e) => {
+                  const raw = String(e.target.value || "")
+                    .trim()
+                    .toUpperCase();
+                  const next = (
+                    PAYMENT_CURRENCIES.includes(raw as PaymentCurrency)
+                      ? raw
+                      : DEFAULT_PAYMENT_CURRENCY
+                  ) as PaymentCurrency;
+                  setForm((f) => ({ ...f, currency: next }));
+                }}
+              >
+                {PAYMENT_CURRENCIES.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {PAYMENT_CURRENCY_LABELS[code]}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
             {form.plan_type === "recurring" ? (
               <Select
                 label={i18n.t("schedule.frequency")}

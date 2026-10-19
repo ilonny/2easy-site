@@ -33,6 +33,8 @@ type TProps = {
   onSuccessEditCallback?: () => void;
   onSuccessDeleteCallback?: () => void;
   btnSecondary?: boolean;
+  /** Show active/archive toggle (profile list only; pickers stay active-only). */
+  showArchiveToggle?: boolean;
 };
 
 export const StudentList = (props: TProps) => {
@@ -46,16 +48,22 @@ export const StudentList = (props: TProps) => {
     onSuccessEditCallback,
     onSuccessDeleteCallback,
     btnSecondary,
+    showArchiveToggle = false,
   } = props;
   const [createIsVisible, setCreateIsVisible] = useState(false);
   const [deleteIsVisible, setDeleteIsVisible] = useState(false);
-  const { students, getStudents, deleteStudent } = useStudentList(studentsList);
+  const [archiveConfirmVisible, setArchiveConfirmVisible] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const { students, getStudents, deleteStudent, setStudentArchived } =
+    useStudentList(studentsList, {
+      archived: showArchiveToggle ? showArchived : false,
+    });
   const [chosenStudent, setChosenStudent] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
     getStudents();
-  }, [createIsVisible, deleteIsVisible, getStudents]);
+  }, [createIsVisible, deleteIsVisible, archiveConfirmVisible, getStudents]);
 
   const onPressCreateGroup = useCallback((student) => {
     setChosenStudent(student || {});
@@ -75,14 +83,50 @@ export const StudentList = (props: TProps) => {
     setDeleteIsVisible(true);
   }, []);
 
+  const onPressArchiveToggle = useCallback((student) => {
+    setChosenStudent(student || {});
+    setArchiveConfirmVisible(true);
+  }, []);
+
   const { checkSubscription } = useCheckSubscription();
+  const isPicker = Boolean(onClickStudent);
+
   return (
     <>
+      {showArchiveToggle && !isPicker && (
+        <div className="mx-auto mb-4 flex w-full max-w-[600px] gap-2">
+          <Button
+            radius="full"
+            color="primary"
+            variant={!showArchived ? "solid" : "bordered"}
+            onClick={() => setShowArchived(false)}
+            size="sm"
+          >
+            <T k="students.activeTab" />
+          </Button>
+          <Button
+            radius="full"
+            color="primary"
+            variant={showArchived ? "solid" : "bordered"}
+            onClick={() => setShowArchived(true)}
+            size="sm"
+          >
+            <T k="students.archivedTab" />
+          </Button>
+        </div>
+      )}
       {!students?.length && (
         <ProfileEmptyLessons
-          title={<T k="students.noStudents" />}
+          title={
+            showArchived ? (
+              <T k="students.noArchivedStudents" />
+            ) : (
+              <T k="students.noStudents" />
+            )
+          }
           buttonTitle={<T k="students.add" />}
-          onButtonPress={onPressCreateGroup}
+          onButtonPress={() => onPressCreateGroup(null)}
+          hideButton={showArchived}
         />
       )}
       {!!students?.length && (
@@ -175,19 +219,40 @@ export const StudentList = (props: TProps) => {
                                 <div className="h-2" />
                               </>
                             )}
+                            {!showArchived && (
+                              <>
+                                <Button
+                                  fullWidth
+                                  color="primary"
+                                  onClick={(e) => {
+                                    if (checkSubscription()) {
+                                      e.preventDefault();
+                                      setTimeout(() => {
+                                        onPressCreateGroup(student);
+                                      }, 100);
+                                    }
+                                  }}
+                                >
+                                  <T k="lessons.edit" />
+                                </Button>
+                                <div className="h-2" />
+                              </>
+                            )}
                             <Button
                               fullWidth
                               color="primary"
-                              onClick={(e) => {
+                              variant="bordered"
+                              onClick={() => {
                                 if (checkSubscription()) {
-                                  e.preventDefault();
-                                  setTimeout(() => {
-                                    onPressCreateGroup(student);
-                                  }, 100);
+                                  onPressArchiveToggle(student);
                                 }
                               }}
                             >
-                              <T k="lessons.edit" />
+                              {showArchived ? (
+                                <T k="students.unarchive" />
+                              ) : (
+                                <T k="students.archive" />
+                              )}
                             </Button>
                             <div className="h-2" />
                             <Button
@@ -211,7 +276,7 @@ export const StudentList = (props: TProps) => {
               </div>
             );
           })}
-          {!hideAddButton && (
+          {!hideAddButton && !showArchived && (
             <Button
               radius="md"
               color="primary"
@@ -266,6 +331,58 @@ export const StudentList = (props: TProps) => {
               }}
             >
               <T k="editor.confirmDelete" />
+            </Button>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+      <Modal
+        size="xl"
+        isOpen={archiveConfirmVisible}
+        onClose={() => setArchiveConfirmVisible(false)}
+        classNames={brandModalClassNames}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <p>
+              {showArchived ? (
+                <T
+                  k="students.unarchiveStudentConfirm"
+                  values={{ name: chosenStudent?.name || "" }}
+                />
+              ) : (
+                <T
+                  k="students.archiveStudentConfirm"
+                  values={{ name: chosenStudent?.name || "" }}
+                />
+              )}
+            </p>
+          </ModalHeader>
+          <ModalBody>
+            {!showArchived && (
+              <p className="mb-3 text-sm text-default-500">
+                <T k="students.archiveStudentHint" />
+              </p>
+            )}
+            <Button
+              color="primary"
+              onClick={() => {
+                setStudentArchived(chosenStudent.id, !showArchived).then(
+                  () => {
+                    setArchiveConfirmVisible(false);
+                    setChosenStudent(null);
+                    getStudents();
+                    if (onSuccessDeleteCallback) {
+                      onSuccessDeleteCallback();
+                    }
+                  },
+                );
+              }}
+            >
+              {showArchived ? (
+                <T k="students.unarchive" />
+              ) : (
+                <T k="students.archive" />
+              )}
             </Button>
           </ModalBody>
         </ModalContent>

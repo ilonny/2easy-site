@@ -12,7 +12,7 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {
   brandDangerBtnClassName,
   brandModalClassNames,
@@ -32,7 +32,7 @@ import { TTemplate } from "../components/create/ChooseTemplateModal/templates";
 import { EditorRootModal } from "../components/editor/EditorRootModal";
 import { useExList } from "../hooks/useExList";
 import { ExList } from "../components/view/ExList";
-import { checkResponse, fetchPostJson } from "@/api";
+import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { withLogin } from "@/auth/hooks/withLogin";
@@ -48,6 +48,8 @@ import createExStyles from "../components/create/CreateExButton/styles.module.cs
 import { getImageUrl } from "../helpers";
 import { ShareLessonLink } from "../components/ShareLessonLink";
 import { CreateHomeworkModal } from "@/app/lessons/components/CreateHomeworkModal";
+import { AddExercisesFromLessonModal } from "../components/AddExercisesFromLessonModal";
+import { LessonModeBanner } from "@/app/lessons/components/LessonModeBanner";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { parseRouteId } from "@/utils/parseRouteId";
@@ -56,11 +58,17 @@ import { EditorAiAssistModal } from "../components/EditorAiAssistModal";
 export default function EditorPage() {
   withLogin();
   const params = useParams();
+  const searchParams = useSearchParams();
   const lessonId = parseRouteId(params?.id);
+  const contextStudentId = Number(searchParams?.get("student_id") || 0) || 0;
   const { profile } = useContext(AuthContext);
   const { lesson, getLesson } = useLessons();
   const { exList, getExList, changeSortIndex, deleteEx } =
     useExList(lessonId ?? undefined);
+  const [contextStudent, setContextStudent] = useState<{
+    name?: string;
+    email?: string;
+  } | null>(null);
   const [exCreateTemplateModal, setExCreateTemplateModal] = useState(false);
   const [editorModal, setEditorModal] = useState(false);
   const [chosenTemplate, setChosenTemplate] = useState<TTemplate | null>(null);
@@ -113,6 +121,33 @@ export default function EditorPage() {
     getLesson(lessonId);
     getExList();
   }, [getExList, getLesson, lessonId]);
+
+  useEffect(() => {
+    if (!contextStudentId) {
+      setContextStudent(null);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetchGet({
+          path: `/student-info?id=${contextStudentId}`,
+          isSecure: true,
+        });
+        const json = await res?.json();
+        if (cancelled || !json?.success) return;
+        setContextStudent({
+          name: json.name || json["student.name"],
+          email: json.email || json["student.email"],
+        });
+      } catch {
+        if (!cancelled) setContextStudent(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [contextStudentId]);
 
   const onChooseTemplate = useCallback((template: TTemplate) => {
     setExCreateTemplateModal(false);
@@ -218,6 +253,7 @@ export default function EditorPage() {
 
   const [editIsVisible, setEditIsVisible] = useState(false);
   const [homeworkModalVisible, setHomeworkModalVisible] = useState(false);
+  const [addFromLessonVisible, setAddFromLessonVisible] = useState(false);
 
   const onPressEdit = useCallback(() => {
     setEditIsVisible(true);
@@ -264,10 +300,53 @@ export default function EditorPage() {
         </div>
         <div className="h-5 md:h-6 lg:h-10" />
         <div className="mx-auto w-full rounded-[20px] bg-white p-3 sm:p-4 md:p-6 lg:max-w-[1160px] lg:rounded-[30px] lg:p-10">
-          {lesson?.lesson_id_homework && lesson?.user_id === profile?.id ? (
-            <StartLessonButton lesson={lesson} mode="homeworkCheck" />
-          ) : (
-            !lesson?.lesson_id_homework && <StartLessonButton lesson={lesson} />
+          {lesson?.user_id === profile?.id && (
+            <div className="mb-4 sm:mb-5">
+              <LessonModeBanner
+                mode={
+                  lesson?.lesson_id_homework ? "homework-edit" : "lesson-edit"
+                }
+                studentName={contextStudent?.name}
+                studentEmail={contextStudent?.email}
+                isPersonalHomework={
+                  !!lesson?.lesson_id_homework && !!contextStudentId
+                }
+                actions={
+                  <>
+                    {lesson?.lesson_id_homework &&
+                    lesson?.user_id === profile?.id ? (
+                      <StartLessonButton
+                        lesson={lesson}
+                        mode="homeworkCheck"
+                      />
+                    ) : (
+                      !lesson?.lesson_id_homework && (
+                        <StartLessonButton lesson={lesson} />
+                      )
+                    )}
+                    {!!lesson?.lesson_id_homework && (
+                      <Link
+                        href={`/editor/${lesson.lesson_id_homework}`}
+                        className="font-bold tracking-brand text-brand-violet"
+                      >
+                        <Button
+                          variant="bordered"
+                          color="primary"
+                          className="min-h-10 font-bold tracking-brand"
+                        >
+                          <T k="lessons.toLesson" defaultText="К уроку" />
+                        </Button>
+                      </Link>
+                    )}
+                  </>
+                }
+              />
+            </div>
+          )}
+          {lesson && lesson.user_id !== profile?.id && !lesson.lesson_id_homework && (
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <StartLessonButton lesson={lesson} />
+            </div>
           )}
           <div
             className={`${styles["wrapper"]} relative pt-12 sm:pt-14 md:pt-[52px] lg:pt-0 common_info relative group`}
@@ -336,6 +415,24 @@ export default function EditorPage() {
                   }
                 />
               </Card>
+              {lesson?.user_id === profile?.id &&
+                !!lesson?.lesson_id_homework && (
+                  <Card
+                    radius="lg"
+                    shadow="none"
+                    className={`${createExStyles.wrapper} mt-3 flex min-h-[140px] items-center justify-center p-4 sm:mt-4 sm:min-h-[160px] sm:p-5 lg:h-[180px]`}
+                  >
+                    <Button
+                      size="lg"
+                      variant="bordered"
+                      color="primary"
+                      className="w-full max-w-[310px] min-w-0 lg:min-w-[310px]"
+                      onClick={() => setAddFromLessonVisible(true)}
+                    >
+                      <T k="editor.addTasksFromLesson" />
+                    </Button>
+                  </Card>
+                )}
               {lesson?.user_id === profile?.id &&
                 !lesson?.lesson_id_homework && (
                   <Card
@@ -489,6 +586,18 @@ export default function EditorPage() {
           onSuccess={() => {
             getExList();
             if (lessonId) getLesson(lessonId);
+          }}
+        />
+      )}
+      {!!lesson?.lesson_id_homework && lessonId && (
+        <AddExercisesFromLessonModal
+          isVisible={addFromLessonVisible}
+          setIsVisible={setAddFromLessonVisible}
+          homeworkLessonId={Number(lessonId)}
+          parentLessonId={Number(lesson.lesson_id_homework)}
+          lastSortIndex={Number(exList[exList.length - 1]?.sortIndex || 0)}
+          onSuccess={() => {
+            getExList();
           }}
         />
       )}

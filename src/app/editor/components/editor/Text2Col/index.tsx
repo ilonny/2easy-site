@@ -15,6 +15,7 @@ import dynamic from "next/dynamic";
 import draftToHtml from "draftjs-to-html";
 import { useUploadText2ColEx } from "../hooks/useUploadText2ColEx";
 import { T } from "@/i18n/T";
+import richTextStyles from "../richTextEditor.module.css";
 
 let htmlToDraft = null;
 if (typeof window === "object") {
@@ -256,12 +257,7 @@ export const Text2ColEx: FC<TProps> = ({
       <div className="h-5" />
       <div className="flex flex-col md:flex-row md:items-start gap-6 md:gap-4 w-full min-w-0">
         <div className="w-full md:w-1/2 md:min-w-0 min-w-0 flex flex-col">
-          <div
-            className="w-full min-w-0 overflow-x-auto rounded-lg bg-white"
-            style={{
-              background: "#fff",
-            }}
-          >
+          <div className={richTextStyles.shell}>
             <Editor
               editorState={editorState}
               stripPastedStyles={true}
@@ -330,9 +326,9 @@ export const Text2ColEx: FC<TProps> = ({
                   ],
                 },
               }}
-              toolbarClassName="toolbarClassName"
-              wrapperClassName="wrapperClassName"
-              editorClassName="editorClassName"
+              toolbarClassName={richTextStyles.toolbar}
+              wrapperClassName={richTextStyles.wrapper}
+              editorClassName={`${richTextStyles.body} editorClassName`}
               onEditorStateChange={setEditorState}
             />
           </div>
@@ -349,12 +345,7 @@ export const Text2ColEx: FC<TProps> = ({
           </div>
         </div>
         <div className="w-full md:w-1/2 md:min-w-0 min-w-0 flex flex-col">
-          <div
-            className="w-full min-w-0 overflow-x-auto rounded-lg bg-white"
-            style={{
-              background: "#fff",
-            }}
-          >
+          <div className={richTextStyles.shell}>
             <Editor
               stripPastedStyles={true}
               editorState={secondEditorState}
@@ -424,9 +415,9 @@ export const Text2ColEx: FC<TProps> = ({
                   ],
                 },
               }}
-              toolbarClassName="toolbarClassName"
-              wrapperClassName="wrapperClassName"
-              editorClassName="editorClassName"
+              toolbarClassName={richTextStyles.toolbar}
+              wrapperClassName={richTextStyles.wrapper}
+              editorClassName={`${richTextStyles.body} editorClassName`}
               onEditorStateChange={setSecondEditorState}
             />
           </div>
