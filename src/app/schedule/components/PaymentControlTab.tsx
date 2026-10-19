@@ -40,7 +40,11 @@ import type {
   ScheduleEvent,
 } from "../types";
 import { eventStudentIds } from "../types";
-import { formatMoney, formatMoneyList } from "../utils/calendar";
+import {
+  formatMoney,
+  formatMoneyList,
+  resolveStatsMoney,
+} from "../utils/calendar";
 import {
   DEFAULT_PAYMENT_CURRENCY,
   PAYMENT_CURRENCIES,
@@ -539,7 +543,11 @@ export const PaymentControlTab = ({
             </div>
             <div className="text-xl font-bold leading-snug text-[#1d1d1f] sm:text-2xl">
               {formatMoneyList(
-                stats?.actual_past ?? stats?.actual_total ?? 0,
+                resolveStatsMoney(
+                  stats?.by_currency?.actual_past ??
+                    stats?.by_currency?.actual_total,
+                  stats?.actual_past ?? stats?.actual_total ?? 0,
+                ),
               )}
             </div>
           </CardBody>
@@ -550,7 +558,12 @@ export const PaymentControlTab = ({
               <T k="schedule.earnedToday" />
             </div>
             <div className="text-xl font-bold leading-snug text-[#1d1d1f] sm:text-2xl">
-              {formatMoneyList(stats?.actual_today ?? 0)}
+              {formatMoneyList(
+                resolveStatsMoney(
+                  stats?.by_currency?.actual_today,
+                  stats?.actual_today ?? 0,
+                ),
+              )}
             </div>
           </CardBody>
         </Card>
@@ -560,7 +573,12 @@ export const PaymentControlTab = ({
               <T k="schedule.projected" />
             </div>
             <div className="text-xl font-bold leading-snug text-[#007AFF] sm:text-2xl">
-              {formatMoneyList(stats?.projected_total || 0)}
+              {formatMoneyList(
+                resolveStatsMoney(
+                  stats?.by_currency?.projected_total,
+                  stats?.projected_total ?? 0,
+                ),
+              )}
             </div>
           </CardBody>
         </Card>
@@ -570,7 +588,13 @@ export const PaymentControlTab = ({
               <T k="schedule.expectedTotal" />
             </div>
             <div className="text-xl font-bold leading-snug text-[#34C759] sm:text-2xl">
-              {formatMoneyList(stats?.expected_total ?? [])}
+              {formatMoneyList(
+                resolveStatsMoney(
+                  stats?.by_currency?.expected_total,
+                  stats?.expected_total ??
+                    (stats?.actual_total || 0) + (stats?.projected_total || 0),
+                ),
+              )}
             </div>
           </CardBody>
         </Card>

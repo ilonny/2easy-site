@@ -59,14 +59,16 @@ export const weekDays = (cursor: Dayjs) => {
 };
 
 export const formatMoney = (amount: number, currency = "RUB") => {
+  const n = typeof amount === "number" ? amount : Number(amount);
+  const safe = Number.isFinite(n) ? n : 0;
   try {
     return new Intl.NumberFormat("ru-RU", {
       style: "currency",
-      currency,
+      currency: String(currency || "RUB"),
       maximumFractionDigits: 0,
-    }).format(amount || 0);
+    }).format(safe);
   } catch {
-    return `${amount || 0} ${currency}`;
+    return `${safe} ${currency || "RUB"}`;
   }
 };
 
@@ -85,10 +87,28 @@ export const asMoneyList = (
       }))
       .filter((row) => row.amount !== 0);
   }
-  if (typeof value === "number" && value !== 0) {
+  if (typeof value === "number" && Number.isFinite(value) && value !== 0) {
     return [{ currency: fallbackCurrency, amount: value }];
   }
   return [];
+};
+
+/**
+ * Prefer multi-currency breakdown; fall back to legacy numeric total.
+ * Works with both old backends (numbers only) and new (`by_currency`).
+ */
+export const resolveStatsMoney = (
+  byCurrency: MoneyByCurrency[] | null | undefined,
+  legacy: number | MoneyByCurrency[] | null | undefined,
+  fallbackCurrency = "RUB",
+): MoneyByCurrency[] => {
+  if (Array.isArray(byCurrency) && byCurrency.length) {
+    return asMoneyList(byCurrency, fallbackCurrency);
+  }
+  if (Array.isArray(legacy)) {
+    return asMoneyList(legacy, fallbackCurrency);
+  }
+  return asMoneyList(legacy ?? 0, fallbackCurrency);
 };
 
 export const formatMoneyList = (

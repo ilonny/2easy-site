@@ -29,6 +29,13 @@ export type ScheduleEvent = {
   due_date?: string | null;
   is_overdue?: boolean;
   is_payment_reminder?: boolean;
+  /** Package lesson ordinals for calendar chips, e.g. 2/8 */
+  package_progress?: Array<{
+    student_id: number;
+    plan_id: number;
+    index: number;
+    total: number;
+  }>;
 };
 
 export type EventFormValues = {
@@ -71,17 +78,27 @@ export type MoneyByCurrency = {
   amount: number;
 };
 
+export type PaymentStatsMoneyGroup = {
+  actual_total?: MoneyByCurrency[];
+  actual_past?: MoneyByCurrency[];
+  actual_today?: MoneyByCurrency[];
+  projected_total?: MoneyByCurrency[];
+  expected_total?: MoneyByCurrency[];
+};
+
 export type PaymentStats = {
   granularity?: PaymentStatsGranularity;
   from?: string;
   to?: string;
   currencies?: string[];
-  /** Multi-currency totals (preferred). Legacy clients may still send a number. */
-  actual_total: number | MoneyByCurrency[];
-  actual_past?: number | MoneyByCurrency[];
-  actual_today?: number | MoneyByCurrency[];
-  projected_total: number | MoneyByCurrency[];
-  expected_total?: number | MoneyByCurrency[];
+  /** Legacy numeric totals (always numbers for old clients). */
+  actual_total: number;
+  actual_past?: number;
+  actual_today?: number;
+  projected_total: number;
+  expected_total?: number;
+  /** Multi-currency breakdown (new clients). */
+  by_currency?: PaymentStatsMoneyGroup;
   chart: Array<{
     period?: string;
     label?: string;

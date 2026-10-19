@@ -70,6 +70,23 @@ const isGenericTitle = (title?: string | null) => {
   return t === generic || /^Занятие$/i.test(t) || /^Lesson$/i.test(t);
 };
 
+/** e.g. "2/8" or "2/8 · 1/10" for multi-student packages */
+export const packageProgressLabel = (event: ScheduleEvent) => {
+  const rows = event.package_progress;
+  if (!Array.isArray(rows) || !rows.length) return "";
+  return rows
+    .map((row) => {
+      const index = Number(row.index);
+      const total = Number(row.total);
+      if (!Number.isFinite(index) || !Number.isFinite(total) || total < 1) {
+        return "";
+      }
+      return `${index}/${total}`;
+    })
+    .filter(Boolean)
+    .join(" · ");
+};
+
 /** Primary/secondary lines for calendar event plaques. */
 export const eventChipText = (
   event: ScheduleEvent,
@@ -110,15 +127,20 @@ export const eventChipText = (
       ? ""
       : rawTitle;
   const place = eventPlaceLabel(event);
+  const packageLabel = packageProgressLabel(event);
   const nameOrTitle =
     students || customTitle || i18n.t("schedule.defaultLessonTitle");
 
   if (!opts?.detailed) {
-    const primary = [time, nameOrTitle].filter(Boolean).join(" ");
+    const primary = [time, nameOrTitle, packageLabel]
+      .filter(Boolean)
+      .join(" ");
     return { primary, secondary: "", titleAttr: primary };
   }
 
-  const primary = [time, nameOrTitle].filter(Boolean).join(" ");
+  const primary = [time, nameOrTitle, packageLabel]
+    .filter(Boolean)
+    .join(" ");
   const secondary = [students ? customTitle : "", place]
     .filter(Boolean)
     .join(" · ");

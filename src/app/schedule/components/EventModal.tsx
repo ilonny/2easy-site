@@ -23,7 +23,11 @@ import { fetchGet } from "@/api";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import type { EventFormValues, ScheduleEvent } from "../types";
-import { colorForStudent, eventStudentIds } from "./eventUi";
+import {
+  colorForStudent,
+  eventStudentIds,
+  packageProgressLabel,
+} from "./eventUi";
 import { formatMoney } from "../utils/calendar";
 import { getLocalTimeZone, getLocalTimeZoneLabel } from "../utils/timezone";
 import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
@@ -333,11 +337,18 @@ export const EventModal = ({
                 <div className="text-xs font-medium uppercase tracking-wide text-[#86868b]">
                   <T k="schedule.students" />
                 </div>
-                <div className="mt-1 text-[17px] font-semibold text-[#1d1d1f]">
-                  {studentNamesLabel ||
-                    event?.student_name ||
-                    form.title ||
-                    i18n.t("schedule.defaultLessonTitle")}
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-[17px] font-semibold text-[#1d1d1f]">
+                  <span>
+                    {studentNamesLabel ||
+                      event?.student_name ||
+                      form.title ||
+                      i18n.t("schedule.defaultLessonTitle")}
+                  </span>
+                  {event && packageProgressLabel(event) ? (
+                    <Chip size="sm" variant="flat" color="primary">
+                      {packageProgressLabel(event)}
+                    </Chip>
+                  ) : null}
                 </div>
               </div>
               {form.title &&
