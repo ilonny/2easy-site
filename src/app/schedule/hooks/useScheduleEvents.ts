@@ -54,24 +54,43 @@ export const useScheduleEvents = () => {
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const loadEvents = useCallback(async (from: string, to: string) => {
-    setLoading(true);
-    try {
-      const res = await fetchGet({
-        path: `/schedule/events?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
-        isSecure: true,
-      });
-      const json = await res?.json();
-      checkResponse(json);
-      if (json?.success) {
-        const list = (json.events || []) as ScheduleEvent[];
-        const enriched = await enrichLessonTitles(list);
-        setEvents(enriched);
+  const loadEvents = useCallback(
+    async (
+      from: string,
+      to: string,
+      opts?: {
+        teacherUserId?: number | null;
+        studentId?: number | null;
+      },
+    ) => {
+      setLoading(true);
+      try {
+        const qs = new URLSearchParams({ from, to });
+        const tid = Number(opts?.teacherUserId);
+        if (Number.isFinite(tid) && tid > 0) {
+          qs.set("teacher_user_id", String(tid));
+        }
+        const sid = Number(opts?.studentId);
+        if (Number.isFinite(sid) && sid > 0) {
+          qs.set("student_id", String(sid));
+        }
+        const res = await fetchGet({
+          path: `/schedule/events?${qs.toString()}`,
+          isSecure: true,
+        });
+        const json = await res?.json();
+        checkResponse(json);
+        if (json?.success) {
+          const list = (json.events || []) as ScheduleEvent[];
+          const enriched = await enrichLessonTitles(list);
+          setEvents(enriched);
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   const createEvent = useCallback(async (data: Record<string, unknown>) => {
     const res = await fetchPostJson({

@@ -60,6 +60,14 @@ const mapHeaders = (params: TParams) => {
   if (isSecure) {
     const token = getTokenFromLocalStorage();
     headers.append("Authorization", `Bearer ${token || ""}`);
+    try {
+      const schoolId = localStorage.getItem("activeSchoolId");
+      if (schoolId && Number(schoolId) > 0) {
+        headers.append("X-School-Id", schoolId);
+      }
+    } catch {
+      // ignore (SSR / private mode)
+    }
   }
   return headers;
 };
@@ -385,6 +393,17 @@ export const fetchPatch = (params: TParams) => {
   const url = (API_URL + path).replace("/undefined", "");
   return safeFetch(url, {
     method: "PATCH",
+    body: JSON.stringify(data),
+    headers,
+  });
+};
+
+export const fetchPut = (params: TParams) => {
+  const { path, data } = params;
+  const headers = mapHeaders(params);
+  const url = (API_URL + path).replace("/undefined", "");
+  return safeFetch(url, {
+    method: "PUT",
     body: JSON.stringify(data),
     headers,
   });

@@ -11,6 +11,8 @@ type TProps = {
   events: ScheduleEvent[];
   detailed?: boolean;
   nameById?: Map<number, string>;
+  teacherById?: Map<number, string>;
+  showTeacher?: boolean;
   onDayClick: (day: Dayjs) => void;
   onEventClick: (event: ScheduleEvent) => void;
 };
@@ -30,6 +32,8 @@ export const MonthView = ({
   events,
   detailed,
   nameById,
+  teacherById,
+  showTeacher,
   onDayClick,
   onEventClick,
 }: TProps) => {
@@ -86,6 +90,8 @@ export const MonthView = ({
                         compact
                         detailed={detailed}
                         nameById={nameById}
+                        teacherById={teacherById}
+                        showTeacher={showTeacher}
                         onClick={onEventClick}
                       />
                     ))}

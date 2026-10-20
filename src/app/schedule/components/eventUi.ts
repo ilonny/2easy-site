@@ -25,6 +25,22 @@ export const isPlaceholderStudentName = (name?: string | null) => {
   return /^(ученик|student)\s*#?\s*\d+$/i.test(t) || /^#\d+$/.test(t);
 };
 
+export const resolveStudentDisplayName = (
+  id: number,
+  opts?: {
+    nameById?: Map<number, string>;
+    apiName?: string | null;
+  },
+) => {
+  const fromMap = String(opts?.nameById?.get(Number(id)) || "").trim();
+  if (fromMap && !isPlaceholderStudentName(fromMap)) return fromMap;
+  const fromApi = String(opts?.apiName || "").trim();
+  if (fromApi && !isPlaceholderStudentName(fromApi)) return fromApi;
+  if (fromMap) return fromMap;
+  if (fromApi) return fromApi;
+  return "";
+};
+
 export const eventStudentLabel = (
   event: ScheduleEvent,
   nameById?: Map<number, string>,
@@ -36,13 +52,16 @@ export const eventStudentLabel = (
         ? [event.student_id]
         : [];
 
-  if (nameById?.size && ids.length) {
+  if (ids.length) {
     const resolved = ids
-      .map((id) => {
-        const fromMap = String(nameById.get(Number(id)) || "").trim();
-        if (fromMap && !isPlaceholderStudentName(fromMap)) return fromMap;
-        return "";
-      })
+      .map((id, i) =>
+        resolveStudentDisplayName(Number(id), {
+          nameById,
+          apiName:
+            event.student_names?.[i] ||
+            (ids.length === 1 ? event.student_name : null),
+        }),
+      )
       .filter(Boolean);
     if (resolved.length) return resolved.join(", ");
   }
@@ -94,9 +113,16 @@ export const eventChipText = (
     detailed?: boolean;
     time?: string;
     nameById?: Map<number, string>;
+    /** When viewing school-wide calendar, show teacher on plaques */
+    teacherById?: Map<number, string>;
+    showTeacher?: boolean;
   },
 ) => {
   const time = opts?.time || "";
+  const teacherLabel =
+    opts?.showTeacher && event.teacher_user_id
+      ? String(opts.teacherById?.get(Number(event.teacher_user_id)) || "").trim()
+      : "";
   if (event.type === "payment") {
     const student = eventStudentLabel(event, opts?.nameById);
     const amount =
@@ -132,13 +158,13 @@ export const eventChipText = (
     students || customTitle || i18n.t("schedule.defaultLessonTitle");
 
   if (!opts?.detailed) {
-    const primary = [time, nameOrTitle, packageLabel]
+    const primary = [time, teacherLabel, nameOrTitle, packageLabel]
       .filter(Boolean)
       .join(" ");
     return { primary, secondary: "", titleAttr: primary };
   }
 
-  const primary = [time, nameOrTitle, packageLabel]
+  const primary = [time, teacherLabel, nameOrTitle, packageLabel]
     .filter(Boolean)
     .join(" ");
   const secondary = [students ? customTitle : "", place]

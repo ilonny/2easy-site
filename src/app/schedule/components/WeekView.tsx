@@ -13,6 +13,8 @@ type TProps = {
   events: ScheduleEvent[];
   detailed?: boolean;
   nameById?: Map<number, string>;
+  teacherById?: Map<number, string>;
+  showTeacher?: boolean;
   onSlotClick: (day: Dayjs, hour: number) => void;
   onEventClick: (event: ScheduleEvent) => void;
 };
@@ -22,6 +24,8 @@ export const WeekView = ({
   events,
   detailed,
   nameById,
+  teacherById,
+  showTeacher,
   onSlotClick,
   onEventClick,
 }: TProps) => {
@@ -158,6 +162,8 @@ export const WeekView = ({
                   detailed: detailed || event.type === "payment",
                   time: start.format("HH:mm"),
                   nameById,
+                  teacherById,
+                  showTeacher,
                 });
                 const minH = eventMinHeight(event, hourHeight);
                 const boxH = Math.max(height, minH);

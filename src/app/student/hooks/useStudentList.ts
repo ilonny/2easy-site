@@ -28,7 +28,8 @@ export const useStudentList = (
       isSecure: true,
     });
     const data = await res?.json();
-    // API returns an array on success; on 401 it returns an object
+    // API returns an array on success; on 401 it returns an object.
+    // Backend lists all students assigned to the teacher (pre-school compatible).
     setStudents(Array.isArray(data) ? data : []);
   }, [localStudents, archived]);
 

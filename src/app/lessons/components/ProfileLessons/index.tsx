@@ -30,13 +30,16 @@ import { DictionaryModal } from "@/app/dictionary/components/DictionaryModal";
 import { useBoardsTab } from "@/app/board/hooks/useBoardsTab";
 import { BoardsTabPanel } from "@/app/board/components/BoardsTabPanel";
 import { BrandPill } from "@/components/BrandPill";
+import { StudentSchedulePanel } from "@/app/student-account/components/StudentSchedulePanel";
+
+type StudentCabinetTab = "lessons" | "courses" | "boards" | "schedule";
 
 const StudentCabinetTabSync = ({
   studentId,
   setStudentTabIndex,
 }: {
   studentId: string;
-  setStudentTabIndex: (v: "lessons" | "courses" | "boards") => void;
+  setStudentTabIndex: (v: StudentCabinetTab) => void;
 }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -55,6 +58,10 @@ const StudentCabinetTabSync = ({
       setStudentTabIndex("boards");
       return;
     }
+    if (tab === "schedule") {
+      setStudentTabIndex("schedule");
+      return;
+    }
     setStudentTabIndex("lessons");
   }, [pathname, searchParams, studentId, setStudentTabIndex]);
   return null;
@@ -63,6 +70,15 @@ const StudentCabinetTabSync = ({
 type TProps = {
   canCreateLesson?: boolean;
   studentId?: string;
+  /** Student row for schedule tab (name, email, teacher user_id) */
+  studentInfo?: {
+    id: number;
+    name?: string;
+    email?: string;
+    user_id?: string | number;
+  } | null;
+  /** Teacher / school staff may edit schedule */
+  canEditSchedule?: boolean;
   hideTabs?: boolean;
   hideAttachButton?: boolean;
   showChangeStatusButton?: boolean;
@@ -103,6 +119,8 @@ export const ProfileLessons = (props: TProps) => {
   const {
     canCreateLesson = true,
     studentId,
+    studentInfo,
+    canEditSchedule = false,
     hideTabs,
     hideAttachButton,
     showChangeStatusButton,
@@ -150,9 +168,8 @@ export const ProfileLessons = (props: TProps) => {
         : "userLessons",
   );
 
-  const [studentTabIndex, setStudentTabIndex] = useState<
-    "lessons" | "courses" | "boards"
-  >("lessons");
+  const [studentTabIndex, setStudentTabIndex] =
+    useState<StudentCabinetTab>("lessons");
   const [filterSearchString, setFilterSearchString] = useState("");
 
   const {
@@ -326,7 +343,7 @@ export const ProfileLessons = (props: TProps) => {
       if (studentTabIndex === "lessons") {
         return lessons;
       }
-      if (studentTabIndex === "boards") {
+      if (studentTabIndex === "boards" || studentTabIndex === "schedule") {
         return [];
       }
       return courses;
@@ -335,7 +352,7 @@ export const ProfileLessons = (props: TProps) => {
       if (studentTabIndex === "lessons") {
         return lessons;
       }
-      if (studentTabIndex === "boards") {
+      if (studentTabIndex === "boards" || studentTabIndex === "schedule") {
         return [];
       }
       return courses;
@@ -656,6 +673,15 @@ export const ProfileLessons = (props: TProps) => {
             <T k="lessons.lessonsTab" />
           </BrandPill>
           <BrandPill
+            active={studentTabIndex === "schedule"}
+            onClick={() => {
+              setStudentTabIndex("schedule");
+              router.push(`/student-account/${studentId}?tab=schedule`);
+            }}
+          >
+            <T k="students.scheduleTab" />
+          </BrandPill>
+          <BrandPill
             active={studentTabIndex === "courses"}
             onClick={() => {
               setStudentTabIndex("courses");
@@ -680,6 +706,13 @@ export const ProfileLessons = (props: TProps) => {
           </BrandPill>
         </div>
       )}
+      {studentId && studentTabIndex === "schedule" && studentInfo ? (
+        <StudentSchedulePanel
+          studentId={Number(studentId)}
+          student={studentInfo}
+          canEdit={!!canEditSchedule}
+        />
+      ) : null}
       {currentCourse && (
         <>
           <div className="flex flex-col items-center gap-2 px-1 text-center sm:flex-row sm:justify-center sm:gap-4 sm:text-left sm:items-baseline">
@@ -707,12 +740,13 @@ export const ProfileLessons = (props: TProps) => {
           <div className="h-10" />
         </>
       )}
-      {isListLoading ? (
+      {studentTabIndex !== "schedule" && isListLoading ? (
         <div className="w-full h-[500px] flex justify-center items-center ">
           <Image src={Dino.src} alt="dino animated" width={150} height={150} />
         </div>
       ) : null}
-      {!currentCourse &&
+      {studentTabIndex !== "schedule" &&
+        !currentCourse &&
         !isBoardsTabActive &&
         !filteredLessons.length &&
         !isListLoading && (
@@ -734,7 +768,8 @@ export const ProfileLessons = (props: TProps) => {
           onButtonPress={data.onButtonPress}
         />
       )}
-      {isBoardsTabActive &&
+      {studentTabIndex !== "schedule" &&
+        isBoardsTabActive &&
         !boardsIsLoading &&
         !filteredBoards.length &&
         !currentCourse &&
@@ -757,6 +792,7 @@ export const ProfileLessons = (props: TProps) => {
         boards={filteredBoards}
         isLoading={boardsIsLoading}
         isActive={
+          studentTabIndex !== "schedule" &&
           isBoardsTabActive &&
           (filteredBoards.length > 0 ||
             (isTeacher &&
@@ -777,7 +813,8 @@ export const ProfileLessons = (props: TProps) => {
         onCreateBoard={onCreateBoard}
         deleteBoardRelation={deleteBoardRelation}
       />
-      {!isBoardsTabActive &&
+      {studentTabIndex !== "schedule" &&
+        !isBoardsTabActive &&
         (!!currentCourse || !!filteredLessons?.length) && (
         <>
           {showCourseSearch && (

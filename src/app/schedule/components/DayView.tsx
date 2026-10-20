@@ -13,6 +13,8 @@ type TProps = {
   events: ScheduleEvent[];
   detailed?: boolean;
   nameById?: Map<number, string>;
+  teacherById?: Map<number, string>;
+  showTeacher?: boolean;
   onSlotClick: (day: Dayjs, hour: number) => void;
   onEventClick: (event: ScheduleEvent) => void;
 };
@@ -22,6 +24,8 @@ export const DayView = ({
   events,
   detailed,
   nameById,
+  teacherById,
+  showTeacher,
   onSlotClick,
   onEventClick,
 }: TProps) => {
@@ -125,6 +129,8 @@ export const DayView = ({
                 detailed: true,
                 time: `${start.format("HH:mm")} – ${end.format("HH:mm")}`,
                 nameById,
+                teacherById,
+                showTeacher,
               });
               const minH = eventMinHeight(event, hourHeight);
               const isPayment = event.type === "payment";

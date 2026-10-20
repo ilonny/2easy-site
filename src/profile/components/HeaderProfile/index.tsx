@@ -124,6 +124,16 @@ export const HeaderProfile = (props: TProps) => {
           content: <T k="profile.myStudents" />,
           onSelect: () => router.push("/profile?students"),
         },
+        // Temporary: school cabin only for allowlisted user
+        ...(Number(profile?.id) === 1177
+          ? [
+              {
+                key: "school",
+                content: <T k="headerMenu.school" />,
+                onSelect: () => router.push("/school"),
+              } satisfies TMenuItem,
+            ]
+          : []),
         {
           key: "profile",
           content: <T k="profile.personalData" />,

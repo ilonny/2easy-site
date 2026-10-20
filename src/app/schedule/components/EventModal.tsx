@@ -26,11 +26,14 @@ import type { EventFormValues, ScheduleEvent } from "../types";
 import {
   colorForStudent,
   eventStudentIds,
+  isPlaceholderStudentName,
   packageProgressLabel,
+  resolveStudentDisplayName,
 } from "./eventUi";
 import { formatMoney } from "../utils/calendar";
 import { getLocalTimeZone, getLocalTimeZoneLabel } from "../utils/timezone";
 import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
+import { SearchableSelect } from "@/components/SearchableSelect";
 
 type StudentOption = { id: number; name?: string; email?: string };
 type LessonOption = { id: number; title?: string; user_id?: number };
@@ -85,9 +88,11 @@ export const EventModal = ({
   const [scope, setScope] = useState<"this" | "this_and_future">("this");
   const [busy, setBusy] = useState(false);
   const [fetchedLessonTitle, setFetchedLessonTitle] = useState("");
+  const [studentPickerKey, setStudentPickerKey] = useState(0);
 
   useEffect(() => {
     if (!isOpen) return;
+    setStudentPickerKey((k) => k + 1);
     if (event && event.type === "lesson") {
       const ids = eventStudentIds(event);
       const lesson = lessons.find((l) => l.id === event.lesson_id);
@@ -178,15 +183,33 @@ export const EventModal = ({
   };
 
   const studentNamesLabel = useMemo(() => {
-    return form.student_ids
-      .map((id) => {
-        const s = students.find((x) => Number(x.id) === Number(id));
-        const name = String(s?.name || "").trim();
-        return name || null;
-      })
+    const nameById = new Map<number, string>();
+    for (const s of students) {
+      const id = Number(s.id);
+      const name =
+        String(s.name || "").trim() || String(s.email || "").trim();
+      if (id > 0 && name && !isPlaceholderStudentName(name)) {
+        nameById.set(id, name);
+      }
+    }
+    const ids =
+      form.student_ids.length > 0
+        ? form.student_ids
+        : event
+          ? eventStudentIds(event)
+          : [];
+    return ids
+      .map((id, i) =>
+        resolveStudentDisplayName(Number(id), {
+          nameById,
+          apiName:
+            event?.student_names?.[i] ||
+            (ids.length === 1 ? event?.student_name : null),
+        }),
+      )
       .filter(Boolean)
       .join(", ");
-  }, [form.student_ids, students]);
+  }, [form.student_ids, students, event]);
 
   const handleSave = async () => {
     if (
@@ -294,7 +317,13 @@ export const EventModal = ({
               ) : null}
               <p>
                 <T k="schedule.student" />:{" "}
-                <b>{event?.student_name || event?.student_id}</b>
+                <b>
+                  {studentNamesLabel ||
+                    (!isPlaceholderStudentName(event?.student_name)
+                      ? event?.student_name
+                      : null) ||
+                    event?.student_id}
+                </b>
               </p>
               <p>
                 <T k="schedule.amount" />:{" "}
@@ -340,7 +369,9 @@ export const EventModal = ({
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-[17px] font-semibold text-[#1d1d1f]">
                   <span>
                     {studentNamesLabel ||
-                      event?.student_name ||
+                      (!isPlaceholderStudentName(event?.student_name)
+                        ? event?.student_name
+                        : null) ||
                       form.title ||
                       i18n.t("schedule.defaultLessonTitle")}
                   </span>
@@ -433,37 +464,26 @@ export const EventModal = ({
                     <T k="schedule.studentsMultiHint" />
                   </span>
                 </div>
-                <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto">
-                  {students.map((s) => {
-                    const selected = form.student_ids.includes(s.id);
-                    const color = colorForStudent(s.id);
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => toggleStudent(s.id)}
-                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition ${
-                          selected
-                            ? "border-transparent text-white"
-                            : "border-[#d2d2d7] bg-white text-[#1d1d1f] hover:bg-[#f5f5f7]"
-                        }`}
-                        style={
-                          selected ? { backgroundColor: color } : undefined
-                        }
-                      >
-                        <span
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{
-                            backgroundColor: selected ? "#fff" : color,
-                          }}
-                        />
-                        {String(s.name || "").trim() ||
-                          String(s.email || "").trim() ||
-                          "—"}
-                      </button>
-                    );
-                  })}
-                </div>
+                <SearchableSelect
+                  key={`add-student-${studentPickerKey}`}
+                  placeholder={i18n.t("school.searchStudent")}
+                  selectedId={null}
+                  onSelect={(id) => {
+                    if (!id) return;
+                    toggleStudent(Number(id));
+                    setStudentPickerKey((k) => k + 1);
+                  }}
+                  items={students
+                    .filter((s) => !form.student_ids.includes(s.id))
+                    .map((s) => ({
+                      id: String(s.id),
+                      label:
+                        String(s.name || "").trim() ||
+                        String(s.email || "").trim() ||
+                        `#${s.id}`,
+                      description: s.email || undefined,
+                    }))}
+                />
                 {!!form.student_ids.length && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {form.student_ids.map((id) => {

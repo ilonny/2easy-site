@@ -10,4 +10,7 @@ export type TProfile = {
   id?: number;
   user_id?: string | number;
   avatar?: string | null;
+  schoolId?: number | null;
+  schoolRoles?: string[];
+  schools?: Array<{ id: number; name: string; roles?: string[] }>;
 };

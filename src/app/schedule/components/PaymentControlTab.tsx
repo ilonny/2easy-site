@@ -33,6 +33,7 @@ import isoWeek from "dayjs/plugin/isoWeek";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { checkResponse, fetchGet } from "@/api";
+import { SearchableSelect } from "@/components/SearchableSelect";
 import type {
   PaymentPlan,
   PaymentStats,
@@ -1002,23 +1003,23 @@ export const PaymentControlTab = ({
             )}
           </ModalHeader>
           <ModalBody className="gap-3">
-            <Select
+            <SearchableSelect
               label={i18n.t("schedule.student")}
-              selectedKeys={form.student_id ? [String(form.student_id)] : []}
-              onChange={(e) =>
+              placeholder={i18n.t("school.searchStudent")}
+              selectedId={form.student_id ? String(form.student_id) : null}
+              onSelect={(id) =>
                 setForm((f) => ({
                   ...f,
-                  student_id: e.target.value ? Number(e.target.value) : "",
+                  student_id: id ? Number(id) : "",
                   anchor_event_id: "",
                 }))
               }
-            >
-              {students.map((s) => (
-                <SelectItem key={String(s.id)} value={String(s.id)}>
-                  {studentLabel(s)}
-                </SelectItem>
-              ))}
-            </Select>
+              items={students.map((s) => ({
+                id: String(s.id),
+                label: studentLabel(s),
+                description: s.email || undefined,
+              }))}
+            />
             <div className="space-y-1.5">
               <p className="text-[11px] leading-snug text-[#86868b]">
                 <T k="schedule.planTypeHints" />
