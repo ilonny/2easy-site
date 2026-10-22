@@ -108,12 +108,12 @@ export default function SchedulePage() {
 
   const scheduleWorkspace = useMemo(
     () =>
-      isStudent
-        ? undefined
-        : {
-            workspaceScope: workspace.scope,
-            schoolId: workspace.scope === "school" ? workspace.schoolId : null,
-          },
+      !isStudent && workspace.scope === "school" && workspace.schoolId
+        ? {
+            workspaceScope: "school" as const,
+            schoolId: workspace.schoolId,
+          }
+        : undefined,
     [isStudent, workspace],
   );
   const {
@@ -224,7 +224,6 @@ export default function SchedulePage() {
         const meRes = await fetchGet({
           path: "/school/me",
           isSecure: true,
-          workspaceScope: "personal",
         });
         const me = await meRes?.json();
         setSchools(me?.success && Array.isArray(me.schools) ? me.schools : []);
@@ -242,7 +241,6 @@ export default function SchedulePage() {
           const stuRes = await fetchGet({
             path: "/student",
             isSecure: true,
-            workspaceScope: "personal",
           });
           const stu = await stuRes?.json();
           setPersonalStudents(Array.isArray(stu) ? stu : stu?.students || []);

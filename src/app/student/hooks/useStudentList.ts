@@ -21,12 +21,11 @@ export const useStudentList = (
   const fetchWorkspace = useMemo(
     () =>
       studentListFetchParams(
-        workspace.workspaceScope ||
-          workspace.schoolId ||
-          workspace.teacherUserId ||
-          workspace.studentScope
+        workspace.workspaceScope === "school" ||
+          workspace.studentScope === "school" ||
+          workspace.teacherUserId
           ? workspace
-          : { workspaceScope: "personal" },
+          : {},
       ),
     [
       workspace.schoolId,

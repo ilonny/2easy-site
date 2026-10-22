@@ -65,7 +65,7 @@ export const StudentSchedulePanel: FC<TProps> = ({
   } = useScheduleEvents(
     student.school_id
       ? { workspaceScope: "school", schoolId: Number(student.school_id) }
-      : { workspaceScope: "personal", schoolId: null },
+      : undefined,
   );
 
   const teacherUserId = Number(student.user_id) || null;
@@ -106,8 +106,8 @@ export const StudentSchedulePanel: FC<TProps> = ({
       const res = await fetchGet({
         path: "/lessons",
         isSecure: true,
-        workspaceScope: student.school_id ? "school" : "personal",
-        schoolId: student.school_id ? Number(student.school_id) : null,
+        workspaceScope: student.school_id ? "school" : undefined,
+        schoolId: student.school_id ? Number(student.school_id) : undefined,
       });
       const json = await res?.json();
       checkResponse(json);

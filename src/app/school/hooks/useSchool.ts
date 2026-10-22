@@ -47,7 +47,6 @@ export const useSchool = () => {
       const res = await fetchGet({
         path: "/school/me",
         isSecure: true,
-        workspaceScope: "personal",
       });
       const data = await res.json();
       if (data?.success) {
@@ -82,7 +81,6 @@ export const useSchool = () => {
       const res = await fetchPostJson({
         path: "/school",
         isSecure: true,
-        workspaceScope: "personal",
         data: {
           name: payload.name,
           settings: payload.settings,

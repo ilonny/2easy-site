@@ -30,7 +30,6 @@ export const useHasSchool = () => {
         const res = await fetchGet({
           path: "/school/me",
           isSecure: true,
-          workspaceScope: "personal",
         });
         const data = await res?.json();
         if (!cancelled) {

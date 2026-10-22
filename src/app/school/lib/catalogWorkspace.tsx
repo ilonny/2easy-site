@@ -10,9 +10,8 @@ export type CatalogWorkspaceValue = {
   studentScope?: "personal" | "school";
 };
 
-export const PERSONAL_CATALOG_WORKSPACE: CatalogWorkspaceValue = {
-  workspaceScope: "personal",
-};
+/** Regular teacher catalog: no workspace headers (legacy / old API). */
+export const PERSONAL_CATALOG_WORKSPACE: CatalogWorkspaceValue = {};
 
 const CatalogWorkspaceContext = createContext<CatalogWorkspaceValue>({});
 
@@ -31,7 +30,8 @@ export const CatalogWorkspaceProvider = ({
 export const useCatalogWorkspace = () => useContext(CatalogWorkspaceContext);
 
 export const catalogFetchParams = (workspace: CatalogWorkspaceValue) => ({
-  workspaceScope: workspace.workspaceScope,
+  workspaceScope:
+    workspace.workspaceScope === "school" ? ("school" as const) : undefined,
   schoolId:
     workspace.workspaceScope === "school"
       ? workspace.schoolId ?? undefined

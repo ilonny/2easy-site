@@ -66,12 +66,11 @@ const mapHeaders = (params: TParams) => {
     headers.append("Authorization", `Bearer ${token || ""}`);
     try {
       const schoolId = Number(params.schoolId);
-      if (params.workspaceScope === "school" || schoolId > 0) {
-        if (schoolId > 0) headers.append("X-School-Id", String(schoolId));
-      } else if (params.workspaceScope === "personal") {
+      const actingTeacherUserId = Number(params.actingTeacherUserId);
+      if (schoolId > 0) headers.append("X-School-Id", String(schoolId));
+      else if (actingTeacherUserId > 0) {
         headers.append("X-Workspace-Scope", "personal");
       }
-      const actingTeacherUserId = Number(params.actingTeacherUserId);
       if (actingTeacherUserId > 0) {
         headers.append("X-Acting-Teacher-Id", String(actingTeacherUserId));
       }
@@ -324,12 +323,11 @@ export const fetchPostMultipartWithProgress = (params: {
       const token = getTokenFromLocalStorage();
       xhr.setRequestHeader("Authorization", `Bearer ${token || ""}`);
       const schoolId = Number(params.schoolId);
-      if (params.workspaceScope === "school" || schoolId > 0) {
-        if (schoolId > 0) xhr.setRequestHeader("X-School-Id", String(schoolId));
-      } else if (params.workspaceScope === "personal") {
+      const actingTeacherUserId = Number(params.actingTeacherUserId);
+      if (schoolId > 0) xhr.setRequestHeader("X-School-Id", String(schoolId));
+      else if (actingTeacherUserId > 0) {
         xhr.setRequestHeader("X-Workspace-Scope", "personal");
       }
-      const actingTeacherUserId = Number(params.actingTeacherUserId);
       if (actingTeacherUserId > 0) {
         xhr.setRequestHeader(
           "X-Acting-Teacher-Id",
