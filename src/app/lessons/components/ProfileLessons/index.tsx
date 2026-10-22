@@ -535,7 +535,7 @@ export const ProfileLessons = (props: TProps) => {
         return false;
       });
     }
-    if (isFreeTariff) {
+    if (isFreeTariff && !studentId) {
       res.sort((a, b) => {
         if (Boolean(a.is_free) === Boolean(b.is_free)) {
           return 0; // Same is_free value, no change in order
