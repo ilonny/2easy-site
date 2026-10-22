@@ -1,5 +1,5 @@
 import { fetchGet, fetchPostJson } from "@/api";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { getImageUrl } from "../helpers";
 import { parseRouteIdNumber } from "@/utils/parseRouteId";
 import {
@@ -203,7 +203,14 @@ export const useExList = (
   const [exListIsLoading, setExListIsLoading] = useState(false);
   const [exList, setExList] = useState([]);
   const catalogWorkspace = useCatalogWorkspace();
-  const workspaceFetch = catalogFetchParams(catalogWorkspace);
+  const workspaceFetch = useMemo(
+    () => catalogFetchParams(catalogWorkspace),
+    [
+      catalogWorkspace.workspaceScope,
+      catalogWorkspace.schoolId,
+      catalogWorkspace.teacherUserId,
+    ],
+  );
 
   const inFlightRef = useRef<Promise<any> | null>(null);
   const inFlightKeyRef = useRef<string>("");

@@ -122,10 +122,12 @@ export default function LessonPage() {
 
   boardModalOpenRef.current = boardModalOpen;
 
+  const requestedSessionId = Number(searchParams?.get("session_id") || 0);
+
   useEffect(() => {
     if (authIsLoading || !lessonIdNum) return;
     let cancelled = false;
-    const requested = Number(searchParams?.get("session_id") || 0);
+    const requested = requestedSessionId;
     void (async () => {
       try {
         const query = new URLSearchParams({
@@ -146,7 +148,12 @@ export default function LessonPage() {
             if (lockedStudentId && !roster.includes(lockedStudentId)) {
               return;
             }
-            setLessonSessionRoster(roster);
+            setLessonSessionRoster((prev) =>
+              prev.length === roster.length &&
+              prev.every((id, index) => id === roster[index])
+                ? prev
+                : roster,
+            );
             writeToLocalStorage(
               "start_lesson_selected_ids",
               JSON.stringify(roster),
@@ -160,7 +167,7 @@ export default function LessonPage() {
     return () => {
       cancelled = true;
     };
-  }, [authIsLoading, lessonIdNum, lockedStudentId, searchParams]);
+  }, [authIsLoading, lessonIdNum, lockedStudentId, requestedSessionId]);
 
   const handleAddWordSelection = useCallback(
     (selection: string) => {
@@ -222,6 +229,15 @@ export default function LessonPage() {
     return bestId;
   }, []);
 
+  const lessonStudentKey =
+    isStudent && profile?.studentId
+      ? `student:${profile.studentId}`
+      : lockedStudentId
+        ? `locked:${lockedStudentId}`
+        : students?.length === 1
+          ? `only:${students[0]?.student_id}`
+          : "none";
+
   useEffect(() => {
     if (!lessonId) return;
     const studentIdForLesson =
@@ -234,7 +250,15 @@ export default function LessonPage() {
             : undefined;
     getLesson(lessonId, studentIdForLesson);
     getExList();
-  }, [getExList, getLesson, lessonId, isStudent, students, profile?.studentId, lockedStudentId]);
+  }, [
+    getExList,
+    getLesson,
+    lessonId,
+    lessonStudentKey,
+    isStudent,
+    profile?.studentId,
+    lockedStudentId,
+  ]);
 
   const fetchStudents = useCallback(async () => {
     if (!lessonId) return;

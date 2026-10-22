@@ -90,7 +90,7 @@ export const useLessons = (
         setLessonsListIslLoading(false);
       }
     }
-  }, [isAuth, studentId, includeCourseLessons, workspace, workspaceKey]);
+  }, [isAuth, studentId, includeCourseLessons, workspaceKey]);
 
   const getLesson = useCallback(
     async (id: string, studentIdParam?: number) => {
@@ -121,7 +121,7 @@ export const useLessons = (
         setLessonsListIslLoading(false);
       }
     },
-    [workspace],
+    [workspaceKey],
   );
 
   const changeLessonStatus = useCallback(
@@ -166,7 +166,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons, workspace],
+    [getLessons, workspaceKey],
   );
 
   const deleteLessonRelation = useCallback(
@@ -187,7 +187,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons, workspace],
+    [getLessons, workspaceKey],
   );
 
   const changeCourseStatus = useCallback(
@@ -232,7 +232,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons, workspace],
+    [getLessons, workspaceKey],
   );
 
   const deleteCourseRelation = useCallback(
@@ -253,7 +253,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons, workspace],
+    [getLessons, workspaceKey],
   );
 
   const filteredLessons = useMemo(() => {
@@ -285,7 +285,7 @@ export const useLessons = (
       checkResponse(data);
       return data;
     },
-    [workspace],
+    [workspaceKey],
   );
 
   return {

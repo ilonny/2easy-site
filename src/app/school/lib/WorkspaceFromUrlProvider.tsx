@@ -13,9 +13,10 @@ export const WorkspaceFromUrlProvider = ({
   children: ReactNode;
 }) => {
   const searchParams = useSearchParams();
+  const query = searchParams?.toString() ?? "";
   const value = useMemo(
-    () => catalogWorkspaceFromSearchParams(searchParams),
-    [searchParams],
+    () => catalogWorkspaceFromSearchParams(new URLSearchParams(query)),
+    [query],
   );
   return (
     <CatalogWorkspaceProvider value={value}>{children}</CatalogWorkspaceProvider>
