@@ -701,6 +701,9 @@
     "resetAnswersUntitled": "untitled",
     "selectStudentToSeeAnswers": "Select a student in the participants list to see their answers.",
     "selectStudentToSeeAnswersBanner": "Select a student in the participants list to see their answers in real time.",
+    "testStudentAnswers": "Student answers",
+    "testStudentAnswersAriaLabel": "Show student answers",
+    "testNoAnswer": "No answer",
     "dragCloserToImage": "Drag the word closer to the image",
     "answersResetStale": "Answers were reset. The exercise was refreshed."
   },

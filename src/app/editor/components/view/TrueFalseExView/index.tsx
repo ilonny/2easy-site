@@ -300,7 +300,12 @@ const TrueFalseExViewImpl: FC<{
             <ResponsiveTooltip
               key={sentence.id}
               content={
-                <div>Correct: {sentence.answer ? "True" : "False"}</div>
+                <div>
+                  Correct:{" "}
+                  <span className="font-semibold text-[#15803D]">
+                    {sentence.answer ? "True" : "False"}
+                  </span>
+                </div>
               }
             >
               <div className={`${styles.sentenceWrap} cursor-help`}>

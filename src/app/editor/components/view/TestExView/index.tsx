@@ -7,20 +7,20 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { TQuestion, TTestData } from "../../editor/TestEx/types";
 import { Button, Card, Checkbox, Radio, RadioGroup } from "@nextui-org/react";
-import Close from "@/assets/icons/cross_white.png";
 import Image from "next/image";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { AuthContext } from "@/auth";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
+import i18n from "@/i18n/config";
 
 import RoundDefaultTest from "@/assets/icons/round_default_test.svg";
 import RoundHoverTest from "@/assets/icons/round_hover_test.svg";
@@ -35,18 +35,24 @@ import SquareChosenTest from "@/assets/icons/square_chosen_test.svg";
 import SquareSuccessTest from "@/assets/icons/square_success_test.svg";
 import SquareGrayTest from "@/assets/icons/square_gray_test.svg";
 import SquareErrorTest from "@/assets/icons/square_error_test.svg";
+import InfoIcon from "@/assets/icons/info.svg";
 
 type TProps = {
   data: TTestData;
   isPreview?: boolean;
+  activeStudentId?: number;
+  isPresentationMode?: boolean;
 };
 
 type TTestStepProps = {
   question: TQuestion;
   onPressNext: () => void;
   setScore: Dispatch<SetStateAction<number>>;
-  writeAnswer: any;
-  answers: any; //ref maps in json format
+  writeAnswer: (
+    questionId: string | number,
+    answer: string
+  ) => void | Promise<unknown>;
+  answers?: { answer?: string }; //ref maps in json format
   isPresentationMode?: boolean;
   onAnswerSubmitted?: (questionId: string, wasCorrect: boolean) => void;
 };
@@ -82,6 +88,9 @@ export const TestStep = (props: TTestStepProps) => {
   }, [isPresentationMode]);
 
   useEffect(() => {
+    if (!answers?.answer) {
+      return;
+    }
     try {
       const answersParsed = JSON.parse(answers.answer);
       if (!answersParsed) {
@@ -91,7 +100,7 @@ export const TestStep = (props: TTestStepProps) => {
       selectedMap.current = answersParsed.selectedMap;
       setIsSubmitted(true);
       setRerender((s) => s + 1);
-    } catch (err) {}
+    } catch {}
   }, [answers]);
 
   const onSubmitResult = useCallback(() => {
@@ -122,8 +131,8 @@ export const TestStep = (props: TTestStepProps) => {
     Array.from(
       document.getElementsByClassName("checkbox-test-option-success")
     ).forEach((el) => {
-      if (!el?.dataset?.selected) {
-        el?.click();
+      if (el instanceof HTMLElement && !el.dataset.selected) {
+        el.click();
       }
     });
   }, [rerender]);
@@ -134,8 +143,6 @@ export const TestStep = (props: TTestStepProps) => {
   const defaultValue = !Object.keys(errorMap).length
     ? undefined
     : Object.keys(errorMap.current)[0];
-
-  const isAnySelected = !!Object.values(selectedMap.current)?.length;
 
   return (
     <div
@@ -210,7 +217,11 @@ export const TestStep = (props: TTestStepProps) => {
               >
                 <div className="relative top-[-2px] shrink-0">
                   <Radio
-                    color={color}
+                    color={
+                      color === "success" || color === "danger"
+                        ? color
+                        : "default"
+                    }
                     value={option.id}
                     // className={`radio-force-${color}`}
                   />
@@ -249,7 +260,7 @@ export const TestStep = (props: TTestStepProps) => {
         </RadioGroup>
       )}
       {!isSingleAnswer &&
-        question.options.map((option, optionIndex) => {
+        question.options.map((option) => {
           const isCorrect =
             isSubmitted &&
             !errorMap.current[option.id] &&
@@ -299,7 +310,11 @@ export const TestStep = (props: TTestStepProps) => {
               <div className="mr-2 shrink-0">
                 <div className="relative top-[-4px]">
                   <Checkbox
-                    color={color}
+                    color={
+                      color === "success" || color === "danger"
+                        ? color
+                        : "default"
+                    }
                     isSelected={isMissed ? isMissed : undefined}
                     isDisabled={isSubmitted && !isCorrect}
                     size="sm"
@@ -374,7 +389,8 @@ export const TestStep = (props: TTestStepProps) => {
 export const TestExView: FC<TProps> = ({
   data,
   isPreview = false,
-  ...rest
+  activeStudentId,
+  isPresentationMode,
 }) => {
   const image = data?.images?.[0];
   const [activeIndex, setActiveIndex] = useState(0);
@@ -383,22 +399,24 @@ export const TestExView: FC<TProps> = ({
   const activeQuestion = data.questions?.[activeIndex];
   const currentStep = activeIndex + 1;
   const totalSteps = data?.questions?.length;
-  const isLastStep = currentStep === totalSteps;
   const [isFinished, setIsFinished] = useState(false);
 
   const { profile } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
-  const lesson_id = useParams()?.id;
+  const lessonIdParam = useParams()?.id;
+  const lesson_id =
+    Number(Array.isArray(lessonIdParam) ? lessonIdParam[0] : lessonIdParam) || 0;
+  const isLessonMode = usePathname()?.startsWith("/lessons/");
   const student_id = profile?.studentId;
-  const ex_id = data?.id;
+  const ex_id = Number(data?.id || 0);
 
-  const { writeAnswer, answers, getAnswers, setAnswers } = useExAnswer({
+  const { writeAnswer, answers, setAnswers } = useExAnswer({
     student_id,
     lesson_id,
     ex_id,
-    activeStudentId: rest.activeStudentId,
+    activeStudentId,
     isTeacher,
-    isPresentationMode: rest?.isPresentationMode,
+    isPresentationMode,
   });
 
   // useEffect(() => {
@@ -465,7 +483,7 @@ export const TestExView: FC<TProps> = ({
     }
     // Local preview / teacher alone: don't sync step from empty answers —
     // that resets activeIndex to 0 and breaks the Next button.
-    const hasStudentTarget = Boolean(rest?.activeStudentId || student_id);
+    const hasStudentTarget = Boolean(activeStudentId || student_id);
     if (!hasStudentTarget || isPreview) {
       return;
     }
@@ -492,13 +510,46 @@ export const TestExView: FC<TProps> = ({
     isTeacher,
     isPreview,
     student_id,
-    rest?.activeStudentId,
+    activeStudentId,
     data?.questions?.length,
   ]);
 
   const questionStepAnswers = useMemo(() => {
     return answers?.[activeQuestion?.id];
   }, [answers, activeQuestion?.id]);
+
+  const studentAnswerSummary = useMemo(() => {
+    return (data.questions || []).map((question, index) => {
+      const rawAnswer = answers?.[question.id]?.answer;
+      let selectedMap: Record<string, boolean> = {};
+
+      try {
+        const parsed =
+          typeof rawAnswer === "string" ? JSON.parse(rawAnswer) : rawAnswer;
+        if (parsed?.selectedMap && typeof parsed.selectedMap === "object") {
+          selectedMap = parsed.selectedMap;
+        }
+      } catch {
+        // Keep the question in the summary even if its saved answer is invalid.
+      }
+
+      return {
+        id: question.id,
+        index,
+        question: question.value,
+        selectedOptions: question.options.filter(
+          (option) => !!selectedMap[option.id]
+        ),
+      };
+    });
+  }, [answers, data.questions]);
+
+  const showStudentAnswerSummary =
+    isFinished &&
+    isTeacher &&
+    isLessonMode &&
+    !isPresentationMode &&
+    !!(activeStudentId || student_id);
 
   return (
     <div className="exercise-view-shell max-w-[886px]">
@@ -533,10 +584,69 @@ export const TestExView: FC<TProps> = ({
       )}
       <div className={`py-4 sm:py-6 md:py-7 lg:py-8 w-full`}>
         <Card
-          className="w-full max-w-[540px] min-w-0 mx-auto p-4 sm:p-6 md:p-8"
+          className="relative w-full max-w-[540px] min-w-0 mx-auto p-4 sm:p-6 md:p-8"
         >
           {isFinished ? (
             <>
+              {showStudentAnswerSummary && (
+                <div className="absolute right-2 top-2 z-10 sm:right-3 sm:top-3">
+                  <ResponsiveTooltip
+                    placement="bottom-end"
+                    delay={0}
+                    closeDelay={150}
+                    classNames={{
+                      content:
+                        "max-w-[min(360px,calc(100vw-32px))] bg-white p-0 text-foreground shadow-xl",
+                    }}
+                    content={
+                      <div className="max-h-[min(70vh,520px)] w-[360px] max-w-[calc(100vw-32px)] overflow-y-auto p-4">
+                        <p className="mb-2 text-base font-semibold">
+                          {i18n.t("lessons.testStudentAnswers")}
+                        </p>
+                        <div className="divide-y divide-[#ECEAF7]">
+                          {studentAnswerSummary.map((item) => (
+                            <div key={item.id} className="py-3 first:pt-1">
+                              <p className="break-words text-sm font-semibold">
+                                {item.index + 1}. {item.question}
+                              </p>
+                              <div className="mt-1.5 flex flex-col gap-1">
+                                {item.selectedOptions.length ? (
+                                  item.selectedOptions.map((option) => (
+                                    <p
+                                      key={option.id}
+                                      className={`break-words text-sm font-medium ${
+                                        option.isCorrect
+                                          ? "text-[#15803D]"
+                                          : "text-[#DC2626]"
+                                      }`}
+                                    >
+                                      {option.value}
+                                    </p>
+                                  ))
+                                ) : (
+                                  <p className="text-sm font-medium text-[#DC2626]">
+                                    {i18n.t("lessons.testNoAnswer")}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    }
+                  >
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="light"
+                      className="min-h-9 min-w-9 touch-manipulation"
+                      aria-label={i18n.t("lessons.testStudentAnswersAriaLabel")}
+                    >
+                      <Image src={InfoIcon} alt="" width={18} height={18} />
+                    </Button>
+                  </ResponsiveTooltip>
+                </div>
+              )}
               <p className="text-center text-xl sm:text-2xl md:text-[28px] font-semibold">
                 Your score
               </p>
@@ -560,7 +670,7 @@ export const TestExView: FC<TProps> = ({
               setScore={setScore}
               writeAnswer={writeAnswer}
               answers={questionStepAnswers}
-              isPresentationMode={rest?.isPresentationMode}
+              isPresentationMode={isPresentationMode}
               onAnswerSubmitted={onAnswerSubmitted}
             />
           )}

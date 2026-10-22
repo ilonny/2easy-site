@@ -703,6 +703,9 @@
     "resetAnswersUntitled": "без названия",
     "selectStudentToSeeAnswers": "Выберите ученика в списке участников, чтобы видеть его ответы.",
     "selectStudentToSeeAnswersBanner": "Выберите ученика в списке участников, чтобы видеть его ответы в реальном времени.",
+    "testStudentAnswers": "Ответы ученика",
+    "testStudentAnswersAriaLabel": "Показать ответы ученика",
+    "testNoAnswer": "Нет ответа",
     "dragCloserToImage": "Перетащите слово ближе к картинке",
     "answersResetStale": "Ответы были сброшены. Задание обновлено."
   },

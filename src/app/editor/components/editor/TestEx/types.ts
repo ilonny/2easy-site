@@ -14,6 +14,7 @@ export type TQuestion = {
 };
 
 export type TTestData = {
+  id?: number;
   title: string;
   titleColor: "#3F28C6";
   subtitle: string;
