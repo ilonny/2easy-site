@@ -237,6 +237,10 @@ export default function LessonPage() {
         : students?.length === 1
           ? `only:${students[0]?.student_id}`
           : "none";
+  const getLessonRef = useRef(getLesson);
+  const getExListRef = useRef(getExList);
+  getLessonRef.current = getLesson;
+  getExListRef.current = getExList;
 
   useEffect(() => {
     if (!lessonId) return;
@@ -248,11 +252,9 @@ export default function LessonPage() {
           : !isStudent && students?.length === 1
             ? students[0]?.student_id
             : undefined;
-    getLesson(lessonId, studentIdForLesson);
-    getExList();
+    void getLessonRef.current(lessonId, studentIdForLesson);
+    void getExListRef.current();
   }, [
-    getExList,
-    getLesson,
     lessonId,
     lessonStudentKey,
     isStudent,

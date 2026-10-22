@@ -13,7 +13,7 @@ import {
 } from "@nextui-org/react";
 import { data } from "./data";
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLessons } from "../lessons/hooks/useLessons";
 import { useExList } from "../editor/hooks/useExList";
 import { ExList } from "../editor/components/view/ExList";
@@ -32,14 +32,20 @@ export default function TutorialPage() {
 
   const { lesson, getLesson, setLesson } = useLessons();
   const { exList, getExList } = useExList(undefined, true);
+  const getLessonRef = useRef(getLesson);
+  const getExListRef = useRef(getExList);
+  const setLessonRef = useRef(setLesson);
+  getLessonRef.current = getLesson;
+  getExListRef.current = getExList;
+  setLessonRef.current = setLesson;
 
   useEffect(() => {
-    setLesson(undefined);
+    setLessonRef.current(undefined);
     if (activeLessonId) {
-      getLesson(activeLessonId.toString());
-      getExList(activeLessonId);
+      void getLessonRef.current(activeLessonId.toString());
+      void getExListRef.current(activeLessonId);
     }
-  }, [activeLessonId, getExList, getLesson, setLesson]);
+  }, [activeLessonId]);
 
   return (
     <CatalogPageShell

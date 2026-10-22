@@ -88,6 +88,10 @@ export default function EditorPage() {
 
   const { scrollToExId, setScrollToExId } = useContext(EditorContext);
   const exListRef = useRef([]);
+  const getLessonRef = useRef(getLesson);
+  const getExListRef = useRef(getExList);
+  getLessonRef.current = getLesson;
+  getExListRef.current = getExList;
   const isLockedOnTrial = useRedirectIfLessonLockedOnTrial(lesson);
 
   useEffect(() => {
@@ -118,9 +122,9 @@ export default function EditorPage() {
 
   useEffect(() => {
     if (!lessonId) return;
-    getLesson(lessonId);
-    getExList();
-  }, [getExList, getLesson, lessonId]);
+    void getLessonRef.current(lessonId);
+    void getExListRef.current();
+  }, [lessonId]);
 
   useEffect(() => {
     if (!contextStudentId) {
