@@ -29,15 +29,29 @@ export const CatalogWorkspaceProvider = ({
 
 export const useCatalogWorkspace = () => useContext(CatalogWorkspaceContext);
 
-export const catalogFetchParams = (workspace: CatalogWorkspaceValue) => ({
-  workspaceScope:
-    workspace.workspaceScope === "school" ? ("school" as const) : undefined,
-  schoolId:
-    workspace.workspaceScope === "school"
-      ? workspace.schoolId ?? undefined
-      : undefined,
-  actingTeacherUserId: workspace.teacherUserId ?? undefined,
-});
+export const catalogFetchParams = (workspace: CatalogWorkspaceValue) => {
+  if (workspace.workspaceScope === "school") {
+    return {
+      workspaceScope: "school" as const,
+      schoolId: workspace.schoolId ?? undefined,
+      actingTeacherUserId: workspace.teacherUserId ?? undefined,
+    };
+  }
+  // Personal catalog must not send X-School-Id (that would force school mode).
+  if (
+    workspace.workspaceScope === "personal" ||
+    Number(workspace.teacherUserId) > 0
+  ) {
+    return {
+      workspaceScope: "personal" as const,
+      schoolId: undefined,
+      actingTeacherUserId: workspace.teacherUserId ?? undefined,
+    };
+  }
+  return {
+    actingTeacherUserId: workspace.teacherUserId ?? undefined,
+  };
+};
 
 export const studentListFetchParams = (workspace: CatalogWorkspaceValue) => {
   const schoolId = Number(workspace.schoolId);

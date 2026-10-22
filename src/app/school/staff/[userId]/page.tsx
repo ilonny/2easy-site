@@ -40,15 +40,20 @@ import { WeekView } from "@/app/schedule/components/WeekView";
 import { DayView } from "@/app/schedule/components/DayView";
 import { EventModal } from "@/app/schedule/components/EventModal";
 import type {
+  AvailabilitySelectionMode,
   EventFormValues,
   ScheduleEvent,
   ScheduleView,
   SelectedScheduleRange,
 } from "@/app/schedule/types";
-import { rangeKey } from "@/app/schedule/components/availabilityUi";
+import {
+  isUnavailableSlot,
+  rangeKey,
+} from "@/app/schedule/components/availabilityUi";
 import { rangeForView } from "@/app/schedule/utils/calendar";
 import scheduleStyles from "@/app/schedule/styles.module.css";
 import { RoleBadges } from "../../components/RoleBadges";
+import { WorkingHoursEditor } from "../../components/WorkingHoursEditor";
 import { DOW_ORDER, LESSON_DURATIONS } from "../../types";
 import { SchoolMaterialsPanel } from "../../components/SchoolMaterialsPanel";
 import { useSchoolBack } from "../../hooks/useSchoolBack";
@@ -102,7 +107,8 @@ export default function StaffCabinetPage() {
 
   const [view, setView] = useState<ScheduleView>("week");
   const [cursor, setCursor] = useState<Dayjs>(dayjs());
-  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectionMode, setSelectionMode] =
+    useState<AvailabilitySelectionMode | null>(null);
   const [selectedRanges, setSelectedRanges] = useState<
     Map<string, SelectedScheduleRange>
   >(new Map());
@@ -144,11 +150,38 @@ export default function StaffCabinetPage() {
     loading: availabilitySaving,
     loadAvailability,
     markInactive,
+    markActive,
   } = useTeacherAvailability(
     school?.id
       ? { workspaceScope: "school", schoolId: school.id }
       : undefined,
   );
+
+  const toggleSelectionMode = (mode: AvailabilitySelectionMode) => {
+    setSelectionMode((current) => (current === mode ? null : mode));
+    setSelectedRanges(new Map());
+  };
+
+  const handleRangeToggle = (
+    range: SelectedScheduleRange,
+    selected: boolean,
+  ) => {
+    if (selected && selectionMode === "available") {
+      const start = dayjs(range.starts_at);
+      if (!isUnavailableSlot(start, start.hour(), availability)) return;
+    }
+    if (selected && selectionMode === "unavailable") {
+      const start = dayjs(range.starts_at);
+      if (isUnavailableSlot(start, start.hour(), availability)) return;
+    }
+    setSelectedRanges((current) => {
+      const next = new Map(current);
+      const key = rangeKey(range);
+      if (selected) next.set(key, range);
+      else next.delete(key);
+      return next;
+    });
+  };
 
   const loadCabinet = useCallback(async () => {
     if (!school?.id || !userId) return;
@@ -486,6 +519,16 @@ export default function StaffCabinetPage() {
           </div>
         </section>
 
+        {school?.id && userId ? (
+          <section className="rounded-[16px] bg-brand-gray/30 px-4 py-4 ring-1 ring-black/5">
+            <WorkingHoursEditor
+              schoolId={school.id}
+              userId={userId}
+              compact
+            />
+          </section>
+        ) : null}
+
         <section className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -522,14 +565,27 @@ export default function StaffCabinetPage() {
                 <div className="flex flex-wrap items-center gap-2 border-b border-[#e8e8ed] px-3 py-2">
                   <Button
                     size="sm"
-                    variant={selectionMode ? "solid" : "flat"}
-                    color={selectionMode ? "primary" : "default"}
-                    onPress={() => {
-                      setSelectionMode((value) => !value);
-                      setSelectedRanges(new Map());
-                    }}
+                    variant={
+                      selectionMode === "unavailable" ? "solid" : "flat"
+                    }
+                    color={
+                      selectionMode === "unavailable" ? "primary" : "default"
+                    }
+                    onPress={() => toggleSelectionMode("unavailable")}
                   >
                     <T k="schedule.selectUnavailable" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={
+                      selectionMode === "available" ? "solid" : "flat"
+                    }
+                    color={
+                      selectionMode === "available" ? "primary" : "default"
+                    }
+                    onPress={() => toggleSelectionMode("available")}
+                  >
+                    <T k="schedule.selectAvailable" />
                   </Button>
                   {selectionMode ? (
                     <>
@@ -545,19 +601,26 @@ export default function StaffCabinetPage() {
                         isLoading={availabilitySaving}
                         isDisabled={!selectedRanges.size}
                         onPress={async () => {
-                          const json = await markInactive(
-                            Array.from(selectedRanges.values()),
-                            userId,
-                          );
+                          const ranges = Array.from(selectedRanges.values());
+                          const json =
+                            selectionMode === "available"
+                              ? await markActive(ranges, userId)
+                              : await markInactive(ranges, userId);
                           checkResponse(json);
                           if (json?.success) {
                             setSelectedRanges(new Map());
-                            setSelectionMode(false);
+                            setSelectionMode(null);
                             await refreshRange();
                           }
                         }}
                       >
-                        <T k="schedule.markInactive" />
+                        <T
+                          k={
+                            selectionMode === "available"
+                              ? "schedule.markActive"
+                              : "schedule.markInactive"
+                          }
+                        />
                       </Button>
                     </>
                   ) : null}
@@ -584,17 +647,9 @@ export default function StaffCabinetPage() {
                     detailed
                     nameById={studentNameById}
                     availability={availability}
-                    selectionMode={selectionMode}
+                    selectionMode={Boolean(selectionMode)}
                     selectedRangeKeys={new Set(selectedRanges.keys())}
-                    onRangeToggle={(range, selected) =>
-                      setSelectedRanges((current) => {
-                        const next = new Map(current);
-                        const key = rangeKey(range);
-                        if (selected) next.set(key, range);
-                        else next.delete(key);
-                        return next;
-                      })
-                    }
+                    onRangeToggle={handleRangeToggle}
                     onSlotClick={openCreate}
                     onEventClick={openEvent}
                   />
@@ -605,17 +660,9 @@ export default function StaffCabinetPage() {
                     detailed
                     nameById={studentNameById}
                     availability={availability}
-                    selectionMode={selectionMode}
+                    selectionMode={Boolean(selectionMode)}
                     selectedRangeKeys={new Set(selectedRanges.keys())}
-                    onRangeToggle={(range, selected) =>
-                      setSelectedRanges((current) => {
-                        const next = new Map(current);
-                        const key = rangeKey(range);
-                        if (selected) next.set(key, range);
-                        else next.delete(key);
-                        return next;
-                      })
-                    }
+                    onRangeToggle={handleRangeToggle}
                     onSlotClick={openCreate}
                     onEventClick={openEvent}
                   />

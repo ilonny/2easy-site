@@ -241,7 +241,9 @@ export const WeekView = ({
                     onKeyDown={(e) => {
                       if (e.key === "Enter") onEventClick(event);
                     }}
-                    className="absolute left-0.5 right-0.5 z-[1] overflow-hidden rounded-[6px] px-1.5 py-0.5 text-left text-[11px] leading-tight text-white shadow-sm"
+                    className={`absolute left-0.5 right-0.5 z-[1] overflow-hidden rounded-[6px] px-1.5 py-0.5 text-left text-[11px] leading-tight text-white shadow-sm ${
+                      selectionMode ? "pointer-events-none" : ""
+                    }`}
                     style={{
                       top: Math.max(top, 0),
                       height: boxH,

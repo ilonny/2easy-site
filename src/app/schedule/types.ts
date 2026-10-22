@@ -41,8 +41,10 @@ export type ScheduleEvent = {
 export type ScheduleAvailability = {
   supported: boolean;
   workingHours: Array<{ dow: number; start: string; end: string }>;
-  unavailable: Array<{ starts_at: string; ends_at: string }>;
+  unavailable: Array<{ id?: number; starts_at: string; ends_at: string }>;
 };
+
+export type AvailabilitySelectionMode = "unavailable" | "available";
 
 export type SelectedScheduleRange = {
   starts_at: string;

@@ -3,9 +3,17 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/ru";
-import { Button, Spinner } from "@nextui-org/react";
+import {
+  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalHeader,
+  Spinner,
+} from "@nextui-org/react";
 import { BrandPill, CatalogPageShell } from "@/components";
 import { SearchableSelect } from "@/components/SearchableSelect";
+import { brandModalClassNames } from "@/components/brandUi";
 import { AuthContext } from "@/auth";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { checkResponse, fetchGet } from "@/api";
@@ -18,6 +26,7 @@ import {
   type WorkspaceContext,
 } from "@/app/school/lib/activeSchool";
 import type { SchoolInfo, SchoolMember } from "@/app/school/types";
+import { WorkingHoursEditor } from "@/app/school/components/WorkingHoursEditor";
 import { useScheduleEvents } from "./hooks/useScheduleEvents";
 import { usePaymentPlans } from "./hooks/usePaymentPlans";
 import { useTeacherAvailability } from "./hooks/useTeacherAvailability";
@@ -29,12 +38,16 @@ import { PaymentControlTab } from "./components/PaymentControlTab";
 import { CalendarToolbar } from "./components/CalendarToolbar";
 import { StudentSidebar } from "./components/StudentSidebar";
 import type {
+  AvailabilitySelectionMode,
   EventFormValues,
   ScheduleEvent,
   ScheduleView,
   SelectedScheduleRange,
 } from "./types";
-import { rangeKey } from "./components/availabilityUi";
+import {
+  isUnavailableSlot,
+  rangeKey,
+} from "./components/availabilityUi";
 import { eventStudentIds } from "./types";
 import { rangeForView } from "./utils/calendar";
 import styles from "./styles.module.css";
@@ -101,10 +114,12 @@ export default function SchedulePage() {
   const [workspace, setWorkspace] =
     useState<WorkspaceContext>(getActiveWorkspace);
   const [teacherFilter, setTeacherFilter] = useState<string>("all");
-  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectionMode, setSelectionMode] =
+    useState<AvailabilitySelectionMode | null>(null);
   const [selectedRanges, setSelectedRanges] = useState<
     Map<string, SelectedScheduleRange>
   >(new Map());
+  const [hoursModalOpen, setHoursModalOpen] = useState(false);
 
   const scheduleWorkspace = useMemo(() => {
     if (isStudent) return undefined;
@@ -145,6 +160,7 @@ export default function SchedulePage() {
     loading: availabilitySaving,
     loadAvailability,
     markInactive,
+    markActive,
   } = useTeacherAvailability(scheduleWorkspace);
 
   useEffect(() => {
@@ -190,6 +206,8 @@ export default function SchedulePage() {
       window.removeEventListener("schedule-events-invalidated", onInvalidate);
   }, [refreshRange]);
 
+  // When filter is "all", still show the current teacher's non-working overlay
+  // (admin-set unavailability / weekly hours). Otherwise the selected teacher.
   const availabilityTeacherId =
     canFilterTeachers && teacherFilter !== "all"
       ? Number(teacherFilter)
@@ -198,8 +216,21 @@ export default function SchedulePage() {
         : null;
   const showAvailability =
     workspace.scope === "school" &&
-    (!canFilterTeachers || teacherFilter !== "all") &&
-    Number.isFinite(availabilityTeacherId);
+    Number.isFinite(availabilityTeacherId) &&
+    Number(availabilityTeacherId) > 0;
+
+  const activeSchool = useMemo(
+    () => schools.find((item) => item.id === workspace.schoolId) || null,
+    [schools, workspace.schoolId],
+  );
+  const canEditAnyTeacherHours = Boolean(
+    activeSchool?.access?.canEditAnyTeacherHours,
+  );
+  // Teachers may always edit their own hours/unavailability; elevated roles may edit others.
+  const canEditAvailability =
+    showAvailability &&
+    (Number(availabilityTeacherId) === Number(profile?.id) ||
+      canEditAnyTeacherHours);
 
   useEffect(() => {
     if (!isTeacher || !teacherAllowed || !showAvailability) return;
@@ -216,9 +247,43 @@ export default function SchedulePage() {
   ]);
 
   useEffect(() => {
-    setSelectionMode(false);
+    setSelectionMode(null);
     setSelectedRanges(new Map());
+    setHoursModalOpen(false);
   }, [workspace, teacherFilter]);
+
+  useEffect(() => {
+    if (!canEditAvailability) {
+      setSelectionMode(null);
+      setSelectedRanges(new Map());
+    }
+  }, [canEditAvailability]);
+
+  const toggleSelectionMode = (mode: AvailabilitySelectionMode) => {
+    setSelectionMode((current) => (current === mode ? null : mode));
+    setSelectedRanges(new Map());
+  };
+
+  const handleRangeToggle = (
+    range: SelectedScheduleRange,
+    selected: boolean,
+  ) => {
+    if (selected && selectionMode === "available") {
+      const start = dayjs(range.starts_at);
+      if (!isUnavailableSlot(start, start.hour(), availability)) return;
+    }
+    if (selected && selectionMode === "unavailable") {
+      const start = dayjs(range.starts_at);
+      if (isUnavailableSlot(start, start.hour(), availability)) return;
+    }
+    setSelectedRanges((current) => {
+      const next = new Map(current);
+      const key = rangeKey(range);
+      if (selected) next.set(key, range);
+      else next.delete(key);
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!isTeacher || !teacherAllowed) return;
@@ -618,18 +683,46 @@ export default function SchedulePage() {
               )}
               {isTeacher && showAvailability && availability.supported && (
                 <div className="flex flex-wrap items-center gap-2 border-b border-[#e8e8ed] px-3 py-2">
-                  <Button
-                    size="sm"
-                    variant={selectionMode ? "solid" : "flat"}
-                    color={selectionMode ? "primary" : "default"}
-                    onPress={() => {
-                      setSelectionMode((value) => !value);
-                      setSelectedRanges(new Map());
-                    }}
-                  >
-                    <T k="schedule.selectUnavailable" />
-                  </Button>
-                  {selectionMode && (
+                  {canEditAvailability ? (
+                    <>
+                      <Button
+                        size="sm"
+                        variant={
+                          selectionMode === "unavailable" ? "solid" : "flat"
+                        }
+                        color={
+                          selectionMode === "unavailable"
+                            ? "primary"
+                            : "default"
+                        }
+                        onPress={() => toggleSelectionMode("unavailable")}
+                      >
+                        <T k="schedule.selectUnavailable" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={
+                          selectionMode === "available" ? "solid" : "flat"
+                        }
+                        color={
+                          selectionMode === "available" ? "primary" : "default"
+                        }
+                        onPress={() => toggleSelectionMode("available")}
+                      >
+                        <T k="schedule.selectAvailable" />
+                      </Button>
+                    </>
+                  ) : null}
+                  {workspace.schoolId && availabilityTeacherId ? (
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      onPress={() => setHoursModalOpen(true)}
+                    >
+                      <T k="schedule.weeklyHoursLink" />
+                    </Button>
+                  ) : null}
+                  {canEditAvailability && selectionMode ? (
                     <>
                       <span className="text-xs text-brand-grayFont">
                         <T
@@ -643,14 +736,21 @@ export default function SchedulePage() {
                         isLoading={availabilitySaving}
                         isDisabled={!selectedRanges.size}
                         onPress={async () => {
-                          const json = await markInactive(
-                            Array.from(selectedRanges.values()),
-                            availabilityTeacherId,
-                          );
+                          const ranges = Array.from(selectedRanges.values());
+                          const json =
+                            selectionMode === "available"
+                              ? await markActive(
+                                  ranges,
+                                  availabilityTeacherId,
+                                )
+                              : await markInactive(
+                                  ranges,
+                                  availabilityTeacherId,
+                                );
                           checkResponse(json);
                           if (json?.success) {
                             setSelectedRanges(new Map());
-                            setSelectionMode(false);
+                            setSelectionMode(null);
                             const { from, to } = rangeForView(cursor, view);
                             await loadAvailability(
                               from,
@@ -660,10 +760,16 @@ export default function SchedulePage() {
                           }
                         }}
                       >
-                        <T k="schedule.markInactive" />
+                        <T
+                          k={
+                            selectionMode === "available"
+                              ? "schedule.markActive"
+                              : "schedule.markInactive"
+                          }
+                        />
                       </Button>
                     </>
-                  )}
+                  ) : null}
                 </div>
               )}
               <div className={styles.viewBody}>
@@ -697,17 +803,11 @@ export default function SchedulePage() {
                     availability={
                       showAvailability ? availability : undefined
                     }
-                    selectionMode={selectionMode}
+                    selectionMode={Boolean(
+                      canEditAvailability && selectionMode,
+                    )}
                     selectedRangeKeys={new Set(selectedRanges.keys())}
-                    onRangeToggle={(range, selected) =>
-                      setSelectedRanges((current) => {
-                        const next = new Map(current);
-                        const key = rangeKey(range);
-                        if (selected) next.set(key, range);
-                        else next.delete(key);
-                        return next;
-                      })
-                    }
+                    onRangeToggle={handleRangeToggle}
                     onSlotClick={openCreate}
                     onEventClick={openEvent}
                   />
@@ -722,17 +822,11 @@ export default function SchedulePage() {
                     availability={
                       showAvailability ? availability : undefined
                     }
-                    selectionMode={selectionMode}
+                    selectionMode={Boolean(
+                      canEditAvailability && selectionMode,
+                    )}
                     selectedRangeKeys={new Set(selectedRanges.keys())}
-                    onRangeToggle={(range, selected) =>
-                      setSelectedRanges((current) => {
-                        const next = new Map(current);
-                        const key = rangeKey(range);
-                        if (selected) next.set(key, range);
-                        else next.delete(key);
-                        return next;
-                      })
-                    }
+                    onRangeToggle={handleRangeToggle}
                     onSlotClick={openCreate}
                     onEventClick={openEvent}
                   />
@@ -751,6 +845,28 @@ export default function SchedulePage() {
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
+      <Modal
+        size="lg"
+        isOpen={hoursModalOpen}
+        onClose={() => setHoursModalOpen(false)}
+        classNames={brandModalClassNames}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <T k="schedule.weeklyHoursLink" />
+          </ModalHeader>
+          <ModalBody className="pb-6">
+            {workspace.schoolId && availabilityTeacherId ? (
+              <WorkingHoursEditor
+                schoolId={workspace.schoolId}
+                userId={availabilityTeacherId}
+                compact
+              />
+            ) : null}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
 
       <EventModal
         isOpen={modalOpen}

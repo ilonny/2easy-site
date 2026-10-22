@@ -262,10 +262,19 @@ export default function SchoolPage() {
         )}
 
         {tab === "materials" && canSeeMaterials && (
-          <SchoolMaterialsPanel
-            schoolId={school.id}
-            canManage={canManageLibrary}
-          />
+          <div className="flex flex-col gap-10">
+            <SchoolMaterialsPanel
+              schoolId={school.id}
+              canManage={canManageLibrary}
+            />
+            {school.access?.canTeach ? (
+              <SchoolMaterialsPanel
+                schoolId={school.id}
+                personalOnly
+                canManage
+              />
+            ) : null}
+          </div>
         )}
 
         {tab === "settings" && canSettings && (

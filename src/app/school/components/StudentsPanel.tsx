@@ -193,6 +193,10 @@ export const StudentsPanel: FC<TProps> = ({
   }, [schoolId]);
 
   useEffect(() => {
+    if (!canManageAssign && showArchived) setShowArchived(false);
+  }, [canManageAssign, showArchived]);
+
+  useEffect(() => {
     if (showArchived) void loadArchivedStudents();
   }, [loadArchivedStudents, showArchived]);
 
@@ -461,26 +465,28 @@ export const StudentsPanel: FC<TProps> = ({
         ) : null}
       </div>
 
-      <div className="flex gap-2">
-        <Button
-          radius="full"
-          color="primary"
-          variant={!showArchived ? "solid" : "bordered"}
-          onClick={() => setShowArchived(false)}
-          size="sm"
-        >
-          <T k="students.activeTab" />
-        </Button>
-        <Button
-          radius="full"
-          color="primary"
-          variant={showArchived ? "solid" : "bordered"}
-          onClick={() => setShowArchived(true)}
-          size="sm"
-        >
-          <T k="students.archivedTab" />
-        </Button>
-      </div>
+      {canManageAssign ? (
+        <div className="flex gap-2">
+          <Button
+            radius="full"
+            color="primary"
+            variant={!showArchived ? "solid" : "bordered"}
+            onClick={() => setShowArchived(false)}
+            size="sm"
+          >
+            <T k="students.activeTab" />
+          </Button>
+          <Button
+            radius="full"
+            color="primary"
+            variant={showArchived ? "solid" : "bordered"}
+            onClick={() => setShowArchived(true)}
+            size="sm"
+          >
+            <T k="students.archivedTab" />
+          </Button>
+        </div>
+      ) : null}
 
       <div className="overflow-hidden rounded-[16px] ring-1 ring-black/5">
         <table className="w-full text-left text-sm">
@@ -524,30 +530,34 @@ export const StudentsPanel: FC<TProps> = ({
                         <T k="school.openCabinet" />
                       </Link>
                     ) : null}
-                    <Button
-                      size="sm"
-                      variant="light"
-                      onPress={() =>
-                        openStudentAction(
-                          s,
-                          showArchived ? "restore" : "archive",
-                        )
-                      }
-                    >
-                      {showArchived ? (
-                        <T k="students.unarchive" />
-                      ) : (
-                        <T k="students.archive" />
-                      )}
-                    </Button>
-                    <Button
-                      size="sm"
-                      color="danger"
-                      variant="light"
-                      onPress={() => openStudentAction(s, "delete")}
-                    >
-                      <T k="common.delete" />
-                    </Button>
+                    {canManageAssign ? (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="light"
+                          onPress={() =>
+                            openStudentAction(
+                              s,
+                              showArchived ? "restore" : "archive",
+                            )
+                          }
+                        >
+                          {showArchived ? (
+                            <T k="students.unarchive" />
+                          ) : (
+                            <T k="students.archive" />
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          color="danger"
+                          variant="light"
+                          onPress={() => openStudentAction(s, "delete")}
+                        >
+                          <T k="common.delete" />
+                        </Button>
+                      </>
+                    ) : null}
                   </div>
                 </td>
               </tr>

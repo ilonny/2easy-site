@@ -1,11 +1,12 @@
 "use client";
 
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Spinner } from "@nextui-org/react";
 import dayjs, { Dayjs } from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import "dayjs/locale/ru";
 import Link from "next/link";
+import { AuthContext } from "@/auth";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { checkResponse, fetchGet } from "@/api";
@@ -46,6 +47,8 @@ export const SchedulePanel: FC<TProps> = ({
   members,
   canFilterTeachers,
 }) => {
+  const { profile } = useContext(AuthContext);
+  const selfUserId = Number(profile?.id) || null;
   const [view, setView] = useState<ScheduleView>("week");
   const [cursor, setCursor] = useState<Dayjs>(dayjs());
   const [teacherFilter, setTeacherFilter] = useState<string>("");
@@ -164,19 +167,38 @@ export const SchedulePanel: FC<TProps> = ({
     return map;
   }, [schoolStudents, events]);
 
+  const availabilityTeacherId = useMemo(() => {
+    if (canFilterTeachers) {
+      const tid = Number(teacherFilter);
+      return Number.isFinite(tid) && tid > 0 ? tid : null;
+    }
+    return selfUserId && selfUserId > 0 ? selfUserId : null;
+  }, [canFilterTeachers, teacherFilter, selfUserId]);
+
   const refreshRange = useCallback(async () => {
     const { from, to } = rangeForView(cursor, view);
     if (canFilterTeachers) {
-      const tid = Number(teacherFilter);
-      if (!Number.isFinite(tid) || tid <= 0) return;
+      if (!availabilityTeacherId) return;
       await Promise.all([
-        loadEvents(from, to, { teacherUserId: tid }),
-        loadAvailability(from, to, tid),
+        loadEvents(from, to, { teacherUserId: availabilityTeacherId }),
+        loadAvailability(from, to, availabilityTeacherId),
       ]);
       return;
     }
-    await Promise.all([loadEvents(from, to), loadAvailability(from, to, null)]);
-  }, [cursor, view, loadEvents, loadAvailability, canFilterTeachers, teacherFilter]);
+    await Promise.all([
+      loadEvents(from, to),
+      availabilityTeacherId
+        ? loadAvailability(from, to, availabilityTeacherId)
+        : Promise.resolve(),
+    ]);
+  }, [
+    cursor,
+    view,
+    loadEvents,
+    loadAvailability,
+    canFilterTeachers,
+    availabilityTeacherId,
+  ]);
 
   useEffect(() => {
     void refreshRange();
@@ -192,19 +214,10 @@ export const SchedulePanel: FC<TProps> = ({
   }, [refreshRange]);
 
   useEffect(() => {
-    const teacherId = canFilterTeachers ? Number(teacherFilter) : null;
-    if (canFilterTeachers && (!Number.isFinite(teacherId) || !teacherId)) {
-      return;
-    }
+    if (!availabilityTeacherId) return;
     const { from, to } = rangeForView(cursor, view);
-    void loadAvailability(from, to, teacherId);
-  }, [
-    canFilterTeachers,
-    teacherFilter,
-    cursor,
-    view,
-    loadAvailability,
-  ]);
+    void loadAvailability(from, to, availabilityTeacherId);
+  }, [availabilityTeacherId, cursor, view, loadAvailability]);
 
   const titleLabel = useMemo(() => {
     if (view === "month") return cursor.format("MMMM YYYY");

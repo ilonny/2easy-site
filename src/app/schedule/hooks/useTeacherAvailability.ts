@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchGet, fetchPostJson } from "@/api";
+import { fetchDelete, fetchGet, fetchPostJson } from "@/api";
 import { useCallback, useState } from "react";
 import type {
   ScheduleAvailability,
@@ -99,5 +99,42 @@ export const useTeacherAvailability = (workspace?: ScheduleWorkspace) => {
     [workspaceScope, schoolId],
   );
 
-  return { availability, loading, loadAvailability, markInactive };
+  const markActive = useCallback(
+    async (
+      ranges: SelectedScheduleRange[],
+      teacherUserId?: number | null,
+    ) => {
+      setLoading(true);
+      try {
+        if (workspaceScope !== "school" || !schoolId) {
+          return { success: false };
+        }
+        if (!ranges.length) {
+          return { success: true, deleted_count: 0 };
+        }
+        const response = await fetchDelete({
+          path: `/school/${schoolId}/unavailability`,
+          isSecure: true,
+          workspaceScope,
+          schoolId,
+          data: {
+            intervals: ranges,
+            ...(teacherUserId ? { teacher_user_id: teacherUserId } : {}),
+          },
+        });
+        return await response.json();
+      } finally {
+        setLoading(false);
+      }
+    },
+    [workspaceScope, schoolId],
+  );
+
+  return {
+    availability,
+    loading,
+    loadAvailability,
+    markInactive,
+    markActive,
+  };
 };

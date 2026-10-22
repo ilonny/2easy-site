@@ -204,7 +204,11 @@ export const DayView = ({
                 <button
                   key={String(event.id)}
                   type="button"
-                  className="pointer-events-auto absolute left-1 right-2 overflow-hidden rounded-[10px] px-3 py-2 text-left text-white shadow-sm"
+                  className={`${
+                    selectionMode
+                      ? "pointer-events-none"
+                      : "pointer-events-auto"
+                  } absolute left-1 right-2 overflow-hidden rounded-[10px] px-3 py-2 text-left text-white shadow-sm`}
                   style={{
                     top: Math.max(top, 0),
                     height: Math.max(height, minH),

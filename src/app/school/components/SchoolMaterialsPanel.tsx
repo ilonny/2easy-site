@@ -44,15 +44,21 @@ export const SchoolMaterialsPanel = ({
             k={
               personalOnly
                 ? "school.materialsPersonal"
-                : "school.materialsTitle"
+                : "school.materialsSchool"
             }
           />
         </h2>
-        {!personalOnly ? (
-          <p className="mt-1 text-sm text-brand-grayFont">
-            <T k="school.materialsHint" />
-          </p>
-        ) : null}
+        <p className="mt-1 text-sm text-brand-grayFont">
+          <T
+            k={
+              personalOnly
+                ? "school.materialsPersonalHint"
+                : canManage
+                  ? "school.materialsHint"
+                  : "school.materialsHintTeacher"
+            }
+          />
+        </p>
       </div>
       <CatalogWorkspaceProvider value={workspace}>
         <ProfileLessons
