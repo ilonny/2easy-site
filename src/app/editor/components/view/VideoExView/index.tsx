@@ -8,10 +8,12 @@ import "react-medium-image-zoom/dist/styles.css";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { getImageUrl } from "@/app/editor/helpers";
 import { getImageNameFromPath } from "../../editor/mappers";
+import type { TLessonMediaSyncTarget } from "@/app/lessons/mediaSync/types";
 
 type TProps = {
   data: TVideoData;
   isPreview?: boolean;
+  mediaSync?: TLessonMediaSyncTarget | null;
 };
 
 const isFileSource = (video?: TVideoItem) => {
@@ -23,7 +25,11 @@ const isFileSource = (video?: TVideoItem) => {
   return false;
 };
 
-const VideoItemView: FC<{ video: TVideoItem }> = ({ video }) => {
+const VideoItemView: FC<{
+  video: TVideoItem;
+  mediaIndex: number;
+  mediaSync?: TLessonMediaSyncTarget | null;
+}> = ({ video, mediaIndex, mediaSync }) => {
   const attachment = video.attachment;
   const pickedFile = attachment?.file;
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
@@ -58,6 +64,16 @@ const VideoItemView: FC<{ video: TVideoItem }> = ({ video }) => {
           getImageNameFromPath(attachment?.path) ||
           undefined
         }
+        sync={
+          mediaSync
+            ? {
+                lessonId: mediaSync.lessonId,
+                exId: mediaSync.exId,
+                mediaIndex,
+                role: mediaSync.role,
+              }
+            : null
+        }
       />
     );
   }
@@ -72,7 +88,7 @@ const VideoItemView: FC<{ video: TVideoItem }> = ({ video }) => {
   );
 };
 
-const VideoExViewComp: FC<TProps> = ({ data }) => {
+const VideoExViewComp: FC<TProps> = ({ data, isPreview, mediaSync }) => {
   const image = data?.images?.[0];
   const videoCount = data.videos?.length ?? 0;
   const videoLayoutClass =
@@ -116,7 +132,11 @@ const VideoExViewComp: FC<TProps> = ({ data }) => {
           {data.videos?.map((video, index) => {
             return (
               <div key={index} className="w-full min-w-0">
-                <VideoItemView video={video} />
+                <VideoItemView
+                  video={video}
+                  mediaIndex={index}
+                  mediaSync={isPreview ? null : mediaSync}
+                />
                 {!!video.title && (
                   <p className="text-center mt-2 text-base sm:text-lg font-semibold break-words px-1">
                     {video.title}

@@ -680,6 +680,12 @@
       "tooltip": "Use this if students got lost during the lesson. When you click the button, all students in the lesson will be moved to the current task you’re looking at.",
       "cantDetectCurrentTask": "Couldn't detect the current task on the screen"
     },
+    "syncMedia": {
+      "tooltip": "Play in sync with students",
+      "tooltipOn": "Sync is on. Pause and seeking follow for students",
+      "join": "Tap to listen together with the teacher",
+      "notConnected": "Couldn't reach the students. Try again."
+    },
     "participants": "PARTICIPANTS",
     "participantsShort": "Partic.",
     "participantsButton": "Participants",

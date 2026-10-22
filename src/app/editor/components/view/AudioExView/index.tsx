@@ -15,6 +15,10 @@ import "react-medium-image-zoom/dist/styles.css";
 import { T } from "@/i18n/T";
 import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import { useTranslation } from "react-i18next";
+import { SyncWithStudentsButton } from "@/app/lessons/mediaSync/SyncWithStudentsButton";
+import { useSyncedMediaElement } from "@/app/lessons/mediaSync/useSyncedMediaElement";
+import { useTeacherMediaSync } from "@/app/lessons/mediaSync/useTeacherMediaSync";
+import type { TLessonMediaSyncTarget } from "@/app/lessons/mediaSync/types";
 
 /** Inline SVGs so play/pause/volume/loop work when Iconify API is blocked (corporate / CSP). */
 const AP_ICON = {
@@ -123,6 +127,7 @@ const ensureAudioFilename = (name: string, mime?: string) => {
 type TProps = {
   data: TAudioData;
   isPreview?: boolean;
+  mediaSync?: TLessonMediaSyncTarget | null;
 };
 
 const extractAudioSrcFromHtml = (html?: string) => {
@@ -139,7 +144,7 @@ const stripAudioElements = (html?: string) => {
     .trim();
 };
 
-export const AudioExView: FC<TProps> = ({ data }) => {
+export const AudioExView: FC<TProps> = ({ data, isPreview, mediaSync }) => {
   const { t } = useTranslation();
   const downloadLabel = t("common.download", { defaultValue: "Скачать" });
   const image = data?.images?.[0];
@@ -232,6 +237,32 @@ export const AudioExView: FC<TProps> = ({ data }) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const deferSrcLoadRef = useRef(true);
   const [deferSrcLoad, setDeferSrcLoad] = useState(true);
+  const canSync = !!mediaSync && !isPreview && !!audioSrc;
+
+  const ensureAudioSource = () => {
+    if (!deferSrcLoadRef.current) return;
+    deferSrcLoadRef.current = false;
+    setDeferSrcLoad(false);
+  };
+
+  useSyncedMediaElement({
+    enabled: canSync && mediaSync?.role === "student",
+    exId: mediaSync?.exId || 0,
+    kind: "audio",
+    mediaIndex: 0,
+    getElement: () => playerRef.current?.audio?.current ?? null,
+    ensureSource: ensureAudioSource,
+  });
+
+  const { active: syncOn, toggleSync } = useTeacherMediaSync({
+    enabled: canSync && mediaSync?.role === "teacher",
+    lessonId: mediaSync?.lessonId || 0,
+    exId: mediaSync?.exId || 0,
+    kind: "audio",
+    mediaIndex: 0,
+    getElement: () => playerRef.current?.audio?.current ?? null,
+    ensureSource: ensureAudioSource,
+  });
 
   useEffect(() => {
     deferSrcLoadRef.current = true;
@@ -321,7 +352,16 @@ export const AudioExView: FC<TProps> = ({ data }) => {
         {!!audioSrc && (
           <div className="flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10 mx-auto w-full min-w-0">
             <Card radius="md" className="p-3 sm:p-4 box-border min-w-0">
-              <div className="relative flex items-center justify-center min-h-[28px] px-8">
+              <div
+                className={`relative flex items-center justify-center min-h-[28px] ${
+                  canSync && mediaSync?.role === "teacher" ? "min-h-11 px-14" : "px-8"
+                }`}
+              >
+                {canSync && mediaSync?.role === "teacher" && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2">
+                    <SyncWithStudentsButton active={syncOn} onClick={() => void toggleSync()} />
+                  </div>
+                )}
                 <p
                   className="text-center"
                   style={{ fontWeight: 500, color: "#3F28C6" }}
@@ -345,7 +385,7 @@ export const AudioExView: FC<TProps> = ({ data }) => {
                 <AudioPlayer
                   ref={playerRef}
                   src={deferSrcLoad ? undefined : audioSrc}
-                  preload="none"
+                  preload={deferSrcLoad ? "none" : "auto"}
                   showJumpControls={false}
                   customIcons={{
                     play: AP_ICON.play,

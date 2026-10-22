@@ -59,6 +59,7 @@ import { LessonToolTrigger } from "@/app/lessons/components/LessonToolTrigger";
 import { BELOW_SITE_HEADER_STICKY_TOP_CLASS } from "@/constants/uiLayers";
 import { useRedirectIfLessonLockedOnTrial } from "@/app/subscription/helpers";
 import { LessonModeBanner } from "@/app/lessons/components/LessonModeBanner";
+import { useLessonMediaSync } from "@/app/lessons/mediaSync/useLessonMediaSync";
 
 const ParticipantsIcon = () => (
   <svg
@@ -99,6 +100,11 @@ export default function LessonPage() {
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
+  useLessonMediaSync({
+    lessonId: lessonIdNum || 0,
+    enabled: !authIsLoading && !!lessonIdNum && (!!isTeacher || !!isStudent),
+    role: isTeacher ? "teacher" : isStudent ? "student" : null,
+  });
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const { exList, getExList, setExList } = useExList(
     lessonIdNum ?? undefined,

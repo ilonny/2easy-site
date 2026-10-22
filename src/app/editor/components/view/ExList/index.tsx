@@ -65,6 +65,7 @@ import {
   EX_ANSWERS_RESET_EVENT,
   TExAnswersResetDetail,
 } from "@/app/editor/hooks/useExAnswer";
+import type { TLessonMediaSyncTarget } from "@/app/lessons/mediaSync/types";
 
 const ANSWER_EX_TYPES = new Set([
   "text-checklist",
@@ -140,6 +141,7 @@ type TExViewerProps = {
   isView?: boolean;
   isPresentationMode?: boolean;
   onChangeIsVisible?: () => void;
+  mediaSync?: TLessonMediaSyncTarget | null;
 };
 
 const ExViewer: FC<TExViewerProps> = ({
@@ -147,11 +149,15 @@ const ExViewer: FC<TExViewerProps> = ({
   id,
   data,
   onChangeIsVisible,
+  mediaSync,
   ...rest
 }) => {
   const dataWithId = useMemo(() => ({ ...data, id }), [data, id]);
   const PlainView = VIEWS_WITHOUT_ID[type];
   if (PlainView) {
+    if ((type === "audio" || type === "video") && mediaSync) {
+      return <PlainView {...rest} data={data} mediaSync={mediaSync} />;
+    }
     return <PlainView {...rest} data={data} />;
   }
   const View = VIEWS_WITH_ID[type];
@@ -285,6 +291,18 @@ const ExListItem: FC<TExListItemProps> = ({
     }
     return isTeacher;
   }, [is2easy, isAdmin, isTeacher]);
+  const lessonIdForSync =
+    Number(ex.lesson_id) ||
+    Number(pathname?.match(/^\/lessons\/(\d+)/)?.[1] || 0);
+  const mediaSync = useMemo<TLessonMediaSyncTarget | null>(() => {
+    if (!isView || !isLessonMode || !lessonIdForSync || !Number(ex.id)) return null;
+    if (!isTeacher && !isStudent) return null;
+    return {
+      lessonId: lessonIdForSync,
+      exId: Number(ex.id),
+      role: isTeacher ? "teacher" : "student",
+    };
+  }, [ex.id, isLessonMode, isStudent, isTeacher, isView, lessonIdForSync]);
   return (
     <div key={ex.id} className="">
       <div
@@ -360,6 +378,7 @@ const ExListItem: FC<TExListItemProps> = ({
           isView={isView}
           isPresentationMode={isPresentationMode}
           onChangeIsVisible={onChangeIsVisible}
+          mediaSync={mediaSync}
         />
         {canResetAnswers && (
           <ResetAnswersControl

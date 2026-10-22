@@ -8,12 +8,23 @@ import {
   useState,
   PointerEvent as ReactPointerEvent,
 } from "react";
+import { SyncWithStudentsButton } from "@/app/lessons/mediaSync/SyncWithStudentsButton";
+import { useSyncedMediaElement } from "@/app/lessons/mediaSync/useSyncedMediaElement";
+import { useTeacherMediaSync } from "@/app/lessons/mediaSync/useTeacherMediaSync";
 import styles from "./styles.module.css";
+
+type TSync = {
+  lessonId: number;
+  exId: number;
+  mediaIndex: number;
+  role: "teacher" | "student";
+} | null;
 
 type TProps = {
   src: string;
   title?: string;
   className?: string;
+  sync?: TSync;
 };
 
 const formatTime = (seconds: number) => {
@@ -53,7 +64,7 @@ const IconFullscreen = () => (
   </svg>
 );
 
-export const VideoPlayer: FC<TProps> = ({ src, title, className }) => {
+export const VideoPlayer: FC<TProps> = ({ src, title, className, sync = null }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const progressRef = useRef<HTMLDivElement | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -174,6 +185,23 @@ export const VideoPlayer: FC<TProps> = ({ src, title, className }) => {
     }
   };
 
+  useSyncedMediaElement({
+    enabled: sync?.role === "student",
+    exId: sync?.exId || 0,
+    kind: "video",
+    mediaIndex: sync?.mediaIndex || 0,
+    getElement: () => videoRef.current,
+  });
+
+  const { active: syncOn, toggleSync } = useTeacherMediaSync({
+    enabled: sync?.role === "teacher",
+    lessonId: sync?.lessonId || 0,
+    exId: sync?.exId || 0,
+    kind: "video",
+    mediaIndex: sync?.mediaIndex || 0,
+    getElement: () => videoRef.current,
+  });
+
   const progress = duration > 0 ? (current / duration) * 100 : 0;
 
   return (
@@ -186,6 +214,19 @@ export const VideoPlayer: FC<TProps> = ({ src, title, className }) => {
       }}
       onFocus={revealControls}
     >
+      {sync?.role === "teacher" && (
+        <div
+          className="absolute right-3 top-3 z-30"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <SyncWithStudentsButton
+            placement="left"
+            active={syncOn}
+            onClick={() => void toggleSync()}
+          />
+        </div>
+      )}
       <video
         ref={videoRef}
         src={src}
