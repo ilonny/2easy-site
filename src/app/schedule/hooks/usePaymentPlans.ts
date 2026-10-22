@@ -1,6 +1,7 @@
 import { checkResponse, fetchDelete, fetchGet, fetchPatch, fetchPostJson } from "@/api";
 import { useCallback, useState } from "react";
 import type { PaymentPlan, PaymentStats, PaymentStatsGranularity } from "../types";
+import type { ScheduleWorkspace } from "./useScheduleEvents";
 
 export type LoadStatsParams = {
   from: string;
@@ -8,7 +9,9 @@ export type LoadStatsParams = {
   granularity: PaymentStatsGranularity;
 };
 
-export const usePaymentPlans = () => {
+export const usePaymentPlans = (workspace?: ScheduleWorkspace) => {
+  const workspaceScope = workspace?.workspaceScope;
+  const schoolId = workspace?.schoolId;
   const [plans, setPlans] = useState<PaymentPlan[]>([]);
   const [stats, setStats] = useState<PaymentStats | null>(null);
   const [loading, setLoading] = useState(false);
@@ -20,6 +23,8 @@ export const usePaymentPlans = () => {
       const res = await fetchGet({
         path: "/schedule/payments/plans",
         isSecure: true,
+        workspaceScope,
+        schoolId,
       });
       const json = await res?.json();
       checkResponse(json);
@@ -27,7 +32,7 @@ export const usePaymentPlans = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [workspaceScope, schoolId]);
 
   const loadStats = useCallback(async (params?: LoadStatsParams) => {
     setStatsLoading(true);
@@ -40,6 +45,8 @@ export const usePaymentPlans = () => {
       const res = await fetchGet({
         path: `/schedule/payments/stats${suffix}`,
         isSecure: true,
+        workspaceScope,
+        schoolId,
       });
       const json = await res?.json();
       checkResponse(json);
@@ -47,18 +54,20 @@ export const usePaymentPlans = () => {
     } finally {
       setStatsLoading(false);
     }
-  }, []);
+  }, [workspaceScope, schoolId]);
 
   const createPlan = useCallback(async (data: Record<string, unknown>) => {
     const res = await fetchPostJson({
       path: "/schedule/payments/plans",
       isSecure: true,
       data,
+      workspaceScope,
+      schoolId,
     });
     const json = await res?.json();
     checkResponse(json);
     return json;
-  }, []);
+  }, [workspaceScope, schoolId]);
 
   const updatePlan = useCallback(
     async (id: number, data: Record<string, unknown>) => {
@@ -66,23 +75,27 @@ export const usePaymentPlans = () => {
         path: `/schedule/payments/plans/${id}`,
         isSecure: true,
         data,
+        workspaceScope,
+        schoolId,
       });
       const json = await res?.json();
       checkResponse(json);
       return json;
     },
-    [],
+    [workspaceScope, schoolId],
   );
 
   const deletePlan = useCallback(async (id: number) => {
     const res = await fetchDelete({
       path: `/schedule/payments/plans/${id}`,
       isSecure: true,
+      workspaceScope,
+      schoolId,
     });
     const json = await res?.json();
     checkResponse(json);
     return json;
-  }, []);
+  }, [workspaceScope, schoolId]);
 
   const recordPayment = useCallback(
     async (id: number, data?: Record<string, unknown>) => {
@@ -90,12 +103,14 @@ export const usePaymentPlans = () => {
         path: `/schedule/payments/plans/${id}/record`,
         isSecure: true,
         data: data || {},
+        workspaceScope,
+        schoolId,
       });
       const json = await res?.json();
       checkResponse(json);
       return json;
     },
-    [],
+    [workspaceScope, schoolId],
   );
 
   return {

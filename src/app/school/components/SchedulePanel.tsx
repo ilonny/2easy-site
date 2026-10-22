@@ -11,6 +11,7 @@ import i18n from "@/i18n/config";
 import { checkResponse, fetchGet } from "@/api";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { useScheduleEvents } from "@/app/schedule/hooks/useScheduleEvents";
+import { useTeacherAvailability } from "@/app/schedule/hooks/useTeacherAvailability";
 import { CalendarToolbar } from "@/app/schedule/components/CalendarToolbar";
 import { MonthView } from "@/app/schedule/components/MonthView";
 import { WeekView } from "@/app/schedule/components/WeekView";
@@ -52,7 +53,13 @@ export const SchedulePanel: FC<TProps> = ({
     null,
   );
 
-  const { events, loading, loadEvents } = useScheduleEvents();
+  const workspace = useMemo(
+    () => ({ workspaceScope: "school" as const, schoolId }),
+    [schoolId],
+  );
+  const { events, loading, loadEvents } = useScheduleEvents(workspace);
+  const { availability, loadAvailability } =
+    useTeacherAvailability(workspace);
   const [schoolStudents, setSchoolStudents] = useState<
     Array<{ id: number; name?: string; email?: string }>
   >([]);
@@ -63,6 +70,8 @@ export const SchedulePanel: FC<TProps> = ({
         const res = await fetchGet({
           path: `/school/${schoolId}/students`,
           isSecure: true,
+          workspaceScope: "school",
+          schoolId,
         });
         const data = await res.json();
         if (data?.success) {
@@ -167,6 +176,30 @@ export const SchedulePanel: FC<TProps> = ({
     void refreshRange();
   }, [refreshRange, schoolId]);
 
+  useEffect(() => {
+    const onInvalidate = () => {
+      void refreshRange();
+    };
+    window.addEventListener("schedule-events-invalidated", onInvalidate);
+    return () =>
+      window.removeEventListener("schedule-events-invalidated", onInvalidate);
+  }, [refreshRange]);
+
+  useEffect(() => {
+    const teacherId = canFilterTeachers ? Number(teacherFilter) : null;
+    if (canFilterTeachers && (!Number.isFinite(teacherId) || !teacherId)) {
+      return;
+    }
+    const { from, to } = rangeForView(cursor, view);
+    void loadAvailability(from, to, teacherId);
+  }, [
+    canFilterTeachers,
+    teacherFilter,
+    cursor,
+    view,
+    loadAvailability,
+  ]);
+
   const titleLabel = useMemo(() => {
     if (view === "month") return cursor.format("MMMM YYYY");
     if (view === "week") {
@@ -256,6 +289,7 @@ export const SchedulePanel: FC<TProps> = ({
                 nameById={studentNameById}
                 teacherById={teacherById}
                 showTeacher={false}
+                availability={availability}
                 onSlotClick={(day) => {
                   setCursor(day);
                   setView("day");
@@ -270,6 +304,7 @@ export const SchedulePanel: FC<TProps> = ({
                 nameById={studentNameById}
                 teacherById={teacherById}
                 showTeacher={false}
+                availability={availability}
                 onSlotClick={() => undefined}
                 onEventClick={setSelectedEvent}
               />

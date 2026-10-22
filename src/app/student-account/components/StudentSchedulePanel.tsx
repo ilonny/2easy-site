@@ -6,7 +6,6 @@ import dayjs, { Dayjs } from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 import "dayjs/locale/ru";
 import { T } from "@/i18n/T";
-import i18n from "@/i18n/config";
 import { checkResponse, fetchGet } from "@/api";
 import { AuthContext } from "@/auth";
 import { brandPrimaryBtnClassName } from "@/components/brandUi";
@@ -28,6 +27,7 @@ type StudentInfo = {
   name?: string;
   email?: string;
   user_id?: string | number;
+  school_id?: number | null;
 };
 
 type TProps = {
@@ -62,7 +62,11 @@ export const StudentSchedulePanel: FC<TProps> = ({
     updateEvent,
     deleteEvent,
     emailEvent,
-  } = useScheduleEvents();
+  } = useScheduleEvents(
+    student.school_id
+      ? { workspaceScope: "school", schoolId: Number(student.school_id) }
+      : { workspaceScope: "personal", schoolId: null },
+  );
 
   const teacherUserId = Number(student.user_id) || null;
   const myUserId = Number(profile?.id) || null;
@@ -80,19 +84,31 @@ export const StudentSchedulePanel: FC<TProps> = ({
     const { from, to } = rangeForView(cursor, view);
     await loadEvents(from, to, {
       studentId,
-      // Narrow to owning teacher when known (helps school-wide lists)
-      teacherUserId: teacherUserId && teacherUserId > 0 ? teacherUserId : null,
     });
-  }, [cursor, view, loadEvents, studentId, teacherUserId]);
+  }, [cursor, view, loadEvents, studentId]);
 
   useEffect(() => {
     void refreshRange();
   }, [refreshRange]);
 
   useEffect(() => {
+    const onInvalidate = () => {
+      void refreshRange();
+    };
+    window.addEventListener("schedule-events-invalidated", onInvalidate);
+    return () =>
+      window.removeEventListener("schedule-events-invalidated", onInvalidate);
+  }, [refreshRange]);
+
+  useEffect(() => {
     if (!canEdit) return;
     (async () => {
-      const res = await fetchGet({ path: "/lessons", isSecure: true });
+      const res = await fetchGet({
+        path: "/lessons",
+        isSecure: true,
+        workspaceScope: student.school_id ? "school" : "personal",
+        schoolId: student.school_id ? Number(student.school_id) : null,
+      });
       const json = await res?.json();
       checkResponse(json);
       const list = Array.isArray(json)
@@ -110,7 +126,7 @@ export const StudentSchedulePanel: FC<TProps> = ({
           })),
       );
     })();
-  }, [canEdit]);
+  }, [canEdit, student.school_id]);
 
   const studentNameById = useMemo(() => {
     const map = new Map<number, string>();

@@ -6,6 +6,9 @@ import styles from "../styles.module.css";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { getLocalTimeZoneLabel } from "../utils/timezone";
+import { Button, Input, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
+import { useCalendarHours } from "../hooks/useCalendarHours";
+import { useState } from "react";
 
 type TProps = {
   cursor: Dayjs;
@@ -32,6 +35,9 @@ export const CalendarToolbar = ({
     month: i18n.t("schedule.viewMonth"),
   };
   const tzLabel = getLocalTimeZoneLabel();
+  const { hours, setHours } = useCalendarHours();
+  const [draftStart, setDraftStart] = useState(hours.start);
+  const [draftEnd, setDraftEnd] = useState(hours.end);
 
   return (
     <div className={styles.toolbar}>
@@ -53,6 +59,70 @@ export const CalendarToolbar = ({
         </div>
       </div>
       <div className={styles.toolbarRight}>
+        <Popover
+          placement="bottom-end"
+          onOpenChange={(open) => {
+            if (open) {
+              setDraftStart(hours.start);
+              setDraftEnd(hours.end);
+            }
+          }}
+        >
+          <PopoverTrigger>
+            <Button size="sm" variant="flat" className="min-w-0 rounded-[10px]">
+              <T
+                k="schedule.visibleHours"
+                values={{
+                  start: `${String(hours.start).padStart(2, "0")}:00`,
+                  end: `${String(hours.end).padStart(2, "0")}:00`,
+                }}
+              />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[260px] p-4">
+            <div className="flex w-full flex-col gap-3">
+              <p className="text-sm font-semibold">
+                <T k="schedule.visibleHoursTitle" />
+              </p>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min={0}
+                  max={22}
+                  size="sm"
+                  label={<T k="schedule.start" />}
+                  value={String(draftStart)}
+                  onValueChange={(value) => setDraftStart(Number(value))}
+                />
+                <Input
+                  type="number"
+                  min={1}
+                  max={24}
+                  size="sm"
+                  label={<T k="schedule.end" />}
+                  value={String(draftEnd)}
+                  onValueChange={(value) => setDraftEnd(Number(value))}
+                />
+              </div>
+              <Button
+                size="sm"
+                color="primary"
+                isDisabled={
+                  !Number.isFinite(draftStart) ||
+                  !Number.isFinite(draftEnd) ||
+                  draftStart < 0 ||
+                  draftEnd > 24 ||
+                  draftEnd <= draftStart
+                }
+                onPress={() =>
+                  setHours({ start: draftStart, end: draftEnd })
+                }
+              >
+                <T k="schedule.applyVisibleHours" />
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
         <div className={styles.segment} role="tablist">
           {views.map((v) => (
             <button

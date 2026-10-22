@@ -2,11 +2,21 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import type { ScheduleEvent } from "../types";
+import type {
+  ScheduleAvailability,
+  ScheduleEvent,
+  SelectedScheduleRange,
+} from "../types";
 import { backgroundForColors, colorsForEvent } from "../types";
-import { eventsOnDay, HOURS, nowScrollTop } from "../utils/calendar";
+import { eventsOnDay, nowScrollTop } from "../utils/calendar";
 import { eventChipText, eventMinHeight } from "./eventUi";
 import styles from "../styles.module.css";
+import { useCalendarHours } from "../hooks/useCalendarHours";
+import {
+  rangeForHour,
+  rangeKey,
+  slotAvailabilityStyle,
+} from "./availabilityUi";
 
 type TProps = {
   cursor: Dayjs;
@@ -15,6 +25,10 @@ type TProps = {
   nameById?: Map<number, string>;
   teacherById?: Map<number, string>;
   showTeacher?: boolean;
+  availability?: ScheduleAvailability;
+  selectionMode?: boolean;
+  selectedRangeKeys?: Set<string>;
+  onRangeToggle?: (range: SelectedScheduleRange, selected: boolean) => void;
   onSlotClick: (day: Dayjs, hour: number) => void;
   onEventClick: (event: ScheduleEvent) => void;
 };
@@ -22,16 +36,20 @@ type TProps = {
 export const DayView = ({
   cursor,
   events,
-  detailed,
   nameById,
   teacherById,
   showTeacher,
+  availability,
+  selectionMode,
+  selectedRangeKeys,
+  onRangeToggle,
   onSlotClick,
   onEventClick,
 }: TProps) => {
   const dayEvents = eventsOnDay(events, cursor);
+  const { hours: visibleWindow, visibleHours } = useCalendarHours();
   const hourHeight = 60;
-  const gridHeight = HOURS.length * hourHeight;
+  const gridHeight = visibleHours.length * hourHeight;
   const today = dayjs();
   const isToday = cursor.isSame(today, "day");
   const [now, setNow] = useState(dayjs());
@@ -46,19 +64,25 @@ export const DayView = ({
     const el = scrollRef.current;
     if (!el) return;
     const target = isToday
-      ? nowScrollTop(hourHeight)
-      : Math.max(0, (9 - HOURS[0]) * hourHeight);
+      ? nowScrollTop(hourHeight, 48, visibleHours)
+      : Math.max(0, (9 - visibleWindow.start) * hourHeight);
     requestAnimationFrame(() => {
       el.scrollTop = target;
     });
-  }, [cursor, isToday, hourHeight]);
+  }, [
+    cursor,
+    isToday,
+    hourHeight,
+    visibleHours,
+    visibleWindow.start,
+  ]);
 
   const nowTop = useMemo(() => {
     if (!isToday) return null;
     const h = now.hour() + now.minute() / 60;
-    if (h < HOURS[0] || h > HOURS[HOURS.length - 1] + 1) return null;
-    return (h - HOURS[0]) * hourHeight;
-  }, [now, isToday, hourHeight]);
+    if (h < visibleWindow.start || h > visibleWindow.end) return null;
+    return (h - visibleWindow.start) * hourHeight;
+  }, [now, isToday, hourHeight, visibleWindow]);
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
@@ -84,15 +108,42 @@ export const DayView = ({
         className="min-h-0 flex-1 overflow-auto overscroll-contain"
       >
         <div className="relative pb-5" style={{ height: gridHeight + 20 }}>
-          {HOURS.map((hour) => (
+          {visibleHours.map((hour) => (
             <button
               key={hour}
               type="button"
-              onClick={() => onSlotClick(cursor, hour)}
+              onClick={() => {
+                if (!selectionMode) onSlotClick(cursor, hour);
+              }}
+              onPointerDown={(event) => {
+                if (!selectionMode) return;
+                event.preventDefault();
+                const range = rangeForHour(cursor, hour);
+                onRangeToggle?.(
+                  range,
+                  !selectedRangeKeys?.has(rangeKey(range)),
+                );
+              }}
+              onPointerEnter={(event) => {
+                if (!selectionMode || event.buttons !== 1) return;
+                const range = rangeForHour(cursor, hour);
+                if (!selectedRangeKeys?.has(rangeKey(range))) {
+                  onRangeToggle?.(range, true);
+                }
+              }}
               className="absolute left-0 right-0 flex border-t border-[#f0f0f5] hover:bg-[#f8f8fa]"
               style={{
-                top: (hour - HOURS[0]) * hourHeight,
+                top: (hour - visibleWindow.start) * hourHeight,
                 height: hourHeight,
+                ...slotAvailabilityStyle(cursor, hour, availability),
+                ...(selectedRangeKeys?.has(
+                  rangeKey(rangeForHour(cursor, hour)),
+                )
+                  ? {
+                      backgroundColor: "rgba(90,66,212,.22)",
+                      boxShadow: "inset 0 0 0 2px #5a42d4",
+                    }
+                  : {}),
               }}
             >
               <div className="w-14 shrink-0 pr-2 text-right text-[11px] text-[#aeaeb2]">
@@ -107,7 +158,9 @@ export const DayView = ({
             className="pointer-events-none absolute left-0 w-14 pr-2 text-right text-[11px] text-[#aeaeb2]"
             style={{ top: gridHeight }}
           >
-            <span className="relative -top-2">00:00</span>
+            <span className="relative -top-2">
+              {`${String(visibleWindow.end).padStart(2, "0")}:00`}
+            </span>
           </div>
           <div className="pointer-events-none absolute inset-0 left-14">
             {dayEvents.map((event) => {
@@ -118,7 +171,7 @@ export const DayView = ({
                 end.diff(start, "minute") / 60,
                 event.type === "payment" ? 1 : 0.45,
               );
-              const top = (startHour - HOURS[0]) * hourHeight;
+              const top = (startHour - visibleWindow.start) * hourHeight;
               const height = Math.min(
                 durationHours * hourHeight,
                 gridHeight - top,

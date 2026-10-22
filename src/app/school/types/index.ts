@@ -74,7 +74,7 @@ export const COMMON_TIMEZONES = [
   "UTC",
 ];
 
-export const LESSON_DURATIONS = [30, 45, 60, 90];
+export const LESSON_DURATIONS = [30, 45, 55, 60, 70, 90, 120];
 
 /** 0=Sun … 6=Sat — labels via i18n school.dow.* */
 export const DOW_ORDER = [1, 2, 3, 4, 5, 6, 0];
@@ -91,14 +91,15 @@ export type SchoolSubscription = {
 export type SchoolInfo = {
   id: number;
   name: string;
+  avatar?: string | null;
   memberId?: number;
-  roles: SchoolRole[];
-  access: SchoolAccessFlags;
-  subscription: SchoolSubscription;
+  roles?: SchoolRole[];
+  access?: Partial<SchoolAccessFlags>;
+  subscription?: SchoolSubscription;
   settings?: {
-    timezone: string;
-    defaultLessonMinutes: number;
-    workingHoursEnabled: boolean;
+    timezone?: string;
+    defaultLessonMinutes?: number;
+    workingHoursEnabled?: boolean;
   };
 };
 
@@ -141,6 +142,18 @@ export type SchoolStats = {
     weekday: number;
     label: string;
     count: number;
+  }>;
+  members_by_month?: Array<{
+    month: string;
+    label: string;
+    added: number;
+    total: number;
+  }>;
+  students_by_month?: Array<{
+    month: string;
+    label: string;
+    added: number;
+    total: number;
   }>;
   teachers_load: Array<{
     user_id: number;

@@ -76,6 +76,7 @@ type TProps = {
     name?: string;
     email?: string;
     user_id?: string | number;
+    school_id?: number | null;
   } | null;
   /** Teacher / school staff may edit schedule */
   canEditSchedule?: boolean;

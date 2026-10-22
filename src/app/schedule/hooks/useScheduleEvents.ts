@@ -2,12 +2,20 @@ import { checkResponse, fetchDelete, fetchGet, fetchPatch, fetchPostJson } from 
 import { useCallback, useState } from "react";
 import type { ScheduleEvent } from "../types";
 
+export type ScheduleWorkspace = {
+  workspaceScope: "personal" | "school";
+  schoolId?: number | null;
+};
+
 const isMissingTitle = (title?: string | null) => {
   const t = String(title || "").trim();
   return !t || /^Урок\s*#\d+$/i.test(t);
 };
 
-const enrichLessonTitles = async (events: ScheduleEvent[]) => {
+const enrichLessonTitles = async (
+  events: ScheduleEvent[],
+  workspace?: ScheduleWorkspace,
+) => {
   const missingIds = [
     ...new Set(
       events
@@ -28,6 +36,7 @@ const enrichLessonTitles = async (events: ScheduleEvent[]) => {
     const res = await fetchGet({
       path: "/lessons",
       isSecure: true,
+      ...workspace,
     });
     const json = await res?.json();
     const lessons = Array.isArray(json?.lessons) ? json.lessons : [];
@@ -50,7 +59,9 @@ const enrichLessonTitles = async (events: ScheduleEvent[]) => {
   });
 };
 
-export const useScheduleEvents = () => {
+export const useScheduleEvents = (workspace?: ScheduleWorkspace) => {
+  const workspaceScope = workspace?.workspaceScope;
+  const schoolId = workspace?.schoolId;
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -77,19 +88,24 @@ export const useScheduleEvents = () => {
         const res = await fetchGet({
           path: `/schedule/events?${qs.toString()}`,
           isSecure: true,
+          workspaceScope,
+          schoolId,
         });
         const json = await res?.json();
         checkResponse(json);
         if (json?.success) {
           const list = (json.events || []) as ScheduleEvent[];
-          const enriched = await enrichLessonTitles(list);
+          const enriched = await enrichLessonTitles(
+            list,
+            workspaceScope ? { workspaceScope, schoolId } : undefined,
+          );
           setEvents(enriched);
         }
       } finally {
         setLoading(false);
       }
     },
-    [],
+    [workspaceScope, schoolId],
   );
 
   const createEvent = useCallback(async (data: Record<string, unknown>) => {
@@ -97,11 +113,13 @@ export const useScheduleEvents = () => {
       path: "/schedule/events",
       isSecure: true,
       data,
+      workspaceScope,
+      schoolId,
     });
     const json = await res?.json();
     checkResponse(json);
     return json;
-  }, []);
+  }, [workspaceScope, schoolId]);
 
   const updateEvent = useCallback(
     async (id: number, data: Record<string, unknown>) => {
@@ -109,34 +127,40 @@ export const useScheduleEvents = () => {
         path: `/schedule/events/${id}`,
         isSecure: true,
         data,
+        workspaceScope,
+        schoolId,
       });
       const json = await res?.json();
       checkResponse(json);
       return json;
     },
-    [],
+    [workspaceScope, schoolId],
   );
 
   const deleteEvent = useCallback(async (id: number, scope: string) => {
     const res = await fetchDelete({
       path: `/schedule/events/${id}?scope=${encodeURIComponent(scope)}`,
       isSecure: true,
+      workspaceScope,
+      schoolId,
     });
     const json = await res?.json();
     checkResponse(json);
     return json;
-  }, []);
+  }, [workspaceScope, schoolId]);
 
   const emailEvent = useCallback(async (id: number, email: string) => {
     const res = await fetchPostJson({
       path: `/schedule/events/${id}/email`,
       isSecure: true,
       data: { email },
+      workspaceScope,
+      schoolId,
     });
     const json = await res?.json();
     checkResponse(json);
     return json;
-  }, []);
+  }, [workspaceScope, schoolId]);
 
   return {
     events,

@@ -3,7 +3,8 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/ru";
-import { Button, Spinner } from "@nextui-org/react";
+import { Button, Select, SelectItem, Spinner } from "@nextui-org/react";
+import Link from "next/link";
 import { BrandPill, CatalogPageShell } from "@/components";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { AuthContext } from "@/auth";
@@ -12,11 +13,15 @@ import { checkResponse, fetchGet } from "@/api";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
-import { useStudentList } from "@/app/student/hooks/useStudentList";
-import { getActiveSchoolId } from "@/app/school/lib/activeSchool";
-import type { SchoolMember } from "@/app/school/types";
+import {
+  getActiveWorkspace,
+  setActiveWorkspace,
+  type WorkspaceContext,
+} from "@/app/school/lib/activeSchool";
+import type { SchoolInfo, SchoolMember } from "@/app/school/types";
 import { useScheduleEvents } from "./hooks/useScheduleEvents";
 import { usePaymentPlans } from "./hooks/usePaymentPlans";
+import { useTeacherAvailability } from "./hooks/useTeacherAvailability";
 import { MonthView } from "./components/MonthView";
 import { WeekView } from "./components/WeekView";
 import { DayView } from "./components/DayView";
@@ -24,7 +29,13 @@ import { EventModal } from "./components/EventModal";
 import { PaymentControlTab } from "./components/PaymentControlTab";
 import { CalendarToolbar } from "./components/CalendarToolbar";
 import { StudentSidebar } from "./components/StudentSidebar";
-import type { EventFormValues, ScheduleEvent, ScheduleView } from "./types";
+import type {
+  EventFormValues,
+  ScheduleEvent,
+  ScheduleView,
+  SelectedScheduleRange,
+} from "./types";
+import { rangeKey } from "./components/availabilityUi";
 import { eventStudentIds } from "./types";
 import { rangeForView } from "./utils/calendar";
 import styles from "./styles.module.css";
@@ -83,9 +94,29 @@ export default function SchedulePage() {
   const [schoolStudents, setSchoolStudents] = useState<
     Array<{ id: number; name?: string; email?: string }>
   >([]);
+  const [personalStudents, setPersonalStudents] = useState<
+    Array<{ id: number; name?: string; email?: string }>
+  >([]);
+  const [schools, setSchools] = useState<SchoolInfo[]>([]);
+  const [schoolsLoaded, setSchoolsLoaded] = useState(false);
+  const [workspace, setWorkspace] =
+    useState<WorkspaceContext>(getActiveWorkspace);
   const [teacherFilter, setTeacherFilter] = useState<string>("all");
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedRanges, setSelectedRanges] = useState<
+    Map<string, SelectedScheduleRange>
+  >(new Map());
 
-  const { students, getStudents } = useStudentList();
+  const scheduleWorkspace = useMemo(
+    () =>
+      isStudent
+        ? undefined
+        : {
+            workspaceScope: workspace.scope,
+            schoolId: workspace.scope === "school" ? workspace.schoolId : null,
+          },
+    [isStudent, workspace],
+  );
   const {
     events,
     loading,
@@ -94,7 +125,7 @@ export default function SchedulePage() {
     updateEvent,
     deleteEvent,
     emailEvent,
-  } = useScheduleEvents();
+  } = useScheduleEvents(scheduleWorkspace);
   const {
     plans,
     stats,
@@ -106,7 +137,13 @@ export default function SchedulePage() {
     deletePlan,
     recordPayment,
     statsLoading,
-  } = usePaymentPlans();
+  } = usePaymentPlans(scheduleWorkspace);
+  const {
+    availability,
+    loading: availabilitySaving,
+    loadAvailability,
+    markInactive,
+  } = useTeacherAvailability(scheduleWorkspace);
 
   useEffect(() => {
     if (isMobile) setView((v) => (v === "week" ? "day" : v));
@@ -127,45 +164,108 @@ export default function SchedulePage() {
   }, [refreshRange, teacherAllowed, isTeacher]);
 
   useEffect(() => {
-    if (isTeacher && teacherAllowed) getStudents();
-  }, [isTeacher, teacherAllowed, getStudents]);
+    const onInvalidate = () => {
+      void refreshRange();
+    };
+    window.addEventListener("schedule-events-invalidated", onInvalidate);
+    return () =>
+      window.removeEventListener("schedule-events-invalidated", onInvalidate);
+  }, [refreshRange]);
+
+  const availabilityTeacherId =
+    canFilterTeachers && teacherFilter !== "all"
+      ? Number(teacherFilter)
+      : workspace.scope === "school"
+        ? Number(profile?.id) || null
+        : null;
+  const showAvailability =
+    workspace.scope === "school" &&
+    (!canFilterTeachers || teacherFilter !== "all") &&
+    Number.isFinite(availabilityTeacherId);
+
+  useEffect(() => {
+    if (!isTeacher || !teacherAllowed || !showAvailability) return;
+    const { from, to } = rangeForView(cursor, view);
+    void loadAvailability(from, to, availabilityTeacherId);
+  }, [
+    isTeacher,
+    teacherAllowed,
+    showAvailability,
+    cursor,
+    view,
+    availabilityTeacherId,
+    loadAvailability,
+  ]);
+
+  useEffect(() => {
+    setSelectionMode(false);
+    setSelectedRanges(new Map());
+  }, [workspace, teacherFilter]);
 
   useEffect(() => {
     if (!isTeacher || !teacherAllowed) return;
     (async () => {
       try {
-        const meRes = await fetchGet({ path: "/school/me", isSecure: true });
+        const meRes = await fetchGet({
+          path: "/school/me",
+          isSecure: true,
+          workspaceScope: "personal",
+        });
         const me = await meRes?.json();
-        if (!me?.success || !Array.isArray(me.schools) || !me.schools.length) {
+        setSchools(me?.success && Array.isArray(me.schools) ? me.schools : []);
+      } finally {
+        setSchoolsLoaded(true);
+      }
+    })();
+  }, [isTeacher, teacherAllowed]);
+
+  useEffect(() => {
+    if (!isTeacher || !teacherAllowed || !schoolsLoaded) return;
+    (async () => {
+      try {
+        if (workspace.scope === "personal") {
+          const stuRes = await fetchGet({
+            path: "/student",
+            isSecure: true,
+            workspaceScope: "personal",
+          });
+          const stu = await stuRes?.json();
+          setPersonalStudents(Array.isArray(stu) ? stu : stu?.students || []);
           setCanFilterTeachers(false);
           setSchoolMembers([]);
           setSchoolStudents([]);
+          setTeacherFilter("all");
           return;
         }
-        const activeId = getActiveSchoolId();
-        const school =
-          me.schools.find((s: { id: number }) => s.id === activeId) ||
-          me.schools[0];
+        const school = schools.find((s) => s.id === workspace.schoolId);
+        if (!school) {
+          const personal: WorkspaceContext = {
+            scope: "personal",
+            schoolId: null,
+          };
+          setActiveWorkspace(personal);
+          setWorkspace(personal);
+          return;
+        }
         const canFilter = Boolean(school?.access?.canSeeAllSchedule);
         setCanFilterTeachers(canFilter);
-        if (!school?.id) {
-          setSchoolMembers([]);
-          setSchoolStudents([]);
-          return;
-        }
-        // School students come from school API — never from personal /student list.
         const stuRes = await fetchGet({
           path: `/school/${school.id}/students`,
           isSecure: true,
+          workspaceScope: "school",
+          schoolId: school.id,
         });
         const stu = await stuRes?.json();
         if (stu?.success) setSchoolStudents(stu.students || []);
         else setSchoolStudents([]);
+        setPersonalStudents([]);
 
         if (canFilter) {
           const memRes = await fetchGet({
             path: `/school/${school.id}/members`,
             isSecure: true,
+            workspaceScope: "school",
+            schoolId: school.id,
           });
           const mem = await memRes?.json();
           if (mem?.success) setSchoolMembers(mem.members || []);
@@ -177,7 +277,7 @@ export default function SchedulePage() {
         setCanFilterTeachers(false);
       }
     })();
-  }, [isTeacher, teacherAllowed]);
+  }, [isTeacher, teacherAllowed, schoolsLoaded, schools, workspace]);
 
   const schoolTeachers = useMemo(
     () =>
@@ -208,7 +308,12 @@ export default function SchedulePage() {
   useEffect(() => {
     if (!isTeacher || !teacherAllowed) return;
     (async () => {
-      const res = await fetchGet({ path: "/lessons", isSecure: true });
+      const res = await fetchGet({
+        path: "/lessons",
+        isSecure: true,
+        workspaceScope: scheduleWorkspace?.workspaceScope,
+        schoolId: scheduleWorkspace?.schoolId,
+      });
       const json = await res?.json();
       checkResponse(json);
       const list = Array.isArray(json)
@@ -216,19 +321,29 @@ export default function SchedulePage() {
         : Array.isArray(json?.lessons)
           ? json.lessons
           : [];
+      const typedList = list as Array<{
+        id?: number;
+        title?: string;
+        user_id?: number;
+      }>;
       setLessons(
-        list
-          .filter((l: any) => l?.id)
-          .map((l: any) => ({
-            id: l.id,
-            title: l.title,
-            user_id: l.user_id,
+        typedList
+          .filter((lesson) => lesson?.id)
+          .map((lesson) => ({
+            id: Number(lesson.id),
+            title: lesson.title,
+            user_id: lesson.user_id,
           })),
       );
     })();
-  }, [isTeacher, teacherAllowed]);
+  }, [
+    isTeacher,
+    teacherAllowed,
+    scheduleWorkspace?.workspaceScope,
+    scheduleWorkspace?.schoolId,
+  ]);
 
-  /** Personal + school students for schedule filters (lists stay separate elsewhere). */
+  /** Never merge personal and school rosters: the selected workspace owns the list. */
   const scheduleStudents = useMemo(() => {
     const map = new Map<
       number,
@@ -240,16 +355,16 @@ export default function SchedulePage() {
       if (map.has(id)) return;
       map.set(id, { id, name: row.name, email: row.email });
     };
-    for (const s of students as Array<{
+    const source = workspace.scope === "school" ? schoolStudents : personalStudents;
+    for (const s of source as Array<{
       id?: number;
       name?: string;
       email?: string;
     }>) {
       add(s);
     }
-    for (const s of schoolStudents) add(s);
     return Array.from(map.values());
-  }, [students, schoolStudents]);
+  }, [workspace.scope, personalStudents, schoolStudents]);
 
   const studentNameById = useMemo(() => {
     const map = new Map<number, string>();
@@ -325,6 +440,49 @@ export default function SchedulePage() {
         )
       }
     >
+      {isTeacher && (
+        <Select
+          aria-label={i18n.t("schedule.workspace")}
+          label={<T k="schedule.workspace" />}
+          className="max-w-[360px]"
+          items={[
+            {
+              key: "personal",
+              label: i18n.t("schedule.workspacePersonal"),
+            },
+            ...schools.map((item) => ({
+              key: `school:${item.id}`,
+              label: item.name,
+            })),
+          ]}
+          selectedKeys={[
+            workspace.scope === "school"
+              ? `school:${workspace.schoolId}`
+              : "personal",
+          ]}
+          onChange={(event) => {
+            const value = event.target.value;
+            const next: WorkspaceContext = value.startsWith("school:")
+              ? {
+                  scope: "school",
+                  schoolId: Number(value.slice("school:".length)),
+                }
+              : { scope: "personal", schoolId: null };
+            if (next.scope === "school" && !next.schoolId) return;
+            setActiveWorkspace(next);
+            setWorkspace(next);
+            setFilterStudentId(null);
+            setTeacherFilter("all");
+          }}
+        >
+          {(item) => (
+            <SelectItem key={item.key} value={item.key}>
+              {item.label}
+            </SelectItem>
+          )}
+        </Select>
+      )}
+
       {isTeacher && (
         <div className={styles.tabRow} role="tablist" aria-label="schedule tabs">
           <BrandPill
@@ -441,6 +599,68 @@ export default function SchedulePage() {
                   />
                 </div>
               )}
+              {isTeacher && showAvailability && availability.supported && (
+                <div className="flex flex-wrap items-center gap-2 border-b border-[#e8e8ed] px-3 py-2">
+                  <Button
+                    size="sm"
+                    variant={selectionMode ? "solid" : "flat"}
+                    color={selectionMode ? "primary" : "default"}
+                    onPress={() => {
+                      setSelectionMode((value) => !value);
+                      setSelectedRanges(new Map());
+                    }}
+                  >
+                    <T k="schedule.selectUnavailable" />
+                  </Button>
+                  {selectionMode && (
+                    <>
+                      <span className="text-xs text-brand-grayFont">
+                        <T
+                          k="schedule.selectedIntervals"
+                          values={{ count: selectedRanges.size }}
+                        />
+                      </span>
+                      <Button
+                        size="sm"
+                        color="primary"
+                        isLoading={availabilitySaving}
+                        isDisabled={!selectedRanges.size}
+                        onPress={async () => {
+                          const json = await markInactive(
+                            Array.from(selectedRanges.values()),
+                            availabilityTeacherId,
+                          );
+                          checkResponse(json);
+                          if (json?.success) {
+                            setSelectedRanges(new Map());
+                            setSelectionMode(false);
+                            const { from, to } = rangeForView(cursor, view);
+                            await loadAvailability(
+                              from,
+                              to,
+                              availabilityTeacherId,
+                            );
+                          }
+                        }}
+                      >
+                        <T k="schedule.markInactive" />
+                      </Button>
+                    </>
+                  )}
+                  {workspace.scope === "school" && (
+                    <Link
+                      href={
+                        availabilityTeacherId
+                          ? `/school/staff/${availabilityTeacherId}?returnTo=${encodeURIComponent("/schedule")}`
+                          : "/school?tab=members"
+                      }
+                      className="text-xs font-medium text-brand-violet hover:underline"
+                    >
+                      <T k="schedule.weeklyHoursLink" />
+                    </Link>
+                  )}
+                </div>
+              )}
               <div className={styles.viewBody}>
                 {loading ? (
                   <div className="flex h-full items-center justify-center">
@@ -469,6 +689,20 @@ export default function SchedulePage() {
                     nameById={studentNameById}
                     teacherById={teacherById}
                     showTeacher={showTeacherOnChips}
+                    availability={
+                      showAvailability ? availability : undefined
+                    }
+                    selectionMode={selectionMode}
+                    selectedRangeKeys={new Set(selectedRanges.keys())}
+                    onRangeToggle={(range, selected) =>
+                      setSelectedRanges((current) => {
+                        const next = new Map(current);
+                        const key = rangeKey(range);
+                        if (selected) next.set(key, range);
+                        else next.delete(key);
+                        return next;
+                      })
+                    }
                     onSlotClick={openCreate}
                     onEventClick={openEvent}
                   />
@@ -480,6 +714,20 @@ export default function SchedulePage() {
                     nameById={studentNameById}
                     teacherById={teacherById}
                     showTeacher={showTeacherOnChips}
+                    availability={
+                      showAvailability ? availability : undefined
+                    }
+                    selectionMode={selectionMode}
+                    selectedRangeKeys={new Set(selectedRanges.keys())}
+                    onRangeToggle={(range, selected) =>
+                      setSelectedRanges((current) => {
+                        const next = new Map(current);
+                        const key = rangeKey(range);
+                        if (selected) next.set(key, range);
+                        else next.delete(key);
+                        return next;
+                      })
+                    }
                     onSlotClick={openCreate}
                     onEventClick={openEvent}
                   />

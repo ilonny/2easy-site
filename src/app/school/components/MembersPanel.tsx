@@ -26,6 +26,7 @@ import {
   SchoolRole,
 } from "../types";
 import { WorkingHoursEditor } from "./WorkingHoursEditor";
+import { RoleBadges } from "./RoleBadges";
 
 type TProps = {
   canManage: boolean;
@@ -65,6 +66,7 @@ export const MembersPanel: FC<TProps> = ({
             ? `/school/${schoolId}/members?archived=1`
             : `/school/${schoolId}/members`,
           isSecure: true,
+          schoolId,
         });
         const data = await res.json();
         if (data?.success) {
@@ -114,6 +116,7 @@ export const MembersPanel: FC<TProps> = ({
       const res = await fetchPostJson({
         path: `/school/${schoolId}/members`,
         isSecure: true,
+        schoolId,
         data: {
           login: login.trim(),
           name: name.trim() || undefined,
@@ -161,6 +164,7 @@ export const MembersPanel: FC<TProps> = ({
       const res = await fetchPatch({
         path: `/school/${schoolId}/members/${editMember.id}`,
         isSecure: true,
+        schoolId,
         data: { roles },
       });
       const data = await res.json();
@@ -182,6 +186,7 @@ export const MembersPanel: FC<TProps> = ({
     const res = await fetchPatch({
       path: `/school/${schoolId}/members/${memberId}`,
       isSecure: true,
+      schoolId,
       data: { status: archive ? "disabled" : "active" },
     });
     const data = await res.json();
@@ -264,14 +269,16 @@ export const MembersPanel: FC<TProps> = ({
                 </td>
                 <td className="px-4 py-3">{m.user?.login || "—"}</td>
                 <td className="px-4 py-3">
-                  {(m.roles || []).map(roleLabel).join(", ")}
+                  <RoleBadges roles={m.roles} />
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-2">
                     {m.can_open_cabinet && !showArchived && (
                       <Button
                         as={Link}
-                        href={`/school/staff/${m.user_id}`}
+                        href={`/school/staff/${m.user_id}?returnTo=${encodeURIComponent(
+                          "/school?tab=members",
+                        )}`}
                         size="sm"
                         variant="flat"
                       >

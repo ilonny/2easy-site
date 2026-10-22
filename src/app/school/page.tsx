@@ -4,8 +4,9 @@ import { CatalogPageShell, BrandPill } from "@/components";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button, Select, SelectItem } from "@nextui-org/react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSchool } from "./hooks/useSchool";
 import { CreateSchoolForm } from "./components/CreateSchoolForm";
 import { MembersPanel } from "./components/MembersPanel";
@@ -14,17 +15,22 @@ import { TariffsPanel } from "./components/TariffsPanel";
 import { StatsPanel } from "./components/StatsPanel";
 import { SchedulePanel } from "./components/SchedulePanel";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { SchoolMaterialsPanel } from "./components/SchoolMaterialsPanel";
 
 type SchoolTab =
   | "stats"
   | "schedule"
   | "members"
   | "students"
+  | "materials"
   | "tariffs"
   | "settings";
 
 export default function SchoolPage() {
   withLogin();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const {
     loading,
     school,
@@ -43,7 +49,18 @@ export default function SchoolPage() {
     refreshMe,
   } = useSchool();
 
-  const [tab, setTab] = useState<SchoolTab>("stats");
+  const requestedTab = searchParams.get("tab") as SchoolTab | null;
+  const tab: SchoolTab = [
+    "stats",
+    "schedule",
+    "members",
+    "students",
+    "materials",
+    "tariffs",
+    "settings",
+  ].includes(requestedTab || "")
+    ? (requestedTab as SchoolTab)
+    : "stats";
   const [showCreate, setShowCreate] = useState(false);
 
   const canManage = !!school?.access?.canManageMembers;
@@ -55,12 +72,24 @@ export default function SchoolPage() {
     !!school?.access?.canManageSchool ||
     !!school?.access?.canManageSchoolSettings;
   const canEditHours = !!school?.access?.canEditAnyTeacherHours;
+  const canSeeMaterials = !!school?.access?.canAccessMaterials;
+  const isSuperAdmin = !!school?.roles?.includes("super_admin");
+
+  const setTab = useCallback(
+    (nextTab: SchoolTab) => {
+      const query = new URLSearchParams(searchParams.toString());
+      query.set("tab", nextTab);
+      router.replace(`${pathname}?${query.toString()}`, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
 
   // Drop onto a visible tab if current one is hidden for this role
   useEffect(() => {
     if (tab === "members" && !canSeeStaff) setTab("stats");
     if (tab === "settings" && !canSettings) setTab("stats");
-  }, [tab, canSeeStaff, canSettings]);
+    if (tab === "materials" && !canSeeMaterials) setTab("stats");
+  }, [tab, canSeeStaff, canSettings, canSeeMaterials, setTab]);
 
   if (loading) {
     return (
@@ -153,6 +182,14 @@ export default function SchoolPage() {
           >
             <T k="school.tabStudents" />
           </BrandPill>
+          {canSeeMaterials ? (
+            <BrandPill
+              active={tab === "materials"}
+              onClick={() => setTab("materials")}
+            >
+              <T k="school.tabMaterials" />
+            </BrandPill>
+          ) : null}
           <BrandPill
             active={tab === "tariffs"}
             onClick={() => setTab("tariffs")}
@@ -217,10 +254,19 @@ export default function SchoolPage() {
           />
         )}
 
+        {tab === "materials" && canSeeMaterials && (
+          <SchoolMaterialsPanel
+            schoolId={school.id}
+            canManage={isSuperAdmin}
+          />
+        )}
+
         {tab === "settings" && canSettings && (
           <SettingsPanel
             schoolId={school.id}
             canEdit={canSettings}
+            canEditAvatar={isSuperAdmin}
+            avatar={school.avatar}
             onSaved={() => void refreshMe()}
           />
         )}

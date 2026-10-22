@@ -1,6 +1,11 @@
 "use client";
 
-import { checkResponse, fetchGet, fetchPostJson } from "@/api";
+import {
+  checkResponse,
+  fetchGet,
+  fetchPostJson,
+  fetchPostMultipart,
+} from "@/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SchoolInfo, SchoolMember, SchoolTier } from "../types";
 import {
@@ -36,7 +41,11 @@ export const useSchool = () => {
   const refreshMe = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetchGet({ path: "/school/me", isSecure: true });
+      const res = await fetchGet({
+        path: "/school/me",
+        isSecure: true,
+        workspaceScope: "personal",
+      });
       const data = await res.json();
       if (data?.success) {
         const list: SchoolInfo[] = data.schools || [];
@@ -57,6 +66,7 @@ export const useSchool = () => {
   const createSchool = useCallback(
     async (payload: {
       name: string;
+      avatarFile?: File | null;
       settings?: {
         timezone: string;
         workingHours?: {
@@ -69,6 +79,7 @@ export const useSchool = () => {
       const res = await fetchPostJson({
         path: "/school",
         isSecure: true,
+        workspaceScope: "personal",
         data: {
           name: payload.name,
           settings: payload.settings,
@@ -77,10 +88,24 @@ export const useSchool = () => {
       });
       const data = await res.json();
       if (data?.success) {
-        const newId = data.school?.id;
+        const newId = Number(data.school?.id || data.school_id || data.id);
         if (newId) {
           setActiveSchoolId(Number(newId));
           setActiveSchoolIdState(Number(newId));
+          if (payload.avatarFile) {
+            const formData = new FormData();
+            formData.append("image", payload.avatarFile);
+            const avatarRes = await fetchPostMultipart({
+              path: `/school/${newId}/avatar`,
+              isSecure: true,
+              schoolId: newId,
+              data: formData,
+            });
+            const avatarData = await avatarRes.json();
+            if (avatarData?.success === false && avatarRes.status !== 404) {
+              checkResponse(avatarData);
+            }
+          }
         }
         await refreshMe();
         return data;
@@ -96,6 +121,7 @@ export const useSchool = () => {
     const res = await fetchGet({
       path: `/school/${schoolId}/members`,
       isSecure: true,
+      schoolId,
     });
     const data = await res.json();
     if (data?.success) {
@@ -111,6 +137,7 @@ export const useSchool = () => {
     const res = await fetchGet({
       path: `/school/${schoolId}/students`,
       isSecure: true,
+      schoolId,
     });
     const data = await res.json();
     if (data?.success) {
@@ -129,16 +156,25 @@ export const useSchool = () => {
         email?: string;
         tag?: string;
         teacher_user_id?: number;
+        frequency?: "weekly" | "biweekly" | "once";
+        duration_minutes?: number;
+        slots?: Array<{ dow?: number; date?: string; start: string }>;
       },
     ) => {
       const res = await fetchPostJson({
         path: `/school/${schoolId}/students`,
         isSecure: true,
+        schoolId,
         data: payload,
       });
       const data = await res.json();
       if (data?.success) {
         await refreshStudents(schoolId);
+        window.dispatchEvent(
+          new CustomEvent("schedule-events-invalidated", {
+            detail: { schoolId },
+          }),
+        );
         return data;
       }
       checkResponse(data);
@@ -151,6 +187,7 @@ export const useSchool = () => {
     const res = await fetchGet({
       path: `/school/${schoolId}/subscription`,
       isSecure: true,
+      schoolId,
     });
     const data = await res.json();
     if (data?.success) {
@@ -168,6 +205,7 @@ export const useSchool = () => {
       const res = await fetchPostJson({
         path: `/school/${schoolId}/payment/create`,
         isSecure: true,
+        schoolId,
         data: { tier, email, phone },
       });
       const data = await res.json();

@@ -2,11 +2,21 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import type { ScheduleEvent } from "../types";
+import type {
+  ScheduleAvailability,
+  ScheduleEvent,
+  SelectedScheduleRange,
+} from "../types";
 import { backgroundForColors, colorsForEvent } from "../types";
-import { eventsOnDay, HOURS, nowScrollTop, weekDays } from "../utils/calendar";
+import { eventsOnDay, nowScrollTop, weekDays } from "../utils/calendar";
 import { eventChipText, eventMinHeight } from "./eventUi";
 import styles from "../styles.module.css";
+import { useCalendarHours } from "../hooks/useCalendarHours";
+import {
+  rangeForHour,
+  rangeKey,
+  slotAvailabilityStyle,
+} from "./availabilityUi";
 
 type TProps = {
   cursor: Dayjs;
@@ -15,6 +25,10 @@ type TProps = {
   nameById?: Map<number, string>;
   teacherById?: Map<number, string>;
   showTeacher?: boolean;
+  availability?: ScheduleAvailability;
+  selectionMode?: boolean;
+  selectedRangeKeys?: Set<string>;
+  onRangeToggle?: (range: SelectedScheduleRange, selected: boolean) => void;
   onSlotClick: (day: Dayjs, hour: number) => void;
   onEventClick: (event: ScheduleEvent) => void;
 };
@@ -26,13 +40,18 @@ export const WeekView = ({
   nameById,
   teacherById,
   showTeacher,
+  availability,
+  selectionMode,
+  selectedRangeKeys,
+  onRangeToggle,
   onSlotClick,
   onEventClick,
 }: TProps) => {
   const days = weekDays(cursor);
+  const { hours: visibleWindow, visibleHours } = useCalendarHours();
   const today = dayjs();
   const hourHeight = 52;
-  const gridHeight = HOURS.length * hourHeight;
+  const gridHeight = visibleHours.length * hourHeight;
   const [now, setNow] = useState(dayjs());
   const scrollRef = useRef<HTMLDivElement>(null);
   const showNowLine = days.some((d) => d.isSame(today, "day"));
@@ -46,16 +65,16 @@ export const WeekView = ({
     const el = scrollRef.current;
     if (!el) return;
     requestAnimationFrame(() => {
-      el.scrollTop = nowScrollTop(hourHeight);
+      el.scrollTop = nowScrollTop(hourHeight, 48, visibleHours);
     });
-  }, [cursor, hourHeight]);
+  }, [cursor, hourHeight, visibleHours]);
 
   const nowTop = useMemo(() => {
     if (!showNowLine) return null;
     const h = now.hour() + now.minute() / 60;
-    if (h < HOURS[0] || h > HOURS[HOURS.length - 1] + 1) return null;
-    return (h - HOURS[0]) * hourHeight;
-  }, [now, hourHeight, showNowLine]);
+    if (h < visibleWindow.start || h > visibleWindow.end) return null;
+    return (h - visibleWindow.start) * hourHeight;
+  }, [now, hourHeight, showNowLine, visibleWindow]);
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
@@ -103,12 +122,12 @@ export const WeekView = ({
           }}
         >
           <div className="relative" style={{ height: gridHeight }}>
-            {HOURS.map((hour) => (
+            {visibleHours.map((hour) => (
               <div
                 key={hour}
                 className="absolute right-0 left-0 border-t border-[#f0f0f5] pr-2 text-right text-[11px] text-[#aeaeb2]"
                 style={{
-                  top: (hour - HOURS[0]) * hourHeight,
+                  top: (hour - visibleWindow.start) * hourHeight,
                   height: hourHeight,
                 }}
               >
@@ -121,7 +140,9 @@ export const WeekView = ({
               className="absolute right-0 left-0 pr-2 text-right text-[11px] text-[#aeaeb2]"
               style={{ top: gridHeight }}
             >
-              <span className="relative -top-2">00:00</span>
+              <span className="relative -top-2">
+                {`${String(visibleWindow.end).padStart(2, "0")}:00`}
+              </span>
             </div>
           </div>
 
@@ -131,15 +152,42 @@ export const WeekView = ({
               className="relative border-l border-[#f0f0f5]"
               style={{ height: gridHeight }}
             >
-              {HOURS.map((hour) => (
+              {visibleHours.map((hour) => (
                 <button
                   key={`${day.toISOString()}-${hour}`}
                   type="button"
-                  onClick={() => onSlotClick(day, hour)}
+                  onClick={() => {
+                    if (!selectionMode) onSlotClick(day, hour);
+                  }}
+                  onPointerDown={(event) => {
+                    if (!selectionMode) return;
+                    event.preventDefault();
+                    const range = rangeForHour(day, hour);
+                    onRangeToggle?.(
+                      range,
+                      !selectedRangeKeys?.has(rangeKey(range)),
+                    );
+                  }}
+                  onPointerEnter={(event) => {
+                    if (!selectionMode || event.buttons !== 1) return;
+                    const range = rangeForHour(day, hour);
+                    if (!selectedRangeKeys?.has(rangeKey(range))) {
+                      onRangeToggle?.(range, true);
+                    }
+                  }}
                   className="absolute left-0 right-0 border-t border-[#f0f0f5] hover:bg-[#f8f8fa]"
                   style={{
-                    top: (hour - HOURS[0]) * hourHeight,
+                    top: (hour - visibleWindow.start) * hourHeight,
                     height: hourHeight,
+                    ...slotAvailabilityStyle(day, hour, availability),
+                    ...(selectedRangeKeys?.has(
+                      rangeKey(rangeForHour(day, hour)),
+                    )
+                      ? {
+                          backgroundColor: "rgba(90,66,212,.22)",
+                          boxShadow: "inset 0 0 0 2px #5a42d4",
+                        }
+                      : {}),
                   }}
                 />
               ))}
@@ -151,7 +199,7 @@ export const WeekView = ({
                   end.diff(start, "minute") / 60,
                   event.type === "payment" ? 1 : 0.4,
                 );
-                const top = (startHour - HOURS[0]) * hourHeight;
+                const top = (startHour - visibleWindow.start) * hourHeight;
                 const height = Math.min(
                   durationHours * hourHeight,
                   gridHeight - top,

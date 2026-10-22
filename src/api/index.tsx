@@ -47,6 +47,9 @@ type TParams = {
   data?: any;
   isSecure?: boolean;
   signal?: AbortSignal;
+  /** Explicit request scope wins over the persisted workspace selection. */
+  workspaceScope?: "personal" | "school";
+  schoolId?: number | null;
 };
 
 const SERVER_UNAVAILABLE_MESSAGE =
@@ -61,9 +64,11 @@ const mapHeaders = (params: TParams) => {
     const token = getTokenFromLocalStorage();
     headers.append("Authorization", `Bearer ${token || ""}`);
     try {
-      const schoolId = localStorage.getItem("activeSchoolId");
-      if (schoolId && Number(schoolId) > 0) {
-        headers.append("X-School-Id", schoolId);
+      const schoolId = Number(params.schoolId);
+      if (params.workspaceScope === "school" || schoolId > 0) {
+        if (schoolId > 0) headers.append("X-School-Id", String(schoolId));
+      } else if (params.workspaceScope === "personal") {
+        headers.append("X-Workspace-Scope", "personal");
       }
     } catch {
       // ignore (SSR / private mode)
@@ -297,6 +302,8 @@ export const fetchPostMultipartWithProgress = (params: {
   path: string;
   data: FormData;
   isSecure?: boolean;
+  workspaceScope?: "personal" | "school";
+  schoolId?: number | null;
   onProgress?: (progress: TUploadProgress) => void;
   signal?: AbortSignal;
 }): Promise<any> => {
@@ -310,6 +317,12 @@ export const fetchPostMultipartWithProgress = (params: {
     if (isSecure) {
       const token = getTokenFromLocalStorage();
       xhr.setRequestHeader("Authorization", `Bearer ${token || ""}`);
+      const schoolId = Number(params.schoolId);
+      if (params.workspaceScope === "school" || schoolId > 0) {
+        if (schoolId > 0) xhr.setRequestHeader("X-School-Id", String(schoolId));
+      } else if (params.workspaceScope === "personal") {
+        xhr.setRequestHeader("X-Workspace-Scope", "personal");
+      }
     }
 
     xhr.upload.onprogress = (event) => {

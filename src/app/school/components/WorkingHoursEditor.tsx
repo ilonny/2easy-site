@@ -78,6 +78,7 @@ export const WorkingHoursEditor: FC<TProps> = ({
       const res = await fetchGet({
         path: `/school/${schoolId}/members/${userId}/hours`,
         isSecure: true,
+        schoolId,
       });
       const data = await res.json();
       if (data?.success) {
@@ -170,6 +171,7 @@ export const WorkingHoursEditor: FC<TProps> = ({
       const res = await fetchPut({
         path: `/school/${schoolId}/members/${userId}/hours`,
         isSecure: true,
+        schoolId,
         data: { hours },
       });
       const data = await res.json();

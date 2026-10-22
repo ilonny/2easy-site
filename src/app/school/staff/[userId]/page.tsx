@@ -40,6 +40,9 @@ import { EventModal } from "@/app/schedule/components/EventModal";
 import type { EventFormValues, ScheduleEvent, ScheduleView } from "@/app/schedule/types";
 import { rangeForView } from "@/app/schedule/utils/calendar";
 import scheduleStyles from "@/app/schedule/styles.module.css";
+import { RoleBadges } from "../../components/RoleBadges";
+import { SchoolMaterialsPanel } from "../../components/SchoolMaterialsPanel";
+import { useSchoolBack } from "../../hooks/useSchoolBack";
 
 dayjs.extend(isoWeek);
 dayjs.locale("ru");
@@ -77,6 +80,7 @@ type CabinetData = {
 export default function StaffCabinetPage() {
   withLogin();
   const params = useParams();
+  const goBack = useSchoolBack("/school?tab=members");
   const userId = Number(params?.userId);
   const { loading: schoolLoading, school } = useSchool();
   const [cabinet, setCabinet] = useState<CabinetData | null>(null);
@@ -108,7 +112,11 @@ export default function StaffCabinetPage() {
     updateEvent,
     deleteEvent,
     emailEvent,
-  } = useScheduleEvents();
+  } = useScheduleEvents(
+    school?.id
+      ? { workspaceScope: "school", schoolId: school.id }
+      : undefined,
+  );
 
   const loadCabinet = useCallback(async () => {
     if (!school?.id || !userId) return;
@@ -118,6 +126,7 @@ export default function StaffCabinetPage() {
       const res = await fetchGet({
         path: `/school/${school.id}/members/by-user/${userId}/cabinet`,
         isSecure: true,
+        schoolId: school.id,
       });
       const data = await res.json();
       if (data?.success) {
@@ -151,7 +160,12 @@ export default function StaffCabinetPage() {
   useEffect(() => {
     if (!cabinet) return;
     (async () => {
-      const res = await fetchGet({ path: "/lessons", isSecure: true });
+      const res = await fetchGet({
+        path: "/lessons",
+        isSecure: true,
+        workspaceScope: "school",
+        schoolId: school?.id,
+      });
       const json = await res?.json();
       checkResponse(json);
       const list = Array.isArray(json)
@@ -169,7 +183,7 @@ export default function StaffCabinetPage() {
           })),
       );
     })();
-  }, [cabinet]);
+  }, [cabinet, school?.id]);
 
   const students = cabinet?.students || [];
 
@@ -213,6 +227,7 @@ export default function StaffCabinetPage() {
       const res = await fetchPostJson({
         path: `/school/${school.id}/students`,
         isSecure: true,
+        schoolId: school.id,
         data: {
           name: studentName.trim(),
           email: studentEmail.trim() || undefined,
@@ -285,8 +300,7 @@ export default function StaffCabinetPage() {
             {error || <T k="school.cabinetForbidden" />}
           </p>
           <Button
-            as={Link}
-            href="/school"
+            onPress={goBack}
             className={brandPrimaryBtnClassName}
             variant="flat"
           >
@@ -311,18 +325,10 @@ export default function StaffCabinetPage() {
     >
       <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-8">
         <div className="flex flex-wrap items-center gap-3">
-          <Button as={Link} href="/school" variant="light" size="sm">
+          <Button onPress={goBack} variant="light" size="sm">
             <T k="school.backToSchool" />
           </Button>
-          {cabinet.self ? (
-            <span className="rounded-full bg-brand-gray px-3 py-1 text-xs text-brand-grayFont">
-              <T k="school.cabinetSelf" />
-            </span>
-          ) : (
-            <span className="rounded-full bg-[#007AFF]/10 px-3 py-1 text-xs font-medium text-[#007AFF]">
-              <T k="school.cabinetManageHint" />
-            </span>
-          )}
+          <RoleBadges roles={cabinet.member.roles} />
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -399,7 +405,11 @@ export default function StaffCabinetPage() {
                     <td className="px-4 py-3">{s.email || "—"}</td>
                     <td className="px-4 py-3">
                       <Link
-                        href={`/student-account/${s.id}`}
+                        href={`/student-account/${s.id}?workspace=school&schoolId=${school.id}&returnTo=${encodeURIComponent(
+                          `/school/staff/${userId}?returnTo=${encodeURIComponent(
+                            "/school?tab=members",
+                          )}`,
+                        )}`}
                         className="font-medium text-brand-violet hover:underline"
                       >
                         <T k="school.openCabinet" />
@@ -486,6 +496,15 @@ export default function StaffCabinetPage() {
             </section>
           </div>
         </section>
+
+        {school.roles?.includes("super_admin") && !cabinet.self ? (
+          <SchoolMaterialsPanel
+            schoolId={school.id}
+            teacherUserId={userId}
+            readOnly
+            personalOnly
+          />
+        ) : null}
       </div>
 
       <EventModal

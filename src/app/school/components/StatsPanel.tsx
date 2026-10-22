@@ -9,9 +9,9 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  ComposedChart,
   Legend,
-  Pie,
-  PieChart,
+  Line,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -104,6 +104,7 @@ export const StatsPanel: FC<TProps> = ({ schoolId }) => {
       const res = await fetchGet({
         path: `/school/${schoolId}/stats`,
         isSecure: true,
+        schoolId,
       });
       const data = await res.json();
       if (data?.success) {
@@ -123,37 +124,21 @@ export const StatsPanel: FC<TProps> = ({ schoolId }) => {
 
   const level = stats?.level || 1;
 
-  const studentsPie = useMemo(() => {
+  const peopleSplit = useMemo(() => {
     if (!stats) return [];
     return [
       {
-        name: i18n.t("school.statStudentsActive"),
-        value: stats.students_active,
-        color: CHART.green,
+        name: i18n.t("school.statActive"),
+        students: stats.students_active,
+        staff: stats.members_active,
       },
       {
-        name: i18n.t("school.statStudentsArchived"),
-        value: stats.students_archived,
-        color: CHART.gray,
+        name: i18n.t("school.statArchived"),
+        students: stats.students_archived,
+        staff: stats.members_archived,
       },
-    ].filter((x) => x.value > 0);
+    ];
   }, [stats]);
-
-  const staffPie = useMemo(() => {
-    if (!stats || level < 2) return [];
-    return [
-      {
-        name: i18n.t("school.statMembersActive"),
-        value: stats.members_active,
-        color: CHART.blue,
-      },
-      {
-        name: i18n.t("school.statMembersArchived"),
-        value: stats.members_archived,
-        color: CHART.orange,
-      },
-    ].filter((x) => x.value > 0);
-  }, [stats, level]);
 
   const levelKey = LEVEL_LABEL[level] || "teacher";
   const levelTitle = i18n.t(`school.roles.${levelKey}`);
@@ -317,60 +302,92 @@ export const StatsPanel: FC<TProps> = ({ schoolId }) => {
 
       {level >= 2 && (
         <div className="grid gap-4 lg:grid-cols-2">
-          <ChartCard title={<T k="school.chartStudentsSplit" />}>
-            {studentsPie.length ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={studentsPie}
-                    dataKey="value"
-                    nameKey="name"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={3}
-                  >
-                    {studentsPie.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="flex h-full items-center justify-center text-sm text-brand-grayFont">
-                <T k="school.statsEmpty" />
-              </p>
-            )}
+          <ChartCard
+            title={<T k="school.chartStaffGrowth" />}
+            subtitle={<T k="school.chartStaffGrowthHint" />}
+            tall
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={stats.members_by_month || []}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="added"
+                  name={i18n.t("school.chartAdded")}
+                  fill={CHART.teal}
+                  radius={[6, 6, 0, 0]}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="total"
+                  name={i18n.t("school.chartTotal")}
+                  stroke={CHART.blue}
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
           </ChartCard>
 
-          <ChartCard title={<T k="school.chartStaffSplit" />}>
-            {staffPie.length ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={staffPie}
-                    dataKey="value"
-                    nameKey="name"
-                    innerRadius={55}
-                    outerRadius={85}
-                    paddingAngle={3}
-                  >
-                    {staffPie.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="flex h-full items-center justify-center text-sm text-brand-grayFont">
-                <T k="school.statsEmpty" />
-              </p>
-            )}
+          <ChartCard
+            title={<T k="school.chartStudentsGrowth" />}
+            subtitle={<T k="school.chartStudentsGrowthHint" />}
+            tall
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={stats.students_by_month || []}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  dataKey="added"
+                  name={i18n.t("school.chartAdded")}
+                  fill={CHART.green}
+                  radius={[6, 6, 0, 0]}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="total"
+                  name={i18n.t("school.chartTotal")}
+                  stroke={CHART.violet}
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
           </ChartCard>
         </div>
+      )}
+
+      {level >= 2 && (
+        <ChartCard title={<T k="school.chartStudentsSplit" />}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={peopleSplit}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Legend />
+              <Bar
+                dataKey="students"
+                name={i18n.t("school.tabStudents")}
+                fill={CHART.green}
+                radius={[6, 6, 0, 0]}
+              />
+              <Bar
+                dataKey="staff"
+                name={i18n.t("school.tabMembers")}
+                fill={CHART.blue}
+                radius={[6, 6, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
       )}
 
       {level >= 2 && !!stats.teachers_load?.length && (

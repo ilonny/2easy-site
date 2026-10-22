@@ -26,6 +26,7 @@ export const useStudentList = (
     const res = await fetchGet({
       path: archived ? "/student?archived=1" : "/student",
       isSecure: true,
+      workspaceScope: "personal",
     });
     const data = await res?.json();
     // API returns an array on success; on 401 it returns an object.

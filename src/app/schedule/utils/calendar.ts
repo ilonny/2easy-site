@@ -4,14 +4,19 @@ import type { ScheduleEvent } from "../types";
 
 dayjs.extend(isoWeek);
 
-export const HOURS = Array.from({ length: 24 }, (_, i) => i); // 00:00–23:00
+/** Default visible calendar window. Components can override it from local prefs. */
+export const HOURS = Array.from({ length: 16 }, (_, i) => i + 7); // 07:00–23:00
 
 /** Pixel offset of "now" within the hour grid; clamped to grid bounds. */
-export const nowScrollTop = (hourHeight: number, pad = 48) => {
+export const nowScrollTop = (
+  hourHeight: number,
+  pad = 48,
+  hours: number[] = HOURS,
+) => {
   const now = dayjs();
   const h = now.hour() + now.minute() / 60;
-  const start = HOURS[0];
-  const end = HOURS[HOURS.length - 1] + 1;
+  const start = hours[0] ?? 7;
+  const end = (hours[hours.length - 1] ?? 22) + 1;
   const clamped = Math.min(Math.max(h, start), end);
   return Math.max(0, (clamped - start) * hourHeight - pad);
 };

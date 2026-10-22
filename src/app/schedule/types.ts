@@ -38,6 +38,17 @@ export type ScheduleEvent = {
   }>;
 };
 
+export type ScheduleAvailability = {
+  supported: boolean;
+  workingHours: Array<{ dow: number; start: string; end: string }>;
+  unavailable: Array<{ starts_at: string; ends_at: string }>;
+};
+
+export type SelectedScheduleRange = {
+  starts_at: string;
+  ends_at: string;
+};
+
 export type EventFormValues = {
   student_ids: number[];
   title: string;

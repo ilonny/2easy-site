@@ -11,7 +11,13 @@ import { FC, useCallback, useEffect, useState } from "react";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { brandPrimaryBtnClassName } from "@/components/brandUi";
-import { checkResponse, fetchGet, fetchPatch } from "@/api";
+import {
+  checkResponse,
+  fetchDelete,
+  fetchGet,
+  fetchPatch,
+  fetchPostMultipart,
+} from "@/api";
 import { toast } from "react-toastify";
 import {
   DOW_ORDER,
@@ -20,10 +26,13 @@ import {
   SchoolWorkingDay,
 } from "../types";
 import { timezoneOptions } from "../lib/timezones";
+import { SchoolAvatarPicker } from "./SchoolAvatarPicker";
 
 type TProps = {
   schoolId: number;
   canEdit: boolean;
+  canEditAvatar?: boolean;
+  avatar?: string | null;
   onSaved?: () => void;
 };
 
@@ -36,13 +45,20 @@ const emptySettings = (): SchoolSettings => ({
   contacts: {},
 });
 
-export const SettingsPanel: FC<TProps> = ({ schoolId, canEdit, onSaved }) => {
+export const SettingsPanel: FC<TProps> = ({
+  schoolId,
+  canEdit,
+  canEditAvatar,
+  avatar,
+  onSaved,
+}) => {
   const [settings, setSettings] = useState<SchoolSettings>(emptySettings);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [langInput, setLangInput] = useState("");
   const [dirInput, setDirInput] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   type DayIntervals = {
     enabled: boolean;
     intervals: Array<{ start: string; end: string }>;
@@ -86,10 +102,25 @@ export const SettingsPanel: FC<TProps> = ({ schoolId, canEdit, onSaved }) => {
       const res = await fetchGet({
         path: `/school/${schoolId}/settings`,
         isSecure: true,
+        schoolId,
       });
       const data = await res.json();
       if (data?.success) {
-        const s: SchoolSettings = data.settings || emptySettings();
+        const raw = data.settings || {};
+        const s: SchoolSettings = {
+          ...emptySettings(),
+          ...raw,
+          workingHours: {
+            ...emptySettings().workingHours,
+            ...(raw.workingHours || {}),
+          },
+          languages: Array.isArray(raw.languages) ? raw.languages : [],
+          directions: Array.isArray(raw.directions) ? raw.directions : [],
+          contacts:
+            raw.contacts && typeof raw.contacts === "object"
+              ? raw.contacts
+              : {},
+        };
         setSettings(s);
         setName(data.name || "");
         applyHoursToLocal(s.workingHours?.days || []);
@@ -142,13 +173,31 @@ export const SettingsPanel: FC<TProps> = ({ schoolId, canEdit, onSaved }) => {
       const res = await fetchPatch({
         path: `/school/${schoolId}/settings`,
         isSecure: true,
+        schoolId,
         data: { name: name.trim() || undefined, ...payload },
       });
       const data = await res.json();
       if (data?.success) {
+        if (avatarFile && canEditAvatar) {
+          const formData = new FormData();
+          formData.append("image", avatarFile);
+          const avatarRes = await fetchPostMultipart({
+            path: `/school/${schoolId}/avatar`,
+            isSecure: true,
+            schoolId,
+            data: formData,
+          });
+          const avatarData = await avatarRes.json();
+          if (avatarData?.success === false && avatarRes.status !== 404) {
+            checkResponse(avatarData);
+          } else {
+            setAvatarFile(null);
+          }
+        }
         toast(i18n.t("school.settingsSaved"), { type: "success" });
-        setSettings(data.settings);
-        applyHoursToLocal(data.settings?.workingHours?.days || []);
+        const saved = data.settings || payload;
+        setSettings({ ...payload, ...saved });
+        applyHoursToLocal(saved?.workingHours?.days || days);
         onSaved?.();
       } else {
         checkResponse(data);
@@ -211,6 +260,28 @@ export const SettingsPanel: FC<TProps> = ({ schoolId, canEdit, onSaved }) => {
           isDisabled={!canEdit}
           onChange={(e) => setName(e.target.value)}
         />
+        {canEditAvatar ? (
+          <SchoolAvatarPicker
+            name={name}
+            avatar={avatar}
+            file={avatarFile}
+            disabled={!canEdit || saving}
+            onFileChange={setAvatarFile}
+            onRemove={async () => {
+              const avatarRes = await fetchDelete({
+                path: `/school/${schoolId}/avatar`,
+                isSecure: true,
+                schoolId,
+              });
+              const avatarData = await avatarRes.json();
+              if (avatarData?.success === false && avatarRes.status !== 404) {
+                checkResponse(avatarData);
+                return;
+              }
+              onSaved?.();
+            }}
+          />
+        ) : null}
         <Select
           label={<T k="school.timezoneLabel" />}
           selectedKeys={settings.timezone ? [settings.timezone] : []}

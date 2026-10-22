@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Checkbox, Input, Select, SelectItem } from "@nextui-org/react";
+import { Button, Input, Select, SelectItem } from "@nextui-org/react";
 import { FC, useMemo, useState } from "react";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
@@ -8,14 +8,15 @@ import { brandPrimaryBtnClassName } from "@/components/brandUi";
 import { toast } from "react-toastify";
 import {
   browserTimezone,
-  defaultMonFriHours,
   timezoneOptions,
 } from "../lib/timezones";
 import type { SchoolSettings } from "../types";
+import { SchoolAvatarPicker } from "./SchoolAvatarPicker";
 
 type CreatePayload = {
   name: string;
   settings: Partial<SchoolSettings> & { timezone: string };
+  avatarFile?: File | null;
 };
 
 type TProps = {
@@ -26,7 +27,7 @@ export const CreateSchoolForm: FC<TProps> = ({ onCreate }) => {
   const zones = useMemo(() => timezoneOptions(), []);
   const [name, setName] = useState("");
   const [timezone, setTimezone] = useState(browserTimezone());
-  const [enableHours, setEnableHours] = useState(true);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
@@ -42,12 +43,13 @@ export const CreateSchoolForm: FC<TProps> = ({ onCreate }) => {
     try {
       const settings: CreatePayload["settings"] = {
         timezone,
-        workingHours: enableHours
-          ? { enabled: true, days: defaultMonFriHours() }
-          : { enabled: false, days: [] },
         defaultLessonMinutes: 60,
       };
-      const res = await onCreate({ name: name.trim(), settings });
+      const res = await onCreate({
+        name: name.trim(),
+        settings,
+        avatarFile,
+      });
       if (res?.success) {
         toast(i18n.t("school.created"), { type: "success" });
       }
@@ -72,6 +74,12 @@ export const CreateSchoolForm: FC<TProps> = ({ onCreate }) => {
         size="lg"
         variant="flat"
       />
+      <SchoolAvatarPicker
+        name={name}
+        file={avatarFile}
+        disabled={loading}
+        onFileChange={setAvatarFile}
+      />
       <Select
         label={<T k="school.timezoneLabel" />}
         selectedKeys={timezone ? [timezone] : []}
@@ -86,9 +94,6 @@ export const CreateSchoolForm: FC<TProps> = ({ onCreate }) => {
           </SelectItem>
         ))}
       </Select>
-      <Checkbox isSelected={enableHours} onValueChange={setEnableHours}>
-        <T k="school.createDefaultHours" />
-      </Checkbox>
       <Button
         className={brandPrimaryBtnClassName}
         isLoading={loading}

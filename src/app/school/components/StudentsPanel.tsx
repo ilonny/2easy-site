@@ -51,6 +51,9 @@ type TProps = {
     email?: string;
     tag?: string;
     teacher_user_id?: number;
+    frequency?: LessonFrequency;
+    duration_minutes?: number;
+    slots?: Array<{ dow?: number; date?: string; start: string }>;
   }) => Promise<any>;
 };
 
@@ -179,6 +182,7 @@ export const StudentsPanel: FC<TProps> = ({
         const res = await fetchGet({
           path: `/school/${schoolId}/teachers/available?${q}`,
           isSecure: true,
+        schoolId,
         });
         const data = await res.json();
         if (!cancelled && data?.success) {
@@ -256,6 +260,13 @@ export const StudentsPanel: FC<TProps> = ({
         email: email.trim() || undefined,
         tag: tag.trim() || undefined,
         teacher_user_id: teacherId ? Number(teacherId) : undefined,
+        frequency,
+        duration_minutes: duration,
+        slots: slots.map((slot) =>
+          frequency === "once"
+            ? { date: slot.date, start: slot.start }
+            : { dow: slot.dow, start: slot.start },
+        ),
       });
       if (res?.success) {
         toast(
@@ -315,7 +326,9 @@ export const StudentsPanel: FC<TProps> = ({
                 <td className="px-4 py-3">{teacherName(s.user_id)}</td>
                 <td className="px-4 py-3">
                   <Link
-                    href={`/student-account/${s.id}`}
+                    href={`/student-account/${s.id}?workspace=school&schoolId=${schoolId}&returnTo=${encodeURIComponent(
+                      "/school?tab=students",
+                    )}`}
                     className="font-medium text-brand-violet hover:underline"
                   >
                     <T k="school.openCabinet" />

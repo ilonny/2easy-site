@@ -31,7 +31,11 @@ export const UserAvatar = ({
   className,
   style,
 }: TProps) => {
-  const src = avatar ? getImageUrl(avatar) : "";
+  const src = avatar
+    ? /^(blob:|data:)/i.test(avatar)
+      ? avatar
+      : getImageUrl(avatar)
+    : "";
   const fontSize = Math.max(12, Math.round(size * 0.38));
 
   return (

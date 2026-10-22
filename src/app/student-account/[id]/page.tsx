@@ -12,10 +12,10 @@ import Loupe from "@/assets/icons/loupe.svg";
 import { ProfileLessons } from "@/app/lessons/components/ProfileLessons";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
-import Link from "next/link";
 import { brandInputClassNames } from "@/components/brandUi";
 import { UserAvatar } from "@/components/UserAvatar";
 import { setActiveSchoolId } from "@/app/school/lib/activeSchool";
+import { useSchoolBack } from "@/app/school/hooks/useSchoolBack";
 
 type StudentInfo = {
   id: number;
@@ -33,6 +33,13 @@ export default function StudentAccountPage() {
   const [searchString, setSearchString] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const sourceSchoolId =
+    searchParams.get("workspace") === "school"
+      ? Number(searchParams.get("schoolId")) || null
+      : null;
+  const goBack = useSchoolBack(
+    sourceSchoolId ? "/school?tab=students" : "/profile?students",
+  );
   const studentId = useParams()?.id;
   const isBoardsTab = searchParams.get("tab") === "boards";
   const isCoursesTab = searchParams.get("tab") === "courses";
@@ -49,19 +56,20 @@ export default function StudentAccountPage() {
     const res = await fetchGet({
       path: `/student-info?id=${studentId}`,
       isSecure: true,
+      workspaceScope: sourceSchoolId ? "school" : "personal",
+      schoolId: sourceSchoolId,
     });
     const json = await res?.json();
     checkResponse(json);
     if (json.success) {
       setStudentInfo(json);
-      // Keep school context when opening a school student
-      if (json.school_id) {
+      if (sourceSchoolId && json.school_id) {
         setActiveSchoolId(Number(json.school_id));
       }
     }
     setIsLoading(false);
     return json;
-  }, [studentId]);
+  }, [studentId, sourceSchoolId]);
 
   useEffect(() => {
     fetchStudentInfo();
@@ -77,11 +85,11 @@ export default function StudentAccountPage() {
 
   const isSchoolStudent = useMemo(
     () =>
-      studentInfo?.school_id != null && Number(studentInfo.school_id) > 0,
-    [studentInfo],
+      sourceSchoolId != null ||
+      (studentInfo?.school_id != null && Number(studentInfo.school_id) > 0),
+    [studentInfo, sourceSchoolId],
   );
 
-  const backHref = isSchoolStudent ? "/school" : "/profile?students";
   const backLabel = isSchoolStudent
     ? i18n.t("students.backToSchool")
     : i18n.t("students.allStudents");
@@ -97,12 +105,13 @@ export default function StudentAccountPage() {
       }
       subtitle={
         isTeacher ? (
-          <Link
-            href={backHref}
+          <button
+            type="button"
+            onClick={goBack}
             className="text-sm text-brand-violet hover:opacity-80"
           >
             {backLabel}
-          </Link>
+          </button>
         ) : undefined
       }
     >
