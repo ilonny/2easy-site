@@ -4,7 +4,8 @@ import { CatalogPageShell, BrandPill } from "@/components";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { AuthContext } from "@/auth";
 import { Button, Select, SelectItem } from "@nextui-org/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSchool } from "./hooks/useSchool";
@@ -16,18 +17,16 @@ import { StatsPanel } from "./components/StatsPanel";
 import { SchedulePanel } from "./components/SchedulePanel";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { SchoolMaterialsPanel } from "./components/SchoolMaterialsPanel";
-
-type SchoolTab =
-  | "stats"
-  | "schedule"
-  | "members"
-  | "students"
-  | "materials"
-  | "tariffs"
-  | "settings";
+import {
+  isSchoolTab,
+  readLastSchoolTab,
+  type SchoolTab,
+  writeLastSchoolTab,
+} from "./lib/schoolTab";
 
 export default function SchoolPage() {
   withLogin();
+  const { profile, authIsLoading } = useContext(AuthContext);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -49,18 +48,9 @@ export default function SchoolPage() {
     refreshMe,
   } = useSchool();
 
-  const requestedTab = searchParams.get("tab") as SchoolTab | null;
-  const tab: SchoolTab = [
-    "stats",
-    "schedule",
-    "members",
-    "students",
-    "materials",
-    "tariffs",
-    "settings",
-  ].includes(requestedTab || "")
-    ? (requestedTab as SchoolTab)
-    : "stats";
+  const requestedTab = searchParams.get("tab");
+  const urlTab = isSchoolTab(requestedTab) ? requestedTab : null;
+  const [tab, setTabState] = useState<SchoolTab>(urlTab || "stats");
   const [showCreate, setShowCreate] = useState(false);
 
   const canManage = !!school?.access?.canManageMembers;
@@ -83,6 +73,8 @@ export default function SchoolPage() {
 
   const setTab = useCallback(
     (nextTab: SchoolTab) => {
+      writeLastSchoolTab(nextTab);
+      setTabState(nextTab);
       const query = new URLSearchParams(searchParams.toString());
       query.set("tab", nextTab);
       router.replace(`${pathname}?${query.toString()}`, { scroll: false });
@@ -90,14 +82,43 @@ export default function SchoolPage() {
     [pathname, router, searchParams],
   );
 
-  // Drop onto a visible tab if current one is hidden for this role
   useEffect(() => {
+    if (authIsLoading) return;
+    if (profile?.isStudent || profile?.studentId) {
+      const studentId = Number(profile.studentId);
+      router.replace(
+        studentId > 0 ? `/student-account/${studentId}` : "/",
+      );
+    }
+  }, [authIsLoading, profile?.isStudent, profile?.studentId, router]);
+
+  useEffect(() => {
+    if (urlTab) {
+      setTabState(urlTab);
+      writeLastSchoolTab(urlTab);
+      return;
+    }
+    const stored = readLastSchoolTab();
+    if (stored) setTab(stored);
+  }, [setTab, urlTab]);
+
+  // Wait until school access is loaded — otherwise members/settings reset to stats.
+  useEffect(() => {
+    if (loading || !school) return;
     if (tab === "members" && !canSeeStaff) setTab("stats");
     if (tab === "settings" && !canSettings) setTab("stats");
     if (tab === "materials" && !canSeeMaterials) setTab("stats");
-  }, [tab, canSeeStaff, canSettings, canSeeMaterials, setTab]);
+  }, [
+    loading,
+    school,
+    tab,
+    canSeeStaff,
+    canSettings,
+    canSeeMaterials,
+    setTab,
+  ]);
 
-  if (loading) {
+  if (loading || profile?.isStudent || profile?.studentId) {
     return (
       <CatalogPageShell title={<T k="school.title" />}>
         <p className="text-center text-brand-grayFont">

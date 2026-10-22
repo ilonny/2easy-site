@@ -16,10 +16,17 @@ import { brandInputClassNames } from "@/components/brandUi";
 import { UserAvatar } from "@/components/UserAvatar";
 import { setActiveSchoolId } from "@/app/school/lib/activeSchool";
 import { useSchoolBack } from "@/app/school/hooks/useSchoolBack";
+import { writeLastSchoolTab } from "@/app/school/lib/schoolTab";
 import {
   CatalogWorkspaceProvider,
   PERSONAL_CATALOG_WORKSPACE,
 } from "@/app/school/lib/catalogWorkspace";
+import {
+  readStudentCabinetBack,
+  rememberStudentCabinetBack,
+  teacherCabinetPath,
+  teacherIdFromReturnTo,
+} from "@/app/school/lib/studentCabinetBack";
 
 type StudentInfo = {
   id: number;
@@ -41,10 +48,26 @@ export default function StudentAccountPage() {
   const [sourceSchoolId, setSourceSchoolId] = useState<number | null>(
     schoolIdFromUrl,
   );
-  const goBack = useSchoolBack(
+  const studentId = useParams()?.id;
+  const teacherUserIdFromUrl =
+    Number(searchParams.get("teacher")) ||
+    Number(searchParams.get("teacher_user_id")) ||
+    teacherIdFromReturnTo(searchParams.get("returnTo"));
+  const [rememberedTeacherId, setRememberedTeacherId] = useState(0);
+  const teacherUserId = teacherUserIdFromUrl || rememberedTeacherId;
+  const teacherPath =
+    teacherUserId > 0 ? teacherCabinetPath(teacherUserId) : "";
+  const goSchoolBack = useSchoolBack(
     sourceSchoolId ? "/school?tab=students" : "/profile?students",
   );
-  const studentId = useParams()?.id;
+  const goBack = useCallback(() => {
+    if (teacherPath) {
+      writeLastSchoolTab("members");
+      router.replace(teacherPath);
+      return;
+    }
+    goSchoolBack();
+  }, [goSchoolBack, router, teacherPath]);
   const isBoardsTab = searchParams.get("tab") === "boards";
   const isCoursesTab = searchParams.get("tab") === "courses";
   const isScheduleTab = searchParams.get("tab") === "schedule";
@@ -82,6 +105,29 @@ export default function StudentAccountPage() {
   }, [schoolIdFromUrl]);
 
   useEffect(() => {
+    if (!studentId) return;
+    if (teacherUserIdFromUrl > 0) {
+      rememberStudentCabinetBack(studentId, {
+        teacherUserId: teacherUserIdFromUrl,
+        returnTo: teacherCabinetPath(teacherUserIdFromUrl),
+      });
+      setRememberedTeacherId(teacherUserIdFromUrl);
+      return;
+    }
+    const urlReturnTo = searchParams.get("returnTo") || "";
+    if (urlReturnTo.startsWith("/school?tab=students")) {
+      rememberStudentCabinetBack(studentId, {
+        teacherUserId: null,
+        returnTo: "/school?tab=students",
+      });
+      setRememberedTeacherId(0);
+      return;
+    }
+    const stored = readStudentCabinetBack(studentId);
+    setRememberedTeacherId(stored?.teacherUserId || 0);
+  }, [searchParams, studentId, teacherUserIdFromUrl]);
+
+  useEffect(() => {
     fetchStudentInfo();
   }, [studentId, fetchStudentInfo]);
 
@@ -102,14 +148,21 @@ export default function StudentAccountPage() {
   const catalogWorkspace = useMemo(
     () =>
       isSchoolStudent && sourceSchoolId
-        ? { workspaceScope: "school" as const, schoolId: sourceSchoolId }
+        ? {
+            workspaceScope: "school" as const,
+            schoolId: sourceSchoolId,
+            teacherUserId: teacherUserId > 0 ? teacherUserId : undefined,
+          }
         : PERSONAL_CATALOG_WORKSPACE,
-    [isSchoolStudent, sourceSchoolId],
+    [isSchoolStudent, sourceSchoolId, teacherUserId],
   );
 
-  const backLabel = isSchoolStudent
-    ? i18n.t("students.backToSchool")
-    : i18n.t("students.allStudents");
+  const backLabel =
+    teacherUserId > 0
+      ? i18n.t("students.backToTeacher")
+      : isSchoolStudent
+        ? i18n.t("students.backToSchool")
+        : i18n.t("students.allStudents");
 
   return (
     <CatalogPageShell

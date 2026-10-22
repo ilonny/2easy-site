@@ -18,6 +18,10 @@ import type { ReactNode } from "react";
 import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
 import { toast } from "react-toastify";
 import { relationAttached } from "../../helpers/ensureTeacherLessonCopy";
+import {
+  studentListFetchParams,
+  useCatalogWorkspace,
+} from "@/app/school/lib/catalogWorkspace";
 
 type TProps = {
   isVisible: boolean;
@@ -72,6 +76,8 @@ export const AttachLessonModalForm: FC<TProps> = ({
   const [step, setStep] = useState(0);
   const [status, setStatus] = useState<"open" | "close">("open");
   const [isLoading, setIsLoading] = useState(false);
+  const catalogWorkspace = useCatalogWorkspace();
+  const workspaceFetch = studentListFetchParams(catalogWorkspace);
 
   const onSubmit = useCallback(async () => {
     setIsLoading(true);
@@ -93,6 +99,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
                 student_id,
                 status,
               },
+              ...workspaceFetch,
             });
             return await res.json();
           }),
@@ -127,6 +134,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
             lesson_id: startedLessonId,
             student_ids: chosenIds,
           },
+          ...workspaceFetch,
         });
         const sessionJson = await sessionRes.json();
         if (!sessionJson?.success || !sessionJson?.session?.id) {
@@ -163,6 +171,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
     hideToast,
     skipCreateRelation,
     createLessonSession,
+    workspaceFetch,
   ]);
 
   const onClickStudent = useCallback(

@@ -21,11 +21,18 @@ export const SchoolMaterialsPanel = ({
   personalOnly,
 }: TProps) => {
   const workspace = useMemo(
-    () => ({
-      workspaceScope: "school" as const,
-      schoolId,
-      teacherUserId: personalOnly ? teacherUserId : undefined,
-    }),
+    () =>
+      personalOnly
+        ? {
+            workspaceScope: "personal" as const,
+            schoolId,
+            teacherUserId,
+            studentScope: "school" as const,
+          }
+        : {
+            workspaceScope: "school" as const,
+            schoolId,
+          },
     [personalOnly, schoolId, teacherUserId],
   );
 

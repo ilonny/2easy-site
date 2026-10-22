@@ -16,6 +16,8 @@ import {
   ModalBody,
   ModalContent,
   ModalHeader,
+  Select,
+  SelectItem,
   Spinner,
 } from "@nextui-org/react";
 import dayjs, { Dayjs } from "dayjs";
@@ -26,23 +28,34 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useSchool } from "../../hooks/useSchool";
-import { WorkingHoursEditor } from "../../components/WorkingHoursEditor";
 import {
   brandModalClassNames,
   brandPrimaryBtnClassName,
 } from "@/components/brandUi";
 import { useScheduleEvents } from "@/app/schedule/hooks/useScheduleEvents";
+import { useTeacherAvailability } from "@/app/schedule/hooks/useTeacherAvailability";
 import { CalendarToolbar } from "@/app/schedule/components/CalendarToolbar";
 import { MonthView } from "@/app/schedule/components/MonthView";
 import { WeekView } from "@/app/schedule/components/WeekView";
 import { DayView } from "@/app/schedule/components/DayView";
 import { EventModal } from "@/app/schedule/components/EventModal";
-import type { EventFormValues, ScheduleEvent, ScheduleView } from "@/app/schedule/types";
+import type {
+  EventFormValues,
+  ScheduleEvent,
+  ScheduleView,
+  SelectedScheduleRange,
+} from "@/app/schedule/types";
+import { rangeKey } from "@/app/schedule/components/availabilityUi";
 import { rangeForView } from "@/app/schedule/utils/calendar";
 import scheduleStyles from "@/app/schedule/styles.module.css";
 import { RoleBadges } from "../../components/RoleBadges";
+import { DOW_ORDER, LESSON_DURATIONS } from "../../types";
 import { SchoolMaterialsPanel } from "../../components/SchoolMaterialsPanel";
 import { useSchoolBack } from "../../hooks/useSchoolBack";
+import {
+  rememberStudentCabinetBack,
+  teacherCabinetPath,
+} from "../../lib/studentCabinetBack";
 
 dayjs.extend(isoWeek);
 dayjs.locale("ru");
@@ -89,6 +102,10 @@ export default function StaffCabinetPage() {
 
   const [view, setView] = useState<ScheduleView>("week");
   const [cursor, setCursor] = useState<Dayjs>(dayjs());
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedRanges, setSelectedRanges] = useState<
+    Map<string, SelectedScheduleRange>
+  >(new Map());
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(
     null,
@@ -102,6 +119,11 @@ export default function StaffCabinetPage() {
   const [studentName, setStudentName] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [studentTag, setStudentTag] = useState("");
+  const [studentDow, setStudentDow] = useState(1);
+  const [studentStart, setStudentStart] = useState("10:00");
+  const [studentDuration, setStudentDuration] = useState(
+    school?.settings?.defaultLessonMinutes || 60,
+  );
   const [savingStudent, setSavingStudent] = useState(false);
 
   const {
@@ -113,6 +135,16 @@ export default function StaffCabinetPage() {
     deleteEvent,
     emailEvent,
   } = useScheduleEvents(
+    school?.id
+      ? { workspaceScope: "school", schoolId: school.id }
+      : undefined,
+  );
+  const {
+    availability,
+    loading: availabilitySaving,
+    loadAvailability,
+    markInactive,
+  } = useTeacherAvailability(
     school?.id
       ? { workspaceScope: "school", schoolId: school.id }
       : undefined,
@@ -149,13 +181,25 @@ export default function StaffCabinetPage() {
   const refreshRange = useCallback(async () => {
     if (!userId) return;
     const { from, to } = rangeForView(cursor, view);
-    await loadEvents(from, to, { teacherUserId: userId });
-  }, [cursor, view, loadEvents, userId]);
+    await Promise.all([
+      loadEvents(from, to, { teacherUserId: userId }),
+      loadAvailability(from, to, userId),
+    ]);
+  }, [cursor, view, loadEvents, loadAvailability, userId]);
 
   useEffect(() => {
     if (!cabinet) return;
     void refreshRange();
   }, [cabinet, refreshRange]);
+
+  useEffect(() => {
+    const onInvalidate = () => {
+      void refreshRange();
+    };
+    window.addEventListener("schedule-events-invalidated", onInvalidate);
+    return () =>
+      window.removeEventListener("schedule-events-invalidated", onInvalidate);
+  }, [refreshRange]);
 
   useEffect(() => {
     if (!cabinet) return;
@@ -233,23 +277,35 @@ export default function StaffCabinetPage() {
           email: studentEmail.trim() || undefined,
           tag: studentTag.trim() || undefined,
           teacher_user_id: userId,
+          frequency: "weekly",
+          duration_minutes: studentDuration,
+          slots: [
+            {
+              dow: studentDow,
+              start: String(studentStart || "10:00").slice(0, 5),
+            },
+          ],
         },
       });
       const data = await res.json();
       if (data?.success) {
+        const createdLessons = Number(data.schedule_events_created) || 0;
         toast(
           data.password
             ? i18n.t("school.studentCreatedWithPassword", {
                 password: data.password,
               })
             : i18n.t("school.studentCreated"),
-          { type: "success" },
+          { type: createdLessons > 0 ? "success" : "warning" },
         );
         setAddStudentOpen(false);
         setStudentName("");
         setStudentEmail("");
         setStudentTag("");
+        setStudentDow(1);
+        setStudentStart("10:00");
         await loadCabinet();
+        await refreshRange();
       } else {
         checkResponse(data);
       }
@@ -366,12 +422,6 @@ export default function StaffCabinetPage() {
           </div>
         </div>
 
-        {school?.id && userId ? (
-          <section className="rounded-[16px] bg-white p-4 ring-1 ring-black/5 sm:p-6">
-            <WorkingHoursEditor schoolId={school.id} userId={userId} />
-          </section>
-        ) : null}
-
         <section className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold">
@@ -405,11 +455,15 @@ export default function StaffCabinetPage() {
                     <td className="px-4 py-3">{s.email || "—"}</td>
                     <td className="px-4 py-3">
                       <Link
-                        href={`/student-account/${s.id}?workspace=school&schoolId=${school.id}&returnTo=${encodeURIComponent(
-                          `/school/staff/${userId}?returnTo=${encodeURIComponent(
-                            "/school?tab=members",
-                          )}`,
+                        href={`/student-account/${s.id}?workspace=school&schoolId=${school.id}&teacher=${userId}&teacher_user_id=${userId}&returnTo=${encodeURIComponent(
+                          teacherCabinetPath(userId),
                         )}`}
+                        onClick={() =>
+                          rememberStudentCabinetBack(s.id, {
+                            teacherUserId: userId,
+                            returnTo: teacherCabinetPath(userId),
+                          })
+                        }
                         className="font-medium text-brand-violet hover:underline"
                       >
                         <T k="school.openCabinet" />
@@ -434,9 +488,14 @@ export default function StaffCabinetPage() {
 
         <section className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">
-              <T k="school.cabinetSchedule" />
-            </h2>
+            <div>
+              <h2 className="text-lg font-semibold">
+                <T k="school.cabinetSchedule" />
+              </h2>
+              <p className="mt-1 text-sm text-brand-grayFont">
+                <T k="school.cabinetScheduleHint" />
+              </p>
+            </div>
             <Button
               className={brandPrimaryBtnClassName}
               size="sm"
@@ -447,7 +506,7 @@ export default function StaffCabinetPage() {
           </div>
 
           <div
-            className={`${scheduleStyles.shell} !h-auto min-h-[520px] !gap-3`}
+            className={`${scheduleStyles.shell} !h-[min(72dvh,760px)] min-h-[520px] !gap-3`}
           >
             <section className={scheduleStyles.calendarPane}>
               <CalendarToolbar
@@ -459,8 +518,53 @@ export default function StaffCabinetPage() {
                 onPrev={() => setCursor((c) => c.subtract(1, shiftUnit))}
                 onNext={() => setCursor((c) => c.add(1, shiftUnit))}
               />
+              {availability.supported ? (
+                <div className="flex flex-wrap items-center gap-2 border-b border-[#e8e8ed] px-3 py-2">
+                  <Button
+                    size="sm"
+                    variant={selectionMode ? "solid" : "flat"}
+                    color={selectionMode ? "primary" : "default"}
+                    onPress={() => {
+                      setSelectionMode((value) => !value);
+                      setSelectedRanges(new Map());
+                    }}
+                  >
+                    <T k="schedule.selectUnavailable" />
+                  </Button>
+                  {selectionMode ? (
+                    <>
+                      <span className="text-xs text-brand-grayFont">
+                        <T
+                          k="schedule.selectedIntervals"
+                          values={{ count: selectedRanges.size }}
+                        />
+                      </span>
+                      <Button
+                        size="sm"
+                        color="primary"
+                        isLoading={availabilitySaving}
+                        isDisabled={!selectedRanges.size}
+                        onPress={async () => {
+                          const json = await markInactive(
+                            Array.from(selectedRanges.values()),
+                            userId,
+                          );
+                          checkResponse(json);
+                          if (json?.success) {
+                            setSelectedRanges(new Map());
+                            setSelectionMode(false);
+                            await refreshRange();
+                          }
+                        }}
+                      >
+                        <T k="schedule.markInactive" />
+                      </Button>
+                    </>
+                  ) : null}
+                </div>
+              ) : null}
               <div className={`${scheduleStyles.viewBody} min-h-[420px]`}>
-                {eventsLoading ? (
+                {eventsLoading && !visibleEvents.length ? (
                   <div className="flex h-full items-center justify-center py-16">
                     <Spinner color="primary" />
                   </div>
@@ -479,6 +583,18 @@ export default function StaffCabinetPage() {
                     events={visibleEvents}
                     detailed
                     nameById={studentNameById}
+                    availability={availability}
+                    selectionMode={selectionMode}
+                    selectedRangeKeys={new Set(selectedRanges.keys())}
+                    onRangeToggle={(range, selected) =>
+                      setSelectedRanges((current) => {
+                        const next = new Map(current);
+                        const key = rangeKey(range);
+                        if (selected) next.set(key, range);
+                        else next.delete(key);
+                        return next;
+                      })
+                    }
                     onSlotClick={openCreate}
                     onEventClick={openEvent}
                   />
@@ -488,6 +604,18 @@ export default function StaffCabinetPage() {
                     events={visibleEvents}
                     detailed
                     nameById={studentNameById}
+                    availability={availability}
+                    selectionMode={selectionMode}
+                    selectedRangeKeys={new Set(selectedRanges.keys())}
+                    onRangeToggle={(range, selected) =>
+                      setSelectedRanges((current) => {
+                        const next = new Map(current);
+                        const key = rangeKey(range);
+                        if (selected) next.set(key, range);
+                        else next.delete(key);
+                        return next;
+                      })
+                    }
                     onSlotClick={openCreate}
                     onEventClick={openEvent}
                   />
@@ -564,6 +692,48 @@ export default function StaffCabinetPage() {
               onChange={(e) => setStudentTag(e.target.value)}
               radius="lg"
             />
+            <div className="flex flex-wrap gap-2">
+              <Select
+                label={<T k="school.desiredWeekday" />}
+                selectedKeys={[String(studentDow)]}
+                className="max-w-[160px]"
+                size="sm"
+                onChange={(e) => {
+                  const dow = Number(e.target.value);
+                  if (Number.isInteger(dow)) setStudentDow(dow);
+                }}
+              >
+                {DOW_ORDER.map((d) => (
+                  <SelectItem key={String(d)} value={String(d)}>
+                    {i18n.t(`school.dow.${d}`)}
+                  </SelectItem>
+                ))}
+              </Select>
+              <Input
+                type="time"
+                label={<T k="school.desiredTime" />}
+                value={studentStart}
+                onChange={(e) => setStudentStart(e.target.value)}
+                className="max-w-[140px]"
+                radius="lg"
+                size="sm"
+              />
+              <Select
+                label={<T k="school.desiredDuration" />}
+                selectedKeys={[String(studentDuration)]}
+                className="max-w-[140px]"
+                size="sm"
+                onChange={(e) =>
+                  setStudentDuration(Number(e.target.value) || 60)
+                }
+              >
+                {LESSON_DURATIONS.map((d) => (
+                  <SelectItem key={String(d)} value={String(d)}>
+                    {i18n.t("school.minutes", { n: d })}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
             <Button
               className={brandPrimaryBtnClassName}
               isLoading={savingStudent}

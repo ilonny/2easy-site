@@ -2,6 +2,10 @@ import { fetchGet, fetchPostJson } from "@/api";
 import { useCallback, useRef, useState } from "react";
 import { getImageUrl } from "../helpers";
 import { parseRouteIdNumber } from "@/utils/parseRouteId";
+import {
+  catalogFetchParams,
+  useCatalogWorkspace,
+} from "@/app/school/lib/catalogWorkspace";
 
 const mapImageExData = (data: string) => {
   const parsedData = data ? JSON.parse(data) : {};
@@ -198,6 +202,8 @@ export const useExList = (
 ) => {
   const [exListIsLoading, setExListIsLoading] = useState(false);
   const [exList, setExList] = useState([]);
+  const catalogWorkspace = useCatalogWorkspace();
+  const workspaceFetch = catalogFetchParams(catalogWorkspace);
 
   const inFlightRef = useRef<Promise<any> | null>(null);
   const inFlightKeyRef = useRef<string>("");
@@ -223,6 +229,7 @@ export const useExList = (
           const listRes = await fetchGet({
             path: `/ex/list?${params.toString()}`,
             isSecure: true,
+            ...workspaceFetch,
           });
           const list = await listRes?.json();
           if (!list?.map) return;
@@ -261,7 +268,7 @@ export const useExList = (
       inFlightRef.current = p;
       return p;
     },
-    [isPresentationMode, lesson_id],
+    [isPresentationMode, lesson_id, workspaceFetch],
   );
 
   const changeSortIndex = useCallback(
@@ -273,9 +280,10 @@ export const useExList = (
           id: exId,
           sortIndex: newSortIndex,
         },
+        ...workspaceFetch,
       });
     },
-    [],
+    [workspaceFetch],
   );
 
   const deleteEx = useCallback(async (exId: number) => {
@@ -285,8 +293,9 @@ export const useExList = (
       data: {
         id: exId,
       },
+      ...workspaceFetch,
     });
-  }, []);
+  }, [workspaceFetch]);
 
   return {
     exListIsLoading,

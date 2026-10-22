@@ -15,6 +15,7 @@ import { useCalendarHours } from "../hooks/useCalendarHours";
 import {
   rangeForHour,
   rangeKey,
+  isNonWorkingSlot,
   slotAvailabilityStyle,
 } from "./availabilityUi";
 
@@ -61,13 +62,19 @@ export const WeekView = ({
     return () => window.clearInterval(id);
   }, []);
 
+  const periodKey = cursor.startOf("isoWeek").format("YYYY-MM-DD");
+  const scrolledPeriodRef = useRef("");
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+    if (scrolledPeriodRef.current === periodKey) return;
+    scrolledPeriodRef.current = periodKey;
+    const hours = visibleHours;
     requestAnimationFrame(() => {
-      el.scrollTop = nowScrollTop(hourHeight, 48, visibleHours);
+      el.scrollTop = nowScrollTop(hourHeight, 48, hours);
     });
-  }, [cursor, hourHeight, visibleHours]);
+  }, [periodKey, hourHeight, visibleHours, visibleWindow.start]);
 
   const nowTop = useMemo(() => {
     if (!showNowLine) return null;
@@ -111,7 +118,7 @@ export const WeekView = ({
 
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 overflow-auto overscroll-contain"
+        className="min-h-0 flex-1 overflow-auto overscroll-contain [overflow-anchor:none]"
       >
         <div
           className="relative min-w-[680px] pb-5"
@@ -189,7 +196,13 @@ export const WeekView = ({
                         }
                       : {}),
                   }}
-                />
+                >
+                  {isNonWorkingSlot(day, hour, availability) ? (
+                    <span className="pointer-events-none flex h-full items-center justify-center text-[13px] font-semibold leading-none text-[#8e8e93]">
+                      ×
+                    </span>
+                  ) : null}
+                </button>
               ))}
               {eventsOnDay(events, day).map((event) => {
                 const start = dayjs(event.starts_at);

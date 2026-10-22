@@ -28,6 +28,10 @@ import Link from "next/link";
 import { T } from "@/i18n/T";
 import { DictionaryModal } from "@/app/dictionary/components/DictionaryModal";
 import { useBoardsTab } from "@/app/board/hooks/useBoardsTab";
+import {
+  useCatalogWorkspace,
+  withWorkspacePath,
+} from "@/app/school/lib/catalogWorkspace";
 import { BoardsTabPanel } from "@/app/board/components/BoardsTabPanel";
 import { BrandPill } from "@/components/BrandPill";
 import { StudentSchedulePanel } from "@/app/student-account/components/StudentSchedulePanel";
@@ -140,6 +144,11 @@ export const ProfileLessons = (props: TProps) => {
     stayOnPage = false,
   } = props;
   const router = useRouter();
+  const catalogWorkspace = useCatalogWorkspace();
+  const isSchoolLibrary =
+    stayOnPage &&
+    catalogWorkspace.workspaceScope === "school" &&
+    !Number(catalogWorkspace.teacherUserId);
   const {
     profile,
     isAuthorized,
@@ -255,7 +264,9 @@ export const ProfileLessons = (props: TProps) => {
   );
   const data = useMemo(() => {
     const title =
-      tabIndex === "userLessons" ? (
+      isSchoolLibrary && !canCreateLesson ? (
+        <T k="school.libraryEmpty" />
+      ) : tabIndex === "userLessons" ? (
         <T k="lessons.noLessons" />
       ) : (
         <T k="lessons.noSavedLessons" />
@@ -275,15 +286,15 @@ export const ProfileLessons = (props: TProps) => {
     };
 
     return { title, buttonTitle, onButtonPress };
-  }, [tabIndex]);
+  }, [canCreateLesson, isSchoolLibrary, tabIndex]);
 
   const onCreateLesson = useCallback(
     (lessonId: number) => {
       setCreateLessonModalIsVisible(false);
       getLessons();
-      router.push("/editor/" + lessonId);
+      router.push(withWorkspacePath("/editor/" + lessonId, catalogWorkspace));
     },
-    [getLessons, router, setCreateLessonModalIsVisible],
+    [catalogWorkspace, getLessons, router, setCreateLessonModalIsVisible],
   );
 
   const onCreateCourse = useCallback(() => {
@@ -326,10 +337,17 @@ export const ProfileLessons = (props: TProps) => {
 
     const index = readFromLocalStorage("saved_lessons_tab");
     if (isLessonsTabIndex(index)) {
-      setTabIndex(index);
+      if (
+        isSchoolLibrary &&
+        (index === "savedLessons" || index === "2easyCourses")
+      ) {
+        setTabIndex("userLessons");
+      } else {
+        setTabIndex(index);
+      }
     }
     setTabHydrated(true);
-  }, [studentId, hideTabs, currentCourse]);
+  }, [studentId, hideTabs, currentCourse, isSchoolLibrary]);
 
   useEffect(() => {
     if (!tabHydrated || studentId || hideTabs || currentCourse) {
@@ -340,7 +358,23 @@ export const ProfileLessons = (props: TProps) => {
 
   // Mirror boards: don't stay on a courses tab that has nothing to show.
   useEffect(() => {
-    if (studentId || hideTabs || currentCourse || coursesIsLoading) {
+    if (
+      !isSchoolLibrary ||
+      (tabIndex !== "savedLessons" && tabIndex !== "2easyCourses")
+    ) {
+      return;
+    }
+    setTabIndex("userLessons");
+  }, [isSchoolLibrary, tabIndex]);
+
+  useEffect(() => {
+    if (
+      studentId ||
+      hideTabs ||
+      currentCourse ||
+      coursesIsLoading ||
+      isSchoolLibrary
+    ) {
       return;
     }
     if (tabIndex === "userCourses" && !courses.some((c) => c.user_id !== 1)) {
@@ -356,6 +390,7 @@ export const ProfileLessons = (props: TProps) => {
     currentCourse,
     hideTabs,
     hasAuthSession,
+    isSchoolLibrary,
     studentId,
     tabIndex,
   ]);
@@ -572,32 +607,51 @@ export const ProfileLessons = (props: TProps) => {
                 active={tabIndex === "userLessons"}
                 onClick={() => goCatalogTab("userLessons")}
               >
-                <T k="lessons.myLessons" />
+                <T
+                  k={
+                    isSchoolLibrary ? "lessons.lessonsTab" : "lessons.myLessons"
+                  }
+                />
               </BrandPill>
               {(!!courses.some((c) => c.user_id !== 1) ||
+                isSchoolLibrary ||
                 (stayOnPage && canCreateLesson)) && (
                 <BrandPill
                   active={tabIndex === "userCourses"}
                   onClick={() => goCatalogTab("userCourses")}
                 >
-                  <T k="lessons.myCourses" />
+                  <T
+                    k={
+                      isSchoolLibrary
+                        ? "lessons.coursesTab"
+                        : "lessons.myCourses"
+                    }
+                  />
                 </BrandPill>
               )}
-              {showBoardsTabButton || (stayOnPage && canCreateLesson) ? (
+              {showBoardsTabButton ||
+              isSchoolLibrary ||
+              (stayOnPage && canCreateLesson) ? (
                 <BrandPill
                   active={tabIndex === "userBoards"}
                   onClick={() => goCatalogTab("userBoards")}
                 >
-                  <T k="boards.myBoards" />
+                  <T
+                    k={
+                      isSchoolLibrary ? "boards.boardsTab" : "boards.myBoards"
+                    }
+                  />
                 </BrandPill>
               ) : null}
-              <BrandPill
-                active={tabIndex === "savedLessons"}
-                onClick={() => goCatalogTab("savedLessons")}
-              >
-                <T k="lessons.lessons2Easy" />
-              </BrandPill>
-              {courses.some((c) => c.user_id === 1) && (
+              {!isSchoolLibrary ? (
+                <BrandPill
+                  active={tabIndex === "savedLessons"}
+                  onClick={() => goCatalogTab("savedLessons")}
+                >
+                  <T k="lessons.lessons2Easy" />
+                </BrandPill>
+              ) : null}
+              {!isSchoolLibrary && courses.some((c) => c.user_id === 1) && (
                 <BrandPill
                   active={tabIndex === "2easyCourses"}
                   onClick={() => goCatalogTab("2easyCourses")}
@@ -716,7 +770,11 @@ export const ProfileLessons = (props: TProps) => {
           <div className="flex flex-col items-center gap-2 px-1 text-center sm:flex-row sm:justify-center sm:gap-4 sm:text-left sm:items-baseline">
             {studentId ? (
               <Link
-                href={"/student-account/" + studentId}
+                href={
+                  typeof window !== "undefined"
+                    ? `/student-account/${studentId}${window.location.search}`
+                    : "/student-account/" + studentId
+                }
                 className="shrink-0 text-sm text-brand-violet sm:text-base"
               >
                 <T k="lessons.backToStudentAccount" />
@@ -761,7 +819,8 @@ export const ProfileLessons = (props: TProps) => {
           }
           hideButton={
             !!studentId ||
-            !!(studentId ? searchString : filterSearchString)?.trim()
+            !!(studentId ? searchString : filterSearchString)?.trim() ||
+            (stayOnPage && !canCreateLesson)
           }
           buttonTitle={data.buttonTitle}
           onButtonPress={data.onButtonPress}

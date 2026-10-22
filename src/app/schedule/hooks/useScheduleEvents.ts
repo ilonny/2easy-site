@@ -1,5 +1,5 @@
 import { checkResponse, fetchDelete, fetchGet, fetchPatch, fetchPostJson } from "@/api";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ScheduleEvent } from "../types";
 
 export type ScheduleWorkspace = {
@@ -64,6 +64,11 @@ export const useScheduleEvents = (workspace?: ScheduleWorkspace) => {
   const schoolId = workspace?.schoolId;
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [loading, setLoading] = useState(false);
+  const hasLoadedRef = useRef(false);
+
+  useEffect(() => {
+    hasLoadedRef.current = false;
+  }, [workspaceScope, schoolId]);
 
   const loadEvents = useCallback(
     async (
@@ -74,7 +79,9 @@ export const useScheduleEvents = (workspace?: ScheduleWorkspace) => {
         studentId?: number | null;
       },
     ) => {
-      setLoading(true);
+      // Keep the grid mounted on refetch — swapping it for a spinner
+      // collapses the page and jumps the scroll back up.
+      if (!hasLoadedRef.current) setLoading(true);
       try {
         const qs = new URLSearchParams({ from, to });
         const tid = Number(opts?.teacherUserId);
@@ -100,6 +107,7 @@ export const useScheduleEvents = (workspace?: ScheduleWorkspace) => {
             workspaceScope ? { workspaceScope, schoolId } : undefined,
           );
           setEvents(enriched);
+          hasLoadedRef.current = true;
         }
       } finally {
         setLoading(false);

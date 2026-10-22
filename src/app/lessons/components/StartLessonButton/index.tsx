@@ -6,6 +6,11 @@ import { useCheckSubscription } from "@/app/subscription/helpers";
 import { fetchPostJson } from "@/api";
 import { openHomeworkForStudent } from "../../openHomeworkForStudent";
 import { T } from "@/i18n/T";
+import {
+  catalogFetchParams,
+  useCatalogWorkspace,
+  withWorkspacePath,
+} from "@/app/school/lib/catalogWorkspace";
 
 type TProps = {
   isSkipCreateRealtion?: boolean;
@@ -18,6 +23,8 @@ export const StartLessonButton = (props: TProps) => {
   const { isSkipCreateRealtion, lesson, mode = "start" } = props;
   const isHomeworkCheck = mode === "homeworkCheck";
   const router = useRouter();
+  const catalogWorkspace = useCatalogWorkspace();
+  const workspaceFetch = catalogFetchParams(catalogWorkspace);
   const { checkSubscription } = useCheckSubscription();
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -41,6 +48,7 @@ export const StartLessonButton = (props: TProps) => {
                 lesson_id: parentLessonId,
                 student_id: studentId,
               },
+              ...workspaceFetch,
             });
             const data = await res?.json();
             const resolvedId = Number(data?.homework_lesson_id);
@@ -56,18 +64,28 @@ export const StartLessonButton = (props: TProps) => {
           await openHomeworkForStudent(router, homeworkId, studentId);
           return;
         }
-        router.push(`/lessons/${homeworkId}`);
+        router.push(withWorkspacePath(`/lessons/${homeworkId}`, catalogWorkspace));
         return;
       }
       const targetLessonId = Number(startedLessonId || lesson.id);
       setModalVisible(false);
       router.push(
-        `/lessons/${targetLessonId}${
-          sessionId ? `?session_id=${sessionId}` : ""
-        }`,
+        withWorkspacePath(
+          `/lessons/${targetLessonId}${
+            sessionId ? `?session_id=${sessionId}` : ""
+          }`,
+          catalogWorkspace,
+        ),
       );
     },
-    [isHomeworkCheck, lesson?.id, lesson?.lesson_id_homework, router],
+    [
+      catalogWorkspace,
+      isHomeworkCheck,
+      lesson?.id,
+      lesson?.lesson_id_homework,
+      router,
+      workspaceFetch,
+    ],
   );
 
   const onPressButton = useCallback(() => {

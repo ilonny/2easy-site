@@ -2,20 +2,24 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import {
+  schoolHomePath,
+  tabFromSchoolPath,
+  writeLastSchoolTab,
+} from "../lib/schoolTab";
 
-const safeInternalPath = (value: string | null, fallback: string) =>
-  value && value.startsWith("/") && !value.startsWith("//") ? value : fallback;
+const safeInternalPath = (value: string | null) =>
+  value && value.startsWith("/") && !value.startsWith("//") ? value : "";
 
-const isSchoolHome = (path: string) =>
-  path === "/school" || path.startsWith("/school?");
-
-export const useSchoolBack = (fallback = "/school?tab=stats") => {
+export const useSchoolBack = (fallback?: string) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnTo = safeInternalPath(searchParams.get("returnTo"), fallback);
-  const target = isSchoolHome(returnTo) ? returnTo : fallback;
+  const returnTo = safeInternalPath(searchParams.get("returnTo"));
 
   return useCallback(() => {
+    const target = returnTo || fallback || schoolHomePath();
+    const tab = tabFromSchoolPath(target);
+    if (tab) writeLastSchoolTab(tab);
     router.replace(target);
-  }, [router, target]);
+  }, [fallback, returnTo, router]);
 };

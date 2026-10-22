@@ -42,6 +42,10 @@ import { CreateHomeworkModal } from "../CreateHomeworkModal";
 import { CreateIndividualHomeworkModal } from "../CreateIndividualHomeworkModal";
 import { T } from "@/i18n/T";
 import { LevelIcon, Tag, TTagTone } from "@/components/Tag";
+import {
+  useCatalogWorkspace,
+  withWorkspacePath,
+} from "@/app/school/lib/catalogWorkspace";
 
 const normalizeLevel = (tag: string) =>
   tag
@@ -124,6 +128,11 @@ export const LessonCard: FC<TProps> = ({
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
+  const catalogWorkspace = useCatalogWorkspace();
+  const go = useCallback(
+    (path: string) => router.push(withWorkspacePath(path, catalogWorkspace)),
+    [catalogWorkspace, router],
+  );
   const params = useParams();
   const { profile } = useContext(AuthContext);
   const isTeacher =
@@ -417,14 +426,14 @@ export const LessonCard: FC<TProps> = ({
       checkResponse(json);
       const sessionId = Number(json?.session?.id || 0);
       if (sessionId) {
-        router.push(`/lessons/${targetLessonId}?session_id=${sessionId}`);
+        go(`/lessons/${targetLessonId}?session_id=${sessionId}`);
         return;
       }
     } catch {
       /* open lesson mode even if session start fails */
     }
-    router.push(`/lessons/${targetLessonId}`);
-  }, [lesson?.id, params?.id, router, studentId]);
+    go(`/lessons/${targetLessonId}`);
+  }, [go, lesson?.id, params?.id, studentId]);
 
   const onPressLesson = useCallback(() => {
     if (isDisabled || disableClick) {
@@ -444,18 +453,17 @@ export const LessonCard: FC<TProps> = ({
 
     if (isCourses) {
       if (isStudent) {
-        router.push("/student-account/course/" + lesson?.id);
+        go("/student-account/course/" + lesson?.id);
         return;
       }
       const url =
         "/course/" + lesson?.id + (studentId ? "?student_id=" + studentId : "");
-      console.log("lol?", url);
-      router.push(url);
+      go(url);
       return;
     }
 
     if (isStudent) {
-      router.push("/lessons/" + lesson?.id);
+      go("/lessons/" + lesson?.id);
       const sid = studentId ?? profile?.studentId ?? params?.id;
       if (sid != null && String(sid) !== "") {
         writeToLocalStorage(
@@ -476,7 +484,7 @@ export const LessonCard: FC<TProps> = ({
       isTeacher &&
       String(studentId ?? "").trim() === ""
     ) {
-      router.push("/editor/" + lesson?.id);
+      go("/editor/" + lesson?.id);
       return;
     }
 
@@ -485,7 +493,7 @@ export const LessonCard: FC<TProps> = ({
       return;
     }
 
-    router.push("/editor/" + lesson?.id);
+    go("/editor/" + lesson?.id);
   }, [
     isDisabled,
     disableClick,
@@ -499,7 +507,7 @@ export const LessonCard: FC<TProps> = ({
     alwaysOpenLessonMode,
     isClosed,
     hasSubscription,
-    router,
+    go,
     studentId,
     profile?.studentId,
     params?.id,
@@ -823,7 +831,7 @@ export const LessonCard: FC<TProps> = ({
                   size="md"
                   onClick={(e) => {
                     e.stopPropagation();
-                    router.push(`/editor/${courseHomeworkCheck.homeworkId}`);
+                    go(`/editor/${courseHomeworkCheck.homeworkId}`);
                   }}
                 >
                   <T k="lessons.homeworkLabel" />
@@ -860,7 +868,7 @@ export const LessonCard: FC<TProps> = ({
                         JSON.stringify([sid])
                       );
                     }
-                    router.push(`/lessons/${hwId}`);
+                    go(`/lessons/${hwId}`);
                   };
                   if (lesson.has_individual_homework && lesson.homework_lesson_id) {
                     saveSelectedAndNavigate(Number(lesson.homework_lesson_id));
@@ -895,11 +903,11 @@ export const LessonCard: FC<TProps> = ({
               onClick={() => {
                 if (isCourses) {
                   if (isStudent) {
-                    router.push(`/student-account/course/${lesson.id}`);
+                    go(`/student-account/course/${lesson.id}`);
                     return;
                   }
 
-                  router.push(`/course/${lesson.id}`);
+                  go(`/course/${lesson.id}`);
                   return;
                 }
 
@@ -909,14 +917,14 @@ export const LessonCard: FC<TProps> = ({
                     alwaysOpenLessonMode &&
                     String(studentId ?? "").trim() === "";
                   if (noStudentForTeacher) {
-                    router.push(`/editor/${lesson.id}`);
+                    go(`/editor/${lesson.id}`);
                     return;
                   }
                   void openTeacherLessonForStudent();
                   return;
                 }
                 if (isStudent) {
-                  router.push(`/lessons/${lesson.id}`);
+                  go(`/lessons/${lesson.id}`);
                   const sid = studentId ?? profile?.studentId;
                   if (sid != null && String(sid) !== "") {
                     writeToLocalStorage(

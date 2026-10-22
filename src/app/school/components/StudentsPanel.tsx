@@ -10,8 +10,9 @@ import {
   Select,
   SelectItem,
 } from "@nextui-org/react";
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useContext, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { AuthContext } from "@/auth";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import {
@@ -21,6 +22,7 @@ import {
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { toast } from "react-toastify";
 import { fetchGet } from "@/api";
+import { rememberStudentCabinetBack } from "../lib/studentCabinetBack";
 import {
   AvailableTeacher,
   DOW_ORDER,
@@ -88,6 +90,7 @@ export const StudentsPanel: FC<TProps> = ({
   const [loadingAvail, setLoadingAvail] = useState(false);
   const [showAllTeachers, setShowAllTeachers] = useState(false);
   const [saving, setSaving] = useState(false);
+  const { profile } = useContext(AuthContext);
 
   const teachers = useMemo(
     () =>
@@ -103,12 +106,23 @@ export const StudentsPanel: FC<TProps> = ({
     [members],
   );
 
-  const teacherName = (userId: string | number | undefined) => {
+  const teacherName = (
+    userId: string | number | undefined,
+    fallbackName?: string | null,
+  ) => {
     const m = members.find((x) => String(x.user_id) === String(userId));
-    if (!m?.user) return String(userId || "—");
-    return (
-      [m.user.name, m.user.surname].filter(Boolean).join(" ") || m.user.login
-    );
+    const fromMember =
+      [m?.user?.name, m?.user?.surname].filter(Boolean).join(" ") ||
+      m?.user?.login;
+    const selfName =
+      String(userId) === String(profile?.id)
+        ? [profile?.name, profile?.surname].filter(Boolean).join(" ") ||
+          profile?.login ||
+          ""
+        : "";
+    const named =
+      fromMember || String(fallbackName || "").trim() || selfName;
+    return named || "—";
   };
 
   const formatTeacher = (t: {
@@ -116,17 +130,10 @@ export const StudentsPanel: FC<TProps> = ({
     name?: string | null;
     surname?: string | null;
     login?: string;
-    free_minutes_day?: number;
-  }) => {
-    const label =
-      [t.name, t.surname].filter(Boolean).join(" ") ||
-      t.login ||
-      String(t.user_id);
-    if (t.free_minutes_day != null) {
-      return `${label} (${Math.round(t.free_minutes_day / 60)}h free)`;
-    }
-    return label;
-  };
+  }) =>
+    [t.name, t.surname].filter(Boolean).join(" ") ||
+    t.login ||
+    String(t.user_id);
 
   const slotsReady = useMemo(() => {
     if (!slots.length) return false;
@@ -264,19 +271,42 @@ export const StudentsPanel: FC<TProps> = ({
         duration_minutes: duration,
         slots: slots.map((slot) =>
           frequency === "once"
-            ? { date: slot.date, start: slot.start }
-            : { dow: slot.dow, start: slot.start },
+            ? { date: slot.date, start: String(slot.start || "").slice(0, 5) }
+            : { dow: slot.dow, start: String(slot.start || "").slice(0, 5) },
         ),
       });
       if (res?.success) {
-        toast(
-          res.password
-            ? i18n.t("school.studentCreatedWithPassword", {
-                password: res.password,
-              })
-            : i18n.t("school.studentCreated"),
-          { type: "success" },
-        );
+        const createdLessons = Number(res.schedule_events_created) || 0;
+        const firstAt = res.first_starts_at
+          ? new Date(res.first_starts_at).toLocaleString("ru-RU", {
+              day: "numeric",
+              month: "long",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "";
+        const message =
+          createdLessons > 0 && firstAt
+            ? res.password
+              ? i18n.t("school.studentCreatedWithPasswordAndLessons", {
+                  password: res.password,
+                  count: createdLessons,
+                  date: firstAt,
+                })
+              : i18n.t("school.studentCreatedWithLessons", {
+                  count: createdLessons,
+                  date: firstAt,
+                })
+            : slots.length
+              ? i18n.t("school.studentCreatedNoLessons")
+              : res.password
+                ? i18n.t("school.studentCreatedWithPassword", {
+                    password: res.password,
+                  })
+                : i18n.t("school.studentCreated");
+        toast(message, {
+          type: createdLessons > 0 || !slots.length ? "success" : "warning",
+        });
         setOpen(false);
         resetForm();
       }
@@ -323,12 +353,20 @@ export const StudentsPanel: FC<TProps> = ({
               <tr key={s.id} className="border-t border-black/5">
                 <td className="px-4 py-3">{s.name || "—"}</td>
                 <td className="px-4 py-3">{s.email || "—"}</td>
-                <td className="px-4 py-3">{teacherName(s.user_id)}</td>
+                <td className="px-4 py-3">
+                  {teacherName(s.user_id, s.teacher_name)}
+                </td>
                 <td className="px-4 py-3">
                   <Link
                     href={`/student-account/${s.id}?workspace=school&schoolId=${schoolId}&returnTo=${encodeURIComponent(
                       "/school?tab=students",
                     )}`}
+                    onClick={() =>
+                      rememberStudentCabinetBack(s.id, {
+                        teacherUserId: null,
+                        returnTo: "/school?tab=students",
+                      })
+                    }
                     className="font-medium text-brand-violet hover:underline"
                   >
                     <T k="school.openCabinet" />

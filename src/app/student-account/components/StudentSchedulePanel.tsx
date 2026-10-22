@@ -209,7 +209,7 @@ export const StudentSchedulePanel: FC<TProps> = ({
         ) : null}
       </div>
 
-      <div className={`${scheduleStyles.shell} !h-auto min-h-[520px] !gap-3`}>
+      <div className={`${scheduleStyles.shell} !h-[min(72dvh,760px)] min-h-[520px] !gap-3`}>
         <section className={scheduleStyles.calendarPane}>
           <CalendarToolbar
             cursor={cursor}
@@ -221,7 +221,7 @@ export const StudentSchedulePanel: FC<TProps> = ({
             onNext={() => setCursor((c) => c.add(1, shiftUnit))}
           />
           <div className={`${scheduleStyles.viewBody} min-h-[420px]`}>
-            {loading ? (
+            {loading && !events.length ? (
               <div className="flex h-full items-center justify-center py-16">
                 <Spinner color="primary" />
               </div>

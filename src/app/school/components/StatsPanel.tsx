@@ -226,14 +226,18 @@ export const StatsPanel: FC<TProps> = ({ schoolId }) => {
           <StatCard
             label={<T k="school.statSubFill" />}
             value={
-              stats.subscription.fill_percent != null
-                ? `${stats.subscription.fill_percent}%`
-                : i18n.t("school.unlimited")
+              Number.isFinite(Number(stats.subscription.fill_percent)) &&
+              Number(stats.subscription.max_students) > 0
+                ? `${Number(stats.subscription.fill_percent)}%`
+                : i18n.t("school.unlimited", {
+                    defaultValue: "без лимита",
+                  })
             }
             hint={
-              stats.subscription.max_students != null
+              Number(stats.subscription.max_students) > 0
                 ? `${stats.subscription.student_count} / ${stats.subscription.max_students}`
-                : stats.subscription.tier
+                : stats.subscription.tier ||
+                  i18n.t("school.unlimited", { defaultValue: "без лимита" })
             }
             accent={CHART.pink}
           />

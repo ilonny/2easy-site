@@ -178,6 +178,11 @@ export const WorkingHoursEditor: FC<TProps> = ({
       if (data?.success) {
         toast(i18n.t("school.hoursSaved"), { type: "success" });
         setWeek(hoursToWeek(data.hours || hours));
+        window.dispatchEvent(
+          new CustomEvent("schedule-events-invalidated", {
+            detail: { schoolId, teacherUserId: userId },
+          }),
+        );
       } else {
         checkResponse(data);
       }

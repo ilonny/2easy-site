@@ -18,6 +18,10 @@ import { StudentList } from "@/app/student/components/StudentList";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import type { ReactNode } from "react";
+import {
+  studentListFetchParams,
+  useCatalogWorkspace,
+} from "@/app/school/lib/catalogWorkspace";
 
 type TProps = {
   isVisible: boolean;
@@ -50,6 +54,8 @@ export const AttachBoardModalForm: FC<TProps> = ({
   const [step, setStep] = useState(0);
   const [status, setStatus] = useState<"open" | "close">("open");
   const [isLoading, setIsLoading] = useState(false);
+  const catalogWorkspace = useCatalogWorkspace();
+  const workspaceFetch = studentListFetchParams(catalogWorkspace);
 
   const onSubmit = useCallback(async () => {
     setIsLoading(true);
@@ -63,6 +69,7 @@ export const AttachBoardModalForm: FC<TProps> = ({
             student_id,
             status,
           },
+          ...workspaceFetch,
         });
         return await res.json();
       }),
@@ -74,7 +81,7 @@ export const AttachBoardModalForm: FC<TProps> = ({
       });
     }
     onSuccess();
-  }, [board.id, chosenIds, hideToast, onSuccess, status]);
+  }, [board.id, chosenIds, hideToast, onSuccess, status, workspaceFetch]);
 
   const onClickStudent = useCallback(
     (id: number) => {

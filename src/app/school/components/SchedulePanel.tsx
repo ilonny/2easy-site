@@ -101,7 +101,7 @@ export const SchedulePanel: FC<TProps> = ({
     [members],
   );
 
-  // Default / repair selection: always a single teacher (no "all")
+  // Default / repair selection: prefer a real teacher, not the first name in the list.
   useEffect(() => {
     if (!canFilterTeachers) return;
     if (!teachers.length) {
@@ -111,9 +111,12 @@ export const SchedulePanel: FC<TProps> = ({
     const stillValid = teachers.some(
       (t) => String(t.user_id) === teacherFilter,
     );
-    if (!stillValid) {
-      setTeacherFilter(String(teachers[0].user_id));
-    }
+    if (stillValid) return;
+    const preferred =
+      teachers.find((t) => (t.roles || []).includes("teacher")) ||
+      teachers.find((t) => !(t.roles || []).includes("super_admin")) ||
+      teachers[0];
+    setTeacherFilter(String(preferred.user_id));
   }, [canFilterTeachers, teachers, teacherFilter]);
 
   const teacherById = useMemo(() => {
@@ -166,11 +169,14 @@ export const SchedulePanel: FC<TProps> = ({
     if (canFilterTeachers) {
       const tid = Number(teacherFilter);
       if (!Number.isFinite(tid) || tid <= 0) return;
-      await loadEvents(from, to, { teacherUserId: tid });
+      await Promise.all([
+        loadEvents(from, to, { teacherUserId: tid }),
+        loadAvailability(from, to, tid),
+      ]);
       return;
     }
-    await loadEvents(from, to);
-  }, [cursor, view, loadEvents, canFilterTeachers, teacherFilter]);
+    await Promise.all([loadEvents(from, to), loadAvailability(from, to, null)]);
+  }, [cursor, view, loadEvents, loadAvailability, canFilterTeachers, teacherFilter]);
 
   useEffect(() => {
     void refreshRange();
@@ -222,7 +228,18 @@ export const SchedulePanel: FC<TProps> = ({
           </h2>
           <p className="text-sm text-brand-grayFont">
             {canFilterTeachers ? (
-              <T k="school.scheduleHintFiltered" />
+              teacherFilter ? (
+                <T
+                  k="school.scheduleHintSelected"
+                  values={{
+                    name:
+                      teacherById.get(Number(teacherFilter)) ||
+                      i18n.t("school.scheduleFilterTeacher"),
+                  }}
+                />
+              ) : (
+                <T k="school.scheduleHintFiltered" />
+              )
             ) : (
               <T k="school.scheduleHintOwn" />
             )}
@@ -250,7 +267,7 @@ export const SchedulePanel: FC<TProps> = ({
       </div>
 
       <div
-        className={`${scheduleStyles.shell} !h-auto min-h-[520px] !gap-3`}
+        className={`${scheduleStyles.shell} !h-[min(72dvh,760px)] min-h-[520px] !gap-3`}
       >
         <section className={scheduleStyles.calendarPane}>
           <CalendarToolbar
@@ -263,7 +280,7 @@ export const SchedulePanel: FC<TProps> = ({
             onNext={() => setCursor((c) => c.add(1, shiftUnit))}
           />
           <div className={`${scheduleStyles.viewBody} min-h-[420px]`}>
-            {loading ? (
+            {loading && !events.length ? (
               <div className="flex h-full items-center justify-center py-16">
                 <Spinner color="primary" />
               </div>

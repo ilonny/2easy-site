@@ -22,6 +22,7 @@ import { T } from "@/i18n/T";
 import { UserAvatar } from "@/components/UserAvatar";
 import { StudentPasswordReveal } from "../StudentPasswordReveal";
 import { brandModalClassNames } from "@/components/brandUi";
+import { useCatalogWorkspace } from "@/app/school/lib/catalogWorkspace";
 
 type TProps = {
   hideAddButton?: boolean;
@@ -58,6 +59,11 @@ export const StudentList = (props: TProps) => {
     useStudentList(studentsList, {
       archived: showArchiveToggle ? showArchived : false,
     });
+  const catalogWorkspace = useCatalogWorkspace();
+  const hideCreateInForeignCabinet = Boolean(
+    catalogWorkspace.teacherUserId ||
+      catalogWorkspace.workspaceScope === "school",
+  );
   const [chosenStudent, setChosenStudent] = useState(null);
   const router = useRouter();
 
@@ -126,7 +132,7 @@ export const StudentList = (props: TProps) => {
           }
           buttonTitle={<T k="students.add" />}
           onButtonPress={() => onPressCreateGroup(null)}
-          hideButton={showArchived}
+          hideButton={showArchived || hideCreateInForeignCabinet}
         />
       )}
       {!!students?.length && (
@@ -276,7 +282,7 @@ export const StudentList = (props: TProps) => {
               </div>
             );
           })}
-          {!hideAddButton && !showArchived && (
+          {!hideAddButton && !hideCreateInForeignCabinet && !showArchived && (
             <Button
               radius="md"
               color="primary"

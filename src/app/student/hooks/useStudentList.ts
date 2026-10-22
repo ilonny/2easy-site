@@ -1,6 +1,10 @@
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { getTokenFromLocalStorage } from "@/auth/utils";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import {
+  studentListFetchParams,
+  useCatalogWorkspace,
+} from "@/app/school/lib/catalogWorkspace";
 
 type UseStudentListOptions = {
   /** When true, load archived students (`GET /student?archived=1`). */
@@ -13,6 +17,24 @@ export const useStudentList = (
 ) => {
   const [students, setStudents] = useState([]);
   const archived = Boolean(options?.archived);
+  const workspace = useCatalogWorkspace();
+  const fetchWorkspace = useMemo(
+    () =>
+      studentListFetchParams(
+        workspace.workspaceScope ||
+          workspace.schoolId ||
+          workspace.teacherUserId ||
+          workspace.studentScope
+          ? workspace
+          : { workspaceScope: "personal" },
+      ),
+    [
+      workspace.schoolId,
+      workspace.studentScope,
+      workspace.teacherUserId,
+      workspace.workspaceScope,
+    ],
+  );
 
   const getStudents = useCallback(async () => {
     if (!!localStudents) {
@@ -26,25 +48,23 @@ export const useStudentList = (
     const res = await fetchGet({
       path: archived ? "/student?archived=1" : "/student",
       isSecure: true,
-      workspaceScope: "personal",
+      ...fetchWorkspace,
     });
     const data = await res?.json();
-    // API returns an array on success; on 401 it returns an object.
-    // Backend lists all students assigned to the teacher (pre-school compatible).
     setStudents(Array.isArray(data) ? data : []);
-  }, [localStudents, archived]);
+  }, [archived, fetchWorkspace, localStudents]);
 
   const deleteStudent = useCallback(async (id) => {
     const res = await fetchPostJson({
       path: "/student/delete",
       isSecure: true,
       data: { id },
-      workspaceScope: "personal",
+      ...fetchWorkspace,
     });
     const student = await res?.json();
     checkResponse(student);
     return student;
-  }, []);
+  }, [fetchWorkspace]);
 
   const setStudentArchived = useCallback(
     async (id: number, is_archived: boolean) => {
@@ -52,13 +72,13 @@ export const useStudentList = (
         path: "/student/archive",
         isSecure: true,
         data: { id, is_archived: is_archived ? 1 : 0 },
-        workspaceScope: "personal",
+        ...fetchWorkspace,
       });
       const student = await res?.json();
       checkResponse(student);
       return student;
     },
-    [],
+    [fetchWorkspace],
   );
 
   return { students, getStudents, deleteStudent, setStudentArchived };

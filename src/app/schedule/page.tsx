@@ -4,7 +4,6 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/ru";
 import { Button, Spinner } from "@nextui-org/react";
-import Link from "next/link";
 import { BrandPill, CatalogPageShell } from "@/components";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { AuthContext } from "@/auth";
@@ -156,7 +155,23 @@ export default function SchedulePage() {
         ? Number(teacherFilter)
         : null;
     await loadEvents(from, to, { teacherUserId: tid });
-  }, [cursor, view, loadEvents, canFilterTeachers, teacherFilter]);
+    if (workspace.scope === "school") {
+      const availabilityId =
+        tid && tid > 0 ? tid : Number(profile?.id) || null;
+      if (availabilityId) {
+        await loadAvailability(from, to, availabilityId);
+      }
+    }
+  }, [
+    cursor,
+    view,
+    loadEvents,
+    loadAvailability,
+    canFilterTeachers,
+    teacherFilter,
+    workspace.scope,
+    profile?.id,
+  ]);
 
   useEffect(() => {
     if (!teacherAllowed && isTeacher) return;
@@ -648,22 +663,10 @@ export default function SchedulePage() {
                       </Button>
                     </>
                   )}
-                  {workspace.scope === "school" && (
-                    <Link
-                      href={
-                        availabilityTeacherId
-                          ? `/school/staff/${availabilityTeacherId}?returnTo=${encodeURIComponent("/schedule")}`
-                          : "/school?tab=members"
-                      }
-                      className="text-xs font-medium text-brand-violet hover:underline"
-                    >
-                      <T k="schedule.weeklyHoursLink" />
-                    </Link>
-                  )}
                 </div>
               )}
               <div className={styles.viewBody}>
-                {loading ? (
+                {loading && !visibleEvents.length ? (
                   <div className="flex h-full items-center justify-center">
                     <Spinner color="primary" />
                   </div>

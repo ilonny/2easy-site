@@ -1,5 +1,16 @@
 import { fetchPostJson } from "@/api";
 import { writeToLocalStorage } from "@/auth/utils";
+import {
+  catalogWorkspaceFromSearchParams,
+  withWorkspacePath,
+} from "@/app/school/lib/catalogWorkspace";
+
+const workspaceFromLocation = () => {
+  if (typeof window === "undefined") return {};
+  return catalogWorkspaceFromSearchParams(
+    new URLSearchParams(window.location.search),
+  );
+};
 
 /** Open lesson mode in a fresh session for the given students, not the last session on that lesson. */
 export async function openLessonForStudents(
@@ -13,7 +24,7 @@ export async function openLessonForStudents(
     return;
   }
   if (!sids.length) {
-    router.push(`/lessons/${id}`);
+    router.push(withWorkspacePath(`/lessons/${id}`, workspaceFromLocation()));
     return;
   }
 
@@ -43,7 +54,12 @@ export async function openLessonForStudents(
     qs.set("session_id", String(sessionId));
   }
   const query = qs.toString();
-  router.push(`/lessons/${id}${query ? `?${query}` : ""}`);
+  router.push(
+    withWorkspacePath(
+      `/lessons/${id}${query ? `?${query}` : ""}`,
+      workspaceFromLocation(),
+    ),
+  );
 }
 
 /** Open homework in the selected student's session, not the last session on that lesson. */

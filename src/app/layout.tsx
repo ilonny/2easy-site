@@ -2,6 +2,7 @@ import type {
   Metadata,
   Viewport,
 } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import { Header } from "@/components";
 import { AuthContextProvider } from "@/auth";
@@ -24,6 +25,7 @@ import {
   VideoCallProvider,
 } from "@/components/VideoCall";
 import { NavigationProgress } from "@/components/NavigationProgress";
+import { WorkspaceFromUrlProvider } from "@/app/school/lib/WorkspaceFromUrlProvider";
 
 export const metadata: Metadata = {
   title: "2EASY Interactive",
@@ -54,6 +56,8 @@ export default function RootLayout({
                 <SibscribeContextProvider>
                   <EditorContextProvider>
                     <ErrorBoundary>
+                      <Suspense fallback={null}>
+                      <WorkspaceFromUrlProvider>
                       <NavigationProgress />
                       <VideoCallProvider>
                         <AppInstallBanner />
@@ -65,6 +69,8 @@ export default function RootLayout({
                         <TalkMeSite />
                         <GlobalVideoCallShell />
                       </VideoCallProvider>
+                      </WorkspaceFromUrlProvider>
+                      </Suspense>
                     </ErrorBoundary>
                   </EditorContextProvider>
                 </SibscribeContextProvider>

@@ -6,7 +6,8 @@ import {
   fetchPostJson,
   fetchPostMultipart,
 } from "@/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { AuthContext } from "@/auth";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { SchoolInfo, SchoolMember, SchoolTier } from "../types";
 import {
   getActiveSchoolId,
@@ -15,6 +16,8 @@ import {
 } from "../lib/activeSchool";
 
 export const useSchool = () => {
+  const { profile } = useContext(AuthContext);
+  const isStudentViewer = !!(profile?.isStudent || profile?.studentId);
   const [loading, setLoading] = useState(true);
   const [schools, setSchools] = useState<SchoolInfo[]>([]);
   const [activeSchoolId, setActiveSchoolIdState] = useState<number | null>(
@@ -218,8 +221,13 @@ export const useSchool = () => {
   );
 
   useEffect(() => {
+    if (isStudentViewer) {
+      setLoading(false);
+      setSchools([]);
+      return;
+    }
     void refreshMe();
-  }, [refreshMe]);
+  }, [isStudentViewer, refreshMe]);
 
   useEffect(() => {
     if (!school?.id) return;

@@ -15,6 +15,7 @@ import { useCalendarHours } from "../hooks/useCalendarHours";
 import {
   rangeForHour,
   rangeKey,
+  isNonWorkingSlot,
   slotAvailabilityStyle,
 } from "./availabilityUi";
 
@@ -60,17 +61,23 @@ export const DayView = ({
     return () => window.clearInterval(id);
   }, []);
 
+  const periodKey = cursor.format("YYYY-MM-DD");
+  const scrolledPeriodRef = useRef("");
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+    if (scrolledPeriodRef.current === periodKey) return;
+    scrolledPeriodRef.current = periodKey;
+    const hours = visibleHours;
     const target = isToday
-      ? nowScrollTop(hourHeight, 48, visibleHours)
+      ? nowScrollTop(hourHeight, 48, hours)
       : Math.max(0, (9 - visibleWindow.start) * hourHeight);
     requestAnimationFrame(() => {
       el.scrollTop = target;
     });
   }, [
-    cursor,
+    periodKey,
     isToday,
     hourHeight,
     visibleHours,
@@ -105,7 +112,7 @@ export const DayView = ({
 
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 overflow-auto overscroll-contain"
+        className="min-h-0 flex-1 overflow-auto overscroll-contain [overflow-anchor:none]"
       >
         <div className="relative pb-5" style={{ height: gridHeight + 20 }}>
           {visibleHours.map((hour) => (
@@ -151,7 +158,13 @@ export const DayView = ({
                   {`${String(hour).padStart(2, "0")}:00`}
                 </span>
               </div>
-              <div className="relative flex-1 border-l border-[#f0f0f5]" />
+              <div className="relative flex flex-1 items-center justify-center border-l border-[#f0f0f5]">
+                {isNonWorkingSlot(cursor, hour, availability) ? (
+                  <span className="pointer-events-none text-[15px] font-semibold leading-none text-[#8e8e93]">
+                    ×
+                  </span>
+                ) : null}
+              </div>
             </button>
           ))}
           <div

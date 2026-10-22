@@ -25,8 +25,8 @@ import {
   SchoolMember,
   SchoolRole,
 } from "../types";
-import { WorkingHoursEditor } from "./WorkingHoursEditor";
 import { RoleBadges } from "./RoleBadges";
+import { WorkingHoursEditor } from "./WorkingHoursEditor";
 
 type TProps = {
   canManage: boolean;
