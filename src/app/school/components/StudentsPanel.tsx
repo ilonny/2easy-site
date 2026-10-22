@@ -10,7 +10,14 @@ import {
   Select,
   SelectItem,
 } from "@nextui-org/react";
-import { FC, useContext, useEffect, useMemo, useState } from "react";
+import {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import Link from "next/link";
 import { AuthContext } from "@/auth";
 import { T } from "@/i18n/T";
@@ -21,7 +28,7 @@ import {
 } from "@/components/brandUi";
 import { SearchableSelect } from "@/components/SearchableSelect";
 import { toast } from "react-toastify";
-import { fetchGet } from "@/api";
+import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { rememberStudentCabinetBack } from "../lib/studentCabinetBack";
 import {
   AvailableTeacher,
@@ -31,6 +38,23 @@ import {
 } from "../types";
 
 type LessonFrequency = "weekly" | "biweekly" | "once";
+type StudentAction = "archive" | "restore" | "delete";
+
+type SchoolStudent = {
+  id: number;
+  name?: string;
+  email?: string;
+  user_id?: number | string;
+  teacher_name?: string | null;
+  is_archived?: number;
+};
+
+type CreateSchoolStudentResult = {
+  success?: boolean;
+  password?: string;
+  schedule_events_created?: number;
+  first_starts_at?: string;
+};
 
 type PreferredSlotRow = {
   id: string;
@@ -46,8 +70,9 @@ type TProps = {
   canManageAssign: boolean;
   defaultLessonMinutes?: number;
   timezone?: string;
-  students: any[];
+  students: SchoolStudent[];
   members: SchoolMember[];
+  onStudentsChanged?: () => Promise<unknown> | void;
   onCreate: (payload: {
     name: string;
     email?: string;
@@ -56,7 +81,7 @@ type TProps = {
     frequency?: LessonFrequency;
     duration_minutes?: number;
     slots?: Array<{ dow?: number; date?: string; start: string }>;
-  }) => Promise<any>;
+  }) => Promise<CreateSchoolStudentResult>;
 };
 
 const newSlotId = () =>
@@ -76,6 +101,7 @@ export const StudentsPanel: FC<TProps> = ({
   timezone,
   students,
   members,
+  onStudentsChanged,
   onCreate,
 }) => {
   const [open, setOpen] = useState(false);
@@ -90,6 +116,16 @@ export const StudentsPanel: FC<TProps> = ({
   const [loadingAvail, setLoadingAvail] = useState(false);
   const [showAllTeachers, setShowAllTeachers] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [archivedStudents, setArchivedStudents] = useState<SchoolStudent[]>([]);
+  const [loadingArchived, setLoadingArchived] = useState(false);
+  const [studentAction, setStudentAction] = useState<StudentAction | null>(
+    null,
+  );
+  const [actionStudent, setActionStudent] = useState<SchoolStudent | null>(
+    null,
+  );
+  const [savingAction, setSavingAction] = useState(false);
   const { profile } = useContext(AuthContext);
 
   const teachers = useMemo(
@@ -134,6 +170,97 @@ export const StudentsPanel: FC<TProps> = ({
     [t.name, t.surname].filter(Boolean).join(" ") ||
     t.login ||
     String(t.user_id);
+
+  const loadArchivedStudents = useCallback(async () => {
+    setLoadingArchived(true);
+    try {
+      const res = await fetchGet({
+        path: `/school/${schoolId}/students?archived=1`,
+        isSecure: true,
+        workspaceScope: "school",
+        schoolId,
+      });
+      const data = await res.json();
+      if (data?.success) {
+        setArchivedStudents(data.students || []);
+      } else {
+        setArchivedStudents([]);
+        checkResponse(data);
+      }
+    } finally {
+      setLoadingArchived(false);
+    }
+  }, [schoolId]);
+
+  useEffect(() => {
+    if (showArchived) void loadArchivedStudents();
+  }, [loadArchivedStudents, showArchived]);
+
+  const visibleStudents = showArchived ? archivedStudents : students;
+
+  const openStudentAction = (
+    student: SchoolStudent,
+    action: StudentAction,
+  ) => {
+    setActionStudent(student);
+    setStudentAction(action);
+  };
+
+  const closeStudentAction = () => {
+    if (savingAction) return;
+    setStudentAction(null);
+    setActionStudent(null);
+  };
+
+  const applyStudentAction = async () => {
+    const studentId = Number(actionStudent?.id);
+    if (!studentId || !studentAction) return;
+
+    setSavingAction(true);
+    try {
+      const res =
+        studentAction === "delete"
+          ? await fetchPostJson({
+              path: "/student/delete",
+              isSecure: true,
+              workspaceScope: "school",
+              schoolId,
+              data: { id: studentId },
+            })
+          : await fetchPostJson({
+              path: "/student/archive",
+              isSecure: true,
+              workspaceScope: "school",
+              schoolId,
+              data: {
+                id: studentId,
+                is_archived: studentAction === "archive" ? 1 : 0,
+              },
+            });
+      const data = await res.json();
+      if (!data?.success) {
+        checkResponse(data);
+        return;
+      }
+
+      toast(
+        i18n.t(
+          studentAction === "delete"
+            ? "school.studentDeleted"
+            : studentAction === "archive"
+              ? "school.studentArchived"
+              : "school.studentUnarchived",
+        ),
+        { type: "success" },
+      );
+      setStudentAction(null);
+      setActionStudent(null);
+      await onStudentsChanged?.();
+      if (showArchived) await loadArchivedStudents();
+    } finally {
+      setSavingAction(false);
+    }
+  };
 
   const slotsReady = useMemo(() => {
     if (!slots.length) return false;
@@ -321,14 +448,37 @@ export const StudentsPanel: FC<TProps> = ({
         <h2 className="text-lg font-bold tracking-brand text-brand-black">
           <T k="school.studentsTitle" />
         </h2>
+        {!showArchived ? (
+          <Button
+            className={brandPrimaryBtnClassName}
+            onPress={() => {
+              setDuration(defaultLessonMinutes);
+              setOpen(true);
+            }}
+          >
+            <T k="school.addStudent" />
+          </Button>
+        ) : null}
+      </div>
+
+      <div className="flex gap-2">
         <Button
-          className={brandPrimaryBtnClassName}
-          onPress={() => {
-            setDuration(defaultLessonMinutes);
-            setOpen(true);
-          }}
+          radius="full"
+          color="primary"
+          variant={!showArchived ? "solid" : "bordered"}
+          onClick={() => setShowArchived(false)}
+          size="sm"
         >
-          <T k="school.addStudent" />
+          <T k="students.activeTab" />
+        </Button>
+        <Button
+          radius="full"
+          color="primary"
+          variant={showArchived ? "solid" : "bordered"}
+          onClick={() => setShowArchived(true)}
+          size="sm"
+        >
+          <T k="students.archivedTab" />
         </Button>
       </div>
 
@@ -349,7 +499,7 @@ export const StudentsPanel: FC<TProps> = ({
             </tr>
           </thead>
           <tbody>
-            {students.map((s) => (
+            {visibleStudents.map((s) => (
               <tr key={s.id} className="border-t border-black/5">
                 <td className="px-4 py-3">{s.name || "—"}</td>
                 <td className="px-4 py-3">{s.email || "—"}</td>
@@ -357,36 +507,117 @@ export const StudentsPanel: FC<TProps> = ({
                   {teacherName(s.user_id, s.teacher_name)}
                 </td>
                 <td className="px-4 py-3">
-                  <Link
-                    href={`/student-account/${s.id}?workspace=school&schoolId=${schoolId}&returnTo=${encodeURIComponent(
-                      "/school?tab=students",
-                    )}`}
-                    onClick={() =>
-                      rememberStudentCabinetBack(s.id, {
-                        teacherUserId: null,
-                        returnTo: "/school?tab=students",
-                      })
-                    }
-                    className="font-medium text-brand-violet hover:underline"
-                  >
-                    <T k="school.openCabinet" />
-                  </Link>
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    {!showArchived ? (
+                      <Link
+                        href={`/student-account/${s.id}?workspace=school&schoolId=${schoolId}&returnTo=${encodeURIComponent(
+                          "/school?tab=students",
+                        )}`}
+                        onClick={() =>
+                          rememberStudentCabinetBack(s.id, {
+                            teacherUserId: null,
+                            returnTo: "/school?tab=students",
+                          })
+                        }
+                        className="font-medium text-brand-violet hover:underline"
+                      >
+                        <T k="school.openCabinet" />
+                      </Link>
+                    ) : null}
+                    <Button
+                      size="sm"
+                      variant="light"
+                      onPress={() =>
+                        openStudentAction(
+                          s,
+                          showArchived ? "restore" : "archive",
+                        )
+                      }
+                    >
+                      {showArchived ? (
+                        <T k="students.unarchive" />
+                      ) : (
+                        <T k="students.archive" />
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      color="danger"
+                      variant="light"
+                      onPress={() => openStudentAction(s, "delete")}
+                    >
+                      <T k="common.delete" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
-            {!students.length && (
+            {!loadingArchived && !visibleStudents.length && (
               <tr>
                 <td
                   colSpan={4}
                   className="px-4 py-6 text-center text-brand-grayFont"
                 >
-                  <T k="school.noStudents" />
+                  {showArchived ? (
+                    <T k="students.noArchivedStudents" />
+                  ) : (
+                    <T k="school.noStudents" />
+                  )}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <Modal
+        size="xl"
+        isOpen={studentAction != null}
+        onClose={closeStudentAction}
+        classNames={brandModalClassNames}
+      >
+        <ModalContent>
+          <ModalHeader>
+            {studentAction === "delete" ? (
+              <T
+                k="students.deleteStudentConfirm"
+                values={{ name: actionStudent?.name || "" }}
+              />
+            ) : studentAction === "restore" ? (
+              <T
+                k="students.unarchiveStudentConfirm"
+                values={{ name: actionStudent?.name || "" }}
+              />
+            ) : (
+              <T
+                k="students.archiveStudentConfirm"
+                values={{ name: actionStudent?.name || "" }}
+              />
+            )}
+          </ModalHeader>
+          <ModalBody className="pb-6">
+            {studentAction === "archive" ? (
+              <p className="text-sm text-brand-grayFont">
+                <T k="students.archiveStudentHint" />
+              </p>
+            ) : null}
+            <Button
+              color={studentAction === "delete" ? "danger" : "primary"}
+              variant={studentAction === "delete" ? "light" : "solid"}
+              isLoading={savingAction}
+              onPress={applyStudentAction}
+            >
+              {studentAction === "delete" ? (
+                <T k="editor.confirmDelete" />
+              ) : studentAction === "restore" ? (
+                <T k="students.unarchive" />
+              ) : (
+                <T k="students.archive" />
+              )}
+            </Button>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
 
       <Modal
         size="2xl"

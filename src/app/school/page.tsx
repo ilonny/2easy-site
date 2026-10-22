@@ -45,6 +45,7 @@ export default function SchoolPage() {
     createSchoolPayment,
     refreshSubscription,
     refreshMembers,
+    refreshStudents,
     refreshMe,
   } = useSchool();
 
@@ -262,6 +263,12 @@ export default function SchoolPage() {
             timezone={school.settings?.timezone}
             students={students}
             members={members}
+            onStudentsChanged={() =>
+              Promise.all([
+                refreshStudents(school.id),
+                refreshSubscription(school.id),
+              ])
+            }
             onCreate={(payload) => createStudent(school.id, payload)}
           />
         )}
@@ -271,7 +278,7 @@ export default function SchoolPage() {
             canPay={canPay}
             schoolId={school.id}
             tiers={tiers}
-            subscription={subscription || school.subscription}
+            subscription={subscription || school.subscription || null}
             studentCount={studentCount}
             createSchoolPayment={createSchoolPayment}
             onPaid={() => {
