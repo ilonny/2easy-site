@@ -4,7 +4,6 @@ export const SCHOOL_TABS = [
   "members",
   "students",
   "materials",
-  "tariffs",
   "settings",
 ] as const;
 

@@ -438,6 +438,10 @@
   },
   "subscription": {
     "title": "2easy Subscription",
+    "personalTab": "Personal subscription",
+    "schoolTab": "School subscription",
+    "schoolSubtitle": "Plan and subscription status for “{{school}}”",
+    "selectSchool": "Select a school",
     "page": {
       "subtitle": "Access to materials and the lesson builder platform",
       "description1": "A subscription gives you access to materials and updates released during your subscription period, the lesson builder platform, and your student dashboard for teaching in real time.",

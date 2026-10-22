@@ -12,7 +12,6 @@ import { useSchool } from "./hooks/useSchool";
 import { CreateSchoolForm } from "./components/CreateSchoolForm";
 import { MembersPanel } from "./components/MembersPanel";
 import { StudentsPanel } from "./components/StudentsPanel";
-import { TariffsPanel } from "./components/TariffsPanel";
 import { StatsPanel } from "./components/StatsPanel";
 import { SchedulePanel } from "./components/SchedulePanel";
 import { SettingsPanel } from "./components/SettingsPanel";
@@ -37,12 +36,8 @@ export default function SchoolPage() {
     selectSchool,
     members,
     students,
-    tiers,
-    studentCount,
-    subscription,
     createSchool,
     createStudent,
-    createSchoolPayment,
     refreshSubscription,
     refreshMembers,
     refreshStudents,
@@ -55,7 +50,6 @@ export default function SchoolPage() {
   const [showCreate, setShowCreate] = useState(false);
 
   const canManage = !!school?.access?.canManageMembers;
-  const canPay = !!school?.access?.canPay;
   const canAssign = !!school?.access?.canSeeAllStudents;
   const canSeeStaff =
     !!school?.access?.canSeeTeachers || !!school?.access?.canManageMembers;
@@ -218,12 +212,6 @@ export default function SchoolPage() {
               <T k="school.tabMaterials" />
             </BrandPill>
           ) : null}
-          <BrandPill
-            active={tab === "tariffs"}
-            onClick={() => setTab("tariffs")}
-          >
-            <T k="school.tabTariffs" />
-          </BrandPill>
           {canSettings ? (
             <BrandPill
               active={tab === "settings"}
@@ -270,21 +258,6 @@ export default function SchoolPage() {
               ])
             }
             onCreate={(payload) => createStudent(school.id, payload)}
-          />
-        )}
-
-        {tab === "tariffs" && (
-          <TariffsPanel
-            canPay={canPay}
-            schoolId={school.id}
-            tiers={tiers}
-            subscription={subscription || school.subscription || null}
-            studentCount={studentCount}
-            createSchoolPayment={createSchoolPayment}
-            onPaid={() => {
-              void refreshSubscription(school.id);
-              void refreshMe();
-            }}
           />
         )}
 
