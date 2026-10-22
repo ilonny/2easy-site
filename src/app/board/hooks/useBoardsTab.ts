@@ -40,6 +40,7 @@ type TParams = {
   studentTabIndex: TStudentTabIndex;
   setStudentTabIndex: (value: TStudentTabIndex) => void;
   filterSearchString: string;
+  keepEmptyBoardsTab?: boolean;
 };
 
 export const useBoardsTab = ({
@@ -50,6 +51,7 @@ export const useBoardsTab = ({
   studentTabIndex,
   setStudentTabIndex,
   filterSearchString,
+  keepEmptyBoardsTab = false,
 }: TParams) => {
   const router = useRouter();
   const { profile } = useContext(AuthContext);
@@ -89,10 +91,21 @@ export const useBoardsTab = ({
   }, [boardsStudentId, getBoards, isTeacher, studentId]);
 
   useEffect(() => {
-    if (tabIndex === "userBoards" && !boards.length && !boardsIsLoading) {
+    if (
+      !keepEmptyBoardsTab &&
+      tabIndex === "userBoards" &&
+      !boards.length &&
+      !boardsIsLoading
+    ) {
       setTabIndex("userLessons");
     }
-  }, [boards.length, boardsIsLoading, setTabIndex, tabIndex]);
+  }, [
+    boards.length,
+    boardsIsLoading,
+    keepEmptyBoardsTab,
+    setTabIndex,
+    tabIndex,
+  ]);
 
   useEffect(() => {
     if (

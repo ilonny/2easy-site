@@ -18,6 +18,10 @@ import {
   useCheckSubscription,
 } from "@/app/subscription/helpers";
 import { getImageUrl } from "@/app/editor/helpers";
+import {
+  catalogFetchParams,
+  useCatalogWorkspace,
+} from "@/app/school/lib/catalogWorkspace";
 import { CopyLessonToModal } from "../CopyLessonToModal";
 import { useCourses } from "@/app/course/hooks/useCourses";
 import { T } from "@/i18n/T";
@@ -75,6 +79,7 @@ export const LessonsList: FC<TProps> = ({
 }) => {
   const { checkSubscription, subscription } = useCheckSubscription();
   const router = useRouter();
+  const workspace = useCatalogWorkspace();
   const { profile } = useContext(AuthContext);
   const isTeacher =
     Number(profile?.role_id) === 2 || Number(profile?.role_id) === 1;
@@ -221,6 +226,7 @@ export const LessonsList: FC<TProps> = ({
       const res = await fetchPostJson({
         path: "/lessons/copy",
         isSecure: true,
+        ...catalogFetchParams(workspace),
         data: { lesson_id },
       });
       const data = await res.json();
@@ -228,7 +234,7 @@ export const LessonsList: FC<TProps> = ({
       checkResponse(data);
       getLessons();
     },
-    [currentCourse, getLessons, getMyCourses, profile?.id],
+    [currentCourse, getLessons, getMyCourses, profile?.id, workspace],
   );
 
   const copyCourse = useCallback(async () => {
@@ -240,6 +246,7 @@ export const LessonsList: FC<TProps> = ({
     const res = await fetchPostJson({
       path: "/course/copy",
       isSecure: true,
+      ...catalogFetchParams(workspace),
       data: {
         id: currentCourse.id,
       },
@@ -248,7 +255,7 @@ export const LessonsList: FC<TProps> = ({
     checkResponse(data);
     setCopyCourseIsLoading(false);
     router.push(`/course/${data.id}`);
-  }, [checkSubscription, currentCourse?.id, router]);
+  }, [checkSubscription, currentCourse?.id, router, workspace]);
 
   const createPrimaryBtn =
     "w-full min-h-10 rounded-[14px] bg-brand-violet text-sm font-medium text-white lg:min-h-11 lg:text-base";

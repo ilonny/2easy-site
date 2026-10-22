@@ -16,6 +16,10 @@ import { brandInputClassNames } from "@/components/brandUi";
 import { UserAvatar } from "@/components/UserAvatar";
 import { setActiveSchoolId } from "@/app/school/lib/activeSchool";
 import { useSchoolBack } from "@/app/school/hooks/useSchoolBack";
+import {
+  CatalogWorkspaceProvider,
+  PERSONAL_CATALOG_WORKSPACE,
+} from "@/app/school/lib/catalogWorkspace";
 
 type StudentInfo = {
   id: number;
@@ -33,10 +37,10 @@ export default function StudentAccountPage() {
   const [searchString, setSearchString] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const sourceSchoolId =
-    searchParams.get("workspace") === "school"
-      ? Number(searchParams.get("schoolId")) || null
-      : null;
+  const schoolIdFromUrl = Number(searchParams.get("schoolId")) || null;
+  const [sourceSchoolId, setSourceSchoolId] = useState<number | null>(
+    schoolIdFromUrl,
+  );
   const goBack = useSchoolBack(
     sourceSchoolId ? "/school?tab=students" : "/profile?students",
   );
@@ -56,20 +60,26 @@ export default function StudentAccountPage() {
     const res = await fetchGet({
       path: `/student-info?id=${studentId}`,
       isSecure: true,
-      workspaceScope: sourceSchoolId ? "school" : "personal",
+      workspaceScope: sourceSchoolId ? "school" : undefined,
       schoolId: sourceSchoolId,
     });
     const json = await res?.json();
     checkResponse(json);
     if (json.success) {
       setStudentInfo(json);
-      if (sourceSchoolId && json.school_id) {
-        setActiveSchoolId(Number(json.school_id));
+      if (json.school_id) {
+        const schoolId = Number(json.school_id);
+        setSourceSchoolId(schoolId);
+        setActiveSchoolId(schoolId);
       }
     }
     setIsLoading(false);
     return json;
   }, [studentId, sourceSchoolId]);
+
+  useEffect(() => {
+    if (schoolIdFromUrl) setSourceSchoolId(schoolIdFromUrl);
+  }, [schoolIdFromUrl]);
 
   useEffect(() => {
     fetchStudentInfo();
@@ -88,6 +98,13 @@ export default function StudentAccountPage() {
       sourceSchoolId != null ||
       (studentInfo?.school_id != null && Number(studentInfo.school_id) > 0),
     [studentInfo, sourceSchoolId],
+  );
+  const catalogWorkspace = useMemo(
+    () =>
+      isSchoolStudent && sourceSchoolId
+        ? { workspaceScope: "school" as const, schoolId: sourceSchoolId }
+        : PERSONAL_CATALOG_WORKSPACE,
+    [isSchoolStudent, sourceSchoolId],
   );
 
   const backLabel = isSchoolStudent
@@ -191,24 +208,26 @@ export default function StudentAccountPage() {
         )}
       </div>
       {!!studentInfo && (
-        <ProfileLessons
-          searchString={searchString}
-          canCreateLesson={false}
-          //@ts-ignore
-          studentId={studentId}
-          studentInfo={studentInfo}
-          canEditSchedule={!!isTeacher}
-          hideTabs
-          hideAttachButton
-          showChangeStatusButton
-          hideDeleteLessonButton
-          showStartLessonButton
-          isStudent={isStudent}
-          alwaysOpenLessonMode={true}
-          includeCourseLessons
-          dictionaryModalOpen={dictionaryModalOpen}
-          onDictionaryModalChange={setDictionaryModalOpen}
-        />
+        <CatalogWorkspaceProvider value={catalogWorkspace}>
+          <ProfileLessons
+            searchString={searchString}
+            canCreateLesson={false}
+            //@ts-ignore
+            studentId={studentId}
+            studentInfo={studentInfo}
+            canEditSchedule={!!isTeacher}
+            hideTabs
+            hideAttachButton
+            showChangeStatusButton
+            hideDeleteLessonButton
+            showStartLessonButton
+            isStudent={isStudent}
+            alwaysOpenLessonMode={true}
+            includeCourseLessons
+            dictionaryModalOpen={dictionaryModalOpen}
+            onDictionaryModalChange={setDictionaryModalOpen}
+          />
+        </CatalogWorkspaceProvider>
       )}
     </CatalogPageShell>
   );

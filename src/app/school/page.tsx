@@ -74,6 +74,12 @@ export default function SchoolPage() {
   const canEditHours = !!school?.access?.canEditAnyTeacherHours;
   const canSeeMaterials = !!school?.access?.canAccessMaterials;
   const isSuperAdmin = !!school?.roles?.includes("super_admin");
+  const canManageLibrary =
+    !!school?.access?.canManageSchoolLibrary ||
+    isSuperAdmin ||
+    !!school?.roles?.some((role) =>
+      ["head_teacher", "methodist", "academic_director"].includes(role),
+    );
 
   const setTab = useCallback(
     (nextTab: SchoolTab) => {
@@ -257,7 +263,7 @@ export default function SchoolPage() {
         {tab === "materials" && canSeeMaterials && (
           <SchoolMaterialsPanel
             schoolId={school.id}
-            canManage={isSuperAdmin}
+            canManage={canManageLibrary}
           />
         )}
 

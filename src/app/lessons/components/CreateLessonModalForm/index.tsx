@@ -25,6 +25,10 @@ import { canUseAi } from "@/app/ai/canUseAi";
 import { AuthContext } from "@/auth";
 import AiIcon from "@/assets/icons/ai.svg";
 import Image from "next/image";
+import {
+  catalogFetchParams,
+  useCatalogWorkspace,
+} from "@/app/school/lib/catalogWorkspace";
 
 type TProps = {
   isVisible: boolean;
@@ -47,6 +51,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
   currentCourse,
 }) => {
   const { profile } = useContext(AuthContext);
+  const workspace = useCatalogWorkspace();
   const { requireAiSubscription } = useCheckSubscription();
   const showAi = canUseAi(profile);
   const {
@@ -79,6 +84,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
         const lessonRes = await fetchPostJson({
           path: "/lesson/create-lesson",
           isSecure: true,
+          ...catalogFetchParams(workspace),
           data: {
             ..._data,
             // tags: tagsArr?.join?.(",") || "",
@@ -98,7 +104,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [images, uploadImages, currentCourse?.id, onSuccess],
+    [images, uploadImages, currentCourse?.id, onSuccess, workspace],
   );
 
   const title = watch("title");

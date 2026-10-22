@@ -15,6 +15,7 @@ export type SchoolAccessFlags = {
   canEditAnyTeacherHours?: boolean;
   canPay: boolean;
   canAccessMaterials: boolean;
+  canManageSchoolLibrary?: boolean;
   canSeeTeachers: boolean;
   canViewStaffCabinets: boolean;
   canTeach: boolean;

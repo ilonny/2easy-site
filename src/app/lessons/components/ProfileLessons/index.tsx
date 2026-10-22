@@ -93,6 +93,8 @@ type TProps = {
   includeCourseLessons?: boolean;
   dictionaryModalOpen?: boolean;
   onDictionaryModalChange?: (open: boolean) => void;
+  /** Stay on the current page instead of navigating to /lesson_plans */
+  stayOnPage?: boolean;
 };
 
 const HOMEWORK_TAG = "Homework";
@@ -135,6 +137,7 @@ export const ProfileLessons = (props: TProps) => {
     includeCourseLessons,
     dictionaryModalOpen: controlledDictionaryModalOpen,
     onDictionaryModalChange,
+    stayOnPage = false,
   } = props;
   const router = useRouter();
   const {
@@ -195,6 +198,7 @@ export const ProfileLessons = (props: TProps) => {
     studentTabIndex,
     setStudentTabIndex,
     filterSearchString: studentId ? (searchString || "") : filterSearchString,
+    keepEmptyBoardsTab: stayOnPage && canCreateLesson,
   });
 
   const [internalDictionaryModalOpen, setInternalDictionaryModalOpen] =
@@ -224,6 +228,31 @@ export const ProfileLessons = (props: TProps) => {
   );
 
   const { t, i18n } = useTranslation();
+  const goCatalogTab = useCallback(
+    (next: TLessonsTabIndex) => {
+      setTabIndex(next);
+      if (!stayOnPage) {
+        router.push("/lesson_plans");
+      }
+    },
+    [router, stayOnPage],
+  );
+  const goStudentTab = useCallback(
+    (next: StudentCabinetTab) => {
+      setStudentTabIndex(next);
+      const params = new URLSearchParams(
+        typeof window !== "undefined" ? window.location.search : "",
+      );
+      if (next === "lessons") params.delete("tab");
+      else params.set("tab", next);
+      const qs = params.toString();
+      router.replace(
+        `/student-account/${studentId}${qs ? `?${qs}` : ""}`,
+        { scroll: false },
+      );
+    },
+    [router, studentId],
+  );
   const data = useMemo(() => {
     const title =
       tabIndex === "userLessons" ? (
@@ -541,51 +570,37 @@ export const ProfileLessons = (props: TProps) => {
             <div className="flex flex-wrap justify-center gap-1.5 px-1 min-[1200px]:gap-3">
               <BrandPill
                 active={tabIndex === "userLessons"}
-                onClick={() => {
-                  setTabIndex("userLessons");
-                  router.push("/lesson_plans");
-                }}
+                onClick={() => goCatalogTab("userLessons")}
               >
                 <T k="lessons.myLessons" />
               </BrandPill>
-              {!!courses.some((c) => c.user_id !== 1) && (
+              {(!!courses.some((c) => c.user_id !== 1) ||
+                (stayOnPage && canCreateLesson)) && (
                 <BrandPill
                   active={tabIndex === "userCourses"}
-                  onClick={() => {
-                    setTabIndex("userCourses");
-                    router.push("/lesson_plans");
-                  }}
+                  onClick={() => goCatalogTab("userCourses")}
                 >
                   <T k="lessons.myCourses" />
                 </BrandPill>
               )}
-              {showBoardsTabButton ? (
+              {showBoardsTabButton || (stayOnPage && canCreateLesson) ? (
                 <BrandPill
                   active={tabIndex === "userBoards"}
-                  onClick={() => {
-                    setTabIndex("userBoards");
-                    router.push("/lesson_plans");
-                  }}
+                  onClick={() => goCatalogTab("userBoards")}
                 >
                   <T k="boards.myBoards" />
                 </BrandPill>
               ) : null}
               <BrandPill
                 active={tabIndex === "savedLessons"}
-                onClick={() => {
-                  setTabIndex("savedLessons");
-                  router.push("/lesson_plans");
-                }}
+                onClick={() => goCatalogTab("savedLessons")}
               >
                 <T k="lessons.lessons2Easy" />
               </BrandPill>
               {courses.some((c) => c.user_id === 1) && (
                 <BrandPill
                   active={tabIndex === "2easyCourses"}
-                  onClick={() => {
-                    setTabIndex("2easyCourses");
-                    router.push("/lesson_plans");
-                  }}
+                  onClick={() => goCatalogTab("2easyCourses")}
                 >
                   <T k="lessons.courses2Easy" />
                 </BrandPill>
@@ -595,20 +610,14 @@ export const ProfileLessons = (props: TProps) => {
             <div className="flex flex-wrap justify-center gap-1.5 px-1 min-[1200px]:gap-3">
               <BrandPill
                 active={tabIndex === "savedLessons"}
-                onClick={() => {
-                  setTabIndex("savedLessons");
-                  router.push("/lesson_plans");
-                }}
+                onClick={() => goCatalogTab("savedLessons")}
               >
                 <T k="lessons.lessons2Easy" />
               </BrandPill>
               {courses.some((c) => c.user_id === 1) && (
                 <BrandPill
                   active={tabIndex === "2easyCourses"}
-                  onClick={() => {
-                    setTabIndex("2easyCourses");
-                    router.push("/lesson_plans");
-                  }}
+                  onClick={() => goCatalogTab("2easyCourses")}
                 >
                   <T k="lessons.courses2Easy" />
                 </BrandPill>
@@ -666,38 +675,26 @@ export const ProfileLessons = (props: TProps) => {
         <div className="flex flex-wrap justify-center gap-1.5 px-1 min-[1200px]:gap-3">
           <BrandPill
             active={studentTabIndex === "lessons"}
-            onClick={() => {
-              setStudentTabIndex("lessons");
-              router.push(`/student-account/${studentId}`);
-            }}
+            onClick={() => goStudentTab("lessons")}
           >
             <T k="lessons.lessonsTab" />
           </BrandPill>
           <BrandPill
             active={studentTabIndex === "schedule"}
-            onClick={() => {
-              setStudentTabIndex("schedule");
-              router.push(`/student-account/${studentId}?tab=schedule`);
-            }}
+            onClick={() => goStudentTab("schedule")}
           >
             <T k="students.scheduleTab" />
           </BrandPill>
           <BrandPill
             active={studentTabIndex === "courses"}
-            onClick={() => {
-              setStudentTabIndex("courses");
-              router.push(`/student-account/${studentId}?tab=courses`);
-            }}
+            onClick={() => goStudentTab("courses")}
           >
             <T k="lessons.coursesTab" />
           </BrandPill>
           {boards.length > 0 && (
             <BrandPill
               active={studentTabIndex === "boards"}
-              onClick={() => {
-                setStudentTabIndex("boards");
-                router.push(`/student-account/${studentId}?tab=boards`);
-              }}
+              onClick={() => goStudentTab("boards")}
             >
               <T k="boards.boardsTab" />
             </BrandPill>
@@ -750,7 +747,8 @@ export const ProfileLessons = (props: TProps) => {
         !currentCourse &&
         !isBoardsTabActive &&
         !filteredLessons.length &&
-        !isListLoading && (
+        !isListLoading &&
+        !(canCreateLesson && stayOnPage) && (
         <ProfileEmptyLessons
           title={
             (studentId ? searchString : filterSearchString)?.trim() ? (
@@ -816,7 +814,9 @@ export const ProfileLessons = (props: TProps) => {
       />
       {studentTabIndex !== "schedule" &&
         !isBoardsTabActive &&
-        (!!currentCourse || !!filteredLessons?.length) && (
+        (!!currentCourse ||
+          !!filteredLessons?.length ||
+          (canCreateLesson && stayOnPage && !isListLoading)) && (
         <>
           {showCourseSearch && (
             <>

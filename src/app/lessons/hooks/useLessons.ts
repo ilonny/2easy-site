@@ -2,6 +2,11 @@ import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { TLesson } from "../types";
 import { parseRouteId } from "@/utils/parseRouteId";
+import {
+  catalogFetchParams,
+  useCatalogWorkspace,
+  withCatalogQuery,
+} from "@/app/school/lib/catalogWorkspace";
 
 export const useLessons = (
   studentId?: string,
@@ -9,6 +14,8 @@ export const useLessons = (
   isAuth: boolean = true,
   includeCourseLessons?: boolean,
 ) => {
+  const workspace = useCatalogWorkspace();
+  const workspaceKey = `${workspace.workspaceScope || ""}:${workspace.schoolId || ""}:${workspace.teacherUserId || ""}`;
   const [lessons, setLessons] = useState<TLesson[]>([]);
   const [lesson, setLesson] = useState<TLesson | undefined>();
   const [lessonsListIslLoading, setLessonsListIslLoading] = useState(false);
@@ -49,9 +56,13 @@ export const useLessons = (
         if (studentId) params.set("student_id", studentId);
         if (includeCourseLessons) params.set("include_course_lessons", "1");
         res = await fetchGet({
-          path: params.toString() ? `/lessons?${params.toString()}` : "/lessons",
+          path: withCatalogQuery(
+            params.toString() ? `/lessons?${params.toString()}` : "/lessons",
+            workspace,
+          ),
           isSecure: true,
           signal,
+          ...catalogFetchParams(workspace),
         });
       }
       if (signal?.aborted || requestId !== lessonsRequestIdRef.current) {
@@ -79,7 +90,7 @@ export const useLessons = (
         setLessonsListIslLoading(false);
       }
     }
-  }, [isAuth, studentId, includeCourseLessons]);
+  }, [isAuth, studentId, includeCourseLessons, workspace, workspaceKey]);
 
   const getLesson = useCallback(
     async (id: string, studentIdParam?: number) => {
@@ -98,8 +109,9 @@ export const useLessons = (
         params.set("id", lessonId);
         if (studentIdParam) params.set("student_id", String(studentIdParam));
         const res = await fetchGet({
-          path: `/lesson?${params.toString()}`,
+          path: withCatalogQuery(`/lesson?${params.toString()}`, workspace),
           isSecure: true,
+          ...catalogFetchParams(workspace),
         });
         const data = await res?.json();
         setLesson(data?.lesson);
@@ -109,7 +121,7 @@ export const useLessons = (
         setLessonsListIslLoading(false);
       }
     },
-    [],
+    [workspace],
   );
 
   const changeLessonStatus = useCallback(
@@ -130,6 +142,7 @@ export const useLessons = (
             status,
           },
           isSecure: true,
+          ...catalogFetchParams(workspace),
         });
         data = await createRes?.json();
         if (data?.success) {
@@ -143,6 +156,7 @@ export const useLessons = (
             status,
           },
           isSecure: true,
+          ...catalogFetchParams(workspace),
         });
         data = await res?.json();
       }
@@ -152,7 +166,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons],
+    [getLessons, workspace],
   );
 
   const deleteLessonRelation = useCallback(
@@ -164,6 +178,7 @@ export const useLessons = (
           relation_id,
         },
         isSecure: true,
+        ...catalogFetchParams(workspace),
       });
       const data = await res?.json();
       setLesson(data?.lesson);
@@ -172,7 +187,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons],
+    [getLessons, workspace],
   );
 
   const changeCourseStatus = useCallback(
@@ -193,6 +208,7 @@ export const useLessons = (
             status,
           },
           isSecure: true,
+          ...catalogFetchParams(workspace),
         });
         data = await createRes?.json();
         if (data?.success) {
@@ -206,6 +222,7 @@ export const useLessons = (
             status,
           },
           isSecure: true,
+          ...catalogFetchParams(workspace),
         });
         data = await res?.json();
       }
@@ -215,7 +232,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons],
+    [getLessons, workspace],
   );
 
   const deleteCourseRelation = useCallback(
@@ -227,6 +244,7 @@ export const useLessons = (
           relation_id,
         },
         isSecure: true,
+        ...catalogFetchParams(workspace),
       });
       const data = await res?.json();
       setLesson(data?.lesson);
@@ -235,7 +253,7 @@ export const useLessons = (
       getLessons();
       return data;
     },
-    [getLessons],
+    [getLessons, workspace],
   );
 
   const filteredLessons = useMemo(() => {
@@ -255,15 +273,19 @@ export const useLessons = (
           ? `&student_id=${student_id}`
           : "";
       const res = await fetchGet({
-        path: `/lessons/course?course_id=${course_id}${studentQuery}`,
+        path: withCatalogQuery(
+          `/lessons/course?course_id=${course_id}${studentQuery}`,
+          workspace,
+        ),
         isSecure: true,
+        ...catalogFetchParams(workspace),
       });
       const data = await res?.json();
       setCourseLessons(data?.lessons || []);
       checkResponse(data);
       return data;
     },
-    [],
+    [workspace],
   );
 
   return {

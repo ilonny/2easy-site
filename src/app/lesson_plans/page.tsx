@@ -7,6 +7,10 @@ import { ProfileLessons } from "../lessons/components/ProfileLessons";
 import { T } from "@/i18n/T";
 import { AuthContext } from "@/auth";
 import Dino from "@/assets/images/dino.gif";
+import {
+  CatalogWorkspaceProvider,
+  PERSONAL_CATALOG_WORKSPACE,
+} from "@/app/school/lib/catalogWorkspace";
 
 export default function LessonPlansPage() {
   const { authIsLoading } = useContext(AuthContext);
@@ -18,7 +22,9 @@ export default function LessonPlansPage() {
           <Image src={Dino.src} alt="dino animated" width={150} height={150} />
         </div>
       ) : (
-        <ProfileLessons />
+        <CatalogWorkspaceProvider value={PERSONAL_CATALOG_WORKSPACE}>
+          <ProfileLessons />
+        </CatalogWorkspaceProvider>
       )}
     </CatalogPageShell>
   );

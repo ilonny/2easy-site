@@ -11,6 +11,10 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { FC, useCallback, useEffect, useState } from "react";
+import {
+  catalogFetchParams,
+  useCatalogWorkspace,
+} from "@/app/school/lib/catalogWorkspace";
 import { useForm } from "react-hook-form";
 import { TBoardFormFields } from "@/app/board/types";
 import { BOARD_FORM_MODAL_CLASS_NAMES } from "@/app/board/constants";
@@ -31,6 +35,7 @@ export const CreateBoardModalForm: FC<TProps> = ({
   setIsVisible,
   onSuccess,
 }) => {
+  const workspace = useCatalogWorkspace();
   const {
     control,
     handleSubmit,
@@ -69,6 +74,7 @@ export const CreateBoardModalForm: FC<TProps> = ({
         const res = await fetchPostJson({
           path: "/board/create",
           isSecure: true,
+          ...catalogFetchParams(workspace),
           data: {
             ...data,
             image_id: attachments?.attachments?.[0]?.id,
@@ -85,7 +91,7 @@ export const CreateBoardModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [images, onSuccess, uploadImages],
+    [images, onSuccess, uploadImages, workspace],
   );
 
   return (

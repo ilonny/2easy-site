@@ -1,5 +1,10 @@
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  catalogFetchParams,
+  useCatalogWorkspace,
+  withCatalogQuery,
+} from "@/app/school/lib/catalogWorkspace";
 
 export type TCourse = {
   id: number;
@@ -22,6 +27,7 @@ export type TCourse = {
 };
 
 export const useCourses = () => {
+  const workspace = useCatalogWorkspace();
   const [coursesIsLoading, setCoursesIsLoading] = useState(true);
   const [courses, setCourses] = useState<TCourse[]>([]);
 
@@ -30,10 +36,14 @@ export const useCourses = () => {
 
     try {
       const res = await fetchGet({
-        path: student_id
-          ? `/course/list?student_id=${student_id}`
-          : "/course/list",
+        path: withCatalogQuery(
+          student_id
+            ? `/course/list?student_id=${student_id}`
+            : "/course/list",
+          workspace,
+        ),
         isSecure: true,
+        ...catalogFetchParams(workspace),
       });
 
       const data = await res?.json();
@@ -54,7 +64,7 @@ export const useCourses = () => {
     } finally {
       setCoursesIsLoading(false);
     }
-  }, []);
+  }, [workspace]);
 
   return { coursesIsLoading, courses, getCourses };
 };

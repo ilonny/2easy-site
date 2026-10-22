@@ -53,6 +53,10 @@ import { AuthContext } from "@/auth";
 import { getImageUrl } from "@/app/editor/helpers";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import {
+  catalogFetchParams,
+  useCatalogWorkspace,
+} from "@/app/school/lib/catalogWorkspace";
 
 type TProps = {
   isVisible: boolean;
@@ -171,6 +175,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
   chosenCourse,
 }) => {
   const { profile } = useContext(AuthContext);
+  const workspace = useCatalogWorkspace();
   const isAdmin = profile?.role_id === 1;
   const {
     control,
@@ -319,6 +324,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
         const courseRes = await fetchPostJson({
           path: chosenCourse?.id ? "/course/edit" : "/course/create",
           isSecure: true,
+          ...catalogFetchParams(workspace),
           data: {
             ..._data,
             image_id: attachments?.attachments?.[0]?.id,
@@ -336,7 +342,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [step, orderedLessons, images, uploadImages, chosenCourse?.id, onSuccess],
+    [step, orderedLessons, images, uploadImages, chosenCourse?.id, onSuccess, workspace],
   );
 
   const title = watch("title");

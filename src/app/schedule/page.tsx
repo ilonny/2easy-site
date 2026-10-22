@@ -3,7 +3,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import "dayjs/locale/ru";
-import { Button, Select, SelectItem, Spinner } from "@nextui-org/react";
+import { Button, Spinner } from "@nextui-org/react";
 import Link from "next/link";
 import { BrandPill, CatalogPageShell } from "@/components";
 import { SearchableSelect } from "@/components/SearchableSelect";
@@ -440,47 +440,48 @@ export default function SchedulePage() {
         )
       }
     >
-      {isTeacher && (
-        <Select
-          aria-label={i18n.t("schedule.workspace")}
-          label={<T k="schedule.workspace" />}
-          className="max-w-[360px]"
-          items={[
-            {
-              key: "personal",
-              label: i18n.t("schedule.workspacePersonal"),
-            },
-            ...schools.map((item) => ({
-              key: `school:${item.id}`,
-              label: item.name,
-            })),
-          ]}
-          selectedKeys={[
-            workspace.scope === "school"
-              ? `school:${workspace.schoolId}`
-              : "personal",
-          ]}
-          onChange={(event) => {
-            const value = event.target.value;
-            const next: WorkspaceContext = value.startsWith("school:")
-              ? {
-                  scope: "school",
-                  schoolId: Number(value.slice("school:".length)),
-                }
-              : { scope: "personal", schoolId: null };
-            if (next.scope === "school" && !next.schoolId) return;
-            setActiveWorkspace(next);
-            setWorkspace(next);
-            setFilterStudentId(null);
-            setTeacherFilter("all");
-          }}
+      {isTeacher && schoolsLoaded && schools.length > 0 && (
+        <div
+          className="flex flex-wrap justify-center gap-1.5 min-[1200px]:gap-3"
+          role="tablist"
+          aria-label={i18n.t("schedule.switchSchedule")}
         >
-          {(item) => (
-            <SelectItem key={item.key} value={item.key}>
-              {item.label}
-            </SelectItem>
-          )}
-        </Select>
+          <BrandPill
+            active={workspace.scope === "personal"}
+            onClick={() => {
+              const next: WorkspaceContext = {
+                scope: "personal",
+                schoolId: null,
+              };
+              setActiveWorkspace(next);
+              setWorkspace(next);
+              setFilterStudentId(null);
+              setTeacherFilter("all");
+            }}
+          >
+            <T k="schedule.personalSchedule" />
+          </BrandPill>
+          {schools.map((item) => (
+            <BrandPill
+              key={item.id}
+              active={
+                workspace.scope === "school" && workspace.schoolId === item.id
+              }
+              onClick={() => {
+                const next: WorkspaceContext = {
+                  scope: "school",
+                  schoolId: item.id,
+                };
+                setActiveWorkspace(next);
+                setWorkspace(next);
+                setFilterStudentId(null);
+                setTeacherFilter("all");
+              }}
+            >
+              {item.name}
+            </BrandPill>
+          ))}
+        </div>
       )}
 
       {isTeacher && (
