@@ -106,16 +106,19 @@ export default function SchedulePage() {
     Map<string, SelectedScheduleRange>
   >(new Map());
 
-  const scheduleWorkspace = useMemo(
-    () =>
-      !isStudent && workspace.scope === "school" && workspace.schoolId
-        ? {
-            workspaceScope: "school" as const,
-            schoolId: workspace.schoolId,
-          }
-        : undefined,
-    [isStudent, workspace],
-  );
+  const scheduleWorkspace = useMemo(() => {
+    if (isStudent) return undefined;
+    if (workspace.scope === "school" && workspace.schoolId) {
+      return {
+        workspaceScope: "school" as const,
+        schoolId: workspace.schoolId,
+      };
+    }
+    if (workspace.scope === "personal") {
+      return { workspaceScope: "personal" as const };
+    }
+    return undefined;
+  }, [isStudent, workspace]);
   const {
     events,
     loading,

@@ -68,7 +68,10 @@ const mapHeaders = (params: TParams) => {
       const schoolId = Number(params.schoolId);
       const actingTeacherUserId = Number(params.actingTeacherUserId);
       if (schoolId > 0) headers.append("X-School-Id", String(schoolId));
-      else if (actingTeacherUserId > 0) {
+      else if (
+        params.workspaceScope === "personal" ||
+        actingTeacherUserId > 0
+      ) {
         headers.append("X-Workspace-Scope", "personal");
       }
       if (actingTeacherUserId > 0) {
@@ -325,7 +328,10 @@ export const fetchPostMultipartWithProgress = (params: {
       const schoolId = Number(params.schoolId);
       const actingTeacherUserId = Number(params.actingTeacherUserId);
       if (schoolId > 0) xhr.setRequestHeader("X-School-Id", String(schoolId));
-      else if (actingTeacherUserId > 0) {
+      else if (
+        params.workspaceScope === "personal" ||
+        actingTeacherUserId > 0
+      ) {
         xhr.setRequestHeader("X-Workspace-Scope", "personal");
       }
       if (actingTeacherUserId > 0) {
