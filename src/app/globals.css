@@ -541,3 +541,9 @@ body.site-menu-open [id^="widget-root-"] {
 body[data-lesson-board-open] .site-header-root {
   display: none !important;
 }
+
+/* Board editor: block macOS Chrome/Safari two-finger swipe = browser back/forward.
+ * !important beats Excalidraw's pointerenter/leave inline overscrollBehaviorX toggle. */
+html[data-board-editor-open] {
+  overscroll-behavior-x: none !important;
+}

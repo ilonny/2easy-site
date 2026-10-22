@@ -12,6 +12,9 @@
   overflow: hidden;
   border-radius: 0;
   background: #fff;
+  /* Belt-and-suspenders with html[data-board-editor-open] in globals.css:
+   * stop trackpad pans from chaining into browser history swipe. */
+  overscroll-behavior-x: none;
 }
 
 .editorLoading {

@@ -23,6 +23,7 @@ import { multiplayerBoardSyncAdapter } from "../../sync/MultiplayerBoardSyncAdap
 import { BOARD_CURSOR_THROTTLE_MS } from "../../constants";
 import { useAutoFinalizeLineTool } from "../../hooks/useAutoFinalizeLineTool";
 import { useBoardToolbarContainer } from "../../hooks/useBoardToolbarContainer";
+import { useDisableBrowserHistorySwipe } from "../../hooks/useDisableBrowserHistorySwipe";
 import { BoardStickyNoteButton } from "../BoardStickyNoteButton";
 import { TBoardCursor, TBoardSnapshot } from "../../types";
 import styles from "./boardEditor.module.css";
@@ -76,6 +77,7 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
     editorWrapRef,
   );
   useAutoFinalizeLineTool(excalidrawAPI, editorWrapRef);
+  useDisableBrowserHistorySwipe();
 
   const excalidrawKey = isRealtime
     ? `board-excalidraw-${boardId}`
