@@ -497,11 +497,11 @@ export default function StaffCabinetPage() {
           </div>
         </section>
 
-        {school.roles?.includes("super_admin") && !cabinet.self ? (
+        {!cabinet.self ? (
           <SchoolMaterialsPanel
             schoolId={school.id}
             teacherUserId={userId}
-            readOnly
+            canManage
             personalOnly
           />
         ) : null}

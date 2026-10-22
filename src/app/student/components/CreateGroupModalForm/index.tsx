@@ -41,6 +41,7 @@ export const CreateGroupModalForm: FC<TProps> = ({
       const lessonRes = await fetchPostJson({
         path: "/group/create",
         isSecure: true,
+        workspaceScope: "personal",
         data: {
           ..._data,
         },

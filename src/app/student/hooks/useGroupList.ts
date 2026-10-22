@@ -8,6 +8,7 @@ export const useGroupList = () => {
     const res = await fetchGet({
       path: "/group",
       isSecure: true,
+      workspaceScope: "personal",
     });
     const groups = await res?.json();
     setGroups(groups);

@@ -39,6 +39,7 @@ export const useStudentList = (
       path: "/student/delete",
       isSecure: true,
       data: { id },
+      workspaceScope: "personal",
     });
     const student = await res?.json();
     checkResponse(student);
@@ -51,6 +52,7 @@ export const useStudentList = (
         path: "/student/archive",
         isSecure: true,
         data: { id, is_archived: is_archived ? 1 : 0 },
+        workspaceScope: "personal",
       });
       const student = await res?.json();
       checkResponse(student);

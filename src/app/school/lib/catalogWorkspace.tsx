@@ -31,6 +31,7 @@ export const useCatalogWorkspace = () => useContext(CatalogWorkspaceContext);
 export const catalogFetchParams = (workspace: CatalogWorkspaceValue) => ({
   workspaceScope: workspace.workspaceScope,
   schoolId: workspace.schoolId ?? undefined,
+  actingTeacherUserId: workspace.teacherUserId ?? undefined,
 });
 
 export const withCatalogQuery = (

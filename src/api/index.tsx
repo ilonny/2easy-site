@@ -50,6 +50,7 @@ type TParams = {
   /** Explicit request scope wins over the persisted workspace selection. */
   workspaceScope?: "personal" | "school";
   schoolId?: number | null;
+  actingTeacherUserId?: number | null;
 };
 
 const SERVER_UNAVAILABLE_MESSAGE =
@@ -69,6 +70,10 @@ const mapHeaders = (params: TParams) => {
         if (schoolId > 0) headers.append("X-School-Id", String(schoolId));
       } else if (params.workspaceScope === "personal") {
         headers.append("X-Workspace-Scope", "personal");
+      }
+      const actingTeacherUserId = Number(params.actingTeacherUserId);
+      if (actingTeacherUserId > 0) {
+        headers.append("X-Acting-Teacher-Id", String(actingTeacherUserId));
       }
     } catch {
       // ignore (SSR / private mode)
@@ -304,6 +309,7 @@ export const fetchPostMultipartWithProgress = (params: {
   isSecure?: boolean;
   workspaceScope?: "personal" | "school";
   schoolId?: number | null;
+  actingTeacherUserId?: number | null;
   onProgress?: (progress: TUploadProgress) => void;
   signal?: AbortSignal;
 }): Promise<any> => {
@@ -322,6 +328,13 @@ export const fetchPostMultipartWithProgress = (params: {
         if (schoolId > 0) xhr.setRequestHeader("X-School-Id", String(schoolId));
       } else if (params.workspaceScope === "personal") {
         xhr.setRequestHeader("X-Workspace-Scope", "personal");
+      }
+      const actingTeacherUserId = Number(params.actingTeacherUserId);
+      if (actingTeacherUserId > 0) {
+        xhr.setRequestHeader(
+          "X-Acting-Teacher-Id",
+          String(actingTeacherUserId),
+        );
       }
     }
 

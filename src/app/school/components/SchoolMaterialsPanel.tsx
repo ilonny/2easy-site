@@ -49,7 +49,7 @@ export const SchoolMaterialsPanel = ({
       </div>
       <CatalogWorkspaceProvider value={workspace}>
         <ProfileLessons
-          canCreateLesson={!!canManage && !readOnly && !personalOnly}
+          canCreateLesson={!!canManage && !readOnly}
           stayOnPage
         />
       </CatalogWorkspaceProvider>
