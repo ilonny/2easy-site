@@ -23,8 +23,10 @@ export function useLessonMediaSync({
     return () => lessonMediaSyncClient.disconnect();
   }, [enabled, lessonId, role]);
 
+  // Restore timer (and student media) from HTTP so page reload keeps
+  // teacher-controlled timer state even before / without WS catch-up.
   useEffect(() => {
-    if (!enabled || !lessonId || role !== "student") return;
+    if (!enabled || !lessonId || !role) return;
     let stop = false;
     let timer = 0;
 
@@ -36,29 +38,46 @@ export function useLessonMediaSync({
           isSecure: true,
         });
         const data = await res?.json();
-        const media = data?.focus?.media;
         const serverNow = Number(data?.server_now_ms || 0);
-        const serverTimeMs = Number(media?.server_time_ms || 0);
-        const kind: TLessonMediaKind | null =
-          media?.kind === "video" ? "video" : media?.kind === "audio" ? "audio" : null;
-        if (
-          kind &&
-          serverNow &&
-          serverTimeMs &&
-          serverNow - serverTimeMs < LESSON_MEDIA_CATCH_UP_MS &&
-          serverNow - serverTimeMs > -5000
-        ) {
-          publishLessonMediaPlay({
-            commandId: Number(media.command_id || 0),
-            exId: Number(media.ex_id || data?.focus?.ex_id || 0),
-            kind,
-            mediaIndex: Number(media.media_index || 0),
-            positionSec: Number(media.position_sec || 0),
-            serverTimeMs,
-            clockOffsetMs: serverNow - Date.now(),
-            action: media.action === "pause" ? "pause" : "play",
-            scroll: media.scroll !== false,
+        const focusTimer = data?.focus?.timer;
+        if (focusTimer && focusTimer.status && focusTimer.status !== "idle") {
+          lessonMediaSyncClient.applyTimerSnapshot({
+            ...focusTimer,
+            server_time_ms: serverNow || Date.now(),
           });
+        } else if (focusTimer?.status === "idle") {
+          // Teacher reset — clear local countdown after reload too.
+          lessonMediaSyncClient.applyTimerSnapshot(null);
+        }
+
+        if (role === "student") {
+          const media = data?.focus?.media;
+          const serverTimeMs = Number(media?.server_time_ms || 0);
+          const kind: TLessonMediaKind | null =
+            media?.kind === "video"
+              ? "video"
+              : media?.kind === "audio"
+                ? "audio"
+                : null;
+          if (
+            kind &&
+            serverNow &&
+            serverTimeMs &&
+            serverNow - serverTimeMs < LESSON_MEDIA_CATCH_UP_MS &&
+            serverNow - serverTimeMs > -5000
+          ) {
+            publishLessonMediaPlay({
+              commandId: Number(media.command_id || 0),
+              exId: Number(media.ex_id || data?.focus?.ex_id || 0),
+              kind,
+              mediaIndex: Number(media.media_index || 0),
+              positionSec: Number(media.position_sec || 0),
+              serverTimeMs,
+              clockOffsetMs: serverNow - Date.now(),
+              action: media.action === "pause" ? "pause" : "play",
+              scroll: media.scroll !== false,
+            });
+          }
         }
       } catch {
         /* ignore */
@@ -66,13 +85,13 @@ export function useLessonMediaSync({
       if (!stop) {
         timer = window.setTimeout(() => {
           void tick();
-        }, lessonMediaSyncClient.isOpen() ? 2500 : 1000);
+        }, lessonMediaSyncClient.isOpen() ? 4000 : 1200);
       }
     };
 
     timer = window.setTimeout(() => {
       void tick();
-    }, 1000);
+    }, 200);
 
     return () => {
       stop = true;

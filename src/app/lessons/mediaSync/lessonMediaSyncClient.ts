@@ -6,10 +6,13 @@ import i18n from "@/i18n/config";
 import { toast } from "react-toastify";
 import { publishLessonMediaPlay } from "./publishLessonMediaPlay";
 import {
+  IDLE_LESSON_TIMER,
   LESSON_MEDIA_CATCH_UP_MS,
   LESSON_MEDIA_WS_PATH,
   type TLessonMediaKind,
   type TLessonMediaPlayRequest,
+  type TLessonTimerState,
+  type TLessonTimerStatus,
 } from "./types";
 
 type TRole = "teacher" | "student";
@@ -24,7 +27,14 @@ type TIncoming = {
   position_sec?: number;
   action?: string;
   scroll?: boolean;
+  status?: string;
+  duration_sec?: number;
+  ends_at_ms?: number | null;
+  remaining_ms?: number | null;
+  updated_at_ms?: number;
 };
+
+type TTimerListener = (state: TLessonTimerState) => void;
 
 const wsUrl = (lessonId: number) => {
   const token = getTokenFromLocalStorage();
@@ -32,6 +42,18 @@ const wsUrl = (lessonId: number) => {
   const params = new URLSearchParams({ lesson_id: String(lessonId) });
   if (token) params.set("token", token);
   return `${wsBase}${LESSON_MEDIA_WS_PATH}?${params.toString()}`;
+};
+
+const parseTimerStatus = (raw?: string): TLessonTimerStatus | null => {
+  if (
+    raw === "idle" ||
+    raw === "running" ||
+    raw === "paused" ||
+    raw === "finished"
+  ) {
+    return raw;
+  }
+  return null;
 };
 
 class LessonMediaSyncClient {
@@ -44,9 +66,17 @@ class LessonMediaSyncClient {
   private clockOffsetMs = 0;
   private pingTimer: ReturnType<typeof setInterval> | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private timerState: TLessonTimerState = IDLE_LESSON_TIMER;
+  private timerListeners = new Set<TTimerListener>();
 
   connect(lessonId: number, role: TRole) {
     this.teardownSocket();
+    if (this.lessonId !== lessonId) {
+      // New lesson: clear local timer. Same lesson reconnect/reload keeps
+      // last known state until server snapshot arrives.
+      this.timerState = IDLE_LESSON_TIMER;
+      this.emitTimer(IDLE_LESSON_TIMER);
+    }
     this.lessonId = lessonId;
     this.role = role;
     this.shouldReconnect = true;
@@ -57,11 +87,112 @@ class LessonMediaSyncClient {
   disconnect() {
     this.shouldReconnect = false;
     this.role = null;
+    // Keep timerState so a brief remount / reload handshake does not flash idle
+    // before WS/HTTP catch-up restores the teacher-controlled server state.
     this.teardownSocket();
+  }
+
+  /** Restore timer from GET /lesson-focus after reload (server is source of truth). */
+  applyTimerSnapshot(raw: {
+    command_id?: number;
+    status?: string;
+    duration_sec?: number;
+    ends_at_ms?: number | null;
+    remaining_ms?: number | null;
+    updated_at_ms?: number;
+    server_time_ms?: number;
+  } | null) {
+    if (!raw) {
+      if (this.timerState.status !== "idle") {
+        this.emitTimer({
+          ...IDLE_LESSON_TIMER,
+          clockOffsetMs: this.clockOffsetMs,
+          serverTimeMs: Date.now() + this.clockOffsetMs,
+        });
+      }
+      return;
+    }
+    if (raw.server_time_ms) {
+      this.clockOffsetMs = Number(raw.server_time_ms) - Date.now();
+    }
+    this.applyTimerMessage({
+      type: "timer",
+      ...raw,
+      server_time_ms: raw.server_time_ms || Date.now() + this.clockOffsetMs,
+    });
   }
 
   isOpen() {
     return this.ready && this.ws?.readyState === WebSocket.OPEN;
+  }
+
+  getClockOffsetMs() {
+    return this.clockOffsetMs;
+  }
+
+  getTimerState() {
+    return this.timerState;
+  }
+
+  subscribeTimer(listener: TTimerListener) {
+    this.timerListeners.add(listener);
+    listener(this.timerState);
+    return () => {
+      this.timerListeners.delete(listener);
+    };
+  }
+
+  startTimer(durationSec: number) {
+    this.sendTimerCommand({ type: "timer_start", duration_sec: durationSec });
+  }
+
+  pauseTimer() {
+    this.sendTimerCommand({ type: "timer_pause" });
+  }
+
+  resumeTimer() {
+    this.sendTimerCommand({ type: "timer_resume" });
+  }
+
+  resetTimer() {
+    this.sendTimerCommand({ type: "timer_reset" });
+  }
+
+  private sendTimerCommand(payload: Record<string, unknown>) {
+    if (!this.isOpen() || !this.ws) {
+      toast(i18n.t("lessons.timer.notConnected"), { type: "error" });
+      return;
+    }
+    this.ws.send(JSON.stringify(payload));
+  }
+
+  private emitTimer(state: TLessonTimerState) {
+    this.timerState = state;
+    this.timerListeners.forEach((listener) => {
+      listener(state);
+    });
+  }
+
+  private applyTimerMessage(msg: TIncoming) {
+    const status = parseTimerStatus(msg.status);
+    if (!status) return;
+    const serverTimeMs = Number(msg.server_time_ms || Date.now());
+    this.emitTimer({
+      commandId: Number(msg.command_id || 0),
+      status,
+      durationSec: Math.max(0, Number(msg.duration_sec || 0)),
+      endsAtMs:
+        msg.ends_at_ms == null || msg.ends_at_ms === undefined
+          ? null
+          : Number(msg.ends_at_ms),
+      remainingMs:
+        msg.remaining_ms == null || msg.remaining_ms === undefined
+          ? null
+          : Number(msg.remaining_ms),
+      updatedAtMs: Number(msg.updated_at_ms || serverTimeMs),
+      serverTimeMs,
+      clockOffsetMs: this.clockOffsetMs,
+    });
   }
 
   private teardownSocket() {
@@ -111,6 +242,11 @@ class LessonMediaSyncClient {
       if (msg.type === "hello") {
         this.ready = true;
         this.startPing(gen);
+        return;
+      }
+
+      if (msg.type === "timer") {
+        this.applyTimerMessage(msg);
         return;
       }
 

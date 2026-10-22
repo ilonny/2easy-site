@@ -43,3 +43,29 @@ export type TActiveMediaSync = {
   kind: TLessonMediaKind;
   mediaIndex: number;
 };
+
+export type TLessonTimerStatus = "idle" | "running" | "paused" | "finished";
+
+export type TLessonTimerState = {
+  commandId: number;
+  status: TLessonTimerStatus;
+  durationSec: number;
+  endsAtMs: number | null;
+  remainingMs: number | null;
+  updatedAtMs: number;
+  serverTimeMs: number;
+  clockOffsetMs: number;
+};
+
+export const LESSON_TIMER_PRESETS_SEC = [60, 180, 300, 600] as const;
+
+export const IDLE_LESSON_TIMER: TLessonTimerState = {
+  commandId: 0,
+  status: "idle",
+  durationSec: 0,
+  endsAtMs: null,
+  remainingMs: null,
+  updatedAtMs: 0,
+  serverTimeMs: 0,
+  clockOffsetMs: 0,
+};

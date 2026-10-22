@@ -692,6 +692,19 @@
       "join": "Tap to listen together with the teacher",
       "notConnected": "Couldn't reach the students. Try again."
     },
+    "timer": {
+      "title": "Timer",
+      "start": "Start timer",
+      "pause": "Pause",
+      "resume": "Resume",
+      "reset": "Reset",
+      "paused": "Paused",
+      "min": "min",
+      "sec": "sec",
+      "customMinutes": "Minutes",
+      "customSeconds": "Seconds",
+      "notConnected": "Couldn't sync the timer. Try again."
+    },
     "participants": "PARTICIPANTS",
     "participantsShort": "Partic.",
     "participantsButton": "Participants",

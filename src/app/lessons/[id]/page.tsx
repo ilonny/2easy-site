@@ -56,10 +56,15 @@ import { LessonParticipantsPanel } from "@/app/lessons/components/LessonParticip
 import type { TLessonParticipant } from "@/app/lessons/components/LessonParticipantsPanel";
 import { LessonFloatingTools } from "@/app/lessons/components/LessonFloatingTools";
 import { LessonToolTrigger } from "@/app/lessons/components/LessonToolTrigger";
+import {
+  LessonTimerFab,
+  LessonTimerPanel,
+} from "@/app/lessons/components/LessonTimer";
 import { BELOW_SITE_HEADER_STICKY_TOP_CLASS } from "@/constants/uiLayers";
 import { useRedirectIfLessonLockedOnTrial } from "@/app/subscription/helpers";
 import { LessonModeBanner } from "@/app/lessons/components/LessonModeBanner";
 import { useLessonMediaSync } from "@/app/lessons/mediaSync/useLessonMediaSync";
+import { useLessonTimer } from "@/app/lessons/mediaSync/useLessonTimer";
 
 const ParticipantsIcon = () => (
   <svg
@@ -100,10 +105,16 @@ export default function LessonPage() {
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
+  const lessonSyncEnabled =
+    !authIsLoading && !!lessonIdNum && (!!isTeacher || !!isStudent);
   useLessonMediaSync({
     lessonId: lessonIdNum || 0,
-    enabled: !authIsLoading && !!lessonIdNum && (!!isTeacher || !!isStudent),
+    enabled: lessonSyncEnabled,
     role: isTeacher ? "teacher" : isStudent ? "student" : null,
+  });
+  const lessonTimer = useLessonTimer({
+    enabled: lessonSyncEnabled,
+    isTeacher: !!isTeacher,
   });
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const { exList, getExList, setExList } = useExList(
@@ -420,6 +431,7 @@ export default function LessonPage() {
   );
 
   const showParticipants = !isStudent && !!students?.length;
+  const showTeacherAside = !!isTeacher && !isStudent;
 
   const handleFocusScroll = useCallback(async () => {
     const lessonId = Number(params.id) || 0;
@@ -747,20 +759,23 @@ export default function LessonPage() {
               )}
             </div>
           </div>
-          {!isStudent && !!students?.length && (
+          {showTeacherAside && (
             <aside
               className="hidden md:flex w-[180px] shrink-0 min-w-0 flex-col self-stretch lg:w-[200px]"
               aria-label={i18n.t("lessons.participantsAriaLabel")}
             >
               <div className={`sticky ${BELOW_SITE_HEADER_STICKY_TOP_CLASS} w-full lg:top-[calc(var(--site-header-h)+32px)]`}>
-                <LessonParticipantsPanel
-                  students={students}
-                  activeStudentId={activeStudentId}
-                  isTeacher={isTeacher}
-                  onSelectStudent={setActiveStudentId}
-                  onOpenDictionary={handleOpenParticipantDictionary}
-                  onFocusScroll={handleFocusScroll}
-                />
+                {showParticipants ? (
+                  <LessonParticipantsPanel
+                    students={students}
+                    activeStudentId={activeStudentId}
+                    isTeacher={isTeacher}
+                    onSelectStudent={setActiveStudentId}
+                    onOpenDictionary={handleOpenParticipantDictionary}
+                    onFocusScroll={handleFocusScroll}
+                  />
+                ) : null}
+                <LessonTimerPanel timer={lessonTimer} />
               </div>
             </aside>
           )}
@@ -799,6 +814,11 @@ export default function LessonPage() {
               studentId={lessonBoardStudentId}
               lessonSessionId={lessonSessionId}
               isTeacher={isTeacher}
+            />
+            <LessonTimerFab
+              timer={lessonTimer}
+              mobileOnly={showTeacherAside}
+              hideWhenIdle={!isTeacher}
             />
           </LessonFloatingTools>
         </div>
