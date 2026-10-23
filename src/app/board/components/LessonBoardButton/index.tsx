@@ -9,6 +9,7 @@ import { TBoard, TLessonBoardScope } from "@/app/board/types";
 import { useLessonBoard } from "@/app/board/hooks/useLessonBoard";
 import { T } from "@/i18n/T";
 import { LessonToolTrigger } from "@/app/lessons/components/LessonToolTrigger";
+import type { TUseLessonTimer } from "@/app/lessons/mediaSync/useLessonTimer";
 
 const BoardEditorModal = dynamic(
   () =>
@@ -24,6 +25,7 @@ type TProps = {
   studentIdForBoard?: number;
   lessonSessionId?: number;
   onOpenChange?: (open: boolean) => void;
+  lessonTimer?: TUseLessonTimer | null;
 };
 
 const BoardIcon = () => (
@@ -41,6 +43,7 @@ export const LessonBoardButton: FC<TProps> = ({
   studentIdForBoard,
   lessonSessionId,
   onOpenChange,
+  lessonTimer = null,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [board, setBoard] = useState<TBoard | null>(null);
@@ -147,6 +150,7 @@ export const LessonBoardButton: FC<TProps> = ({
         board={board}
         mode="realtime"
         isHost={isTeacher}
+        lessonTimer={lessonTimer}
       />
     </>
   );

@@ -8,6 +8,8 @@ import {
 import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
 import { BoardEditorChrome } from "@/app/board/components/BoardEditorChrome";
 import { BoardParticipantsList } from "@/app/board/components/BoardParticipantsList";
+import { LessonTimerFab } from "@/app/lessons/components/LessonTimer";
+import type { TUseLessonTimer } from "@/app/lessons/mediaSync/useLessonTimer";
 import { T } from "@/i18n/T";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import {
@@ -24,6 +26,8 @@ type TProps = {
   board?: TBoard | null;
   mode?: "solo" | "realtime";
   isHost?: boolean;
+  /** Synced lesson countdown — shown over the board while a lesson is open. */
+  lessonTimer?: TUseLessonTimer | null;
 };
 
 export const BoardEditorModal: FC<TProps> = ({
@@ -32,6 +36,7 @@ export const BoardEditorModal: FC<TProps> = ({
   board,
   mode = "solo",
   isHost = false,
+  lessonTimer = null,
 }) => {
   const boardId = board?.id;
   const [boardApi, setBoardApi] = useState<ExcalidrawImperativeAPI | null>(
@@ -101,7 +106,7 @@ export const BoardEditorModal: FC<TProps> = ({
             }}
           />
         </ModalHeader>
-        <ModalBody className="flex min-h-0 flex-1 flex-col">
+        <ModalBody className="flex min-h-0 flex-1 flex-col relative">
           {boardId ? (
             <BoardEditorChrome
               boardId={boardId}
@@ -110,6 +115,15 @@ export const BoardEditorModal: FC<TProps> = ({
               isEditorReady={isEditorReady}
               onApiChange={setBoardApi}
             />
+          ) : null}
+          {lessonTimer ? (
+            <div className="pointer-events-auto absolute bottom-3 right-3 z-[100] sm:bottom-4 sm:right-4 pb-[env(safe-area-inset-bottom,0px)]">
+              <LessonTimerFab
+                timer={lessonTimer}
+                hideWhenIdle={!lessonTimer.isTeacher}
+                className="bg-white/95 shadow-lg ring-1 ring-black/5"
+              />
+            </div>
           ) : null}
         </ModalBody>
       </ModalContent>

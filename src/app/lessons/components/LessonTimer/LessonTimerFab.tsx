@@ -20,6 +20,8 @@ type TProps = {
   mobileOnly?: boolean;
   /** Hide when idle for students who have nothing to open. */
   hideWhenIdle?: boolean;
+  /** Extra classes on the trigger (e.g. board overlay stacking). */
+  className?: string;
 };
 
 const MD_QUERY = "(min-width: 768px)";
@@ -28,6 +30,7 @@ export const LessonTimerFab: FC<TProps> = ({
   timer,
   mobileOnly,
   hideWhenIdle,
+  className,
 }) => {
   const [open, setOpen] = useState(false);
   const label = i18n.t("lessons.timer.title");
@@ -73,7 +76,7 @@ export const LessonTimerFab: FC<TProps> = ({
           aria-label={label}
           className={`${LESSON_FAB_BUTTON_CLASS} ${
             mobileOnly ? "md:hidden" : ""
-          } ${timer.finishedPulse ? "animate-pulse" : ""}`}
+          } ${timer.finishedPulse ? "animate-pulse" : ""} ${className || ""}`}
         >
           {showRing ? (
             <TimerRing

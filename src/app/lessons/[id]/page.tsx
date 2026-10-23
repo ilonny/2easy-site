@@ -56,10 +56,7 @@ import { LessonParticipantsPanel } from "@/app/lessons/components/LessonParticip
 import type { TLessonParticipant } from "@/app/lessons/components/LessonParticipantsPanel";
 import { LessonFloatingTools } from "@/app/lessons/components/LessonFloatingTools";
 import { LessonToolTrigger } from "@/app/lessons/components/LessonToolTrigger";
-import {
-  LessonTimerFab,
-  LessonTimerPanel,
-} from "@/app/lessons/components/LessonTimer";
+import { LessonTimerFab } from "@/app/lessons/components/LessonTimer";
 import { BELOW_SITE_HEADER_STICKY_TOP_CLASS } from "@/constants/uiLayers";
 import { useRedirectIfLessonLockedOnTrial } from "@/app/subscription/helpers";
 import { LessonModeBanner } from "@/app/lessons/components/LessonModeBanner";
@@ -431,7 +428,6 @@ export default function LessonPage() {
   );
 
   const showParticipants = !isStudent && !!students?.length;
-  const showTeacherAside = !!isTeacher && !isStudent;
 
   const handleFocusScroll = useCallback(async () => {
     const lessonId = Number(params.id) || 0;
@@ -759,23 +755,20 @@ export default function LessonPage() {
               )}
             </div>
           </div>
-          {showTeacherAside && (
+          {showParticipants && (
             <aside
               className="hidden md:flex w-[180px] shrink-0 min-w-0 flex-col self-stretch lg:w-[200px]"
               aria-label={i18n.t("lessons.participantsAriaLabel")}
             >
               <div className={`sticky ${BELOW_SITE_HEADER_STICKY_TOP_CLASS} w-full lg:top-[calc(var(--site-header-h)+32px)]`}>
-                {showParticipants ? (
-                  <LessonParticipantsPanel
-                    students={students}
-                    activeStudentId={activeStudentId}
-                    isTeacher={isTeacher}
-                    onSelectStudent={setActiveStudentId}
-                    onOpenDictionary={handleOpenParticipantDictionary}
-                    onFocusScroll={handleFocusScroll}
-                  />
-                ) : null}
-                <LessonTimerPanel timer={lessonTimer} />
+                <LessonParticipantsPanel
+                  students={students}
+                  activeStudentId={activeStudentId}
+                  isTeacher={isTeacher}
+                  onSelectStudent={setActiveStudentId}
+                  onOpenDictionary={handleOpenParticipantDictionary}
+                  onFocusScroll={handleFocusScroll}
+                />
               </div>
             </aside>
           )}
@@ -807,6 +800,7 @@ export default function LessonPage() {
               studentIdForBoard={lessonBoardStudentId}
               lessonSessionId={lessonSessionId}
               onOpenChange={setBoardModalOpen}
+              lessonTimer={lessonTimer}
             />
             <VideoCallTrigger />
             <Chat
@@ -817,7 +811,6 @@ export default function LessonPage() {
             />
             <LessonTimerFab
               timer={lessonTimer}
-              mobileOnly={showTeacherAside}
               hideWhenIdle={!isTeacher}
             />
           </LessonFloatingTools>
