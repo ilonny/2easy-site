@@ -53,7 +53,6 @@ export const MembersPanel: FC<TProps> = ({
   const [login, setLogin] = useState("");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
-  const [password, setPassword] = useState("");
   const [roles, setRoles] = useState<SchoolRole[]>(["teacher"]);
   const [saving, setSaving] = useState(false);
 
@@ -101,7 +100,6 @@ export const MembersPanel: FC<TProps> = ({
     setLogin("");
     setName("");
     setSurname("");
-    setPassword("");
     setRoles(["teacher"]);
     setEditMember(null);
   };
@@ -121,7 +119,6 @@ export const MembersPanel: FC<TProps> = ({
           login: login.trim(),
           name: name.trim() || undefined,
           surname: surname.trim() || undefined,
-          password: password.trim() || undefined,
           roles,
         },
       });
@@ -372,13 +369,9 @@ export const MembersPanel: FC<TProps> = ({
               onChange={(e) => setSurname(e.target.value)}
               radius="lg"
             />
-            <Input
-              label={<T k="school.memberPassword" />}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              radius="lg"
-              description={<T k="school.memberPasswordHint" />}
-            />
+            <p className="text-sm text-brand-grayFont">
+              <T k="school.memberPasswordHint" />
+            </p>
             <CheckboxGroup
               label={<T k="school.colRoles" />}
               value={roles}

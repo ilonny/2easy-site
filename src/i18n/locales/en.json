@@ -1303,7 +1303,7 @@
     "memberFormInvalid": "Enter email and at least one role",
     "memberLoginHint": "If the teacher already has a 2EASY account, we only add them to the school",
     "memberNameHint": "Required for a new account only. Skip if the teacher already exists",
-    "memberPasswordHint": "For new accounts only. Leave empty to generate and email. Ignored for existing teachers",
+    "memberPasswordHint": "New accounts get a random numeric password by email. Existing teachers keep their own password",
     "saveMember": "Add staff member",
     "saveRoles": "Save roles",
     "memberCreated": "Staff member created",

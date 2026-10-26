@@ -13,7 +13,6 @@ import { UserAvatar } from "@/components/UserAvatar";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { headerControlHeightClassName } from "@/components/Header/styles";
 import { schoolHomePath } from "@/app/school/lib/schoolTab";
-import { useHasSchool } from "@/app/school/hooks/useHasSchool";
 
 type TProps = {
   isStudent?: boolean;
@@ -63,8 +62,6 @@ export const HeaderProfile = (props: TProps) => {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [isOpen]);
-
-  const hasSchool = useHasSchool();
 
   const logout = () => {
     fetchPostJson({
@@ -128,15 +125,11 @@ export const HeaderProfile = (props: TProps) => {
           content: <T k="profile.myStudents" />,
           onSelect: () => router.push("/profile?students"),
         },
-        ...(hasSchool
-          ? [
-              {
-                key: "school",
-                content: <T k="headerMenu.school" />,
-                onSelect: () => router.push(schoolHomePath()),
-              } satisfies TMenuItem,
-            ]
-          : []),
+        {
+          key: "school",
+          content: <T k="headerMenu.school" />,
+          onSelect: () => router.push(schoolHomePath()),
+        },
         {
           key: "profile",
           content: <T k="profile.personalData" />,
