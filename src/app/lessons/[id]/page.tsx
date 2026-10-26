@@ -58,7 +58,8 @@ import { LessonFloatingTools } from "@/app/lessons/components/LessonFloatingTool
 import { LessonToolTrigger } from "@/app/lessons/components/LessonToolTrigger";
 import { LessonTimerFab } from "@/app/lessons/components/LessonTimer";
 import { BELOW_SITE_HEADER_STICKY_TOP_CLASS } from "@/constants/uiLayers";
-import { useRedirectIfLessonLockedOnTrial } from "@/app/subscription/helpers";
+import { useRedirectIfLessonLockedOnTrial, useTeacherPlan } from "@/app/subscription/helpers";
+import { schoolHomePath } from "@/app/school/lib/schoolTab";
 import { LessonModeBanner } from "@/app/lessons/components/LessonModeBanner";
 import { useLessonMediaSync } from "@/app/lessons/mediaSync/useLessonMediaSync";
 import { useLessonTimer } from "@/app/lessons/mediaSync/useLessonTimer";
@@ -485,6 +486,7 @@ export default function LessonPage() {
   ]);
 
   const isLockedOnTrial = useRedirectIfLessonLockedOnTrial(lesson);
+  const { schoolOnly } = useTeacherPlan();
 
   if (isLockedOnTrial) {
     return (
@@ -492,13 +494,24 @@ export default function LessonPage() {
         <ContentWrapper>
           <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center">
             <p className="text-lg font-bold tracking-brand text-brand-black">
-              <T k="subscriptionStatus.subscribeToContinue" />
+              <T
+                k={
+                  schoolOnly
+                    ? "lessons.schoolTrialLimitTitle"
+                    : "subscriptionStatus.subscribeToContinue"
+                }
+              />
             </p>
+            {schoolOnly ? (
+              <p className="max-w-[420px] text-sm leading-relaxed text-brand-black">
+                <T k="lessons.schoolTrialLimitBody" />
+              </p>
+            ) : null}
             <Link
-              href="/subscription"
+              href={schoolOnly ? schoolHomePath("materials") : "/subscription"}
               className="font-bold tracking-brand text-brand-violet underline"
             >
-              <T k="profile.personalCabinet" />
+              <T k={schoolOnly ? "hero.goToLessons" : "profile.personalCabinet"} />
             </Link>
           </div>
         </ContentWrapper>

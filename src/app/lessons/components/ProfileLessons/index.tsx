@@ -15,7 +15,7 @@ import { CreateLessonModalForm } from "../CreateLessonModalForm";
 import { LessonsList } from "../LessonsList";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Dino from "@/assets/images/dino.gif";
-import { useCheckSubscription } from "@/app/subscription/helpers";
+import { useCheckSubscription, useTeacherPlan } from "@/app/subscription/helpers";
 import { AuthContext } from "@/auth";
 import { readFromLocalStorage, writeToLocalStorage } from "@/auth/utils";
 import { tabs } from "../LessonsFilters/tabs";
@@ -327,6 +327,16 @@ export const ProfileLessons = (props: TProps) => {
   }, [getCourses, studentId]);
 
   const { checkSubscription } = useCheckSubscription();
+  const { schoolOnly, loading: planLoading } = useTeacherPlan();
+  // Only a school member without a personal plan loses "My lessons".
+  // A regular teacher with no school keeps their own catalog.
+  const hideMyLessons =
+    !stayOnPage &&
+    !studentId &&
+    !currentCourse &&
+    !isSchoolLibrary &&
+    !planLoading &&
+    schoolOnly;
 
   useEffect(() => {
     // Course/student embeds shouldn't restore or own the global lessons tab.
@@ -366,6 +376,20 @@ export const ProfileLessons = (props: TProps) => {
     }
     setTabIndex("userLessons");
   }, [isSchoolLibrary, tabIndex]);
+
+  useEffect(() => {
+    if (!hideMyLessons || tabIndex !== "userLessons") return;
+    setTabIndex("savedLessons");
+  }, [hideMyLessons, tabIndex]);
+
+  useEffect(() => {
+    const onCatalogChange = () => {
+      getLessons();
+    };
+    window.addEventListener("catalog-lessons-changed", onCatalogChange);
+    return () =>
+      window.removeEventListener("catalog-lessons-changed", onCatalogChange);
+  }, [getLessons]);
 
   useEffect(() => {
     if (
@@ -603,16 +627,20 @@ export const ProfileLessons = (props: TProps) => {
         <div className="relative z-0 flex flex-col gap-4 min-[1200px]:gap-6">
           {!!profile?.name ? (
             <div className="flex flex-wrap justify-center gap-1.5 px-1 min-[1200px]:gap-3">
-              <BrandPill
-                active={tabIndex === "userLessons"}
-                onClick={() => goCatalogTab("userLessons")}
-              >
-                <T
-                  k={
-                    isSchoolLibrary ? "lessons.lessonsTab" : "lessons.myLessons"
-                  }
-                />
-              </BrandPill>
+              {!hideMyLessons && (
+                <BrandPill
+                  active={tabIndex === "userLessons"}
+                  onClick={() => goCatalogTab("userLessons")}
+                >
+                  <T
+                    k={
+                      isSchoolLibrary
+                        ? "lessons.lessonsTab"
+                        : "lessons.myLessons"
+                    }
+                  />
+                </BrandPill>
+              )}
               {(!!courses.some((c) => c.user_id !== 1) ||
                 isSchoolLibrary ||
                 (stayOnPage && canCreateLesson)) && (
@@ -914,7 +942,7 @@ export const ProfileLessons = (props: TProps) => {
               }
             }}
             onPressCreateBoard={isTeacher ? openCreateBoardModal : undefined}
-            canCreateLesson={canCreateLesson}
+            canCreateLesson={canCreateLesson && !hideMyLessons}
             lessons={filteredLessons}
             getLessons={
               currentCourse

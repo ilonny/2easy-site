@@ -11,7 +11,8 @@ import { T } from "@/i18n/T";
 import Image from "next/image";
 import Link from "next/link";
 import FireButtonIcon from "@/assets/icons/fire_button.svg";
-import { TUserAccess } from "@/app/subscription/helpers";
+import { TUserAccess, useTeacherPlan } from "@/app/subscription/helpers";
+import { schoolHomePath } from "@/app/school/lib/schoolTab";
 import { headerCtaClassName } from "../Header/styles";
 
 type TProps = {
@@ -38,6 +39,7 @@ export const HeaderProfile = (props: TProps) => {
   const { createLessonModalIsVisible, setCreateLessonModalIsVisible } =
     useContext(AuthContext);
   const openCreateLesson = useOpenCreateLesson();
+  const { schoolOnly } = useTeacherPlan();
   const pathname = usePathname();
   const renderGlobalCreateModal = !pathname?.startsWith("/school");
 
@@ -48,7 +50,18 @@ export const HeaderProfile = (props: TProps) => {
           {access === "loading" && (
             <Skeleton className="h-10 w-[180px] rounded-[14px] md:h-[46px] lg:h-10 min-[1200px]:h-12" />
           )}
-          {access === "noSubscription" && (
+          {schoolOnly && (
+            <Link href={schoolHomePath("materials")} className={headerCtaClassName}>
+              <T k="hero.goToLessons" />
+              <Image
+                src={FireButtonIcon}
+                alt=""
+                aria-hidden
+                className="size-8 shrink-0"
+              />
+            </Link>
+          )}
+          {!schoolOnly && access === "noSubscription" && (
             <Link href="/subscription" className={headerCtaClassName}>
               <T k="header.chooseTariff" />
               <Image
@@ -59,7 +72,7 @@ export const HeaderProfile = (props: TProps) => {
               />
             </Link>
           )}
-          {access === "subscribed" && (
+          {!schoolOnly && access === "subscribed" && (
             <button
               type="button"
               className={headerCtaClassName}

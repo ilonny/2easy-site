@@ -232,6 +232,9 @@ export const LessonsList: FC<TProps> = ({
       const data = await res.json();
       window?.ym(103955671, "reachGoal", "lesson-copy");
       checkResponse(data);
+      if (data?.success !== false) {
+        window.dispatchEvent(new CustomEvent("catalog-lessons-changed"));
+      }
       getLessons();
     },
     [currentCourse, getLessons, getMyCourses, profile?.id, workspace],

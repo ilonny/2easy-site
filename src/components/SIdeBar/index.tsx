@@ -8,7 +8,8 @@ import { LanguageSwitcher } from "../LanguageSwitcher";
 import { TrialChip } from "../TrialChip";
 import { useOpenCreateLesson } from "../HeaderProfile";
 import { T } from "@/i18n/T";
-import { TUserAccess } from "@/app/subscription/helpers";
+import { TUserAccess, useTeacherPlan } from "@/app/subscription/helpers";
+import { schoolHomePath } from "@/app/school/lib/schoolTab";
 
 type TProps = {
   isOpened: boolean;
@@ -24,6 +25,7 @@ export const SideBar: FC<TProps> = ({ isOpened, onClose, access }) => {
   const [present, setPresent] = useState(false);
   const [shown, setShown] = useState(false);
   const openCreateLesson = useOpenCreateLesson();
+  const { schoolOnly } = useTeacherPlan();
 
   useEffect(() => {
     setMounted(true);
@@ -105,7 +107,16 @@ export const SideBar: FC<TProps> = ({ isOpened, onClose, access }) => {
               </Link>
             </div>
           )}
-          {access === "noSubscription" && (
+          {schoolOnly && (
+            <Link
+              href={schoolHomePath("materials")}
+              onClick={onClose}
+              className={primaryButtonClassName}
+            >
+              <T k="hero.goToLessons" />
+            </Link>
+          )}
+          {!schoolOnly && access === "noSubscription" && (
             <Link
               href="/subscription"
               onClick={onClose}
@@ -114,7 +125,7 @@ export const SideBar: FC<TProps> = ({ isOpened, onClose, access }) => {
               <T k="header.chooseTariff" />
             </Link>
           )}
-          {access === "subscribed" && (
+          {!schoolOnly && access === "subscribed" && (
             <button
               type="button"
               className={primaryButtonClassName}

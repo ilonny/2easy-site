@@ -17,7 +17,7 @@ import { brandModalClassNames } from "@/components/brandUi";
 import { AuthContext } from "@/auth";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { checkResponse, fetchGet } from "@/api";
-import { useCheckSubscription } from "@/app/subscription/helpers";
+import { useCheckSubscription, useTeacherPlan } from "@/app/subscription/helpers";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import {
@@ -78,6 +78,8 @@ export default function SchedulePage() {
   withLogin();
   const { profile, authIsLoading } = useContext(AuthContext);
   const { checkSubscription, hasSubscription } = useCheckSubscription();
+  const { schoolOnly, loading: planLoading, hasPersonalSubscription } =
+    useTeacherPlan();
   const isStudent = Boolean(profile?.isStudent);
   const isTeacher =
     !isStudent && (profile?.role_id === 1 || profile?.role_id === 2);
@@ -325,7 +327,21 @@ export default function SchedulePage() {
   ]);
 
   useEffect(() => {
-    if (!isTeacher || !teacherAllowed || !schoolsLoaded) return;
+    if (!isTeacher || !teacherAllowed || !schoolsLoaded || planLoading) return;
+    if (
+      hasPersonalSubscription === false &&
+      schools.length > 0 &&
+      (workspace.scope === "personal" ||
+        !schools.some((item) => item.id === workspace.schoolId))
+    ) {
+      const next: WorkspaceContext = {
+        scope: "school",
+        schoolId: schools[0].id,
+      };
+      setActiveWorkspace(next);
+      setWorkspace(next);
+      return;
+    }
     (async () => {
       try {
         if (workspace.scope === "personal") {
@@ -343,6 +359,15 @@ export default function SchedulePage() {
         }
         const school = schools.find((s) => s.id === workspace.schoolId);
         if (!school) {
+          if (schools[0] && (schoolOnly || hasPersonalSubscription === false)) {
+            const next: WorkspaceContext = {
+              scope: "school",
+              schoolId: schools[0].id,
+            };
+            setActiveWorkspace(next);
+            setWorkspace(next);
+            return;
+          }
           const personal: WorkspaceContext = {
             scope: "personal",
             schoolId: null,
@@ -381,7 +406,16 @@ export default function SchedulePage() {
         setCanFilterTeachers(false);
       }
     })();
-  }, [isTeacher, teacherAllowed, schoolsLoaded, schools, workspace]);
+  }, [
+    isTeacher,
+    teacherAllowed,
+    schoolsLoaded,
+    schools,
+    workspace,
+    schoolOnly,
+    hasPersonalSubscription,
+    planLoading,
+  ]);
 
   const schoolTeachers = useMemo(
     () =>
@@ -544,27 +578,33 @@ export default function SchedulePage() {
         )
       }
     >
-      {isTeacher && schoolsLoaded && schools.length > 0 && (
+      {isTeacher &&
+        schoolsLoaded &&
+        !planLoading &&
+        schools.length > 0 &&
+        (hasPersonalSubscription || schools.length > 1) && (
         <div
           className="flex flex-wrap justify-center gap-1.5 min-[1200px]:gap-3"
           role="tablist"
           aria-label={i18n.t("schedule.switchSchedule")}
         >
-          <BrandPill
-            active={workspace.scope === "personal"}
-            onClick={() => {
-              const next: WorkspaceContext = {
-                scope: "personal",
-                schoolId: null,
-              };
-              setActiveWorkspace(next);
-              setWorkspace(next);
-              setFilterStudentId(null);
-              setTeacherFilter("all");
-            }}
-          >
-            <T k="schedule.personalSchedule" />
-          </BrandPill>
+          {hasPersonalSubscription && (
+            <BrandPill
+              active={workspace.scope === "personal"}
+              onClick={() => {
+                const next: WorkspaceContext = {
+                  scope: "personal",
+                  schoolId: null,
+                };
+                setActiveWorkspace(next);
+                setWorkspace(next);
+                setFilterStudentId(null);
+                setTeacherFilter("all");
+              }}
+            >
+              <T k="schedule.personalSchedule" />
+            </BrandPill>
+          )}
           {schools.map((item) => (
             <BrandPill
               key={item.id}

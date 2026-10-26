@@ -28,7 +28,7 @@ import { useParams, useRouter } from "next/navigation";
 import Bg from "@/assets/images/create_lesson_bg_card.png";
 import { LessonStatus } from "./LessonStatus";
 import { AuthContext } from "@/auth";
-import { useCheckSubscription } from "@/app/subscription/helpers";
+import { useCheckSubscription, useTeacherPlan } from "@/app/subscription/helpers";
 import { writeToLocalStorage } from "@/auth/utils";
 import { openHomeworkForStudent } from "../../openHomeworkForStudent";
 import LockIcon from "@/assets/icons/lock.svg";
@@ -150,6 +150,7 @@ export const LessonCard: FC<TProps> = ({
   const showPrimaryStartLessonButton =
     showLessonBottomActions && !hideStartLessonForMyCourseWithoutStudent;
   const { checkSubscription, hasSubscription } = useCheckSubscription();
+  const { schoolOnly } = useTeacherPlan();
   const [lockedModalOpen, setLockedModalOpen] = useState(false);
   const [tryNowModal, setTryNowModal] = useState(false);
   const [regModal, setRegModal] = useState(false);
@@ -962,28 +963,46 @@ export const LessonCard: FC<TProps> = ({
         scrollBehavior="inside"
       >
         <ModalContent>
-          <ModalBody style={{ minHeight: 460 }}>
-            <p
-              style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
-              className="mb-4"
-            >
-              <T k="lessons.chooseTariffToOpenFull" />
-            </p>
-            <p
-              style={{ fontWeight: "400", textAlign: "center" }}
-              className="mb-4 whitespace-pre-line"
-            >
-              <T k="lessons.tariffsDifferByPeriod" />
-            </p>
+          {schoolOnly ? (
+            <ModalBody className="flex flex-col items-center gap-4 py-8">
+              <p className="text-center text-[22px] font-medium text-brand-black">
+                <T k="lessons.schoolTrialLimitTitle" />
+              </p>
+              <p className="max-w-[420px] text-center leading-relaxed text-brand-black">
+                <T k="lessons.schoolTrialLimitBody" />
+              </p>
+              <Button
+                color="primary"
+                className="mt-2 min-w-[160px]"
+                onClick={() => setLockedModalOpen(false)}
+              >
+                <T k="lessons.schoolTrialLimitOk" />
+              </Button>
+            </ModalBody>
+          ) : (
+            <ModalBody style={{ minHeight: 460 }}>
+              <p
+                style={{ fontSize: 22, fontWeight: 500, textAlign: "center" }}
+                className="mb-4"
+              >
+                <T k="lessons.chooseTariffToOpenFull" />
+              </p>
+              <p
+                style={{ fontWeight: "400", textAlign: "center" }}
+                className="mb-4 whitespace-pre-line"
+              >
+                <T k="lessons.tariffsDifferByPeriod" />
+              </p>
 
-            <SubscribeTariffs
-              hideTitle
-              hideTopBlocks
-              hideTariffsTitle
-              fullWidth
-            />
-            <div className="h-4"></div>
-          </ModalBody>
+              <SubscribeTariffs
+                hideTitle
+                hideTopBlocks
+                hideTariffsTitle
+                fullWidth
+              />
+              <div className="h-4"></div>
+            </ModalBody>
+          )}
         </ModalContent>
       </Modal>
       <Modal

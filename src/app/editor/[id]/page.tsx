@@ -37,7 +37,8 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { StartLessonButton } from "@/app/lessons/components/StartLessonButton";
-import { useCheckSubscription, useRedirectIfLessonLockedOnTrial } from "@/app/subscription/helpers";
+import { useCheckSubscription, useRedirectIfLessonLockedOnTrial, useTeacherPlan } from "@/app/subscription/helpers";
+import { schoolHomePath } from "@/app/school/lib/schoolTab";
 import { EditorContext } from "../context";
 import { AuthContext } from "@/auth";
 import EditIcon from "@/assets/icons/edit_blue.svg";
@@ -98,6 +99,7 @@ export default function EditorPage() {
   getLessonRef.current = getLesson;
   getExListRef.current = getExList;
   const isLockedOnTrial = useRedirectIfLessonLockedOnTrial(lesson);
+  const { schoolOnly } = useTeacherPlan();
 
   useEffect(() => {
     if (!exListRef.current.length) {
@@ -274,13 +276,24 @@ export default function EditorPage() {
         <ContentWrapper>
           <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4 text-center">
             <p className="text-lg font-bold tracking-brand text-brand-black">
-              <T k="subscriptionStatus.subscribeToContinue" />
+              <T
+                k={
+                  schoolOnly
+                    ? "lessons.schoolTrialLimitTitle"
+                    : "subscriptionStatus.subscribeToContinue"
+                }
+              />
             </p>
+            {schoolOnly ? (
+              <p className="max-w-[420px] text-sm leading-relaxed text-brand-black">
+                <T k="lessons.schoolTrialLimitBody" />
+              </p>
+            ) : null}
             <a
-              href="/subscription"
+              href={schoolOnly ? schoolHomePath("materials") : "/subscription"}
               className="font-bold tracking-brand text-brand-violet underline"
             >
-              <T k="profile.personalCabinet" />
+              <T k={schoolOnly ? "hero.goToLessons" : "profile.personalCabinet"} />
             </a>
           </div>
         </ContentWrapper>

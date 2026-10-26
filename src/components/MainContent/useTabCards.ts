@@ -6,6 +6,7 @@ import {
   isLessonLockedOnFreeTariff,
   TUserAccess,
   useCheckSubscription,
+  useTeacherPlan,
 } from "@/app/subscription/helpers";
 import { data as discussionCards } from "@/app/cards/data";
 import { TTagTone } from "@/components/Tag";
@@ -89,6 +90,7 @@ export const useTabCards = (
   access: TUserAccess,
 ): { cards: TGameCard[]; isLoading: boolean; isError: boolean } => {
   const { subscription } = useCheckSubscription();
+  const { schoolOnly } = useTeacherPlan();
   const isFreeTariff = subscription?.subscribe_type_id === 1;
   const isTeacher = access === "subscribed" || access === "noSubscription";
   const limit =
@@ -139,7 +141,8 @@ export const useTabCards = (
       { ...lesson, user_id: Number(lesson.user_id) },
       isFreeTariff,
     );
-    return locked ? "/subscription" : `/editor/${lesson.id}`;
+    if (!locked) return `/editor/${lesson.id}`;
+    return schoolOnly ? "/lesson_plans" : "/subscription";
   };
 
   const toLessonCard = (lesson: TApiLesson): TGameCard => {

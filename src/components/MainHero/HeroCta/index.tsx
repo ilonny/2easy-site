@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Skeleton } from "@nextui-org/react";
 import { AuthContext } from "@/auth";
 import { T } from "@/i18n/T";
-import { useUserAccess } from "@/app/subscription/helpers";
+import { useTeacherPlan, useUserAccess } from "@/app/subscription/helpers";
+import { schoolHomePath } from "@/app/school/lib/schoolTab";
 import { TrialChip } from "@/components/TrialChip";
 import NoCardIcon from "@/assets/icons/no_card.svg";
 
@@ -15,6 +16,7 @@ const buttonClassName =
 export const HeroCta = () => {
   const { profile } = useContext(AuthContext);
   const access = useUserAccess();
+  const { schoolOnly } = useTeacherPlan();
 
   if (access === "loading") {
     return (
@@ -45,6 +47,16 @@ export const HeroCta = () => {
           </span>
           <T k="hero.noCard" />
         </p>
+      </div>
+    );
+  }
+
+  if (schoolOnly) {
+    return (
+      <div className="flex flex-col items-center gap-3 pt-2.5">
+        <Link href={schoolHomePath("materials")} className={buttonClassName}>
+          <T k="hero.goToLessons" />
+        </Link>
       </div>
     );
   }

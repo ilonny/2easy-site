@@ -107,6 +107,45 @@ export type TUserAccess =
   | "noSubscription"
   | "subscribed";
 
+type TPlanSubscription = {
+  success?: boolean;
+  subscribe_type_id?: number;
+  hasPersonalSubscription?: boolean;
+  isSchoolSubscription?: boolean;
+  school_id?: number;
+} | null;
+
+/** Personal plan vs school-only membership. `loading` until /subscription resolves. */
+export const useTeacherPlan = () => {
+  const { subscription } = useContext(SibscribeContext) as {
+    subscription?: TPlanSubscription;
+  };
+  const { authIsLoading, profile } = useContext(AuthContext);
+  const loading =
+    authIsLoading ||
+    (!!profile?.name && !isStudentUser(profile) && subscription === undefined);
+  const hasPersonalSubscription = loading
+    ? undefined
+    : subscription?.hasPersonalSubscription === true ||
+      (subscription?.hasPersonalSubscription == null &&
+        Boolean(subscription?.success) &&
+        !subscription?.isSchoolSubscription);
+  const hasSchool =
+    (Array.isArray(profile?.schools) && profile.schools.length > 0) ||
+    Number(profile?.schoolId) > 0 ||
+    Boolean(subscription?.isSchoolSubscription) ||
+    Number(subscription?.school_id) > 0;
+  const schoolOnly =
+    !loading && hasPersonalSubscription === false && hasSchool;
+  return {
+    loading,
+    hasPersonalSubscription,
+    hasSchool,
+    schoolOnly,
+    subscription,
+  };
+};
+
 /** `subscription === undefined` means the teacher's subscription is still being fetched. */
 export const useUserAccess = (): TUserAccess => {
   const { subscription } = useContext(SibscribeContext) as {
@@ -123,6 +162,7 @@ export const useUserAccess = (): TUserAccess => {
 
 export const useRedirectIfLessonLockedOnTrial = (lesson: TTrialLockLesson) => {
   const { subscription } = useCheckSubscription();
+  const { schoolOnly, loading } = useTeacherPlan();
   const { profile } = useContext(AuthContext);
   const router = useRouter();
   const isStudent = isStudentUser(profile);
@@ -133,10 +173,9 @@ export const useRedirectIfLessonLockedOnTrial = (lesson: TTrialLockLesson) => {
   );
 
   useEffect(() => {
-    if (isLocked) {
-      router.replace("/subscription");
-    }
-  }, [isLocked, router]);
+    if (!isLocked || loading || schoolOnly) return;
+    router.replace("/subscription");
+  }, [isLocked, loading, router, schoolOnly]);
 
   return isLocked;
 };
