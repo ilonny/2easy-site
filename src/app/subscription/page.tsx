@@ -71,7 +71,9 @@ export default function SubscriptionPage() {
           setSchools(data.schools || []);
         } else {
           setSchools([]);
-          checkResponse(data);
+          // Already on /subscription — skip needSubscription redirect/toast
+          // (expired personal sub + school/me is a normal case here).
+          checkResponse(data, Boolean(data?.needSubscription), true);
         }
       } finally {
         if (!cancelled) setSchoolsLoading(false);
@@ -126,7 +128,7 @@ export default function SubscriptionPage() {
           canPay: Boolean(data.canPay),
         });
       } else {
-        checkResponse(data);
+        checkResponse(data, Boolean(data?.needSubscription), true);
       }
     } finally {
       setSchoolSubscriptionLoading(false);
@@ -154,7 +156,7 @@ export default function SubscriptionPage() {
         data: { tier, email, phone },
       });
       const data = await res.json();
-      if (!data?.success) checkResponse(data);
+      if (!data?.success) checkResponse(data, false, true);
       return data;
     },
     [],

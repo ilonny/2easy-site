@@ -214,7 +214,13 @@ export const checkResponse = (
       type: "error",
     });
     if (res?.needSubscription && !skipNeedSubscription) {
-      window.location.pathname = "/subscription";
+      // Same guard as 401→/login: assigning pathname to the current path
+      // reloads the page. On /subscription that creates an infinite loop when
+      // school APIs also return needSubscription (expired personal sub).
+      const path = window.location.pathname.replace(/\/$/, "") || "/";
+      if (path !== "/subscription") {
+        window.location.pathname = "/subscription";
+      }
       return;
     }
     if (res?.needRedirect) {
