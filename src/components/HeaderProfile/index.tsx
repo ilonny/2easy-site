@@ -3,7 +3,7 @@ import { SubscribeCounter } from "@/subscribe/components";
 import { HeaderProfile as HeaderProfileShort } from "@/profile/components";
 import { Skeleton } from "@nextui-org/react";
 import { writeToLocalStorage } from "@/auth/utils";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useContext } from "react";
 import { AuthContext } from "@/auth";
 import { CreateLessonModalForm } from "@/app/lessons/components/CreateLessonModalForm";
@@ -38,6 +38,8 @@ export const HeaderProfile = (props: TProps) => {
   const { createLessonModalIsVisible, setCreateLessonModalIsVisible } =
     useContext(AuthContext);
   const openCreateLesson = useOpenCreateLesson();
+  const pathname = usePathname();
+  const renderGlobalCreateModal = !pathname?.startsWith("/school");
 
   return (
     <div className="flex min-w-0 flex-row items-center gap-3 max-[374px]:gap-2 md:gap-[15px] lg:gap-2">
@@ -77,14 +79,16 @@ export const HeaderProfile = (props: TProps) => {
       )}
       <div className="min-w-0">
         <HeaderProfileShort isStudent={isStudent} />
-        <CreateLessonModalForm
-          isVisible={createLessonModalIsVisible}
-          onSuccess={() => {
-            writeToLocalStorage("saved_lessons_tab", "userLessons");
-            window.location.reload();
-          }}
-          setIsVisible={setCreateLessonModalIsVisible}
-        />
+        {renderGlobalCreateModal ? (
+          <CreateLessonModalForm
+            isVisible={createLessonModalIsVisible}
+            onSuccess={() => {
+              writeToLocalStorage("saved_lessons_tab", "userLessons");
+              window.location.reload();
+            }}
+            setIsVisible={setCreateLessonModalIsVisible}
+          />
+        ) : null}
       </div>
     </div>
   );

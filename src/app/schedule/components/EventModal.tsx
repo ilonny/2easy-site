@@ -31,12 +31,17 @@ import {
   resolveStudentDisplayName,
 } from "./eventUi";
 import { formatMoney } from "../utils/calendar";
-import { getLocalTimeZone, getLocalTimeZoneLabel } from "../utils/timezone";
+import {
+  formatScheduleInstant,
+  getLocalTimeZone,
+  getScheduleTimeZoneLabel,
+  scheduleWallClockToIso,
+} from "../utils/timezone";
 import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
-import { SearchableSelect } from "@/components/SearchableSelect";
 
 type StudentOption = { id: number; name?: string; email?: string };
 type LessonOption = { id: number; title?: string; user_id?: number };
+type TeacherOption = { id: number; name: string };
 
 type TProps = {
   isOpen: boolean;
@@ -46,7 +51,12 @@ type TProps = {
   defaults?: Partial<EventFormValues>;
   students: StudentOption[];
   lessons: LessonOption[];
+  /** Supervisors who do not teach must pick whose calendar the lesson goes on. */
+  requireTeacher?: boolean;
+  teachers?: TeacherOption[];
   defaultEmail?: string;
+  /** School timezone. Personal schedules keep using the browser timezone. */
+  timeZone?: string;
   onSave: (payload: Record<string, unknown>, editingId?: number) => Promise<void>;
   onDelete?: (id: number, scope: string) => Promise<void>;
   onEmail?: (id: number, email: string) => Promise<void>;
@@ -75,7 +85,10 @@ export const EventModal = ({
   defaults,
   students,
   lessons,
+  requireTeacher = false,
+  teachers = [],
   defaultEmail,
+  timeZone,
   onSave,
   onDelete,
   onEmail,
@@ -89,19 +102,27 @@ export const EventModal = ({
   const [busy, setBusy] = useState(false);
   const [fetchedLessonTitle, setFetchedLessonTitle] = useState("");
   const [studentPickerKey, setStudentPickerKey] = useState(0);
+  const [eventTeacherId, setEventTeacherId] = useState("");
 
   useEffect(() => {
     if (!isOpen) return;
     setStudentPickerKey((k) => k + 1);
+    setEventTeacherId(
+      event?.teacher_user_id ? String(event.teacher_user_id) : "",
+    );
     if (event && event.type === "lesson") {
       const ids = eventStudentIds(event);
       const lesson = lessons.find((l) => l.id === event.lesson_id);
       setForm({
         student_ids: ids,
         title: event.title || "",
-        date: dayjs(event.starts_at).format("YYYY-MM-DD"),
-        start_time: dayjs(event.starts_at).format("HH:mm"),
-        end_time: dayjs(event.ends_at).format("HH:mm"),
+        date: formatScheduleInstant(
+          event.starts_at,
+          "YYYY-MM-DD",
+          timeZone,
+        ),
+        start_time: formatScheduleInstant(event.starts_at, "HH:mm", timeZone),
+        end_time: formatScheduleInstant(event.ends_at, "HH:mm", timeZone),
         location_type: event.location_type || "lesson",
         lesson_source: Number(lesson?.user_id) === 1 ? "2easy" : "mine",
         lesson_id: event.lesson_id || "",
@@ -115,7 +136,7 @@ export const EventModal = ({
     setEmail(defaultEmail || "");
     setScope("this");
     setFetchedLessonTitle("");
-  }, [isOpen, event, defaults, defaultEmail, lessons]);
+  }, [isOpen, event, defaults, defaultEmail, lessons, timeZone]);
 
   const filteredLessons = useMemo(() => {
     if (form.lesson_source === "2easy") {
@@ -221,13 +242,22 @@ export const EventModal = ({
       toast(i18n.t("schedule.fillRequired"), { type: "warning" });
       return;
     }
+    if (requireTeacher && !isEdit && !eventTeacherId) {
+      toast(i18n.t("school.teacherRequired"), { type: "warning" });
+      return;
+    }
     setBusy(true);
     try {
-      // Local wall-clock → absolute UTC instant. Each viewer then sees their local time.
-      const starts_at = dayjs(
-        `${form.date}T${form.start_time}`,
-      ).toISOString();
-      const ends_at = dayjs(`${form.date}T${form.end_time}`).toISOString();
+      const starts_at = scheduleWallClockToIso(
+        form.date,
+        form.start_time,
+        timeZone,
+      );
+      const ends_at = scheduleWallClockToIso(
+        form.date,
+        form.end_time,
+        timeZone,
+      );
       const hasLesson =
         form.location_type === "lesson" && Boolean(form.lesson_id);
       const title =
@@ -238,10 +268,13 @@ export const EventModal = ({
         {
           student_ids: form.student_ids,
           student_id: form.student_ids[0],
+          ...(eventTeacherId
+            ? { teacher_user_id: Number(eventTeacherId) }
+            : {}),
           title,
           starts_at,
           ends_at,
-          timezone: getLocalTimeZone(),
+          timezone: timeZone || getLocalTimeZone(),
           location_type: hasLesson ? "lesson" : "text",
           lesson_id: hasLesson ? Number(form.lesson_id) : null,
           location_text:
@@ -412,8 +445,12 @@ export const EventModal = ({
                 </div>
                 <div className="mt-1 text-xs text-[#86868b]">
                   <T
-                    k="schedule.localTimezoneHint"
-                    values={{ tz: getLocalTimeZoneLabel() }}
+                    k={
+                      timeZone
+                        ? "schedule.schoolTimezoneHint"
+                        : "schedule.localTimezoneHint"
+                    }
+                    values={{ tz: getScheduleTimeZoneLabel(timeZone) }}
                   />
                 </div>
               </div>
@@ -457,6 +494,19 @@ export const EventModal = ({
             </div>
           ) : (
             <>
+              {requireTeacher && !isEdit ? (
+                <Select
+                  label={i18n.t("schedule.eventTeacher")}
+                  selectedKeys={eventTeacherId ? [eventTeacherId] : []}
+                  onChange={(e) => setEventTeacherId(e.target.value)}
+                >
+                  {teachers.map((teacher) => (
+                    <SelectItem key={String(teacher.id)} value={String(teacher.id)}>
+                      {teacher.name}
+                    </SelectItem>
+                  ))}
+                </Select>
+              ) : null}
               <div className="rounded-xl border border-[#e8e8ed] p-3">
                 <div className="mb-2 text-sm font-medium text-[#1d1d1f]">
                   <T k="schedule.students" />
@@ -464,26 +514,28 @@ export const EventModal = ({
                     <T k="schedule.studentsMultiHint" />
                   </span>
                 </div>
-                <SearchableSelect
+                <Select
                   key={`add-student-${studentPickerKey}`}
+                  aria-label={i18n.t("schedule.students")}
                   placeholder={i18n.t("school.searchStudent")}
-                  selectedId={null}
-                  onSelect={(id) => {
+                  selectedKeys={[]}
+                  onChange={(e) => {
+                    const id = Number(e.target.value);
                     if (!id) return;
-                    toggleStudent(Number(id));
+                    toggleStudent(id);
                     setStudentPickerKey((k) => k + 1);
                   }}
-                  items={students
+                >
+                  {students
                     .filter((s) => !form.student_ids.includes(s.id))
-                    .map((s) => ({
-                      id: String(s.id),
-                      label:
-                        String(s.name || "").trim() ||
-                        String(s.email || "").trim() ||
-                        `#${s.id}`,
-                      description: s.email || undefined,
-                    }))}
-                />
+                    .map((s) => (
+                      <SelectItem key={String(s.id)} value={String(s.id)}>
+                        {String(s.name || "").trim() ||
+                          String(s.email || "").trim() ||
+                          `#${s.id}`}
+                      </SelectItem>
+                    ))}
+                </Select>
                 {!!form.student_ids.length && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {form.student_ids.map((id) => {
@@ -543,8 +595,12 @@ export const EventModal = ({
               </div>
               <p className="text-xs text-[#86868b]">
                 <T
-                  k="schedule.timeTimezoneHint"
-                  values={{ tz: getLocalTimeZoneLabel() }}
+                  k={
+                    timeZone
+                      ? "schedule.schoolTimeTimezoneHint"
+                      : "schedule.timeTimezoneHint"
+                  }
+                  values={{ tz: getScheduleTimeZoneLabel(timeZone) }}
                 />
               </p>
 

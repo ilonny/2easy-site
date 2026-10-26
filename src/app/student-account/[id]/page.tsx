@@ -14,6 +14,7 @@ import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { brandInputClassNames } from "@/components/brandUi";
 import { UserAvatar } from "@/components/UserAvatar";
+import { LevelIcon, Tag, type TTagTone } from "@/components/Tag";
 import { setActiveSchoolId } from "@/app/school/lib/activeSchool";
 import { useSchoolBack } from "@/app/school/hooks/useSchoolBack";
 import { writeLastSchoolTab } from "@/app/school/lib/schoolTab";
@@ -27,6 +28,7 @@ import {
   teacherCabinetPath,
   teacherIdFromReturnTo,
 } from "@/app/school/lib/studentCabinetBack";
+import type { SchoolAccessFlags } from "@/app/school/types";
 
 type StudentInfo = {
   id: number;
@@ -38,6 +40,28 @@ type StudentInfo = {
   avatar?: string | null;
   success?: boolean;
 };
+
+const normalizeStudentTag = (tag: string) =>
+  tag
+    .trim()
+    .replace(/[АВС]/gi, (letter) => {
+      const upper = letter.toUpperCase();
+      const latin = { А: "A", В: "B", С: "C" } as Record<string, string>;
+      return latin[upper] || upper;
+    })
+    .replace(/\s+/g, "")
+    .toUpperCase();
+
+const studentTagTone = (tag: string): TTagTone => {
+  const normalized = normalizeStudentTag(tag);
+  if (normalized.startsWith("A")) return "green";
+  if (normalized.startsWith("B")) return "mint";
+  if (normalized.startsWith("C")) return "blue";
+  return "violet";
+};
+
+const isLevelTag = (tag: string) =>
+  /^[ABC][12]\+?(-[ABC]?[12]\+?)?$/.test(normalizeStudentTag(tag));
 
 export default function StudentAccountPage() {
   withLogin();
@@ -54,9 +78,12 @@ export default function StudentAccountPage() {
     Number(searchParams.get("teacher_user_id")) ||
     teacherIdFromReturnTo(searchParams.get("returnTo"));
   const [rememberedTeacherId, setRememberedTeacherId] = useState(0);
-  const teacherUserId = teacherUserIdFromUrl || rememberedTeacherId;
+  const cabinetTeacherUserId =
+    teacherUserIdFromUrl || rememberedTeacherId;
   const teacherPath =
-    teacherUserId > 0 ? teacherCabinetPath(teacherUserId) : "";
+    cabinetTeacherUserId > 0
+      ? teacherCabinetPath(cabinetTeacherUserId)
+      : "";
   const goSchoolBack = useSchoolBack(
     sourceSchoolId ? "/school?tab=students" : "/profile?students",
   );
@@ -74,12 +101,17 @@ export default function StudentAccountPage() {
   const activeTab = searchParams.get("tab") || "lessons";
 
   const { profile, authIsLoading } = useContext(AuthContext);
+  const [schoolAccess, setSchoolAccess] = useState<SchoolAccessFlags | null>(
+    null,
+  );
 
   const [studentInfo, setStudentInfo] = useState<StudentInfo | undefined>();
+  const [accessDenied, setAccessDenied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchStudentInfo = useCallback(async () => {
     setIsLoading(true);
+    setAccessDenied(false);
     const res = await fetchGet({
       path: `/student-info?id=${studentId}`,
       isSecure: true,
@@ -87,14 +119,18 @@ export default function StudentAccountPage() {
       schoolId: sourceSchoolId,
     });
     const json = await res?.json();
-    checkResponse(json);
-    if (json.success) {
+    checkResponse(json, !json?.success);
+    if (json?.success) {
+      setAccessDenied(false);
       setStudentInfo(json);
       if (json.school_id) {
         const schoolId = Number(json.school_id);
         setSourceSchoolId(schoolId);
         setActiveSchoolId(schoolId);
       }
+    } else {
+      setStudentInfo(undefined);
+      setAccessDenied(true);
     }
     setIsLoading(false);
     return json;
@@ -145,20 +181,50 @@ export default function StudentAccountPage() {
       (studentInfo?.school_id != null && Number(studentInfo.school_id) > 0),
     [studentInfo, sourceSchoolId],
   );
+
+  useEffect(() => {
+    if (!isSchoolStudent || !sourceSchoolId) {
+      setSchoolAccess(null);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const res = await fetchGet({
+        path: "/school/me",
+        isSecure: true,
+      });
+      const data = await res?.json();
+      if (cancelled || !data?.success) return;
+      const match = (data.schools || []).find(
+        (item: { id?: number }) => Number(item.id) === Number(sourceSchoolId),
+      );
+      if (!cancelled) {
+        setSchoolAccess(match?.access || null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isSchoolStudent, sourceSchoolId]);
+  const materialTeacherUserId =
+    cabinetTeacherUserId || Number(studentInfo?.user_id) || 0;
   const catalogWorkspace = useMemo(
     () =>
       isSchoolStudent && sourceSchoolId
         ? {
             workspaceScope: "school" as const,
             schoolId: sourceSchoolId,
-            teacherUserId: teacherUserId > 0 ? teacherUserId : undefined,
+            teacherUserId:
+              materialTeacherUserId > 0
+                ? materialTeacherUserId
+                : undefined,
           }
         : PERSONAL_CATALOG_WORKSPACE,
-    [isSchoolStudent, sourceSchoolId, teacherUserId],
+    [isSchoolStudent, sourceSchoolId, materialTeacherUserId],
   );
 
   const backLabel =
-    teacherUserId > 0
+    cabinetTeacherUserId > 0
       ? i18n.t("students.backToTeacher")
       : isSchoolStudent
         ? i18n.t("students.backToSchool")
@@ -185,6 +251,11 @@ export default function StudentAccountPage() {
         ) : undefined
       }
     >
+      {!isLoading && !authIsLoading && accessDenied && !studentInfo && (
+        <p className="text-sm text-brand-grayFont">
+          {i18n.t("students.cabinetDenied")}
+        </p>
+      )}
       {(isLoading || authIsLoading) && (
         <div className="flex h-[225px] w-full items-center justify-center">
           <Button
@@ -213,14 +284,26 @@ export default function StudentAccountPage() {
                   <p className="truncate text-sm text-brand-grayFont">
                     {studentInfo.email || "—"}
                   </p>
-                  {studentInfo.tag ? (
-                    <p className="mt-1 text-xs text-brand-grayFont">
-                      {studentInfo.tag}
-                    </p>
-                  ) : null}
-                  <p className="mt-2 text-xs font-medium text-brand-violet">
-                    <T k="students.schoolStudentBadge" />
-                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {studentInfo.tag
+                      ?.split(",")
+                      .map((tag) => tag.trim())
+                      .filter(Boolean)
+                      .map((tag) => (
+                        <Tag
+                          key={tag}
+                          tone={studentTagTone(tag)}
+                          icon={isLevelTag(tag) ? <LevelIcon /> : undefined}
+                        >
+                          {isLevelTag(tag)
+                            ? normalizeStudentTag(tag)
+                            : tag}
+                        </Tag>
+                      ))}
+                    <Tag tone="violet">
+                      <T k="students.schoolStudentBadge" />
+                    </Tag>
+                  </div>
                 </div>
               </div>
             </div>
@@ -268,7 +351,12 @@ export default function StudentAccountPage() {
             //@ts-ignore
             studentId={studentId}
             studentInfo={studentInfo}
-            canEditSchedule={!!isTeacher}
+            canEditSchedule={
+              !!isTeacher &&
+              (!isSchoolStudent ||
+                !!schoolAccess?.canManageOwnStudents ||
+                !!schoolAccess?.canManageStudentsBelow)
+            }
             hideTabs
             hideAttachButton
             showChangeStatusButton

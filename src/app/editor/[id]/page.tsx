@@ -54,6 +54,7 @@ import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { parseRouteId } from "@/utils/parseRouteId";
 import { EditorAiAssistModal } from "../components/EditorAiAssistModal";
+import { useCatalogWorkspace } from "@/app/school/lib/catalogWorkspace";
 
 export default function EditorPage() {
   withLogin();
@@ -62,6 +63,10 @@ export default function EditorPage() {
   const lessonId = parseRouteId(params?.id);
   const contextStudentId = Number(searchParams?.get("student_id") || 0) || 0;
   const { profile } = useContext(AuthContext);
+  const catalogWorkspace = useCatalogWorkspace();
+  const workspaceKey = `${catalogWorkspace.workspaceScope || ""}:${
+    catalogWorkspace.schoolId || ""
+  }:${catalogWorkspace.teacherUserId || ""}`;
   const { lesson, getLesson } = useLessons();
   const { exList, getExList, changeSortIndex, deleteEx } =
     useExList(lessonId ?? undefined);
@@ -124,7 +129,7 @@ export default function EditorPage() {
     if (!lessonId) return;
     void getLessonRef.current(lessonId);
     void getExListRef.current();
-  }, [lessonId]);
+  }, [lessonId, workspaceKey]);
 
   useEffect(() => {
     if (!contextStudentId) {

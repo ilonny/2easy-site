@@ -76,17 +76,12 @@ const useIsMobile = () => {
 
 export default function SchedulePage() {
   withLogin();
-  const { profile } = useContext(AuthContext);
+  const { profile, authIsLoading } = useContext(AuthContext);
   const { checkSubscription, hasSubscription } = useCheckSubscription();
   const isStudent = Boolean(profile?.isStudent);
   const isTeacher =
     !isStudent && (profile?.role_id === 1 || profile?.role_id === 2);
   const isMobile = useIsMobile();
-  const teacherAllowed = !isTeacher || hasSubscription;
-
-  useEffect(() => {
-    if (isTeacher) checkSubscription();
-  }, [isTeacher, checkSubscription]);
 
   const [tab, setTab] = useState<"calendar" | "payments">("calendar");
   const [view, setView] = useState<ScheduleView>("week");
@@ -111,6 +106,8 @@ export default function SchedulePage() {
   >([]);
   const [schools, setSchools] = useState<SchoolInfo[]>([]);
   const [schoolsLoaded, setSchoolsLoaded] = useState(false);
+  const teacherAllowed =
+    !isTeacher || hasSubscription || schools.length > 0;
   const [workspace, setWorkspace] =
     useState<WorkspaceContext>(getActiveWorkspace);
   const [teacherFilter, setTeacherFilter] = useState<string>("all");
@@ -223,10 +220,14 @@ export default function SchedulePage() {
     () => schools.find((item) => item.id === workspace.schoolId) || null,
     [schools, workspace.schoolId],
   );
+  const needsEventTeacher =
+    workspace.scope === "school" &&
+    activeSchool?.access?.canManageOwnSchedule === false &&
+    !!activeSchool?.access?.canManageSchedulesBelow;
   const canEditAnyTeacherHours = Boolean(
     activeSchool?.access?.canEditAnyTeacherHours,
   );
-  // Teachers may always edit their own hours/unavailability; elevated roles may edit others.
+  // Staff may edit their own unavailability; only super admin may edit another's.
   const canEditAvailability =
     showAvailability &&
     (Number(availabilityTeacherId) === Number(profile?.id) ||
@@ -286,7 +287,12 @@ export default function SchedulePage() {
   };
 
   useEffect(() => {
-    if (!isTeacher || !teacherAllowed) return;
+    if (authIsLoading) return;
+    if (!isTeacher) {
+      setSchoolsLoaded(true);
+      return;
+    }
+    let cancelled = false;
     (async () => {
       try {
         const meRes = await fetchGet({
@@ -294,12 +300,29 @@ export default function SchedulePage() {
           isSecure: true,
         });
         const me = await meRes?.json();
-        setSchools(me?.success && Array.isArray(me.schools) ? me.schools : []);
+        if (!cancelled) {
+          setSchools(me?.success && Array.isArray(me.schools) ? me.schools : []);
+        }
       } finally {
-        setSchoolsLoaded(true);
+        if (!cancelled) setSchoolsLoaded(true);
       }
     })();
-  }, [isTeacher, teacherAllowed]);
+    return () => {
+      cancelled = true;
+    };
+  }, [authIsLoading, isTeacher]);
+
+  useEffect(() => {
+    if (!isTeacher || !schoolsLoaded) return;
+    if (hasSubscription || schools.length > 0) return;
+    checkSubscription();
+  }, [
+    isTeacher,
+    schoolsLoaded,
+    hasSubscription,
+    schools.length,
+    checkSubscription,
+  ]);
 
   useEffect(() => {
     if (!isTeacher || !teacherAllowed || !schoolsLoaded) return;
@@ -499,7 +522,7 @@ export default function SchedulePage() {
   const shiftUnit =
     view === "month" ? "month" : view === "week" ? "week" : "day";
 
-  if (isTeacher && !teacherAllowed) {
+  if (authIsLoading || (isTeacher && !teacherAllowed)) {
     return (
       <CatalogPageShell title={<T k="schedule.titlePage" />}>
         <div className="flex h-[50vh] items-center justify-center">
@@ -713,7 +736,9 @@ export default function SchedulePage() {
                       </Button>
                     </>
                   ) : null}
-                  {workspace.schoolId && availabilityTeacherId ? (
+                  {canEditAnyTeacherHours &&
+                  workspace.schoolId &&
+                  availabilityTeacherId ? (
                     <Button
                       size="sm"
                       variant="flat"
@@ -848,7 +873,7 @@ export default function SchedulePage() {
 
       <Modal
         size="lg"
-        isOpen={hoursModalOpen}
+        isOpen={canEditAnyTeacherHours && hoursModalOpen}
         onClose={() => setHoursModalOpen(false)}
         classNames={brandModalClassNames}
       >
@@ -857,7 +882,9 @@ export default function SchedulePage() {
             <T k="schedule.weeklyHoursLink" />
           </ModalHeader>
           <ModalBody className="pb-6">
-            {workspace.schoolId && availabilityTeacherId ? (
+            {canEditAnyTeacherHours &&
+            workspace.schoolId &&
+            availabilityTeacherId ? (
               <WorkingHoursEditor
                 schoolId={workspace.schoolId}
                 userId={availabilityTeacherId}
@@ -874,8 +901,31 @@ export default function SchedulePage() {
         readOnly={!isTeacher}
         event={selectedEvent}
         defaults={defaults}
+        timeZone={
+          workspace.scope === "school"
+            ? activeSchool?.settings?.timezone
+            : undefined
+        }
         students={scheduleStudents}
         lessons={lessons}
+        requireTeacher={needsEventTeacher}
+        teachers={schoolMembers
+          .filter(
+            (member) =>
+              member.status === "active" &&
+              (member.roles || []).some(
+                (role) => role === "teacher" || role === "head_teacher",
+              ),
+          )
+          .map((member) => ({
+            id: member.user_id,
+            name:
+              [member.user?.name, member.user?.surname]
+                .filter(Boolean)
+                .join(" ") ||
+              member.user?.login ||
+              String(member.user_id),
+          }))}
         defaultEmail={profile?.login || profile?.email || ""}
         onSave={async (payload, editingId) => {
           if (editingId) {

@@ -30,6 +30,7 @@ dayjs.locale("ru");
 type TProps = {
   schoolId: number;
   members: SchoolMember[];
+  timezone?: string;
   /** Roles with staff: see all teachers + filter. Plain teacher: own only. */
   canFilterTeachers: boolean;
 };
@@ -45,6 +46,7 @@ const TEACHING_ROLES = new Set([
 export const SchedulePanel: FC<TProps> = ({
   schoolId,
   members,
+  timezone,
   canFilterTeachers,
 }) => {
   const { profile } = useContext(AuthContext);
@@ -358,6 +360,7 @@ export const SchedulePanel: FC<TProps> = ({
         readOnly
         event={selectedEvent}
         defaults={{}}
+        timeZone={timezone}
         students={schoolStudents}
         lessons={[]}
         defaultEmail=""

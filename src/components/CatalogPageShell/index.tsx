@@ -4,6 +4,7 @@ import { landingContainerClassName } from "@/constants/layout";
 type TProps = {
   title: ReactNode;
   subtitle?: ReactNode;
+  titlePrefix?: ReactNode;
   children: ReactNode;
   className?: string;
   /** Lock page to viewport height; only nested panes scroll (e.g. calendar). */
@@ -13,6 +14,7 @@ type TProps = {
 export const CatalogPageShell = ({
   title,
   subtitle,
+  titlePrefix,
   children,
   className = "",
   fillHeight = false,
@@ -32,22 +34,44 @@ export const CatalogPageShell = ({
             : "gap-[30px] pb-16 pt-8 lg:gap-[50px] lg:pb-24 lg:pt-12"
         }`}
       >
-        <div className="mx-auto flex max-w-[675px] shrink-0 flex-col items-center gap-2 px-1 lg:gap-3">
-          <h1
-            className={`text-center font-bold leading-none text-brand-black ${
-              fillHeight
-                ? "text-[22px] lg:text-[32px]"
-                : "text-[25px] lg:text-[40px]"
-            }`}
-          >
-            {title}
-          </h1>
-          {subtitle ? (
-            <p className="text-center text-sm leading-[1.3] text-brand-grayFont lg:text-base">
-              {subtitle}
-            </p>
-          ) : null}
-        </div>
+        {titlePrefix ? (
+          <div className="mx-auto flex max-w-[675px] shrink-0 items-center justify-center gap-3 px-1 lg:gap-4">
+            {titlePrefix}
+            <div className="flex min-w-0 flex-col items-center gap-2 lg:gap-3">
+              <h1
+                className={`break-words text-center font-bold leading-none text-brand-black ${
+                  fillHeight
+                    ? "text-[22px] lg:text-[32px]"
+                    : "text-[25px] lg:text-[40px]"
+                }`}
+              >
+                {title}
+              </h1>
+              {subtitle ? (
+                <p className="text-center text-sm leading-[1.3] text-brand-grayFont lg:text-base">
+                  {subtitle}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : (
+          <div className="mx-auto flex max-w-[675px] shrink-0 flex-col items-center gap-2 px-1 lg:gap-3">
+            <h1
+              className={`text-center font-bold leading-none text-brand-black ${
+                fillHeight
+                  ? "text-[22px] lg:text-[32px]"
+                  : "text-[25px] lg:text-[40px]"
+              }`}
+            >
+              {title}
+            </h1>
+            {subtitle ? (
+              <p className="text-center text-sm leading-[1.3] text-brand-grayFont lg:text-base">
+                {subtitle}
+              </p>
+            ) : null}
+          </div>
+        )}
         {fillHeight ? (
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden lg:gap-5">
             {children}

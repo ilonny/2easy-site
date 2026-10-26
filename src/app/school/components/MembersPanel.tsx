@@ -285,7 +285,7 @@ export const MembersPanel: FC<TProps> = ({
                         <T k="school.openStaffCabinet" />
                       </Button>
                     )}
-                    {!showArchived && (canEditHours || m.can_open_cabinet) && (
+                    {!showArchived && canEditHours && (
                       <Button
                         size="sm"
                         variant="flat"

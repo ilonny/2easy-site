@@ -82,11 +82,11 @@ export const catalogWorkspaceFromSearchParams = (
   const schoolId = Number(searchParams.get("schoolId") || 0);
   const scope = String(searchParams.get("workspace") || "").toLowerCase();
   const value: CatalogWorkspaceValue = {};
-  if (scope === "school" || schoolId > 0) {
+  if (scope === "personal") {
+    value.workspaceScope = "personal";
+  } else if (scope === "school" || schoolId > 0) {
     value.workspaceScope = "school";
     if (schoolId > 0) value.schoolId = schoolId;
-  } else if (scope === "personal") {
-    value.workspaceScope = "personal";
   }
   if (teacherUserId > 0) value.teacherUserId = teacherUserId;
   return value;
@@ -109,7 +109,11 @@ export const withWorkspacePath = (
     params.set("workspace", workspace.workspaceScope);
   }
   const schoolId = Number(workspace.schoolId);
-  if (schoolId > 0) params.set("schoolId", String(schoolId));
+  if (workspace.workspaceScope !== "personal" && schoolId > 0) {
+    params.set("schoolId", String(schoolId));
+  } else {
+    params.delete("schoolId");
+  }
   const teacherId = Number(workspace.teacherUserId);
   if (teacherId > 0) params.set("teacher_user_id", String(teacherId));
   const next = params.toString();

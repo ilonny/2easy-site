@@ -50,6 +50,7 @@ export const StudentSchedulePanel: FC<TProps> = ({
     null,
   );
   const [defaults, setDefaults] = useState<Partial<EventFormValues>>({});
+  const [schoolTimeZone, setSchoolTimeZone] = useState<string | undefined>();
   const [lessons, setLessons] = useState<
     Array<{ id: number; title?: string; user_id?: number }>
   >([]);
@@ -80,6 +81,29 @@ export const StudentSchedulePanel: FC<TProps> = ({
       ? teacherUserId
       : null;
 
+  useEffect(() => {
+    const schoolId = Number(student.school_id);
+    if (!canEdit || !schoolId) {
+      setSchoolTimeZone(undefined);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const res = await fetchGet({
+        path: `/school/${schoolId}/settings`,
+        isSecure: true,
+        schoolId,
+      });
+      const json = await res?.json();
+      if (!cancelled && json?.success) {
+        setSchoolTimeZone(json.settings?.timezone || undefined);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [canEdit, student.school_id]);
+
   const refreshRange = useCallback(async () => {
     const { from, to } = rangeForView(cursor, view);
     await loadEvents(from, to, {
@@ -108,6 +132,7 @@ export const StudentSchedulePanel: FC<TProps> = ({
         isSecure: true,
         workspaceScope: student.school_id ? "school" : undefined,
         schoolId: student.school_id ? Number(student.school_id) : undefined,
+        actingTeacherUserId: delegateTeacherId,
       });
       const json = await res?.json();
       checkResponse(json);
@@ -126,7 +151,7 @@ export const StudentSchedulePanel: FC<TProps> = ({
           })),
       );
     })();
-  }, [canEdit, student.school_id]);
+  }, [canEdit, delegateTeacherId, student.school_id]);
 
   const studentNameById = useMemo(() => {
     const map = new Map<number, string>();
@@ -273,6 +298,7 @@ export const StudentSchedulePanel: FC<TProps> = ({
         readOnly={!canEdit}
         event={selectedEvent}
         defaults={defaults}
+        timeZone={schoolTimeZone}
         students={studentsForModal}
         lessons={lessons}
         defaultEmail={student.email || ""}

@@ -120,7 +120,12 @@ export const DayView = ({
               key={hour}
               type="button"
               onClick={() => {
-                if (!selectionMode) onSlotClick(cursor, hour);
+                if (
+                  !selectionMode &&
+                  !isNonWorkingSlot(cursor, hour, availability)
+                ) {
+                  onSlotClick(cursor, hour);
+                }
               }}
               onPointerDown={(event) => {
                 if (!selectionMode) return;
@@ -138,7 +143,16 @@ export const DayView = ({
                   onRangeToggle?.(range, true);
                 }
               }}
-              className="absolute left-0 right-0 flex border-t border-[#f0f0f5] hover:bg-[#f8f8fa]"
+              aria-disabled={
+                !selectionMode &&
+                isNonWorkingSlot(cursor, hour, availability)
+              }
+              className={`absolute left-0 right-0 flex border-t border-[#f0f0f5] ${
+                !selectionMode &&
+                isNonWorkingSlot(cursor, hour, availability)
+                  ? "cursor-not-allowed"
+                  : "hover:bg-[#f8f8fa]"
+              }`}
               style={{
                 top: (hour - visibleWindow.start) * hourHeight,
                 height: hourHeight,

@@ -40,6 +40,10 @@ import {
   TAiLimitCategory,
 } from "@/app/ai/aiLimits";
 import { OVERLAY_ABOVE_HEADER_Z_CLASS } from "@/constants/uiLayers";
+import {
+  catalogFetchParams,
+  useCatalogWorkspace,
+} from "@/app/school/lib/catalogWorkspace";
 
 type TProps = {
   isVisible: boolean;
@@ -73,6 +77,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
   onSuccess,
   currentCourse,
 }) => {
+  const workspace = useCatalogWorkspace();
   const [step, setStep] = useState<TStep>("collect");
   const [level, setLevel] = useState<TAiLevel | null>(null);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([
@@ -526,6 +531,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
       const saveRes = await fetchPostJson({
         path: "/ai/save-lesson",
         isSecure: true,
+        ...catalogFetchParams(workspace),
         data: { draft, course_id: currentCourse?.id },
       });
       const saved = await saveRes.json();
@@ -556,6 +562,7 @@ export const CreateLessonWithAiModal: FC<TProps> = ({
     pendingPreview,
     savedLessonId,
     setIsVisible,
+    workspace,
   ]);
 
   // Prevent background page scroll while modal (and nested panels) are scrolling

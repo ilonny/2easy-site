@@ -19,6 +19,19 @@ export type SchoolAccessFlags = {
   canSeeTeachers: boolean;
   canViewStaffCabinets: boolean;
   canTeach: boolean;
+  canViewStaffDirectory?: boolean;
+  canViewAllStudents?: boolean;
+  canManageOwnStudents?: boolean;
+  canManageStudentsBelow?: boolean;
+  canViewAllSchedules?: boolean;
+  canManageOwnSchedule?: boolean;
+  canManageSchedulesBelow?: boolean;
+  canViewSharedMaterials?: boolean;
+  canManageSharedMaterials?: boolean;
+  canViewStudentMaterials?: boolean;
+  canViewStaffMaterialsBelow?: boolean;
+  canManageStaffMaterialsBelow?: boolean;
+  canViewSchoolStats?: boolean;
 };
 
 export type SchoolWorkingDay = {

@@ -1,6 +1,7 @@
 "use client";
 
 import { CatalogPageShell, BrandPill } from "@/components";
+import { UserAvatar } from "@/components/UserAvatar";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
@@ -50,21 +51,22 @@ export default function SchoolPage() {
   const [showCreate, setShowCreate] = useState(false);
 
   const canManage = !!school?.access?.canManageMembers;
-  const canAssign = !!school?.access?.canSeeAllStudents;
+  const canAssign =
+    !!school?.access?.canManageOwnStudents ||
+    !!school?.access?.canManageStudentsBelow;
   const canSeeStaff =
-    !!school?.access?.canSeeTeachers || !!school?.access?.canManageMembers;
+    !!school?.access?.canViewStaffDirectory ||
+    !!school?.access?.canSeeTeachers ||
+    !!school?.access?.canManageMembers;
   const canSettings =
     !!school?.access?.canManageSchool ||
     !!school?.access?.canManageSchoolSettings;
+  const canSeeMaterials = !!school?.access?.canViewSharedMaterials;
+  const isSuperAdmin =
+    !!school?.access?.canViewSchoolStats ||
+    !!school?.roles?.includes("super_admin");
   const canEditHours = !!school?.access?.canEditAnyTeacherHours;
-  const canSeeMaterials = !!school?.access?.canAccessMaterials;
-  const isSuperAdmin = !!school?.roles?.includes("super_admin");
-  const canManageLibrary =
-    !!school?.access?.canManageSchoolLibrary ||
-    isSuperAdmin ||
-    !!school?.roles?.some((role) =>
-      ["head_teacher", "methodist", "academic_director"].includes(role),
-    );
+  const canManageLibrary = !!school?.access?.canManageSharedMaterials;
 
   const setTab = useCallback(
     (nextTab: SchoolTab) => {
@@ -100,9 +102,11 @@ export default function SchoolPage() {
   // Wait until school access is loaded — otherwise members/settings reset to stats.
   useEffect(() => {
     if (loading || !school) return;
-    if (tab === "members" && !canSeeStaff) setTab("stats");
-    if (tab === "settings" && !canSettings) setTab("stats");
-    if (tab === "materials" && !canSeeMaterials) setTab("stats");
+    const fallbackTab: SchoolTab = isSuperAdmin ? "stats" : "schedule";
+    if (tab === "stats" && !isSuperAdmin) setTab("schedule");
+    if (tab === "members" && !canSeeStaff) setTab(fallbackTab);
+    if (tab === "settings" && !canSettings) setTab(fallbackTab);
+    if (tab === "materials" && !canSeeMaterials) setTab(fallbackTab);
   }, [
     loading,
     school,
@@ -110,6 +114,7 @@ export default function SchoolPage() {
     canSeeStaff,
     canSettings,
     canSeeMaterials,
+    isSuperAdmin,
     setTab,
   ]);
 
@@ -154,6 +159,14 @@ export default function SchoolPage() {
   return (
     <CatalogPageShell
       title={school.name}
+      titlePrefix={
+        <UserAvatar
+          name={school.name}
+          avatar={school.avatar}
+          size={52}
+          className="shrink-0"
+        />
+      }
       subtitle={
         <T k="school.subtitleRoles" values={{ roles: rolesLabel }} />
       }
@@ -178,12 +191,14 @@ export default function SchoolPage() {
         ) : null}
 
         <div className="flex flex-wrap justify-center gap-1.5 min-[1200px]:gap-3">
-          <BrandPill
-            active={tab === "stats"}
-            onClick={() => setTab("stats")}
-          >
-            <T k="school.tabStats" />
-          </BrandPill>
+          {isSuperAdmin ? (
+            <BrandPill
+              active={tab === "stats"}
+              onClick={() => setTab("stats")}
+            >
+              <T k="school.tabStats" />
+            </BrandPill>
+          ) : null}
           <BrandPill
             active={tab === "schedule"}
             onClick={() => setTab("schedule")}
@@ -222,12 +237,15 @@ export default function SchoolPage() {
           ) : null}
         </div>
 
-        {tab === "stats" && <StatsPanel schoolId={school.id} />}
+        {tab === "stats" && isSuperAdmin && (
+          <StatsPanel schoolId={school.id} />
+        )}
 
         {tab === "schedule" && (
           <SchedulePanel
             schoolId={school.id}
             members={members}
+            timezone={school.settings?.timezone}
             canFilterTeachers={!!school.access?.canSeeAllSchedule}
           />
         )}
@@ -235,7 +253,7 @@ export default function SchoolPage() {
         {tab === "members" && canSeeStaff && (
           <MembersPanel
             canManage={canManage}
-            canEditHours={canEditHours || !!school.access?.canTeach}
+            canEditHours={canEditHours}
             schoolId={school.id}
             onActiveMembersChanged={() => refreshMembers(school.id)}
           />
@@ -245,6 +263,7 @@ export default function SchoolPage() {
           <StudentsPanel
             schoolId={school.id}
             canManageAssign={canAssign}
+            canLeaveUnassigned={!!school.access?.canViewAllStudents}
             defaultLessonMinutes={
               school.settings?.defaultLessonMinutes || 60
             }

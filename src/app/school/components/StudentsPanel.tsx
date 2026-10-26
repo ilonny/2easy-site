@@ -26,7 +26,6 @@ import {
   brandModalClassNames,
   brandPrimaryBtnClassName,
 } from "@/components/brandUi";
-import { SearchableSelect } from "@/components/SearchableSelect";
 import { toast } from "react-toastify";
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { rememberStudentCabinetBack } from "../lib/studentCabinetBack";
@@ -47,6 +46,7 @@ type SchoolStudent = {
   user_id?: number | string;
   teacher_name?: string | null;
   is_archived?: number;
+  can_manage?: boolean;
 };
 
 type CreateSchoolStudentResult = {
@@ -68,6 +68,8 @@ type PreferredSlotRow = {
 type TProps = {
   schoolId: number;
   canManageAssign: boolean;
+  /** Supervisors may leave a student without a private teacher. */
+  canLeaveUnassigned?: boolean;
   defaultLessonMinutes?: number;
   timezone?: string;
   students: SchoolStudent[];
@@ -97,6 +99,7 @@ const defaultSlot = (): PreferredSlotRow => ({
 export const StudentsPanel: FC<TProps> = ({
   schoolId,
   canManageAssign,
+  canLeaveUnassigned = false,
   defaultLessonMinutes = 60,
   timezone,
   students,
@@ -387,7 +390,7 @@ export const StudentsPanel: FC<TProps> = ({
       toast(i18n.t("school.studentNameRequired"), { type: "error" });
       return;
     }
-    if (canManageAssign && !teacherId) {
+    if (canManageAssign && !canLeaveUnassigned && !teacherId) {
       toast(i18n.t("school.teacherRequired"), { type: "error" });
       return;
     }
@@ -400,11 +403,19 @@ export const StudentsPanel: FC<TProps> = ({
         teacher_user_id: teacherId ? Number(teacherId) : undefined,
         frequency,
         duration_minutes: duration,
-        slots: slots.map((slot) =>
-          frequency === "once"
-            ? { date: slot.date, start: String(slot.start || "").slice(0, 5) }
-            : { dow: slot.dow, start: String(slot.start || "").slice(0, 5) },
-        ),
+        slots: teacherId
+          ? slots.map((slot) =>
+              frequency === "once"
+                ? {
+                    date: slot.date,
+                    start: String(slot.start || "").slice(0, 5),
+                  }
+                : {
+                    dow: slot.dow,
+                    start: String(slot.start || "").slice(0, 5),
+                  },
+            )
+          : [],
       });
       if (res?.success) {
         const createdLessons = Number(res.schedule_events_created) || 0;
@@ -452,7 +463,7 @@ export const StudentsPanel: FC<TProps> = ({
         <h2 className="text-lg font-bold tracking-brand text-brand-black">
           <T k="school.studentsTitle" />
         </h2>
-        {!showArchived ? (
+        {canManageAssign && !showArchived ? (
           <Button
             className={brandPrimaryBtnClassName}
             onPress={() => {
@@ -530,7 +541,7 @@ export const StudentsPanel: FC<TProps> = ({
                         <T k="school.openCabinet" />
                       </Link>
                     ) : null}
-                    {canManageAssign ? (
+                    {canManageAssign && s.can_manage !== false ? (
                       <>
                         <Button
                           size="sm"
@@ -659,6 +670,34 @@ export const StudentsPanel: FC<TProps> = ({
               radius="lg"
             />
             {canManageAssign && (
+              <>
+                <Select
+                  label={<T k="school.colTeacher" />}
+                  placeholder={i18n.t("school.searchTeacher")}
+                  selectedKeys={
+                    teacherId
+                      ? [teacherId]
+                      : canLeaveUnassigned
+                        ? ["none"]
+                        : []
+                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setTeacherId(!value || value === "none" ? "" : value);
+                  }}
+                >
+                  {canLeaveUnassigned ? (
+                    <SelectItem key="none" value="none">
+                      {i18n.t("school.unassignedTeacher")}
+                    </SelectItem>
+                  ) : null}
+                  {teacherItems.map((teacher) => (
+                    <SelectItem key={teacher.id} value={teacher.id}>
+                      {teacher.label}
+                    </SelectItem>
+                  ))}
+                </Select>
+                {teacherId ? (
               <>
                 <p className="text-sm text-brand-grayFont">
                   <T
@@ -814,13 +853,6 @@ export const StudentsPanel: FC<TProps> = ({
                         })}
                   </p>
                 ) : null}
-                <SearchableSelect
-                  label={<T k="school.colTeacher" />}
-                  placeholder={i18n.t("school.searchTeacher")}
-                  selectedId={teacherId || null}
-                  onSelect={(id) => setTeacherId(id || "")}
-                  items={teacherItems}
-                />
                 {slotsReady ? (
                   <Button
                     size="sm"
@@ -838,6 +870,8 @@ export const StudentsPanel: FC<TProps> = ({
                   <p className="text-xs text-amber-700">
                     <T k="school.forceTeacherWarning" />
                   </p>
+                ) : null}
+              </>
                 ) : null}
               </>
             )}

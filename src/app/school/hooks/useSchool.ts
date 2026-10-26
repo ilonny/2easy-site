@@ -16,7 +16,7 @@ import {
 } from "../lib/activeSchool";
 
 export const useSchool = () => {
-  const { profile } = useContext(AuthContext);
+  const { profile, authIsLoading } = useContext(AuthContext);
   const isStudentViewer = !!(profile?.isStudent || profile?.studentId);
   const [loading, setLoading] = useState(true);
   const [schools, setSchools] = useState<SchoolInfo[]>([]);
@@ -219,13 +219,16 @@ export const useSchool = () => {
   );
 
   useEffect(() => {
+    // Profile is empty until auth finishes. Fetching /school/me with a student
+    // token returns 401 and the global handler sends them to /login.
+    if (authIsLoading) return;
     if (isStudentViewer) {
       setLoading(false);
       setSchools([]);
       return;
     }
     void refreshMe();
-  }, [isStudentViewer, refreshMe]);
+  }, [authIsLoading, isStudentViewer, refreshMe]);
 
   useEffect(() => {
     if (!school?.id) return;

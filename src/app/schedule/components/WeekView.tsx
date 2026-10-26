@@ -164,7 +164,12 @@ export const WeekView = ({
                   key={`${day.toISOString()}-${hour}`}
                   type="button"
                   onClick={() => {
-                    if (!selectionMode) onSlotClick(day, hour);
+                    if (
+                      !selectionMode &&
+                      !isNonWorkingSlot(day, hour, availability)
+                    ) {
+                      onSlotClick(day, hour);
+                    }
                   }}
                   onPointerDown={(event) => {
                     if (!selectionMode) return;
@@ -182,7 +187,16 @@ export const WeekView = ({
                       onRangeToggle?.(range, true);
                     }
                   }}
-                  className="absolute left-0 right-0 border-t border-[#f0f0f5] hover:bg-[#f8f8fa]"
+                  aria-disabled={
+                    !selectionMode &&
+                    isNonWorkingSlot(day, hour, availability)
+                  }
+                  className={`absolute left-0 right-0 border-t border-[#f0f0f5] ${
+                    !selectionMode &&
+                    isNonWorkingSlot(day, hour, availability)
+                      ? "cursor-not-allowed"
+                      : "hover:bg-[#f8f8fa]"
+                  }`}
                   style={{
                     top: (hour - visibleWindow.start) * hourHeight,
                     height: hourHeight,

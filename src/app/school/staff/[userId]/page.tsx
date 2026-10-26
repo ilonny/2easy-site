@@ -74,6 +74,7 @@ type CabinetStudent = {
 
 type CabinetData = {
   self?: boolean;
+  can_manage?: boolean;
   member: {
     id: number;
     user_id: number;
@@ -101,7 +102,11 @@ export default function StaffCabinetPage() {
   const goBack = useSchoolBack("/school?tab=members");
   const userId = Number(params?.userId);
   const { loading: schoolLoading, school } = useSchool();
+  const isSuperAdmin =
+    !!school?.access?.canEditAnyTeacherHours ||
+    !!school?.roles?.includes("super_admin");
   const [cabinet, setCabinet] = useState<CabinetData | null>(null);
+  const canManageCabinet = !!cabinet?.can_manage;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -122,6 +127,7 @@ export default function StaffCabinetPage() {
   >([]);
 
   const [addStudentOpen, setAddStudentOpen] = useState(false);
+  const [hoursModalOpen, setHoursModalOpen] = useState(false);
   const [studentName, setStudentName] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
   const [studentTag, setStudentTag] = useState("");
@@ -242,6 +248,7 @@ export default function StaffCabinetPage() {
         isSecure: true,
         workspaceScope: "school",
         schoolId: school?.id,
+        actingTeacherUserId: userId,
       });
       const json = await res?.json();
       checkResponse(json);
@@ -260,7 +267,7 @@ export default function StaffCabinetPage() {
           })),
       );
     })();
-  }, [cabinet, school?.id]);
+  }, [cabinet, school?.id, userId]);
 
   const students = cabinet?.students || [];
 
@@ -460,13 +467,15 @@ export default function StaffCabinetPage() {
             <h2 className="text-lg font-semibold">
               <T k="school.cabinetStudents" />
             </h2>
-            <Button
-              className={brandPrimaryBtnClassName}
-              size="sm"
-              onPress={() => setAddStudentOpen(true)}
-            >
-              <T k="school.addStudent" />
-            </Button>
+            {canManageCabinet ? (
+              <Button
+                className={brandPrimaryBtnClassName}
+                size="sm"
+                onPress={() => setAddStudentOpen(true)}
+              >
+                <T k="school.addStudent" />
+              </Button>
+            ) : null}
           </div>
           <div className="overflow-hidden rounded-[16px] ring-1 ring-black/5">
             <table className="w-full text-left text-sm">
@@ -519,16 +528,6 @@ export default function StaffCabinetPage() {
           </div>
         </section>
 
-        {school?.id && userId ? (
-          <section className="rounded-[16px] bg-brand-gray/30 px-4 py-4 ring-1 ring-black/5">
-            <WorkingHoursEditor
-              schoolId={school.id}
-              userId={userId}
-              compact
-            />
-          </section>
-        ) : null}
-
         <section className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -539,13 +538,26 @@ export default function StaffCabinetPage() {
                 <T k="school.cabinetScheduleHint" />
               </p>
             </div>
-            <Button
-              className={brandPrimaryBtnClassName}
-              size="sm"
-              onPress={() => openCreate(dayjs())}
-            >
-              <T k="schedule.newLesson" />
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              {isSuperAdmin ? (
+                <Button
+                  size="sm"
+                  variant="flat"
+                  onPress={() => setHoursModalOpen(true)}
+                >
+                  <T k="school.workingHoursTitle" />
+                </Button>
+              ) : null}
+              {canManageCabinet ? (
+                <Button
+                  className={brandPrimaryBtnClassName}
+                  size="sm"
+                  onPress={() => openCreate(dayjs())}
+                >
+                  <T k="schedule.newLesson" />
+                </Button>
+              ) : null}
+            </div>
           </div>
 
           <div
@@ -561,7 +573,7 @@ export default function StaffCabinetPage() {
                 onPrev={() => setCursor((c) => c.subtract(1, shiftUnit))}
                 onNext={() => setCursor((c) => c.add(1, shiftUnit))}
               />
-              {availability.supported ? (
+              {canManageCabinet && availability.supported ? (
                 <div className="flex flex-wrap items-center gap-2 border-b border-[#e8e8ed] px-3 py-2">
                   <Button
                     size="sm"
@@ -637,7 +649,9 @@ export default function StaffCabinetPage() {
                     events={visibleEvents}
                     detailed
                     nameById={studentNameById}
-                    onDayClick={(day) => openCreate(day)}
+                    onDayClick={
+                      canManageCabinet ? (day) => openCreate(day) : undefined
+                    }
                     onEventClick={openEvent}
                   />
                 ) : view === "week" ? (
@@ -650,7 +664,9 @@ export default function StaffCabinetPage() {
                     selectionMode={Boolean(selectionMode)}
                     selectedRangeKeys={new Set(selectedRanges.keys())}
                     onRangeToggle={handleRangeToggle}
-                    onSlotClick={openCreate}
+                    onSlotClick={
+                      canManageCabinet ? openCreate : () => undefined
+                    }
                     onEventClick={openEvent}
                   />
                 ) : (
@@ -663,7 +679,9 @@ export default function StaffCabinetPage() {
                     selectionMode={Boolean(selectionMode)}
                     selectedRangeKeys={new Set(selectedRanges.keys())}
                     onRangeToggle={handleRangeToggle}
-                    onSlotClick={openCreate}
+                    onSlotClick={
+                      canManageCabinet ? openCreate : () => undefined
+                    }
                     onEventClick={openEvent}
                   />
                 )}
@@ -676,17 +694,42 @@ export default function StaffCabinetPage() {
           <SchoolMaterialsPanel
             schoolId={school.id}
             teacherUserId={userId}
-            canManage
+            canManage={canManageCabinet}
+            readOnly={!canManageCabinet}
             personalOnly
           />
         ) : null}
       </div>
 
+      <Modal
+        size="lg"
+        isOpen={hoursModalOpen}
+        onClose={() => setHoursModalOpen(false)}
+        classNames={brandModalClassNames}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <T k="school.workingHoursTitle" />
+          </ModalHeader>
+          <ModalBody className="pb-6">
+            {school?.id && userId && isSuperAdmin ? (
+              <WorkingHoursEditor
+                schoolId={school.id}
+                userId={userId}
+                compact
+              />
+            ) : null}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
       <EventModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
+        readOnly={!canManageCabinet}
         event={selectedEvent}
         defaults={defaults}
+        timeZone={school?.settings?.timezone}
         students={students}
         lessons={lessons}
         defaultEmail={cabinet.member.user?.login || ""}
