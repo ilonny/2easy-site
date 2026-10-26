@@ -110,8 +110,12 @@ export default function SchedulePage() {
   const [schoolsLoaded, setSchoolsLoaded] = useState(false);
   const teacherAllowed =
     !isTeacher || hasSubscription || schools.length > 0;
-  const [workspace, setWorkspace] =
-    useState<WorkspaceContext>(getActiveWorkspace);
+  // Don't trust a stored school until /school/me confirms membership.
+  // Otherwise a teacher with no school sends X-School-Id and gets 403.
+  const [workspace, setWorkspace] = useState<WorkspaceContext>({
+    scope: "personal",
+    schoolId: null,
+  });
   const [teacherFilter, setTeacherFilter] = useState<string>("all");
   const [selectionMode, setSelectionMode] =
     useState<AvailabilitySelectionMode | null>(null);
@@ -122,17 +126,23 @@ export default function SchedulePage() {
 
   const scheduleWorkspace = useMemo(() => {
     if (isStudent) return undefined;
-    if (workspace.scope === "school" && workspace.schoolId) {
+    // Wait for membership. Until then, and when the teacher has no school,
+    // send no workspace headers — the same legacy calendar as before schools.
+    if (isTeacher && !schoolsLoaded) return undefined;
+    if (
+      workspace.scope === "school" &&
+      schools.some((item) => item.id === workspace.schoolId)
+    ) {
       return {
         workspaceScope: "school" as const,
         schoolId: workspace.schoolId,
       };
     }
-    if (workspace.scope === "personal") {
+    if (schools.length > 0) {
       return { workspaceScope: "personal" as const };
     }
     return undefined;
-  }, [isStudent, workspace]);
+  }, [isStudent, isTeacher, schoolsLoaded, schools, workspace]);
   const {
     events,
     loading,
@@ -192,9 +202,10 @@ export default function SchedulePage() {
   ]);
 
   useEffect(() => {
+    if (isTeacher && !schoolsLoaded) return;
     if (!teacherAllowed && isTeacher) return;
     refreshRange();
-  }, [refreshRange, teacherAllowed, isTeacher]);
+  }, [refreshRange, teacherAllowed, isTeacher, schoolsLoaded]);
 
   useEffect(() => {
     const onInvalidate = () => {
@@ -303,7 +314,23 @@ export default function SchedulePage() {
         });
         const me = await meRes?.json();
         if (!cancelled) {
-          setSchools(me?.success && Array.isArray(me.schools) ? me.schools : []);
+          const list =
+            me?.success && Array.isArray(me.schools) ? me.schools : [];
+          setSchools(list);
+          const stored = getActiveWorkspace();
+          const storedIsMember =
+            stored.scope === "school" &&
+            list.some((item) => item.id === stored.schoolId);
+          if (storedIsMember) {
+            setWorkspace(stored);
+          } else if (stored.scope === "school") {
+            const personal: WorkspaceContext = {
+              scope: "personal",
+              schoolId: null,
+            };
+            setActiveWorkspace(personal);
+            setWorkspace(personal);
+          }
         }
       } finally {
         if (!cancelled) setSchoolsLoaded(true);

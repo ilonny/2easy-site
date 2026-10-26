@@ -43,10 +43,10 @@ export default function LessonPlansPage() {
           (active && ids.includes(active) ? active : 0) ||
           (ids.includes(fromProfile) ? fromProfile : 0) ||
           ids[0] ||
-          fromProfile;
+          0;
         if (!cancelled) setSchoolId(next > 0 ? next : null);
       } catch {
-        if (!cancelled) setSchoolId(fromProfile > 0 ? fromProfile : null);
+        if (!cancelled) setSchoolId(null);
       } finally {
         if (!cancelled) setSchoolReady(true);
       }

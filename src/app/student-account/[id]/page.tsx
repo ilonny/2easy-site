@@ -29,6 +29,7 @@ import {
   teacherIdFromReturnTo,
 } from "@/app/school/lib/studentCabinetBack";
 import type { SchoolAccessFlags } from "@/app/school/types";
+import { useTeacherPlan } from "@/app/subscription/helpers";
 
 type StudentInfo = {
   id: number;
@@ -101,6 +102,7 @@ export default function StudentAccountPage() {
   const activeTab = searchParams.get("tab") || "lessons";
 
   const { profile, authIsLoading } = useContext(AuthContext);
+  const { hasSchool, loading: planLoading } = useTeacherPlan();
   const [schoolAccess, setSchoolAccess] = useState<SchoolAccessFlags | null>(
     null,
   );
@@ -115,15 +117,16 @@ export default function StudentAccountPage() {
     const res = await fetchGet({
       path: `/student-info?id=${studentId}`,
       isSecure: true,
-      workspaceScope: sourceSchoolId ? "school" : undefined,
-      schoolId: sourceSchoolId,
+      workspaceScope:
+        hasSchool && sourceSchoolId ? "school" : undefined,
+      schoolId: hasSchool ? sourceSchoolId : undefined,
     });
     const json = await res?.json();
     checkResponse(json, !json?.success);
     if (json?.success) {
       setAccessDenied(false);
       setStudentInfo(json);
-      if (json.school_id) {
+      if (json.school_id && hasSchool) {
         const schoolId = Number(json.school_id);
         setSourceSchoolId(schoolId);
         setActiveSchoolId(schoolId);
@@ -134,7 +137,7 @@ export default function StudentAccountPage() {
     }
     setIsLoading(false);
     return json;
-  }, [studentId, sourceSchoolId]);
+  }, [hasSchool, studentId, sourceSchoolId]);
 
   useEffect(() => {
     if (schoolIdFromUrl) setSourceSchoolId(schoolIdFromUrl);
@@ -183,7 +186,7 @@ export default function StudentAccountPage() {
   );
 
   useEffect(() => {
-    if (!isSchoolStudent || !sourceSchoolId) {
+    if (planLoading || !hasSchool || !isSchoolStudent || !sourceSchoolId) {
       setSchoolAccess(null);
       return;
     }
@@ -205,12 +208,12 @@ export default function StudentAccountPage() {
     return () => {
       cancelled = true;
     };
-  }, [isSchoolStudent, sourceSchoolId]);
+  }, [hasSchool, isSchoolStudent, planLoading, sourceSchoolId]);
   const materialTeacherUserId =
     cabinetTeacherUserId || Number(studentInfo?.user_id) || 0;
   const catalogWorkspace = useMemo(
     () =>
-      isSchoolStudent && sourceSchoolId
+      !planLoading && hasSchool && isSchoolStudent && sourceSchoolId
         ? {
             workspaceScope: "school" as const,
             schoolId: sourceSchoolId,
@@ -220,7 +223,13 @@ export default function StudentAccountPage() {
                 : undefined,
           }
         : PERSONAL_CATALOG_WORKSPACE,
-    [isSchoolStudent, sourceSchoolId, materialTeacherUserId],
+    [
+      planLoading,
+      hasSchool,
+      isSchoolStudent,
+      sourceSchoolId,
+      materialTeacherUserId,
+    ],
   );
 
   const backLabel =

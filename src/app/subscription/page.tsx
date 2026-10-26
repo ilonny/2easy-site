@@ -8,6 +8,7 @@ import { SibscribeContext } from "@/subscribe/context";
 import { SubscribeCancel } from "@/subscribe/components/SubscribeCancel";
 import { T } from "@/i18n/T";
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
+import { useTeacherPlan } from "@/app/subscription/helpers";
 import { Select, SelectItem } from "@nextui-org/react";
 import { TariffsPanel } from "@/app/school/components/TariffsPanel";
 import type {
@@ -34,6 +35,7 @@ export default function SubscriptionPage() {
   const { subscription } = useContext(SibscribeContext) as {
     subscription?: PersonalSubscription;
   };
+  const { hasSchool, loading: planLoading } = useTeacherPlan();
   const [tab, setTab] = useState<SubscriptionTab>("personal");
   const [schools, setSchools] = useState<SchoolInfo[]>([]);
   const [schoolsLoading, setSchoolsLoading] = useState(false);
@@ -49,11 +51,13 @@ export default function SubscriptionPage() {
   useEffect(() => {
     if (
       authIsLoading ||
+      planLoading ||
       !isAuthorized ||
       profile?.isStudent ||
-      profile?.studentId
+      profile?.studentId ||
+      !hasSchool
     ) {
-      if (!authIsLoading) setSchools([]);
+      if (!authIsLoading && !planLoading) setSchools([]);
       return;
     }
 
@@ -85,7 +89,9 @@ export default function SubscriptionPage() {
     };
   }, [
     authIsLoading,
+    hasSchool,
     isAuthorized,
+    planLoading,
     profile?.isStudent,
     profile?.studentId,
   ]);

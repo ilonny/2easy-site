@@ -662,7 +662,9 @@ export default function LessonPage() {
                   isView
                   activeStudentId={activeStudentId}
                   is2easy={lesson?.user_id === 1}
-                  isAdmin={profile?.role_id === 1}
+                  isAdmin={
+                    Number(profile?.id) === 1 || Number(profile?.role_id) === 1
+                  }
                   isPresentationMode={isPresentationMode}
                   onPressCreate={VIEW_NOOP}
                   onSuccessCreate={VIEW_NOOP}

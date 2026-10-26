@@ -8,6 +8,7 @@ import "dayjs/locale/ru";
 import { T } from "@/i18n/T";
 import { checkResponse, fetchGet } from "@/api";
 import { AuthContext } from "@/auth";
+import { useTeacherPlan } from "@/app/subscription/helpers";
 import { brandPrimaryBtnClassName } from "@/components/brandUi";
 import { useScheduleEvents } from "@/app/schedule/hooks/useScheduleEvents";
 import { CalendarToolbar } from "@/app/schedule/components/CalendarToolbar";
@@ -43,6 +44,9 @@ export const StudentSchedulePanel: FC<TProps> = ({
   canEdit,
 }) => {
   const { profile } = useContext(AuthContext);
+  const { hasSchool, loading: planLoading } = useTeacherPlan();
+  const studentSchoolId =
+    !planLoading && hasSchool ? Number(student.school_id) || 0 : 0;
   const [view, setView] = useState<ScheduleView>("week");
   const [cursor, setCursor] = useState<Dayjs>(dayjs());
   const [modalOpen, setModalOpen] = useState(false);
@@ -64,8 +68,8 @@ export const StudentSchedulePanel: FC<TProps> = ({
     deleteEvent,
     emailEvent,
   } = useScheduleEvents(
-    student.school_id
-      ? { workspaceScope: "school", schoolId: Number(student.school_id) }
+    studentSchoolId
+      ? { workspaceScope: "school", schoolId: studentSchoolId }
       : undefined,
   );
 
@@ -82,7 +86,7 @@ export const StudentSchedulePanel: FC<TProps> = ({
       : null;
 
   useEffect(() => {
-    const schoolId = Number(student.school_id);
+    const schoolId = studentSchoolId;
     if (!canEdit || !schoolId) {
       setSchoolTimeZone(undefined);
       return;
@@ -102,7 +106,7 @@ export const StudentSchedulePanel: FC<TProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [canEdit, student.school_id]);
+  }, [canEdit, studentSchoolId]);
 
   const refreshRange = useCallback(async () => {
     const { from, to } = rangeForView(cursor, view);
@@ -130,8 +134,8 @@ export const StudentSchedulePanel: FC<TProps> = ({
       const res = await fetchGet({
         path: "/lessons",
         isSecure: true,
-        workspaceScope: student.school_id ? "school" : undefined,
-        schoolId: student.school_id ? Number(student.school_id) : undefined,
+        workspaceScope: studentSchoolId ? "school" : undefined,
+        schoolId: studentSchoolId || undefined,
         actingTeacherUserId: delegateTeacherId,
       });
       const json = await res?.json();
@@ -151,7 +155,7 @@ export const StudentSchedulePanel: FC<TProps> = ({
           })),
       );
     })();
-  }, [canEdit, delegateTeacherId, student.school_id]);
+  }, [canEdit, delegateTeacherId, studentSchoolId]);
 
   const studentNameById = useMemo(() => {
     const map = new Map<number, string>();

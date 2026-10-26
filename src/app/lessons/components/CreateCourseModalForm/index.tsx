@@ -176,7 +176,8 @@ export const CreateCourseModalForm: FC<TProps> = ({
 }) => {
   const { profile } = useContext(AuthContext);
   const workspace = useCatalogWorkspace();
-  const isAdmin = profile?.role_id === 1;
+  const isAdmin =
+    Number(profile?.id) === 1 || Number(profile?.role_id) === 1;
   const {
     control,
     handleSubmit,

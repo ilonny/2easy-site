@@ -237,7 +237,8 @@ export default function EditorPage() {
   }, [exList.length]);
 
   const is2easy = lesson?.user_id === 1;
-  const isAdmin = profile?.role_id === 1;
+  const isAdmin =
+    Number(profile?.id) === 1 || Number(profile?.role_id) === 1;
 
   const showCreateExBtn = useMemo(() => {
     if (
