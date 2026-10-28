@@ -34,6 +34,7 @@ import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { checkResponse, fetchGet } from "@/api";
 import { SearchableSelect } from "@/components/SearchableSelect";
+import { ResponsiveTooltip } from "@/components/ResponsiveTooltip";
 import type {
   PaymentPlan,
   PaymentStats,
@@ -204,6 +205,59 @@ const studentLabel = (s: {
     (s.student_id || s.id ? `Ученик #${s.student_id || s.id}` : "Ученик");
   const email = String(s.student_email || s.email || "").trim();
   return email ? `${name} · ${email}` : name;
+};
+
+const packageLessonCounts = (plan: {
+  lessons_remaining?: number | null;
+  lessons_total?: number | null;
+}) => {
+  const total = Math.max(0, Number(plan.lessons_total || 0));
+  const remaining =
+    plan.lessons_remaining == null
+      ? total
+      : Math.max(0, Number(plan.lessons_remaining) || 0);
+  const done =
+    total > 0 ? Math.max(0, total - Math.min(remaining, total)) : 0;
+  return { done, total };
+};
+
+/** Lessons of this package that have already started. */
+const countPassedPackageLessons = (planId: number, events: ScheduleEvent[]) => {
+  const now = Date.now();
+  let passed = 0;
+  for (const event of events) {
+    if (event.type === "payment") continue;
+    const start = new Date(event.starts_at).getTime();
+    if (!Number.isFinite(start) || start > now) continue;
+    const hit = (event.package_progress || []).some(
+      (row) => Number(row.plan_id) === planId,
+    );
+    if (hit) passed += 1;
+  }
+  return passed;
+};
+
+const packageMoney = (
+  plan: PaymentPlan,
+  events: ScheduleEvent[],
+  eventsLoaded: boolean,
+) => {
+  const total = Math.max(0, Number(plan.lessons_total || 0));
+  const unit = Number(plan.amount) || 0;
+  const fromCalendar = countPassedPackageLessons(plan.id, events);
+  const passed = eventsLoaded
+    ? total > 0
+      ? Math.min(fromCalendar, total)
+      : fromCalendar
+    : packageLessonCounts(plan).done;
+  return {
+    passed,
+    total,
+    unit,
+    earned: unit * passed,
+    due: unit * total,
+    currency: plan.currency || DEFAULT_PAYMENT_CURRENCY,
+  };
 };
 
 const frequencyLabel = (frequency?: string | null) => {
@@ -412,6 +466,95 @@ export const PaymentControlTab = ({
   };
 
   const activePlans = plans.filter((p) => p.is_active);
+  const [lessonEvents, setLessonEvents] = useState<ScheduleEvent[]>([]);
+  const [lessonEventsLoaded, setLessonEventsLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const from = dayjs().subtract(8, "month").startOf("day").toISOString();
+        const to = dayjs().add(8, "month").endOf("day").toISOString();
+        const res = await fetchGet({
+          path: `/schedule/events?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
+          isSecure: true,
+        });
+        const json = await res?.json();
+        if (cancelled) return;
+        if (json?.success) setLessonEvents(json.events || []);
+      } catch {
+        if (!cancelled) setLessonEvents([]);
+      } finally {
+        if (!cancelled) setLessonEventsLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [plans]);
+
+  const paidByStudentCurrency = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const row of stats?.by_student || []) {
+      const sid = Number(row.student_id);
+      if (!Number.isFinite(sid)) continue;
+      if (row.amounts?.length) {
+        for (const amount of row.amounts) {
+          map.set(
+            `${sid}:${String(amount.currency || "").toUpperCase()}`,
+            Number(amount.actual) || 0,
+          );
+        }
+      } else if (row.actual) {
+        map.set(`${sid}:${DEFAULT_PAYMENT_CURRENCY}`, Number(row.actual) || 0);
+      }
+    }
+    return map;
+  }, [stats?.by_student]);
+
+  const packageRows = useMemo(
+    () =>
+      activePlans
+        .filter((plan) => plan.plan_type === "package")
+        .map((plan) => {
+          const money = packageMoney(plan, lessonEvents, lessonEventsLoaded);
+          const paid =
+            paidByStudentCurrency.get(
+              `${plan.student_id}:${String(money.currency).toUpperCase()}`,
+            ) || 0;
+          return { plan, ...money, paid, still: Math.max(0, money.due - paid) };
+        }),
+    [activePlans, lessonEvents, lessonEventsLoaded, paidByStudentCurrency],
+  );
+
+  const packageTotals = useMemo(() => {
+    const earned = new Map<string, number>();
+    const due = new Map<string, number>();
+    const still = new Map<string, number>();
+    const paidSeen = new Set<string>();
+    const paid = new Map<string, number>();
+    for (const row of packageRows) {
+      const currency = String(row.currency).toUpperCase();
+      earned.set(currency, (earned.get(currency) || 0) + row.earned);
+      due.set(currency, (due.get(currency) || 0) + row.due);
+      const paidKey = `${row.plan.student_id}:${currency}`;
+      if (!paidSeen.has(paidKey)) {
+        paidSeen.add(paidKey);
+        paid.set(currency, (paid.get(currency) || 0) + row.paid);
+      }
+      still.set(currency, (still.get(currency) || 0) + row.still);
+    }
+    const toList = (map: Map<string, number>) =>
+      [...map.entries()]
+        .filter(([, amount]) => amount !== 0)
+        .map(([currency, amount]) => ({ currency, amount }));
+    return {
+      earned: toList(earned),
+      due: toList(due),
+      still: toList(still),
+      paid: toList(paid),
+    };
+  }, [packageRows]);
 
   const statsCurrencies = useMemo(() => {
     const fromStats = (stats?.currencies || []).map((c) =>
@@ -515,9 +658,34 @@ export const PaymentControlTab = ({
     });
   }, [stats?.chart, from, to, granularity, chartCurrency, statsCurrencies]);
 
+  const chartWithPackages = useMemo(() => {
+    if (!packageRows.length) return chartData;
+    const dueByPeriod = new Map<string, number>();
+    for (const row of packageRows) {
+      if (String(row.currency).toUpperCase() !== chartCurrency) continue;
+      if (!row.plan.next_payment_date) continue;
+      const date = dayjs(row.plan.next_payment_date);
+      const period =
+        granularity === "month"
+          ? date.format("YYYY-MM")
+          : granularity === "week"
+            ? date.startOf("isoWeek").format("YYYY-MM-DD")
+            : date.format("YYYY-MM-DD");
+      dueByPeriod.set(period, (dueByPeriod.get(period) || 0) + row.due);
+    }
+    return chartData.map((row) => {
+      const projected = dueByPeriod.get(row.period) || 0;
+      return {
+        ...row,
+        projected,
+        total: row.actual + projected,
+      };
+    });
+  }, [chartData, packageRows, chartCurrency, granularity]);
+
   const yMax = Math.max(
     1000,
-    ...chartData.map((r) => Math.max(r.actual, r.projected, r.total)),
+    ...chartWithPackages.map((r) => Math.max(r.actual, r.projected, r.total)),
   );
 
   return (
@@ -540,63 +708,58 @@ export const PaymentControlTab = ({
         <Card shadow="none" className="border border-[#d2d2d7]">
           <CardBody>
             <div className="text-sm text-[#86868b]">
-              <T k="schedule.earnedPast" />
+              <T k="schedule.earnedFromLessons" />
             </div>
             <div className="text-xl font-bold leading-snug text-[#1d1d1f] sm:text-2xl">
-              {formatMoneyList(
-                resolveStatsMoney(
-                  stats?.by_currency?.actual_past ??
-                    stats?.by_currency?.actual_total,
-                  stats?.actual_past ?? stats?.actual_total ?? 0,
-                ),
-              )}
+              {formatMoneyList(packageTotals.earned)}
             </div>
+            <p className="mt-1 text-[11px] leading-snug text-[#86868b]">
+              <T k="schedule.earnedFromLessonsHint" />
+            </p>
           </CardBody>
         </Card>
         <Card shadow="none" className="border border-[#d2d2d7]">
           <CardBody>
             <div className="text-sm text-[#86868b]">
-              <T k="schedule.earnedToday" />
+              <T k="schedule.alreadyPaid" />
             </div>
             <div className="text-xl font-bold leading-snug text-[#1d1d1f] sm:text-2xl">
               {formatMoneyList(
                 resolveStatsMoney(
-                  stats?.by_currency?.actual_today,
-                  stats?.actual_today ?? 0,
+                  stats?.by_currency?.actual_total,
+                  stats?.actual_total ?? 0,
                 ),
               )}
             </div>
+            <p className="mt-1 text-[11px] leading-snug text-[#86868b]">
+              <T k="schedule.alreadyPaidHint" />
+            </p>
           </CardBody>
         </Card>
         <Card shadow="none" className="border border-[#d2d2d7]">
           <CardBody>
             <div className="text-sm text-[#86868b]">
-              <T k="schedule.projected" />
+              <T k="schedule.packageDue" />
             </div>
             <div className="text-xl font-bold leading-snug text-[#007AFF] sm:text-2xl">
-              {formatMoneyList(
-                resolveStatsMoney(
-                  stats?.by_currency?.projected_total,
-                  stats?.projected_total ?? 0,
-                ),
-              )}
+              {formatMoneyList(packageTotals.due)}
             </div>
+            <p className="mt-1 text-[11px] leading-snug text-[#86868b]">
+              <T k="schedule.packageDueHint" />
+            </p>
           </CardBody>
         </Card>
         <Card shadow="none" className="border border-[#d2d2d7]">
           <CardBody>
             <div className="text-sm text-[#86868b]">
-              <T k="schedule.expectedTotal" />
+              <T k="schedule.stillToCollect" />
             </div>
             <div className="text-xl font-bold leading-snug text-[#34C759] sm:text-2xl">
-              {formatMoneyList(
-                resolveStatsMoney(
-                  stats?.by_currency?.expected_total,
-                  stats?.expected_total ??
-                    (stats?.actual_total || 0) + (stats?.projected_total || 0),
-                ),
-              )}
+              {formatMoneyList(packageTotals.still)}
             </div>
+            <p className="mt-1 text-[11px] leading-snug text-[#86868b]">
+              <T k="schedule.stillToCollectHint" />
+            </p>
           </CardBody>
         </Card>
       </div>
@@ -693,7 +856,7 @@ export const PaymentControlTab = ({
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
+                <BarChart data={chartWithPackages}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis
                     dataKey="label"
@@ -720,13 +883,13 @@ export const PaymentControlTab = ({
                   <Legend />
                   <Bar
                     dataKey="actual"
-                    name={i18n.t("schedule.earned")}
+                    name={i18n.t("schedule.alreadyPaid")}
                     fill="#34C759"
                     radius={[4, 4, 0, 0]}
                   />
                   <Bar
                     dataKey="projected"
-                    name={i18n.t("schedule.projected")}
+                    name={i18n.t("schedule.packageDue")}
                     fill="#007AFF"
                     radius={[4, 4, 0, 0]}
                   />
@@ -751,27 +914,25 @@ export const PaymentControlTab = ({
                       <T k="schedule.student" />
                     </th>
                     <th className="pb-2 font-semibold">
-                      <T k="schedule.earned" />
+                      <T k="schedule.passedLessons" />
                     </th>
                     <th className="pb-2 font-semibold">
-                      <T k="schedule.projected" />
+                      <T k="schedule.earnedFromLessons" />
+                    </th>
+                    <th className="pb-2 font-semibold">
+                      <T k="schedule.packageTotal" />
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {(stats?.by_student || []).map((row) => {
+                  {packageRows.map((row) => {
                     const s = resolveStudent(
-                      row.student_id,
-                      row.student_name,
-                      row.student_email,
-                    );
-                    const money = formatStudentAmounts(
-                      row.amounts,
-                      row.actual,
-                      row.projected,
+                      row.plan.student_id,
+                      row.plan.student_name,
+                      row.plan.student_email,
                     );
                     return (
-                    <tr key={row.student_id} className="border-t border-[#f0f0f5]">
+                    <tr key={row.plan.id} className="border-t border-[#f0f0f5]">
                       <td className="py-2 font-medium">
                         <div>{s.name}</div>
                         {s.email ? (
@@ -780,16 +941,21 @@ export const PaymentControlTab = ({
                           </div>
                         ) : null}
                       </td>
-                      <td className="py-2">{money.earned}</td>
+                      <td className="py-2">
+                        {row.passed} / {row.total}
+                      </td>
+                      <td className="py-2">
+                        {formatMoney(row.earned, row.currency)}
+                      </td>
                       <td className="py-2 text-[#007AFF]">
-                        {money.projected}
+                        {formatMoney(row.due, row.currency)}
                       </td>
                     </tr>
                     );
                   })}
-                  {!stats?.by_student?.length && (
+                  {!packageRows.length && (
                     <tr>
-                      <td colSpan={3} className="py-6 text-center text-[#86868b]">
+                      <td colSpan={4} className="py-6 text-center text-[#86868b]">
                         <T k="schedule.noStatsYet" />
                       </td>
                     </tr>
@@ -805,39 +971,51 @@ export const PaymentControlTab = ({
             <div className="mb-3 text-sm font-semibold text-[#1d1d1f]">
               <T k="schedule.upcomingPayments" />
             </div>
-            <div className="flex max-h-[280px] flex-col gap-2 overflow-y-auto">
-              {(stats?.upcoming || []).map((item, idx) => {
+            <div className="flex max-h-[420px] flex-col gap-2 overflow-y-auto">
+              {packageRows.map((row) => {
                 const s = resolveStudent(
-                  item.student_id,
-                  item.student_name,
-                  item.student_email,
+                  row.plan.student_id,
+                  row.plan.student_name,
+                  row.plan.student_email,
                 );
                 return (
                 <div
-                  key={`${item.plan_id}-${item.date}-${idx}`}
-                  className="flex items-center justify-between rounded-xl bg-[#f5f5f7] px-3 py-2 text-sm"
+                  key={row.plan.id}
+                  className="flex items-start justify-between gap-3 rounded-xl bg-[#f5f5f7] px-3 py-2 text-sm"
                 >
                   <div>
                     <div className="font-medium text-[#1d1d1f]">{s.name}</div>
                     <div className="text-xs text-[#86868b]">
-                      {s.email ? `${s.email} · ` : ""}
-                      {dayjs(item.date).format("D MMM YYYY")}
+                      {row.plan.next_payment_date
+                        ? dayjs(row.plan.next_payment_date).format("D MMM YYYY")
+                        : "—"}
                       {" · "}
-                      {item.plan_type === "package"
-                        ? i18n.t("schedule.planPackage")
-                        : i18n.t("schedule.planRecurring")}
+                      {i18n.t("schedule.passedOfTotal", {
+                        passed: row.passed,
+                        total: row.total,
+                      })}
+                      {" · "}
+                      {i18n.t("schedule.earnedAmount", {
+                        amount: formatMoney(row.earned, row.currency),
+                      })}
+                    </div>
+                    <div className="text-xs text-[#1d1d1f]">
+                      {i18n.t("schedule.needToPay", {
+                        amount: formatMoney(row.due, row.currency),
+                      })}
+                      {" · "}
+                      {i18n.t("schedule.alreadyPaidAmount", {
+                        amount: formatMoney(row.paid, row.currency),
+                      })}
                     </div>
                   </div>
-                  <div className="font-semibold text-[#007AFF]">
-                    {formatMoney(
-                      item.amount,
-                      item.currency || DEFAULT_PAYMENT_CURRENCY,
-                    )}
+                  <div className="shrink-0 text-right font-semibold text-[#007AFF]">
+                    {formatMoney(row.due, row.currency)}
                   </div>
                 </div>
                 );
               })}
-              {!stats?.upcoming?.length && (
+              {!packageRows.length && (
                 <div className="py-6 text-center text-sm text-[#86868b]">
                   <T k="schedule.noUpcoming" />
                 </div>
@@ -881,6 +1059,10 @@ export const PaymentControlTab = ({
                   plan.student_name,
                   plan.student_email,
                 );
+                const pack =
+                  plan.plan_type === "package"
+                    ? packageRows.find((row) => row.plan.id === plan.id)
+                    : null;
                 return (
                 <tr key={plan.id} className="border-b border-[#e8e8ed]">
                   <td className="px-4 py-3 font-medium">
@@ -897,7 +1079,12 @@ export const PaymentControlTab = ({
                       : i18n.t("schedule.planPackage")}
                   </td>
                   <td className="px-4 py-3">
-                    {formatMoney(plan.amount, plan.currency)}
+                    <div>{formatMoney(plan.amount, plan.currency)}</div>
+                    {plan.plan_type === "package" ? (
+                      <div className="text-[11px] text-[#86868b]">
+                        <T k="schedule.perLesson" />
+                      </div>
+                    ) : null}
                   </td>
                   <td className="px-4 py-3">
                     {plan.next_payment_date ? (
@@ -927,9 +1114,40 @@ export const PaymentControlTab = ({
                     )}
                   </td>
                   <td className="px-4 py-3 text-[#86868b]">
-                    {plan.plan_type === "recurring"
-                      ? frequencyLabel(plan.frequency)
-                      : `${plan.lessons_remaining ?? 0}/${plan.lessons_total ?? 0}`}
+                    {plan.plan_type === "recurring" ? (
+                      <ResponsiveTooltip
+                        content={i18n.t("schedule.detailsRecurringHint")}
+                        placement="top"
+                        delay={200}
+                      >
+                        <span
+                          tabIndex={0}
+                          className="cursor-help border-b border-dotted border-[#c7c7cc] outline-none"
+                        >
+                          {frequencyLabel(plan.frequency)}
+                        </span>
+                      </ResponsiveTooltip>
+                    ) : (
+                      <ResponsiveTooltip
+                        content={i18n.t("schedule.detailsPackageHint", {
+                          passed: pack?.passed ?? 0,
+                          total: pack?.total ?? 0,
+                          earned: formatMoney(
+                            pack?.earned ?? 0,
+                            pack?.currency || plan.currency,
+                          ),
+                        })}
+                        placement="top"
+                        delay={200}
+                      >
+                        <span
+                          tabIndex={0}
+                          className="cursor-help border-b border-dotted border-[#c7c7cc] outline-none"
+                        >
+                          {`${pack?.passed ?? 0}/${pack?.total ?? 0}`}
+                        </span>
+                      </ResponsiveTooltip>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
