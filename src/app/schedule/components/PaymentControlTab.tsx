@@ -240,16 +240,14 @@ const countPassedPackageLessons = (planId: number, events: ScheduleEvent[]) => {
 const packageMoney = (
   plan: PaymentPlan,
   events: ScheduleEvent[],
-  eventsLoaded: boolean,
 ) => {
   const total = Math.max(0, Number(plan.lessons_total || 0));
   const unit = Number(plan.amount) || 0;
   const fromCalendar = countPassedPackageLessons(plan.id, events);
-  const passed = eventsLoaded
-    ? total > 0
-      ? Math.min(fromCalendar, total)
-      : fromCalendar
-    : packageLessonCounts(plan).done;
+  const fromCounter = packageLessonCounts(plan).done;
+  const passed = total > 0
+    ? Math.min(Math.max(fromCalendar, fromCounter), total)
+    : Math.max(fromCalendar, fromCounter);
   return {
     passed,
     total,
@@ -467,7 +465,6 @@ export const PaymentControlTab = ({
 
   const activePlans = plans.filter((p) => p.is_active);
   const [lessonEvents, setLessonEvents] = useState<ScheduleEvent[]>([]);
-  const [lessonEventsLoaded, setLessonEventsLoaded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -484,8 +481,6 @@ export const PaymentControlTab = ({
         if (json?.success) setLessonEvents(json.events || []);
       } catch {
         if (!cancelled) setLessonEvents([]);
-      } finally {
-        if (!cancelled) setLessonEventsLoaded(true);
       }
     })();
     return () => {
@@ -517,14 +512,14 @@ export const PaymentControlTab = ({
       activePlans
         .filter((plan) => plan.plan_type === "package")
         .map((plan) => {
-          const money = packageMoney(plan, lessonEvents, lessonEventsLoaded);
+          const money = packageMoney(plan, lessonEvents);
           const paid =
             paidByStudentCurrency.get(
               `${plan.student_id}:${String(money.currency).toUpperCase()}`,
             ) || 0;
           return { plan, ...money, paid, still: Math.max(0, money.due - paid) };
         }),
-    [activePlans, lessonEvents, lessonEventsLoaded, paidByStudentCurrency],
+    [activePlans, lessonEvents, paidByStudentCurrency],
   );
 
   const packageTotals = useMemo(() => {
@@ -1332,17 +1327,22 @@ export const PaymentControlTab = ({
                   }
                 />
                 {editing ? (
-                  <Input
-                    type="number"
-                    label={i18n.t("schedule.lessonsRemaining")}
-                    value={form.lessons_remaining}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        lessons_remaining: e.target.value,
-                      }))
-                    }
-                  />
+                  <>
+                    <Input
+                      type="number"
+                      label={i18n.t("schedule.lessonsRemaining")}
+                      value={form.lessons_remaining}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          lessons_remaining: e.target.value,
+                        }))
+                      }
+                    />
+                    <p className="text-[11px] leading-snug text-[#86868b]">
+                      <T k="schedule.lessonsRemainingHint" />
+                    </p>
+                  </>
                 ) : null}
               </>
             )}

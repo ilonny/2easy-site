@@ -207,7 +207,8 @@
     "freqBiweekly": "Every 2 weeks",
     "freqMonthly": "Monthly",
     "lessonsInPackage": "Lessons in package",
-    "lessonsRemaining": "Lessons remaining"
+    "lessonsRemaining": "Lessons remaining",
+    "lessonsRemainingHint": "If these lessons are not on the calendar, lower this number. Done = lessons in the package minus remaining."
   },
   "hero": {
     "badge": "For teachers and tutors",
