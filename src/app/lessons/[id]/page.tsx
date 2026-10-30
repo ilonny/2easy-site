@@ -123,7 +123,7 @@ export default function LessonPage() {
   const [tutorialOpen, setTutorialOpen] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(1);
   const [students, setStudents] = useState<TLessonParticipant[]>([]);
-  const [activeStudentId, setActiveStudentId] = useState(0);
+  const [activeStudentId, setActiveStudentId] = useState(lockedStudentId);
   const [lessonSessionId, setLessonSessionId] = useState<number | undefined>(
     () => Number(searchParams?.get("session_id") || 0) || undefined,
   );
@@ -310,7 +310,9 @@ export default function LessonPage() {
           })
         : [];
       setStudents(filteredIds || []);
-      if (filteredIds?.length === 1) {
+      if (lockedStudentId) {
+        setActiveStudentId(lockedStudentId);
+      } else if (filteredIds?.length === 1) {
         setActiveStudentId(filteredIds[0]?.student_id);
       }
     } catch {

@@ -210,17 +210,32 @@ const UnscrambleWordsExViewImpl: FC<{
     if (!shouldPersistAnswers) return;
     if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
     saveTimerRef.current = window.setTimeout(() => {
+      saveTimerRef.current = null;
       try {
         writeAnswer(data.id as any, JSON.stringify(answersRef.current));
       } catch {}
     }, 400);
   }, [data.id, shouldPersistAnswers, writeAnswer]);
 
+  const writeAnswerRef = useRef(writeAnswer);
+  writeAnswerRef.current = writeAnswer;
+  const shouldPersistRef = useRef(shouldPersistAnswers);
+  shouldPersistRef.current = shouldPersistAnswers;
+
   useEffect(() => {
     return () => {
-      if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+      if (!saveTimerRef.current) return;
+      window.clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+      if (!shouldPersistRef.current) return;
+      try {
+        writeAnswerRef.current(
+          data.id as any,
+          JSON.stringify(answersRef.current),
+        );
+      } catch {}
     };
-  }, []);
+  }, [data.id]);
 
   const setAnswer = useCallback(
     (

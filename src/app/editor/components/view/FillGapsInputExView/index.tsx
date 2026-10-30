@@ -211,7 +211,9 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
   writeAnswerRef.current = writeAnswer;
 
   const getAnswer = useCallback((fieldId: string | number) => {
-    return String(answersRef.current?.[fieldId]?.answer ?? "");
+    const map = answersRef.current || {};
+    const row = map[fieldId] ?? map[String(fieldId)];
+    return String(row?.answer ?? "");
   }, []);
 
   const stableWriteAnswer = useCallback(

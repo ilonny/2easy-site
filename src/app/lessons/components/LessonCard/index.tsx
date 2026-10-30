@@ -427,13 +427,15 @@ export const LessonCard: FC<TProps> = ({
       checkResponse(json);
       const sessionId = Number(json?.session?.id || 0);
       if (sessionId) {
-        go(`/lessons/${targetLessonId}?session_id=${sessionId}`);
+        go(
+          `/lessons/${targetLessonId}?session_id=${sessionId}&student_id=${selectedStudentId}`,
+        );
         return;
       }
     } catch {
       /* open lesson mode even if session start fails */
     }
-    go(`/lessons/${targetLessonId}`);
+    go(`/lessons/${targetLessonId}?student_id=${selectedStudentId}`);
   }, [go, lesson?.id, params?.id, studentId]);
 
   const onPressLesson = useCallback(() => {

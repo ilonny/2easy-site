@@ -65,7 +65,7 @@ const splitAnswerRows = (data: any[]) => {
       sync_v = Math.max(sync_v, parseSyncVersion(obj.answer));
       return;
     }
-    answersMap[obj.q_id] = obj;
+    answersMap[String(obj.q_id)] = obj;
   });
   return { answersMap, sync_v };
 };
@@ -76,6 +76,25 @@ const answersSignature = (answersMap: Record<string, any>, sync_v: number) => {
     .map((k) => `${k}:${answersMap[k]?.answer ?? ""}`)
     .join("|");
   return `v${sync_v}|${body}`;
+};
+
+/** Keep answers saved locally when a poll that started earlier comes back empty. */
+const mergeMissingAnswers = (
+  server: Record<string, any>,
+  local: Record<string, any>,
+) => {
+  const merged = { ...server };
+  Object.keys(local).forEach((key) => {
+    if (merged[key] == null) {
+      merged[key] = local[key];
+    }
+  });
+  return merged;
+};
+
+const positiveId = (value: unknown) => {
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) && n > 0 ? n : 0;
 };
 
 type SharedPollListener = {
@@ -336,6 +355,16 @@ export const useExAnswer = (params: TParams) => {
   const writeGenRef = useRef(0);
   const syncVersionRef = useRef(0);
   const mountedRef = useRef(true);
+  /** Answers this client successfully saved. Stale polls must not drop them. */
+  const confirmedRef = useRef<Record<string, any>>({});
+  const queuedRef = useRef<Array<{ q_id: number | string; answer: string }>>(
+    []
+  );
+
+  const lessonIdNum = positiveId(
+    Array.isArray(lesson_id) ? lesson_id[0] : lesson_id
+  );
+  const exIdNum = positiveId(ex_id);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -354,66 +383,99 @@ export const useExAnswer = (params: TParams) => {
       const targetStudentId = Number(
         isTeacher ? activeStudentId || 0 : student_id || 0
       );
-      if (!targetStudentId) {
+      if (String(q_id) === ANSWER_SYNC_Q_ID || q_id == null || q_id === "") {
         return { ok: false as const, stale: false };
       }
-      if (String(q_id) === ANSWER_SYNC_Q_ID) {
+      if (!targetStudentId || !lessonIdNum || !exIdNum) {
+        if (!isTeacher) {
+          queuedRef.current = queuedRef.current
+            .filter((item) => String(item.q_id) !== String(q_id))
+            .concat({ q_id, answer });
+        }
         return { ok: false as const, stale: false };
       }
 
       const genAtStart = writeGenRef.current;
-      const sync_v = syncVersionRef.current;
+      let sync_v = syncVersionRef.current;
 
-      try {
-        const res = await limit(() =>
+      const send = (version: number) =>
+        limit(() =>
           fetchPostJson({
             path: "/answer",
             isSecure: true,
             data: {
-              lesson_id,
-              ex_id,
-              q_id,
+              lesson_id: lessonIdNum,
+              ex_id: exIdNum,
+              q_id: String(q_id),
               answer,
               student_id: targetStudentId,
-              sync_v,
+              sync_v: version,
             },
           })
         );
+
+      try {
+        let res = await send(sync_v);
+        let data = await res?.json?.().catch?.(() => null);
+        const isStale = (response: typeof res, body: any) =>
+          !!body?.stale || response?.status === 409;
+
+        if (isStale(res, data)) {
+          const nextSync =
+            Number(data?.sync_v) > 0
+              ? Number(data.sync_v)
+              : syncVersionRef.current;
+          syncVersionRef.current = nextSync;
+          sync_v = nextSync;
+          res = await send(nextSync);
+          data = await res?.json?.().catch?.(() => null);
+        } else if (data?.success === false && res?.status !== 409) {
+          res = await send(sync_v);
+          data = await res?.json?.().catch?.(() => null);
+        }
 
         if (!mountedRef.current || writeGenRef.current !== genAtStart) {
           return { ok: false as const, stale: true };
         }
 
-        const data = await res?.json?.().catch?.(() => null);
-        if (data?.stale || res?.status === 409) {
+        if (isStale(res, data)) {
           const nextSync =
             Number(data?.sync_v) > 0
               ? Number(data.sync_v)
               : syncVersionRef.current;
           syncVersionRef.current = nextSync;
           lastSyncVRef.current = nextSync;
+          confirmedRef.current = {};
           setSyncVersion(nextSync);
           setAnswers({});
           lastSignatureRef.current = answersSignature({}, nextSync);
           bumpWriteGen();
           setResetSeq((n) => n + 1);
           dispatchAnswersReset({
-            ex_id: Number(ex_id),
+            ex_id: exIdNum,
             student_id: targetStudentId,
-            lesson_id: Number(lesson_id),
+            lesson_id: lessonIdNum,
             sync_v: nextSync,
           });
           return { ok: false as const, stale: true };
         }
 
+        if (data?.success === false || (res?.status != null && res.status >= 400)) {
+          return { ok: false as const, stale: false };
+        }
+
         if (mountedRef.current && writeGenRef.current === genAtStart) {
+          const row = { q_id: String(q_id), answer };
+          confirmedRef.current = {
+            ...confirmedRef.current,
+            [String(q_id)]: row,
+          };
           setAnswers((prev) => {
             const next = {
               ...prev,
               [String(q_id)]: {
                 ...(prev[String(q_id)] || {}),
-                q_id,
-                answer,
+                ...row,
               },
             };
             lastSignatureRef.current = answersSignature(
@@ -430,14 +492,26 @@ export const useExAnswer = (params: TParams) => {
       }
     },
     [
-      lesson_id,
-      ex_id,
+      lessonIdNum,
+      exIdNum,
       student_id,
       isTeacher,
       activeStudentId,
       bumpWriteGen,
     ]
   );
+
+  useEffect(() => {
+    const targetStudentId = Number(
+      isTeacher ? activeStudentId || 0 : student_id || 0
+    );
+    if (!targetStudentId || !lessonIdNum || !exIdNum) return;
+    if (!queuedRef.current.length) return;
+    const batch = queuedRef.current.splice(0);
+    batch.forEach((item) => {
+      void writeAnswer(item.q_id, item.answer);
+    });
+  }, [activeStudentId, student_id, isTeacher, lessonIdNum, exIdNum, writeAnswer]);
 
   const applyAnswers = useCallback(
     (
@@ -460,15 +534,22 @@ export const useExAnswer = (params: TParams) => {
 
       // Switching student: never treat as a reset of the previous student.
       if (!sameTarget) {
+        const switchingStudent = lastTargetRef.current > 0;
+        if (switchingStudent) {
+          confirmedRef.current = {};
+        }
+        const nextMap = switchingStudent
+          ? answersMap
+          : mergeMissingAnswers(answersMap, confirmedRef.current);
         lastTargetRef.current = targetStudentId;
-        lastSignatureRef.current = nextSig;
+        lastSignatureRef.current = answersSignature(nextMap, sync_v);
         lastSyncVRef.current = sync_v;
         syncVersionRef.current = sync_v;
         setSyncVersion(sync_v);
         if (updateState) {
-          setAnswers(answersMap);
+          setAnswers(nextMap);
         }
-        return answersMap;
+        return nextMap;
       }
 
       if (prevSig === nextSig && !syncBumped) {
@@ -480,20 +561,32 @@ export const useExAnswer = (params: TParams) => {
       const prevHadRealAnswers = !!prevBody;
       const nextHasAnswers = Object.keys(answersMap).length > 0;
 
-      lastSignatureRef.current = nextSig;
+      // A poll that left before the save returns empty and used to look like a reset.
+      // A real reset always bumps sync_v.
+      if (!syncBumped && prevHadRealAnswers && !nextHasAnswers) {
+        return mergeMissingAnswers(answersMap, confirmedRef.current);
+      }
+
+      const nextMap = syncBumped
+        ? answersMap
+        : mergeMissingAnswers(answersMap, confirmedRef.current);
+      if (syncBumped) {
+        confirmedRef.current = {};
+      }
+      lastSignatureRef.current = answersSignature(nextMap, sync_v);
       lastSyncVRef.current = sync_v;
       syncVersionRef.current = sync_v;
       setSyncVersion(sync_v);
 
       if (updateState) {
-        setAnswers(answersMap);
+        setAnswers(nextMap);
       }
 
       const shouldReset =
         detectReset &&
         !suppressResetEvent &&
         targetStudentId &&
-        (syncBumped || (prevHadRealAnswers && !nextHasAnswers));
+        syncBumped;
 
       if (shouldReset) {
         if (!updateState) {
@@ -502,23 +595,23 @@ export const useExAnswer = (params: TParams) => {
         bumpWriteGen();
         setResetSeq((n) => n + 1);
         dispatchAnswersReset({
-          ex_id: Number(ex_id),
+          ex_id: exIdNum,
           student_id: targetStudentId,
-          lesson_id: Number(lesson_id),
+          lesson_id: lessonIdNum,
           sync_v,
         });
       }
 
-      return answersMap;
+      return nextMap;
     },
-    [ex_id, lesson_id, bumpWriteGen]
+    [exIdNum, lessonIdNum, bumpWriteGen]
   );
 
   const fetchAnswersMap = useCallback(async () => {
     const targetStudentId = Number(activeStudentId || student_id || 0);
     const { answersMap, sync_v } = await fetchAnswersMapShared(
-      Number(lesson_id),
-      Number(ex_id),
+      lessonIdNum,
+      exIdNum,
       targetStudentId
     );
     return {
@@ -526,7 +619,7 @@ export const useExAnswer = (params: TParams) => {
       targetStudentId,
       sync_v,
     };
-  }, [activeStudentId, student_id, lesson_id, ex_id]);
+  }, [activeStudentId, student_id, lessonIdNum, exIdNum]);
 
   const getAnswers = useCallback(
     async (_once?: boolean) => {
@@ -563,6 +656,7 @@ export const useExAnswer = (params: TParams) => {
             : syncVersionRef.current;
         syncVersionRef.current = nextSync;
         lastSyncVRef.current = nextSync;
+        confirmedRef.current = {};
         lastSignatureRef.current = answersSignature({}, nextSync);
         setSyncVersion(nextSync);
         setAnswers({});
@@ -589,17 +683,21 @@ export const useExAnswer = (params: TParams) => {
       lastSignatureRef.current = null;
       lastSyncVRef.current = 0;
       syncVersionRef.current = 0;
+      confirmedRef.current = {};
       setSyncVersion(0);
       setAnswers({});
       bumpWriteGen();
     }
-    if (!targetStudentId) {
+    if (!targetStudentId || !lessonIdNum || !exIdNum) {
       lastTargetRef.current = 0;
       lastSignatureRef.current = null;
       lastSyncVRef.current = 0;
       syncVersionRef.current = 0;
       setSyncVersion(0);
-      setAnswers({});
+      if (!queuedRef.current.length) {
+        confirmedRef.current = {};
+        setAnswers({});
+      }
       return;
     }
 
@@ -631,8 +729,8 @@ export const useExAnswer = (params: TParams) => {
     })();
 
     const unsubscribe = subscribeSharedPoller({
-      lesson_id: Number(lesson_id),
-      ex_id: Number(ex_id),
+      lesson_id: lessonIdNum,
+      ex_id: exIdNum,
       targetStudentId,
       isTeacher: !!isTeacher,
       intervalMs,
@@ -662,8 +760,8 @@ export const useExAnswer = (params: TParams) => {
     isTeacher,
     activeStudentId,
     student_id,
-    ex_id,
-    lesson_id,
+    exIdNum,
+    lessonIdNum,
     isPresentationMode,
     sleepDelay,
     enablePolling,

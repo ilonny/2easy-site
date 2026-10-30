@@ -470,9 +470,15 @@ export const TestExView: FC<TProps> = ({
     setActiveIndex((i) => (i - 1 < 0 ? 0 : i - 1));
   }, [activeIndex, data.questions, writeAnswer, setAnswers]);
 
+  const skipInitialStepWrite = useRef(true);
   useEffect(() => {
-    // Teachers without student_id can't persist answers — skip noop writes
+    // Teachers without student_id can't persist answers — skip noop writes.
+    // Skip the first run so opening the lesson does not overwrite saved step/score with 0.
     if (!student_id) return;
+    if (skipInitialStepWrite.current) {
+      skipInitialStepWrite.current = false;
+      return;
+    }
     writeAnswer("step", activeIndex.toString());
     writeAnswer("score", score.toString());
   }, [activeIndex, writeAnswer, score, student_id]);

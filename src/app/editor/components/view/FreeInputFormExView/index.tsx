@@ -66,6 +66,12 @@ export const FreeInputFormExView: FC<TProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [student_id, activeStudentId, isPreview]);
 
+  useEffect(() => {
+    return () => {
+      persistAnswer.flush();
+    };
+  }, [persistAnswer]);
+
   const handleChange = useCallback(
     (q_id: number | string, val: string) => {
       setAnswers((prev) => ({

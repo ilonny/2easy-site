@@ -14,6 +14,17 @@ type TProps = {
   isPreview?: boolean;
 };
 
+const parseChecked = (raw?: string) => {
+  if (!raw) return false;
+  if (raw === "1" || raw === "true") return true;
+  if (raw === "0" || raw === "false") return false;
+  try {
+    return !!JSON.parse(raw);
+  } catch {
+    return false;
+  }
+};
+
 export const TextChecklistExView: FC<TProps> = ({
   data,
   isPreview = false,
@@ -82,10 +93,9 @@ export const TextChecklistExView: FC<TProps> = ({
                 if (!sticker) {
                   return <></>;
                 }
-                const answerString = answers[sticker]?.answer;
-                const isChecked = answerString
-                  ? JSON.parse(answerString)
-                  : false;
+                const answerString =
+                  answers[sticker]?.answer ?? answers[String(sticker)]?.answer;
+                const isChecked = parseChecked(answerString);
                 return (
                   <label
                     className="flex items-baseline gap-2"
@@ -97,9 +107,18 @@ export const TextChecklistExView: FC<TProps> = ({
                         size="lg"
                         color="primary"
                         onValueChange={(val) => {
-                          writeAnswer(sticker, JSON.stringify(val));
+                          const next = JSON.stringify(!!val);
+                          setAnswers((prev: Record<string, any>) => ({
+                            ...prev,
+                            [sticker]: {
+                              ...(prev?.[sticker] || {}),
+                              q_id: sticker,
+                              answer: next,
+                            },
+                          }));
+                          writeAnswer(sticker, next);
                         }}
-                        isSelected={isTeacher ? isChecked : undefined}
+                        isSelected={isChecked}
                       />
                     ) : (
                       <Checkbox size="lg" color="primary" />
