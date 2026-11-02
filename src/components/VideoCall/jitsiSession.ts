@@ -18,7 +18,18 @@ declare global {
   }
 }
 
-export const JITSI_DOMAIN = "meet.2easyeng.com";
+const COM_JITSI_DOMAIN = "meet.2easyeng.com";
+const RU_JITSI_DOMAIN = "meet.2easyeng.ru";
+
+export function getJitsiDomain() {
+  if (typeof window === "undefined") return COM_JITSI_DOMAIN;
+  const host = window.location.hostname.toLowerCase();
+  const onRu =
+    host === "2easyeng.ru" ||
+    host === "www.2easyeng.ru" ||
+    host.endsWith(".2easyeng.ru");
+  return onRu ? RU_JITSI_DOMAIN : COM_JITSI_DOMAIN;
+}
 
 type Session = {
   api: JitsiApi;
@@ -36,7 +47,7 @@ export function loadJitsiScript(): Promise<void> {
   if (window.JitsiMeetExternalAPI) return Promise.resolve();
   if (scriptPromise) return scriptPromise;
 
-  const scriptUrl = `https://${JITSI_DOMAIN}/external_api.js`;
+  const scriptUrl = `https://${getJitsiDomain()}/external_api.js`;
   const existing = document.querySelector(`script[src="${scriptUrl}"]`);
   if (existing) {
     scriptPromise = new Promise((resolve, reject) => {
@@ -136,7 +147,7 @@ export async function ensureJitsiSession(opts: {
   // Clear leftover iframe nodes from a prior dispose race.
   host.replaceChildren();
 
-  const api = new window.JitsiMeetExternalAPI(JITSI_DOMAIN, {
+  const api = new window.JitsiMeetExternalAPI(getJitsiDomain(), {
     roomName: opts.roomName,
     width: "100%",
     height: "100%",
