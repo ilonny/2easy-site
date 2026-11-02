@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ALLOWED_HOST_SUFFIXES = ["selstorage.ru", "2easyeng.com", "localhost"];
+const ALLOWED_HOST_SUFFIXES = ["selstorage.ru", "2easyeng.com", "2easyeng.ru", "localhost"];
 
 function isAllowedUrl(raw: string): boolean {
   try {

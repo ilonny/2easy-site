@@ -26,26 +26,25 @@ export const ApiProvider = ({ children }) => {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
 // Same build is opened as https://2easyeng.com, https://2easyeng.ru, or http://<ip>.
-// The public API host only works on the real HTTPS domains; the IP site
-// talks to the API on :8889.
+// .com uses NEXT_PUBLIC_BASE_URL, .ru uses its own API host, the IP site uses :8889.
 const DIRECT_IP_BASE_URL = "http://89.111.152.174:8889";
-const REAL_DOMAINS = ["2easyeng.com", "2easyeng.ru"];
+const RU_API_BASE_URL = "https://api.2easyeng.ru";
 
 const envBaseUrl = () =>
   process.env.NEXT_PUBLIC_BASE_URL?.replace("/undefined", "") ?? "";
 
-const isRealHttpsDomain = (protocol: string, hostname: string) => {
-  const host = hostname.toLowerCase();
-  const onRealDomain = REAL_DOMAINS.some(
-    (domain) => host === domain || host === `www.${domain}` || host.endsWith(`.${domain}`)
-  );
-  return protocol === "https:" && onRealDomain;
-};
+const matchesDomain = (hostname: string, domain: string) =>
+  hostname === domain ||
+  hostname === `www.${domain}` ||
+  hostname.endsWith(`.${domain}`);
 
 export const getBaseUrl = () => {
   if (typeof window === "undefined") return envBaseUrl();
   const { protocol, hostname } = window.location;
-  if (isRealHttpsDomain(protocol, hostname)) return envBaseUrl();
+  if (protocol !== "https:") return DIRECT_IP_BASE_URL;
+  const host = hostname.toLowerCase();
+  if (matchesDomain(host, "2easyeng.ru")) return RU_API_BASE_URL;
+  if (matchesDomain(host, "2easyeng.com")) return envBaseUrl();
   return DIRECT_IP_BASE_URL;
 };
 
