@@ -1,8 +1,6 @@
 "use client";
 
-import { fetchGet, fetchPostJson } from "@/api";
-import { BASE_URL } from "@/api";
-import { API_URL } from "@/api";
+import { fetchGet, fetchPostJson, getApiUrl, getBaseUrl } from "@/api";
 
 export type TranslationsPayload = {
   success: boolean;
@@ -31,7 +29,7 @@ export async function apiGetTranslations(): Promise<TranslationsPayload> {
   // Prefer public endpoint without /api to avoid proxy auth rules.
 
   try {
-    const base = (BASE_URL || "").replace("/undefined", "");
+    const base = (getBaseUrl() || "").replace("/undefined", "");
     if (base) {
       const payload = await withTimeout(async (signal) => {
         const res = await fetch(`${base}/translations`, {
@@ -51,7 +49,7 @@ export async function apiGetTranslations(): Promise<TranslationsPayload> {
   // Fallback to /api/translations (also no-store to avoid stale cache)
   try {
     return await withTimeout(async (signal) => {
-      const res = await fetch(`${API_URL}/translations`, {
+      const res = await fetch(`${getApiUrl()}/translations`, {
         method: "GET",
         cache: "no-store",
         signal,

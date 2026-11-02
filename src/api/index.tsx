@@ -25,17 +25,31 @@ export const ApiProvider = ({ children }) => {
 
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 };
-// console.log("process.env?", process.env);
-// export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.replace(
-//   "/undefined",
-//   ""
-// );
-// console.log("BASE_URL", BASE_URL);
-// export const BASE_URL = "http://localhost:8888";
-// export const BASE_URL = "https://beta-api.2easyeng.com";
-export const BASE_URL = "http://89.111.152.174:8889";
+// Same build is opened as https://2easyeng.com, https://2easyeng.ru, or http://<ip>.
+// The public API host only works on the real HTTPS domains; the IP site
+// talks to the API on :8889.
+const DIRECT_IP_BASE_URL = "http://89.111.152.174:8889";
+const REAL_DOMAINS = ["2easyeng.com", "2easyeng.ru"];
 
-export const API_URL = BASE_URL + "/api";
+const envBaseUrl = () =>
+  process.env.NEXT_PUBLIC_BASE_URL?.replace("/undefined", "") ?? "";
+
+const isRealHttpsDomain = (protocol: string, hostname: string) => {
+  const host = hostname.toLowerCase();
+  const onRealDomain = REAL_DOMAINS.some(
+    (domain) => host === domain || host === `www.${domain}` || host.endsWith(`.${domain}`)
+  );
+  return protocol === "https:" && onRealDomain;
+};
+
+export const getBaseUrl = () => {
+  if (typeof window === "undefined") return envBaseUrl();
+  const { protocol, hostname } = window.location;
+  if (isRealHttpsDomain(protocol, hostname)) return envBaseUrl();
+  return DIRECT_IP_BASE_URL;
+};
+
+export const getApiUrl = () => `${getBaseUrl()}/api`;
 
 export const getFormData = (object) =>
   Object.keys(object).reduce((formData, key) => {
@@ -240,7 +254,7 @@ export const checkResponse = (
 export const fetchPostJson = (params: TParams) => {
   const { path, data, signal } = params;
   const headers = mapHeaders(params);
-  const url = (API_URL + path).replace("/undefined", "");
+  const url = (getApiUrl() + path).replace("/undefined", "");
   return safeFetch(url, {
     method: "POST",
     body: JSON.stringify(data),
@@ -256,7 +270,7 @@ export const fetchPostJson = (params: TParams) => {
 export const fetchPostBlob = async (params: TParams): Promise<Response> => {
   const { path, data, signal } = params;
   const headers = mapHeaders(params);
-  const url = (API_URL + path).replace("/undefined", "");
+  const url = (getApiUrl() + path).replace("/undefined", "");
 
   try {
     return await fetch(url, {
@@ -298,7 +312,7 @@ export const fetchPostMultipart = (params: TParams) => {
   const headers = mapHeaders(params);
   headers.set("Content-Type", "multipart/form-data");
   headers.delete("Content-Type");
-  const url = (API_URL + path).replace("/undefined", "");
+  const url = (getApiUrl() + path).replace("/undefined", "");
   return safeFetch(url, {
     method: "POST",
     body: data,
@@ -323,7 +337,7 @@ export const fetchPostMultipartWithProgress = (params: {
   signal?: AbortSignal;
 }): Promise<any> => {
   const { path, data, isSecure, onProgress, signal } = params;
-  const url = (API_URL + path).replace("/undefined", "");
+  const url = (getApiUrl() + path).replace("/undefined", "");
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -416,7 +430,7 @@ export const fetchGet = (params: TParams) => {
   //   return;
   // }
   const headers = mapHeaders(params);
-  const url = (API_URL + path).replace("/undefined", "");
+  const url = (getApiUrl() + path).replace("/undefined", "");
   return safeFetch(url, {
     method: "GET",
     headers,
@@ -427,7 +441,7 @@ export const fetchGet = (params: TParams) => {
 export const fetchPatch = (params: TParams) => {
   const { path, data } = params;
   const headers = mapHeaders(params);
-  const url = (API_URL + path).replace("/undefined", "");
+  const url = (getApiUrl() + path).replace("/undefined", "");
   return safeFetch(url, {
     method: "PATCH",
     body: JSON.stringify(data),
@@ -438,7 +452,7 @@ export const fetchPatch = (params: TParams) => {
 export const fetchPut = (params: TParams) => {
   const { path, data } = params;
   const headers = mapHeaders(params);
-  const url = (API_URL + path).replace("/undefined", "");
+  const url = (getApiUrl() + path).replace("/undefined", "");
   return safeFetch(url, {
     method: "PUT",
     body: JSON.stringify(data),
@@ -449,7 +463,7 @@ export const fetchPut = (params: TParams) => {
 export const fetchDelete = (params: TParams) => {
   const { path, data } = params;
   const headers = mapHeaders(params);
-  const url = (API_URL + path).replace("/undefined", "");
+  const url = (getApiUrl() + path).replace("/undefined", "");
   // Always send a JSON object — Content-Type is application/json, and
   // JSON.stringify(undefined) would omit the body (parser edge cases).
   return safeFetch(url, {

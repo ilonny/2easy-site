@@ -1,5 +1,5 @@
 "use client";
-import { BASE_URL, checkResponse, fetchPostJson } from "@/api";
+import { checkResponse, fetchPostJson } from "@/api";
 import { ImageUpload } from "@/components/ImageUpload";
 import { useUploadImage } from "@/hooks/useUploadImage";
 import {

@@ -1,6 +1,6 @@
 "use client";
 
-import { BASE_URL, fetchPostJson } from "@/api";
+import { fetchPostJson, getBaseUrl } from "@/api";
 import { getTokenFromLocalStorage } from "@/auth/utils";
 import i18n from "@/i18n/config";
 import { toast } from "react-toastify";
@@ -38,7 +38,7 @@ type TTimerListener = (state: TLessonTimerState) => void;
 
 const wsUrl = (lessonId: number) => {
   const token = getTokenFromLocalStorage();
-  const wsBase = String(BASE_URL || "").replace(/^http/i, "ws");
+  const wsBase = String(getBaseUrl() || "").replace(/^http/i, "ws");
   const params = new URLSearchParams({ lesson_id: String(lessonId) });
   if (token) params.set("token", token);
   return `${wsBase}${LESSON_MEDIA_WS_PATH}?${params.toString()}`;

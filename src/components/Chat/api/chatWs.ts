@@ -1,4 +1,4 @@
-import { BASE_URL } from "@/api";
+import { getBaseUrl } from "@/api";
 import { getTokenFromLocalStorage } from "@/auth/utils";
 import { CHAT_WS_PATH } from "../constants";
 
@@ -8,7 +8,7 @@ export const getChatWsUrl = (
   sessionId?: number,
 ) => {
   const token = getTokenFromLocalStorage();
-  const wsBase = String(BASE_URL || "").replace(/^http/i, "ws");
+  const wsBase = String(getBaseUrl() || "").replace(/^http/i, "ws");
   const params = new URLSearchParams({
     lesson_id: String(lessonId),
   });
