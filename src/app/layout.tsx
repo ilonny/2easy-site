@@ -93,12 +93,18 @@ export default function RootLayout({
           strategy="lazyOnload"
         />
         <Script id="talk-me-setup" strategy="afterInteractive">
-          {`window.TalkMeSetup = {
-            domain: window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-              ? "2easyeng.com"
-              : undefined,
-            disableTimeouts: true
-          };`}
+          {`window.TalkMeSetup = (function () {
+            var host = (window.location.hostname || "").toLowerCase();
+            var useMainDomain =
+              host === "localhost" ||
+              host === "127.0.0.1" ||
+              host === "2easyeng.ru" ||
+              host.endsWith(".2easyeng.ru");
+            return {
+              domain: useMainDomain ? "2easyeng.com" : undefined,
+              disableTimeouts: true
+            };
+          })();`}
         </Script>
         <Script id="talk-me-script" strategy="lazyOnload">
           {`(function(){(function c(d,w,m,i) {
