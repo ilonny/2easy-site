@@ -690,17 +690,22 @@ export default function LessonPage() {
                       color="primary"
                       size="lg"
                       onClick={async () => {
-                        if (
-                          !isStudent &&
-                          students?.length === 1 &&
-                          students[0]?.student_id
-                        ) {
+                        const teacherStudentId = !isStudent
+                          ? Number(
+                              activeStudentId ||
+                                lockedStudentId ||
+                                (students?.length === 1
+                                  ? students[0]?.student_id
+                                  : 0),
+                            )
+                          : 0;
+                        if (teacherStudentId > 0) {
                           const res = await fetchPostJson({
                             path: "/lessons/homework/get-or-create-for-student",
                             isSecure: true,
                             data: {
                               lesson_id: params.id,
-                              student_id: students[0].student_id,
+                              student_id: teacherStudentId,
                             },
                           });
                           const data = await res?.json();
@@ -708,7 +713,7 @@ export default function LessonPage() {
                             await openHomeworkForStudent(
                               router,
                               Number(data.homework_lesson_id),
-                              Number(students[0].student_id),
+                              teacherStudentId,
                             );
                             return;
                           }
