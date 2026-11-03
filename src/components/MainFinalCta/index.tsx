@@ -53,7 +53,7 @@ export const MainFinalCta = () => {
         {options.map((option) => (
           <div
             key={option.titleKey}
-            className="relative flex flex-col items-center overflow-hidden rounded-[20px] bg-brand-gray px-[25px] pb-[240px] pt-[25px] md:h-[420px] md:pb-0 lg:h-[534px] lg:rounded-[30px] lg:px-9 lg:pt-[60px] wide:h-[580px] wide:px-[58px]"
+            className="relative mx-auto flex w-full max-w-[400px] flex-col items-center overflow-hidden rounded-[20px] bg-brand-gray px-[25px] pb-[240px] pt-[25px] md:mx-0 md:h-[420px] md:max-w-none md:pb-0 lg:h-[534px] lg:rounded-[30px] lg:px-9 lg:pt-[60px] wide:h-[580px] wide:px-[58px]"
           >
             <Image
               src={option.image}

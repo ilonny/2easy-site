@@ -38,17 +38,36 @@ export const Footer = () => {
     if (!isLanding) return;
     const footer = footerRef.current;
     if (!footer) return;
-    const update = () =>
+    const root = document.documentElement;
+    const readPx = (name: string) => {
+      const value = parseFloat(getComputedStyle(root).getPropertyValue(name));
+      return Number.isFinite(value) ? value : 0;
+    };
+    const update = () => {
+      const scale = getClientScale(footer);
+      // `--site-chrome-h` is a calc() and does not parse to pixels.
+      // Header and the app banner sit above the page sheet, so a footer that
+      // fits the raw viewport can still poke out underneath them.
+      const chrome = readPx("--site-header-h") + readPx("--app-install-banner-h");
       setCanPin(
-        footer.getBoundingClientRect().height * getClientScale(footer) <=
-          window.innerHeight,
+        footer.getBoundingClientRect().height * scale <=
+          window.innerHeight - chrome * scale,
       );
+    };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(footer);
+    const header = document.querySelector("header");
+    if (header) observer.observe(header);
+    const styleObserver = new MutationObserver(update);
+    styleObserver.observe(root, {
+      attributes: true,
+      attributeFilter: ["style"],
+    });
     window.addEventListener("resize", update);
     return () => {
       observer.disconnect();
+      styleObserver.disconnect();
       window.removeEventListener("resize", update);
     };
   }, [pathname, isLanding]);
