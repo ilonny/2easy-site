@@ -373,14 +373,6 @@ export const MatchWordImageExView: FC<TProps> = ({
   const ex_id = data?.id;
   const viewType = data?.viewType === "input" ? "input" : "drag";
 
-  const isSorted = useRef(false);
-  useEffect(() => {
-    const t = setTimeout(() => {
-      isSorted.current = true;
-    }, 300);
-    return () => clearTimeout(t);
-  }, []);
-
   const { writeAnswer, answers, getAnswers, resetSeq } = useExAnswer({
     student_id,
     lesson_id,
@@ -430,15 +422,49 @@ export const MatchWordImageExView: FC<TProps> = ({
     clearLocal();
   }, [resetSeq, clearLocal]);
 
+  // Keep one shuffled order for the exercise lifetime. Filtering out matched
+  // chips must NOT fall back to images[] order — that made remaining words
+  // line up with the pictures after the first correct drop.
+  //
+  // Order is stored as indices into data.images (not by id) so editor preview
+  // still works for unsaved images that may lack unique attachment ids.
+  const chipOrderRef = useRef<{
+    indices: number[];
+    exerciseKey: string;
+  } | null>(null);
+
   const sortedChips = useMemo(() => {
-    const available = [...(data.images || [])].filter(
-      (i) => !!i.text && !hasId(correctIds, i.id)
-    );
-    if (!isSorted.current) {
-      return available.sort(() => 0.5 - Math.random());
+    const images = data.images || [];
+    // Rebuild shuffle when the image set / texts / exercise identity changes —
+    // not when correctIds changes.
+    const exerciseKey = `${data.id ?? "new"}|${images
+      .map(
+        (img, index) =>
+          `${index}:${img?.id ?? ""}:${img?.path ?? ""}:${img?.text ? "1" : "0"}`
+      )
+      .join(",")}`;
+
+    if (
+      !chipOrderRef.current ||
+      chipOrderRef.current.exerciseKey !== exerciseKey
+    ) {
+      const withText = images
+        .map((img, index) => ({ img, index }))
+        .filter(({ img }) => !!img?.text);
+      const shuffled = [...withText].sort(() => 0.5 - Math.random());
+      chipOrderRef.current = {
+        indices: shuffled.map(({ index }) => index),
+        exerciseKey,
+      };
     }
-    return available;
-  }, [correctIds, data.images]);
+
+    return chipOrderRef.current.indices
+      .map((index) => images[index])
+      .filter(
+        (img): img is TMatchWordImageData["images"][number] =>
+          !!img && !!img.text && !hasId(correctIds, img.id)
+      );
+  }, [correctIds, data.images, data.id]);
 
   useEffect(() => {
     if (student_id) {
