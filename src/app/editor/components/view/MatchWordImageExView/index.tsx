@@ -373,14 +373,6 @@ export const MatchWordImageExView: FC<TProps> = ({
   const ex_id = data?.id;
   const viewType = data?.viewType === "input" ? "input" : "drag";
 
-  const isSorted = useRef(false);
-  useEffect(() => {
-    const t = setTimeout(() => {
-      isSorted.current = true;
-    }, 300);
-    return () => clearTimeout(t);
-  }, []);
-
   const { writeAnswer, answers, getAnswers, resetSeq } = useExAnswer({
     student_id,
     lesson_id,
@@ -430,15 +422,39 @@ export const MatchWordImageExView: FC<TProps> = ({
     clearLocal();
   }, [resetSeq, clearLocal]);
 
+  // Keep one shuffled order for the exercise lifetime. Filtering out matched
+  // chips must NOT fall back to images[] order — that made remaining words
+  // line up with the pictures after the first correct drop.
+  const chipOrderRef = useRef<{
+    order: Array<string | number>;
+    exerciseKey: string;
+  } | null>(null);
+
   const sortedChips = useMemo(() => {
-    const available = [...(data.images || [])].filter(
-      (i) => !!i.text && !hasId(correctIds, i.id)
-    );
-    if (!isSorted.current) {
-      return available.sort(() => 0.5 - Math.random());
+    const images = [...(data.images || [])].filter((i) => !!i.text);
+    const exerciseKey = `${data.id ?? "new"}-${images
+      .map((i) => String(i.id))
+      .join(",")}`;
+
+    if (
+      !chipOrderRef.current ||
+      chipOrderRef.current.exerciseKey !== exerciseKey
+    ) {
+      const shuffled = [...images].sort(() => 0.5 - Math.random());
+      chipOrderRef.current = {
+        order: shuffled.map((i) => i.id),
+        exerciseKey,
+      };
     }
-    return available;
-  }, [correctIds, data.images]);
+
+    const byId = new Map(images.map((i) => [String(i.id), i]));
+    return chipOrderRef.current.order
+      .map((id) => byId.get(String(id)))
+      .filter(
+        (i): i is TMatchWordImageData["images"][number] =>
+          !!i && !hasId(correctIds, i.id)
+      );
+  }, [correctIds, data.images, data.id]);
 
   useEffect(() => {
     if (student_id) {
