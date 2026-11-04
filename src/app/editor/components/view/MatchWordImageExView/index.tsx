@@ -425,34 +425,44 @@ export const MatchWordImageExView: FC<TProps> = ({
   // Keep one shuffled order for the exercise lifetime. Filtering out matched
   // chips must NOT fall back to images[] order — that made remaining words
   // line up with the pictures after the first correct drop.
+  //
+  // Order is stored as indices into data.images (not by id) so editor preview
+  // still works for unsaved images that may lack unique attachment ids.
   const chipOrderRef = useRef<{
-    order: Array<string | number>;
+    indices: number[];
     exerciseKey: string;
   } | null>(null);
 
   const sortedChips = useMemo(() => {
-    const images = [...(data.images || [])].filter((i) => !!i.text);
-    const exerciseKey = `${data.id ?? "new"}-${images
-      .map((i) => String(i.id))
+    const images = data.images || [];
+    // Rebuild shuffle when the image set / texts / exercise identity changes —
+    // not when correctIds changes.
+    const exerciseKey = `${data.id ?? "new"}|${images
+      .map(
+        (img, index) =>
+          `${index}:${img?.id ?? ""}:${img?.path ?? ""}:${img?.text ? "1" : "0"}`
+      )
       .join(",")}`;
 
     if (
       !chipOrderRef.current ||
       chipOrderRef.current.exerciseKey !== exerciseKey
     ) {
-      const shuffled = [...images].sort(() => 0.5 - Math.random());
+      const withText = images
+        .map((img, index) => ({ img, index }))
+        .filter(({ img }) => !!img?.text);
+      const shuffled = [...withText].sort(() => 0.5 - Math.random());
       chipOrderRef.current = {
-        order: shuffled.map((i) => i.id),
+        indices: shuffled.map(({ index }) => index),
         exerciseKey,
       };
     }
 
-    const byId = new Map(images.map((i) => [String(i.id), i]));
-    return chipOrderRef.current.order
-      .map((id) => byId.get(String(id)))
+    return chipOrderRef.current.indices
+      .map((index) => images[index])
       .filter(
-        (i): i is TMatchWordImageData["images"][number] =>
-          !!i && !hasId(correctIds, i.id)
+        (img): img is TMatchWordImageData["images"][number] =>
+          !!img && !!img.text && !hasId(correctIds, img.id)
       );
   }, [correctIds, data.images, data.id]);
 
