@@ -16,6 +16,7 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { TFillGapsNewGap, TFillGapsNewMode, TFillGapsNewOption } from "./types";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { NESTED_OVERLAY_Z_CLASS } from "@/constants/uiLayers";
 
 type TProps = {
   isOpen: boolean;
@@ -186,7 +187,14 @@ export const GapOptionsModal: FC<TProps> = ({
       size="2xl"
       placement="center"
       scrollBehavior="inside"
-      classNames={{ base: "max-h-[85dvh]" }}
+      // Nested inside EditorRootModal (site-overlay-layer / z-70 on mobile).
+      // Default NextUI z-50 would open behind the parent and look like a no-op click.
+      shouldBlockScroll={false}
+      classNames={{
+        base: "max-h-[85dvh]",
+        backdrop: NESTED_OVERLAY_Z_CLASS,
+        wrapper: NESTED_OVERLAY_Z_CLASS,
+      }}
     >
       <ModalContent>
         <ModalHeader className="justify-between items-center">

@@ -1,7 +1,7 @@
 /**
  * Stacking layers for the site header vs overlays (modals, chat, menu).
  * Keep in sync with CSS in globals.css (--site-header-z, --site-header-desktop-z,
- * --overlay-above-header-z, --site-menu-z).
+ * --overlay-above-header-z, --site-menu-z) and `.site-nested-overlay-layer`.
  *
  * These are real CSS classes (not Tailwind z-[N] strings) so they always apply.
  *
@@ -30,3 +30,9 @@ export const getSiteHeaderHeight = () =>
  * Default NextUI modal is z-50; mobile header is 60.
  */
 export const OVERLAY_ABOVE_HEADER_Z_CLASS = "site-overlay-layer";
+
+/**
+ * Nested NextUI modals opened from inside another overlay (e.g. gap options
+ * inside EditorRootModal). Always above `site-overlay-layer`, below the menu.
+ */
+export const NESTED_OVERLAY_Z_CLASS = "site-nested-overlay-layer";
