@@ -23,6 +23,7 @@ import {
 import { arrayMoveImmutable } from "array-move";
 import i18n from "@/i18n/config";
 import { T } from "@/i18n/T";
+import { NESTED_OVERLAY_Z_CLASS } from "@/constants/uiLayers";
 
 type TProps = {
   field: TField | undefined;
@@ -186,7 +187,16 @@ export const FieldOptionsModal: FC<TProps> = ({
   if (!field) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="md"
+      shouldBlockScroll={false}
+      classNames={{
+        backdrop: NESTED_OVERLAY_Z_CLASS,
+        wrapper: NESTED_OVERLAY_Z_CLASS,
+      }}
+    >
       <ModalContent>
         <ModalHeader>
           <T k="editor.optionsForGap" defaultText="Варианты для пропуска" />

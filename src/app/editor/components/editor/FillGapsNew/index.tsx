@@ -491,11 +491,38 @@ export const FillGapsNew: FC<TProps> = ({
     return v.length ? v : defaultValuesStub.content;
   }, [data.content]);
 
+  const MOVE_PX = 10;
+
   const renderElement = useCallback(
     (props: RenderElementProps) => {
       const el = props.element as any;
       if (el.type === "gap") {
         const gapId = el.gapId as string;
+        const clearGapTap = (target: EventTarget | null) => {
+          if (target && typeof target === "object") {
+            (target as any).__gapTap = null;
+          }
+        };
+        const markGapTapMoved = (
+          target: EventTarget | null,
+          x: number,
+          y: number,
+        ) => {
+          const st = target && typeof target === "object" ? (target as any).__gapTap : null;
+          if (!st) return;
+          if (Math.abs(x - st.x) > MOVE_PX || Math.abs(y - st.y) > MOVE_PX) {
+            st.moved = true;
+          }
+        };
+        const tryOpenGapModal = (target: EventTarget | null) => {
+          const st = target && typeof target === "object" ? (target as any).__gapTap : null;
+          clearGapTap(target);
+          if (!st || st.moved) return;
+          if (Date.now() - st.t > 350) return;
+          // Defer past the current pointer gesture so the nested NextUI modal
+          // is not immediately dismissed by the same interaction.
+          window.setTimeout(() => openGapModalFor(gapId), 0);
+        };
         return (
           <span
             {...props.attributes}
@@ -505,70 +532,35 @@ export const FillGapsNew: FC<TProps> = ({
               // Gap pill: open only on short tap, not when scrolling starts here
               e.preventDefault();
               e.stopPropagation();
-              const x = e.clientX ?? 0;
-              const y = e.clientY ?? 0;
+              try {
+                (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+              } catch {
+                // ignore
+              }
               (e.currentTarget as any).__gapTap = {
                 t: Date.now(),
-                x,
-                y,
+                x: e.clientX ?? 0,
+                y: e.clientY ?? 0,
                 moved: false,
               };
             }}
             onPointerMove={(e) => {
-              const st = (e.currentTarget as any).__gapTap;
-              if (!st) return;
-              if (
-                Math.abs((e.clientX ?? 0) - st.x) > MOVE_PX ||
-                Math.abs((e.clientY ?? 0) - st.y) > MOVE_PX
-              ) {
-                st.moved = true;
-              }
+              markGapTapMoved(e.currentTarget, e.clientX ?? 0, e.clientY ?? 0);
             }}
             onPointerUp={(e) => {
-              e.stopPropagation();
-              const st = (e.currentTarget as any).__gapTap;
-              (e.currentTarget as any).__gapTap = null;
-              if (!st || st.moved) return;
-              if (Date.now() - st.t > 350) return;
-              openGapModalFor(gapId);
-            }}
-            onPointerCancel={(e) => {
-              (e.currentTarget as any).__gapTap = null;
-            }}
-            onTouchStart={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              const t = e.touches?.[0];
-              (e.currentTarget as any).__gapTap = {
-                t: Date.now(),
-                x: t?.clientX ?? 0,
-                y: t?.clientY ?? 0,
-                moved: false,
-              };
-            }}
-            onTouchMove={(e) => {
-              const st = (e.currentTarget as any).__gapTap;
-              if (!st) return;
-              const t = e.touches?.[0];
-              if (
-                Math.abs((t?.clientX ?? 0) - st.x) > MOVE_PX ||
-                Math.abs((t?.clientY ?? 0) - st.y) > MOVE_PX
-              ) {
-                st.moved = true;
+              try {
+                (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+              } catch {
+                // ignore
               }
+              tryOpenGapModal(e.currentTarget);
             }}
-            onTouchEnd={(e) => {
-              e.stopPropagation();
-              const st = (e.currentTarget as any).__gapTap;
-              (e.currentTarget as any).__gapTap = null;
-              if (!st || st.moved) return;
-              if (Date.now() - st.t > 350) return;
-              openGapModalFor(gapId);
+            onPointerCancel={(e) => {
+              clearGapTap(e.currentTarget);
             }}
-            onTouchCancel={(e) => {
-              (e.currentTarget as any).__gapTap = null;
-            }}
-            style={{ cursor: "pointer" }}
+            style={{ cursor: "pointer", touchAction: "manipulation" }}
           >
             Пропуск{props.children}
           </span>
@@ -603,8 +595,6 @@ export const FillGapsNew: FC<TProps> = ({
     scrollEl?: Element | null;
     unbindScroll?: (() => void) | null;
   } | null>(null);
-
-  const MOVE_PX = 10;
 
   const getScrollParent = useCallback((el: Element | null): Element | null => {
     let cur: Element | null = el;

@@ -51,8 +51,8 @@ html.landing-zoom body {
     --site-header-h: 107px;
   }
 }
-/* Stacking: page/chips (1–20) < header (60) < chat/modals (70) < mobile menu (80).
-   Desktop header (40) stays under NextUI modals and popovers (50). */
+/* Stacking: page/chips (1–20) < header (60) < chat/modals (70) < nested modals (75)
+   < mobile menu (80). Desktop header (40) stays under NextUI modals and popovers (50). */
 .site-header-root {
   position: relative;
   z-index: var(--site-header-z);
@@ -90,6 +90,10 @@ html.landing-zoom body {
   .site-overlay-layer {
     z-index: var(--overlay-above-header-z);
   }
+}
+/* Nested modals inside EditorRootModal / other site-overlay modals */
+.site-nested-overlay-layer {
+  z-index: calc(var(--overlay-above-header-z) + 5);
 }
 .site-menu-layer {
   z-index: var(--site-menu-z);
