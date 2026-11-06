@@ -208,7 +208,7 @@
     "freqMonthly": "Monthly",
     "lessonsInPackage": "Lessons in package",
     "lessonsRemaining": "Lessons remaining",
-    "lessonsRemainingHint": "If these lessons are not on the calendar, lower this number. Done = lessons in the package minus remaining."
+    "lessonsRemainingHint": "This number drives the Details column: done = lessons in the package minus remaining. Lower it if lessons happened off the calendar."
   },
   "hero": {
     "badge": "For teachers and tutors",

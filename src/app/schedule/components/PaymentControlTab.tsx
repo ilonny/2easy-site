@@ -221,20 +221,28 @@ const packageLessonCounts = (plan: {
   return { done, total };
 };
 
-/** Lessons of this package that have already started. */
-const countPassedPackageLessons = (planId: number, events: ScheduleEvent[]) => {
+/**
+ * Lessons of this package that have already started.
+ * Uses the highest package ordinal on past events (not a raw event count),
+ * so duplicate calendar rows cannot inflate progress to "all done".
+ */
+const countPassedPackageLessons = (
+  planId: number,
+  events: ScheduleEvent[],
+) => {
   const now = Date.now();
-  let passed = 0;
+  let maxIndex = 0;
   for (const event of events) {
     if (event.type === "payment") continue;
     const start = new Date(event.starts_at).getTime();
     if (!Number.isFinite(start) || start > now) continue;
-    const hit = (event.package_progress || []).some(
-      (row) => Number(row.plan_id) === planId,
-    );
-    if (hit) passed += 1;
+    for (const row of event.package_progress || []) {
+      if (Number(row.plan_id) !== planId) continue;
+      const index = Number(row.index);
+      if (Number.isFinite(index) && index > maxIndex) maxIndex = index;
+    }
   }
-  return passed;
+  return Math.max(0, maxIndex);
 };
 
 const packageMoney = (
@@ -243,11 +251,25 @@ const packageMoney = (
 ) => {
   const total = Math.max(0, Number(plan.lessons_total || 0));
   const unit = Number(plan.amount) || 0;
-  const fromCalendar = countPassedPackageLessons(plan.id, events);
   const fromCounter = packageLessonCounts(plan).done;
-  const passed = total > 0
-    ? Math.min(Math.max(fromCalendar, fromCounter), total)
-    : Math.max(fromCalendar, fromCounter);
+  const remaining =
+    plan.lessons_remaining == null
+      ? total
+      : Math.max(0, Number(plan.lessons_remaining) || 0);
+  // "Осталось уроков" is the teacher's source of truth once it differs from
+  // the full package. Calendar auto-count only fills in while remaining is
+  // still untouched (equal to total) — otherwise Math.max(calendar, counter)
+  // ignored settings and showed "all done" (e.g. 4/4 instead of 1/4).
+  const remainingAdjusted =
+    plan.lessons_remaining != null && remaining !== total;
+  const fromCalendar = remainingAdjusted
+    ? 0
+    : countPassedPackageLessons(plan.id, events);
+  const passed = remainingAdjusted
+    ? fromCounter
+    : total > 0
+      ? Math.min(Math.max(fromCalendar, fromCounter), total)
+      : Math.max(fromCalendar, fromCounter);
   return {
     passed,
     total,
