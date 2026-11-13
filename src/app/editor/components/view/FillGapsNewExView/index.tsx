@@ -80,6 +80,18 @@ function normalizeGapAnswer(s: string): string {
   return (s || "").trim().toLowerCase();
 }
 
+/** Match a stored answer to an option; keys must be option ids (values may have spaces). */
+function findGapOptionByAnswer(
+  gap: TFillGapsNewGap | undefined,
+  raw: string,
+) {
+  const norm = normalizeGapAnswer(raw);
+  if (!gap || !norm) return undefined;
+  return (gap.options || []).find(
+    (o) => normalizeGapAnswer(o.value || "") === norm,
+  );
+}
+
 /** Есть ли у пропуска непустой вариант, отмеченный как правильный */
 function hasDefinedCorrectAnswer(gap: TFillGapsNewGap | undefined): boolean {
   if (!gap) return false;
@@ -714,6 +726,13 @@ const FillGapsNewExViewImpl: FC<{
                 : "bg-[#F7F7FF] border border-[rgba(63,40,198,0.25)]";
         const highlightCorrectInDropdown =
           isPreview || (isTeacher && !isPresentationMode);
+        // Option values often have leading/trailing spaces; SelectItem keys must
+        // be stable ids. selectedKeys used to pass trimmed text, so keys never
+        // matched, NextUI cleared the selection and wiped the pending save.
+        const selectedOption = findGapOptionByAnswer(gap, currentRaw);
+        const selectedKeys = selectedOption?.id
+          ? new Set([selectedOption.id])
+          : new Set<string>();
         return (
           <Tooltip
             isDisabled={tooltipDisabled}
@@ -726,11 +745,15 @@ const FillGapsNewExViewImpl: FC<{
                 size="sm"
                 className={styles.gapSelect}
                 key={answerKey}
-                selectedKeys={current ? [current] : []}
+                selectedKeys={selectedKeys}
                 isDisabled={!canInteract}
-                onChange={(e) => {
+                onSelectionChange={(keys) => {
                   if (!canInteract) return;
-                  const v = e.target.value;
+                  const id = Array.from(keys as Set<string>)[0];
+                  if (id == null || id === "") return;
+                  const opt = (gap.options || []).find((o) => o.id === id);
+                  if (!opt) return;
+                  const v = opt.value || "";
                   const ok = isCorrectForGap(gap, v);
                   setAnswer(answerKey, v, ok ? "correct" : "incorrect");
                 }}
@@ -746,7 +769,10 @@ const FillGapsNewExViewImpl: FC<{
                 }}
               >
                 {(gap.options || []).map((o) => (
-                  <SelectItem key={o.value} value={o.value} textValue={o.value}>
+                  <SelectItem
+                    key={o.id}
+                    textValue={(o.value || "").trim() || o.value || o.id}
+                  >
                     <span
                       style={
                         highlightCorrectInDropdown && o.isCorrect
