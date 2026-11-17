@@ -103,7 +103,20 @@ const gridPatches = [
   },
 ];
 
-for (const patch of [...patches, ...gridPatches, ...markerPatches]) {
+const lockPatches = [
+  {
+    file: "node_modules/@excalidraw/excalidraw/dist/dev/index.js",
+    from: "getElementsAtPosition(x, y, includeBoundTextElement = false, includeLockedElements = false)",
+    to: "getElementsAtPosition(x, y, includeBoundTextElement = false, includeLockedElements = true)",
+  },
+  {
+    file: "node_modules/@excalidraw/excalidraw/dist/prod/index.js",
+    from: "getElementsAtPosition(t,r,n=!1,i=!1)",
+    to: "getElementsAtPosition(t,r,n=!1,i=!0)",
+  },
+];
+
+for (const patch of [...patches, ...gridPatches, ...markerPatches, ...lockPatches]) {
   if (!fs.existsSync(patch.file)) {
     console.warn(`skip missing ${patch.file}`);
     continue;

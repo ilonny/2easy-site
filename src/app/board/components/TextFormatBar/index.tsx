@@ -456,6 +456,40 @@ export const TextFormatBar = ({ api, editorWrapRef }: TProps) => {
     patchTexts({ fontSize });
   };
 
+  const toggleLock = () => {
+    const selectedIds = new Set(
+      Object.entries(api.getAppState().selectedElementIds)
+        .filter(([, selected]) => selected)
+        .map(([id]) => id),
+    );
+    api.getSceneElements().forEach((element) => {
+      if (element.isDeleted) return;
+      const containerId = (element as { containerId?: string | null }).containerId;
+      if (selectedIds.has(element.id) && containerId) {
+        selectedIds.add(containerId);
+      }
+      const bound = (element as { boundElements?: Array<{ id?: string }> | null }).boundElements;
+      if (selectedIds.has(element.id) && bound) {
+        bound.forEach((item) => {
+          if (item?.id) selectedIds.add(item.id);
+        });
+      }
+    });
+    const targets = api
+      .getSceneElements()
+      .filter((element) => selectedIds.has(element.id) && !element.isDeleted);
+    if (!targets.length) return;
+    const nextLocked = !targets.every((element) => element.locked);
+    targets.forEach((element) => {
+      mutateElement(element as never, { locked: nextLocked });
+    });
+    api.updateScene({
+      elements: api.getSceneElements(),
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
+    });
+    setMenu(null);
+  };
+
   const toggleList = () => {
     const editor = liveEditor();
     const current = editor?.value ?? "";
@@ -675,7 +709,7 @@ export const TextFormatBar = ({ api, editorWrapRef }: TProps) => {
           className={bar.locked ? styles.iconActive : styles.icon}
           aria-label={bar.locked ? "Разблокировать" : "Заблокировать"}
           onMouseDown={keepEditing}
-          onClick={() => patchTexts({ locked: !bar.locked })}
+          onClick={toggleLock}
         >
           <LockIcon />
         </button>

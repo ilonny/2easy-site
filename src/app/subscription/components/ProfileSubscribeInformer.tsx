@@ -65,7 +65,7 @@ export const ProfileSubscribeInformer = () => {
   }, [router, subscription?.dateEnd, subscription?.subscribe_type_id]);
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-md shrink-0 xl:mx-0">
+    <div className="w-full min-w-0">
       <div className="rounded-[20px] bg-brand-gray p-5 lg:rounded-[30px] lg:p-6">
         {diffText}
       </div>

@@ -2,7 +2,24 @@ import { fetchPostJson } from "@/api";
 import { useCallback, useState } from "react";
 
 type TStatus = "success" | "error" | "loading" | undefined;
-export type TPromocodeErrorReason = "invalid" | "already_used";
+export type TPromocodeErrorReason =
+  | "invalid"
+  | "already_used"
+  | "own_code"
+  | "not_first_purchase"
+  | "referral_cap";
+
+const mapPromocodeReason = (reason: unknown): TPromocodeErrorReason => {
+  if (
+    reason === "already_used" ||
+    reason === "own_code" ||
+    reason === "not_first_purchase" ||
+    reason === "referral_cap"
+  ) {
+    return reason;
+  }
+  return "invalid";
+};
 
 export const usePromocode = () => {
   const [promocodeStatus, setPromocodeStatus] = useState<TStatus>();
@@ -32,9 +49,7 @@ export const usePromocode = () => {
 
         setPromocodeStatus("error");
         setPromocodeValue(0);
-        setPromocodeErrorReason(
-          json?.reason === "already_used" ? "already_used" : "invalid",
-        );
+        setPromocodeErrorReason(mapPromocodeReason(json?.reason));
       } catch (_e) {
         setPromocodeStatus("error");
         setPromocodeErrorReason("invalid");
@@ -49,11 +64,18 @@ export const usePromocode = () => {
     setPromocodeErrorReason("already_used");
   }, []);
 
+  const markPromocodeError = useCallback((reason: unknown) => {
+    setPromocodeStatus("error");
+    setPromocodeValue(0);
+    setPromocodeErrorReason(mapPromocodeReason(reason));
+  }, []);
+
   return {
     checkPromo,
     promocodeStatus,
     promocodeValue,
     promocodeErrorReason,
     markPromocodeAlreadyUsed,
+    markPromocodeError,
   };
 };

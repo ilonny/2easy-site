@@ -498,7 +498,19 @@
     "apply": "Apply",
     "promocodeInvalid": "Promo code is invalid or does not exist",
     "promocodeAlreadyUsed": "This promo code has already been used",
+    "promocodeOwnCode": "You cannot use your own referral code",
+    "promocodeNotFirstPurchase": "Referral discount applies only to the first payment",
+    "promocodeReferralCap": "This code has reached its referral limit",
     "promocodeApplied": "Promo code applied"
+  },
+  "referral": {
+    "title": "Referral program",
+    "step1": "Copy your code",
+    "step2": "Share it with a colleague",
+    "step3": "You get a free month added to your subscription; your friend gets 50% off their first payment.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "paidCount": "Paid with your code"
   },
   "modals": {
     "newLesson": "New lesson",

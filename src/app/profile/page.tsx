@@ -5,6 +5,7 @@ import { AuthContext } from "@/auth";
 import { useContext, useEffect, useState } from "react";
 import { ProfileInfoForm } from "./components/ProfileInfoForm";
 import { ProfileSubscribeInformer } from "../subscription/components/ProfileSubscribeInformer";
+import { ProfileReferralBlock } from "./components/ProfileReferralBlock";
 import { ProfileLessons } from "../lessons/components/ProfileLessons";
 import { ProfileStudents } from "../student/components/ProfileStudents";
 import { withLogin } from "@/auth/hooks/withLogin";
@@ -68,7 +69,12 @@ export default function ProfilePage() {
       {(tabIndex === "profile" || isStudent) && !authIsLoading && (
         <div className="flex w-full min-w-0 max-w-full flex-col items-stretch justify-center gap-8 px-1 md:gap-12 xl:flex-row xl:items-start xl:gap-24 2xl:gap-40">
           <ProfileInfoForm />
-          {!isStudent && <ProfileSubscribeInformer />}
+          {!isStudent && (
+            <div className="mx-auto flex w-full min-w-0 max-w-md shrink-0 flex-col gap-6 xl:mx-0">
+              <ProfileSubscribeInformer />
+              <ProfileReferralBlock />
+            </div>
+          )}
         </div>
       )}
       {tabIndex === "lessons" && !isStudent && !authIsLoading && (

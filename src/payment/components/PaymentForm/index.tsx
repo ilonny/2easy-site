@@ -61,7 +61,7 @@ export const PaymentForm = (props: TProps) => {
     promocodeValue,
     promocodeStatus,
     promocodeErrorReason,
-    markPromocodeAlreadyUsed,
+    markPromocodeError,
   } = usePromocode();
   const {
     paymentIsLoading,
@@ -88,8 +88,8 @@ export const PaymentForm = (props: TProps) => {
         getValues().login,
       );
       if (!response.success) {
-        if (response.reason === "already_used") {
-          markPromocodeAlreadyUsed();
+        if (response.reason) {
+          markPromocodeError(response.reason);
         }
         return;
       }
@@ -232,7 +232,7 @@ export const PaymentForm = (props: TProps) => {
       createPayment,
       getValues,
       isRF,
-      markPromocodeAlreadyUsed,
+      markPromocodeError,
       price,
       profile?.login,
       profile?.name,
@@ -371,6 +371,21 @@ export const PaymentForm = (props: TProps) => {
                       <T
                         k="payment.promocodeAlreadyUsed"
                         defaultText="Этот промокод уже был использован"
+                      />
+                    ) : promocodeErrorReason === "own_code" ? (
+                      <T
+                        k="payment.promocodeOwnCode"
+                        defaultText="Нельзя использовать свой реферальный код"
+                      />
+                    ) : promocodeErrorReason === "not_first_purchase" ? (
+                      <T
+                        k="payment.promocodeNotFirstPurchase"
+                        defaultText="Реферальная скидка действует только на первую оплату"
+                      />
+                    ) : promocodeErrorReason === "referral_cap" ? (
+                      <T
+                        k="payment.promocodeReferralCap"
+                        defaultText="По этому коду достигнуто ограничение приглашений"
                       />
                     ) : (
                       <T
