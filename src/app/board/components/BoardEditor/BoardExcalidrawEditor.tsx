@@ -43,8 +43,6 @@ type TProps = {
   onApiChange?: (api: ExcalidrawImperativeAPI | null) => void;
 };
 
-const BOARD_GRID_MIN_ZOOM = 0.15;
-
 if (typeof window !== "undefined") {
   (
     window as Window & { EXCALIDRAW_THROTTLE_RENDER?: boolean }
@@ -128,23 +126,6 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
   useEffect(() => {
     lastEditKeyRef.current = sceneEditKey(initialData.elements);
   }, [initialData]);
-
-  useEffect(() => {
-    if (!excalidrawAPI) return;
-    const syncGrid = () => {
-      const appState = excalidrawAPI.getAppState();
-      const zoom = appState.zoom?.value || 1;
-      const wantGrid = zoom >= BOARD_GRID_MIN_ZOOM;
-      if (appState.gridModeEnabled === wantGrid) return;
-      excalidrawAPI.updateScene({
-        appState: { gridModeEnabled: wantGrid },
-        captureUpdate: CaptureUpdateAction.NEVER,
-      });
-    };
-    const unsubscribe = excalidrawAPI.onScrollChange(syncGrid);
-    syncGrid();
-    return unsubscribe;
-  }, [excalidrawAPI]);
 
   useEffect(() => {
     shouldFitViewportRef.current = true;
@@ -336,31 +317,15 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
     <div className={styles.editorWrap} data-board-editor-wrap ref={editorWrapRef}>
       <TextFormatBar api={excalidrawAPI} editorWrapRef={editorWrapRef} />
       <BoardStickyNoteButton api={excalidrawAPI} container={toolbarContainer} />
-      {imageProgress && imageProgress.loaded < imageProgress.total ? (
-        <>
-          <div className={styles.imageProgress}>
-            <span className={styles.imageSpinner} aria-hidden />
-            <T
-              k="boards.loadingImages"
-              values={imageProgress}
-              defaultText={`Изображения ${imageProgress.loaded} из ${imageProgress.total}`}
-            />
-          </div>
-          {imageProgress.slots.map((slot) => (
-            <div
-              key={slot.id}
-              className={styles.imageSlotLoader}
-              style={{
-                left: slot.x,
-                top: slot.y,
-                width: slot.width,
-                height: slot.height,
-              }}
-            >
-              <span className={styles.imageSpinner} aria-hidden />
-            </div>
-          ))}
-        </>
+      {imageProgress?.loading ? (
+        <div className={styles.imageProgress}>
+          <span className={styles.imageSpinner} aria-hidden />
+          <T
+            k="boards.loadingImages"
+            values={imageProgress}
+            defaultText={`Изображения ${imageProgress.loaded} из ${imageProgress.total}`}
+          />
+        </div>
       ) : null}
       <Excalidraw
         key={excalidrawKey}

@@ -10,40 +10,41 @@ import {
 } from "../utils/boardFileStore";
 
 const VIEW_PAD = 0.75;
-const SLOT_MIN_PX = 36;
+const BATCH_SIZE = 8;
 
-export type TImageSlot = {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
+type TBinaryFile = Record<string, unknown> & { id: string; dataURL: string };
 
 export type TImageLoadState = {
   loaded: number;
   total: number;
-  slots: TImageSlot[];
+  loading: boolean;
 };
 
-const clientSlot = (
-  image: { x: number; y: number; width: number; height: number; id: string },
-  appState: {
-    zoom?: { value?: number };
-    scrollX?: number;
-    scrollY?: number;
-    offsetLeft?: number;
-    offsetTop?: number;
-  },
-): TImageSlot => {
-  const zoom = appState.zoom?.value || 1;
-  return {
-    id: image.id,
-    x: (image.x + (appState.scrollX || 0)) * zoom + (appState.offsetLeft || 0),
-    y: (image.y + (appState.scrollY || 0)) * zoom + (appState.offsetTop || 0),
-    width: image.width * zoom,
-    height: image.height * zoom,
-  };
+const fileIdOf = (id: string, file: Record<string, unknown>) =>
+  String(file.id || id);
+
+const asBinary = (id: string, file: Record<string, unknown>): TBinaryFile | null => {
+  const dataURL = file.dataURL;
+  if (typeof dataURL !== "string" || !dataURL) return null;
+  const resolvedId = fileIdOf(id, file);
+  if (!resolvedId) return null;
+  return { ...file, id: resolvedId, dataURL };
+};
+
+/**
+ * Excalidraw ignores addFiles when a stub with the same id is already
+ * registered, so the gray placeholder never receives the bytes.
+ */
+const installBinaries = (api: ExcalidrawImperativeAPI, binaries: TBinaryFile[]) => {
+  if (!binaries.length) return;
+  const files = api.getFiles() as Record<string, { dataURL?: string } | undefined>;
+  binaries.forEach((file) => {
+    const current = files[file.id];
+    if (current && !current.dataURL) {
+      delete files[file.id];
+    }
+  });
+  api.addFiles(binaries as never);
 };
 
 export const useVisibleBoardFiles = (
@@ -53,13 +54,42 @@ export const useVisibleBoardFiles = (
   const [imageProgress, setImageProgress] = useState<TImageLoadState | null>(null);
   const inflightRef = useRef(new Set<string>());
   const cooldownRef = useRef(new Map<string, number>());
+  const attemptsRef = useRef(new Map<string, number>());
 
   useEffect(() => {
     if (!api || !boardId) return;
 
     let cancelled = false;
+    let running = false;
+    let dirty = false;
+
+    const hasBinary = (id: string) => {
+      const live = api.getFiles()[id] as { dataURL?: string } | undefined;
+      if (typeof live?.dataURL === "string" && live.dataURL) return true;
+      const stashed = getStashedFile(boardId, id)?.dataURL;
+      return typeof stashed === "string" && !!stashed;
+    };
+
+    const publish = (ids: string[], loading: boolean) => {
+      const loaded = ids.filter(hasBinary).length;
+      setImageProgress((current) => {
+        if (!ids.length) return current ? null : current;
+        if (
+          current?.loaded === loaded &&
+          current.total === ids.length &&
+          current.loading === loading
+        ) {
+          return current;
+        }
+        return { loaded, total: ids.length, loading };
+      });
+    };
 
     const loadVisible = async () => {
+      if (running) {
+        dirty = true;
+        return;
+      }
       const appState = api.getAppState();
       const zoom = appState.zoom?.value || 1;
       const width = (appState.width || 0) / zoom;
@@ -73,124 +103,79 @@ export const useVisibleBoardFiles = (
         right: -appState.scrollX + width * (1 + pad),
         bottom: -appState.scrollY + height * (1 + pad),
       };
-      const visible = visibleImageFileIds(api.getSceneElements(), view, zoom);
-      const ids = visible.map((image) => image.id);
-      const known = api.getFiles();
-      const hasBinary = (id: string) => {
-        const file = known[id] as { dataURL?: string } | undefined;
-        return !!file?.dataURL;
-      };
+      const ids = visibleImageFileIds(api.getSceneElements(), view, zoom).map(
+        (image) => image.id,
+      );
       const now = Date.now();
       const missing = ids.filter((id) => {
         if (hasBinary(id)) return false;
         if (inflightRef.current.has(id)) return false;
-        const cooldown = cooldownRef.current.get(id) || 0;
-        return cooldown <= now;
+        return (cooldownRef.current.get(id) || 0) <= now;
       });
-      const cached = missing.filter((id) => {
-        const file = getStashedFile(boardId, id);
-        return typeof file?.dataURL === "string" && !!file.dataURL;
-      });
-      if (cached.length) {
-        api.addFiles(
-          cached.map((id) => getStashedFile(boardId, id)).filter(Boolean) as never,
-        );
+
+      const cached = missing
+        .map((id) => asBinary(id, getStashedFile(boardId, id) || {}))
+        .filter((file): file is TBinaryFile => !!file);
+      if (cached.length) installBinaries(api, cached);
+      const cachedIds = new Set(cached.map((file) => file.id));
+      const remoteMissing = missing.filter((id) => !cachedIds.has(id));
+
+      if (!remoteMissing.length) {
+        publish(ids, inflightRef.current.size > 0);
+        return;
       }
-      const remoteMissing = missing.filter((id) => !cached.includes(id));
 
-      const publishProgress = (loadedCount: number) => {
-        const ready = new Set(
-          ids.filter((id) => {
-            const file = api.getFiles()[id] as { dataURL?: string } | undefined;
-            return !!file?.dataURL;
-          }),
-        );
-        cached.forEach((id) => ready.add(id));
-        const slots = visible
-          .filter((image) => !ready.has(image.id))
-          .map((image) => clientSlot(image, appState))
-          .filter((slot) => slot.width >= SLOT_MIN_PX && slot.height >= SLOT_MIN_PX);
-        setImageProgress((current) => {
-          if (!ids.length) return current ? null : current;
-          const sameSlots =
-            current?.slots.length === slots.length &&
-            current.slots.every(
-              (slot, index) =>
-                slot.id === slots[index]?.id &&
-                Math.abs(slot.x - slots[index].x) < 1 &&
-                Math.abs(slot.y - slots[index].y) < 1,
-            );
-          if (
-            current?.loaded === loadedCount &&
-            current.total === ids.length &&
-            sameSlots
-          ) {
-            return current;
-          }
-          return { loaded: loadedCount, total: ids.length, slots };
-        });
-      };
-
-      const loadedCount = ids.filter(hasBinary).length + cached.length;
-      publishProgress(loadedCount);
-      if (!remoteMissing.length) return;
-
+      running = true;
       remoteMissing.forEach((id) => inflightRef.current.add(id));
+      publish(ids, true);
       try {
-        for (let index = 0; index < remoteMissing.length; index += 8) {
-          const batch = remoteMissing.slice(index, index + 8);
+        for (let index = 0; index < remoteMissing.length; index += BATCH_SIZE) {
+          if (cancelled) return;
+          const batch = remoteMissing.slice(index, index + BATCH_SIZE);
           const res = await fetch(
-            `/api/board-files?id=${boardId}&file_ids=${batch.join(",")}`,
+            `/api/board-files?id=${boardId}&file_ids=${batch.map(encodeURIComponent).join(",")}`,
             { headers: boardAuthHeaders(), cache: "no-store" },
           );
           const json = await res.json().catch(() => null);
-          const files = json?.files && typeof json.files === "object" ? json.files : {};
-          const binaries = Object.values(files).filter((file) => {
-            return (
-              !!file &&
-              typeof file === "object" &&
-              typeof (file as { dataURL?: unknown }).dataURL === "string"
-            );
-          }) as Array<Record<string, unknown> & { id?: string; dataURL?: string }>;
+          const files =
+            json?.files && typeof json.files === "object"
+              ? (json.files as Record<string, Record<string, unknown>>)
+              : {};
+          const binaries = Object.entries(files)
+            .map(([id, file]) =>
+              file && typeof file === "object" ? asBinary(id, file) : null,
+            )
+            .filter((file): file is TBinaryFile => !!file);
 
           if (cancelled) return;
-          binaries.forEach((file) => {
-            const id = String(file.id || "");
-            if (!id) return;
-            stashBoardFile(boardId, id, file, true);
-          });
-          if (binaries.length) {
-            api.addFiles(binaries as never);
-          }
-          if (!cancelled) {
-            const nextKnown = api.getFiles();
-            publishProgress(
-              ids.filter((id) => {
-                const file = nextKnown[id] as { dataURL?: string } | undefined;
-                return !!file?.dataURL;
-              }).length,
-            );
-          }
+          binaries.forEach((file) => stashBoardFile(boardId, file.id, file, true));
+          installBinaries(api, binaries);
 
-          const found = new Set(
-            binaries.map((file) => String(file.id || "")).filter(Boolean),
-          );
+          const found = new Set(binaries.map((file) => file.id));
           batch.forEach((id) => {
-            if (!found.has(id)) cooldownRef.current.set(id, Date.now() + 8000);
+            if (found.has(id)) {
+              attemptsRef.current.delete(id);
+              cooldownRef.current.delete(id);
+              return;
+            }
+            const attempts = (attemptsRef.current.get(id) || 0) + 1;
+            attemptsRef.current.set(id, attempts);
+            cooldownRef.current.set(
+              id,
+              Date.now() + (attempts >= 3 ? 60_000 : 4_000),
+            );
           });
+          publish(ids, true);
         }
       } catch {
-        remoteMissing.forEach((id) => cooldownRef.current.set(id, Date.now() + 8000));
+        remoteMissing.forEach((id) => cooldownRef.current.set(id, Date.now() + 4_000));
       } finally {
         remoteMissing.forEach((id) => inflightRef.current.delete(id));
-        if (!cancelled) {
-          const nextKnown = api.getFiles();
-          publishProgress(
-            ids.filter((id) => {
-              const file = nextKnown[id] as { dataURL?: string } | undefined;
-              return !!file?.dataURL;
-            }).length,
-          );
+        running = false;
+        if (!cancelled) publish(ids, inflightRef.current.size > 0);
+        if (dirty && !cancelled) {
+          dirty = false;
+          void loadVisible();
         }
       }
     };
@@ -200,7 +185,7 @@ export const useVisibleBoardFiles = (
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
         void loadVisible();
-      }, 120);
+      }, 180);
     };
 
     const unsubScroll = api.onScrollChange(schedule);

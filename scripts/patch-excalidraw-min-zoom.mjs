@@ -93,13 +93,13 @@ const markerPatches = [
 const gridPatches = [
   {
     file: "node_modules/@excalidraw/excalidraw/dist/dev/chunk-4FTI6OG3.js",
-    from: "if (!isBold && actualGridSize < 10) {\n      continue;\n    }",
-    to: "if (actualGridSize < 8 || !isBold && actualGridSize < 10) {\n      continue;\n    }",
+    from: "if (actualGridSize < 8 || !isBold && actualGridSize < 10) {\n      continue;\n    }",
+    to: "if (!isBold && actualGridSize < 10) {\n      continue;\n    }",
   },
   {
     file: "node_modules/@excalidraw/excalidraw/dist/prod/chunk-K2UTITRG.js",
-    from: "if(!m&&l<10)continue;",
-    to: "if(l<8||!m&&l<10)continue;",
+    from: "if(l<8||!m&&l<10)continue;",
+    to: "if(!m&&l<10)continue;",
   },
 ];
 
