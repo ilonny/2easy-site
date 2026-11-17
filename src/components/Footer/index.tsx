@@ -28,14 +28,15 @@ export const Footer = () => {
   const footerRef = useRef<HTMLElement>(null);
   const [canPin, setCanPin] = useState(false);
 
-  const isLanding = pathname === "/";
+  const showMarketingFooter =
+    pathname === "/" || pathname === "/get-your-prize";
   const isStudentFooter =
     Boolean(profile?.isStudent) && isStudentAppPath(pathname);
 
   // The page slides up and uncovers the footer pinned to the bottom of the screen.
   // A footer taller than the screen would never show its top, so it is only pinned when it fits.
   useEffect(() => {
-    if (!isLanding) return;
+    if (!showMarketingFooter) return;
     const footer = footerRef.current;
     if (!footer) return;
     const root = document.documentElement;
@@ -70,7 +71,7 @@ export const Footer = () => {
       styleObserver.disconnect();
       window.removeEventListener("resize", update);
     };
-  }, [pathname, isLanding]);
+  }, [pathname, showMarketingFooter]);
 
   if (isStudentFooter) {
     return (
@@ -106,7 +107,7 @@ export const Footer = () => {
     );
   }
 
-  if (!isLanding) {
+  if (!showMarketingFooter) {
     return null;
   }
 

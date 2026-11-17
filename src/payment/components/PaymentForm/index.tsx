@@ -24,6 +24,8 @@ import {
 
 type TProps = {
   type: TSubscribePeriod;
+  /** Prefill promocode (e.g. roulette prize) and auto-check. */
+  initialPromocode?: string;
 };
 
 type TFieldList = {
@@ -35,7 +37,7 @@ type TFieldList = {
 };
 
 export const PaymentForm = (props: TProps) => {
-  const { type } = props;
+  const { type, initialPromocode } = props;
   const { profile } = useContext(AuthContext);
 
   const [price, setPrice] = useState(
@@ -48,11 +50,13 @@ export const PaymentForm = (props: TProps) => {
     formState: { errors },
     getValues,
     trigger,
+    setValue,
   } = useForm<TFieldList>({
     defaultValues: {
       login: profile?.login || "",
       name: profile?.name || "",
       phone: profile?.phone || "",
+      promocode: initialPromocode || "",
     },
   });
 
@@ -77,6 +81,13 @@ export const PaymentForm = (props: TProps) => {
   useEffect(() => {
     loadCloudPayments().catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!initialPromocode) return;
+    setValue("promocode", initialPromocode);
+    void checkPromo(initialPromocode, type);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- apply once on mount / code change
+  }, [initialPromocode, type]);
 
   const onSubmit = useCallback(
     async (_data) => {

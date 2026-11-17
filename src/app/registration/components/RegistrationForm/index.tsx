@@ -31,7 +31,12 @@ type TConfirmInputs = {
   password: string;
 };
 
-export const RegistrationForm = () => {
+type TRegistrationFormProps = {
+  /** If set, called instead of navigating to `/` after successful registration. */
+  onSuccess?: () => void;
+};
+
+export const RegistrationForm = ({ onSuccess }: TRegistrationFormProps = {}) => {
   const {
     control,
     handleSubmit,
@@ -108,9 +113,13 @@ export const RegistrationForm = () => {
           writeToLocalStorage("token", res.token);
           writeToLocalStorage("profile", JSON.stringify(res));
           writeToLocalStorage("success_registration_completed", "1");
-          setProfile(res);
+          setProfile?.(res);
           window?.ym(103955671, "reachGoal", "register-success");
-          router.replace("/");
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            router.replace("/");
+          }
         }
       });
     },
