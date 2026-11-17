@@ -19,6 +19,14 @@ import {
   type TExcalidrawInitialData,
 } from "../utils/boardSnapshot";
 import { multiplayerBoardSyncAdapter } from "../sync/MultiplayerBoardSyncAdapter";
+import { publishBoardProgress } from "../utils/boardOpenProgress";
+import {
+  resetBoardFileStore,
+  snapshotForRealtime,
+  snapshotForSave,
+  stashAndStripSnapshot,
+} from "../utils/boardFileStore";
+import { saveBoardDetail } from "../api/loadBoardContent";
 
 type TUseBoardRealtimeParams = {
   boardId?: number;
@@ -42,10 +50,14 @@ export const useBoardRealtime = ({
   const [board, setBoard] = useState<TBoard | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [contentRevision, setContentRevision] = useState(0);
+  const [loadProgress, setLoadProgress] = useState<number | null>(null);
   const [cursors, setCursors] = useState<TBoardCursor[]>([]);
   const [participants, setParticipants] = useState<TBoardParticipant[]>([]);
 
   const versionRef = useRef(0);
+  const versionReadyRef = useRef(false);
+  const filesOmittedRef = useRef(false);
+  const pendingSnapshotRef = useRef<TBoardSnapshot | null>(null);
   const lastSentFingerprintRef = useRef<string | null>(null);
   const isRemoteUpdateRef = useRef(false);
   const isHostRef = useRef(isHost);
@@ -71,12 +83,18 @@ export const useBoardRealtime = ({
     boardIdRef.current = boardId;
   }, [boardId]);
 
-  const applyScene = useCallback((data: TBoardSnapshot, version: number) => {
+  const applyScene = useCallback((data: TBoardSnapshot, version: number, filesOmitted?: boolean) => {
+    if (filesOmitted) filesOmittedRef.current = true;
     versionRef.current = version;
-    lastSentFingerprintRef.current = getBoardSnapshotFingerprint(data);
+    versionReadyRef.current = true;
+    const currentBoardId = boardIdRef.current || 0;
+    const lite = currentBoardId ? stashAndStripSnapshot(currentBoardId, data) : data;
+    lastSentFingerprintRef.current = getBoardSnapshotFingerprint(lite);
     hasInitialSceneRef.current = true;
-    setInitialData(snapshotToExcalidrawInitialData(data));
+    setInitialData(snapshotToExcalidrawInitialData(lite));
     setContentRevision((value) => value + 1);
+    setLoadProgress(100);
+    publishBoardProgress(100, "ready");
   }, []);
 
   const loadSessionStatus = useCallback(async () => {
@@ -134,21 +152,50 @@ export const useBoardRealtime = ({
     if (!currentBoardId || isRemoteUpdateRef.current) {
       return;
     }
-
-    const fingerprint = getBoardSnapshotFingerprint(snapshot);
-    if (fingerprint === lastSentFingerprintRef.current) {
+    if (!versionReadyRef.current) {
+      pendingSnapshotRef.current = snapshot;
       return;
     }
 
-    lastSentFingerprintRef.current = fingerprint;
-    versionRef.current += 1;
-    setSaveStatus("saving");
-    multiplayerBoardSyncAdapter.sendScene(
+    const fingerprint = getBoardSnapshotFingerprint(snapshot);
+    if (fingerprint === lastSentFingerprintRef.current) {
+      pendingSnapshotRef.current = null;
+      return;
+    }
+
+    const prepared = snapshotForRealtime(
       currentBoardId,
       snapshot,
-      versionRef.current,
+      filesOmittedRef.current,
     );
-    setSaveStatus("connected");
+    pendingSnapshotRef.current = snapshot;
+
+    void (async () => {
+      if (!prepared.complete) {
+        const saved = await saveBoardDetail(
+          currentBoardId,
+          snapshotForSave(currentBoardId, snapshot),
+          versionRef.current,
+        ).catch(() => null);
+        if (saved?.json?.success) {
+          versionRef.current = Number(saved.json.version || versionRef.current);
+          lastSentFingerprintRef.current = fingerprint;
+          setSaveStatus("connected");
+        }
+        return;
+      }
+
+      lastSentFingerprintRef.current = fingerprint;
+      versionRef.current += 1;
+      setSaveStatus("saving");
+      multiplayerBoardSyncAdapter.sendScene(
+        currentBoardId,
+        prepared.snapshot,
+        versionRef.current,
+      );
+      setSaveStatus("connected");
+      pendingSnapshotRef.current = null;
+    })();
   }, BOARD_REALTIME_SAVE_DEBOUNCE_MS);
 
   useEffect(() => {
@@ -158,10 +205,15 @@ export const useBoardRealtime = ({
       setBoard(null);
       setLoadError(false);
       setSaveStatus("idle");
+      setLoadProgress(null);
       setCursors([]);
       setParticipants([]);
       versionRef.current = 0;
+      versionReadyRef.current = false;
+      filesOmittedRef.current = false;
+      pendingSnapshotRef.current = null;
       lastSentFingerprintRef.current = null;
+      if (boardId) resetBoardFileStore(boardId);
       hasInitialSceneRef.current = false;
       sessionClosedRef.current = false;
       return;
@@ -173,25 +225,47 @@ export const useBoardRealtime = ({
     const connect = async () => {
       setSaveStatus("connecting");
       setLoadError(false);
+      setLoadProgress(0);
+      versionReadyRef.current = false;
+      filesOmittedRef.current = false;
+      resetBoardFileStore(boardId);
+      publishBoardProgress(0, "download");
 
       try {
-        const detail = await loadBoardDetail(boardId);
+        await loadBoardDetail(boardId, {
+          onProgress: (progress) => {
+            if (!disposed) setLoadProgress(progress);
+          },
+          onBoard: (nextBoard) => {
+            if (!disposed) setBoard(nextBoard);
+          },
+          onScene: (snapshot) => {
+            if (disposed) return;
+            const lite = stashAndStripSnapshot(boardId, snapshot);
+            lastSentFingerprintRef.current = getBoardSnapshotFingerprint(lite);
+            hasInitialSceneRef.current = true;
+            setInitialData(snapshotToExcalidrawInitialData(lite));
+            setContentRevision((value) => value + 1);
+            setLoadProgress(100);
+            setSaveStatus("connected");
+          },
+          onDone: ({ version, filesOmitted }) => {
+            if (disposed) return;
+            versionRef.current = version;
+            versionReadyRef.current = true;
+            if (filesOmitted) filesOmittedRef.current = true;
+            const pending = pendingSnapshotRef.current;
+            if (pending) debouncedSendScene(pending);
+          },
+        });
         if (disposed) {
           return;
         }
-
-        if (!detail) {
-          setLoadError(true);
-          setSaveStatus("error");
-          return;
-        }
-
-        setBoard(detail.board);
-        applyScene(detail.content.data, detail.content.version);
       } catch {
         if (!disposed) {
           setLoadError(true);
           setSaveStatus("error");
+          publishBoardProgress(null, "error");
         }
       }
 
@@ -200,9 +274,13 @@ export const useBoardRealtime = ({
         return;
       }
 
-      if (isHostRef.current) {
+      if (isHostRef.current && hasInitialSceneRef.current) {
         if (!status?.active && autoStartHostSessionRef.current) {
-          await startHostSession();
+          try {
+            await startHostSession();
+          } catch {
+            if (!disposed) setSaveStatus("error");
+          }
         }
         if (!disposed) {
           setSaveStatus(hasInitialSceneRef.current ? "connected" : "connecting");
@@ -225,21 +303,23 @@ export const useBoardRealtime = ({
             setSaveStatus("connected");
           }
         },
-        onJoined: ({ scene, version }) => {
+        onJoined: ({ scene, version, filesOmitted }) => {
           if (disposed) {
             return;
           }
           isRemoteUpdateRef.current = true;
-          applyScene(scene, version);
+          applyScene(scene, version, filesOmitted);
           setSaveStatus("connected");
           isRemoteUpdateRef.current = false;
+          const pending = pendingSnapshotRef.current;
+          if (pending) debouncedSendScene(pending);
         },
-        onScene: ({ data, version }) => {
+        onScene: ({ data, version, filesOmitted }) => {
           if (disposed) {
             return;
           }
           isRemoteUpdateRef.current = true;
-          applyScene(data, version);
+          applyScene(data, version, filesOmitted);
           setSaveStatus("connected");
           isRemoteUpdateRef.current = false;
         },
@@ -343,6 +423,7 @@ export const useBoardRealtime = ({
     initialData,
     board,
     loadError,
+    loadProgress,
     contentRevision,
     cursors,
     participants,

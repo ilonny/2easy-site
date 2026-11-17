@@ -3,6 +3,7 @@
 import { getBoardWsUrl } from "../api/boardWs";
 import { BOARD_REALTIME_PING_MS } from "../constants";
 import { normalizeBoardSnapshot } from "../utils/boardSnapshot";
+import { stashAndStripSnapshot } from "../utils/boardFileStore";
 import { TBoardParticipant, TBoardSnapshot } from "../types";
 import {
   IBoardRealtimeAdapter,
@@ -142,8 +143,11 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
         return;
       case "joined":
         if (message.data || (message as { scene?: unknown }).scene) {
-          const scene = normalizeBoardSnapshot(
-            (message as { scene?: unknown }).scene ?? message.data,
+          const scene = stashAndStripSnapshot(
+            this.boardId || 0,
+            normalizeBoardSnapshot(
+              (message as { scene?: unknown }).scene ?? message.data,
+            ),
           );
           this.callbacks.onJoined?.({
             role:
@@ -151,6 +155,7 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
               "participant",
             scene,
             version: Number(message.version || 0),
+            filesOmitted: !!(message as { files_omitted?: boolean }).files_omitted,
           });
         }
         if (message.participants) {
@@ -161,9 +166,13 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
         return;
       case "scene":
         this.callbacks.onScene?.({
-          data: normalizeBoardSnapshot(message.data),
+          data: stashAndStripSnapshot(
+            this.boardId || 0,
+            normalizeBoardSnapshot(message.data),
+          ),
           version: Number(message.version || 0),
           from: message.from,
+          filesOmitted: !!(message as { files_omitted?: boolean }).files_omitted,
         });
         return;
       case "cursor": {

@@ -18,6 +18,12 @@ import {
 } from "../types";
 import { soloBoardSyncAdapter } from "../sync/SoloBoardSyncAdapter";
 import { BoardContentConflictError } from "../sync/types";
+import { publishBoardProgress } from "../utils/boardOpenProgress";
+import {
+  resetBoardFileStore,
+  snapshotForSave,
+  stashAndStripSnapshot,
+} from "../utils/boardFileStore";
 
 export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
   const [saveStatus, setSaveStatus] = useState<TBoardSaveStatus>("idle");
@@ -27,8 +33,11 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
   const [board, setBoard] = useState<TBoard | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [contentRevision, setContentRevision] = useState(0);
+  const [loadProgress, setLoadProgress] = useState<number | null>(null);
 
+  const debouncedSaveRef = useRef<(snapshot: TBoardSnapshot) => void>(() => {});
   const versionRef = useRef(0);
+  const versionReadyRef = useRef(false);
   const pendingSnapshotRef = useRef<TBoardSnapshot | null>(null);
   const deferredSnapshotRef = useRef<TBoardSnapshot | null>(null);
   const lastSavedFingerprintRef = useRef<string | null>(null);
@@ -36,6 +45,7 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
 
   const resetSyncState = useCallback(() => {
     versionRef.current = 0;
+    versionReadyRef.current = false;
     pendingSnapshotRef.current = null;
     deferredSnapshotRef.current = null;
     lastSavedFingerprintRef.current = null;
@@ -44,36 +54,50 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
 
   const applyLoadedContent = useCallback((data: TBoardSnapshot, version: number) => {
     versionRef.current = version;
+    versionReadyRef.current = true;
+    const lite = boardId ? stashAndStripSnapshot(boardId, data) : data;
     pendingSnapshotRef.current = null;
     deferredSnapshotRef.current = null;
-    lastSavedFingerprintRef.current = getBoardSnapshotFingerprint(data);
-    setInitialData(snapshotToExcalidrawInitialData(data));
+    lastSavedFingerprintRef.current = getBoardSnapshotFingerprint(lite);
+    setInitialData(snapshotToExcalidrawInitialData(lite));
     setContentRevision((value) => value + 1);
-  }, []);
+  }, [boardId]);
 
   const load = useCallback(async () => {
     if (!boardId) return;
 
     setSaveStatus("loading");
     setLoadError(false);
+    setLoadProgress(0);
+    versionReadyRef.current = false;
+    resetBoardFileStore(boardId);
+    publishBoardProgress(0, "download");
     try {
-      const detail = await loadBoardDetail(boardId);
-      if (!detail) {
-        setLoadError(true);
-        setSaveStatus("error");
-        toast(i18n.t("boards.loadError"), { type: "error" });
-        return;
-      }
-
-      setBoard(detail.board);
-      applyLoadedContent(detail.content.data, detail.content.version);
-      setSaveStatus("saved");
+      await loadBoardDetail(boardId, {
+        onProgress: (progress) => setLoadProgress(progress),
+        onBoard: (nextBoard) => setBoard(nextBoard),
+        onScene: (snapshot) => {
+          const lite = stashAndStripSnapshot(boardId, snapshot);
+          lastSavedFingerprintRef.current = getBoardSnapshotFingerprint(lite);
+          setInitialData(snapshotToExcalidrawInitialData(lite));
+          setContentRevision((value) => value + 1);
+          setLoadProgress(100);
+          setSaveStatus("saved");
+        },
+        onDone: ({ version }) => {
+          versionRef.current = version;
+          versionReadyRef.current = true;
+          const pending = pendingSnapshotRef.current;
+          if (pending) debouncedSaveRef.current(pending);
+        },
+      });
     } catch {
       setLoadError(true);
       setSaveStatus("error");
+      publishBoardProgress(null, "error");
       toast(i18n.t("boards.loadError"), { type: "error" });
     }
-  }, [applyLoadedContent, boardId]);
+  }, [boardId]);
 
   useEffect(() => {
     if (!isOpen || !boardId) {
@@ -81,6 +105,7 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
       setBoard(null);
       setLoadError(false);
       setSaveStatus("idle");
+      setLoadProgress(null);
       resetSyncState();
       return;
     }
@@ -104,7 +129,7 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
       try {
         const nextVersion = await soloBoardSyncAdapter.save(
           boardId,
-          snapshot,
+          snapshotForSave(boardId, snapshot),
           versionRef.current,
         );
         versionRef.current = nextVersion;
@@ -158,6 +183,7 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
   const debouncedSave = useDebouncedCallback((snapshot: TBoardSnapshot) => {
     void saveNow(snapshot);
   }, BOARD_SAVE_DEBOUNCE_MS);
+  debouncedSaveRef.current = debouncedSave;
 
   useEffect(() => {
     if (!isOpen) {
@@ -172,6 +198,7 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
       }
 
       pendingSnapshotRef.current = snapshot;
+      if (!versionReadyRef.current) return;
       debouncedSave(snapshot);
     },
     [debouncedSave],
@@ -190,6 +217,7 @@ export const useBoardContent = (boardId?: number, isOpen?: boolean) => {
     initialData,
     board,
     loadError,
+    loadProgress,
     contentRevision,
     queueSave,
     flushSave,

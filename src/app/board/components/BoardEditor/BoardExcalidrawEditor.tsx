@@ -25,6 +25,9 @@ import { useAutoFinalizeLineTool } from "../../hooks/useAutoFinalizeLineTool";
 import { useBoardToolbarContainer } from "../../hooks/useBoardToolbarContainer";
 import { useDisableBrowserHistorySwipe } from "../../hooks/useDisableBrowserHistorySwipe";
 import { BoardStickyNoteButton } from "../BoardStickyNoteButton";
+import { TextFormatBar } from "../TextFormatBar";
+import { useVisibleBoardFiles } from "../../hooks/useVisibleBoardFiles";
+import { T } from "@/i18n/T";
 import { TBoardCursor, TBoardSnapshot } from "../../types";
 import styles from "./boardEditor.module.css";
 
@@ -38,6 +41,28 @@ type TProps = {
   syncMode?: "solo" | "realtime";
   cursors?: TBoardCursor[];
   onApiChange?: (api: ExcalidrawImperativeAPI | null) => void;
+};
+
+const BOARD_GRID_MIN_ZOOM = 0.15;
+
+if (typeof window !== "undefined") {
+  (
+    window as Window & { EXCALIDRAW_THROTTLE_RENDER?: boolean }
+  ).EXCALIDRAW_THROTTLE_RENDER = true;
+}
+
+/** Element versions change only when the drawing changes, not while panning. */
+const sceneEditKey = (elements: readonly unknown[]) => {
+  let key = elements.length;
+  for (let index = 0; index < elements.length; index += 1) {
+    const element = elements[index] as {
+      version?: number;
+      versionNonce?: number;
+    };
+    key =
+      (key + (element.version || 0) * 131 + (element.versionNonce || 0)) | 0;
+  }
+  return key;
 };
 
 const BOARD_UI_TOOLS = {
@@ -60,6 +85,7 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
   onApiChange,
 }) => {
   const lastFingerprintRef = useRef<string | null>(null);
+  const lastEditKeyRef = useRef<number | null>(null);
   const excalidrawAPIRef = useRef<ExcalidrawImperativeAPI | null>(null);
   const lastAppliedRevisionRef = useRef(-1);
   const isApplyingRemoteRef = useRef(false);
@@ -76,6 +102,7 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
     excalidrawAPI,
     editorWrapRef,
   );
+  const imageProgress = useVisibleBoardFiles(excalidrawAPI, boardId);
   useAutoFinalizeLineTool(excalidrawAPI, editorWrapRef);
   useDisableBrowserHistorySwipe();
 
@@ -97,6 +124,27 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
       },
     );
   }, []);
+
+  useEffect(() => {
+    lastEditKeyRef.current = sceneEditKey(initialData.elements);
+  }, [initialData]);
+
+  useEffect(() => {
+    if (!excalidrawAPI) return;
+    const syncGrid = () => {
+      const appState = excalidrawAPI.getAppState();
+      const zoom = appState.zoom?.value || 1;
+      const wantGrid = zoom >= BOARD_GRID_MIN_ZOOM;
+      if (appState.gridModeEnabled === wantGrid) return;
+      excalidrawAPI.updateScene({
+        appState: { gridModeEnabled: wantGrid },
+        captureUpdate: CaptureUpdateAction.NEVER,
+      });
+    };
+    const unsubscribe = excalidrawAPI.onScrollChange(syncGrid);
+    syncGrid();
+    return unsubscribe;
+  }, [excalidrawAPI]);
 
   useEffect(() => {
     shouldFitViewportRef.current = true;
@@ -159,7 +207,13 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
         captureUpdate: CaptureUpdateAction.NEVER,
       });
 
-      const remoteFiles = Object.values(data.files || {});
+      const remoteFiles = Object.values(data.files || {}).filter((file) => {
+        return (
+          !!file &&
+          typeof file === "object" &&
+          typeof (file as { dataURL?: unknown }).dataURL === "string"
+        );
+      });
       if (remoteFiles.length) {
         api.addFiles(remoteFiles as never);
       }
@@ -216,6 +270,12 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
       if (isApplyingRemoteRef.current) {
         return;
       }
+
+      const editKey = sceneEditKey(elements);
+      if (editKey === lastEditKeyRef.current) {
+        return;
+      }
+      lastEditKeyRef.current = editKey;
 
       const snapshot = buildBoardSnapshotFromExcalidraw(elements, appState, files);
       const fingerprint = getBoardSnapshotFingerprint(snapshot);
@@ -274,7 +334,17 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
 
   return (
     <div className={styles.editorWrap} data-board-editor-wrap ref={editorWrapRef}>
+      <TextFormatBar api={excalidrawAPI} editorWrapRef={editorWrapRef} />
       <BoardStickyNoteButton api={excalidrawAPI} container={toolbarContainer} />
+      {imageProgress && imageProgress.loaded < imageProgress.total ? (
+        <div className={styles.imageProgress}>
+          <T
+            k="boards.loadingImages"
+            values={imageProgress}
+            defaultText={`Изображения ${imageProgress.loaded} из ${imageProgress.total}`}
+          />
+        </div>
+      ) : null}
       <Excalidraw
         key={excalidrawKey}
         excalidrawAPI={handleExcalidrawAPI}

@@ -19,10 +19,67 @@
 
 .editorLoading {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 14px;
   width: 100%;
   height: 100%;
+  padding: 24px;
+}
+
+.progressLabel {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2a2440;
+}
+
+.progressTrack {
+  width: min(280px, 72vw);
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ece8f8;
+}
+
+.progressFill,
+.progressFillIndeterminate {
+  height: 100%;
+  border-radius: inherit;
+  background: #3f28c6;
+}
+
+.progressFill {
+  transition: width 0.2s linear;
+}
+
+.progressFillIndeterminate {
+  width: 40%;
+  animation: boardLoadProgress 1.1s ease-in-out infinite;
+}
+
+.imageProgress {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 6;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 1px 4px rgba(42, 36, 64, 0.12);
+  font-size: 12px;
+  font-weight: 600;
+  color: #3f28c6;
+}
+
+@keyframes boardLoadProgress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(280%);
+  }
 }
 
 .editorWrap :global(.main-menu-trigger) {
@@ -96,4 +153,9 @@
 
 .editorWrap :global(.App-toolbar-container > .Island:not(.App-toolbar)) {
   order: 2;
+}
+
+/* Our format bar replaces Excalidraw's left text panel. */
+.editorWrap[data-text-format-bar] :global(.selected-shape-actions) {
+  display: none !important;
 }

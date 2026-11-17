@@ -6,7 +6,12 @@ export type TBoardLoadResult = {
 };
 
 export type TBoardRealtimeCallbacks = {
-  onScene?: (payload: { data: TBoardSnapshot; version: number; from?: string }) => void;
+  onScene?: (payload: {
+    data: TBoardSnapshot;
+    version: number;
+    from?: string;
+    filesOmitted?: boolean;
+  }) => void;
   onParticipants?: (participants: TBoardParticipant[]) => void;
   onSessionStarted?: (sessionId: number) => void;
   onSessionClosed?: () => void;
@@ -14,6 +19,7 @@ export type TBoardRealtimeCallbacks = {
     role: "host" | "participant";
     scene: TBoardSnapshot;
     version: number;
+    filesOmitted?: boolean;
   }) => void;
   onError?: (message: string) => void;
   onConnectionChange?: (connected: boolean) => void;

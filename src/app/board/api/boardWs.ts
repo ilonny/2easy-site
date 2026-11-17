@@ -7,6 +7,7 @@ export const getBoardWsUrl = (boardId: number) => {
   const wsBase = getBaseUrl().replace(/^http/i, "ws");
   const params = new URLSearchParams({
     board_id: String(boardId),
+    omit_files: "1",
   });
   if (token) {
     params.set("token", token);

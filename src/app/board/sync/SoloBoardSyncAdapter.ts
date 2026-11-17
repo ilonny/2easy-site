@@ -1,7 +1,6 @@
 "use client";
 
-import { fetchPostJson } from "@/api";
-import { loadBoardDetail } from "../api/loadBoardContent";
+import { loadBoardDetail, saveBoardDetail } from "../api/loadBoardContent";
 import {
   BoardContentConflictError,
   IBoardSyncAdapter,
@@ -15,11 +14,20 @@ export const soloBoardSyncAdapter: IBoardSyncAdapter = {
   mode: "solo",
 
   async load(boardId: number): Promise<TBoardLoadResult> {
-    const detail = await loadBoardDetail(boardId);
-    if (!detail) {
+    let snapshot: TBoardSnapshot | null = null;
+    let version = 0;
+    await loadBoardDetail(boardId, {
+      onScene: (data) => {
+        snapshot = data;
+      },
+      onDone: (result) => {
+        version = result.version;
+      },
+    });
+    if (!snapshot) {
       throw new Error(i18n.t("boards.loadError"));
     }
-    return detail.content;
+    return { data: snapshot, version };
   },
 
   async save(
@@ -27,25 +35,15 @@ export const soloBoardSyncAdapter: IBoardSyncAdapter = {
     data: TBoardSnapshot,
     clientVersion: number,
   ): Promise<number> {
-    const res = await fetchPostJson({
-      path: "/board/save-content",
-      isSecure: true,
-      data: {
-        board_id: boardId,
-        data,
-        client_version: clientVersion,
-      },
-    });
+    const { status, json } = await saveBoardDetail(boardId, data, clientVersion);
 
-    if (res.status === 409) {
-      const json = await res.json();
+    if (status === 409 && json?.content?.data) {
       throw new BoardContentConflictError({
-        data: normalizeBoardSnapshot(json?.content?.data),
-        version: Number(json?.content?.version || 0),
+        data: normalizeBoardSnapshot(json.content.data),
+        version: Number(json.content.version || 0),
       });
     }
 
-    const json = await res.json();
     if (!json?.success) {
       throw new Error(json?.message || i18n.t("boards.saveError"));
     }

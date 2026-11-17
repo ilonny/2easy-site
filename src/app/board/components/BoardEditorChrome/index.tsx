@@ -1,8 +1,9 @@
 "use client";
 
 import { FC } from "react";
+import { T } from "@/i18n/T";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
-import { BoardEditorShell } from "../BoardEditorShell";
+import { BoardEditorShell, BoardLoadProgress } from "../BoardEditorShell";
 import { useBoardEditor } from "../../hooks/useBoardEditor";
 
 type TEditor = ReturnType<typeof useBoardEditor>;
@@ -23,7 +24,14 @@ export const BoardEditorChrome: FC<TProps> = ({
   onApiChange,
 }) => {
   if (!editor.initialData) {
-    return null;
+    if (editor.loadError) {
+      return (
+        <div className="flex h-full items-center justify-center px-6 text-center">
+          <T k="boards.loadError" />
+        </div>
+      );
+    }
+    return <BoardLoadProgress progress={editor.loadProgress} />;
   }
 
   return (
