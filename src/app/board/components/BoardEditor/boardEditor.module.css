@@ -61,16 +61,47 @@
 
 .imageProgress {
   position: absolute;
-  left: 12px;
-  bottom: 12px;
+  left: 50%;
+  bottom: 16px;
   z-index: 6;
-  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 1px 4px rgba(42, 36, 64, 0.12);
-  font-size: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 1px 6px rgba(42, 36, 64, 0.16);
+  font-size: 13px;
   font-weight: 600;
   color: #3f28c6;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.imageSpinner {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  border: 2px solid #d9d4f2;
+  border-top-color: #3f28c6;
+  border-radius: 50%;
+  animation: boardImageSpin 0.7s linear infinite;
+}
+
+.imageSlotLoader {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+@keyframes boardImageSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes boardLoadProgress {

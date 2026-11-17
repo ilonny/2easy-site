@@ -337,13 +337,30 @@ export const BoardExcalidrawEditor: FC<TProps> = ({
       <TextFormatBar api={excalidrawAPI} editorWrapRef={editorWrapRef} />
       <BoardStickyNoteButton api={excalidrawAPI} container={toolbarContainer} />
       {imageProgress && imageProgress.loaded < imageProgress.total ? (
-        <div className={styles.imageProgress}>
-          <T
-            k="boards.loadingImages"
-            values={imageProgress}
-            defaultText={`Изображения ${imageProgress.loaded} из ${imageProgress.total}`}
-          />
-        </div>
+        <>
+          <div className={styles.imageProgress}>
+            <span className={styles.imageSpinner} aria-hidden />
+            <T
+              k="boards.loadingImages"
+              values={imageProgress}
+              defaultText={`Изображения ${imageProgress.loaded} из ${imageProgress.total}`}
+            />
+          </div>
+          {imageProgress.slots.map((slot) => (
+            <div
+              key={slot.id}
+              className={styles.imageSlotLoader}
+              style={{
+                left: slot.x,
+                top: slot.y,
+                width: slot.width,
+                height: slot.height,
+              }}
+            >
+              <span className={styles.imageSpinner} aria-hidden />
+            </div>
+          ))}
+        </>
       ) : null}
       <Excalidraw
         key={excalidrawKey}

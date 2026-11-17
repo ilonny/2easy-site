@@ -10,15 +10,47 @@ import {
 } from "../utils/boardFileStore";
 
 const VIEW_PAD = 0.75;
+const SLOT_MIN_PX = 36;
+
+export type TImageSlot = {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type TImageLoadState = {
+  loaded: number;
+  total: number;
+  slots: TImageSlot[];
+};
+
+const clientSlot = (
+  image: { x: number; y: number; width: number; height: number; id: string },
+  appState: {
+    zoom?: { value?: number };
+    scrollX?: number;
+    scrollY?: number;
+    offsetLeft?: number;
+    offsetTop?: number;
+  },
+): TImageSlot => {
+  const zoom = appState.zoom?.value || 1;
+  return {
+    id: image.id,
+    x: (image.x + (appState.scrollX || 0)) * zoom + (appState.offsetLeft || 0),
+    y: (image.y + (appState.scrollY || 0)) * zoom + (appState.offsetTop || 0),
+    width: image.width * zoom,
+    height: image.height * zoom,
+  };
+};
 
 export const useVisibleBoardFiles = (
   api: ExcalidrawImperativeAPI | null,
   boardId: number,
 ) => {
-  const [imageProgress, setImageProgress] = useState<{
-    loaded: number;
-    total: number;
-  } | null>(null);
+  const [imageProgress, setImageProgress] = useState<TImageLoadState | null>(null);
   const inflightRef = useRef(new Set<string>());
   const cooldownRef = useRef(new Map<string, number>());
 
@@ -41,12 +73,16 @@ export const useVisibleBoardFiles = (
         right: -appState.scrollX + width * (1 + pad),
         bottom: -appState.scrollY + height * (1 + pad),
       };
-      const ids = visibleImageFileIds(api.getSceneElements(), view, zoom);
+      const visible = visibleImageFileIds(api.getSceneElements(), view, zoom);
+      const ids = visible.map((image) => image.id);
       const known = api.getFiles();
+      const hasBinary = (id: string) => {
+        const file = known[id] as { dataURL?: string } | undefined;
+        return !!file?.dataURL;
+      };
       const now = Date.now();
       const missing = ids.filter((id) => {
-        const file = known[id] as { dataURL?: string } | undefined;
-        if (file?.dataURL) return false;
+        if (hasBinary(id)) return false;
         if (inflightRef.current.has(id)) return false;
         const cooldown = cooldownRef.current.get(id) || 0;
         return cooldown <= now;
@@ -62,18 +98,41 @@ export const useVisibleBoardFiles = (
       }
       const remoteMissing = missing.filter((id) => !cached.includes(id));
 
-      const loadedCount =
-        ids.filter((id) => {
-          const file = known[id] as { dataURL?: string } | undefined;
-          return !!file?.dataURL;
-        }).length + cached.length;
-      setImageProgress((current) => {
-        if (!ids.length) return current ? null : current;
-        if (current?.loaded === loadedCount && current.total === ids.length) {
-          return current;
-        }
-        return { loaded: loadedCount, total: ids.length };
-      });
+      const publishProgress = (loadedCount: number) => {
+        const ready = new Set(
+          ids.filter((id) => {
+            const file = api.getFiles()[id] as { dataURL?: string } | undefined;
+            return !!file?.dataURL;
+          }),
+        );
+        cached.forEach((id) => ready.add(id));
+        const slots = visible
+          .filter((image) => !ready.has(image.id))
+          .map((image) => clientSlot(image, appState))
+          .filter((slot) => slot.width >= SLOT_MIN_PX && slot.height >= SLOT_MIN_PX);
+        setImageProgress((current) => {
+          if (!ids.length) return current ? null : current;
+          const sameSlots =
+            current?.slots.length === slots.length &&
+            current.slots.every(
+              (slot, index) =>
+                slot.id === slots[index]?.id &&
+                Math.abs(slot.x - slots[index].x) < 1 &&
+                Math.abs(slot.y - slots[index].y) < 1,
+            );
+          if (
+            current?.loaded === loadedCount &&
+            current.total === ids.length &&
+            sameSlots
+          ) {
+            return current;
+          }
+          return { loaded: loadedCount, total: ids.length, slots };
+        });
+      };
+
+      const loadedCount = ids.filter(hasBinary).length + cached.length;
+      publishProgress(loadedCount);
       if (!remoteMissing.length) return;
 
       remoteMissing.forEach((id) => inflightRef.current.add(id));
@@ -103,6 +162,15 @@ export const useVisibleBoardFiles = (
           if (binaries.length) {
             api.addFiles(binaries as never);
           }
+          if (!cancelled) {
+            const nextKnown = api.getFiles();
+            publishProgress(
+              ids.filter((id) => {
+                const file = nextKnown[id] as { dataURL?: string } | undefined;
+                return !!file?.dataURL;
+              }).length,
+            );
+          }
 
           const found = new Set(
             binaries.map((file) => String(file.id || "")).filter(Boolean),
@@ -117,17 +185,12 @@ export const useVisibleBoardFiles = (
         remoteMissing.forEach((id) => inflightRef.current.delete(id));
         if (!cancelled) {
           const nextKnown = api.getFiles();
-          const nextLoaded = ids.filter((id) => {
-            const file = nextKnown[id] as { dataURL?: string } | undefined;
-            return !!file?.dataURL;
-          }).length;
-          setImageProgress((current) => {
-            if (!ids.length) return null;
-            if (current?.loaded === nextLoaded && current.total === ids.length) {
-              return current;
-            }
-            return { loaded: nextLoaded, total: ids.length };
-          });
+          publishProgress(
+            ids.filter((id) => {
+              const file = nextKnown[id] as { dataURL?: string } | undefined;
+              return !!file?.dataURL;
+            }).length,
+          );
         }
       }
     };

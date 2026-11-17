@@ -128,16 +128,23 @@ export const snapshotForRealtime = (
 
 export type TScenePoint = { x: number; y: number; width: number; height: number };
 
+export type TVisibleImage = {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+/** Images that intersect the viewport. Larger on-screen pictures come first. */
 export const visibleImageFileIds = (
   elements: readonly unknown[],
   view: { left: number; top: number; right: number; bottom: number },
   zoom = 1,
-) => {
-  const ids: string[] = [];
+): TVisibleImage[] => {
+  const hits: Array<TVisibleImage & { score: number }> = [];
   const seen = new Set<string>();
-  // At a far zoom-out the whole board is "visible", but tiny pictures are not
-  // worth their bytes. Load an image once it is large enough to read.
-  const minSceneSize = 80 / Math.max(zoom, 0.01);
+  const safeZoom = Math.max(zoom, 0.01);
   for (const element of elements) {
     if (!element || typeof element !== "object") continue;
     const image = element as {
@@ -153,7 +160,7 @@ export const visibleImageFileIds = (
     if (image.type !== "image" || image.isDeleted || !image.fileId) continue;
     const width = Number(image.width || 0);
     const height = Number(image.height || 0);
-    if (width < minSceneSize && height < minSceneSize) continue;
+    if (width <= 0 || height <= 0) continue;
     const extra = image.angle ? Math.hypot(width, height) : 0;
     const left = Number(image.x || 0) - extra;
     const top = Number(image.y || 0) - extra;
@@ -162,10 +169,18 @@ export const visibleImageFileIds = (
     if (right < view.left || left > view.right || bottom < view.top || top > view.bottom) {
       continue;
     }
-    const fileId = String(image.fileId);
-    if (seen.has(fileId)) continue;
-    seen.add(fileId);
-    ids.push(fileId);
+    const id = String(image.fileId);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    hits.push({
+      id,
+      x: Number(image.x || 0),
+      y: Number(image.y || 0),
+      width,
+      height,
+      score: width * height * safeZoom * safeZoom,
+    });
   }
-  return ids;
+  hits.sort((left, right) => right.score - left.score);
+  return hits.map(({ id, x, y, width, height }) => ({ id, x, y, width, height }));
 };
