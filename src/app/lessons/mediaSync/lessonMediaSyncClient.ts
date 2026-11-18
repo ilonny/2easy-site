@@ -11,6 +11,8 @@ import {
   LESSON_MEDIA_WS_PATH,
   type TLessonMediaKind,
   type TLessonMediaPlayRequest,
+  type TLessonMiniGameDetail,
+  type TLessonMiniGameSend,
   type TLessonTimerState,
   type TLessonTimerStatus,
 } from "./types";
@@ -32,9 +34,14 @@ type TIncoming = {
   ends_at_ms?: number | null;
   remaining_ms?: number | null;
   updated_at_ms?: number;
+  client_event_id?: string;
+  actor_id?: string;
+  revision?: number;
+  state?: Record<string, unknown>;
 };
 
 type TTimerListener = (state: TLessonTimerState) => void;
+type TMiniGameListener = (detail: TLessonMiniGameDetail) => void;
 
 const wsUrl = (lessonId: number) => {
   const token = getTokenFromLocalStorage();
@@ -68,6 +75,9 @@ class LessonMediaSyncClient {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private timerState: TLessonTimerState = IDLE_LESSON_TIMER;
   private timerListeners = new Set<TTimerListener>();
+  private miniGameListeners = new Set<TMiniGameListener>();
+  /** Last mini-game snapshot per ex — survives late exercise mount after WS catch-up. */
+  private lastMiniGameByEx = new Map<number, TLessonMiniGameDetail>();
 
   connect(lessonId: number, role: TRole) {
     this.teardownSocket();
@@ -76,6 +86,7 @@ class LessonMediaSyncClient {
       // last known state until server snapshot arrives.
       this.timerState = IDLE_LESSON_TIMER;
       this.emitTimer(IDLE_LESSON_TIMER);
+      this.lastMiniGameByEx.clear();
     }
     this.lessonId = lessonId;
     this.role = role;
@@ -142,6 +153,34 @@ class LessonMediaSyncClient {
     };
   }
 
+  getLastMiniGame(exId: number) {
+    return this.lastMiniGameByEx.get(exId) || null;
+  }
+
+  subscribeMiniGame(listener: TMiniGameListener) {
+    this.miniGameListeners.add(listener);
+    // Replay cached catch-up so exercises mounted after WS hello still hydrate.
+    this.lastMiniGameByEx.forEach((detail) => {
+      listener(detail);
+    });
+    return () => {
+      this.miniGameListeners.delete(listener);
+    };
+  }
+
+  sendMiniGame(payload: TLessonMiniGameSend) {
+    if (!this.isOpen() || !this.ws) return false;
+    this.ws.send(
+      JSON.stringify({
+        type: "mini_game",
+        ex_id: payload.exId,
+        client_event_id: payload.clientEventId,
+        state: payload.state,
+      }),
+    );
+    return true;
+  }
+
   startTimer(durationSec: number) {
     this.sendTimerCommand({ type: "timer_start", duration_sec: durationSec });
   }
@@ -192,6 +231,31 @@ class LessonMediaSyncClient {
       updatedAtMs: Number(msg.updated_at_ms || serverTimeMs),
       serverTimeMs,
       clockOffsetMs: this.clockOffsetMs,
+    });
+  }
+
+  private applyMiniGameMessage(msg: TIncoming) {
+    const exId = Number(msg.ex_id || 0);
+    const revision = Number(msg.revision || 0);
+    const clientEventId = String(msg.client_event_id || "");
+    const state = msg.state;
+    if (!exId || !revision || !clientEventId) return;
+    if (!state || typeof state !== "object") return;
+    const prev = this.lastMiniGameByEx.get(exId);
+    if (prev && prev.revision >= revision) return;
+    const detail: TLessonMiniGameDetail = {
+      commandId: Number(msg.command_id || 0),
+      exId,
+      clientEventId,
+      actorId: String(msg.actor_id || ""),
+      revision,
+      serverTimeMs: Number(msg.server_time_ms || Date.now()),
+      clockOffsetMs: this.clockOffsetMs,
+      state,
+    };
+    this.lastMiniGameByEx.set(exId, detail);
+    this.miniGameListeners.forEach((listener) => {
+      listener(detail);
     });
   }
 
@@ -247,6 +311,11 @@ class LessonMediaSyncClient {
 
       if (msg.type === "timer") {
         this.applyTimerMessage(msg);
+        return;
+      }
+
+      if (msg.type === "mini_game") {
+        this.applyMiniGameMessage(msg);
         return;
       }
 

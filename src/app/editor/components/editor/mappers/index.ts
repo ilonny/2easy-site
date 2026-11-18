@@ -68,6 +68,31 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return i18n.t("templates.trueFalse", {
         defaultValue: "TRUE / FALSE",
       });
+    case "mini_games":
+    case "mini_game":
+      return i18n.t("templates.miniGames", {
+        defaultValue: "Мини игры",
+      });
+    case "flash-cards":
+      return i18n.t("templates.miniGameFlashCards", {
+        defaultValue: "Flash cards",
+      });
+    case "matching-pairs":
+      return i18n.t("templates.miniGameMatchingPairs", {
+        defaultValue: "Matching pairs",
+      });
+    case "spin-wheel":
+      return i18n.t("templates.miniGameSpinWheel", {
+        defaultValue: "Spin the wheel",
+      });
+    case "hangman":
+      return i18n.t("templates.miniGameHangman", {
+        defaultValue: "Hangman",
+      });
+    case "wordsearch":
+      return i18n.t("templates.miniGameWordsearch", {
+        defaultValue: "Wordsearch",
+      });
     default:
       return type;
   }

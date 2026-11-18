@@ -3,6 +3,7 @@
 export const LESSON_MEDIA_WS_PATH = "/api/lesson/media/ws";
 export const LESSON_MEDIA_PLAY_EVENT = "lesson-media-play";
 export const LESSON_MEDIA_CATCH_UP_MS = 90_000;
+export const LESSON_MINI_GAME_EVENT = "lesson-mini-game";
 
 export type TLessonMediaKind = "audio" | "video";
 
@@ -68,4 +69,21 @@ export const IDLE_LESSON_TIMER: TLessonTimerState = {
   updatedAtMs: 0,
   serverTimeMs: 0,
   clockOffsetMs: 0,
+};
+
+export type TLessonMiniGameDetail = {
+  commandId: number;
+  exId: number;
+  clientEventId: string;
+  actorId: string;
+  revision: number;
+  serverTimeMs: number;
+  clockOffsetMs: number;
+  state: Record<string, unknown>;
+};
+
+export type TLessonMiniGameSend = {
+  exId: number;
+  clientEventId: string;
+  state: Record<string, unknown>;
 };

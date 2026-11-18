@@ -39,6 +39,7 @@ import { FillGapsDragExView } from "../FillGapsDragExView";
 import { FillGapsNewExView } from "../FillGapsNewExView";
 import { UnscrambleWordsExView } from "../UnscrambleWordsExView";
 import { TrueFalseExView } from "../TrueFalseExView";
+import { MiniGameExView } from "../MiniGameExView";
 import { MatchWordWordExView } from "../MatchWordWordExView";
 import { MatchWordImageExView } from "../MatchWordImageExView";
 import { MatchWordColumnExView } from "../MatchWordColumnExView";
@@ -80,6 +81,7 @@ const ANSWER_EX_TYPES = new Set([
   "match-word-column",
   "test",
   "free-input-form",
+  "mini_game",
 ]);
 
 const getExerciseTitle = (data: any) => {
@@ -125,6 +127,7 @@ const VIEWS_WITH_ID: Record<string, ComponentType<any>> = {
   FILL_GAPS_NEW: FillGapsNewExView,
   UNSCRAMBLE_WORDS: UnscrambleWordsExView,
   TRUE_FALSE: TrueFalseExView,
+  mini_game: MiniGameExView,
   "match-word-word": MatchWordWordExView,
   "match-word-image": MatchWordImageExView,
   "match-word-column": MatchWordColumnExView,

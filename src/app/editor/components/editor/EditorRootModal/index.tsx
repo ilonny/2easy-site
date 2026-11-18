@@ -22,6 +22,7 @@ import { IntEx } from "../Int";
 import { FillGapsNew } from "../FillGapsNew";
 import { UnscrambleWords } from "../UnscrambleWords";
 import { TrueFalse } from "../TrueFalse";
+import { MiniGame } from "../MiniGame";
 import { T } from "@/i18n/T";
 import Image from "next/image";
 import CloseIcon from "@/assets/icons/close.svg";
@@ -201,6 +202,13 @@ export const EditorRootModal: FC<TProps> = ({
         return UnscrambleWords;
       case "TRUE_FALSE":
         return TrueFalse;
+      case "mini_game":
+      case "flash-cards":
+      case "matching-pairs":
+      case "spin-wheel":
+      case "hangman":
+      case "wordsearch":
+        return MiniGame;
       default:
     }
   }, [type, chosenExToEdit]);
@@ -303,6 +311,7 @@ export const EditorRootModal: FC<TProps> = ({
               defaultValues={chosenExToEdit ? chosenExToEdit : undefined}
               lastSortIndex={lastSortIndex}
               currentSortIndexToShift={currentSortIndexToShift}
+              templateType={titleType}
             />
           )}
         </ModalBody>

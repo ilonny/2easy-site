@@ -1,0 +1,137 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.question {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.hint {
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.howto {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(63, 40, 198, 0.18);
+  background: #f7f7ff;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #111827;
+  line-height: 1.45;
+}
+
+.modeRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.modeCard {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.modeCardActive {
+  border: 1px solid rgba(63, 40, 198, 0.35);
+  box-shadow: 0px 8px 24px 0px #908ba826;
+}
+
+.modeTitle {
+  font-weight: 800;
+  color: #111827;
+  font-size: 13px;
+}
+
+.modeDesc {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.itemCard {
+  padding: 14px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0px 8px 24px 0px #908ba826;
+  border: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.itemHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.itemLabel {
+  font-weight: 700;
+  color: #111827;
+  font-size: 14px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fieldError {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.addRow {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.optionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.optionLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+}
+
+.flashLayoutGroup {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.flashLayoutLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
