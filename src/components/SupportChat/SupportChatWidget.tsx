@@ -20,6 +20,8 @@ import {
   type TSupportConversation,
   type TSupportMessage,
 } from "./api";
+import { getSupportUserId } from "./access";
+
 function shouldHideOnPath(pathname: string | null) {
   return (
     !!pathname?.includes("/lessons/") || !!pathname?.includes("/grammar/")
@@ -58,13 +60,44 @@ export const SupportChatWidget = () => {
   const wsRef = useRef<WebSocket | null>(null);
   const conversationIdRef = useRef<number | null>(null);
   const openRef = useRef(false);
+  const supportUserId = getSupportUserId(profile);
+  const supportUserIdRef = useRef<number | null>(supportUserId);
+
+  const resetChatState = useCallback(() => {
+    setOpen(false);
+    setConversation(null);
+    setMessages([]);
+    setText("");
+    setUnread(0);
+    setTyping(null);
+    setPendingFiles([]);
+    setLoading(false);
+    setSending(false);
+    conversationIdRef.current = null;
+    wsRef.current?.close();
+    wsRef.current = null;
+  }, []);
+
+  // Logout / switch account — never keep previous user's thread in memory.
+  useEffect(() => {
+    const prev = supportUserIdRef.current;
+    supportUserIdRef.current = supportUserId;
+    if (!isAuthorized || supportUserId == null) {
+      resetChatState();
+      return;
+    }
+    if (prev != null && prev !== supportUserId) {
+      resetChatState();
+    }
+  }, [isAuthorized, supportUserId, resetChatState]);
 
   const visible = useMemo(() => {
     if (!isAuthorized) return false;
     if (profile?.isStudent || profile?.studentId) return false;
+    if (!supportUserId) return false;
     if (shouldHideOnPath(pathname)) return false;
     return true;
-  }, [isAuthorized, profile, pathname]);
+  }, [isAuthorized, profile, pathname, supportUserId]);
 
   const isClosed = conversation?.status === "closed";
 
@@ -138,6 +171,12 @@ export const SupportChatWidget = () => {
         res = await supportGetCurrent();
       }
       if (!res?.conversation) return;
+      if (
+        supportUserIdRef.current != null &&
+        Number(res.conversation.user_id) !== supportUserIdRef.current
+      ) {
+        return;
+      }
       setConversation(res.conversation);
       conversationIdRef.current = res.conversation.id;
       setUnread(Number(res.unread || 0));
@@ -153,6 +192,12 @@ export const SupportChatWidget = () => {
         await new Promise((r) => setTimeout(r, 400));
         const res = await supportGetCurrent();
         if (!res?.conversation) return;
+        if (
+          supportUserIdRef.current != null &&
+          Number(res.conversation.user_id) !== supportUserIdRef.current
+        ) {
+          return;
+        }
         setConversation(res.conversation);
         conversationIdRef.current = res.conversation.id;
         setUnread(Number(res.unread || 0));
@@ -204,6 +249,11 @@ export const SupportChatWidget = () => {
       const ws = openSupportWs({
         onEvent: (data) => {
           if (data?.type === "message" && data.message) {
+            const msgCid = Number(
+              data.message.conversation_id ?? data.conversationId ?? 0,
+            );
+            const cid = conversationIdRef.current;
+            if (cid && msgCid && msgCid !== cid) return;
             mergeMessages([data.message]);
             scrollToBottom();
             if (!openRef.current && data.message.sender !== "user") {
@@ -211,11 +261,18 @@ export const SupportChatWidget = () => {
             }
           }
           if (data?.type === "status" && data.status) {
+            const cid = conversationIdRef.current;
+            if (
+              data.conversationId &&
+              cid &&
+              Number(data.conversationId) !== cid
+            ) {
+              return;
+            }
             setConversation((c) =>
               c ? { ...c, status: data.status } : c,
             );
             // Safety net: takeover / return-AI can race WS subscribe — refetch.
-            const cid = conversationIdRef.current;
             if (cid) void refreshMessages(cid);
           }
           if (data?.type === "typing") {
@@ -260,7 +317,7 @@ export const SupportChatWidget = () => {
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, [visible, mergeMessages, t, subscribeWs, refreshMessages]);
+  }, [visible, supportUserId, mergeMessages, t, subscribeWs, refreshMessages]);
 
   useEffect(() => {
     if (open && visible && !conversation) {
