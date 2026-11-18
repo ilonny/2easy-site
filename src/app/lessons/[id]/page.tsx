@@ -132,6 +132,7 @@ export default function LessonPage() {
 
   const [boardModalOpen, setBoardModalOpen] = useState(false);
   const [participantsOpen, setParticipantsOpen] = useState(false);
+  const [isEditHomeworkLoading, setIsEditHomeworkLoading] = useState(false);
   const dictionaryRef = useRef<LessonDictionaryHandle>(null);
   const boardModalOpenRef = useRef(false);
 
@@ -183,6 +184,52 @@ export default function LessonPage() {
       cancelled = true;
     };
   }, [authIsLoading, lessonIdNum, lockedStudentId, requestedSessionId]);
+
+  const handleEditHomeworkForStudent = useCallback(async () => {
+    const sid = Number(
+      activeStudentId || lockedStudentId || students[0]?.student_id || 0,
+    );
+    const parentLessonId = Number(lesson?.lesson_id_homework || 0);
+    const currentHwId = Number(lessonIdNum || params.id || 0);
+
+    if (sid > 0 && parentLessonId > 0) {
+      setIsEditHomeworkLoading(true);
+      try {
+        const res = await fetchPostJson({
+          path: "/lessons/homework/get-or-create-for-student",
+          isSecure: true,
+          data: {
+            lesson_id: parentLessonId,
+            student_id: sid,
+          },
+        });
+        const data = await res?.json();
+        checkResponse(data);
+        const hwId = Number(data?.homework_lesson_id || currentHwId);
+        if (hwId > 0) {
+          router.push(`/editor/${hwId}?student_id=${sid}`);
+          return;
+        }
+      } catch {
+        toast(i18n.t("lessons.homeworkOpenFailed"), { type: "error" });
+        return;
+      } finally {
+        setIsEditHomeworkLoading(false);
+      }
+    }
+
+    router.push(
+      `/editor/${currentHwId}${sid > 0 ? `?student_id=${sid}` : ""}`,
+    );
+  }, [
+    activeStudentId,
+    lesson?.lesson_id_homework,
+    lessonIdNum,
+    lockedStudentId,
+    params.id,
+    router,
+    students,
+  ]);
 
   const handleAddWordSelection = useCallback(
     (selection: string) => {
@@ -607,11 +654,8 @@ export default function LessonPage() {
                     ) || students[0]
                   )?.["student.email"]
                 }
-                editHref={`/editor/${params.id}${
-                  Number(activeStudentId || lockedStudentId || students[0]?.student_id || 0)
-                    ? `?student_id=${Number(activeStudentId || lockedStudentId || students[0]?.student_id)}`
-                    : ""
-                }`}
+                onEditHomework={handleEditHomeworkForStudent}
+                isEditLoading={isEditHomeworkLoading}
               />
             </div>
           )}

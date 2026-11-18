@@ -194,51 +194,60 @@ export const FillGapsSelectExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
-    isPresentationMode: rest?.isPresentationMode
+    isPresentationMode: rest?.isPresentationMode,
+    syncRemoteToStudent: true,
   });
 
   const skipPersistRef = useRef(false);
+  const lastHydratedRawRef = useRef<string>("");
+
+  const applyRemoteAnswers = useCallback((raw: string) => {
+    if (raw === lastHydratedRawRef.current) return;
+    try {
+      const parsed = JSON.parse(raw);
+      lastHydratedRawRef.current = raw;
+      skipPersistRef.current = true;
+      setLocalAnswers(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      // Ignore malformed payloads; do not arm skipPersist or the next real
+      // student answer would be dropped.
+    }
+  }, []);
 
   useEffect(() => {
     skipPersistRef.current = true;
+    lastHydratedRawRef.current = "";
     setLocalAnswers([]);
   }, [resetSeq]);
 
   useEffect(() => {
     if (student_id) {
       getAnswers(true).then((a) => {
-        try {
-          skipPersistRef.current = true;
-          setLocalAnswers(JSON.parse(a[data.id].answer));
-        } catch (err) {}
+        const raw = a?.[data.id]?.answer;
+        if (typeof raw === "string" && raw) applyRemoteAnswers(raw);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [student_id]);
 
   useEffect(() => {
-    if (!isTeacher) {
-      return;
-    }
-    // Only mirror student answers when viewing a student —
-    // otherwise empty poll wipes local practice progress.
-    if (!rest.activeStudentId) {
-      return;
-    }
-    try {
-      const raw = answers[data.id]?.answer;
-      skipPersistRef.current = true;
-      if (!raw) {
+    const hasTarget = isTeacher ? !!rest.activeStudentId : !!student_id;
+    if (!hasTarget) return;
+    const raw = answers[data.id]?.answer;
+    if (typeof raw !== "string" || !raw) {
+      // Empty poll must not wipe in-progress student work; real reset uses resetSeq.
+      // Important: do not set skipPersistRef here — that would swallow the
+      // student's first answer after mount (answers starts as {}).
+      if (isTeacher) {
+        lastHydratedRawRef.current = "";
+        skipPersistRef.current = true;
         setLocalAnswers([]);
-        return;
       }
-      setLocalAnswers(JSON.parse(raw));
-    } catch (err) {
-      skipPersistRef.current = true;
-      setLocalAnswers([]);
+      return;
     }
+    applyRemoteAnswers(raw);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers, isTeacher, rest.activeStudentId]);
+  }, [answers, isTeacher, rest.activeStudentId, student_id, applyRemoteAnswers]);
 
   useEffect(() => {
     if (skipPersistRef.current) {
@@ -246,7 +255,9 @@ export const FillGapsSelectExView: FC<TProps> = ({
       return;
     }
     if (localAnswers.length) {
-      void writeAnswer(data.id, JSON.stringify(localAnswers));
+      const payload = JSON.stringify(localAnswers);
+      lastHydratedRawRef.current = payload;
+      void writeAnswer(data.id, payload);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localAnswers, writeAnswer]);

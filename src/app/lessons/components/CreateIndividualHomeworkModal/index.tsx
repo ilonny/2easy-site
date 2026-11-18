@@ -269,7 +269,7 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
                 disabled={!canSubmit}
                 onClick={onSubmit}
               >
-                <T k="lessons.createHomework" />
+                <T k="lessons.createPersonalHomework" />
               </Button>
             </>
           )}

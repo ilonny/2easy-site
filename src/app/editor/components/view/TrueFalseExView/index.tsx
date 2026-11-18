@@ -19,6 +19,7 @@ import "react-medium-image-zoom/dist/styles.css";
 import { useParams } from "next/navigation";
 import { AuthContext } from "@/auth";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { getExerciseAnswerAccess } from "@/app/editor/helpers/exerciseAnswerAccess";
 import {
   isTrueFalseSentenceValid,
   TTrueFalseData,
@@ -40,6 +41,7 @@ const TrueFalseExViewImpl: FC<{
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isViewMode = !!(rest as any)?.isView;
   const isPresentationMode = !!(rest as any)?.isPresentationMode;
+  const activeStudentId = (rest as any)?.activeStudentId;
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
@@ -59,16 +61,19 @@ const TrueFalseExViewImpl: FC<{
     return m;
   }, [sentences]);
 
-  const canInteract =
-    isPreview ||
-    !isViewMode ||
-    (!!student_id && !isTeacher) ||
-    (isTeacher && isPresentationMode);
-  const shouldPersistAnswers =
-    !isPreview && isViewMode && !!student_id && !isTeacher;
+  const { canInteract, shouldPersistAnswers } = getExerciseAnswerAccess({
+    isPreview,
+    isViewMode,
+    isTeacher,
+    isPresentationMode,
+    studentId: student_id,
+    activeStudentId,
+  });
 
   const [answersVersion, setAnswersVersion] = useState(0);
   const answersRef = useRef<TAnswersMap>({});
+  const userEditedRef = useRef(false);
+  const lastHydratedRawRef = useRef<string>("");
   const [statusById, setStatusById] = useState<Record<string, TAnswerStatus>>(
     {},
   );
@@ -81,9 +86,10 @@ const TrueFalseExViewImpl: FC<{
     student_id,
     lesson_id,
     ex_id,
-    activeStudentId: (rest as any).activeStudentId,
+    activeStudentId,
     isTeacher,
     isPresentationMode,
+    syncRemoteToStudent: true,
   });
 
   useEffect(() => {
@@ -92,17 +98,23 @@ const TrueFalseExViewImpl: FC<{
       saveTimerRef.current = null;
     }
     answersRef.current = {};
+    userEditedRef.current = false;
+    lastHydratedRawRef.current = "";
     setStatusById({});
     setAnswersVersion((v) => v + 1);
   }, [resetSeq]);
 
-  const hydrateFromRaw = useCallback((raw: string | undefined | null) => {
+  const hydrateFromRaw = useCallback((raw: string | undefined | null, opts?: { allowClear?: boolean }) => {
     if (!raw) {
+      // Empty poll must not wipe in-progress student work; real reset uses resetSeq.
+      if (!opts?.allowClear) return;
       answersRef.current = {};
+      lastHydratedRawRef.current = "";
       setStatusById({});
       setAnswersVersion((v) => v + 1);
       return;
     }
+    if (raw === lastHydratedRawRef.current) return;
     try {
       const parsedRaw = JSON.parse(raw);
       const parsed: TAnswersMap = {};
@@ -116,6 +128,7 @@ const TrueFalseExViewImpl: FC<{
         }
       });
       answersRef.current = parsed;
+      lastHydratedRawRef.current = raw;
       const m: Record<string, TAnswerStatus> = {};
       Object.keys(parsed).forEach((k) => {
         const s = parsed[k]?.status;
@@ -129,22 +142,28 @@ const TrueFalseExViewImpl: FC<{
   useEffect(() => {
     if (isPreview || !student_id) return;
     getAnswers(true).then((a) => {
-      hydrateFromRaw(a?.[data.id as number]?.answer);
+      if (userEditedRef.current) return;
+      hydrateFromRaw(a?.[data.id as number]?.answer, { allowClear: true });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [student_id, isPreview]);
 
   useEffect(() => {
-    if (isPreview || !answers || !isTeacher) return;
-    if (!(rest as any)?.activeStudentId) return;
-    hydrateFromRaw((answers as any)?.[data.id as number]?.answer);
+    if (isPreview || !answers) return;
+    const hasTarget = isTeacher ? !!activeStudentId : !!student_id;
+    if (!hasTarget) return;
+    if (userEditedRef.current) return;
+    hydrateFromRaw((answers as any)?.[data.id as number]?.answer, {
+      allowClear: isTeacher,
+    });
   }, [
     answers,
     data.id,
     hydrateFromRaw,
     isPreview,
     isTeacher,
-    (rest as any)?.activeStudentId,
+    activeStudentId,
+    student_id,
   ]);
 
   const schedulePersist = useCallback(() => {
@@ -153,7 +172,11 @@ const TrueFalseExViewImpl: FC<{
     saveTimerRef.current = window.setTimeout(() => {
       saveTimerRef.current = null;
       try {
-        writeAnswer(data.id as any, JSON.stringify(answersRef.current));
+        const payload = JSON.stringify(answersRef.current);
+        lastHydratedRawRef.current = payload;
+        void writeAnswer(data.id as any, payload).then(() => {
+          userEditedRef.current = false;
+        });
       } catch {}
     }, 400);
   }, [data.id, shouldPersistAnswers, writeAnswer]);
@@ -187,6 +210,7 @@ const TrueFalseExViewImpl: FC<{
       if (current?.status === "correct") return;
 
       const ok = sentence.answer === value;
+      userEditedRef.current = true;
       answersRef.current = {
         ...answersRef.current,
         [sentenceId]: {

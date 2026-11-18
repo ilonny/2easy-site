@@ -818,7 +818,7 @@ export const LessonCard: FC<TProps> = ({
                     setCreateHomeworkModalVisible(true);
                   }}
                 >
-                  <T k="lessons.createHomework" />
+                  <T k="lessons.createPersonalHomework" />
                 </Button>
               )}
             </>
@@ -850,7 +850,7 @@ export const LessonCard: FC<TProps> = ({
                     setCourseHomeworkModalVisible(true);
                   }}
                 >
-                  <T k="lessons.createHomework" />
+                  <T k="lessons.createSharedHomework" />
                 </Button>
               )}
             </>

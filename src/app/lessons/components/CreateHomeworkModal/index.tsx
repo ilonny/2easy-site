@@ -170,7 +170,7 @@ export const CreateHomeworkModal: FC<TProps> = ({
     >
       <ModalContent>
         <ModalHeader>
-          <p><T k="modals.chooseTasksForHomework" /></p>
+          <p><T k="modals.chooseTasksForSharedHomework" /></p>
         </ModalHeader>
         <ModalBody>
           {isChecking && (
@@ -183,7 +183,7 @@ export const CreateHomeworkModal: FC<TProps> = ({
           {!isChecking && (
             <>
               <p className="text-small text-default-500 mb-2">
-                <T k="modals.homeworkCopyHint" />
+                <T k="modals.homeworkSharedCopyHint" />
               </p>
               <div
                 role="button"
@@ -271,7 +271,7 @@ export const CreateHomeworkModal: FC<TProps> = ({
                 disabled={!canSubmit}
                 onClick={onSubmit}
               >
-                <T k="lessons.createHomework" />
+                <T k="lessons.createSharedHomework" />
               </Button>
             </>
           )}

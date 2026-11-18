@@ -27,6 +27,7 @@ import "react-medium-image-zoom/dist/styles.css";
 import { useParams } from "next/navigation";
 import { AuthContext } from "@/auth";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { getExerciseAnswerAccess } from "@/app/editor/helpers/exerciseAnswerAccess";
 import {
   TFillGapsNewData,
   TFillGapsNewGap,
@@ -254,6 +255,7 @@ const FillGapsNewExViewImpl: FC<{
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isViewMode = !!(rest as any)?.isView;
   const isPresentationMode = !!(rest as any)?.isPresentationMode;
+  const activeStudentId = (rest as any)?.activeStudentId;
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
@@ -266,18 +268,20 @@ const FillGapsNewExViewImpl: FC<{
     return m;
   }, [data.gaps]);
 
-  const canInteract =
-    isPreview ||
-    !isViewMode ||
-    (!!student_id && !isTeacher) ||
-    (isTeacher && isPresentationMode);
-  const shouldPersistAnswers =
-    !isPreview && isViewMode && !!student_id && !isTeacher;
+  const { canInteract, shouldPersistAnswers } = getExerciseAnswerAccess({
+    isPreview,
+    isViewMode,
+    isTeacher,
+    isPresentationMode,
+    studentId: student_id,
+    activeStudentId,
+  });
 
   const [answersVersion, setAnswersVersion] = useState(0);
   const [serverHydrationVersion, setServerHydrationVersion] = useState(0);
   const answersRef = useRef<TAnswersMap>({});
   const userEditedRef = useRef(false);
+  const lastHydratedRawRef = useRef<string>("");
   const [statusByGap, setStatusByGap] = useState<Record<string, TAnswerStatus>>(
     {},
   );
@@ -287,9 +291,10 @@ const FillGapsNewExViewImpl: FC<{
     student_id,
     lesson_id,
     ex_id,
-    activeStudentId: (rest as any).activeStudentId,
+    activeStudentId,
     isTeacher,
     isPresentationMode,
+    syncRemoteToStudent: true,
   });
 
   useEffect(() => {
@@ -299,57 +304,16 @@ const FillGapsNewExViewImpl: FC<{
     }
     answersRef.current = {};
     userEditedRef.current = false;
+    lastHydratedRawRef.current = "";
     setStatusByGap({});
     setServerHydrationVersion((v) => v + 1);
     setAnswersVersion((v) => v + 1);
   }, [resetSeq]);
 
-  // initial load for lesson mode
-  useEffect(() => {
-    if (isPreview || !student_id) return;
-    getAnswers(true).then((a) => {
-      try {
-        // Don't overwrite in-progress typing if the student already started
-        if (userEditedRef.current) return;
-        const raw = a?.[data.id]?.answer;
-        if (!raw) return;
-        const parsedRaw = JSON.parse(raw);
-        const parsed: TAnswersMap = {};
-        Object.keys(parsedRaw || {}).forEach((k) => {
-          const v = parsedRaw[k];
-          if (v && typeof v === "object")
-            parsed[k] = { value: v.value, status: v.status };
-          else parsed[k] = { value: String(v || ""), status: "neutral" };
-        });
-        answersRef.current = parsed;
-        const m: Record<string, TAnswerStatus> = {};
-        Object.keys(parsed).forEach((k) => {
-          const s = parsed[k]?.status;
-          if (s) m[k] = s;
-        });
-        setStatusByGap(m);
-        setServerHydrationVersion((v) => v + 1);
-        setAnswersVersion((v) => v + 1);
-      } catch {}
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [student_id, isPreview]);
-
-  // teacher live updates + remote reset sync (only when viewing a student)
-  useEffect(() => {
-    if (isPreview || !answers || !isTeacher) return;
-    if (!(rest as any)?.activeStudentId) return;
+  const hydrateFromRaw = useCallback((raw: string | undefined | null) => {
+    if (!raw) return false;
+    if (raw === lastHydratedRawRef.current) return false;
     try {
-      const raw = (answers as any)?.[data.id]?.answer;
-      if (!raw) {
-        if (Object.keys(answersRef.current || {}).length > 0) {
-          answersRef.current = {};
-          setStatusByGap({});
-          setServerHydrationVersion((v) => v + 1);
-          setAnswersVersion((v) => v + 1);
-        }
-        return;
-      }
       const parsedRaw = JSON.parse(raw);
       const parsed: TAnswersMap = {};
       Object.keys(parsedRaw || {}).forEach((k) => {
@@ -359,6 +323,7 @@ const FillGapsNewExViewImpl: FC<{
         else parsed[k] = { value: String(v || ""), status: "neutral" };
       });
       answersRef.current = parsed;
+      lastHydratedRawRef.current = raw;
       const m: Record<string, TAnswerStatus> = {};
       Object.keys(parsed).forEach((k) => {
         const s = parsed[k]?.status;
@@ -367,8 +332,52 @@ const FillGapsNewExViewImpl: FC<{
       setStatusByGap(m);
       setServerHydrationVersion((v) => v + 1);
       setAnswersVersion((v) => v + 1);
-    } catch {}
-  }, [answers, data.id, isPreview, isTeacher, (rest as any)?.activeStudentId]);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  // initial load for lesson mode
+  useEffect(() => {
+    if (isPreview || !student_id) return;
+    getAnswers(true).then((a) => {
+      // Don't overwrite in-progress typing if the student already started
+      if (userEditedRef.current) return;
+      hydrateFromRaw(a?.[data.id]?.answer);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student_id, isPreview]);
+
+  // Live updates + remote reset sync (teacher viewing student, or student receiving teacher fills)
+  useEffect(() => {
+    if (isPreview || !answers) return;
+    const hasTarget = isTeacher ? !!activeStudentId : !!student_id;
+    if (!hasTarget) return;
+    // Don't clobber in-progress local edits (teacher typing for student, or student typing).
+    if (userEditedRef.current) return;
+    const raw = (answers as any)?.[data.id]?.answer;
+    if (!raw) {
+      // Empty poll must not wipe in-progress student work; real reset uses resetSeq.
+      if (isTeacher && Object.keys(answersRef.current || {}).length > 0) {
+        answersRef.current = {};
+        lastHydratedRawRef.current = "";
+        setStatusByGap({});
+        setServerHydrationVersion((v) => v + 1);
+        setAnswersVersion((v) => v + 1);
+      }
+      return;
+    }
+    hydrateFromRaw(raw);
+  }, [
+    answers,
+    data.id,
+    isPreview,
+    isTeacher,
+    activeStudentId,
+    student_id,
+    hydrateFromRaw,
+  ]);
 
   const schedulePersist = useCallback(() => {
     if (!shouldPersistAnswers) return;
@@ -376,7 +385,13 @@ const FillGapsNewExViewImpl: FC<{
     saveTimerRef.current = window.setTimeout(() => {
       saveTimerRef.current = null;
       try {
-        writeAnswer(data.id as any, JSON.stringify(answersRef.current));
+        const payload = JSON.stringify(answersRef.current);
+        // Mark as hydrated before write resolves so the echo setAnswers
+        // from writeAnswer does not re-render the whole exercise.
+        lastHydratedRawRef.current = payload;
+        void writeAnswer(data.id as any, payload).then(() => {
+          userEditedRef.current = false;
+        });
       } catch {}
     }, 400);
   }, [data.id, shouldPersistAnswers, writeAnswer]);

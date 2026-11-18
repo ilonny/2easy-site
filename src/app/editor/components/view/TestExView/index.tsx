@@ -417,6 +417,7 @@ export const TestExView: FC<TProps> = ({
     activeStudentId,
     isTeacher,
     isPresentationMode,
+    syncRemoteToStudent: true,
   });
 
   // useEffect(() => {
@@ -471,17 +472,34 @@ export const TestExView: FC<TProps> = ({
   }, [activeIndex, data.questions, writeAnswer, setAnswers]);
 
   const skipInitialStepWrite = useRef(true);
+  // Switching student briefly clears answers (index/score → 0); skip that write.
   useEffect(() => {
-    // Teachers without student_id can't persist answers — skip noop writes.
-    // Skip the first run so opening the lesson does not overwrite saved step/score with 0.
-    if (!student_id) return;
+    skipInitialStepWrite.current = true;
+  }, [activeStudentId]);
+
+  useEffect(() => {
+    // Persist step/score for the student, or for the teacher acting as that student.
+    const canPersistStep =
+      !!student_id ||
+      (!!isTeacher && !!activeStudentId && !isPresentationMode);
+    if (!canPersistStep) return;
+    // Skip the first run so opening the lesson / switching student does not
+    // overwrite saved step/score with 0 before hydrate finishes.
     if (skipInitialStepWrite.current) {
       skipInitialStepWrite.current = false;
       return;
     }
     writeAnswer("step", activeIndex.toString());
     writeAnswer("score", score.toString());
-  }, [activeIndex, writeAnswer, score, student_id]);
+  }, [
+    activeIndex,
+    writeAnswer,
+    score,
+    student_id,
+    isTeacher,
+    activeStudentId,
+    isPresentationMode,
+  ]);
 
   useEffect(() => {
     if (!isTeacher) {

@@ -12,7 +12,7 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   brandDangerBtnClassName,
   brandModalClassNames,
@@ -61,6 +61,7 @@ export default function EditorPage() {
   withLogin();
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const lessonId = parseRouteId(params?.id);
   const contextStudentId = Number(searchParams?.get("student_id") || 0) || 0;
   const { profile } = useContext(AuthContext);
@@ -75,6 +76,7 @@ export default function EditorPage() {
     name?: string;
     email?: string;
   } | null>(null);
+  const [isPersonalHomework, setIsPersonalHomework] = useState(false);
   const [exCreateTemplateModal, setExCreateTemplateModal] = useState(false);
   const [editorModal, setEditorModal] = useState(false);
   const [chosenTemplate, setChosenTemplate] = useState<TTemplate | null>(null);
@@ -159,6 +161,78 @@ export default function EditorPage() {
       cancelled = true;
     };
   }, [contextStudentId]);
+
+  // Student-scoped homework edit must land on a personal copy (fork shared template).
+  useEffect(() => {
+    if (!contextStudentId || !lessonId || !lesson?.lesson_id_homework) {
+      setIsPersonalHomework(false);
+      return;
+    }
+
+    let cancelled = false;
+    const parentLessonId = Number(lesson.lesson_id_homework);
+    const currentId = Number(lessonId);
+
+    void (async () => {
+      try {
+        const resolveRes = await fetchPostJson({
+          path: "/lessons/homework/resolve-for-student",
+          isSecure: true,
+          data: {
+            lesson_id: parentLessonId,
+            student_id: contextStudentId,
+          },
+        });
+        const resolveData = await resolveRes?.json();
+        if (cancelled) return;
+
+        if (
+          resolveData?.has_individual_homework &&
+          Number(resolveData?.homework_lesson_id) > 0
+        ) {
+          const personalId = Number(resolveData.homework_lesson_id);
+          setIsPersonalHomework(true);
+          if (personalId !== currentId) {
+            router.replace(
+              `/editor/${personalId}?student_id=${contextStudentId}`,
+            );
+          }
+          return;
+        }
+
+        const createRes = await fetchPostJson({
+          path: "/lessons/homework/get-or-create-for-student",
+          isSecure: true,
+          data: {
+            lesson_id: parentLessonId,
+            student_id: contextStudentId,
+          },
+        });
+        const createData = await createRes?.json();
+        if (cancelled) return;
+        const personalId = Number(createData?.homework_lesson_id || 0);
+        if (personalId > 0) {
+          setIsPersonalHomework(true);
+          if (personalId !== currentId) {
+            router.replace(
+              `/editor/${personalId}?student_id=${contextStudentId}`,
+            );
+          }
+        }
+      } catch {
+        if (!cancelled) setIsPersonalHomework(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    contextStudentId,
+    lesson?.lesson_id_homework,
+    lessonId,
+    router,
+  ]);
 
   const onChooseTemplate = useCallback((template: TTemplate) => {
     setExCreateTemplateModal(false);
@@ -332,7 +406,7 @@ export default function EditorPage() {
                 studentName={contextStudent?.name}
                 studentEmail={contextStudent?.email}
                 isPersonalHomework={
-                  !!lesson?.lesson_id_homework && !!contextStudentId
+                  !!lesson?.lesson_id_homework && isPersonalHomework
                 }
                 actions={
                   <>
@@ -478,7 +552,7 @@ export default function EditorPage() {
                     >
                       {lesson?.homework_lesson_id
                         ? "Homework"
-                        : <T k="lessons.createHomework" />}
+                        : <T k="lessons.createSharedHomework" />}
                     </Button>
                   </Card>
                 )}

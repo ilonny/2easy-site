@@ -77,6 +77,7 @@ export const MatchWordWordExView: FC<TProps> = ({
     activeStudentId: rest.activeStudentId,
     isTeacher,
     isPresentationMode: rest?.isPresentationMode,
+    syncRemoteToStudent: true,
   });
 
   const [selectedLeftId, setSelectedLeftId] = useState<string | number | undefined>(undefined);
@@ -86,21 +87,26 @@ export const MatchWordWordExView: FC<TProps> = ({
   const [correctIds, setCorrectIds] = useState<Array<string | number>>([]);
   const [incorrectIdsMap, setIncorrectIdsMap] = useState<Record<string, any>>({});
 
+  const lastHydratedRawRef = useRef<string>("");
+
   const persist = useCallback(
     (
       nextCorrect: Array<string | number>,
       nextIncorrect: Record<string, any>
     ) => {
       if (!nextCorrect.length && !Object.keys(nextIncorrect).length) return;
-      void writeAnswer(
-        data.id,
-        JSON.stringify({ correctIds: nextCorrect, incorrectIdsMap: nextIncorrect })
-      );
+      const payload = JSON.stringify({
+        correctIds: nextCorrect,
+        incorrectIdsMap: nextIncorrect,
+      });
+      lastHydratedRawRef.current = payload;
+      void writeAnswer(data.id, payload);
     },
     [data.id, writeAnswer]
   );
 
   useEffect(() => {
+    lastHydratedRawRef.current = "";
     setCorrectIds([]);
     setIncorrectIdsMap({});
     setSelectedLeftId(undefined);
@@ -269,30 +275,33 @@ export const MatchWordWordExView: FC<TProps> = ({
   }, [student_id]);
 
   useEffect(() => {
-    if (!isTeacher) {
-      return;
-    }
-    // Only mirror student answers when viewing a student —
-    // otherwise empty poll wipes local practice progress.
-    if (!rest.activeStudentId) {
-      return;
-    }
+    const hasTarget = isTeacher ? !!rest.activeStudentId : !!student_id;
+    if (!hasTarget) return;
     try {
       const raw = answers[data.id]?.answer ?? answers[String(data.id)]?.answer;
       if (!raw) {
-        setCorrectIds([]);
-        setIncorrectIdsMap({});
+        // Empty poll must not wipe in-progress student work; real reset uses resetSeq.
+        if (isTeacher) {
+          lastHydratedRawRef.current = "";
+          setCorrectIds([]);
+          setIncorrectIdsMap({});
+        }
         return;
       }
+      if (raw === lastHydratedRawRef.current) return;
       const parsedIds = parseSavedAnswer(raw);
+      lastHydratedRawRef.current = raw;
       setCorrectIds(parsedIds?.correctIds || []);
       setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
     } catch {
-      setCorrectIds([]);
-      setIncorrectIdsMap({});
+      if (isTeacher) {
+        lastHydratedRawRef.current = "";
+        setCorrectIds([]);
+        setIncorrectIdsMap({});
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers, isTeacher, rest.activeStudentId]);
+  }, [answers, isTeacher, rest.activeStudentId, student_id]);
 
   return (
     <div className="exercise-view-shell max-w-[886px]">

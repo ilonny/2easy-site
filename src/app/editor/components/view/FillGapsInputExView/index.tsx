@@ -19,6 +19,7 @@ import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import { useParams } from "next/navigation";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { canTeacherActForStudent } from "@/app/editor/helpers/exerciseAnswerAccess";
 import {
   collectGapIds,
   maxOptionTextLength,
@@ -65,6 +66,14 @@ const AnswerField: FC<{
   writeAnswerRef.current = writeAnswer;
   latestValueRef.current = selectedValue;
 
+  const canPersist = canTeacherActForStudent({
+    isTeacher,
+    isPresentationMode,
+    activeStudentId,
+  })
+    ? true
+    : !isTeacher;
+
   const isCorrect = useMemo(() => {
     return !!field?.options?.find((o) => {
       const mappedValue = o.value.toLowerCase()?.trim()?.replaceAll("’", "'");
@@ -77,26 +86,32 @@ const AnswerField: FC<{
   }, [selectedValue, field?.options]);
 
   const flushPersist = useCallback(() => {
-    if (isTeacher) return;
+    if (!canPersist) return;
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
       saveTimerRef.current = null;
     }
     const val = latestValueRef.current;
-    void writeAnswerRef.current(field.id, val);
-  }, [field.id, isTeacher]);
+    void writeAnswerRef.current(field.id, val).then(() => {
+      dirtyRef.current = false;
+    });
+  }, [field.id, canPersist]);
 
   const schedulePersist = useCallback(
     (val: string) => {
-      if (isTeacher) return;
+      if (!canPersist) return;
       latestValueRef.current = val;
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => {
         saveTimerRef.current = null;
-        void writeAnswerRef.current(field.id, latestValueRef.current);
+        void writeAnswerRef.current(field.id, latestValueRef.current).then(
+          () => {
+            dirtyRef.current = false;
+          },
+        );
       }, PERSIST_DEBOUNCE_MS);
     },
-    [field.id, isTeacher],
+    [field.id, canPersist],
   );
 
   const onChangeSelection = useCallback(
@@ -108,30 +123,22 @@ const AnswerField: FC<{
     [schedulePersist],
   );
 
-  // Student: apply remote value only when not editing locally
+  // Apply remote value only when not editing locally (student or teacher-for-student)
   useEffect(() => {
-    if (isTeacher) return;
     if (focusedRef.current || dirtyRef.current) return;
+    if (isTeacher && (!activeStudentId || isPresentationMode)) return;
     const fromServer = getAnswer(field?.id);
     if (fromServer !== undefined && fromServer !== latestValueRef.current) {
       setSelectedValue(fromServer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [syncToken, field?.id, getAnswer, isTeacher]);
-
-  // Teacher: live sync only when viewing a student (don't wipe solo practice)
-  useEffect(() => {
-    if (!isTeacher || isPresentationMode) return;
-    if (!activeStudentId) return;
-    setSelectedValue(getAnswer(field?.id) || "");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    isTeacher,
     syncToken,
     field?.id,
-    isPresentationMode,
-    activeStudentId,
     getAnswer,
+    isTeacher,
+    activeStudentId,
+    isPresentationMode,
   ]);
 
   useEffect(() => {
@@ -139,12 +146,12 @@ const AnswerField: FC<{
       if (saveTimerRef.current) {
         clearTimeout(saveTimerRef.current);
         saveTimerRef.current = null;
-        if (!isTeacher && dirtyRef.current) {
+        if (canPersist && dirtyRef.current) {
           void writeAnswerRef.current(field.id, latestValueRef.current);
         }
       }
     };
-  }, [field.id, isTeacher]);
+  }, [field.id, canPersist]);
 
   return (
     <Input
@@ -203,6 +210,7 @@ export const FillGapsInputExViewComp: FC<TProps> = ({
     isTeacher,
     activeStudentId,
     isPresentationMode,
+    syncRemoteToStudent: true,
   });
 
   const answersRef = useRef(answers);

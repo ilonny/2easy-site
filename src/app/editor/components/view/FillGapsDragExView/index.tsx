@@ -298,22 +298,28 @@ export const FillGapsDragExView: FC<TProps> = ({
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
-    isPresentationMode: rest?.isPresentationMode
+    isPresentationMode: rest?.isPresentationMode,
+    syncRemoteToStudent: true,
   });
+
+  const lastHydratedRawRef = useRef<string>("");
 
   const persist = useCallback(
     (nextCorrect: number[], nextIncorrect: Record<string, string>) => {
       if (isPreview) return;
       if (!nextCorrect.length && !Object.keys(nextIncorrect).length) return;
-      void writeAnswer(
-        data.id,
-        JSON.stringify({ correctIds: nextCorrect, incorrectIdsMap: nextIncorrect })
-      );
+      const payload = JSON.stringify({
+        correctIds: nextCorrect,
+        incorrectIdsMap: nextIncorrect,
+      });
+      lastHydratedRawRef.current = payload;
+      void writeAnswer(data.id, payload);
     },
     [data.id, isPreview, writeAnswer]
   );
 
   useEffect(() => {
+    lastHydratedRawRef.current = "";
     setCorrectIds([]);
     setIncorrectIdsMap({});
   }, [resetSeq]);
@@ -373,7 +379,10 @@ export const FillGapsDragExView: FC<TProps> = ({
     if (student_id) {
       getAnswers(true).then((a) => {
         try {
-          const parsedIds = JSON.parse(a?.[data.id]?.answer || "{}");
+          const raw = a?.[data.id]?.answer || "";
+          if (!raw) return;
+          const parsedIds = JSON.parse(raw);
+          lastHydratedRawRef.current = raw;
           setCorrectIds(parsedIds?.correctIds || []);
           setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
         } catch (err) {}
@@ -383,30 +392,33 @@ export const FillGapsDragExView: FC<TProps> = ({
   }, [student_id]);
 
   useEffect(() => {
-    if (!isTeacher) {
-      return;
-    }
-    // Only mirror student answers when viewing a student —
-    // otherwise empty poll wipes local practice progress.
-    if (!rest.activeStudentId) {
-      return;
-    }
+    const hasTarget = isTeacher ? !!rest.activeStudentId : !!student_id;
+    if (!hasTarget) return;
     try {
       const raw = answers[data.id]?.answer;
       if (!raw) {
-        setCorrectIds([]);
-        setIncorrectIdsMap({});
+        // Empty poll must not wipe in-progress student work; real reset uses resetSeq.
+        if (isTeacher) {
+          lastHydratedRawRef.current = "";
+          setCorrectIds([]);
+          setIncorrectIdsMap({});
+        }
         return;
       }
+      if (raw === lastHydratedRawRef.current) return;
       const parsedIds = JSON.parse(raw);
+      lastHydratedRawRef.current = raw;
       setCorrectIds(parsedIds?.correctIds || []);
       setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
     } catch (err) {
-      setCorrectIds([]);
-      setIncorrectIdsMap({});
+      if (isTeacher) {
+        lastHydratedRawRef.current = "";
+        setCorrectIds([]);
+        setIncorrectIdsMap({});
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers, isTeacher, rest.activeStudentId]);
+  }, [answers, isTeacher, rest.activeStudentId, student_id]);
 
   useEffect(() => {
     renderContent();

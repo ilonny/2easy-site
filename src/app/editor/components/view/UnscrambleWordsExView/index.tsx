@@ -20,6 +20,7 @@ import "react-medium-image-zoom/dist/styles.css";
 import { useParams } from "next/navigation";
 import { AuthContext } from "@/auth";
 import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
+import { getExerciseAnswerAccess } from "@/app/editor/helpers/exerciseAnswerAccess";
 import {
   normalizeUnscrambleToken,
   TUnscrambleSentence,
@@ -81,6 +82,7 @@ const UnscrambleWordsExViewImpl: FC<{
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isViewMode = !!(rest as any)?.isView;
   const isPresentationMode = !!(rest as any)?.isPresentationMode;
+  const activeStudentId = (rest as any)?.activeStudentId;
 
   const lesson_id = useParams()?.id;
   const student_id = profile?.studentId;
@@ -100,17 +102,20 @@ const UnscrambleWordsExViewImpl: FC<{
     return m;
   }, [sentences]);
 
-  const canInteract =
-    isPreview ||
-    !isViewMode ||
-    (!!student_id && !isTeacher) ||
-    (isTeacher && isPresentationMode);
-  const shouldPersistAnswers =
-    !isPreview && isViewMode && !!student_id && !isTeacher;
+  const { canInteract, shouldPersistAnswers } = getExerciseAnswerAccess({
+    isPreview,
+    isViewMode,
+    isTeacher,
+    isPresentationMode,
+    studentId: student_id,
+    activeStudentId,
+  });
 
   const [answersVersion, setAnswersVersion] = useState(0);
   const [serverHydrationVersion, setServerHydrationVersion] = useState(0);
   const answersRef = useRef<TAnswersMap>({});
+  const userEditedRef = useRef(false);
+  const lastHydratedRawRef = useRef<string>("");
   const [statusBySlot, setStatusBySlot] = useState<
     Record<string, TAnswerStatus>
   >({});
@@ -120,9 +125,10 @@ const UnscrambleWordsExViewImpl: FC<{
     student_id,
     lesson_id,
     ex_id,
-    activeStudentId: (rest as any).activeStudentId,
+    activeStudentId,
     isTeacher,
     isPresentationMode,
+    syncRemoteToStudent: true,
   });
 
   useEffect(() => {
@@ -131,57 +137,17 @@ const UnscrambleWordsExViewImpl: FC<{
       saveTimerRef.current = null;
     }
     answersRef.current = {};
+    userEditedRef.current = false;
+    lastHydratedRawRef.current = "";
     setStatusBySlot({});
     setServerHydrationVersion((v) => v + 1);
     setAnswersVersion((v) => v + 1);
   }, [resetSeq]);
 
-  useEffect(() => {
-    if (isPreview || !student_id) return;
-    getAnswers(true).then((a) => {
-      try {
-        const raw = a?.[data.id as number]?.answer;
-        if (!raw) return;
-        const parsedRaw = JSON.parse(raw);
-        const parsed: TAnswersMap = {};
-        Object.keys(parsedRaw || {}).forEach((k) => {
-          const v = parsedRaw[k];
-          if (v && typeof v === "object")
-            parsed[k] = {
-              value: v.value,
-              status: v.status,
-              tokenId: v.tokenId,
-            };
-          else parsed[k] = { value: String(v || ""), status: "neutral" };
-        });
-        answersRef.current = parsed;
-        const m: Record<string, TAnswerStatus> = {};
-        Object.keys(parsed).forEach((k) => {
-          const s = parsed[k]?.status;
-          if (s) m[k] = s;
-        });
-        setStatusBySlot(m);
-        setServerHydrationVersion((v) => v + 1);
-        setAnswersVersion((v) => v + 1);
-      } catch {}
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [student_id, isPreview]);
-
-  useEffect(() => {
-    if (isPreview || !answers || !isTeacher) return;
-    if (!(rest as any)?.activeStudentId) return;
+  const hydrateFromRaw = useCallback((raw: string | undefined | null) => {
+    if (!raw) return false;
+    if (raw === lastHydratedRawRef.current) return false;
     try {
-      const raw = (answers as any)?.[data.id as number]?.answer;
-      if (!raw) {
-        if (Object.keys(answersRef.current || {}).length > 0) {
-          answersRef.current = {};
-          setStatusBySlot({});
-          setServerHydrationVersion((v) => v + 1);
-          setAnswersVersion((v) => v + 1);
-        }
-        return;
-      }
       const parsedRaw = JSON.parse(raw);
       const parsed: TAnswersMap = {};
       Object.keys(parsedRaw || {}).forEach((k) => {
@@ -195,6 +161,7 @@ const UnscrambleWordsExViewImpl: FC<{
         else parsed[k] = { value: String(v || ""), status: "neutral" };
       });
       answersRef.current = parsed;
+      lastHydratedRawRef.current = raw;
       const m: Record<string, TAnswerStatus> = {};
       Object.keys(parsed).forEach((k) => {
         const s = parsed[k]?.status;
@@ -203,8 +170,48 @@ const UnscrambleWordsExViewImpl: FC<{
       setStatusBySlot(m);
       setServerHydrationVersion((v) => v + 1);
       setAnswersVersion((v) => v + 1);
-    } catch {}
-  }, [answers, data.id, isPreview, isTeacher, (rest as any)?.activeStudentId]);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isPreview || !student_id) return;
+    getAnswers(true).then((a) => {
+      if (userEditedRef.current) return;
+      hydrateFromRaw(a?.[data.id as number]?.answer);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student_id, isPreview]);
+
+  useEffect(() => {
+    if (isPreview || !answers) return;
+    const hasTarget = isTeacher ? !!activeStudentId : !!student_id;
+    if (!hasTarget) return;
+    if (userEditedRef.current) return;
+    const raw = (answers as any)?.[data.id as number]?.answer;
+    if (!raw) {
+      // Empty poll must not wipe in-progress student work; real reset uses resetSeq.
+      if (isTeacher && Object.keys(answersRef.current || {}).length > 0) {
+        answersRef.current = {};
+        lastHydratedRawRef.current = "";
+        setStatusBySlot({});
+        setServerHydrationVersion((v) => v + 1);
+        setAnswersVersion((v) => v + 1);
+      }
+      return;
+    }
+    hydrateFromRaw(raw);
+  }, [
+    answers,
+    data.id,
+    isPreview,
+    isTeacher,
+    activeStudentId,
+    student_id,
+    hydrateFromRaw,
+  ]);
 
   const schedulePersist = useCallback(() => {
     if (!shouldPersistAnswers) return;
@@ -212,7 +219,11 @@ const UnscrambleWordsExViewImpl: FC<{
     saveTimerRef.current = window.setTimeout(() => {
       saveTimerRef.current = null;
       try {
-        writeAnswer(data.id as any, JSON.stringify(answersRef.current));
+        const payload = JSON.stringify(answersRef.current);
+        lastHydratedRawRef.current = payload;
+        void writeAnswer(data.id as any, payload).then(() => {
+          userEditedRef.current = false;
+        });
       } catch {}
     }, 400);
   }, [data.id, shouldPersistAnswers, writeAnswer]);
@@ -244,6 +255,7 @@ const UnscrambleWordsExViewImpl: FC<{
       status: TAnswerStatus,
       tokenId?: string,
     ) => {
+      userEditedRef.current = true;
       answersRef.current = {
         ...answersRef.current,
         [answerKey]: { value, status, tokenId },

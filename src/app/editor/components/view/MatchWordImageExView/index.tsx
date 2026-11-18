@@ -380,7 +380,10 @@ export const MatchWordImageExView: FC<TProps> = ({
     activeStudentId: rest.activeStudentId,
     isTeacher,
     isPresentationMode: rest?.isPresentationMode,
+    syncRemoteToStudent: true,
   });
+
+  const lastHydratedRawRef = useRef<string>("");
 
   const persist = useCallback(
     (
@@ -391,21 +394,23 @@ export const MatchWordImageExView: FC<TProps> = ({
       if (!nextCorrect.length && !Object.keys(nextIncorrect).length) {
         return;
       }
-      void writeAnswer(
-        data.id,
-        JSON.stringify({
-          correctIds: nextCorrect,
-          incorrectIdsMap: nextIncorrect,
-          viewType,
-        })
-      );
+      const payload = JSON.stringify({
+        correctIds: nextCorrect,
+        incorrectIdsMap: nextIncorrect,
+        viewType,
+      });
+      lastHydratedRawRef.current = payload;
+      void writeAnswer(data.id, payload);
     },
     [data.id, isPreview, viewType, writeAnswer]
   );
 
   const applyParsed = useCallback(
     (raw: unknown) => {
+      const rawStr = typeof raw === "string" ? raw : JSON.stringify(raw ?? "");
+      if (rawStr === lastHydratedRawRef.current) return;
       const parsed = parseSavedAnswer(raw, viewType);
+      lastHydratedRawRef.current = rawStr;
       setCorrectIds(parsed.correctIds || []);
       setIncorrectIdsMap(parsed.incorrectIdsMap || {});
     },
@@ -413,6 +418,7 @@ export const MatchWordImageExView: FC<TProps> = ({
   );
 
   const clearLocal = useCallback(() => {
+    lastHydratedRawRef.current = "";
     setCorrectIds([]);
     setIncorrectIdsMap({});
     setActiveChip("");
@@ -478,22 +484,19 @@ export const MatchWordImageExView: FC<TProps> = ({
   }, [student_id]);
 
   useEffect(() => {
-    if (!isTeacher) {
-      return;
-    }
-    // Only mirror student answers when viewing a student —
-    // otherwise empty poll wipes local practice progress.
-    if (!rest.activeStudentId) {
-      return;
-    }
+    // Teacher: only when viewing a student (don't wipe solo practice).
+    // Student: live updates when teacher fills answers on their behalf.
+    const hasTarget = isTeacher ? !!rest.activeStudentId : !!student_id;
+    if (!hasTarget) return;
     const raw = answers[data.id]?.answer ?? answers[String(data.id)]?.answer;
     if (!raw) {
-      clearLocal();
+      // Empty poll must not wipe in-progress student work; real reset uses resetSeq.
+      if (isTeacher) clearLocal();
       return;
     }
     applyParsed(raw);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers, isTeacher, rest.activeStudentId, viewType]);
+  }, [answers, isTeacher, rest.activeStudentId, student_id, viewType]);
 
   return (
     <div

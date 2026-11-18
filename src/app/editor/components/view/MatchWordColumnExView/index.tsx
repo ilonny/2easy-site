@@ -222,14 +222,16 @@ export const MatchWordColumnExView: FC<TProps> = ({
   }, [rest?.isPresentationMode]);
 
   const { writeAnswer, answers, getAnswers, resetSeq } = useExAnswer({
-
     student_id,
     lesson_id,
     ex_id,
     activeStudentId: rest.activeStudentId,
     isTeacher,
     isPresentationMode: rest?.isPresentationMode,
+    syncRemoteToStudent: true,
   });
+
+  const lastHydratedRawRef = useRef<string>("");
 
   const persist = useCallback(
     (
@@ -238,18 +240,18 @@ export const MatchWordColumnExView: FC<TProps> = ({
     ) => {
       if (isPreview) return;
       if (!nextCorrect.length && !Object.keys(nextIncorrect).length) return;
-      void writeAnswer(
-        data.id,
-        JSON.stringify({
-          correctIds: nextCorrect,
-          incorrectIdsMap: nextIncorrect,
-        })
-      );
+      const payload = JSON.stringify({
+        correctIds: nextCorrect,
+        incorrectIdsMap: nextIncorrect,
+      });
+      lastHydratedRawRef.current = payload;
+      void writeAnswer(data.id, payload);
     },
     [data.id, isPreview, writeAnswer]
   );
 
   useEffect(() => {
+    lastHydratedRawRef.current = "";
     setCorrectChips([]);
     setIncorrectIdsMap({});
   }, [resetSeq]);
@@ -319,28 +321,35 @@ export const MatchWordColumnExView: FC<TProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [student_id]);
 
-  // Only mirror server answers when teacher is viewing a student —
-  // otherwise empty poll wipes local practice drops.
+  // Mirror server answers for teacher→student view and live teacher fills for the student.
   useEffect(() => {
-    if (!isTeacher || !rest.activeStudentId) {
-      return;
-    }
+    const hasTarget = isTeacher ? !!rest.activeStudentId : !!student_id;
+    if (!hasTarget) return;
     try {
       const raw = answers[data.id]?.answer;
       if (!raw) {
-        setCorrectChips([]);
-        setIncorrectIdsMap({});
+        // Empty poll must not wipe in-progress student work; real reset uses resetSeq.
+        if (isTeacher) {
+          lastHydratedRawRef.current = "";
+          setCorrectChips([]);
+          setIncorrectIdsMap({});
+        }
         return;
       }
+      if (raw === lastHydratedRawRef.current) return;
       const parsedIds = JSON.parse(raw);
+      lastHydratedRawRef.current = raw;
       setCorrectChips(parsedIds?.correctIds || []);
       setIncorrectIdsMap(parsedIds?.incorrectIdsMap || {});
     } catch (err) {
-      setCorrectChips([]);
-      setIncorrectIdsMap({});
+      if (isTeacher) {
+        lastHydratedRawRef.current = "";
+        setCorrectChips([]);
+        setIncorrectIdsMap({});
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers, isTeacher, rest.activeStudentId]);
+  }, [answers, isTeacher, rest.activeStudentId, student_id]);
 
   return (
     <div

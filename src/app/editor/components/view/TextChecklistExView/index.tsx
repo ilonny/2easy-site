@@ -46,13 +46,15 @@ export const TextChecklistExView: FC<TProps> = ({
     activeStudentId: rest.activeStudentId,
     isTeacher,
     isPresentationMode: rest?.isPresentationMode,
+    syncRemoteToStudent: true,
   });
 
   useEffect(() => {
-    if (student_id) {
+    if (student_id || rest.activeStudentId) {
       getAnswers(true);
     }
-  }, [student_id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [student_id, rest.activeStudentId]);
 
   return (
     <div className="exercise-view-shell max-w-[886px]">

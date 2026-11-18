@@ -12,6 +12,8 @@ type TProps = {
   /** personal student copy vs shared template */
   isPersonalHomework?: boolean;
   editHref?: string;
+  onEditHomework?: () => void;
+  isEditLoading?: boolean;
   sticky?: boolean;
   actions?: ReactNode;
 };
@@ -22,6 +24,8 @@ export const LessonModeBanner: FC<TProps> = ({
   studentEmail,
   isPersonalHomework,
   editHref,
+  onEditHomework,
+  isEditLoading,
   sticky = false,
   actions,
 }) => {
@@ -41,12 +45,14 @@ export const LessonModeBanner: FC<TProps> = ({
 
   const hintKey =
     mode === "homework-edit"
-      ? studentName || isPersonalHomework
+      ? isPersonalHomework
         ? "editor.homeworkPersonalHint"
         : "editor.homeworkSharedHint"
       : mode === "homework-check"
         ? "lessons.homeworkCheckHint"
         : undefined;
+
+  const showEditButton = !!onEditHomework || !!editHref;
 
   return (
     <div
@@ -85,16 +91,26 @@ export const LessonModeBanner: FC<TProps> = ({
         </div>
         <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           {actions}
-          {!!editHref && (
-            <Link href={editHref} className="w-full sm:w-auto">
+          {showEditButton &&
+            (onEditHomework ? (
               <Button
                 color="primary"
                 className="min-h-10 w-full touch-manipulation px-4 font-bold tracking-brand sm:w-auto"
+                isLoading={!!isEditLoading}
+                onPress={onEditHomework}
               >
                 <T k="lessons.editHomework" />
               </Button>
-            </Link>
-          )}
+            ) : (
+              <Link href={editHref!} className="w-full sm:w-auto">
+                <Button
+                  color="primary"
+                  className="min-h-10 w-full touch-manipulation px-4 font-bold tracking-brand sm:w-auto"
+                >
+                  <T k="lessons.editHomework" />
+                </Button>
+              </Link>
+            ))}
         </div>
       </div>
     </div>
