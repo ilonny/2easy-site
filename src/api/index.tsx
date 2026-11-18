@@ -41,8 +41,12 @@ const matchesDomain = (hostname: string, domain: string) =>
 export const getBaseUrl = () => {
   if (typeof window === "undefined") return envBaseUrl();
   const { protocol, hostname } = window.location;
-  if (protocol !== "https:") return DIRECT_IP_BASE_URL;
   const host = hostname.toLowerCase();
+  // Localhost → prod API (NEXT_PUBLIC_BASE_URL), not local backend
+  if (host === "localhost" || host === "127.0.0.1") {
+    return (envBaseUrl() || DIRECT_IP_BASE_URL).replace(/\/$/, "");
+  }
+  if (protocol !== "https:") return DIRECT_IP_BASE_URL;
   if (matchesDomain(host, "2easyeng.ru")) return RU_API_BASE_URL;
   if (matchesDomain(host, "2easyeng.com")) return envBaseUrl();
   return DIRECT_IP_BASE_URL;

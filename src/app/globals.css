@@ -86,10 +86,10 @@ html.landing-zoom body {
 .site-header-overlay .site-header-bar {
   background: transparent;
 }
-@media (max-width: 1023px) {
-  .site-overlay-layer {
-    z-index: var(--overlay-above-header-z);
-  }
+/* Always above landing `z-[2]` / sticky chrome — not only on mobile.
+   Support chat FAB and overlays live in this layer on every breakpoint. */
+.site-overlay-layer {
+  z-index: var(--overlay-above-header-z);
 }
 /* Nested modals inside EditorRootModal / other site-overlay modals */
 .site-nested-overlay-layer {

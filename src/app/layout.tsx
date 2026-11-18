@@ -15,7 +15,9 @@ import { BodyContainer } from "./BodyContainer";
 import { Footer } from "@/components/Footer";
 import Script from "next/script";
 import { EditorContextProvider } from "./editor/context";
-import { TalkMeSite } from "@/components/TalkMeSite";
+import { SupportChatWidget } from "@/components/SupportChat";
+// Talk-Me kept for rollback — disabled while AI SupportChatWidget is live.
+// import { TalkMeSite } from "@/components/TalkMeSite";
 import { CookieConsent } from "@/components/CookieConsent";
 import { AppInstallBanner } from "@/components/AppInstallBanner";
 import { I18nProvider } from "@/i18n/I18nProvider";
@@ -66,7 +68,8 @@ export default function RootLayout({
                         <Footer />
                         <CookieConsent />
                         <ToastWrapper />
-                        <TalkMeSite />
+                        {/* <TalkMeSite /> */}
+                        <SupportChatWidget />
                         <GlobalVideoCallShell />
                       </VideoCallProvider>
                       </WorkspaceFromUrlProvider>
@@ -92,8 +95,11 @@ export default function RootLayout({
           src="https://mc.yandex.ru/metrika/tag.js?id=103955671"
           strategy="lazyOnload"
         />
-        <Script id="talk-me-setup" strategy="afterInteractive">
-          {`window.TalkMeSetup = (function () {
+        {/* Talk-Me kept for rollback — set true to re-enable alongside/instead of AI widget. */}
+        {false && (
+          <>
+            <Script id="talk-me-setup" strategy="afterInteractive">
+              {`window.TalkMeSetup = (function () {
             var host = (window.location.hostname || "").toLowerCase();
             var useMainDomain =
               host === "localhost" ||
@@ -105,9 +111,9 @@ export default function RootLayout({
               disableTimeouts: true
             };
           })();`}
-        </Script>
-        <Script id="talk-me-script" strategy="lazyOnload">
-          {`(function(){(function c(d,w,m,i) {
+            </Script>
+            <Script id="talk-me-script" strategy="lazyOnload">
+              {`(function(){(function c(d,w,m,i) {
         window.supportAPIMethod = m;
         var s = d.createElement('script');
         s.id = 'supportScript';
@@ -118,7 +124,9 @@ export default function RootLayout({
         w[m] = w[m] ? w[m] : function(){(w[m].q = w[m].q ? w[m].q : []).push(arguments);};
         (d.head ? d.head : d.body).appendChild(s);
       })(document,window,'TalkMe')})();`}
-        </Script>
+            </Script>
+          </>
+        )}
         <noscript>
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}

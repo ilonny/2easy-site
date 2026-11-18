@@ -1,8 +1,17 @@
 "use client";
 
+/**
+ * Talk-Me visibility helper. Currently unused from layout (AI SupportChatWidget is live).
+ * Re-enable: uncomment TalkMeSite + scripts in src/app/layout.tsx.
+ */
+
 import { useCallback, useContext, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { AuthContext } from "@/auth";
+import {
+  getSupportUserId,
+  isAiSupportEnabledForUser,
+} from "@/components/SupportChat/access";
 
 const TALK_ME_DOM_SELECTORS = [
   'iframe[src*="site-chat.me"]',
@@ -83,11 +92,18 @@ export const TalkMeSite = () => {
   const { profile, authIsLoading } = useContext(AuthContext);
   const isStudent = Boolean(profile?.isStudent || profile?.studentId);
 
+  // Teachers on AI support get the in-house widget; Talk-Me stays loaded for guests / rollback.
+  const useAiSupport = isAiSupportEnabledForUser(getSupportUserId(profile));
+
   const hideChat = useMemo(
     () =>
       // Wait for auth so students never briefly see the widget.
-      authIsLoading || isStudent || shouldHideSiteChatOnPath(path),
-    [authIsLoading, isStudent, path],
+      // Authenticated teachers with AI support use SupportChatWidget instead.
+      authIsLoading ||
+      isStudent ||
+      useAiSupport ||
+      shouldHideSiteChatOnPath(path),
+    [authIsLoading, isStudent, useAiSupport, path],
   );
 
   const applyVisibility = useCallback(() => {

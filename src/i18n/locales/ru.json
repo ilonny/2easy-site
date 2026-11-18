@@ -1521,5 +1521,28 @@
     "unusedDaysHint": "Оставшиеся {{days}} дн. текущей подписки перенесутся на новый тариф.",
     "scrollToWheel": "Крутить колесо",
     "wheelTitle": "Spin to win"
+  },
+  "supportChat": {
+    "title": "Поддержка 2easy",
+    "you": "Вы",
+    "assistant": "Поддержка",
+    "operator": "Поддержка",
+    "system": "Система",
+    "placeholder": "Напишите вопрос…",
+    "send": "Отправить",
+    "attach": "Прикрепить файл",
+    "file": "Файл",
+    "statusAi": "Онлайн",
+    "statusWaiting": "Онлайн",
+    "statusHuman": "Онлайн",
+    "statusClosed": "Диалог завершён",
+    "typingAssistant": "Печатает…",
+    "typingOperator": "Печатает…",
+    "welcomeTitle": "Здравствуйте!",
+    "welcomeBody": "Поддержка 2easy на связи. Напишите про уроки, подписку, учеников или если что-то не работает — поможем.",
+    "endDialog": "Завершить диалог",
+    "endDialogConfirm": "Завершить этот диалог?",
+    "newDialog": "Начать новый диалог",
+    "closedHint": "Диалог завершён. Можете открыть новый, если вопрос остался."
   }
 }

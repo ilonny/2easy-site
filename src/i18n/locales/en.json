@@ -1519,5 +1519,28 @@
     "unusedDaysHint": "Your remaining {{days}} days will carry over to the new plan.",
     "scrollToWheel": "Spin the wheel",
     "wheelTitle": "Spin to win"
+  },
+  "supportChat": {
+    "title": "2easy Support",
+    "you": "You",
+    "assistant": "Support",
+    "operator": "Support",
+    "system": "System",
+    "placeholder": "Type your question…",
+    "send": "Send",
+    "attach": "Attach file",
+    "file": "File",
+    "statusAi": "Online",
+    "statusWaiting": "Online",
+    "statusHuman": "Online",
+    "statusClosed": "Chat ended",
+    "typingAssistant": "Typing…",
+    "typingOperator": "Typing…",
+    "welcomeTitle": "Hello!",
+    "welcomeBody": "2easy support here. Ask about lessons, subscription, students, or if something isn’t working — we’ll help.",
+    "endDialog": "End chat",
+    "endDialogConfirm": "End this chat?",
+    "newDialog": "Start a new chat",
+    "closedHint": "This chat is closed. Start a new one if you still need help."
   }
 }
