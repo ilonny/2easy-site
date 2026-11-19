@@ -292,9 +292,22 @@ export const ProfileLessons = (props: TProps) => {
     (lessonId: number) => {
       setCreateLessonModalIsVisible(false);
       getLessons();
-      router.push(withWorkspacePath("/editor/" + lessonId, catalogWorkspace));
+      if (currentCourse?.id) {
+        getCourseLessons(currentCourse.id, studentId);
+      }
+      if (lessonId) {
+        router.push(withWorkspacePath("/editor/" + lessonId, catalogWorkspace));
+      }
     },
-    [catalogWorkspace, getLessons, router, setCreateLessonModalIsVisible],
+    [
+      catalogWorkspace,
+      currentCourse?.id,
+      getCourseLessons,
+      getLessons,
+      router,
+      setCreateLessonModalIsVisible,
+      studentId,
+    ],
   );
 
   const onCreateCourse = useCallback(() => {

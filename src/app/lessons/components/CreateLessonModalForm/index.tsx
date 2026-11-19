@@ -20,6 +20,10 @@ import { Controller, useForm } from "react-hook-form";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { CreateLessonWithAiModal } from "../CreateLessonWithAiModal";
+import {
+  canUsePmImport,
+  ImportPmArchiveModal,
+} from "../ImportPmArchiveModal";
 import { useCheckSubscription } from "@/app/subscription/helpers";
 import { canUseAi } from "@/app/ai/canUseAi";
 import { AuthContext } from "@/auth";
@@ -70,6 +74,9 @@ export const CreateLessonModalForm: FC<TProps> = ({
   const { uploadImages } = useUploadImage();
   const [isLoading, setIsLoading] = useState(false);
   const [aiModalVisible, setAiModalVisible] = useState(false);
+  const [pmImportVisible, setPmImportVisible] = useState(false);
+  const [pmImportHelp, setPmImportHelp] = useState(false);
+  const showPmImport = canUsePmImport(profile);
 
   const onSubmit = useCallback(
     async (_data) => {
@@ -238,6 +245,42 @@ export const CreateLessonModalForm: FC<TProps> = ({
                 </Button>
               </>
             )}
+            {showPmImport && (
+              <>
+                <div className="h-3" />
+                <div className="flex w-full items-center gap-2">
+                  <Button
+                    variant="bordered"
+                    className="flex-1"
+                    size="lg"
+                    type="button"
+                    onPress={() => {
+                      setIsVisible(false);
+                      setPmImportVisible(true);
+                    }}
+                  >
+                    <T
+                      k="pmImport.importArchive"
+                      defaultText="Импортировать архив"
+                    />
+                  </Button>
+                  <Button
+                    isIconOnly
+                    variant="flat"
+                    size="lg"
+                    type="button"
+                    aria-label="Инструкция по импорту"
+                    onPress={() => {
+                      setIsVisible(false);
+                      setPmImportHelp(true);
+                      setPmImportVisible(true);
+                    }}
+                  >
+                    ?
+                  </Button>
+                </div>
+              </>
+            )}
             <div className="h-10" />
           </form>
         </ModalBody>
@@ -249,6 +292,19 @@ export const CreateLessonModalForm: FC<TProps> = ({
         setIsVisible={setAiModalVisible}
         onSuccess={onSuccess}
         currentCourse={currentCourse}
+      />
+    )}
+    {showPmImport && (
+      <ImportPmArchiveModal
+        isVisible={pmImportVisible}
+        setIsVisible={(v) => {
+          setPmImportVisible(v);
+          if (!v) setPmImportHelp(false);
+        }}
+        mode={currentCourse?.id ? "into_course" : "standalone"}
+        currentCourse={currentCourse}
+        onSuccess={() => onSuccess(0)}
+        initialHelpOpen={pmImportHelp}
       />
     )}
     </>

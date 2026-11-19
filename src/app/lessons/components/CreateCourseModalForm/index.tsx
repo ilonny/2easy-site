@@ -48,6 +48,10 @@ import Bg from "@/assets/images/create_lesson_bg_card.png";
 import Loupe from "@/assets/icons/loupe.svg";
 import DragHandleIcon from "@/assets/icons/drag_handle.svg";
 import { TCourse } from "@/app/course/hooks/useCourses";
+import {
+  canUsePmImport,
+  ImportPmArchiveModal,
+} from "../ImportPmArchiveModal";
 import { useLessons } from "../../hooks/useLessons";
 import { AuthContext } from "@/auth";
 import { getImageUrl } from "@/app/editor/helpers";
@@ -206,6 +210,9 @@ export const CreateCourseModalForm: FC<TProps> = ({
   );
   const { uploadImages } = useUploadImage();
   const [isLoading, setIsLoading] = useState(false);
+  const [pmImportVisible, setPmImportVisible] = useState(false);
+  const [pmImportHelp, setPmImportHelp] = useState(false);
+  const showPmImport = canUsePmImport(profile) && !chosenCourse?.id;
 
   const [step, setStep] = useState(0);
   // Ordered unique course membership — always keyed by lesson.id (never created_from_id).
@@ -370,6 +377,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
   }, []);
 
   return (
+    <>
     <Modal
       size="xl"
       isOpen={isVisible}
@@ -453,6 +461,43 @@ export const CreateCourseModalForm: FC<TProps> = ({
                 >
                   <T k="modals.next" />
                 </Button>
+                {showPmImport && (
+                  <>
+                    <div className="h-3" />
+                    <div className="flex w-full items-center gap-2">
+                      <Button
+                        variant="bordered"
+                        className="flex-1"
+                        size="lg"
+                        type="button"
+                        onPress={() => {
+                          setIsVisible(false);
+                          setPmImportHelp(false);
+                          setPmImportVisible(true);
+                        }}
+                      >
+                        <T
+                          k="pmImport.importArchive"
+                          defaultText="Импортировать архив"
+                        />
+                      </Button>
+                      <Button
+                        isIconOnly
+                        variant="flat"
+                        size="lg"
+                        type="button"
+                        aria-label="Инструкция по импорту"
+                        onPress={() => {
+                          setIsVisible(false);
+                          setPmImportHelp(true);
+                          setPmImportVisible(true);
+                        }}
+                      >
+                        ?
+                      </Button>
+                    </div>
+                  </>
+                )}
                 <div className="h-10" />
               </ModalBody>
             </>
@@ -631,5 +676,18 @@ export const CreateCourseModalForm: FC<TProps> = ({
         </ModalContent>
       </form>
     </Modal>
+    {showPmImport && (
+      <ImportPmArchiveModal
+        isVisible={pmImportVisible}
+        setIsVisible={(v) => {
+          setPmImportVisible(v);
+          if (!v) setPmImportHelp(false);
+        }}
+        mode="new_course"
+        onSuccess={() => onSuccess(0)}
+        initialHelpOpen={pmImportHelp}
+      />
+    )}
+    </>
   );
 };
