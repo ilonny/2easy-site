@@ -27,6 +27,21 @@ type TProps = {
   isPreview?: boolean;
 };
 
+/** Two cards saved with the same attachment id must stay separate drop targets. */
+const withUniqueCardIds = (list: TMatchWordImageData["images"] = []) => {
+  const seen = new Set<string>();
+  return list.map((img, index) => {
+    const base = String(img?.id ?? index);
+    if (!seen.has(base)) {
+      seen.add(base);
+      return img;
+    }
+    const id = `${base}__${index}`;
+    seen.add(id);
+    return { ...img, id };
+  });
+};
+
 const sameId = (
   a: string | number | undefined | null,
   b: string | number | undefined | null
@@ -372,6 +387,10 @@ export const MatchWordImageExView: FC<TProps> = ({
   const student_id = profile?.studentId;
   const ex_id = data?.id;
   const viewType = data?.viewType === "input" ? "input" : "drag";
+  const images = useMemo(
+    () => withUniqueCardIds(data?.images),
+    [data?.images],
+  );
 
   const { writeAnswer, answers, getAnswers, resetSeq } = useExAnswer({
     student_id,
@@ -440,7 +459,6 @@ export const MatchWordImageExView: FC<TProps> = ({
   } | null>(null);
 
   const sortedChips = useMemo(() => {
-    const images = data.images || [];
     // Rebuild shuffle when the image set / texts / exercise identity changes —
     // not when correctIds changes.
     const exerciseKey = `${data.id ?? "new"}|${images
@@ -470,7 +488,7 @@ export const MatchWordImageExView: FC<TProps> = ({
         (img): img is TMatchWordImageData["images"][number] =>
           !!img && !!img.text && !hasId(correctIds, img.id)
       );
-  }, [correctIds, data.images, data.id]);
+  }, [correctIds, images, data.id]);
 
   useEffect(() => {
     if (student_id) {
@@ -529,7 +547,7 @@ export const MatchWordImageExView: FC<TProps> = ({
       )}
       <div className="h-10" />
       <div style={{ margin: "0 auto" }}>
-        {!Boolean(data?.images?.length) && (
+        {!images.length && (
           <div
             className="w-full h-[180px] sm:h-[250px] rounded-lg"
             style={{ backgroundColor: "#D9D9D9" }}
@@ -546,7 +564,7 @@ export const MatchWordImageExView: FC<TProps> = ({
                   setCorrectIds={setCorrectIds}
                   setActiveChip={setActiveChip}
                   setIncorrectIdsMap={setIncorrectIdsMap}
-                  fields={data.images}
+                  fields={images}
                   onPersist={persist}
                   correctIds={correctIds}
                   incorrectIdsMap={incorrectIdsMap}
@@ -559,9 +577,9 @@ export const MatchWordImageExView: FC<TProps> = ({
             })}
           </div>
         )}
-        {!!data?.images?.length && (
+        {!!images.length && (
           <div className="flex flex-wrap justify-center gap-y-3 w-full min-w-0">
-            {data?.images?.map((image, imageIndex) => {
+            {images.map((image, imageIndex) => {
               const isCorrect =
                 hasId(correctIds, image.id) ||
                 (isTeacher &&
@@ -573,7 +591,7 @@ export const MatchWordImageExView: FC<TProps> = ({
                   incorrectIdsMap?.[image?.id as any]);
               return (
                 <div
-                  key={image.path || image.id || image.dataURL || imageIndex}
+                  key={`${imageIndex}-${image.id || ""}-${image.path || ""}`}
                   className="w-full min-w-0 sm:w-1/2 lg:w-1/3 p-2 sm:p-3 lg:p-4 box-border"
                 >
                   <div className="min-h-[160px] sm:h-[220px] flex items-center justify-center overflow-hidden rounded-lg bg-neutral-50">

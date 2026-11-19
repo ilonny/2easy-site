@@ -93,7 +93,8 @@ html.landing-zoom body {
 }
 /* Nested modals inside EditorRootModal / other site-overlay modals */
 .site-nested-overlay-layer {
-  z-index: calc(var(--overlay-above-header-z) + 5);
+  /* Beat NextUI's own z-50 on the same node, or the search dialog opens under the editor. */
+  z-index: calc(var(--overlay-above-header-z) + 5) !important;
 }
 .site-menu-layer {
   z-index: var(--site-menu-z);

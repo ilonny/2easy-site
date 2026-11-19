@@ -273,7 +273,7 @@ export const MatchWordImage: FC<TProps> = ({
         >
           {images.map((image, index) => (
             <SortableImageItem
-              key={image.path || image.id || image.dataURL || index}
+              key={`${index}-${image.id || ""}-${image.path || ""}`}
               index={index}
               itemIndex={index}
               image={image}

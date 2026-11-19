@@ -807,6 +807,8 @@
     "typeWord": "type word",
     "viewTypeChangeResetsAnswers": "After changing the mode, have students answer again: previous answers do not apply to the new mode. We recommend resetting answers.",
     "imagesUploadPartialFail": "Not all images were saved ({{saved}} of {{total}}). Check the exercise and upload the missing ones again.",
+    "unsupportedImageType": "This format is not supported. Choose JPG, PNG, WEBP, GIF, or HEIC.",
+    "tooManyImages": "You can add at most {{max}} images.",
     "embedCode": "Embed code",
     "embedCodeHint": "Please use the special embed link (embed link / embed code). You can find it in the 'Share' section on the original service (it should start with <iframe ...>). A direct link from the browser may not work correctly or may not display.",
     "clickOrDragImages": "Click this block or drag images here",

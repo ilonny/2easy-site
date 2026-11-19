@@ -25,8 +25,43 @@ jobs:
       - run: cd ./ && npm ci --legacy-peer-deps && npm run build
       # - run: cd ./frontend && npm ci --legacy-peer-deps && npm run build
       # - run: cd ./site && yarn && npm run build
-      # Deploy
-      - run: cd ./ && sshpass -p '${{ secrets.pass }}' rsync -e "ssh -o StrictHostKeyChecking=no" --exclude 'uploads' --exclude '.git' src --archive --compress --delete --exclude '.env' . 2easy@89.111.152.174:/var/www/2easy/data/www/2easyeng.com
+      # Deploy only files whose contents changed.
+      # Checkout refreshes mtimes, so the default size+mtime check re-reads every
+      # image and video on each deploy. --checksum skips identical files.
+      # .next/cache is the webpack build cache (hundreds of MB, always dirty)
+      # and is not used by `next start`.
+      - name: Deploy changed files
+        run: |
+          set -eu
+          RSH="sshpass -p '${{ secrets.pass }}' ssh -o StrictHostKeyChecking=no"
+          DEST="2easy@89.111.152.174:/var/www/2easy/data/www/2easyeng.com"
+          REMOTE="2easy@89.111.152.174"
+          REMOTE_DIR="/var/www/2easy/data/www/2easyeng.com"
+
+          rsync -azc --delete --stats \
+            -e "$RSH" \
+            --exclude '.git' \
+            --exclude 'uploads' \
+            --exclude '.env' \
+            --exclude 'node_modules' \
+            --exclude '.next/cache' \
+            --exclude '.deploy-deps-hash' \
+            ./ "$DEST/"
+
+          # npm ci rewrites every file in node_modules, so a normal rsync would
+          # send the whole tree whenever dependencies did not change.
+          HASH="$(cat package-lock.json scripts/patch-excalidraw-min-zoom.mjs | sha256sum | awk '{print $1}')"
+          REMOTE_HASH="$(sshpass -p '${{ secrets.pass }}' ssh -o StrictHostKeyChecking=no "$REMOTE" "cat '$REMOTE_DIR/.deploy-deps-hash' 2>/dev/null || true")"
+          REMOTE_HASH="$(printf '%s' "$REMOTE_HASH" | tr -d '[:space:]')"
+          if [ "$HASH" != "$REMOTE_HASH" ]; then
+            echo "Dependencies changed, syncing node_modules"
+            rsync -azc --delete --stats \
+              -e "$RSH" \
+              ./node_modules/ "$DEST/node_modules/"
+            printf '%s\n' "$HASH" | sshpass -p '${{ secrets.pass }}' ssh -o StrictHostKeyChecking=no "$REMOTE" "cat > '$REMOTE_DIR/.deploy-deps-hash'"
+          else
+            echo "Dependencies unchanged, skipping node_modules"
+          fi
       # - run: sshpass -p '${{ secrets.pass }}' ssh 2easy@89.111.152.174 "pm2 start /var/www/2easy/data/www/2easyeng.com/dist/index.js"
       - run: sshpass -p '${{ secrets.pass }}' ssh 2easy@89.111.152.174 "cd /var/www/2easy/data/www/2easyeng.com && pm2 restart all"
       

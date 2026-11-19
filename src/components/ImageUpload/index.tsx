@@ -22,6 +22,7 @@ import { fetchPostJson } from "@/api";
 import { NESTED_OVERLAY_Z_CLASS } from "@/constants/uiLayers";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
+import { toast } from "react-toastify";
 
 type TProps = {
   label?: string;
@@ -50,7 +51,7 @@ export const ImageUpload: FC<TProps> = ({
   maxNumber = 12,
   isButton,
   title,
-  acceptType = ["jpg", "png", "jpeg", "gif", "webp", "svg"],
+  acceptType = ["jpg", "png", "jpeg", "gif", "webp", "svg", "heic", "heif"],
   fullWidth,
   whiteBg,
   withInternetSearch = true,
@@ -132,6 +133,31 @@ export const ImageUpload: FC<TProps> = ({
         onChange={onChange}
         maxNumber={maxNumber}
         acceptType={acceptType}
+        // Safari often gives an empty MIME type for Photos / iCloud files.
+        // Extension check below still rejects non-images.
+        allowNonImageType
+        onError={(errors) => {
+          if (errors?.maxNumber) {
+            toast.error(
+              i18n.t("editor.tooManyImages", { max: maxNumber }),
+            );
+            return;
+          }
+          if (errors?.acceptType) {
+            toast.error(i18n.t("editor.unsupportedImageType"));
+          }
+        }}
+        inputProps={{
+          // display:none file inputs do not open from a click in Safari.
+          style: {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: 1,
+            height: 1,
+            opacity: 0,
+          },
+        }}
       >
         {({
           imageList,
@@ -185,11 +211,18 @@ export const ImageUpload: FC<TProps> = ({
                   </>
                 )}
                 <div className="w-full sm:flex-1 sm:min-w-0 min-w-0">
-                  <button
-                    type="button"
+                  <div
+                    role="button"
+                    tabIndex={0}
                     className="w-full min-w-0 block"
                     style={isDragging ? { color: "red" } : undefined}
                     onClick={onImageUpload}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onImageUpload();
+                      }
+                    }}
                     {...dragProps}
                   >
                     {customPlaceHolder ? (
@@ -251,7 +284,7 @@ export const ImageUpload: FC<TProps> = ({
                         </p>
                       </div>
                     )}
-                  </button>
+                  </div>
                 </div>
               </div>
             )}
