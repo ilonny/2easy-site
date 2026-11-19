@@ -85,5 +85,6 @@ export type TLessonMiniGameDetail = {
 export type TLessonMiniGameSend = {
   exId: number;
   clientEventId: string;
+  baseRevision: number;
   state: Record<string, unknown>;
 };

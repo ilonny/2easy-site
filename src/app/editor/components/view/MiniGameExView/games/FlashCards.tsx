@@ -1,10 +1,12 @@
 "use client";
 
 import { Button } from "@nextui-org/react";
-import { FC, useEffect, useMemo } from "react";
+import { FC, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   TMiniGameAnswerState,
   TMiniGameItem,
+  TMiniGamePatch,
 } from "../../../editor/MiniGame/types";
 import { hashSeed, shuffleWithSeed } from "../miniGameLiveUtils";
 import styles from "../styles.module.css";
@@ -15,7 +17,7 @@ type TProps = {
   layout?: "one" | "all";
   canInteract: boolean;
   state: TMiniGameAnswerState;
-  onPatch: (patch: Partial<TMiniGameAnswerState>) => void;
+  onPatch: (patch: TMiniGamePatch) => void;
 };
 
 export const FlashCardsGame: FC<TProps> = ({
@@ -53,29 +55,15 @@ function useSharedOrder(
   items: TMiniGameItem[],
   shuffle: boolean | undefined,
   state: TMiniGameAnswerState,
-  onPatch: (patch: Partial<TMiniGameAnswerState>) => void,
-  canInteract: boolean,
 ) {
   const ids = useMemo(() => items.map((i) => i.id), [items]);
   const defaultSeed = useMemo(() => hashSeed(ids.join("|")), [ids]);
 
-  const order = useMemo(() => {
+  return useMemo(() => {
     if (state.order?.length) return state.order;
     const seed = state.layoutSeed ?? defaultSeed;
     return shuffle ? shuffleWithSeed(ids, seed) : ids;
   }, [defaultSeed, ids, shuffle, state.layoutSeed, state.order]);
-
-  useEffect(() => {
-    if (!canInteract || !items.length) return;
-    if (state.order?.length && state.layoutSeed != null) return;
-    onPatch({
-      layoutSeed: state.layoutSeed ?? defaultSeed,
-      order,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canInteract, defaultSeed, items.length]);
-
-  return order;
 }
 
 const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
@@ -85,7 +73,8 @@ const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
   state,
   onPatch,
 }) => {
-  const order = useSharedOrder(items, shuffle, state, onPatch, canInteract);
+  const { t } = useTranslation();
+  const order = useSharedOrder(items, shuffle, state);
   const byId = useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
 
   const known = new Set(state.knownIds || []);
@@ -119,17 +108,20 @@ const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
   const markKnown = (know: boolean) => {
     if (!canInteract || !current) return;
     if (know) {
-      const nextKnown = Array.from(
-        new Set([...(state.knownIds || []), current.id]),
-      );
-      onPatch({
-        activeGame: "flash-cards",
-        knownIds: nextKnown,
-        score: nextKnown.length,
-        total: items.length,
-        completed: nextKnown.length >= items.length,
-        flipped: false,
-        cardIndex: 0,
+      onPatch((prev) => {
+        const nextKnown = Array.from(
+          new Set([...(prev.knownIds || []), current.id]),
+        );
+        return {
+          ...prev,
+          activeGame: "flash-cards",
+          knownIds: nextKnown,
+          score: nextKnown.length,
+          total: items.length,
+          completed: nextKnown.length >= items.length,
+          flipped: false,
+          cardIndex: 0,
+        };
       });
     } else {
       onPatch({
@@ -143,12 +135,15 @@ const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
     return (
       <div className={styles.flashStage}>
         <div className={styles.score}>
-          Done: {items.length}/{items.length}
+          {t("editor.miniGameDone", {
+            known: items.length,
+            total: items.length,
+          })}
         </div>
-        <p className={styles.flashText}>Все карточки пройдены</p>
+        <p className={styles.flashText}>{t("editor.miniGameAllPassed")}</p>
         {canInteract && (
           <Button color="primary" variant="flat" onPress={restartAll}>
-            Начать заново
+            {t("editor.miniGameRestart")}
           </Button>
         )}
       </div>
@@ -158,7 +153,10 @@ const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
   return (
     <div className={styles.flashStage}>
       <div className={styles.score}>
-        Known: {known.size}/{items.length}
+        {t("editor.miniGameKnown", {
+          known: known.size,
+          total: items.length,
+        })}
       </div>
       <div className={styles.flashScene}>
         <button
@@ -170,16 +168,16 @@ const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
           aria-pressed={flipped}
           onClick={() => {
             if (!canInteract) return;
-            onPatch({ flipped: !flipped });
+            onPatch((prev) => ({ ...prev, flipped: !prev.flipped }));
           }}
         >
           <div className={`${styles.flashFace} ${styles.flashFaceFront}`}>
             <div className={styles.flashText}>{frontText || "\u00A0"}</div>
-            <div className={styles.flashHint}>Нажмите, чтобы перевернуть</div>
+            <div className={styles.flashHint}>{t("editor.miniGameFlipHint")}</div>
           </div>
           <div className={`${styles.flashFace} ${styles.flashFaceBack}`}>
             <div className={styles.flashText}>{backText || "\u00A0"}</div>
-            <div className={styles.flashHint}>Нажмите, чтобы перевернуть</div>
+            <div className={styles.flashHint}>{t("editor.miniGameFlipHint")}</div>
           </div>
         </button>
       </div>
@@ -189,17 +187,17 @@ const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
           isDisabled={!canInteract}
           onPress={() => markKnown(false)}
         >
-          Again
+          {t("editor.miniGameAgain")}
         </Button>
         <Button
           color="primary"
           isDisabled={!canInteract}
           onPress={() => markKnown(true)}
         >
-          Next
+          {t("editor.miniGameNext")}
         </Button>
         <Button variant="light" isDisabled={!canInteract} onPress={restartAll}>
-          Начать заново
+          {t("editor.miniGameRestart")}
         </Button>
       </div>
     </div>
@@ -213,7 +211,8 @@ const FlashCardsAll: FC<Omit<TProps, "layout">> = ({
   state,
   onPatch,
 }) => {
-  const order = useSharedOrder(items, shuffle, state, onPatch, canInteract);
+  const { t } = useTranslation();
+  const order = useSharedOrder(items, shuffle, state);
   const byId = useMemo(() => new Map(items.map((i) => [i.id, i])), [items]);
   const flippedIds = new Set(state.flippedIds || []);
 
@@ -234,23 +233,28 @@ const FlashCardsAll: FC<Omit<TProps, "layout">> = ({
 
   const toggleFlip = (id: string) => {
     if (!canInteract) return;
-    const next = new Set(flippedIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    const viewed = Array.from(new Set([...(state.knownIds || []), id]));
-    onPatch({
-      activeGame: "flash-cards",
-      flippedIds: Array.from(next),
-      knownIds: viewed,
-      score: viewed.length,
-      total: items.length,
-      completed: viewed.length >= items.length,
+    onPatch((prev) => {
+      const next = new Set(prev.flippedIds || []);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      const viewed = Array.from(new Set([...(prev.knownIds || []), id]));
+      return {
+        ...prev,
+        activeGame: "flash-cards",
+        flippedIds: Array.from(next),
+        knownIds: viewed,
+        score: viewed.length,
+        total: items.length,
+        completed: viewed.length >= items.length,
+      };
     });
   };
 
   return (
     <div className={styles.flashStage}>
-      <div className={styles.score}>Cards: {items.length}</div>
+      <div className={styles.score}>
+        {t("editor.miniGameCardCount", { total: items.length })}
+      </div>
       <div className={styles.flashAllGrid}>
         {order.map((id) => {
           const item = byId.get(id);
@@ -289,7 +293,7 @@ const FlashCardsAll: FC<Omit<TProps, "layout">> = ({
       {canInteract && (
         <div className={styles.flashActions}>
           <Button color="primary" variant="flat" onPress={restartAll}>
-            Начать заново
+            {t("editor.miniGameRestart")}
           </Button>
         </div>
       )}

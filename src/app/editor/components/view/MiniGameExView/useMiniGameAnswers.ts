@@ -203,10 +203,11 @@ export function useMiniGameAnswers({
         | ((prev: TMiniGameAnswerState) => TMiniGameAnswerState),
     ) => {
       if (!canInteract) return;
-      userEditedRef.current = true;
       const prev = stateRef.current;
       const next =
         typeof patch === "function" ? patch(prev) : { ...prev, ...patch };
+      if (next === prev) return;
+      userEditedRef.current = true;
       applyState(next);
       schedulePersist();
     },

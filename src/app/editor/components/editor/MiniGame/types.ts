@@ -78,6 +78,10 @@ export type TMiniGameAnswerState = {
 
 export type TMiniGameLiveState = TMiniGameAnswerState;
 
+export type TMiniGamePatch =
+  | Partial<TMiniGameAnswerState>
+  | ((prev: TMiniGameAnswerState) => TMiniGameAnswerState);
+
 export function isMiniGameKind(value: unknown): value is TMiniGameKind {
   return (
     typeof value === "string" &&

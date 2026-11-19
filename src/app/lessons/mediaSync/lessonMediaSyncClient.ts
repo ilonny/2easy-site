@@ -76,6 +76,7 @@ class LessonMediaSyncClient {
   private timerState: TLessonTimerState = IDLE_LESSON_TIMER;
   private timerListeners = new Set<TTimerListener>();
   private miniGameListeners = new Set<TMiniGameListener>();
+  private readyListeners = new Set<() => void>();
   /** Last mini-game snapshot per ex — survives late exercise mount after WS catch-up. */
   private lastMiniGameByEx = new Map<number, TLessonMiniGameDetail>();
 
@@ -168,6 +169,15 @@ class LessonMediaSyncClient {
     };
   }
 
+  /** Fires once the socket has received hello. Catch-up is sent before hello. */
+  subscribeReady(listener: () => void) {
+    this.readyListeners.add(listener);
+    if (this.ready) listener();
+    return () => {
+      this.readyListeners.delete(listener);
+    };
+  }
+
   sendMiniGame(payload: TLessonMiniGameSend) {
     if (!this.isOpen() || !this.ws) return false;
     this.ws.send(
@@ -175,6 +185,7 @@ class LessonMediaSyncClient {
         type: "mini_game",
         ex_id: payload.exId,
         client_event_id: payload.clientEventId,
+        base_revision: payload.baseRevision,
         state: payload.state,
       }),
     );
@@ -306,6 +317,7 @@ class LessonMediaSyncClient {
       if (msg.type === "hello") {
         this.ready = true;
         this.startPing(gen);
+        this.readyListeners.forEach((listener) => listener());
         return;
       }
 

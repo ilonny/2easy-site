@@ -1,10 +1,12 @@
 "use client";
 
 import { FC, useEffect, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   itemWord,
   TMiniGameAnswerState,
   TMiniGameItem,
+  TMiniGamePatch,
 } from "../../../editor/MiniGame/types";
 import { hashSeed, shuffleWithSeed } from "../miniGameLiveUtils";
 import styles from "../styles.module.css";
@@ -20,7 +22,7 @@ type TProps = {
   shuffle?: boolean;
   canInteract: boolean;
   state: TMiniGameAnswerState;
-  onPatch: (patch: Partial<TMiniGameAnswerState>) => void;
+  onPatch: (patch: TMiniGamePatch) => void;
 };
 
 export const MatchingPairsGame: FC<TProps> = ({
@@ -30,6 +32,7 @@ export const MatchingPairsGame: FC<TProps> = ({
   state,
   onPatch,
 }) => {
+  const { t } = useTranslation();
   const resolveTimerRef = useRef<number | null>(null);
 
   const baseTiles = useMemo(() => {
@@ -68,18 +71,6 @@ export const MatchingPairsGame: FC<TProps> = ({
     return shuffle ? shuffleWithSeed(baseTiles, seed) : baseTiles;
   }, [baseTiles, defaultSeed, shuffle, state.layoutSeed, state.tileOrder]);
 
-  useEffect(() => {
-    if (!canInteract || !baseTiles.length) return;
-    if (state.tileOrder?.length && state.layoutSeed != null) return;
-    const seed = state.layoutSeed ?? defaultSeed;
-    const ordered = shuffle ? shuffleWithSeed(baseTiles, seed) : baseTiles;
-    onPatch({
-      layoutSeed: seed,
-      tileOrder: ordered.map((t) => t.id),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canInteract, defaultSeed, baseTiles.length]);
-
   const matched = new Set(state.matchedPairIds || []);
   const openIds = state.openIds || [];
   const locked = openIds.length >= 2;
@@ -97,30 +88,34 @@ export const MatchingPairsGame: FC<TProps> = ({
     const [aId, bId] = openIds;
     const a = tiles.find((t) => t.id === aId);
     const b = tiles.find((t) => t.id === bId);
-    const matchedSnapshot = state.matchedPairIds || [];
     if (resolveTimerRef.current) {
       window.clearTimeout(resolveTimerRef.current);
     }
     resolveTimerRef.current = window.setTimeout(() => {
       resolveTimerRef.current = null;
-      if (a && b && a.pairId === b.pairId && a.id !== b.id) {
-        const nextMatched = Array.from(
-          new Set([...matchedSnapshot, a.pairId]),
-        );
-        onPatch({
+      onPatch((prev) => {
+        const open = prev.openIds || [];
+        if (open[0] !== aId || open[1] !== bId) return prev;
+        if (a && b && a.pairId === b.pairId && a.id !== b.id) {
+          const nextMatched = Array.from(
+            new Set([...(prev.matchedPairIds || []), a.pairId]),
+          );
+          return {
+            ...prev,
+            activeGame: "matching-pairs",
+            matchedPairIds: nextMatched,
+            openIds: [],
+            score: nextMatched.length,
+            total: items.length,
+            completed: nextMatched.length >= items.length,
+          };
+        }
+        return {
+          ...prev,
           activeGame: "matching-pairs",
-          matchedPairIds: nextMatched,
           openIds: [],
-          score: nextMatched.length,
-          total: items.length,
-          completed: nextMatched.length >= items.length,
-        });
-      } else {
-        onPatch({
-          activeGame: "matching-pairs",
-          openIds: [],
-        });
-      }
+        };
+      });
     }, 550);
     return () => {
       if (resolveTimerRef.current) {
@@ -136,16 +131,25 @@ export const MatchingPairsGame: FC<TProps> = ({
     if (matched.has(tile.pairId)) return;
     if (openIds.includes(tile.id)) return;
 
-    onPatch({
-      activeGame: "matching-pairs",
-      openIds: [...openIds, tile.id],
+    onPatch((prev) => {
+      const open = prev.openIds || [];
+      if (open.length >= 2 || open.includes(tile.id)) return prev;
+      if ((prev.matchedPairIds || []).includes(tile.pairId)) return prev;
+      return {
+        ...prev,
+        activeGame: "matching-pairs",
+        openIds: [...open, tile.id],
+      };
     });
   };
 
   return (
     <div>
       <div className={styles.score}>
-        Pairs: {matched.size}/{items.length}
+        {t("editor.miniGamePairs", {
+          matched: matched.size,
+          total: items.length,
+        })}
       </div>
       <div className={styles.memoryGrid}>
         {tiles.map((tile) => {

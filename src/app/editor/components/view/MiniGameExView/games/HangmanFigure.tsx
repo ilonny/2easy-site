@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import { useTranslation } from "react-i18next";
 import styles from "../styles.module.css";
 
 type TProps = {
@@ -13,6 +14,7 @@ type TProps = {
  * one per wrong guess (6 lives → head, body, L-arm, R-arm, L-leg, R-leg).
  */
 export const HangmanFigure: FC<TProps> = ({ wrong, maxWrong = 6 }) => {
+  const { t } = useTranslation();
   const w = Math.min(Math.max(0, wrong), maxWrong);
   const livesLeft = Math.max(0, maxWrong - w);
   const lost = w >= maxWrong;
@@ -23,7 +25,10 @@ export const HangmanFigure: FC<TProps> = ({ wrong, maxWrong = 6 }) => {
         className={styles.hangmanFigureSvg}
         viewBox="0 0 200 240"
         role="img"
-        aria-label={`Виселица: ошибок ${w} из ${maxWrong}`}
+        aria-label={t("editor.miniGameHangmanAria", {
+          wrong: w,
+          max: maxWrong,
+        })}
       >
         {/* scaffold — always on */}
         <line
@@ -146,7 +151,7 @@ export const HangmanFigure: FC<TProps> = ({ wrong, maxWrong = 6 }) => {
           />
         ))}
         <span className={styles.hangmanLivesText}>
-          Осталось попыток: {livesLeft}
+          {t("editor.miniGameLivesLeft", { count: livesLeft })}
         </span>
       </div>
     </div>

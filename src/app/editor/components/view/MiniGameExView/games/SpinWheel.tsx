@@ -9,10 +9,12 @@ import {
   useRef,
   useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import {
   itemWord,
   TMiniGameAnswerState,
   TMiniGameItem,
+  TMiniGamePatch,
 } from "../../../editor/MiniGame/types";
 import styles from "../styles.module.css";
 
@@ -78,7 +80,7 @@ type TProps = {
   showDefinition?: boolean;
   canInteract: boolean;
   state: TMiniGameAnswerState;
-  onPatch: (patch: Partial<TMiniGameAnswerState>) => void;
+  onPatch: (patch: TMiniGamePatch) => void;
 };
 
 export const SpinWheelGame: FC<TProps> = ({
@@ -88,6 +90,7 @@ export const SpinWheelGame: FC<TProps> = ({
   state,
   onPatch,
 }) => {
+  const { t } = useTranslation();
   const uid = useId().replace(/:/g, "");
   const wheelRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef(0);
@@ -214,17 +217,24 @@ export const SpinWheelGame: FC<TProps> = ({
   const spin = () => {
     if (!canInteract || spinning || !labels.length) return;
     const index = Math.floor(Math.random() * labels.length);
+    const picked = labels[index];
+    if (!picked) return;
+    const token = (state.spinToken || 0) + 1;
     const startedAt = Date.now();
-    onPatch({
-      activeGame: "spin-wheel",
-      spinTargetId: labels[index].id,
-      lastSpinItemId: labels[index].id,
-      spinStartedAtMs: startedAt,
-      spinDurationMs: WHEEL_SPIN_MS,
-      spinToken: (state.spinToken || 0) + 1,
-      score: (state.score || 0) + 1,
-      total: labels.length,
-      completed: false,
+    onPatch((prev) => {
+      if ((prev.spinToken || 0) >= token) return prev;
+      return {
+        ...prev,
+        activeGame: "spin-wheel",
+        spinTargetId: picked.id,
+        lastSpinItemId: picked.id,
+        spinStartedAtMs: startedAt,
+        spinDurationMs: WHEEL_SPIN_MS,
+        spinToken: token,
+        score: (prev.score || 0) + 1,
+        total: labels.length,
+        completed: false,
+      };
     });
   };
 
@@ -277,7 +287,7 @@ export const SpinWheelGame: FC<TProps> = ({
             viewBox={`0 0 ${SIZE} ${SIZE}`}
             className={styles.prizeWheelSvg}
             role="img"
-            aria-label="Spin the wheel"
+            aria-label={t("editor.miniGameSpinAria")}
           >
             <defs>
               <radialGradient id={`${uid}-gloss`} cx="30%" cy="26%" r="78%">
@@ -447,7 +457,7 @@ export const SpinWheelGame: FC<TProps> = ({
         isLoading={spinning}
         onPress={spin}
       >
-        Spin
+        {t("editor.miniGameSpin")}
       </Button>
     </div>
   );

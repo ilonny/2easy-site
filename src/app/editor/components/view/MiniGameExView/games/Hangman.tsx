@@ -2,10 +2,12 @@
 
 import { Button } from "@nextui-org/react";
 import { FC, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   itemWord,
   TMiniGameAnswerState,
   TMiniGameItem,
+  TMiniGamePatch,
 } from "../../../editor/MiniGame/types";
 import { HangmanFigure } from "./HangmanFigure";
 import styles from "../styles.module.css";
@@ -17,7 +19,7 @@ type TProps = {
   items: TMiniGameItem[];
   canInteract: boolean;
   state: TMiniGameAnswerState;
-  onPatch: (patch: Partial<TMiniGameAnswerState>) => void;
+  onPatch: (patch: TMiniGamePatch) => void;
 };
 
 function normalize(s: string) {
@@ -62,6 +64,7 @@ export const HangmanGame: FC<TProps> = ({
   state,
   onPatch,
 }) => {
+  const { t } = useTranslation();
   const wordIndex = Math.min(
     Math.max(0, state.hangman?.wordIndex ?? 0),
     Math.max(0, items.length - 1),
@@ -135,43 +138,62 @@ export const HangmanGame: FC<TProps> = ({
     const L = letter.toUpperCase();
     if (letterExhausted(L)) return;
 
-    const nextRevealed = Array.from(revealed);
-    const nextMissed = Array.from(missed);
-    let nextWrong = wrong;
+    onPatch((prev) => {
+      const h = prev.hangman;
+      if (h && (h.wordIndex !== wordIndex || h.status !== "playing")) {
+        return prev;
+      }
+      const revealedNow = new Set(h?.revealedIndexes || []);
+      const missedNow = new Set(
+        (h?.missedLetters?.length ? h.missedLetters : h?.guessed || []).map(
+          (g) => g.toUpperCase(),
+        ),
+      );
+      if (missedNow.has(L)) return prev;
+      const totalInWord = word.split("").filter((ch) => ch === L).length;
+      const already = word
+        .split("")
+        .filter((ch, idx) => ch === L && revealedNow.has(idx)).length;
+      if (totalInWord > 0 && already >= totalInWord) return prev;
 
-    // Classic hangman: reveal every occurrence of the letter at once
-    const hitIndexes: number[] = [];
-    word.split("").forEach((ch, idx) => {
-      if (ch === L && !revealed.has(idx)) hitIndexes.push(idx);
-    });
+      const nextRevealed = Array.from(revealedNow);
+      const nextMissed = Array.from(missedNow);
+      let nextWrong = h?.wrong ?? missedNow.size;
+      const hitIndexes: number[] = [];
+      word.split("").forEach((ch, idx) => {
+        if (ch === L && !revealedNow.has(idx)) hitIndexes.push(idx);
+      });
+      if (hitIndexes.length) {
+        hitIndexes.forEach((idx) => nextRevealed.push(idx));
+      } else {
+        nextMissed.push(L);
+        nextWrong += 1;
+      }
 
-    if (hitIndexes.length) {
-      hitIndexes.forEach((idx) => nextRevealed.push(idx));
-    } else {
-      if (!missed.has(L)) nextMissed.push(L);
-      nextWrong += 1;
-    }
+      const allDone = playableIndexes.every((i) => nextRevealed.includes(i));
+      let nextStatus: "playing" | "won" | "lost" = "playing";
+      if (allDone) nextStatus = "won";
+      else if (nextWrong >= MAX_WRONG) nextStatus = "lost";
 
-    const allDone = playableIndexes.every((i) => nextRevealed.includes(i));
-    let nextStatus: "playing" | "won" | "lost" = "playing";
-    if (allDone) nextStatus = "won";
-    else if (nextWrong >= MAX_WRONG) nextStatus = "lost";
+      const wonCount =
+        (prev.score || 0) +
+        (nextStatus === "won" && h?.status !== "won" ? 1 : 0);
 
-    const wonCount = (state.score || 0) + (nextStatus === "won" ? 1 : 0);
-
-    onPatch({
-      activeGame: "hangman",
-      hangman: {
-        wordIndex,
-        revealedIndexes: nextRevealed,
-        missedLetters: nextMissed,
-        guessed: nextMissed, // keep something for older readers
-        wrong: nextWrong,
-        status: nextStatus,
-      },
-      score: wonCount,
-      total: items.length,
-      completed: false,
+      return {
+        ...prev,
+        activeGame: "hangman",
+        hangman: {
+          wordIndex,
+          revealedIndexes: nextRevealed,
+          missedLetters: nextMissed,
+          guessed: nextMissed,
+          wrong: nextWrong,
+          status: nextStatus,
+        },
+        score: wonCount,
+        total: items.length,
+        completed: false,
+      };
     });
   };
 
@@ -203,14 +225,19 @@ export const HangmanGame: FC<TProps> = ({
   return (
     <div>
       <div className={styles.score}>
-        Слово {wordIndex + 1}/{items.length || 1} · Wins: {state.score || 0}/
-        {items.length}
+        {t("editor.miniGameWordOf", {
+          current: wordIndex + 1,
+          total: items.length || 1,
+          wins: state.score || 0,
+        })}
       </div>
       <div className={styles.hangmanLayout}>
         <HangmanFigure wrong={wrong} maxWrong={MAX_WRONG} />
         <div className={styles.hangmanMain}>
           {!!clue && (
-            <div className={styles.hangmanClue}>Clue: {clue}</div>
+            <div className={styles.hangmanClue}>
+              {t("editor.miniGameClue", { clue })}
+            </div>
           )}
           <div className={styles.hangmanWord}>
             {display.map((d) =>
@@ -225,7 +252,9 @@ export const HangmanGame: FC<TProps> = ({
           </div>
           {status !== "playing" && (
             <div className={styles.hangmanStatus}>
-              {status === "won" ? "You won!" : `Lost — ${word}`}
+              {status === "won"
+                ? t("editor.miniGameWon")
+                : t("editor.miniGameLost", { word })}
             </div>
           )}
           <div className={styles.alphaGrid}>
@@ -254,21 +283,21 @@ export const HangmanGame: FC<TProps> = ({
           isDisabled={!canInteract || wordIndex <= 0}
           onPress={() => goToWord(wordIndex - 1)}
         >
-          Назад
+          {t("common.back")}
         </Button>
         <Button
           variant="flat"
           isDisabled={!canInteract}
           onPress={restartCurrent}
         >
-          Заново
+          {t("editor.miniGameRetry")}
         </Button>
         <Button
           variant="light"
           isDisabled={!canInteract}
           onPress={restartAll}
         >
-          С начала
+          {t("editor.miniGameFromStart")}
         </Button>
         <Button
           color="primary"
@@ -276,7 +305,7 @@ export const HangmanGame: FC<TProps> = ({
           isDisabled={!canInteract || wordIndex >= items.length - 1}
           onPress={() => goToWord(wordIndex + 1)}
         >
-          Далее
+          {t("editor.miniGameNext")}
         </Button>
       </div>
     </div>

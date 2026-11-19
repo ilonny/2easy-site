@@ -264,12 +264,15 @@ export const CreateIndividualHomeworkModal: FC<TProps> = ({
               )}
               <Button
                 color="primary"
-                className="w-full"
+                className="!h-auto !min-w-0 w-full !whitespace-normal px-3 py-2 text-center leading-snug"
                 isLoading={isLoading}
                 disabled={!canSubmit}
                 onClick={onSubmit}
               >
-                <T k="lessons.createPersonalHomework" />
+                <T
+                  k="lessons.createPersonalHomework"
+                  className="block w-full min-w-0 whitespace-normal text-center leading-snug"
+                />
               </Button>
             </>
           )}

@@ -1,10 +1,12 @@
 "use client";
 
 import { FC, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   itemWord,
   TMiniGameAnswerState,
   TMiniGameItem,
+  TMiniGamePatch,
 } from "../../../editor/MiniGame/types";
 import { buildWordsearchGrid, cellsKey } from "../wordsearchGrid";
 import styles from "../styles.module.css";
@@ -13,7 +15,7 @@ type TProps = {
   items: TMiniGameItem[];
   canInteract: boolean;
   state: TMiniGameAnswerState;
-  onPatch: (patch: Partial<TMiniGameAnswerState>) => void;
+  onPatch: (patch: TMiniGamePatch) => void;
 };
 
 type Cell = { row: number; col: number };
@@ -38,6 +40,7 @@ export const WordsearchGame: FC<TProps> = ({
   state,
   onPatch,
 }) => {
+  const { t } = useTranslation();
   const words = useMemo(() => items.map((i) => itemWord(i)), [items]);
   const built = useMemo(() => buildWordsearchGrid(words), [words]);
   const found = new Set((state.foundWords || []).map((w) => w.toUpperCase()));
@@ -98,23 +101,34 @@ export const WordsearchGame: FC<TProps> = ({
       return;
     }
 
-    const nextFound = Array.from(
-      new Set([...(state.foundWords || []), match.word]),
-    );
-    onPatch({
-      activeGame: "wordsearch",
-      foundWords: nextFound,
-      drag: null,
-      score: nextFound.length,
-      total: built.placements.length,
-      completed: nextFound.length >= built.placements.length,
+    const word = match.word;
+    onPatch((prev) => {
+      const already = new Set(
+        (prev.foundWords || []).map((item) => item.toUpperCase()),
+      );
+      if (already.has(word)) {
+        return { ...prev, activeGame: "wordsearch", drag: null };
+      }
+      const nextFound = [...(prev.foundWords || []), word];
+      return {
+        ...prev,
+        activeGame: "wordsearch",
+        foundWords: nextFound,
+        drag: null,
+        score: nextFound.length,
+        total: built.placements.length,
+        completed: nextFound.length >= built.placements.length,
+      };
     });
   };
 
   return (
     <div className={styles.wsLayout}>
       <div className={styles.score}>
-        Found: {found.size}/{built.placements.length}
+        {t("editor.miniGameFound", {
+          found: found.size,
+          total: built.placements.length,
+        })}
       </div>
       <div className={styles.wsWords}>
         {built.placements.map((p) => (

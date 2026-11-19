@@ -68,6 +68,7 @@ const actionBtnClassName =
   "w-full min-h-10 rounded-[14px] text-sm font-medium lg:text-base";
 const primaryActionClassName = `${actionBtnClassName} bg-brand-violet text-white`;
 const secondaryActionClassName = `${actionBtnClassName} border border-brand-violet/30 bg-white text-brand-violet`;
+const wrappingSecondaryActionClassName = `${secondaryActionClassName} !h-auto !min-w-0 !whitespace-normal px-3 py-2 text-center leading-snug`;
 
 
 type TProps = {
@@ -811,14 +812,17 @@ export const LessonCard: FC<TProps> = ({
                 <Button
                   color="secondary"
                   variant="bordered"
-                  className={secondaryActionClassName}
+                  className={wrappingSecondaryActionClassName}
                   size="md"
                   onClick={(e) => {
                     e.stopPropagation();
                     setCreateHomeworkModalVisible(true);
                   }}
                 >
-                  <T k="lessons.createPersonalHomework" />
+                  <T
+                    k="lessons.createPersonalHomework"
+                    className="block w-full min-w-0 whitespace-normal text-center leading-snug"
+                  />
                 </Button>
               )}
             </>
