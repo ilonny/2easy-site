@@ -19,6 +19,7 @@ import Close from "@/assets/icons/close.svg";
 import GalleryIcon from "@/assets/icons/gallery.svg";
 import { getImageNameFromPath } from "@/app/editor/components/editor/mappers";
 import { fetchPostJson } from "@/api";
+import { NESTED_OVERLAY_Z_CLASS } from "@/constants/uiLayers";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 
@@ -292,12 +293,24 @@ export const ImageUpload: FC<TProps> = ({
         )}
       </ReactImageUploading>
 
-      {/* Модальное окно поиска */}
+      {/* Opens on top of the lesson edit modal and the exercise editor
+          (both site-overlay-layer / z-70). Default NextUI z-50 plus
+          placement "auto" docks this dialog at the bottom, under the parent. */}
       <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         size="3xl"
+        placement="center"
         scrollBehavior="inside"
+        shouldBlockScroll={false}
+        classNames={{
+          base: "!my-4 max-h-[min(85dvh,calc(100dvh-2rem))] sm:!my-6",
+          header: "shrink-0",
+          body: "min-h-0 overflow-y-auto",
+          footer: "shrink-0",
+          backdrop: NESTED_OVERLAY_Z_CLASS,
+          wrapper: `${NESTED_OVERLAY_Z_CLASS} !items-center`,
+        }}
       >
         <ModalContent>
           {(onClose) => (
