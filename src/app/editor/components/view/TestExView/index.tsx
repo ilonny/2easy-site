@@ -453,7 +453,15 @@ export const TestExView: FC<TProps> = ({
     const prevIndex = activeIndex - 1;
     if (prevIndex >= 0) {
       const prevQuestion = data.questions?.[prevIndex];
-      if (prevQuestion) {
+      // Only undo an answer submitted in this sitting. Saved student answers
+      // (teacher reviewing, or reopening the lesson) must stay put.
+      if (
+        prevQuestion &&
+        Object.prototype.hasOwnProperty.call(
+          sessionAnswersRef.current,
+          prevQuestion.id,
+        )
+      ) {
         const wasCorrect = sessionAnswersRef.current[prevQuestion.id];
         if (wasCorrect === true) {
           setScore((s) => Math.max(0, s - 1));

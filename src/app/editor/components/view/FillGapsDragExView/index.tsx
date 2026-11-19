@@ -34,6 +34,17 @@ type TProps = {
   isPreview?: boolean;
 };
 
+type TGapId = string | number;
+
+/** Mobile drag stores gap ids as strings; exercise JSON keeps them as numbers. */
+const sameGapId = (
+  a: TGapId | undefined | null,
+  b: TGapId | undefined | null,
+) => a != null && b != null && String(a) === String(b);
+
+const hasGapId = (ids: TGapId[] | undefined, id: TGapId | undefined | null) =>
+  !!ids?.some((x) => sameGapId(x, id));
+
 const AnswerField: FC<{
   field: TField;
   isTeacher: boolean;
@@ -105,13 +116,13 @@ const DraggableItem = (props: {
   isIntersected: MutableRefObject<boolean>;
   isMissedIntersectedId: MutableRefObject<number>;
   onDrop: () => void;
-  setCorrectIds: Dispatch<SetStateAction<number[]>>;
+  setCorrectIds: Dispatch<SetStateAction<TGapId[]>>;
   setErrorAnswerId: Dispatch<SetStateAction<number>>;
   isCorrect: boolean;
   activeDragId: number | null;
   setIncorrectIdsMap: Dispatch<SetStateAction<Record<string, string>>>;
   fields: TField[];
-  correctIds: number[];
+  correctIds: TGapId[];
   incorrectIdsMap: Record<string, string>;
   onPersist: (
     nextCorrect: number[],
@@ -279,7 +290,7 @@ export const FillGapsDragExView: FC<TProps> = ({
   const isIntersected = useRef(false);
   const isMissedIntersectedId = useRef<number>(0);
   const [errorAnswerId, setErrorAnswerId] = useState<number>(0);
-  const [correctIds, setCorrectIds] = useState<number[]>([]);
+  const [correctIds, setCorrectIds] = useState<TGapId[]>([]);
   const [incorrectIdsMap, setIncorrectIdsMap] = useState<Record<string, string>>(
     {}
   );
@@ -305,7 +316,7 @@ export const FillGapsDragExView: FC<TProps> = ({
   const lastHydratedRawRef = useRef<string>("");
 
   const persist = useCallback(
-    (nextCorrect: number[], nextIncorrect: Record<string, string>) => {
+    (nextCorrect: TGapId[], nextIncorrect: Record<string, string>) => {
       if (isPreview) return;
       if (!nextCorrect.length && !Object.keys(nextIncorrect).length) return;
       const payload = JSON.stringify({
@@ -344,7 +355,7 @@ export const FillGapsDragExView: FC<TProps> = ({
               <AnswerField
                 field={field}
                 isTeacher={profile?.role_id === 2 || profile?.role_id === 1}
-                isCorrect={correctIds.includes(field?.id)}
+                isCorrect={hasGapId(correctIds, field?.id)}
                 dataId={data?.id}
                 errorAnswerId={errorAnswerId}
                 incorrectIdsMap={incorrectIdsMap}
@@ -487,7 +498,7 @@ export const FillGapsDragExView: FC<TProps> = ({
                   isMissedIntersectedId={isMissedIntersectedId}
                   onDrop={onDrop}
                   setCorrectIds={setCorrectIds}
-                  isCorrect={correctIds?.includes(field?.id)}
+                  isCorrect={hasGapId(correctIds, field?.id)}
                   setErrorAnswerId={setErrorAnswerId}
                   setIncorrectIdsMap={setIncorrectIdsMap}
                   fields={data.fields}
