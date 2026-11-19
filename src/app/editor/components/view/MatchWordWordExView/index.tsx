@@ -17,15 +17,64 @@ import { useExAnswer } from "@/app/editor/hooks/useExAnswer";
 import { useParams } from "next/navigation";
 import { T } from "@/i18n/T";
 
-/** Детерминированная перестановка: одинаковый seed даёт одинаковый порядок */
+/** Детерминированная перестановка: одинаковый seed даёт одинаковый порядок. */
 function shuffleWithSeed<T>(array: T[], seed: number): T[] {
   const result = [...array];
+  let s = seed >>> 0 || 1;
+  const rng = () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
   for (let i = result.length - 1; i > 0; i--) {
-    const x = Math.sin(seed + i) * 10000;
-    const j = Math.floor((x - Math.floor(x)) * (i + 1));
+    const j = Math.floor(rng() * (i + 1));
     [result[i], result[j]] = [result[j], result[i]];
   }
   return result;
+}
+
+function hashSeed(input: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/**
+ * Правая колонка не должна совпасть с левой по индексу:
+ * иначе слово и его определение стоят в одной строке.
+ * Поворот детерминированный, чтобы учитель и ученик видели один порядок.
+ */
+function derangeAgainst<T>(left: T[], right: T[]): T[] {
+  if (left.length !== right.length || left.length < 2) return right;
+  const hasFixed = (arr: T[]) =>
+    arr.some((id, i) => String(left[i]) === String(id));
+  const n = right.length;
+  for (let rot = 0; rot < n; rot++) {
+    const rotated = right.map((_, i) => right[(i + rot) % n]);
+    if (!hasFixed(rotated)) return rotated;
+  }
+  const out = [...right];
+  for (let pass = 0; pass < n; pass++) {
+    let moved = false;
+    for (let i = 0; i < n; i++) {
+      if (String(out[i]) !== String(left[i])) continue;
+      for (let j = 0; j < n; j++) {
+        if (j === i) continue;
+        const nextI = out[j];
+        const nextJ = out[i];
+        if (String(nextI) === String(left[i])) continue;
+        if (String(nextJ) === String(left[j])) continue;
+        [out[i], out[j]] = [out[j], out[i]];
+        moved = true;
+        break;
+      }
+    }
+    if (!hasFixed(out)) return out;
+    if (!moved) break;
+  }
+  return out;
 }
 
 /** Saved answers often store numeric ids; exercise matches may keep them as strings. */
@@ -83,7 +132,11 @@ export const MatchWordWordExView: FC<TProps> = ({
   const [selectedLeftId, setSelectedLeftId] = useState<string | number | undefined>(undefined);
   const [selectedRightId, setSelectedRightId] = useState<string | number | undefined>(undefined);
 
-  const [incorrectId, setIncorrectId] = useState<string | undefined>(undefined);
+  const [wrongFlash, setWrongFlash] = useState<{
+    leftId: string;
+    rightId: string;
+  } | null>(null);
+  const wrongFlashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [correctIds, setCorrectIds] = useState<Array<string | number>>([]);
   const [incorrectIdsMap, setIncorrectIdsMap] = useState<Record<string, any>>({});
 
@@ -111,7 +164,15 @@ export const MatchWordWordExView: FC<TProps> = ({
     setIncorrectIdsMap({});
     setSelectedLeftId(undefined);
     setSelectedRightId(undefined);
+    setWrongFlash(null);
+    if (wrongFlashTimer.current) clearTimeout(wrongFlashTimer.current);
   }, [resetSeq]);
+
+  useEffect(() => {
+    return () => {
+      if (wrongFlashTimer.current) clearTimeout(wrongFlashTimer.current);
+    };
+  }, []);
 
   const sortOrderRef = useRef<{
     leftOrder: string[];
@@ -135,12 +196,18 @@ export const MatchWordWordExView: FC<TProps> = ({
       let rightOrder: string[];
 
       if (isLessonMode) {
-        const seed = Number(lesson_id) * 10000 + Number(ex_id || 0);
+        const seed = hashSeed(`${lesson_id}:${ex_id}:mww`);
         leftOrder = shuffleWithSeed(ids, seed);
-        rightOrder = shuffleWithSeed(ids, seed + 1);
+        rightOrder = derangeAgainst(
+          leftOrder,
+          shuffleWithSeed(ids, seed ^ 0x9e3779b9)
+        );
       } else {
-        leftOrder = [...ids].sort(() => 0.5 - Math.random());
-        rightOrder = [...ids].sort(() => 0.5 - Math.random());
+        leftOrder = shuffleWithSeed(ids, (Math.random() * 0x100000000) >>> 0);
+        rightOrder = derangeAgainst(
+          leftOrder,
+          shuffleWithSeed(ids, (Math.random() * 0x100000000) >>> 0)
+        );
       }
       sortOrderRef.current = { leftOrder, rightOrder, exerciseKey };
     }
@@ -152,7 +219,10 @@ export const MatchWordWordExView: FC<TProps> = ({
     );
 
     const restLeft = leftOrder.filter((id) => restIdsSet.has(id));
-    const restRight = rightOrder.filter((id) => restIdsSet.has(id));
+    const restRight = derangeAgainst(
+      restLeft,
+      rightOrder.filter((id) => restIdsSet.has(id))
+    );
 
     return restLeft
       .map((leftId, i) => {
@@ -186,10 +256,20 @@ export const MatchWordWordExView: FC<TProps> = ({
   }, [data.matches, correctIds, incorrectIdsMap]);
 
   const showIncorrect = useCallback(
-    (leftId: string | number, selectedValue: string | undefined) => {
-      setIncorrectId(String(leftId));
-      setTimeout(() => {
-        setIncorrectId(undefined);
+    (
+      leftId: string | number,
+      rightId: string | number,
+      selectedValue: string | undefined
+    ) => {
+      const flash = { leftId: String(leftId), rightId: String(rightId) };
+      setWrongFlash(flash);
+      if (wrongFlashTimer.current) clearTimeout(wrongFlashTimer.current);
+      wrongFlashTimer.current = setTimeout(() => {
+        setWrongFlash((cur) =>
+          cur && cur.leftId === flash.leftId && cur.rightId === flash.rightId
+            ? null
+            : cur
+        );
       }, 2000);
       setIncorrectIdsMap((incorrectIds) => {
         const next = {
@@ -222,7 +302,7 @@ export const MatchWordWordExView: FC<TProps> = ({
           return next;
         });
       } else {
-        showIncorrect(leftId, rightM?.correctValue);
+        showIncorrect(leftId, selectedRightId, rightM?.correctValue);
       }
 
       setSelectedLeftId(undefined);
@@ -250,7 +330,7 @@ export const MatchWordWordExView: FC<TProps> = ({
           return next;
         });
       } else {
-        showIncorrect(selectedLeftId, rightM?.correctValue);
+        showIncorrect(selectedLeftId, rightId, rightM?.correctValue);
       }
 
       setSelectedLeftId(undefined);
@@ -350,9 +430,20 @@ export const MatchWordWordExView: FC<TProps> = ({
               bgColor = "#E9FEE8";
             }
 
-            if (sameId(m.id, incorrectId)) {
-              bgColor = "#FBE6E5";
-            }
+            const leftIsWrong =
+              !!wrongFlash && sameId(m.id, wrongFlash.leftId);
+            const rightIsWrong =
+              !!wrongFlash && sameId(m.correctId, wrongFlash.rightId);
+            const hintLeft =
+              !rest.isPresentationMode &&
+              isTeacher &&
+              selectedRightId !== undefined &&
+              sameId(m.id, selectedRightId);
+            const hintRight =
+              !rest.isPresentationMode &&
+              isTeacher &&
+              selectedLeftId !== undefined &&
+              sameId(m.correctId, selectedLeftId);
 
             return (
               <div
@@ -369,15 +460,14 @@ export const MatchWordWordExView: FC<TProps> = ({
                     className="h-full min-h-[3rem] p-1.5 text-xs font-bold [overflow-wrap:anywhere] break-words sm:min-h-[3.5rem] sm:p-3 sm:text-base md:p-4 md:text-[18px]"
                     style={{
                       cursor: "pointer",
-                      background:
-                        !rest.isPresentationMode &&
-                        (profile?.role_id === 2 || profile?.role_id === 1) &&
-                        selectedRightId !== undefined &&
-                        sameId(m.id, selectedRightId)
+                      background: leftIsWrong
+                        ? "#FBE6E5"
+                        : hintLeft
                           ? "#E9FEE8"
                           : undefined,
-                      border:
-                        sameId(m.id, selectedLeftId)
+                      border: leftIsWrong
+                        ? "2px solid rgb(164, 41, 41)"
+                        : sameId(m.id, selectedLeftId)
                           ? "2px solid #3f28c6"
                           : "2px solid transparent",
                       whiteSpace: "break-spaces",
@@ -396,15 +486,14 @@ export const MatchWordWordExView: FC<TProps> = ({
                     radius="sm"
                     style={{
                       cursor: "pointer",
-                      background:
-                        !rest.isPresentationMode &&
-                        (profile?.role_id === 2 || profile?.role_id === 1) &&
-                        selectedLeftId !== undefined &&
-                        sameId(m.correctId, selectedLeftId)
+                      background: rightIsWrong
+                        ? "#FBE6E5"
+                        : hintRight
                           ? "#E9FEE8"
                           : bgColor,
-                      border:
-                        sameId(m.correctId, selectedRightId)
+                      border: rightIsWrong
+                        ? "2px solid rgb(164, 41, 41)"
+                        : sameId(m.correctId, selectedRightId)
                           ? "2px solid #3f28c6"
                           : "2px solid transparent",
                       whiteSpace: "break-spaces",
