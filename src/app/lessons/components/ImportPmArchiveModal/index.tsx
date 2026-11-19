@@ -42,6 +42,7 @@ type TPreviewExercise = {
   key: string;
   title: string;
   type: string;
+  recognized?: boolean;
   warning?: string;
 };
 
@@ -483,8 +484,21 @@ export const ImportPmArchiveModal: FC<TProps> = ({
                   {selectedCount}. Снимите галочки с того, что не нужно
                   импортировать.
                 </p>
+                {job.preview.lessons.some((l) =>
+                  l.exercises.some((e) => e.recognized === false || e.warning),
+                ) ? (
+                  <p className="rounded-lg bg-warning-50 px-3 py-2 text-sm text-warning-700">
+                    Есть задания, которые не удалось полностью распознать — они
+                    отмечены ниже. Их можно снять с импорта или оставить как
+                    текст.
+                  </p>
+                ) : null}
                 <Accordion selectionMode="multiple" variant="bordered">
-                  {job.preview.lessons.map((lesson) => (
+                  {job.preview.lessons.map((lesson) => {
+                    const badCount = lesson.exercises.filter(
+                      (e) => e.recognized === false || !!e.warning,
+                    ).length;
+                    return (
                     <AccordionItem
                       key={lesson.key}
                       aria-label={lesson.title}
@@ -504,16 +518,24 @@ export const ImportPmArchiveModal: FC<TProps> = ({
                                 ? `${lesson.moduleTitle} · `
                                 : ""}
                               {lesson.exerciseCount} заданий
+                              {badCount > 0
+                                ? ` · не распознано: ${badCount}`
+                                : ""}
                             </div>
                           </div>
                         </div>
                       }
                     >
                       <div className="flex flex-col gap-2 pb-2 pl-2">
-                        {lesson.exercises.map((ex) => (
+                        {lesson.exercises.map((ex) => {
+                          const unrecognized =
+                            ex.recognized === false || !!ex.warning;
+                          return (
                           <label
                             key={ex.key}
-                            className="flex items-start gap-2 text-sm"
+                            className={`flex items-start gap-2 rounded-md px-2 py-1.5 text-sm ${
+                              unrecognized ? "bg-warning-50" : ""
+                            }`}
                           >
                             <Checkbox
                               isSelected={exerciseChecked[ex.key] !== false}
@@ -527,23 +549,30 @@ export const ImportPmArchiveModal: FC<TProps> = ({
                               }
                               size="sm"
                             />
-                            <span>
+                            <span className="min-w-0 flex-1">
                               <span className="font-medium">{ex.title}</span>
                               <span className="text-default-400">
                                 {" "}
                                 · {ex.type}
                               </span>
+                              {unrecognized ? (
+                                <span className="ml-2 inline-block rounded bg-warning-200 px-1.5 py-0.5 text-[11px] font-semibold uppercase text-warning-800">
+                                  Не распознано
+                                </span>
+                              ) : null}
                               {ex.warning ? (
-                                <span className="block text-xs text-warning">
+                                <span className="mt-0.5 block text-xs text-warning-700">
                                   {ex.warning}
                                 </span>
                               ) : null}
                             </span>
                           </label>
-                        ))}
+                          );
+                        })}
                       </div>
                     </AccordionItem>
-                  ))}
+                    );
+                  })}
                 </Accordion>
                 <Button
                   color="primary"
