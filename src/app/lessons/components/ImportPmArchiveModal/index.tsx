@@ -36,6 +36,12 @@ import {
 const CWS_URL =
   "https://chromewebstore.google.com/detail/2easy-progressme-export/mffboabccpkfbnlephbhigcamgjleaaa?hl=ru";
 
+/** Max ZIP size (must match backend multer + nginx client_max_body_size). */
+const PM_IMPORT_MAX_ZIP_BYTES = 500 * 1024 * 1024;
+const PM_IMPORT_MAX_ZIP_LABEL = "500 МБ";
+const PAYLOAD_TOO_LARGE_MESSAGE =
+  `Архив слишком большой или сервер отклонил загрузку (лимит ${PM_IMPORT_MAX_ZIP_LABEL}). Разбейте учебник на части или уменьшите медиа.`;
+
 export type TPmImportMode = "standalone" | "into_course" | "new_course";
 
 type TPreviewExercise = {
@@ -257,6 +263,13 @@ export const ImportPmArchiveModal: FC<TProps> = ({
         setStep("error");
         return;
       }
+      if (file.size > PM_IMPORT_MAX_ZIP_BYTES) {
+        setError(
+          `Файл больше ${PM_IMPORT_MAX_ZIP_LABEL}. Экспортируйте учебник частями или уменьшите медиа.`,
+        );
+        setStep("error");
+        return;
+      }
       setError(null);
       setStep("upload");
       setUploadPercent(0);
@@ -275,7 +288,16 @@ export const ImportPmArchiveModal: FC<TProps> = ({
           },
         });
         if (!json?.success || !json.jobId) {
-          setError(json?.message || "Не удалось загрузить архив");
+          const tooLarge =
+            json?.status === 413 ||
+            /payload too large|request entity too large|слишком большой/i.test(
+              String(json?.message || ""),
+            );
+          setError(
+            tooLarge
+              ? PAYLOAD_TOO_LARGE_MESSAGE
+              : json?.message || "Не удалось загрузить архив",
+          );
           setStep("error");
           return;
         }
@@ -425,7 +447,8 @@ export const ImportPmArchiveModal: FC<TProps> = ({
                     Перетащите ZIP сюда или нажмите, чтобы выбрать
                   </p>
                   <p className="text-sm text-default-500">
-                    Архив из расширения 2easy ProgressMe Export
+                    Архив из расширения 2easy ProgressMe Export · до{" "}
+                    {PM_IMPORT_MAX_ZIP_LABEL}
                   </p>
                 </div>
                 <input
@@ -668,7 +691,8 @@ export const ImportPmArchiveModal: FC<TProps> = ({
               </li>
               <li>
                 Откройте учебник на ProgressMe или EdVibe, запустите расширение
-                и экспортируйте выбранные уроки в ZIP.
+                и экспортируйте выбранные уроки в ZIP (максимум{" "}
+                {PM_IMPORT_MAX_ZIP_LABEL} на один архив).
               </li>
               <li>
                 В 2easy нажмите «Импортировать архив» и загрузите полученный
@@ -680,11 +704,20 @@ export const ImportPmArchiveModal: FC<TProps> = ({
               </li>
             </ol>
             <div className="rounded-lg bg-default-100 p-3">
+              <p className="mb-2 font-medium">Целый учебник — как курс</p>
+              <p>
+                Если переносите целый учебник (много уроков), оформляйте импорт
+                как курс 2easy: откройте «Создать курс» → «Импортировать архив»,
+                укажите название курса и загрузите ZIP. Не используйте обычное
+                «Создать урок» — иначе уроки окажутся разрозненными без курса.
+              </p>
+            </div>
+            <div className="rounded-lg bg-default-100 p-3">
               <p className="mb-2 font-medium">Куда попадут уроки</p>
               <ul className="list-disc space-y-1 pl-5">
                 <li>
                   <b>Создать урок</b> на главной lesson plans — отдельные уроки
-                  без курса.
+                  без курса (удобно для 1–2 уроков, не для учебника).
                 </li>
                 <li>
                   <b>Создать урок</b> внутри открытого курса — уроки добавляются
@@ -692,9 +725,14 @@ export const ImportPmArchiveModal: FC<TProps> = ({
                 </li>
                 <li>
                   <b>Создать курс</b> → «Импортировать архив» — сначала укажите
-                  название курса, затем в него попадут выбранные уроки.
+                  название курса, затем в него попадут выбранные уроки
+                  (рекомендуется для целого учебника).
                 </li>
               </ul>
+              <p className="mt-2 text-default-600">
+                Размер ZIP — до {PM_IMPORT_MAX_ZIP_LABEL}. Если архив больше,
+                экспортируйте учебник частями.
+              </p>
             </div>
             <Button
               as="a"
