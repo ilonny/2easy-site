@@ -66,11 +66,14 @@ export const LessonParticipantsPanel: FC<TProps> = ({
         }`}
       >
         {students.map((s) => {
-          const isActive = s?.student_id === activeStudentId;
+          const studentId = Number(s?.student_id);
+          const isActive = studentId > 0 && studentId === Number(activeStudentId);
           return (
             <div
               key={s.id}
-              onClick={() => onSelectStudent(s.student_id)}
+              onClick={() => {
+                if (studentId > 0) onSelectStudent(studentId);
+              }}
               className="min-w-0 cursor-pointer touch-manipulation"
             >
               <Card

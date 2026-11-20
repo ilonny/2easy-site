@@ -675,7 +675,10 @@ export const useExAnswer = (params: TParams) => {
       enablePolling &&
       !isPresentationMode &&
       !!targetStudentId &&
-      (isTeacher || !!student_id);
+      // Class view passes the focused student before the teacher profile
+      // finishes loading. Poll as soon as that id exists so answers are not
+      // skipped for the whole lesson.
+      (isTeacher || !!student_id || positiveId(activeStudentId) > 0);
 
     // Student switched (teacher) or target cleared — drop previous answers immediately
     // so UI never shows the previous student's data.
