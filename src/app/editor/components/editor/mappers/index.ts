@@ -68,6 +68,10 @@ export const mapTypeToTitle = (type?: TTemplate["type"]) => {
       return i18n.t("templates.trueFalse", {
         defaultValue: "TRUE / FALSE",
       });
+    case "TABLES":
+      return i18n.t("templates.tables", {
+        defaultValue: "Таблицы",
+      });
     case "mini_games":
     case "mini_game":
       return i18n.t("templates.miniGames", {

@@ -1,0 +1,61 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  max-width: 886px;
+  margin: 0 auto;
+  padding: 8px 0 28px;
+}
+
+.figure {
+  margin: 0;
+}
+
+.caption {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  min-width: 280px;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px #908ba826;
+}
+
+.cell {
+  border: 1px solid #e6e2f2;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  font-size: 16px;
+  line-height: 1.45;
+  color: #111827;
+  min-width: 88px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.head {
+  background: #f4f1ff;
+  font-weight: 700;
+}
+
+.desc {
+  white-space: pre-wrap;
+}

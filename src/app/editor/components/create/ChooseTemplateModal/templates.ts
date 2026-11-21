@@ -21,6 +21,8 @@ import MatchBg from "@/assets/images/match_template_bg.png";
 import TestBg from "@/assets/images/test_template_bg.png";
 import FreeFormBg from "@/assets/images/free_form_template_bg.png";
 import IntTemplateBg from "@/assets/images/int_template_bg.png";
+import TableBg from "@/assets/images/table_template_bg.png";
+import { TABLES_EX_TYPE } from "../../editor/Tables/tablesModel";
 import { StaticImageData } from "next/image";
 
 export type TTemplate = {
@@ -151,6 +153,15 @@ export const templates: TTemplate[] = [
     descriptionDefault:
       "Прочитать предложение и выбрать True или False",
     bgImage: TrueFalseBg,
+  },
+  {
+    type: TABLES_EX_TYPE,
+    titleKey: "templates.tables",
+    titleDefault: "Таблицы",
+    descriptionKey: "templates.tablesDesc",
+    descriptionDefault:
+      "С нуля: до 10 таблиц, свои строки и колонки, курсив и цвет",
+    bgImage: TableBg,
   },
   {
     type: "test",

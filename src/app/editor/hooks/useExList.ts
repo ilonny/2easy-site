@@ -188,6 +188,8 @@ const getDataMapper = (type: string) => {
       return mapFillGapsNewExData;
     case "TRUE_FALSE":
       return mapFillGapsNewExData;
+    case "TABLES":
+      return mapNoteExData;
     case "free-input-form":
     case "test":
       return mapImageExData;

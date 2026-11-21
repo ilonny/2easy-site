@@ -39,6 +39,7 @@ import { FillGapsDragExView } from "../FillGapsDragExView";
 import { FillGapsNewExView } from "../FillGapsNewExView";
 import { UnscrambleWordsExView } from "../UnscrambleWordsExView";
 import { TrueFalseExView } from "../TrueFalseExView";
+import { TablesExView } from "../TablesExView";
 import { MiniGameExView } from "../MiniGameExView";
 import { MatchWordWordExView } from "../MatchWordWordExView";
 import { MatchWordImageExView } from "../MatchWordImageExView";
@@ -116,6 +117,7 @@ const VIEWS_WITHOUT_ID: Record<string, ComponentType<any>> = {
   "text-sticker": TextStickerExView,
   video: VideoExView,
   audio: AudioExView,
+  TABLES: TablesExView,
 };
 
 const VIEWS_WITH_ID: Record<string, ComponentType<any>> = {

@@ -22,6 +22,7 @@ import { IntEx } from "../Int";
 import { FillGapsNew } from "../FillGapsNew";
 import { UnscrambleWords } from "../UnscrambleWords";
 import { TrueFalse } from "../TrueFalse";
+import { TablesEx } from "../Tables";
 import { MiniGame } from "../MiniGame";
 import { T } from "@/i18n/T";
 import Image from "next/image";
@@ -202,6 +203,8 @@ export const EditorRootModal: FC<TProps> = ({
         return UnscrambleWords;
       case "TRUE_FALSE":
         return TrueFalse;
+      case "TABLES":
+        return TablesEx;
       case "mini_game":
       case "flash-cards":
       case "matching-pairs":

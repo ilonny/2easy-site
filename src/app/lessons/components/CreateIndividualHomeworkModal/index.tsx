@@ -31,6 +31,7 @@ const EX_TYPE_TO_TEMPLATE_KEY: Record<string, string> = {
   FILL_GAPS_NEW: "templates.fillGapsNew",
   UNSCRAMBLE_WORDS: "templates.unscrambleWords",
   TRUE_FALSE: "templates.trueFalse",
+  TABLES: "templates.tables",
   "match-word-word": "templates.matchWordWord",
   "match-word-image": "templates.matchWordImage",
   "match-word-column": "templates.matchWordColumn",
