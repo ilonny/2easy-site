@@ -13,7 +13,7 @@ import {
 } from "@nextui-org/react";
 import { ContentWrapper } from "@/components";
 import { AuthContext } from "@/auth";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { withLogin } from "@/auth/hooks/withLogin";
 import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
@@ -60,6 +60,10 @@ import { LessonTimerFab } from "@/app/lessons/components/LessonTimer";
 import { BELOW_SITE_HEADER_STICKY_TOP_CLASS } from "@/constants/uiLayers";
 import { useRedirectIfLessonLockedOnTrial, useTeacherPlan } from "@/app/subscription/helpers";
 import { schoolHomePath } from "@/app/school/lib/schoolTab";
+import {
+  catalogFetchParams,
+  useCatalogWorkspace,
+} from "@/app/school/lib/catalogWorkspace";
 import { LessonModeBanner } from "@/app/lessons/components/LessonModeBanner";
 import { useLessonMediaSync } from "@/app/lessons/mediaSync/useLessonMediaSync";
 import { useLessonTimer } from "@/app/lessons/mediaSync/useLessonTimer";
@@ -92,6 +96,16 @@ const LessonBoardButton = dynamic(
 const VIEW_NOOP = () => {};
 const VIEW_ASYNC_NOOP = async () => {};
 
+const toPositiveId = (value: unknown) => {
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isInteger(n) && n > 0 ? n : 0;
+};
+
+const hasId = (ids: readonly unknown[], id: unknown) => {
+  const target = toPositiveId(id);
+  return target > 0 && ids.some((item) => toPositiveId(item) === target);
+};
+
 export default function LessonPage() {
   withLogin();
   const router = useRouter();
@@ -99,7 +113,16 @@ export default function LessonPage() {
   const params = useParams() as { id: string };
   const lessonId = parseRouteId(params.id);
   const lessonIdNum = parseRouteIdNumber(params.id);
-  const lockedStudentId = Number(searchParams?.get("student_id") || 0) || 0;
+  const lockedStudentId = toPositiveId(searchParams?.get("student_id"));
+  const catalogWorkspace = useCatalogWorkspace();
+  const workspaceFetch = useMemo(
+    () => catalogFetchParams(catalogWorkspace),
+    [
+      catalogWorkspace.workspaceScope,
+      catalogWorkspace.schoolId,
+      catalogWorkspace.teacherUserId,
+    ],
+  );
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
@@ -153,15 +176,20 @@ export default function LessonPage() {
         const res = await fetchGet({
           path: `/lesson/session/resolve?${query.toString()}`,
           isSecure: true,
+          ...workspaceFetch,
         });
         const json = await res?.json();
         if (!cancelled && json?.success && json?.session?.id) {
           setLessonSessionId(Number(json.session.id));
           const roster = Array.isArray(json.session.student_ids)
-            ? json.session.student_ids.map(Number).filter(Boolean)
+            ? json.session.student_ids
+                .map((id: unknown) => toPositiveId(id))
+                .filter(Boolean)
             : [];
           if (roster.length) {
-            if (lockedStudentId && !roster.includes(lockedStudentId)) {
+            // A link opened for one student must not adopt a different class
+            // roster — that cleared the focused student and stopped answer polls.
+            if (lockedStudentId && !hasId(roster, lockedStudentId)) {
               return;
             }
             setLessonSessionRoster((prev) =>
@@ -183,7 +211,13 @@ export default function LessonPage() {
     return () => {
       cancelled = true;
     };
-  }, [authIsLoading, lessonIdNum, lockedStudentId, requestedSessionId]);
+  }, [
+    authIsLoading,
+    lessonIdNum,
+    lockedStudentId,
+    requestedSessionId,
+    workspaceFetch,
+  ]);
 
   const handleEditHomeworkForStudent = useCallback(async () => {
     const sid = Number(
@@ -324,16 +358,21 @@ export default function LessonPage() {
     lockedStudentId,
   ]);
 
+  const studentFetchGen = useRef(0);
   const fetchStudents = useCallback(async () => {
     if (!lessonId) return;
-    let selectedIds: number[] = lockedStudentId ? [lockedStudentId] : lessonSessionRoster;
+    const gen = ++studentFetchGen.current;
+    const locked = toPositiveId(lockedStudentId);
+    let selectedIds: number[] = locked
+      ? [locked]
+      : lessonSessionRoster.map((id) => toPositiveId(id)).filter(Boolean);
     if (!selectedIds.length) {
       try {
         selectedIds = (
           JSON.parse(readFromLocalStorage("start_lesson_selected_ids") || "[]") as unknown[]
         )
-          ?.map((el) => Number(el))
-          ?.filter((n) => Number(n) > 0);
+          .map((el) => toPositiveId(el))
+          .filter(Boolean);
       } catch {
         /* ignore */
       }
@@ -341,31 +380,39 @@ export default function LessonPage() {
 
     const paramsQs = new URLSearchParams();
     paramsQs.set("lesson_id", lessonId);
-    if (selectedIds?.length) {
+    if (selectedIds.length) {
       paramsQs.set("student_ids", selectedIds.join(","));
     }
     const list = await (
       await fetchGet({
         path: `/lesson-students?${paramsQs.toString()}`,
         isSecure: true,
+        ...workspaceFetch,
       })
     )?.json();
+    if (gen !== studentFetchGen.current) return;
     try {
-      const filteredIds = selectedIds?.length
-        ? (list?.studentList as TLessonParticipant[] | undefined)?.filter((s) => {
-            return selectedIds.includes(s.student_id);
-          })
+      const rows = Array.isArray(list?.studentList)
+        ? (list.studentList as TLessonParticipant[])
         : [];
-      setStudents(filteredIds || []);
-      if (lockedStudentId) {
-        setActiveStudentId(lockedStudentId);
-      } else if (filteredIds?.length === 1) {
-        setActiveStudentId(filteredIds[0]?.student_id);
+      const filteredIds = selectedIds.length
+        ? rows.filter((s) => hasId(selectedIds, s.student_id))
+        : [];
+      setStudents(filteredIds);
+      if (locked) {
+        setActiveStudentId(locked);
+      } else if (filteredIds.length === 1) {
+        const only = toPositiveId(filteredIds[0]?.student_id);
+        if (only) setActiveStudentId(only);
+      } else if (selectedIds.length === 1) {
+        // Session roster knows the student even when the list payload drops
+        // them (id typed as a string, or school workspace not applied yet).
+        setActiveStudentId(selectedIds[0]);
       }
     } catch {
       /* ignore */
     }
-  }, [lessonId, lessonSessionRoster, lockedStudentId]);
+  }, [lessonId, lessonSessionRoster, lockedStudentId, workspaceFetch]);
 
   useEffect(() => {
     fetchStudents();

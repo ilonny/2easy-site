@@ -68,12 +68,21 @@ export const StartLessonButton = (props: TProps) => {
         return;
       }
       const targetLessonId = Number(startedLessonId || lesson.id);
+      const studentIds = (chosenIds || [])
+        .map((id) => Number(id))
+        .filter((id) => Number.isInteger(id) && id > 0);
       setModalVisible(false);
+      const qs = new URLSearchParams();
+      if (sessionId) qs.set("session_id", String(sessionId));
+      // One student in the class: lock the lesson on them so answers load
+      // without waiting for a roster click.
+      if (studentIds.length === 1) {
+        qs.set("student_id", String(studentIds[0]));
+      }
+      const query = qs.toString();
       router.push(
         withWorkspacePath(
-          `/lessons/${targetLessonId}${
-            sessionId ? `?session_id=${sessionId}` : ""
-          }`,
+          `/lessons/${targetLessonId}${query ? `?${query}` : ""}`,
           catalogWorkspace,
         ),
       );
