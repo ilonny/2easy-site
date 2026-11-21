@@ -459,7 +459,7 @@ export const TablesEx: FC<TProps> = ({
       <div className={styles.header}>
         <div className={styles.question}>
           <T
-            k="editor.tablesHowTitle"
+            k="editor.tablesBuildTitle"
             defaultText="Как собрать упражнение?"
           />
         </div>

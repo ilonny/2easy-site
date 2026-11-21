@@ -158,7 +158,7 @@ export const templates: TTemplate[] = [
     type: TABLES_EX_TYPE,
     titleKey: "templates.tables",
     titleDefault: "Таблицы",
-    descriptionKey: "templates.tablesDesc",
+    descriptionKey: "templates.tablesCardDesc",
     descriptionDefault:
       "До 10 таблиц, свои строки и колонки, курсив и цвет",
     bgImage: TableBg,
