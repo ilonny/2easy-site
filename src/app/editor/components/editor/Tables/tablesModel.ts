@@ -49,6 +49,7 @@ export type TTablesExerciseData = {
   titleColor?: string;
   subtitle?: string;
   description?: string;
+  images?: Array<Record<string, string>>;
   tables: TLessonTable[];
 };
 
@@ -322,6 +323,9 @@ export function normalizeTablesData(raw: unknown): TTablesExerciseData {
     titleColor,
     subtitle: rec.subtitle != null ? String(rec.subtitle) : "",
     description: rec.description != null ? String(rec.description) : "",
+    images: Array.isArray(rec.images)
+      ? (rec.images as Array<Record<string, string>>)
+      : [],
     tables: tables.length ? tables : [createTable("table-1")],
   };
 }

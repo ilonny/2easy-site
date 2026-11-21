@@ -160,7 +160,7 @@ export const templates: TTemplate[] = [
     titleDefault: "Таблицы",
     descriptionKey: "templates.tablesDesc",
     descriptionDefault:
-      "С нуля: до 10 таблиц, свои строки и колонки, курсив и цвет",
+      "До 10 таблиц, свои строки и колонки, курсив и цвет",
     bgImage: TableBg,
   },
   {

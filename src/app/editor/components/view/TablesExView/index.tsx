@@ -1,6 +1,10 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+
 import { FC, Fragment } from "react";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 import {
   TCellRun,
   TLessonTable,
@@ -80,6 +84,11 @@ export const TablesExView: FC<{
   isPreview?: boolean;
 }> = ({ data }) => {
   const tables = data?.tables || [];
+  const image = data?.images?.[0] as
+    | { dataURL?: string; path?: string }
+    | undefined;
+  const imageSrc = image?.dataURL || image?.path || "";
+
   return (
     <div className="exercise-view-shell max-w-[886px]">
       <div className="exercise-view-head py-4 sm:py-6 md:py-7 lg:py-8 w-full max-w-[766px] mx-auto">
@@ -92,9 +101,22 @@ export const TablesExView: FC<{
           <p className="exercise-view-subtitle">{data.subtitle}</p>
         )}
         {!!data?.description && (
-          <p className={`exercise-view-desc ${styles.desc}`}>{data.description}</p>
+          <p className={`exercise-view-desc ${styles.desc}`}>
+            {data.description}
+          </p>
         )}
       </div>
+      {!!imageSrc && (
+        <div className="w-full max-w-full min-w-0">
+          <Zoom>
+            <img
+              src={imageSrc}
+              alt=""
+              className="block max-w-full h-auto max-h-[min(50vh,400px)] object-contain mx-auto"
+            />
+          </Zoom>
+        </div>
+      )}
       <div className={styles.stack}>
         {tables.map((table) => (
           <TableFigure key={table.id} table={table} />

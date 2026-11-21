@@ -1,6 +1,7 @@
 "use client";
 
 import { uuidv4 } from "@/app/editor/helpers";
+import { ImageUpload } from "@/components/ImageUpload";
 import { Button, Input } from "@nextui-org/react";
 import {
   FC,
@@ -13,16 +14,19 @@ import {
 } from "react";
 import { TablesExView } from "../../view/TablesExView";
 import { useExData } from "../hooks/useExData";
+import { CreateExWithAiButton } from "../CreateExWithAiButton";
 import { useUploadTablesEx } from "../hooks/useUploadTablesEx";
 import { TitleExInput } from "../TitleExInput";
 import { T } from "@/i18n/T";
 import i18n from "@/i18n/config";
 import { toast } from "react-toastify";
 import Close from "@/assets/icons/close.svg";
+import GalleryIcon from "@/assets/icons/gallery.svg";
 import Image from "next/image";
 import { domToRuns } from "./cellDom";
 import {
   TABLE_TEXT_COLORS,
+  TABLES_EX_TYPE,
   TABLES_MAX_COLS,
   TABLES_MAX_ROWS,
   TABLES_MAX_TABLES,
@@ -201,7 +205,11 @@ export const TablesEx: FC<TProps> = ({
     () => normalizeTablesData(defaultValues),
     [defaultValues],
   );
-  const { data, changeData, setData } = useExData<TTablesExerciseData>(initialData);
+  const { data, changeData, setData, resetData } =
+    useExData<TTablesExerciseData>(initialData);
+  const [images, setImages] = useState<TTablesExerciseData["images"]>(
+    initialData.images || [],
+  );
   const [openId, setOpenId] = useState<string | null>(
     initialData.tables[0]?.id ?? null,
   );
@@ -212,6 +220,10 @@ export const TablesEx: FC<TProps> = ({
     italic: false,
     underline: false,
   });
+
+  useEffect(() => {
+    changeData("images", images || []);
+  }, [changeData, images]);
 
   useEffect(() => {
     if (!success) return;
@@ -354,40 +366,102 @@ export const TablesEx: FC<TProps> = ({
   );
 
   const onSave = useCallback(() => {
-    const normalized = normalizeTablesData(data);
-    saveTablesEx({ ...normalized, id: data.id, sortIndex: data.sortIndex });
-  }, [data, saveTablesEx]);
+    const normalized = normalizeTablesData({ ...data, images });
+    saveTablesEx({
+      ...normalized,
+      id: data.id,
+      sortIndex: data.sortIndex,
+      images,
+    });
+  }, [data, images, saveTablesEx]);
+
+  const previewData = useMemo(
+    () => normalizeTablesData({ ...data, images }),
+    [data, images],
+  );
 
   return (
     <div>
-      <div className="w-full max-w-[640px]">
-        <TitleExInput
-          label={<T k="editor.taskTitle" defaultText="Заголовок задания" />}
-          value={data.title || ""}
-          setValue={(val) => changeData("title", val)}
-          onColorChange={(color: string) => changeData("titleColor", color)}
-          selectedColor={data.titleColor || "#3F28C6"}
-        />
-        <div className="h-4" />
-        <TitleExInput
-          label={<T k="editor.taskSubtitle" defaultText="Подзаголовок" />}
-          value={data.subtitle || ""}
-          setValue={(val) => changeData("subtitle", val)}
-        />
-        <div className="h-4" />
-        <TitleExInput
-          isTextarea
-          label={<T k="editor.description" defaultText="Описание" />}
-          value={data.description || ""}
-          setValue={(val) => changeData("description", val)}
-        />
+      <div className="flex flex-wrap">
+        <div className="w-full md:w-1/2 md:pr-2 min-w-0">
+          <TitleExInput
+            label={<T k="editor.taskTitle" defaultText="Заголовок задания" />}
+            value={data.title || ""}
+            setValue={(val) => changeData("title", val)}
+            onColorChange={(color: string) => changeData("titleColor", color)}
+            selectedColor={data.titleColor || "#3F28C6"}
+          />
+          <div className="h-4" />
+          <TitleExInput
+            label={<T k="editor.taskSubtitle" defaultText="Подзаголовок" />}
+            value={data.subtitle || ""}
+            setValue={(val) => changeData("subtitle", val)}
+          />
+          <div className="h-4" />
+          <TitleExInput
+            isTextarea
+            label={<T k="editor.description" defaultText="Описание" />}
+            value={data.description || ""}
+            setValue={(val) => changeData("description", val)}
+          />
+        </div>
+        <div className="w-full md:w-1/2 md:pl-2 min-w-0">
+          <p className="font-light mb-2">
+            <T k="editor.imageForTask" defaultText="Изображение для задания" />
+          </p>
+          <ImageUpload
+            images={images || []}
+            setImages={setImages}
+            customPlaceHolder={
+              <div
+                style={{
+                  width: "100%",
+                  background: "#fff",
+                  height: 200,
+                  borderRadius: 10,
+                }}
+                className="flex items-center justify-center flex-col gap-4"
+              >
+                <Image src={GalleryIcon} alt="GalleryIcon" />
+                <p
+                  className="text-small text-center max-w-[250px]"
+                  style={{ color: "#B7B7B7" }}
+                >
+                  <T
+                    k="editor.dragImagesHere"
+                    defaultText="Нажмите на этот блок или перетащите сюда изображения"
+                  />
+                </p>
+              </div>
+            }
+          />
+          <CreateExWithAiButton
+            type={TABLES_EX_TYPE}
+            currentData={data as Record<string, unknown>}
+            onApply={(generated) => {
+              const next = normalizeTablesData({
+                ...generated,
+                id: data.id,
+                sortIndex: data.sortIndex,
+              });
+              resetData(next);
+              setImages(
+                Array.isArray(generated.images) ? generated.images : images,
+              );
+              setOpenId(next.tables[0]?.id ?? null);
+            }}
+          />
+        </div>
       </div>
 
       <div className="h-6" />
 
       <div className={styles.header}>
         <div className={styles.question}>
-          <T k="editor.tablesHowTitle" defaultText="Таблицы с нуля" />
+          <T
+            k="editor.tablesHowTitle"
+            defaultText="Как собрать упражнение?"
+          />
         </div>
         <div className={styles.hint}>
           <T
@@ -664,7 +738,7 @@ export const TablesEx: FC<TProps> = ({
           }}
           className="pointer-events-none select-none"
         >
-          <TablesExView data={normalizeTablesData(data)} isPreview />
+          <TablesExView data={previewData} isPreview />
         </div>
         <div className="h-5" />
         <div className="flex justify-center">

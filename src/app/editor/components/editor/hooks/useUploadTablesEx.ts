@@ -8,6 +8,11 @@ import {
   TTablesExerciseData,
   normalizeTablesData,
 } from "../Tables/tablesModel";
+import { useUploadImage } from "@/hooks/useUploadImage";
+import {
+  filterImagesToUpload,
+  persistExerciseAttachments,
+} from "@/app/editor/helpers";
 
 export const useUploadTablesEx = (
   lastSortIndex: number,
@@ -16,12 +21,32 @@ export const useUploadTablesEx = (
   const lessonId = useEditorLessonId();
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const { uploadImages } = useUploadImage();
 
   const saveTablesEx = useCallback(
     async (data: TTablesExerciseData) => {
       setIsLoading(true);
       try {
         const normalized = normalizeTablesData(data);
+        const imagesToUpload =
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ((data?.images as any[]) || []).filter(filterImagesToUpload) || [];
+
+        const savedAttachments = imagesToUpload?.length
+          ? await uploadImages(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              imagesToUpload.map((i: any) => ({
+                ...i,
+              })),
+            )
+          : [];
+
+        const persistedImages = persistExerciseAttachments(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data?.images as any[],
+          savedAttachments,
+        ).filter((i) => !!i?.path);
+
         const createdExRes = await fetchPostJson({
           path: "/ex/create",
           isSecure: true,
@@ -34,6 +59,7 @@ export const useUploadTablesEx = (
               titleColor: normalized.titleColor,
               subtitle: normalized.subtitle,
               description: normalized.description,
+              images: persistedImages,
               tables: normalized.tables,
             }),
             sortIndex:
@@ -50,7 +76,7 @@ export const useUploadTablesEx = (
         setIsLoading(false);
       }
     },
-    [currentSortIndexToShift, lastSortIndex, lessonId],
+    [currentSortIndexToShift, lastSortIndex, lessonId, uploadImages],
   );
 
   return { isLoading, saveTablesEx, success };
