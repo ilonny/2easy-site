@@ -19,35 +19,142 @@
   margin-bottom: 12px;
 }
 
-/* Flash cards — 3D flip */
+/* Flash cards — 3D flip + deck */
 .flashStage {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
+  width: 100%;
+}
+
+.flashDeckRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 3vw, 28px);
+  width: 100%;
+  max-width: 720px;
+}
+
+.flashDeck {
+  position: relative;
+  flex-shrink: 0;
+  width: clamp(72px, 18vw, 120px);
+  height: clamp(110px, 28vw, 168px);
+  margin-right: 10px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  appearance: none;
+}
+
+.flashDeckEmpty {
+  opacity: 0.35;
+}
+
+.flashDeckClickable {
+  cursor: pointer;
+}
+
+.flashDeckClickable:hover .flashDeckLayer {
+  box-shadow: 0 8px 20px rgba(63, 40, 198, 0.2);
+}
+
+.flashDeckClickable:active .flashDeckLayer {
+  transform: translate(1px, 2px) scale(0.98);
+}
+
+.flashDeck:disabled {
+  cursor: default;
+}
+
+.flashDeckLayer {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(63, 40, 198, 0.28);
+  background:
+    linear-gradient(145deg, #ddd6ff 0%, #f3f0ff 42%, #ffffff 100%);
+  box-shadow: 0 6px 16px rgba(63, 40, 198, 0.12);
+  pointer-events: none;
+}
+
+.flashDeckBadge {
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(63, 40, 198, 0.92);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(63, 40, 198, 0.28);
+  pointer-events: none;
 }
 
 .flashScene {
+  position: relative;
+  flex: 1 1 auto;
   width: min(100%, 420px);
-  perspective: 1200px;
+  max-width: 420px;
+  perspective: 1400px;
+}
+
+.flashCardMotion {
+  width: 100%;
+  min-height: clamp(200px, 42vw, 260px);
+}
+
+@keyframes flashCardDrawIn {
+  0% {
+    opacity: 0.55;
+    transform: translateX(-132px) scale(0.52) rotate(-8deg);
+  }
+  62% {
+    opacity: 1;
+    transform: translateX(10px) scale(1.03) rotate(1.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotate(0deg);
+  }
+}
+
+.flashCardDrawIn {
+  animation: flashCardDrawIn 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .flashCard3d {
   position: relative;
+  display: block;
   width: 100%;
-  min-height: 220px;
+  min-height: clamp(200px, 42vw, 260px);
   border: none;
   padding: 0;
   background: transparent;
   cursor: pointer;
   transform-style: preserve-3d;
-  transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.34, 1.2, 0.64, 1);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  /* No filter/opacity here — they break backface-visibility and mirror text */
 }
 
 .flashCard3d:disabled {
   cursor: default;
+}
+
+.flashCard3dDimmed {
   opacity: 0.85;
 }
 
@@ -64,19 +171,54 @@
   justify-content: center;
   padding: 24px;
   border-radius: 18px;
-  border: 1px solid rgba(63, 40, 198, 0.25);
+  border: 2px solid rgba(63, 40, 198, 0.35);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   text-align: center;
+  box-shadow:
+    0 10px 22px rgba(63, 40, 198, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55);
 }
 
 .flashFaceFront {
   background: linear-gradient(160deg, #f7f7ff 0%, #ffffff 70%);
+  transform: rotateY(0deg);
 }
 
 .flashFaceBack {
   background: linear-gradient(160deg, #efeaff 0%, #ffffff 70%);
   transform: rotateY(180deg);
+}
+
+.flashFaceBlank {
+  background: linear-gradient(160deg, #f4f4f8 0%, #ffffff 75%);
+  border-color: rgba(63, 40, 198, 0.18);
+}
+
+.flashFaceEmpty {
+  width: 42%;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(63, 40, 198, 0.12);
+}
+
+@media (max-width: 560px) {
+  .flashDeckRow {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .flashDeck {
+    width: 88px;
+    height: 120px;
+    margin-right: 0;
+    align-self: flex-start;
+    margin-left: max(0px, calc(50% - 210px));
+  }
+
+  .flashScene {
+    width: 100%;
+  }
 }
 
 .flashText {
@@ -121,6 +263,7 @@
   background: transparent;
   cursor: pointer;
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   transition: transform 0.45s cubic-bezier(0.4, 0.2, 0.2, 1);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -128,7 +271,6 @@
 
 .flashAllCard3d:disabled {
   cursor: default;
-  opacity: 0.85;
 }
 
 .flashAllCard3dFlipped {

@@ -100,6 +100,10 @@ type TProps = {
   onHomeworkCreated?: () => void;
   batchResolveEnabled?: boolean;
   resolvedHw?: { homework_lesson_id?: number; has_individual_homework?: boolean };
+  isFolder?: boolean;
+  onPressFolder?: (folder: TLesson) => void;
+  onMoveToFolder?: (lesson: TLesson) => void;
+  dragHandleProps?: Record<string, unknown>;
 };
 
 export const LessonCard: FC<TProps> = ({
@@ -126,6 +130,10 @@ export const LessonCard: FC<TProps> = ({
   onHomeworkCreated,
   batchResolveEnabled,
   resolvedHw: resolvedHwProp,
+  isFolder,
+  onPressFolder,
+  onMoveToFolder,
+  dragHandleProps,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const router = useRouter();
@@ -444,6 +452,11 @@ export const LessonCard: FC<TProps> = ({
       return;
     }
 
+    if (isFolder) {
+      onPressFolder?.(lesson);
+      return;
+    }
+
     if (
       !profile?.name &&
       (lesson?.created_from_2easy || lesson?.user_id === 1) &&
@@ -501,6 +514,8 @@ export const LessonCard: FC<TProps> = ({
   }, [
     isDisabled,
     disableClick,
+    isFolder,
+    onPressFolder,
     profile?.name,
     lesson?.created_from_2easy,
     lesson?.user_id,
@@ -555,9 +570,25 @@ export const LessonCard: FC<TProps> = ({
             })`,
           }}
         />
+        {isFolder && (
+          <div className="pointer-events-none absolute right-3 top-3 z-[2] text-4xl leading-none drop-shadow-sm lg:right-4 lg:top-4 lg:text-5xl">
+            📁
+          </div>
+        )}
+        {!!dragHandleProps && lesson.canEdit && (
+          <button
+            type="button"
+            className="absolute bottom-3 right-3 z-[3] flex h-9 w-9 items-center justify-center rounded-[12px] bg-brand-black/35 text-[15px] leading-none text-white backdrop-blur-md touch-none"
+            onClick={(e) => e.stopPropagation()}
+            {...dragHandleProps}
+            aria-label="drag"
+          >
+            ↔️
+          </button>
+        )}
         <div className={styles["menu-shadow"]} />
         {!isStudent && !disableClick && !hideContextMenu && (
-          <div className={styles["btn-wrapper"]}>
+          <div className={`${styles["btn-wrapper"]}${isFolder ? " !left-3 !right-auto" : ""}`}>
             <Popover
               color="foreground"
               placement="bottom-end"
@@ -661,7 +692,7 @@ export const LessonCard: FC<TProps> = ({
                     <T k="lessons.attachToStudent" />
                   </Button>
                 )}
-                {!isCourses && !currentCourse && !!onPressAttachToCourse && (
+                {!isFolder && !isCourses && !currentCourse && !!onPressAttachToCourse && (
                   <Button
                     size="sm"
                     variant="light"
@@ -675,7 +706,25 @@ export const LessonCard: FC<TProps> = ({
                     <T k="lessons.addToCourse" />
                   </Button>
                 )}
-                {!isCourses && !!copyLesson && !showChangeStatusButton && (
+                {!isFolder &&
+                  !!onMoveToFolder &&
+                  lesson.canEdit &&
+                  !showChangeStatusButton &&
+                  !currentCourse && (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    className="w-full text-default-foreground py-1 px-2 text-left justify-start"
+                    style={{ fontSize: 14 }}
+                    onClick={() => {
+                      setPopoverIsOpen(false);
+                      onMoveToFolder(lesson);
+                    }}
+                  >
+                    <T k="lessons.moveToFolder" />
+                  </Button>
+                )}
+                {!isFolder && !isCourses && !!copyLesson && !showChangeStatusButton && (
                   <Button
                     size="sm"
                     variant="light"
@@ -737,7 +786,14 @@ export const LessonCard: FC<TProps> = ({
           </div>
         )}
         <p className="text-black font-bold" style={{ fontSize: 18 }}>
-          {lesson.title}
+          {isFolder ? (
+            <>
+              <T k="lessons.folderTitlePrefix" />
+              {lesson.title}
+            </>
+          ) : (
+            lesson.title
+          )}
         </p>
         {!!lesson?.["lesson_relations.status"] && (
           <LessonStatus

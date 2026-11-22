@@ -79,6 +79,8 @@ export const AttachLessonModalForm: FC<TProps> = ({
   const catalogWorkspace = useCatalogWorkspace();
   const workspaceFetch = studentListFetchParams(catalogWorkspace);
 
+  const isFolder = (lesson as { type?: string })?.type === "folder";
+
   const onSubmit = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -90,15 +92,23 @@ export const AttachLessonModalForm: FC<TProps> = ({
         const allRes = await Promise.all(
           chosenIds.map(async (student_id) => {
             const res = await fetchPostJson({
-              path: isCourses
-                ? "/course-relation/create"
-                : "/lesson-relation/create",
+              path: isFolder
+                ? "/folder-relation/create"
+                : isCourses
+                  ? "/course-relation/create"
+                  : "/lesson-relation/create",
               isSecure: true,
-              data: {
-                lesson_id: startedLessonId,
-                student_id,
-                status,
-              },
+              data: isFolder
+                ? {
+                    folder_id: startedLessonId,
+                    student_id,
+                    status,
+                  }
+                : {
+                    lesson_id: startedLessonId,
+                    student_id,
+                    status,
+                  },
               ...workspaceFetch,
             });
             return await res.json();
@@ -108,7 +118,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
           allRes.forEach((res) => {
             checkResponse(res);
           });
-        } else if (!isCourses) {
+        } else if (!isCourses && !isFolder) {
           const allOk = allRes.every((res) => relationAttached(res));
           if (!allOk) {
             throw new Error(
@@ -126,7 +136,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
       );
 
       let sessionId: number | undefined;
-      if (createLessonSession && chosenIds.length) {
+      if (createLessonSession && chosenIds.length && !isFolder) {
         const sessionRes = await fetchPostJson({
           path: "/lesson/session/start",
           isSecure: true,
@@ -168,6 +178,7 @@ export const AttachLessonModalForm: FC<TProps> = ({
     onSuccess,
     status,
     isCourses,
+    isFolder,
     hideToast,
     skipCreateRelation,
     createLessonSession,
@@ -219,7 +230,12 @@ export const AttachLessonModalForm: FC<TProps> = ({
           <p>
             {step === 0 ? (
               title ?? (
-                isCourses ? (
+                isFolder ? (
+                  <T
+                    k="modals.attachSelectStudentsFolder"
+                    defaultText="Выберите учеников, чтобы прикрепить папку"
+                  />
+                ) : isCourses ? (
                   <T
                     k="modals.attachSelectStudentsCourse"
                     defaultText="Выберите учеников, чтобы прикрепить курс"
@@ -231,6 +247,11 @@ export const AttachLessonModalForm: FC<TProps> = ({
                   />
                 )
               )
+            ) : isFolder ? (
+              <T
+                k="modals.attachStatusFolder"
+                defaultText="Выберите статус уроков в папке для ученика"
+              />
             ) : isCourses ? (
               <T
                 k="modals.attachStatusCourse"

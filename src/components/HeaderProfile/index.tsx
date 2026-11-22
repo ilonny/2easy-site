@@ -75,7 +75,7 @@ export const HeaderProfile = (props: TProps) => {
           {!schoolOnly && access === "subscribed" && (
             <button
               type="button"
-              className={headerCtaClassName}
+              className={`${headerCtaClassName} !bg-primary`}
               onClick={openCreateLesson}
             >
               <T k="lessons.createLesson" />

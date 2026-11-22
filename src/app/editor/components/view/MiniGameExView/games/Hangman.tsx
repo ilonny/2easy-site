@@ -4,7 +4,6 @@ import { Button } from "@nextui-org/react";
 import { FC, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  itemWord,
   TMiniGameAnswerState,
   TMiniGameItem,
   TMiniGamePatch,
@@ -70,7 +69,7 @@ export const HangmanGame: FC<TProps> = ({
     Math.max(0, items.length - 1),
   );
   const item = items[wordIndex];
-  const word = normalize(item ? itemWord(item) : "");
+  const word = normalize(String(item?.term || "").trim());
   const revealed = useMemo(
     () => new Set(resolveRevealed(word, state.hangman)),
     [word, state.hangman],
@@ -81,8 +80,7 @@ export const HangmanGame: FC<TProps> = ({
     );
     if (!state.hangman?.missedLetters?.length && state.hangman?.guessed?.length) {
       (state.hangman.guessed || []).forEach((g) => {
-        const L = g.toUpperCase();
-        if (!word.includes(L)) set.add(L);
+        const L = g.toUpperCase();        if (!word.includes(L)) set.add(L);
       });
     }
     return set;
@@ -127,11 +125,7 @@ export const HangmanGame: FC<TProps> = ({
     return remainingCount(L) === 0;
   };
 
-  const clue =
-    String(item?.definition || "").trim() &&
-    String(item?.term || "").trim()
-      ? item?.definition
-      : undefined;
+  const clue = String(item?.definition || "").trim() || undefined;
 
   const guess = (letter: string) => {
     if (!canInteract || status !== "playing") return;

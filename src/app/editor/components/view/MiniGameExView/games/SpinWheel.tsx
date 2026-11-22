@@ -11,7 +11,6 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  itemWord,
   TMiniGameAnswerState,
   TMiniGameItem,
   TMiniGamePatch,
@@ -77,7 +76,6 @@ const splitLabel = (text: string): [string, string?] => {
 
 type TProps = {
   items: TMiniGameItem[];
-  showDefinition?: boolean;
   canInteract: boolean;
   state: TMiniGameAnswerState;
   onPatch: (patch: TMiniGamePatch) => void;
@@ -85,7 +83,6 @@ type TProps = {
 
 export const SpinWheelGame: FC<TProps> = ({
   items,
-  showDefinition,
   canInteract,
   state,
   onPatch,
@@ -99,12 +96,9 @@ export const SpinWheelGame: FC<TProps> = ({
     () =>
       items.map((i) => ({
         id: i.id,
-        text:
-          showDefinition && String(i.definition || "").trim()
-            ? String(i.definition)
-            : itemWord(i),
+        text: String(i.term || "").trim(),
       })),
-    [items, showDefinition],
+    [items],
   );
 
   const n = Math.max(labels.length, 1);

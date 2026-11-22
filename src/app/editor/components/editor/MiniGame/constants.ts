@@ -12,7 +12,7 @@ export const MINI_GAME_META: Array<{
     titleKey: "templates.miniGameFlashCards",
     titleDefault: "Flash cards",
     descKey: "templates.miniGameFlashCardsDesc",
-    descDefault: "Карточки term ↔ definition",
+    descDefault: "Односторонние/двусторонние карточки",
   },
   {
     id: "matching-pairs",

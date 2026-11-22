@@ -207,38 +207,6 @@ export const templates: TTemplate[] = [
     descriptionDefault:
       "Flash cards, memory, колесо, hangman, wordsearch — один контент, разные игры",
     bgImage: MatchBg,
-    subItems: [
-      {
-        type: "flash-cards",
-        titleKey: "templates.miniGameFlashCards",
-        titleDefault: "Flash cards",
-        bgImage: TextStickerBg,
-      },
-      {
-        type: "matching-pairs",
-        titleKey: "templates.miniGameMatchingPairs",
-        titleDefault: "Matching pairs",
-        bgImage: MatchWordWordBg,
-      },
-      {
-        type: "spin-wheel",
-        titleKey: "templates.miniGameSpinWheel",
-        titleDefault: "Spin the wheel",
-        bgImage: TestBg,
-      },
-      {
-        type: "hangman",
-        titleKey: "templates.miniGameHangman",
-        titleDefault: "Hangman",
-        bgImage: TrueFalseBg,
-      },
-      {
-        type: "wordsearch",
-        titleKey: "templates.miniGameWordsearch",
-        titleDefault: "Wordsearch",
-        bgImage: UnscrambleWordsBg,
-      },
-    ],
   },
   {
     type: "free-input-form",

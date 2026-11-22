@@ -39,6 +39,7 @@ type TProps = {
   setIsVisible: (val: boolean) => void;
   onSuccess: (createdLessonId: number) => void;
   currentCourse?: TCourse;
+  folderId?: number | null;
 };
 
 type TFieldList = {
@@ -53,6 +54,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
   setIsVisible,
   onSuccess,
   currentCourse,
+  folderId,
 }) => {
   const { profile } = useContext(AuthContext);
   const workspace = useCatalogWorkspace();
@@ -97,6 +99,9 @@ export const CreateLessonModalForm: FC<TProps> = ({
             // tags: tagsArr?.join?.(",") || "",
             image_id: attachments?.attachments?.[0]?.id,
             course_id: currentCourse?.id,
+            ...(folderId != null && !currentCourse?.id
+              ? { folder_id: folderId }
+              : {}),
           },
         });
         const lesson = await lessonRes.json();
@@ -111,7 +116,7 @@ export const CreateLessonModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [images, uploadImages, currentCourse?.id, onSuccess, workspace],
+    [images, uploadImages, currentCourse?.id, folderId, onSuccess, workspace],
   );
 
   const title = watch("title");
@@ -125,10 +130,14 @@ export const CreateLessonModalForm: FC<TProps> = ({
       size="xl"
       isOpen={isVisible}
       onClose={() => setIsVisible(false)}
-      scrollBehavior="outside"
+      placement="center"
+      scrollBehavior="inside"
       classNames={{
-        base: "rounded-[20px] bg-white lg:rounded-[30px]",
-        header: "border-b border-black/5 font-medium text-brand-black",
+        wrapper: "site-overlay-layer items-center p-2 sm:p-4",
+        backdrop: "site-overlay-layer",
+        base: "mx-0 my-auto max-h-[min(90dvh,900px)] w-full max-w-[calc(100vw-1rem)] rounded-[20px] bg-white sm:max-w-xl lg:rounded-[30px]",
+        header: "shrink-0 border-b border-black/5 font-medium text-brand-black",
+        body: "overflow-y-auto overscroll-contain",
       }}
     >
       <ModalContent>

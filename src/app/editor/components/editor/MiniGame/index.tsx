@@ -39,7 +39,7 @@ function makeItem(term = "", definition = ""): TMiniGameItem {
 const defaultValuesStub: TMiniGameData = {
   title: "Let's play!",
   titleColor: "#3F28C6",
-  subtitle: "Mini game",
+  subtitle: "",
   description: "",
   images: [],
   activeGame: "flash-cards",
@@ -152,13 +152,22 @@ export const MiniGame: FC<TProps> = ({
   const onSave = useCallback(() => {
     const list = data.items || [];
     const keepEmpty = data.activeGame === "flash-cards";
-    const usable = keepEmpty ? list : list.filter(isMiniGameItemValid);
+    const isWheel = data.activeGame === "spin-wheel";
+    const isWordOnly =
+      isWheel || data.activeGame === "wordsearch";
+    const isHangman = data.activeGame === "hangman";
+    const needsWord = isWordOnly || isHangman;
+    const isItemOk = (i: TMiniGameItem) =>
+      needsWord
+        ? !!String(i.term || "").trim()
+        : isMiniGameItemValid(i);
+    const usable = keepEmpty ? list : list.filter(isItemOk);
     const min = minItemsForGame(data.activeGame);
     if (usable.length < min) {
       if (!keepEmpty) {
         const mark: Record<string, boolean> = {};
         list.forEach((i) => {
-          if (!isMiniGameItemValid(i)) mark[i.id] = true;
+          if (!isItemOk(i)) mark[i.id] = true;
         });
         setTouched((t) => ({ ...t, ...mark }));
       }
@@ -172,7 +181,17 @@ export const MiniGame: FC<TProps> = ({
     }
     saveMiniGameEx({
       ...data,
-      items: validItems(list, { keepEmpty }),
+      options: {
+        ...(data.options || {}),
+        ...(isWheel ? { showDefinitionOnWheel: false } : {}),
+      },
+      items: needsWord
+        ? usable.map((i) => ({
+            ...i,
+            term: String(i.term || "").trim(),
+            definition: String(i.definition || "").trim() || undefined,
+          }))
+        : validItems(list, { keepEmpty }),
     });
   }, [data, saveMiniGameEx]);
 
@@ -262,7 +281,7 @@ export const MiniGame: FC<TProps> = ({
         <div className={styles.howto}>
           <T
             k="editor.miniGameHowSteps"
-            defaultText="1) Выберите игру. 2) Добавьте пары: лицевая и обратная сторона — заполняйте как угодно (слово/перевод, вопрос/ответ, картинка текстом и т.д.), любую сторону можно оставить пустой. 3) Сохраните — ученики смогут играть в уроке."
+            defaultText="1) Выберите игру. 2) Добавьте контент: лицевую и обратную сторону можно заполнить как угодно (слово/перевод, вопрос/ответ, и т.д.), любую сторону можно оставить пустой."
           />
         </div>
       </div>
@@ -307,24 +326,6 @@ export const MiniGame: FC<TProps> = ({
             defaultText="Перемешивать"
           />
         </label>
-        {data.activeGame === "spin-wheel" && (
-          <label className={styles.optionLabel}>
-            <input
-              type="checkbox"
-              checked={!!data.options?.showDefinitionOnWheel}
-              onChange={(e) =>
-                changeData("options", {
-                  ...(data.options || {}),
-                  showDefinitionOnWheel: e.target.checked,
-                })
-              }
-            />
-            <T
-              k="editor.miniGameWheelDefs"
-              defaultText="На колесе показывать обратную сторону"
-            />
-          </label>
-        )}
         {data.activeGame === "flash-cards" && (
           <div className={styles.flashLayoutGroup}>
             <span className={styles.flashLayoutLabel}>
@@ -369,19 +370,60 @@ export const MiniGame: FC<TProps> = ({
 
       <div className={styles.items}>
         {(data.items || []).map((item, index) => {
+          const isWordOnly =
+            data.activeGame === "spin-wheel" ||
+            data.activeGame === "wordsearch";
+          const isHangman = data.activeGame === "hangman";
+          const isMatching = data.activeGame === "matching-pairs";
+          const needsWord = isWordOnly || isHangman;
           const showError =
             data.activeGame !== "flash-cards" &&
             touched[item.id] &&
-            !isMiniGameItemValid(item);
+            (needsWord
+              ? !String(item.term || "").trim()
+              : !isMiniGameItemValid(item));
+          const termLabel = isWordOnly
+            ? i18n.t("editor.word", { defaultValue: "Слово" })
+            : isHangman
+              ? i18n.t("editor.miniGameSecretWord", {
+                  defaultValue: "Загаданное слово",
+                })
+              : isMatching
+                ? undefined
+                : i18n.t("editor.miniGameFrontSide", {
+                    defaultValue: "Лицевая сторона",
+                  });
+          const defLabel = isHangman
+            ? i18n.t("editor.miniGameHint", { defaultValue: "Подсказка" })
+            : isMatching
+              ? undefined
+              : i18n.t("editor.miniGameBackSide", {
+                  defaultValue: "Обратная сторона",
+                });
+          const defPlaceholder = isHangman
+            ? i18n.t("editor.miniGameHintPlaceholder", {
+                defaultValue: "например: a fruit",
+              })
+            : i18n.t("editor.miniGameDefPlaceholder", {
+                defaultValue: "например: a fruit",
+              });
           return (
             <div key={item.id} className={styles.itemCard}>
               <div className={styles.itemHead}>
                 <div className={styles.itemLabel}>
-                  <T
-                    k="editor.miniGameItemN"
-                    defaultText="Пара {{n}}"
-                    values={{ n: index + 1 }}
-                  />
+                  {needsWord ? (
+                    <T
+                      k="editor.miniGameWordN"
+                      defaultText="Слово {{n}}"
+                      values={{ n: index + 1 }}
+                    />
+                  ) : (
+                    <T
+                      k="editor.miniGameItemN"
+                      defaultText="Пара {{n}}"
+                      values={{ n: index + 1 }}
+                    />
+                  )}
                 </div>
                 {(data.items || []).length > 1 && (
                   <Button
@@ -397,9 +439,15 @@ export const MiniGame: FC<TProps> = ({
               </div>
               <div className={styles.fields}>
                 <Input
-                  label={i18n.t("editor.miniGameFrontSide", {
-                    defaultValue: "Лицевая сторона",
-                  })}
+                  label={termLabel}
+                  aria-label={
+                    isMatching
+                      ? i18n.t("editor.miniGameItemN", {
+                          defaultValue: "Пара {{n}}",
+                          n: index + 1,
+                        })
+                      : undefined
+                  }
                   value={item.term}
                   placeholder={i18n.t("editor.miniGameTermPlaceholder", {
                     defaultValue: "например: apple",
@@ -414,25 +462,38 @@ export const MiniGame: FC<TProps> = ({
                       : undefined,
                   }}
                 />
-                <Input
-                  label={i18n.t("editor.miniGameBackSide", {
-                    defaultValue: "Обратная сторона",
-                  })}
-                  value={item.definition || ""}
-                  placeholder={i18n.t("editor.miniGameDefPlaceholder", {
-                    defaultValue: "например: a fruit",
-                  })}
-                  onValueChange={(val) =>
-                    updateItem(item.id, { definition: val })
-                  }
-                />
+                {!isWordOnly && (
+                  <Input
+                    label={defLabel}
+                    aria-label={
+                      isMatching
+                        ? i18n.t("editor.miniGameItemN", {
+                            defaultValue: "Пара {{n}}",
+                            n: index + 1,
+                          })
+                        : undefined
+                    }
+                    value={item.definition || ""}
+                    placeholder={defPlaceholder}
+                    onValueChange={(val) =>
+                      updateItem(item.id, { definition: val })
+                    }
+                  />
+                )}
               </div>
               {showError && (
                 <div className={styles.fieldError}>
-                  <T
-                    k="editor.miniGameNeedTermShort"
-                    defaultText="Заполните хотя бы одну сторону"
-                  />
+                  {needsWord ? (
+                    <T
+                      k="editor.miniGameNeedWord"
+                      defaultText="Заполните слово"
+                    />
+                  ) : (
+                    <T
+                      k="editor.miniGameNeedTermShort"
+                      defaultText="Заполните хотя бы одну сторону"
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -443,7 +504,13 @@ export const MiniGame: FC<TProps> = ({
       <div className="h-3" />
       <div className={styles.addRow}>
         <Button color="primary" variant="flat" onPress={addItem}>
-          <T k="editor.miniGameAddItem" defaultText="+ Добавить пару" />
+          {data.activeGame === "spin-wheel" ||
+          data.activeGame === "wordsearch" ||
+          data.activeGame === "hangman" ? (
+            <T k="editor.miniGameAddWord" defaultText="+ Добавить слово" />
+          ) : (
+            <T k="editor.miniGameAddItem" defaultText="+ Добавить пару" />
+          )}
         </Button>
       </div>
 

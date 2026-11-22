@@ -10,6 +10,11 @@ import {
   useState,
 } from "react";
 import { useLessons } from "../../hooks/useLessons";
+import {
+  TCatalogFolder,
+  TCatalogItem,
+  useCatalog,
+} from "../../hooks/useCatalog";
 import { ProfileEmptyLessons } from "../ProfileEmptyLessons";
 import { CreateLessonModalForm } from "../CreateLessonModalForm";
 import { LessonsList } from "../LessonsList";
@@ -29,12 +34,25 @@ import { T } from "@/i18n/T";
 import { DictionaryModal } from "@/app/dictionary/components/DictionaryModal";
 import { useBoardsTab } from "@/app/board/hooks/useBoardsTab";
 import {
+  catalogFetchParams,
+  studentListFetchParams,
   useCatalogWorkspace,
   withWorkspacePath,
 } from "@/app/school/lib/catalogWorkspace";
 import { BoardsTabPanel } from "@/app/board/components/BoardsTabPanel";
 import { BrandPill } from "@/components/BrandPill";
 import { StudentSchedulePanel } from "@/app/student-account/components/StudentSchedulePanel";
+import { CreateFolderModalForm } from "../CreateFolderModalForm";
+import { DeleteFolderModalForm } from "../DeleteFolderModalForm";
+import { MoveToFolderModal } from "../MoveToFolderModal";
+import { checkResponse, fetchGet, fetchPostJson } from "@/api";
+import { Button } from "@nextui-org/react";
+
+type TStudentFolder = TCatalogFolder & {
+  lesson_ids?: number[];
+  relation_id?: number;
+  status?: string;
+};
 
 type StudentCabinetTab = "lessons" | "courses" | "boards" | "schedule";
 
@@ -218,6 +236,52 @@ export const ProfileLessons = (props: TProps) => {
     onDictionaryModalChange ?? setInternalDictionaryModalOpen;
 
   const { courses, coursesIsLoading, getCourses } = useCourses();
+  const {
+    items: catalogItems,
+    setItems: setCatalogItems,
+    isLoading: catalogIsLoading,
+    getCatalog,
+    reorderCatalog,
+    moveToFolder,
+    createFolder,
+    editFolder,
+    deleteFolder,
+    checkFolderContents,
+  } = useCatalog();
+
+  const [currentFolderId, setCurrentFolderId] = useState<number | null>(null);
+  const [currentFolderMeta, setCurrentFolderMeta] =
+    useState<TCatalogFolder | null>(null);
+  const [rootFolders, setRootFolders] = useState<TCatalogFolder[]>([]);
+  const [createFolderVisible, setCreateFolderVisible] = useState(false);
+  const [editFolderTarget, setEditFolderTarget] =
+    useState<TCatalogFolder | null>(null);
+  const [deleteFolderTarget, setDeleteFolderTarget] =
+    useState<TCatalogFolder | null>(null);
+  const [moveItem, setMoveItem] = useState<(TLesson & { type?: string }) | null>(
+    null,
+  );
+  const [studentFolders, setStudentFolders] = useState<TStudentFolder[]>([]);
+
+  const refreshStudentFolders = useCallback(async () => {
+    if (!studentId) {
+      setStudentFolders([]);
+      return;
+    }
+    try {
+      const res = await fetchGet({
+        path: `/folder-relation?student_id=${Number(studentId)}`,
+        isSecure: true,
+        ...studentListFetchParams(catalogWorkspace),
+      });
+      const data = await res?.json();
+      if (data?.success === false) return;
+      setStudentFolders((data?.folders || []) as TStudentFolder[]);
+    } catch {
+      // Old backends without folder-relation: keep flat lesson list (BC).
+      setStudentFolders([]);
+    }
+  }, [studentId, catalogWorkspace]);
 
   const {
     lessons,
@@ -235,6 +299,20 @@ export const ProfileLessons = (props: TProps) => {
     hasAuthSession,
     includeCourseLessons,
   );
+
+  useEffect(() => {
+    void refreshStudentFolders();
+  }, [refreshStudentFolders, lessons.length]);
+
+  const useCatalogMode =
+    !!isTeacher &&
+    !studentId &&
+    !currentCourse &&
+    hasAuthSession &&
+    (isSchoolLibrary ||
+      tabIndex === "userLessons" ||
+      tabIndex === "userCourses" ||
+      currentFolderId != null);
 
   const { t, i18n } = useTranslation();
   const goCatalogTab = useCallback(
@@ -288,10 +366,34 @@ export const ProfileLessons = (props: TProps) => {
     return { title, buttonTitle, onButtonPress };
   }, [canCreateLesson, isSchoolLibrary, tabIndex]);
 
+  const refreshCatalog = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      const data = await getCatalog(
+        currentFolderId,
+        undefined,
+        opts?.silent,
+      );
+      if (data?.success === false) return data;
+      const items = (data?.items || []) as TCatalogItem[];
+      setCatalogItems(items);
+      if (currentFolderId == null) {
+        setRootFolders(
+          items.filter((item): item is TCatalogFolder => item.type === "folder"),
+        );
+      }
+      return data;
+    },
+    [getCatalog, currentFolderId, setCatalogItems],
+  );
+
   const onCreateLesson = useCallback(
     (lessonId: number) => {
       setCreateLessonModalIsVisible(false);
-      getLessons();
+      if (useCatalogMode) {
+        void refreshCatalog();
+      } else {
+        getLessons();
+      }
       if (currentCourse?.id) {
         getCourseLessons(currentCourse.id, studentId);
       }
@@ -304,17 +406,32 @@ export const ProfileLessons = (props: TProps) => {
       currentCourse?.id,
       getCourseLessons,
       getLessons,
+      refreshCatalog,
       router,
       setCreateLessonModalIsVisible,
       studentId,
+      useCatalogMode,
     ],
   );
 
   const onCreateCourse = useCallback(() => {
     setCreateCourseModalIsVisible(false);
+    if (currentFolderId != null) {
+      void refreshCatalog();
+      return;
+    }
     setTabIndex("userCourses");
+    if (useCatalogMode) {
+      void refreshCatalog();
+    }
     getCourses(studentId ? Number(studentId) : undefined);
-  }, [getCourses, studentId]);
+  }, [
+    currentFolderId,
+    getCourses,
+    refreshCatalog,
+    studentId,
+    useCatalogMode,
+  ]);
 
   useEffect(() => {
     if (authIsLoading) return;
@@ -324,20 +441,47 @@ export const ProfileLessons = (props: TProps) => {
       return;
     }
 
+    if (useCatalogMode) {
+      const controller = new AbortController();
+      getCatalog(currentFolderId, controller.signal).then((data) => {
+        if (!data || data.success === false || controller.signal.aborted) return;
+        const items = (data.items || []) as TCatalogItem[];
+        setCatalogItems(items);
+        if (currentFolderId == null) {
+          setRootFolders(
+            items.filter((item): item is TCatalogFolder => item.type === "folder"),
+          );
+        }
+      });
+      return () => controller.abort();
+    }
+
     const controller = new AbortController();
     getLessons(controller.signal);
     return () => controller.abort();
   }, [
     getLessons,
+    getCatalog,
     currentCourse,
     getCourseLessons,
     studentId,
     authIsLoading,
+    useCatalogMode,
+    currentFolderId,
+    tabIndex,
+    setCatalogItems,
   ]);
 
   useEffect(() => {
     getCourses(studentId ? Number(studentId) : undefined);
   }, [getCourses, studentId]);
+
+  useEffect(() => {
+    if (tabIndex !== "userLessons" && tabIndex !== "userCourses" && !isSchoolLibrary) {
+      setCurrentFolderId(null);
+      setCurrentFolderMeta(null);
+    }
+  }, [tabIndex, isSchoolLibrary]);
 
   const { checkSubscription } = useCheckSubscription();
   const { schoolOnly, loading: planLoading } = useTeacherPlan();
@@ -438,35 +582,61 @@ export const ProfileLessons = (props: TProps) => {
       return courseLessons;
     }
 
-    // 2. Режим для не-учителя или для студента (если studentId указан)
-    // Это условие означает, что мы находимся в "студенческом" представлении,
-    // либо пользователь не является учителем
-    if (isTeacher && studentId) {
-      if (studentTabIndex === "lessons") {
-        return lessons;
+    // Catalog v2: keep "Мои уроки" / "Мои курсы" split at root.
+    // Inside a folder both types can appear (folders hold mixed content).
+    if (useCatalogMode) {
+      if (currentFolderId != null) {
+        return catalogItems as unknown as TLesson[];
       }
-      if (studentTabIndex === "boards" || studentTabIndex === "schedule") {
-        return [];
+      if (tabIndex === "userCourses") {
+        return catalogItems.filter(
+          (item) => item.type === "course",
+        ) as unknown as TLesson[];
       }
-      return courses;
-    }
-    if (!isTeacher && studentId) {
-      if (studentTabIndex === "lessons") {
-        return lessons;
-      }
-      if (studentTabIndex === "boards" || studentTabIndex === "schedule") {
-        return [];
-      }
-      return courses;
+      // userLessons / school library root: folders + lessons only
+      return catalogItems.filter(
+        (item) => item.type === "folder" || item.type === "lesson",
+      ) as unknown as TLesson[];
     }
 
-    // 3. Режим для учителя (isTeacher === true && studentId === false/undefined/null)
-    // Здесь мы обрабатываем tabIndex для учителя
+    // 2. Student cabinet (teacher viewing student or student self):
+    // folders are additive UI; lessons remain available flat if folders empty (BC).
+    if (studentId) {
+      if (studentTabIndex === "boards" || studentTabIndex === "schedule") {
+        return [];
+      }
+      if (studentTabIndex === "courses") {
+        return courses as unknown as TLesson[];
+      }
+      const folderLessonIds = new Set(
+        studentFolders.flatMap((f) =>
+          (f.lesson_ids || []).map((id) => Number(id)),
+        ),
+      );
+      if (currentFolderId != null) {
+        const ids = new Set(
+          (
+            studentFolders.find((f) => Number(f.id) === Number(currentFolderId))
+              ?.lesson_ids || []
+          ).map((id) => Number(id)),
+        );
+        return lessons.filter((l) => ids.has(Number(l.id)));
+      }
+      if (studentFolders.length) {
+        return [
+          ...studentFolders.map((f) => ({ ...f, type: "folder" as const })),
+          ...lessons.filter((l) => !folderLessonIds.has(Number(l.id))),
+        ] as unknown as TLesson[];
+      }
+      return lessons;
+    }
+
+    // 3. Режим для учителя
     switch (tabIndex) {
       case "userCourses":
-        return courses.filter((c) => c.user_id !== 1); // Курсы пользователя (кроме user_id=1)
+        return courses.filter((c) => c.user_id !== 1);
       case "2easyCourses":
-        return courses.filter((c) => c.user_id === 1); // Курсы 2easy (user_id=1)
+        return courses.filter((c) => c.user_id === 1);
       case "userLessons":
         return lessons.filter((l) => l.user_id !== 1);
       default:
@@ -481,6 +651,10 @@ export const ProfileLessons = (props: TProps) => {
     courseLessons,
     courses,
     studentTabIndex,
+    useCatalogMode,
+    catalogItems,
+    currentFolderId,
+    studentFolders,
   ]);
 
   const hasHomeworkTag = useCallback((lesson: TLesson) => {
@@ -493,12 +667,16 @@ export const ProfileLessons = (props: TProps) => {
   }, []);
 
   const tabsToRender = useMemo(() => {
+    // My lessons / my courses / folders: no level or "All lessons"/"Homework" filter pills.
+    if (
+      useCatalogMode ||
+      tabIndex === "userLessons" ||
+      tabIndex === "userCourses"
+    ) {
+      return [];
+    }
     if (tabIndex === "savedLessons" || !profile?.name) {
       return tabs;
-    }
-    if (tabIndex === "userLessons") {
-      const hasHomeworkLessons = lessonsToRender.some(hasHomeworkTag);
-      return hasHomeworkLessons ? ["All lessons", HOMEWORK_TAG] : ["All lessons"];
     }
     const lessonsTags = lessonsToRender
       .map((l) => {
@@ -509,7 +687,7 @@ export const ProfileLessons = (props: TProps) => {
     return ["All lessons"].concat(
       Array.from(new Set(lessonsTags)).filter(Boolean),
     );
-  }, [lessonsToRender, tabIndex, profile?.name, hasHomeworkTag]);
+  }, [lessonsToRender, tabIndex, profile?.name, useCatalogMode]);
 
   useEffect(() => {
     if (tabsToRender.length) {
@@ -529,7 +707,12 @@ export const ProfileLessons = (props: TProps) => {
       ? searchString || ""
       : filterSearchString;
 
-    if (effectiveFilterTab !== "All lessons") {
+    // No level pills on my catalog — empty/unset filter must not hide everything.
+    if (
+      effectiveFilterTab &&
+      effectiveFilterTab !== "All lessons" &&
+      tabsToRender.length > 0
+    ) {
       res = res.filter((lesson: TLesson) => {
         if (effectiveFilterTab === HOMEWORK_TAG) {
           return hasHomeworkTag(lesson);
@@ -592,6 +775,7 @@ export const ProfileLessons = (props: TProps) => {
   }, [
     lessonsToRender,
     activeFilterTab,
+    tabsToRender.length,
     filterSearchString,
     searchString,
     studentId,
@@ -612,6 +796,7 @@ export const ProfileLessons = (props: TProps) => {
 
   const isCourse =
     !currentCourse &&
+    currentFolderId == null &&
     ((!studentId && tabIndex === "userCourses") ||
       tabIndex === "2easyCourses" ||
       studentTabIndex === "courses");
@@ -622,9 +807,11 @@ export const ProfileLessons = (props: TProps) => {
       ? false
       : isBoardsTabActive
         ? boardsIsLoading
-        : isCourse
-          ? coursesIsLoading
-          : lessonsListIslLoading);
+        : useCatalogMode
+          ? catalogIsLoading
+          : isCourse
+            ? coursesIsLoading
+            : lessonsListIslLoading);
 
   return (
     <div className="relative z-0 flex w-full min-w-0 flex-col gap-6 lg:gap-8">
@@ -847,7 +1034,7 @@ export const ProfileLessons = (props: TProps) => {
         !isBoardsTabActive &&
         !filteredLessons.length &&
         !isListLoading &&
-        !(canCreateLesson && stayOnPage) && (
+        !(canCreateLesson && (stayOnPage || useCatalogMode)) && (
         <ProfileEmptyLessons
           title={
             (studentId ? searchString : filterSearchString)?.trim() ? (
@@ -916,7 +1103,9 @@ export const ProfileLessons = (props: TProps) => {
         !isBoardsTabActive &&
         (!!currentCourse ||
           !!filteredLessons?.length ||
-          (canCreateLesson && stayOnPage && !isListLoading)) && (
+          (canCreateLesson &&
+            (stayOnPage || useCatalogMode) &&
+            !isListLoading)) && (
         <>
           {showCourseSearch && (
             <>
@@ -943,6 +1132,26 @@ export const ProfileLessons = (props: TProps) => {
               </div>
             </>
           )}
+          {currentFolderId != null && (
+            <div className="mb-2 flex items-center gap-3 px-1">
+              <Button
+                size="sm"
+                variant="flat"
+                className="rounded-[12px]"
+                onClick={() => {
+                  setCurrentFolderId(null);
+                  setCurrentFolderMeta(null);
+                }}
+              >
+                ← <T k="lessons.backToMyLessons" />
+              </Button>
+              {currentFolderMeta?.title ? (
+                <span className="text-sm font-medium text-brand-black">
+                  📁 {currentFolderMeta.title}
+                </span>
+              ) : null}
+            </div>
+          )}
           <LessonsList
             onPressCreate={() => {
               if (checkSubscription()) {
@@ -954,13 +1163,32 @@ export const ProfileLessons = (props: TProps) => {
                 setCreateCourseModalIsVisible(true);
               }
             }}
-            onPressCreateBoard={isTeacher ? openCreateBoardModal : undefined}
+            onPressCreateFolder={
+              useCatalogMode &&
+              currentFolderId == null &&
+              (tabIndex === "userLessons" || isSchoolLibrary)
+                ? () => {
+                    if (checkSubscription()) setCreateFolderVisible(true);
+                  }
+                : undefined
+            }
+            onPressCreateBoard={
+              useCatalogMode && currentFolderId != null
+                ? undefined
+                : isTeacher
+                  ? openCreateBoardModal
+                  : undefined
+            }
             canCreateLesson={canCreateLesson && !hideMyLessons}
             lessons={filteredLessons}
             getLessons={
               currentCourse
                 ? () => getCourseLessons(currentCourse.id, studentId)
-                : getLessons
+                : useCatalogMode
+                  ? () => {
+                      void refreshCatalog();
+                    }
+                  : getLessons
             }
             getCourses={() => getCourses(studentId ? Number(studentId) : undefined)}
             hideAttachButton={hideAttachButton}
@@ -1005,6 +1233,100 @@ export const ProfileLessons = (props: TProps) => {
             currentCourse={currentCourse}
             studentId={studentId}
             alwaysOpenLessonMode={alwaysOpenLessonMode}
+            enableCatalogDnd={
+              (!!useCatalogMode || !!currentCourse) &&
+              !isStudent &&
+              tabIndex !== "2easyCourses" &&
+              tabIndex !== "savedLessons"
+            }
+            currentFolderId={currentFolderId}
+            onEnterFolder={(folderId) => {
+              const meta = (catalogItems.find(
+                (item) => item.type === "folder" && item.id === folderId,
+              ) ||
+                rootFolders.find((f) => f.id === folderId) ||
+                studentFolders.find((f) => Number(f.id) === Number(folderId))) as
+                | TCatalogFolder
+                | undefined;
+              setCurrentFolderMeta(meta || null);
+              setCurrentFolderId(folderId);
+              if (!studentId && tabIndex !== "userLessons") {
+                setTabIndex("userLessons");
+              }
+            }}
+            onReorderItems={async (ordered) => {
+              if (currentCourse?.id) {
+                const lessonIds = ordered
+                  .filter((item) => item.type === "lesson")
+                  .map((item) => item.id);
+                setCatalogItems((prev) => prev);
+                const res = await fetchPostJson({
+                  path: "/course/edit",
+                  isSecure: true,
+                  ...catalogFetchParams(catalogWorkspace),
+                  data: {
+                    id: currentCourse.id,
+                    title: currentCourse.title,
+                    description: currentCourse.description,
+                    tags: currentCourse.tags,
+                    image_id: currentCourse.image_id,
+                    lesson_ids: JSON.stringify(lessonIds),
+                  },
+                });
+                const data = await res.json();
+                checkResponse(data);
+                getCourseLessons(currentCourse.id, studentId);
+                return;
+              }
+              // Optimistic local reorder — do not full-refresh (that flips the
+              // page loader / dino and feels like a hard reload).
+              const prevItems = catalogItems;
+              const byKey = new Map(
+                catalogItems.map((item) => [`${item.type}:${item.id}`, item]),
+              );
+              // Keep items not in this view (e.g. courses on "Мои уроки") in place.
+              const orderedKeys = new Set(
+                ordered.map((item) => `${item.type}:${item.id}`),
+              );
+              const reorderedVisible = ordered
+                .map((item) => byKey.get(`${item.type}:${item.id}`))
+                .filter(Boolean) as TCatalogItem[];
+              const rest = catalogItems.filter(
+                (item) => !orderedKeys.has(`${item.type}:${item.id}`),
+              );
+              if (reorderedVisible.length) {
+                setCatalogItems([...reorderedVisible, ...rest]);
+              }
+              try {
+                const data = await reorderCatalog(currentFolderId, ordered);
+                if (data?.success === false) {
+                  setCatalogItems(prevItems);
+                }
+              } catch {
+                setCatalogItems(prevItems);
+              }
+            }}
+            onDropOnFolder={async (item, folderId) => {
+              if (item.type === "folder") return;
+              setCatalogItems((prev) =>
+                prev.filter(
+                  (row) =>
+                    !(row.type === item.type && Number(row.id) === Number(item.id)),
+                ),
+              );
+              try {
+                await moveToFolder(item.type, item.id, folderId);
+              } finally {
+                void refreshCatalog({ silent: true });
+              }
+            }}
+            onMoveToFolderRequest={(lesson) => setMoveItem(lesson)}
+            onEditFolder={(folder) =>
+              setEditFolderTarget(folder as unknown as TCatalogFolder)
+            }
+            onDeleteFolder={(folder) =>
+              setDeleteFolderTarget(folder as unknown as TCatalogFolder)
+            }
           />
         </>
       )}
@@ -1013,11 +1335,83 @@ export const ProfileLessons = (props: TProps) => {
         setIsVisible={setCreateLessonModalIsVisible}
         onSuccess={onCreateLesson}
         currentCourse={currentCourse}
+        folderId={currentFolderId}
       />
       <CreateCourseModalForm
         isVisible={createCourseModalIsVisible}
         setIsVisible={setCreateCourseModalIsVisible}
         onSuccess={onCreateCourse}
+        folderId={currentFolderId}
+      />
+      <CreateFolderModalForm
+        isVisible={createFolderVisible || !!editFolderTarget}
+        setIsVisible={(v) => {
+          if (!v) {
+            setCreateFolderVisible(false);
+            setEditFolderTarget(null);
+          } else {
+            setCreateFolderVisible(true);
+          }
+        }}
+        folder={editFolderTarget}
+        onSubmitFolder={async (data) => {
+          if (data.id) {
+            await editFolder({
+              id: data.id,
+              title: data.title,
+              description: data.description,
+              tags: data.tags,
+              image_id: data.image_id,
+            });
+          } else {
+            await createFolder({
+              title: data.title,
+              description: data.description,
+              tags: data.tags,
+              image_id: data.image_id,
+            });
+          }
+          setEditFolderTarget(null);
+          setCreateFolderVisible(false);
+          await refreshCatalog();
+        }}
+      />
+      <DeleteFolderModalForm
+        isVisible={!!deleteFolderTarget}
+        setIsVisible={(v) => {
+          if (!v) setDeleteFolderTarget(null);
+        }}
+        folder={deleteFolderTarget}
+        onCheck={async (id) => checkFolderContents(id)}
+        onDelete={async (id, force) => deleteFolder(id, force)}
+        onSuccess={() => {
+          setDeleteFolderTarget(null);
+          if (currentFolderId === deleteFolderTarget?.id) {
+            setCurrentFolderId(null);
+            setCurrentFolderMeta(null);
+          }
+          void refreshCatalog();
+        }}
+      />
+      <MoveToFolderModal
+        isVisible={!!moveItem}
+        setIsVisible={(v) => {
+          if (!v) setMoveItem(null);
+        }}
+        folders={rootFolders}
+        currentFolderId={
+          moveItem?.folder_id != null
+            ? Number(moveItem.folder_id)
+            : currentFolderId
+        }
+        onPick={async (folderId) => {
+          if (!moveItem) return;
+          const type =
+            moveItem.type === "course" || isCourse ? "course" : "lesson";
+          await moveToFolder(type, moveItem.id, folderId);
+          setMoveItem(null);
+          await refreshCatalog();
+        }}
       />
       {!!studentId && (
         <DictionaryModal

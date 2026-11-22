@@ -3,7 +3,6 @@
 import { FC, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  itemWord,
   TMiniGameAnswerState,
   TMiniGameItem,
   TMiniGamePatch,
@@ -41,7 +40,10 @@ export const WordsearchGame: FC<TProps> = ({
   onPatch,
 }) => {
   const { t } = useTranslation();
-  const words = useMemo(() => items.map((i) => itemWord(i)), [items]);
+  const words = useMemo(
+    () => items.map((i) => String(i.term || "").trim()).filter(Boolean),
+    [items],
+  );
   const built = useMemo(() => buildWordsearchGrid(words), [words]);
   const found = new Set((state.foundWords || []).map((w) => w.toUpperCase()));
 

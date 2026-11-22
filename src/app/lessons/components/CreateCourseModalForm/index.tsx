@@ -66,6 +66,7 @@ type TProps = {
   isVisible: boolean;
   setIsVisible: (val: boolean) => void;
   onSuccess: (createdcourseId: number) => void;
+  folderId?: number | null;
   chosenCourse?: TCourse;
 };
 
@@ -177,6 +178,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
   setIsVisible,
   onSuccess,
   chosenCourse,
+  folderId,
 }) => {
   const { profile } = useContext(AuthContext);
   const workspace = useCatalogWorkspace();
@@ -337,6 +339,9 @@ export const CreateCourseModalForm: FC<TProps> = ({
             ..._data,
             image_id: attachments?.attachments?.[0]?.id,
             lesson_ids: JSON.stringify(lessonIdsToSave),
+            ...(folderId != null && !chosenCourse?.id
+              ? { folder_id: folderId }
+              : {}),
           },
         });
         const course = await courseRes.json();
@@ -350,7 +355,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [step, orderedLessons, images, uploadImages, chosenCourse?.id, onSuccess, workspace],
+    [step, orderedLessons, images, uploadImages, chosenCourse?.id, folderId, onSuccess, workspace],
   );
 
   const title = watch("title");

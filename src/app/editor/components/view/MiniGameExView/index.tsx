@@ -81,7 +81,6 @@ const MiniGameExViewImpl: FC<{
         return (
           <SpinWheelGame
             items={items}
-            showDefinition={!!data.options?.showDefinitionOnWheel}
             canInteract={canInteract}
             state={state}
             onPatch={patchState}

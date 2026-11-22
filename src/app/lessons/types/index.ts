@@ -19,4 +19,6 @@ export type TLesson = {
   lesson_id_homework?: number;
   homework_lesson_id?: number;
   has_individual_homework?: boolean;
+  folder_id?: number | null;
+  sort_index?: number;
 };

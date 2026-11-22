@@ -79,6 +79,8 @@ const mapHeaders = (params: TParams) => {
   const headers: Headers = new Headers();
   const { isSecure } = params;
   headers.append("Content-Type", "application/json");
+  // Advertise catalog v2 capability; server v2 routes are path-based and do not require this.
+  headers.append("X-Client-Catalog", "v2");
   if (isSecure) {
     const token = getTokenFromLocalStorage();
     headers.append("Authorization", `Bearer ${token || ""}`);

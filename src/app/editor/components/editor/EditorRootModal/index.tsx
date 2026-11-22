@@ -205,6 +205,7 @@ export const EditorRootModal: FC<TProps> = ({
         return TrueFalse;
       case "TABLES":
         return TablesEx;
+      case "mini_games":
       case "mini_game":
       case "flash-cards":
       case "matching-pairs":
