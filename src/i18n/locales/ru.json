@@ -972,7 +972,7 @@
     "miniGameAllPassed": "Все карточки пройдены",
     "miniGameRestart": "Начать заново",
     "miniGameFlipHint": "Нажмите, чтобы перевернуть",
-    "miniGameAgain": "Ещё раз",
+    "miniGameAgain": "Назад",
     "miniGameNext": "Далее",
     "miniGameCardCount": "Карточки: {{total}}",
     "miniGamePairs": "Пары: {{matched}}/{{total}}",

@@ -970,7 +970,7 @@
     "miniGameAllPassed": "All cards done",
     "miniGameRestart": "Start over",
     "miniGameFlipHint": "Tap to flip",
-    "miniGameAgain": "Again",
+    "miniGameAgain": "Back",
     "miniGameNext": "Next",
     "miniGameCardCount": "Cards: {{total}}",
     "miniGamePairs": "Pairs: {{matched}}/{{total}}",

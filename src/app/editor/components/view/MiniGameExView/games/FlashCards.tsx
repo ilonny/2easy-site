@@ -131,55 +131,56 @@ const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
     });
   };
 
-  const drawNext = () => {
-    if (!canInteract || remaining.length <= 1 || drawing) return;
-    onPatch({
-      flipped: false,
-      cardIndex: (index + 1) % remaining.length,
+  const goNext = () => {
+    if (!canInteract || !current || drawing) return;
+    onPatch((prev) => {
+      const nextKnown = Array.from(
+        new Set([...(prev.knownIds || []), current.id]),
+      );
+      const nextRemaining = order.filter((id) => !nextKnown.includes(id));
+      // After removing current, the next card lands at the same index
+      // (or wrap to 0 past the end).
+      const nextIndex =
+        nextRemaining.length === 0
+          ? 0
+          : index >= nextRemaining.length
+            ? 0
+            : index;
+      return {
+        ...prev,
+        activeGame: "flash-cards",
+        knownIds: nextKnown,
+        score: nextKnown.length,
+        total: items.length,
+        completed: nextRemaining.length === 0,
+        flipped: false,
+        cardIndex: nextIndex,
+      };
     });
   };
 
-  const markKnown = (know: boolean) => {
-    if (!canInteract || !current || drawing) return;
-    if (know) {
-      onPatch((prev) => {
-        const nextKnown = Array.from(
-          new Set([...(prev.knownIds || []), current.id]),
-        );
-        const nextRemaining = order.filter((id) => !nextKnown.includes(id));
-        // Keep moving forward: after removing current, the old next card
-        // lands at the same index (or wrap to 0 past the end).
-        const nextIndex =
-          nextRemaining.length === 0
-            ? 0
-            : index >= nextRemaining.length
-              ? 0
-              : index;
-        return {
-          ...prev,
-          activeGame: "flash-cards",
-          knownIds: nextKnown,
-          score: nextKnown.length,
-          total: items.length,
-          completed: nextRemaining.length === 0,
-          flipped: false,
-          cardIndex: nextIndex,
-        };
-      });
-    } else {
-      drawNext();
-    }
+  const goBack = () => {
+    if (!canInteract || drawing) return;
+    const knownIds = state.knownIds || [];
+    if (!knownIds.length) return;
+    const prevId = knownIds[knownIds.length - 1];
+    const nextKnown = knownIds.slice(0, -1);
+    const nextRemaining = order.filter((id) => !nextKnown.includes(id));
+    const nextIndex = Math.max(0, nextRemaining.indexOf(prevId));
+    onPatch({
+      activeGame: "flash-cards",
+      knownIds: nextKnown,
+      score: nextKnown.length,
+      total: items.length,
+      completed: false,
+      flipped: false,
+      cardIndex: nextIndex,
+    });
   };
 
   if (!remaining.length) {
     return (
       <div className={styles.flashStage}>
-        <div className={styles.score}>
-          {t("editor.miniGameDone", {
-            known: items.length,
-            total: items.length,
-          })}
-        </div>
         <p className={styles.flashText}>{t("editor.miniGameAllPassed")}</p>
         {canInteract && (
           <Button color="primary" variant="flat" onPress={restartAll}>
@@ -192,16 +193,12 @@ const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
 
   const deckBehind = Math.max(0, remaining.length - 1);
   const deckLayers = Math.min(deckBehind, 4);
-  const canDraw = canInteract && deckBehind > 0 && !drawing;
+  const canGoNext = canInteract && !!current && !drawing;
+  const canGoBack = canInteract && known.size > 0 && !drawing;
+  const canDraw = canGoNext && deckBehind > 0;
 
   return (
     <div className={styles.flashStage}>
-      <div className={styles.score}>
-        {t("editor.miniGameKnown", {
-          known: known.size,
-          total: items.length,
-        })}
-      </div>
       <div className={styles.flashDeckRow}>
         <button
           type="button"
@@ -209,12 +206,8 @@ const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
             deckBehind === 0 ? styles.flashDeckEmpty : ""
           } ${canDraw ? styles.flashDeckClickable : ""}`}
           disabled={!canDraw}
-          aria-label={
-            deckBehind > 0
-              ? t("editor.miniGameCardCount", { total: deckBehind })
-              : undefined
-          }
-          onClick={drawNext}
+          aria-label={t("editor.miniGameNext", { defaultValue: "Далее" })}
+          onClick={goNext}
         >
           {Array.from({ length: Math.max(deckLayers, 1) }).map((_, i) => (
             <div
@@ -226,9 +219,6 @@ const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
               }}
             />
           ))}
-          {deckBehind > 0 && (
-            <div className={styles.flashDeckBadge}>{deckBehind}</div>
-          )}
         </button>
         <div className={styles.flashScene}>
           <div
@@ -284,15 +274,15 @@ const FlashCardsOne: FC<Omit<TProps, "layout">> = ({
       <div className={styles.flashActions}>
         <Button
           variant="bordered"
-          isDisabled={!canInteract || drawing}
-          onPress={() => markKnown(false)}
+          isDisabled={!canGoBack}
+          onPress={goBack}
         >
           {t("editor.miniGameAgain")}
         </Button>
         <Button
           color="primary"
-          isDisabled={!canInteract || drawing}
-          onPress={() => markKnown(true)}
+          isDisabled={!canGoNext}
+          onPress={goNext}
         >
           {t("editor.miniGameNext")}
         </Button>
