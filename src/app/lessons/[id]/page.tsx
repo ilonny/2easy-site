@@ -19,6 +19,11 @@ import { checkResponse, fetchGet, fetchPostJson } from "@/api";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useLessons } from "@/app/lessons/hooks/useLessons";
 import {
+  catalogFetchParams,
+  useCatalogWorkspace,
+  withCatalogQuery,
+} from "@/app/school/lib/catalogWorkspace";
+import {
   openHomeworkForStudent,
   openLessonForStudents,
 } from "@/app/lessons/openHomeworkForStudent";
@@ -100,6 +105,7 @@ export default function LessonPage() {
   const lessonId = parseRouteId(params.id);
   const lessonIdNum = parseRouteIdNumber(params.id);
   const lockedStudentId = Number(searchParams?.get("student_id") || 0) || 0;
+  const catalogWorkspace = useCatalogWorkspace();
   const { profile, authIsLoading } = useContext(AuthContext);
   const isTeacher = profile?.role_id === 2 || profile?.role_id === 1;
   const isStudent = profile?.isStudent;
@@ -150,9 +156,16 @@ export default function LessonPage() {
           lesson_id: String(lessonIdNum),
         });
         if (requested) query.set("session_id", String(requested));
+        if (lockedStudentId) {
+          query.set("student_id", String(lockedStudentId));
+        }
         const res = await fetchGet({
-          path: `/lesson/session/resolve?${query.toString()}`,
+          path: withCatalogQuery(
+            `/lesson/session/resolve?${query.toString()}`,
+            catalogWorkspace,
+          ),
           isSecure: true,
+          ...catalogFetchParams(catalogWorkspace),
         });
         const json = await res?.json();
         if (!cancelled && json?.success && json?.session?.id) {
@@ -183,7 +196,13 @@ export default function LessonPage() {
     return () => {
       cancelled = true;
     };
-  }, [authIsLoading, lessonIdNum, lockedStudentId, requestedSessionId]);
+  }, [
+    authIsLoading,
+    catalogWorkspace,
+    lessonIdNum,
+    lockedStudentId,
+    requestedSessionId,
+  ]);
 
   const handleEditHomeworkForStudent = useCallback(async () => {
     const sid = Number(
