@@ -578,7 +578,7 @@ export const LessonCard: FC<TProps> = ({
         {!!dragHandleProps && lesson.canEdit && (
           <button
             type="button"
-            className="absolute bottom-3 right-3 z-[3] flex h-9 w-9 items-center justify-center rounded-[12px] bg-brand-black/35 text-[15px] leading-none text-white backdrop-blur-md touch-none"
+            className={`${styles["drag-handle"]} absolute bottom-3 right-3 z-[3] flex h-9 w-9 items-center justify-center rounded-[12px] bg-brand-black/35 text-[15px] leading-none text-white backdrop-blur-md touch-none`}
             onClick={(e) => e.stopPropagation()}
             {...dragHandleProps}
             aria-label="drag"

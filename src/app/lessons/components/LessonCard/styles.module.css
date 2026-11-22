@@ -14,6 +14,10 @@
   opacity: 1;
 }
 
+.lesson-card:hover .drag-handle {
+  opacity: 1;
+}
+
 .menu-shadow {
   width: 100%;
   height: 100%;
@@ -35,15 +39,24 @@
   z-index: 2;
 }
 
+.drag-handle {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
 .image-bg {
   background-size: cover !important;
   background-position: center !important;
   transition: transform 300ms ease;
 }
 
-/* Touch: keep card menu visible without hover */
+/* Touch: keep card menu / drag handle visible without hover */
 @media (hover: none), (pointer: coarse) {
   .btn-wrapper {
+    opacity: 1;
+  }
+
+  .drag-handle {
     opacity: 1;
   }
 
