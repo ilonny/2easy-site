@@ -671,11 +671,15 @@ export const ImportPmArchiveModal: FC<TProps> = ({
         onClose={() => setHelpOpen(false)}
         size="lg"
         scrollBehavior="inside"
-        classNames={{ wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS }}
+        classNames={{
+          wrapper: OVERLAY_ABOVE_HEADER_Z_CLASS,
+          header: "shrink-0",
+          body: "gap-3 overflow-y-auto overscroll-contain pb-8 text-sm max-sm:min-h-0",
+        }}
       >
         <ModalContent>
           <ModalHeader>Как импортировать из ProgressMe</ModalHeader>
-          <ModalBody className="gap-3 pb-8 text-sm">
+          <ModalBody>
             <ol className="list-decimal space-y-2 pl-5">
               <li>
                 Установите расширение{" "}
@@ -734,15 +738,18 @@ export const ImportPmArchiveModal: FC<TProps> = ({
                 экспортируйте учебник частями.
               </p>
             </div>
-            <Button
-              as="a"
-              href={CWS_URL}
-              target="_blank"
-              rel="noreferrer"
-              color="primary"
-            >
-              Открыть страницу расширения
-            </Button>
+            <div className="shrink-0 pt-1">
+              <Button
+                as="a"
+                href={CWS_URL}
+                target="_blank"
+                rel="noreferrer"
+                color="primary"
+                className="h-auto min-h-10 w-full touch-manipulation whitespace-normal px-4 py-2.5 leading-snug sm:w-auto"
+              >
+                Открыть страницу расширения
+              </Button>
+            </div>
           </ModalBody>
         </ModalContent>
       </Modal>
