@@ -265,10 +265,6 @@ export default function SchoolPage() {
             schoolId={school.id}
             canManageAssign={canAssign}
             canLeaveUnassigned={!!school.access?.canViewAllStudents}
-            defaultLessonMinutes={
-              school.settings?.defaultLessonMinutes || 60
-            }
-            timezone={school.settings?.timezone}
             students={students}
             members={members}
             onStudentsChanged={() =>

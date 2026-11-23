@@ -28,16 +28,10 @@ import {
   brandPrimaryBtnClassName,
 } from "@/components/brandUi";
 import { toast } from "react-toastify";
-import { checkResponse, fetchGet, fetchPostJson } from "@/api";
+import { checkResponse, fetchGet, fetchPatch, fetchPostJson } from "@/api";
 import { rememberStudentCabinetBack } from "../lib/studentCabinetBack";
-import {
-  AvailableTeacher,
-  DOW_ORDER,
-  LESSON_DURATIONS,
-  SchoolMember,
-} from "../types";
+import { SchoolMember } from "../types";
 
-type LessonFrequency = "weekly" | "biweekly" | "once";
 type StudentAction = "archive" | "restore" | "delete";
 
 type SchoolStudent = {
@@ -57,22 +51,11 @@ type CreateSchoolStudentResult = {
   first_starts_at?: string;
 };
 
-type PreferredSlotRow = {
-  id: string;
-  /** For weekly/biweekly */
-  dow: number;
-  /** For once */
-  date: string;
-  start: string;
-};
-
 type TProps = {
   schoolId: number;
   canManageAssign: boolean;
   /** Supervisors may leave a student without a private teacher. */
   canLeaveUnassigned?: boolean;
-  defaultLessonMinutes?: number;
-  timezone?: string;
   students: SchoolStudent[];
   members: SchoolMember[];
   onStudentsChanged?: () => Promise<unknown> | void;
@@ -81,9 +64,6 @@ type TProps = {
     email?: string;
     tag?: string;
     teacher_user_id?: number;
-    frequency?: LessonFrequency;
-    duration_minutes?: number;
-    slots?: Array<{ dow?: number; date?: string; start: string }>;
   }) => Promise<CreateSchoolStudentResult>;
   onAttachPersonal?: (
     studentIds: number[],
@@ -97,24 +77,14 @@ type PersonalStudentRow = {
   user_id?: number | string;
   teacher_name?: string | null;
   duplicate_student_id?: number | null;
+  school_id?: number | string | null;
+  is_archived?: number;
 };
-
-const newSlotId = () =>
-  `s-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-
-const defaultSlot = (): PreferredSlotRow => ({
-  id: newSlotId(),
-  dow: 1,
-  date: "",
-  start: "10:00",
-});
 
 export const StudentsPanel: FC<TProps> = ({
   schoolId,
   canManageAssign,
   canLeaveUnassigned = false,
-  defaultLessonMinutes = 60,
-  timezone,
   students,
   members,
   onStudentsChanged,
@@ -126,14 +96,9 @@ export const StudentsPanel: FC<TProps> = ({
   const [email, setEmail] = useState("");
   const [tag, setTag] = useState("");
   const [teacherId, setTeacherId] = useState<string>("");
-  const [frequency, setFrequency] = useState<LessonFrequency>("weekly");
-  const [slots, setSlots] = useState<PreferredSlotRow[]>([defaultSlot()]);
-  const [duration, setDuration] = useState(defaultLessonMinutes);
-  const [available, setAvailable] = useState<AvailableTeacher[]>([]);
-  const [loadingAvail, setLoadingAvail] = useState(false);
-  // Default to every teacher. Availability uses a hidden Monday 10:00 slot
-  // before the user picks a time, and that hid the school owner.
-  const [showAllTeachers, setShowAllTeachers] = useState(true);
+  const [ownStudents, setOwnStudents] = useState<PersonalStudentRow[]>([]);
+  const [loadingOwn, setLoadingOwn] = useState(false);
+  const [studentPick, setStudentPick] = useState("");
   const [personalOpen, setPersonalOpen] = useState(false);
   const [personalStudents, setPersonalStudents] = useState<PersonalStudentRow[]>(
     [],
@@ -153,6 +118,10 @@ export const StudentsPanel: FC<TProps> = ({
     null,
   );
   const [savingAction, setSavingAction] = useState(false);
+  const [teacherEditStudent, setTeacherEditStudent] =
+    useState<SchoolStudent | null>(null);
+  const [editTeacherId, setEditTeacherId] = useState("");
+  const [savingTeacher, setSavingTeacher] = useState(false);
   const { profile } = useContext(AuthContext);
 
   const teachers = useMemo(() => {
@@ -221,16 +190,6 @@ export const StudentsPanel: FC<TProps> = ({
       fromMember || String(fallbackName || "").trim() || selfName;
     return named || "—";
   };
-
-  const formatTeacher = (t: {
-    user_id: number;
-    name?: string | null;
-    surname?: string | null;
-    login?: string;
-  }) =>
-    [t.name, t.surname].filter(Boolean).join(" ") ||
-    t.login ||
-    String(t.user_id);
 
   const loadArchivedStudents = useCallback(async () => {
     setLoadingArchived(true);
@@ -389,123 +348,144 @@ export const StudentsPanel: FC<TProps> = ({
     }
   };
 
-  const slotsReady = useMemo(() => {
-    if (!slots.length) return false;
-    if (frequency === "once") {
-      return slots.every(
-        (s) =>
-          /^\d{4}-\d{2}-\d{2}$/.test(s.date) &&
-          /^([01]\d|2[0-3]):([0-5]\d)$/.test(s.start),
-      );
-    }
-    return slots.every(
-      (s) =>
-        Number.isInteger(s.dow) &&
-        s.dow >= 0 &&
-        s.dow <= 6 &&
-        /^([01]\d|2[0-3]):([0-5]\d)$/.test(s.start),
-    );
-  }, [slots, frequency]);
-
-  const slotsQueryKey = useMemo(() => {
-    if (!slotsReady) return "";
-    if (frequency === "once") {
-      return slots.map((s) => `${s.date}@${s.start}`).join("|");
-    }
-    return slots.map((s) => `${s.dow}:${s.start}`).join(",");
-  }, [slots, frequency, slotsReady]);
-
-  useEffect(() => {
-    if (!open || !canManageAssign || !slotsReady) {
-      setAvailable([]);
-      return;
-    }
-    let cancelled = false;
-    const run = async () => {
-      setLoadingAvail(true);
-      try {
-        const q = new URLSearchParams({
-          frequency,
-          duration_minutes: String(duration),
-        });
-        if (frequency === "once") {
-          const payload = slots.map((s) => ({
-            date: s.date,
-            start: s.start,
-          }));
-          q.set("slots", JSON.stringify(payload));
-        } else {
-          q.set(
-            "slots",
-            slots.map((s) => `${s.dow}:${s.start}`).join(","),
-          );
-        }
-        const res = await fetchGet({
-          path: `/school/${schoolId}/teachers/available?${q}`,
-          isSecure: true,
-        schoolId,
-        });
-        const data = await res.json();
-        if (!cancelled && data?.success) {
-          setAvailable(data.teachers || []);
-        }
-      } finally {
-        if (!cancelled) setLoadingAvail(false);
-      }
-    };
-    const t = setTimeout(run, 250);
-    return () => {
-      cancelled = true;
-      clearTimeout(t);
-    };
-  }, [
-    open,
-    canManageAssign,
-    slotsReady,
-    slotsQueryKey,
-    frequency,
-    duration,
-    schoolId,
-    slots,
-  ]);
-
   const teacherItems = useMemo(() => {
     if (!canManageAssign) return [];
-    if (!showAllTeachers && slotsReady) {
-      return available.map((t) => ({
-        id: String(t.user_id),
-        label: formatTeacher(t),
-        description: t.login,
-      }));
-    }
     return teachers.map((t) => ({
       id: String(t.user_id),
       label:
         [t.user?.name, t.user?.surname].filter(Boolean).join(" ") ||
         t.user?.login ||
         String(t.user_id),
-      description: t.user?.login,
     }));
-  }, [
-    canManageAssign,
-    showAllTeachers,
-    slotsReady,
-    available,
-    teachers,
-  ]);
+  }, [canManageAssign, teachers]);
 
   const resetForm = () => {
     setName("");
     setEmail("");
     setTag("");
     setTeacherId("");
-    setFrequency("weekly");
-    setSlots([defaultSlot()]);
-    setShowAllTeachers(false);
-    setAvailable([]);
+    setStudentPick("");
+    setOwnStudents([]);
   };
 
+  const loadOwnStudents = useCallback(async () => {
+    setLoadingOwn(true);
+    try {
+      const res = await fetchGet({
+        path: "/student",
+        isSecure: true,
+        workspaceScope: "personal",
+      });
+      const data = await res.json();
+      const rows = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.students)
+          ? data.students
+          : null;
+      if (!rows) {
+        setOwnStudents([]);
+        setStudentPick("new");
+        return;
+      }
+      const inSchool = new Set(students.map((row) => Number(row.id)));
+      const available = rows.filter((row: PersonalStudentRow) => {
+        const id = Number(row.id);
+        const linkedSchool =
+          row.school_id == null || row.school_id === ""
+            ? null
+            : Number(row.school_id);
+        if (!id || inSchool.has(id) || linkedSchool === schoolId) return false;
+        if (linkedSchool != null && linkedSchool !== schoolId) return false;
+        if (Number(row.is_archived) === 1) return false;
+        return true;
+      });
+      setOwnStudents(available);
+      setStudentPick(available.length ? "" : "new");
+    } catch {
+      setOwnStudents([]);
+      setStudentPick("new");
+    } finally {
+      setLoadingOwn(false);
+    }
+  }, [schoolId, students]);
+
+  const canEditTeacher = (student: SchoolStudent) =>
+    canManageAssign &&
+    !showArchived &&
+    (canLeaveUnassigned ||
+      student.can_manage !== false ||
+      !student.user_id);
+
+  const openTeacherEdit = (student: SchoolStudent) => {
+    setTeacherEditStudent(student);
+    setEditTeacherId(student.user_id ? String(student.user_id) : "");
+  };
+
+  const closeTeacherEdit = () => {
+    if (savingTeacher) return;
+    setTeacherEditStudent(null);
+    setEditTeacherId("");
+  };
+
+  const saveTeacher = async () => {
+    const studentId = Number(teacherEditStudent?.id);
+    if (!studentId) return;
+    if (canManageAssign && !canLeaveUnassigned && !editTeacherId) {
+      toast(i18n.t("school.teacherRequired"), { type: "error" });
+      return;
+    }
+    setSavingTeacher(true);
+    try {
+      const res = await fetchPatch({
+        path: `/school/${schoolId}/students/${studentId}`,
+        isSecure: true,
+        workspaceScope: "school",
+        schoolId,
+        data: {
+          teacher_user_id: editTeacherId ? Number(editTeacherId) : null,
+        },
+      });
+      const data = await res.json();
+      if (!data?.success) {
+        checkResponse(data);
+        return;
+      }
+      toast(i18n.t("school.teacherUpdated"), { type: "success" });
+      setTeacherEditStudent(null);
+      setEditTeacherId("");
+      await onStudentsChanged?.();
+    } finally {
+      setSavingTeacher(false);
+    }
+  };
+
+  const creatingNew = studentPick === "new" || ownStudents.length === 0;
+  const pickedStudent = ownStudents.find(
+    (row) => String(row.id) === studentPick,
+  );
+
   const submit = async () => {
+    if (!creatingNew) {
+      if (!pickedStudent) {
+        toast(i18n.t("school.pickStudentRequired"), { type: "error" });
+        return;
+      }
+      if (!onAttachPersonal) return;
+      setSaving(true);
+      try {
+        const res = await onAttachPersonal([pickedStudent.id]);
+        if (res?.success) {
+          toast(i18n.t("school.ownStudentsAttached", { count: 1 }), {
+            type: "success",
+          });
+          setOpen(false);
+          resetForm();
+        }
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     if (!name.trim()) {
       toast(i18n.t("school.studentNameRequired"), { type: "error" });
       return;
@@ -521,54 +501,14 @@ export const StudentsPanel: FC<TProps> = ({
         email: email.trim() || undefined,
         tag: tag.trim() || undefined,
         teacher_user_id: teacherId ? Number(teacherId) : undefined,
-        frequency,
-        duration_minutes: duration,
-        slots: teacherId
-          ? slots.map((slot) =>
-              frequency === "once"
-                ? {
-                    date: slot.date,
-                    start: String(slot.start || "").slice(0, 5),
-                  }
-                : {
-                    dow: slot.dow,
-                    start: String(slot.start || "").slice(0, 5),
-                  },
-            )
-          : [],
       });
       if (res?.success) {
-        const createdLessons = Number(res.schedule_events_created) || 0;
-        const firstAt = res.first_starts_at
-          ? new Date(res.first_starts_at).toLocaleString("ru-RU", {
-              day: "numeric",
-              month: "long",
-              hour: "2-digit",
-              minute: "2-digit",
+        const message = res.password
+          ? i18n.t("school.studentCreatedWithPassword", {
+              password: res.password,
             })
-          : "";
-        const message =
-          createdLessons > 0 && firstAt
-            ? res.password
-              ? i18n.t("school.studentCreatedWithPasswordAndLessons", {
-                  password: res.password,
-                  count: createdLessons,
-                  date: firstAt,
-                })
-              : i18n.t("school.studentCreatedWithLessons", {
-                  count: createdLessons,
-                  date: firstAt,
-                })
-            : slots.length
-              ? i18n.t("school.studentCreatedNoLessons")
-              : res.password
-                ? i18n.t("school.studentCreatedWithPassword", {
-                    password: res.password,
-                  })
-                : i18n.t("school.studentCreated");
-        toast(message, {
-          type: createdLessons > 0 || !slots.length ? "success" : "warning",
-        });
+          : i18n.t("school.studentCreated");
+        toast(message, { type: "success" });
         setOpen(false);
         resetForm();
       }
@@ -595,9 +535,9 @@ export const StudentsPanel: FC<TProps> = ({
             <Button
               className={brandPrimaryBtnClassName}
               onPress={() => {
-                setDuration(defaultLessonMinutes);
-                setShowAllTeachers(true);
+                resetForm();
                 setOpen(true);
+                void loadOwnStudents();
               }}
             >
               <T k="school.addStudent" />
@@ -651,7 +591,19 @@ export const StudentsPanel: FC<TProps> = ({
                 <td className="px-4 py-3">{s.name || "—"}</td>
                 <td className="px-4 py-3">{s.email || "—"}</td>
                 <td className="px-4 py-3">
-                  {teacherName(s.user_id, s.teacher_name)}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span>{teacherName(s.user_id, s.teacher_name)}</span>
+                    {canEditTeacher(s) ? (
+                      <Button
+                        size="sm"
+                        variant="light"
+                        className="min-w-0 px-2 text-brand-violet"
+                        onPress={() => openTeacherEdit(s)}
+                      >
+                        <T k="school.editTeacher" />
+                      </Button>
+                    ) : null}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap items-center justify-end gap-2">
@@ -671,7 +623,8 @@ export const StudentsPanel: FC<TProps> = ({
                         <T k="school.openCabinet" />
                       </Link>
                     ) : null}
-                    {canManageAssign && s.can_manage !== false ? (
+                    {canManageAssign &&
+                    (s.can_manage !== false || !s.user_id) ? (
                       <>
                         <Button
                           size="sm"
@@ -857,7 +810,58 @@ export const StudentsPanel: FC<TProps> = ({
       </Modal>
 
       <Modal
-        size="2xl"
+        size="lg"
+        isOpen={teacherEditStudent != null}
+        onClose={closeTeacherEdit}
+        classNames={brandModalClassNames}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <T
+              k="school.editTeacherTitle"
+              values={{ name: teacherEditStudent?.name || "" }}
+            />
+          </ModalHeader>
+          <ModalBody className="flex flex-col gap-4 pb-6">
+            <Select
+              label={<T k="school.colTeacher" />}
+              placeholder={i18n.t("school.searchTeacher")}
+              selectedKeys={
+                editTeacherId
+                  ? [editTeacherId]
+                  : canLeaveUnassigned
+                    ? ["none"]
+                    : []
+              }
+              onChange={(e) => {
+                const value = e.target.value;
+                setEditTeacherId(!value || value === "none" ? "" : value);
+              }}
+            >
+              {canLeaveUnassigned ? (
+                <SelectItem key="none" value="none">
+                  {i18n.t("school.unassignedTeacher")}
+                </SelectItem>
+              ) : null}
+              {teacherItems.map((teacher) => (
+                <SelectItem key={teacher.id} value={teacher.id}>
+                  {teacher.label}
+                </SelectItem>
+              ))}
+            </Select>
+            <Button
+              className={brandPrimaryBtnClassName}
+              isLoading={savingTeacher}
+              onPress={saveTeacher}
+            >
+              <T k="school.saveTeacher" />
+            </Button>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        size="lg"
         isOpen={open}
         onClose={() => setOpen(false)}
         classNames={brandModalClassNames}
@@ -867,6 +871,41 @@ export const StudentsPanel: FC<TProps> = ({
             <T k="school.addStudent" />
           </ModalHeader>
           <ModalBody className="flex flex-col gap-4 pb-6">
+            {loadingOwn ? (
+              <p className="text-sm text-brand-grayFont">
+                <T k="school.ownStudentsLoading" />
+              </p>
+            ) : null}
+            {ownStudents.length > 0 ? (
+              <>
+                <Select
+                  label={<T k="school.pickExistingStudent" />}
+                  placeholder={i18n.t("school.pickExistingStudentPlaceholder")}
+                  selectedKeys={studentPick ? [studentPick] : []}
+                  onChange={(e) => setStudentPick(e.target.value)}
+                >
+                  {ownStudents.map((row) => (
+                    <SelectItem
+                      key={String(row.id)}
+                      value={String(row.id)}
+                      textValue={row.name || row.email || String(row.id)}
+                    >
+                      {[row.name, row.email].filter(Boolean).join(" · ")}
+                    </SelectItem>
+                  ))}
+                  <SelectItem key="new" value="new">
+                    {i18n.t("school.createNewStudentOption")}
+                  </SelectItem>
+                </Select>
+                {pickedStudent ? (
+                  <p className="text-sm text-brand-grayFont">
+                    <T k="school.existingStudentHint" />
+                  </p>
+                ) : null}
+              </>
+            ) : null}
+            {creatingNew && !loadingOwn ? (
+              <>
             <Input
               label={<T k="school.studentName" />}
               value={name}
@@ -913,190 +952,21 @@ export const StudentsPanel: FC<TProps> = ({
                     </SelectItem>
                   ))}
                 </Select>
-                {teacherId ? (
-              <>
-                <p className="text-sm text-brand-grayFont">
-                  <T
-                    k="school.desiredSlotHint"
-                    values={{ tz: timezone || "—" }}
-                  />
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Select
-                    label={<T k="school.lessonFrequency" />}
-                    selectedKeys={[frequency]}
-                    className="max-w-[200px]"
-                    onChange={(e) => {
-                      const v = e.target.value as LessonFrequency;
-                      if (v) setFrequency(v);
-                    }}
-                  >
-                    <SelectItem key="weekly" value="weekly">
-                      {i18n.t("school.frequencyWeekly")}
-                    </SelectItem>
-                    <SelectItem key="biweekly" value="biweekly">
-                      {i18n.t("school.frequencyBiweekly")}
-                    </SelectItem>
-                    <SelectItem key="once" value="once">
-                      {i18n.t("school.frequencyOnce")}
-                    </SelectItem>
-                  </Select>
-                  <Select
-                    label={<T k="school.desiredDuration" />}
-                    selectedKeys={[String(duration)]}
-                    className="max-w-[140px]"
-                    onChange={(e) =>
-                      setDuration(Number(e.target.value) || 60)
-                    }
-                  >
-                    {LESSON_DURATIONS.map((d) => (
-                      <SelectItem key={String(d)} value={String(d)}>
-                        {i18n.t("school.minutes", { n: d })}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  {slots.map((slot, index) => (
-                    <div
-                      key={slot.id}
-                      className="flex flex-wrap items-end gap-2 rounded-[12px] bg-brand-gray/40 px-3 py-2"
-                    >
-                      {frequency === "once" ? (
-                        <Input
-                          type="date"
-                          label={<T k="school.desiredDate" />}
-                          value={slot.date}
-                          onChange={(e) =>
-                            setSlots((prev) =>
-                              prev.map((s) =>
-                                s.id === slot.id
-                                  ? { ...s, date: e.target.value }
-                                  : s,
-                              ),
-                            )
-                          }
-                          className="max-w-[180px]"
-                          radius="lg"
-                          size="sm"
-                        />
-                      ) : (
-                        <Select
-                          label={<T k="school.desiredWeekday" />}
-                          selectedKeys={[String(slot.dow)]}
-                          className="max-w-[140px]"
-                          size="sm"
-                          onChange={(e) => {
-                            const dow = Number(e.target.value);
-                            if (!Number.isInteger(dow)) return;
-                            setSlots((prev) =>
-                              prev.map((s) =>
-                                s.id === slot.id ? { ...s, dow } : s,
-                              ),
-                            );
-                          }}
-                        >
-                          {DOW_ORDER.map((d) => (
-                            <SelectItem key={String(d)} value={String(d)}>
-                              {i18n.t(`school.dow.${d}`)}
-                            </SelectItem>
-                          ))}
-                        </Select>
-                      )}
-                      <Input
-                        type="time"
-                        label={<T k="school.desiredTime" />}
-                        value={slot.start}
-                        onChange={(e) =>
-                          setSlots((prev) =>
-                            prev.map((s) =>
-                              s.id === slot.id
-                                ? { ...s, start: e.target.value }
-                                : s,
-                            ),
-                          )
-                        }
-                        className="max-w-[140px]"
-                        radius="lg"
-                        size="sm"
-                      />
-                      {slots.length > 1 ? (
-                        <Button
-                          size="sm"
-                          variant="light"
-                          onPress={() =>
-                            setSlots((prev) =>
-                              prev.filter((s) => s.id !== slot.id),
-                            )
-                          }
-                        >
-                          <T k="school.removeSlot" />
-                        </Button>
-                      ) : null}
-                      {index === 0 && frequency !== "once" ? (
-                        <span className="pb-2 text-xs text-brand-grayFont">
-                          <T k="school.slotIndexHint" />
-                        </span>
-                      ) : null}
-                    </div>
-                  ))}
-                  <Button
-                    size="sm"
-                    variant="flat"
-                    className="self-start"
-                    onPress={() =>
-                      setSlots((prev) => [
-                        ...prev,
-                        {
-                          ...defaultSlot(),
-                          start:
-                            prev[prev.length - 1]?.start || "10:00",
-                        },
-                      ])
-                    }
-                  >
-                    <T k="school.addSlot" />
-                  </Button>
-                </div>
-
-                {slotsReady && !showAllTeachers ? (
-                  <p className="text-xs text-brand-grayFont">
-                    {loadingAvail
-                      ? i18n.t("school.loadingAvailable")
-                      : i18n.t("school.availableCount", {
-                          n: available.length,
-                        })}
-                  </p>
-                ) : null}
-                {slotsReady ? (
-                  <Button
-                    size="sm"
-                    variant="light"
-                    onPress={() => setShowAllTeachers((v) => !v)}
-                  >
-                    {showAllTeachers ? (
-                      <T k="school.showAvailableOnly" />
-                    ) : (
-                      <T k="school.showAllTeachers" />
-                    )}
-                  </Button>
-                ) : null}
-                {showAllTeachers && slotsReady ? (
-                  <p className="text-xs text-amber-700">
-                    <T k="school.forceTeacherWarning" />
-                  </p>
-                ) : null}
-              </>
-                ) : null}
               </>
             )}
+              </>
+            ) : null}
             <Button
               className={brandPrimaryBtnClassName}
-              isLoading={saving}
+              isLoading={saving || loadingOwn}
+              isDisabled={loadingOwn || (!creatingNew && !pickedStudent)}
               onPress={submit}
             >
-              <T k="school.saveStudent" />
+              {creatingNew ? (
+                <T k="school.saveStudent" />
+              ) : (
+                <T k="school.ownStudentsAttach" />
+              )}
             </Button>
           </ModalBody>
         </ModalContent>
