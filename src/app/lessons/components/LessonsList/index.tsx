@@ -51,6 +51,7 @@ import {
   SortableCatalogCard,
   nestFolderDropId,
 } from "./SortableCatalogCard";
+import { selectVisibleCatalogItems } from "./visibleCatalogItems";
 
 const INITIAL_LESSON_BATCH = 24;
 const LESSON_RENDER_STEP = 24;
@@ -401,8 +402,9 @@ export const LessonsList: FC<TProps> = ({
   }, [lessonIdsKey, lessons.length]);
 
   const visibleLessons = useMemo(
-    () => lessons.slice(0, visibleLessonCount),
-    [lessons, visibleLessonCount],
+    () =>
+      selectVisibleCatalogItems(lessons, visibleLessonCount, !!isCourses),
+    [lessons, visibleLessonCount, isCourses],
   );
   const hasMoreLessonsToRender =
     !isCourses && visibleLessonCount < lessons.length;

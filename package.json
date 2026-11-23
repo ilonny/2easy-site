@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "next lint",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/tablesModel.test.ts"
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/tablesModel.test.ts tests/visibleCatalogItems.test.ts"
   },
   "dependencies": {
     "@chatscope/chat-ui-kit-react": "^2.1.1",
