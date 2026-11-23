@@ -738,14 +738,14 @@ export const ImportPmArchiveModal: FC<TProps> = ({
                 экспортируйте учебник частями.
               </p>
             </div>
-            <div className="shrink-0 pt-1">
+            <div className="w-full shrink-0 pt-1">
               <Button
                 as="a"
                 href={CWS_URL}
                 target="_blank"
                 rel="noreferrer"
                 color="primary"
-                className="h-auto min-h-10 w-full touch-manipulation whitespace-normal px-4 py-2.5 leading-snug sm:w-auto"
+                className="h-auto min-h-10 w-full touch-manipulation whitespace-normal px-4 py-2.5 leading-snug"
               >
                 Открыть страницу расширения
               </Button>
