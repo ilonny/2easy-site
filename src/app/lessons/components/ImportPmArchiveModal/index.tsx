@@ -750,8 +750,10 @@ export const ImportPmArchiveModal: FC<TProps> = ({
   );
 };
 
-export const PM_IMPORT_ALLOWLIST_USER_IDS = [1169];
-
-export function canUsePmImport(profile: { id?: number | string } | null | undefined) {
-  return PM_IMPORT_ALLOWLIST_USER_IDS.includes(Number(profile?.id));
+/** Admin (1) and teacher (2) — same as backend `isTeacherRole`. */
+export function canUsePmImport(
+  profile: { role_id?: number | string } | null | undefined,
+) {
+  const roleId = Number(profile?.role_id);
+  return roleId === 1 || roleId === 2;
 }
