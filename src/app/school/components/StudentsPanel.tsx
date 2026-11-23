@@ -2,6 +2,7 @@
 
 import {
   Button,
+  Checkbox,
   Input,
   Modal,
   ModalBody,
@@ -84,6 +85,18 @@ type TProps = {
     duration_minutes?: number;
     slots?: Array<{ dow?: number; date?: string; start: string }>;
   }) => Promise<CreateSchoolStudentResult>;
+  onAttachPersonal?: (
+    studentIds: number[],
+  ) => Promise<{ success?: boolean; count?: number } | void>;
+};
+
+type PersonalStudentRow = {
+  id: number;
+  name?: string;
+  email?: string;
+  user_id?: number | string;
+  teacher_name?: string | null;
+  duplicate_student_id?: number | null;
 };
 
 const newSlotId = () =>
@@ -106,6 +119,7 @@ export const StudentsPanel: FC<TProps> = ({
   members,
   onStudentsChanged,
   onCreate,
+  onAttachPersonal,
 }) => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -117,7 +131,17 @@ export const StudentsPanel: FC<TProps> = ({
   const [duration, setDuration] = useState(defaultLessonMinutes);
   const [available, setAvailable] = useState<AvailableTeacher[]>([]);
   const [loadingAvail, setLoadingAvail] = useState(false);
-  const [showAllTeachers, setShowAllTeachers] = useState(false);
+  // Default to every teacher. Availability uses a hidden Monday 10:00 slot
+  // before the user picks a time, and that hid the school owner.
+  const [showAllTeachers, setShowAllTeachers] = useState(true);
+  const [personalOpen, setPersonalOpen] = useState(false);
+  const [personalStudents, setPersonalStudents] = useState<PersonalStudentRow[]>(
+    [],
+  );
+  const [selectedPersonal, setSelectedPersonal] = useState<number[]>([]);
+  const [loadingPersonal, setLoadingPersonal] = useState(false);
+  const [personalError, setPersonalError] = useState("");
+  const [attachingPersonal, setAttachingPersonal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [archivedStudents, setArchivedStudents] = useState<SchoolStudent[]>([]);
@@ -131,19 +155,53 @@ export const StudentsPanel: FC<TProps> = ({
   const [savingAction, setSavingAction] = useState(false);
   const { profile } = useContext(AuthContext);
 
-  const teachers = useMemo(
-    () =>
-      members.filter(
-        (m) =>
-          m.status === "active" &&
-          (m.roles.includes("teacher") ||
-            m.roles.includes("head_teacher") ||
-            m.roles.includes("methodist") ||
-            m.roles.includes("academic_director") ||
-            m.roles.includes("super_admin")),
-      ),
-    [members],
-  );
+  const teachers = useMemo(() => {
+    const listed = members.filter(
+      (m) =>
+        m.status === "active" &&
+        (m.roles.includes("teacher") ||
+          m.roles.includes("head_teacher") ||
+          m.roles.includes("methodist") ||
+          m.roles.includes("academic_director") ||
+          m.roles.includes("super_admin")),
+    );
+    const selfId = Number(profile?.id);
+    const withSelf =
+      canManageAssign &&
+      selfId > 0 &&
+      !listed.some((member) => Number(member.user_id) === selfId)
+        ? [
+            ...listed,
+            {
+              id: 0,
+              user_id: selfId,
+              status: "active",
+              roles: ["teacher" as const],
+              user: {
+                id: selfId,
+                login: profile?.login || "",
+                name: profile?.name,
+                surname: profile?.surname,
+              },
+            },
+          ]
+        : listed;
+    return [...withSelf].sort((a, b) => {
+      const aSelf = Number(a.user_id) === selfId ? 0 : 1;
+      const bSelf = Number(b.user_id) === selfId ? 0 : 1;
+      if (aSelf !== bSelf) return aSelf - bSelf;
+      const aName = [a.user?.name, a.user?.surname].filter(Boolean).join(" ");
+      const bName = [b.user?.name, b.user?.surname].filter(Boolean).join(" ");
+      return aName.localeCompare(bName, "ru");
+    });
+  }, [
+    canManageAssign,
+    members,
+    profile?.id,
+    profile?.login,
+    profile?.name,
+    profile?.surname,
+  ]);
 
   const teacherName = (
     userId: string | number | undefined,
@@ -204,6 +262,68 @@ export const StudentsPanel: FC<TProps> = ({
   }, [loadArchivedStudents, showArchived]);
 
   const visibleStudents = showArchived ? archivedStudents : students;
+
+  const loadPersonalStudents = useCallback(async () => {
+    setLoadingPersonal(true);
+    try {
+      const res = await fetchGet({
+        path: `/school/${schoolId}/students/personal`,
+        isSecure: true,
+        workspaceScope: "school",
+        schoolId,
+      });
+      const data = await res.json();
+      if (data?.success) {
+        setPersonalError("");
+        setPersonalStudents(data.students || []);
+      } else {
+        setPersonalStudents([]);
+        setPersonalError(
+          data?.message || i18n.t("school.ownStudentsLoadError"),
+        );
+        checkResponse(data);
+      }
+    } finally {
+      setLoadingPersonal(false);
+    }
+  }, [schoolId]);
+
+  const openPersonal = () => {
+    setSelectedPersonal([]);
+    setPersonalError("");
+    setPersonalOpen(true);
+    void loadPersonalStudents();
+  };
+
+  const togglePersonal = (id: number) => {
+    setSelectedPersonal((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
+
+  const attachPersonal = async () => {
+    if (!selectedPersonal.length) {
+      toast(i18n.t("school.ownStudentsSelect"), { type: "error" });
+      return;
+    }
+    if (!onAttachPersonal) return;
+    setAttachingPersonal(true);
+    try {
+      const res = await onAttachPersonal(selectedPersonal);
+      if (res?.success) {
+        toast(
+          i18n.t("school.ownStudentsAttached", {
+            count: res.count || selectedPersonal.length,
+          }),
+          { type: "success" },
+        );
+        setPersonalOpen(false);
+        setSelectedPersonal([]);
+      }
+    } finally {
+      setAttachingPersonal(false);
+    }
+  };
 
   const openStudentAction = (
     student: SchoolStudent,
@@ -464,15 +584,25 @@ export const StudentsPanel: FC<TProps> = ({
           <T k="school.studentsTitle" />
         </h2>
         {canManageAssign && !showArchived ? (
-          <Button
-            className={brandPrimaryBtnClassName}
-            onPress={() => {
-              setDuration(defaultLessonMinutes);
-              setOpen(true);
-            }}
-          >
-            <T k="school.addStudent" />
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="bordered"
+              className="border-brand-violet text-brand-violet"
+              onPress={openPersonal}
+            >
+              <T k="school.addOwnStudents" />
+            </Button>
+            <Button
+              className={brandPrimaryBtnClassName}
+              onPress={() => {
+                setDuration(defaultLessonMinutes);
+                setShowAllTeachers(true);
+                setOpen(true);
+              }}
+            >
+              <T k="school.addStudent" />
+            </Button>
+          </div>
         ) : null}
       </div>
 
@@ -635,6 +765,92 @@ export const StudentsPanel: FC<TProps> = ({
               ) : (
                 <T k="students.archive" />
               )}
+            </Button>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        size="lg"
+        isOpen={personalOpen}
+        onClose={() => {
+          if (attachingPersonal) return;
+          setPersonalOpen(false);
+        }}
+        classNames={brandModalClassNames}
+      >
+        <ModalContent>
+          <ModalHeader>
+            <T k="school.ownStudentsTitle" />
+          </ModalHeader>
+          <ModalBody className="flex flex-col gap-4 pb-6">
+            <p className="text-sm text-brand-grayFont">
+              <T k="school.ownStudentsHint" />
+            </p>
+            {loadingPersonal ? (
+              <p className="text-sm text-brand-grayFont">
+                <T k="school.ownStudentsLoading" />
+              </p>
+            ) : personalError ? (
+              <p className="text-sm text-brand-grayFont">{personalError}</p>
+            ) : personalStudents.length ? (
+              <>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="light"
+                    onPress={() =>
+                      setSelectedPersonal(personalStudents.map((row) => row.id))
+                    }
+                  >
+                    <T k="school.selectAllStudents" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="light"
+                    onPress={() => setSelectedPersonal([])}
+                  >
+                    <T k="school.clearStudentSelection" />
+                  </Button>
+                </div>
+                <div className="flex max-h-[360px] flex-col gap-2 overflow-y-auto">
+                  {personalStudents.map((row) => (
+                    <Checkbox
+                      key={row.id}
+                      isSelected={selectedPersonal.includes(row.id)}
+                      onValueChange={() => togglePersonal(row.id)}
+                      classNames={{ base: "max-w-full" }}
+                    >
+                      <span className="text-sm text-brand-black">
+                        {row.name || "—"}
+                        {row.teacher_name ? ` · ${row.teacher_name}` : ""}
+                      </span>
+                      {row.email ? (
+                        <span className="block text-xs text-brand-grayFont">
+                          {row.email}
+                        </span>
+                      ) : null}
+                      {row.duplicate_student_id ? (
+                        <span className="block text-xs text-amber-700">
+                          <T k="school.ownStudentsDuplicate" />
+                        </span>
+                      ) : null}
+                    </Checkbox>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-brand-grayFont">
+                <T k="school.ownStudentsEmpty" />
+              </p>
+            )}
+            <Button
+              className={brandPrimaryBtnClassName}
+              isLoading={attachingPersonal}
+              isDisabled={!selectedPersonal.length || loadingPersonal}
+              onPress={attachPersonal}
+            >
+              <T k="school.ownStudentsAttach" />
             </Button>
           </ModalBody>
         </ModalContent>

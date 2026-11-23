@@ -39,6 +39,7 @@ export default function SchoolPage() {
     students,
     createSchool,
     createStudent,
+    attachPersonalStudents,
     refreshSubscription,
     refreshMembers,
     refreshStudents,
@@ -277,6 +278,9 @@ export default function SchoolPage() {
               ])
             }
             onCreate={(payload) => createStudent(school.id, payload)}
+            onAttachPersonal={(studentIds) =>
+              attachPersonalStudents(school.id, studentIds)
+            }
           />
         )}
 

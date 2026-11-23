@@ -126,10 +126,15 @@ export default function StudentAccountPage() {
     if (json?.success) {
       setAccessDenied(false);
       setStudentInfo(json);
-      if (json.school_id && hasSchool) {
-        const schoolId = Number(json.school_id);
-        setSourceSchoolId(schoolId);
-        setActiveSchoolId(schoolId);
+      // School context comes from the link that opened the cabinet.
+      // A student who is also in a school stays in the personal catalog
+      // when opened from the personal list, so the personal teacher can
+      // keep assigning their own lessons to the same profile.
+      if (
+        schoolIdFromUrl &&
+        Number(json.school_id) === schoolIdFromUrl
+      ) {
+        setActiveSchoolId(schoolIdFromUrl);
       }
     } else {
       setStudentInfo(undefined);
@@ -137,7 +142,7 @@ export default function StudentAccountPage() {
     }
     setIsLoading(false);
     return json;
-  }, [hasSchool, studentId, sourceSchoolId]);
+  }, [hasSchool, schoolIdFromUrl, studentId, sourceSchoolId]);
 
   useEffect(() => {
     if (schoolIdFromUrl) setSourceSchoolId(schoolIdFromUrl);
@@ -178,12 +183,7 @@ export default function StudentAccountPage() {
   const isStudent = profile?.isStudent;
   const [dictionaryModalOpen, setDictionaryModalOpen] = useState(false);
 
-  const isSchoolStudent = useMemo(
-    () =>
-      sourceSchoolId != null ||
-      (studentInfo?.school_id != null && Number(studentInfo.school_id) > 0),
-    [studentInfo, sourceSchoolId],
-  );
+  const isSchoolStudent = sourceSchoolId != null && sourceSchoolId > 0;
 
   useEffect(() => {
     if (planLoading || !hasSchool || !isSchoolStudent || !sourceSchoolId) {

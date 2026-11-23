@@ -184,6 +184,25 @@ export const useSchool = () => {
     [refreshStudents],
   );
 
+  const attachPersonalStudents = useCallback(
+    async (schoolId: number, studentIds: number[]) => {
+      const res = await fetchPostJson({
+        path: `/school/${schoolId}/students/attach`,
+        isSecure: true,
+        schoolId,
+        data: { student_ids: studentIds },
+      });
+      const data = await res.json();
+      if (data?.success) {
+        await refreshStudents(schoolId);
+        return data;
+      }
+      checkResponse(data);
+      return data;
+    },
+    [refreshStudents],
+  );
+
   const refreshSubscription = useCallback(async (schoolId: number) => {
     const res = await fetchGet({
       path: `/school/${schoolId}/subscription`,
@@ -235,7 +254,10 @@ export const useSchool = () => {
     void refreshStudents(school.id);
     void refreshSubscription(school.id);
     const canLoadMembers =
-      !!school.access?.canSeeTeachers || !!school.access?.canManageMembers;
+      !!school.access?.canSeeTeachers ||
+      !!school.access?.canManageMembers ||
+      !!school.access?.canManageOwnStudents ||
+      !!school.access?.canManageStudentsBelow;
     if (canLoadMembers) {
       void refreshMembers(school.id);
     } else {
@@ -245,6 +267,8 @@ export const useSchool = () => {
     school?.id,
     school?.access?.canSeeTeachers,
     school?.access?.canManageMembers,
+    school?.access?.canManageOwnStudents,
+    school?.access?.canManageStudentsBelow,
     refreshMembers,
     refreshStudents,
     refreshSubscription,
@@ -266,6 +290,7 @@ export const useSchool = () => {
     refreshMembers,
     refreshStudents,
     createStudent,
+    attachPersonalStudents,
     refreshSubscription,
     createSchoolPayment,
   };
