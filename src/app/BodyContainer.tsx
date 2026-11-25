@@ -36,7 +36,6 @@ export const BodyContainer: FC<any> = ({ children }) => {
   const { profile } = useContext(AuthContext);
   const router = useRouter();
   const [hintDismissed, setHintDismissed] = useState(true);
-  const [hintConcealed, setHintConcealed] = useState(false);
   const [transferModal, setTransferModal] = useState(false);
 
   useEffect(() => {
@@ -58,13 +57,13 @@ export const BodyContainer: FC<any> = ({ children }) => {
   }, [trackHintEvent]);
 
   const openTransferHint = useCallback(() => {
-    setHintConcealed(true);
+    writeToLocalStorage(PM_TRANSFER_HINT_KEY, "1");
+    setHintDismissed(true);
     setTransferModal(true);
     trackHintEvent("open");
   }, [trackHintEvent]);
 
-  const showTransferHint =
-    isLoggedInTeacher(profile) && !hintDismissed && !hintConcealed;
+  const showTransferHint = isLoggedInTeacher(profile) && !hintDismissed;
 
   useEffect(() => {
     // Логика перенаправления для студентов
