@@ -220,7 +220,9 @@ export const CreateCourseModalForm: FC<TProps> = ({
   // Ordered unique course membership — always keyed by lesson.id (never created_from_id).
   const [orderedLessons, setOrderedLessons] = useState<TLesson[]>([]);
   const [lessonsSearchString, setLessonsSearchString] = useState("");
+  const [courseLessonsReady, setCourseLessonsReady] = useState(!chosenCourse?.id);
   const loadRequestIdRef = useRef(0);
+  const initialCourseLessonIdsRef = useRef<number[]>([]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -247,6 +249,8 @@ export const CreateCourseModalForm: FC<TProps> = ({
       setStep(0);
       setOrderedLessons([]);
       setLessonsSearchString("");
+      setCourseLessonsReady(!chosenCourse?.id);
+      initialCourseLessonIdsRef.current = [];
       loadRequestIdRef.current += 1;
       return;
     }
@@ -254,18 +258,36 @@ export const CreateCourseModalForm: FC<TProps> = ({
     getAllLessons();
 
     if (!chosenCourse?.id) {
+      setCourseLessonsReady(true);
+      initialCourseLessonIdsRef.current = [];
       return;
     }
 
     const requestId = ++loadRequestIdRef.current;
+    setCourseLessonsReady(false);
     (async () => {
-      const data = await getCourseLessons(chosenCourse.id);
-      if (requestId !== loadRequestIdRef.current) {
-        return;
+      try {
+        const data = await getCourseLessons(chosenCourse.id);
+        if (requestId !== loadRequestIdRef.current) {
+          return;
+        }
+        const lessons: TLesson[] = (data?.lessons || []).filter(
+          (lesson: TLesson) => lesson?.id != null,
+        );
+        // Keep unique course lesson rows as-is — id is the only stable identity.
+        initialCourseLessonIdsRef.current = lessons.map((lesson) =>
+          Number(lesson.id),
+        );
+        setOrderedLessons(lessons);
+      } catch {
+        if (requestId !== loadRequestIdRef.current) return;
+        initialCourseLessonIdsRef.current = [];
+        setOrderedLessons([]);
+      } finally {
+        if (requestId === loadRequestIdRef.current) {
+          setCourseLessonsReady(true);
+        }
       }
-      const lessons: TLesson[] = data?.lessons || [];
-      // Keep unique course lesson rows as-is — id is the only stable identity.
-      setOrderedLessons(lessons.filter((l) => l?.id != null));
     })();
   }, [isVisible, chosenCourse?.id, getAllLessons, getCourseLessons]);
 
@@ -307,6 +329,11 @@ export const CreateCourseModalForm: FC<TProps> = ({
         return;
       }
 
+      // Editing before the current lessons arrive used to save lesson_ids: [].
+      if (chosenCourse?.id && !courseLessonsReady) {
+        return;
+      }
+
       if (step === 1 && orderedLessons.length) {
         setStep(2);
         return;
@@ -329,6 +356,10 @@ export const CreateCourseModalForm: FC<TProps> = ({
       // Persist unique lesson row ids in current order.
       // Backend keeps existing course lessons by id; clones library ids when needed.
       const lessonIdsToSave = orderedLessons.map((lesson) => Number(lesson.id));
+      const savedIdSet = new Set(lessonIdsToSave);
+      const removedLessonIds = chosenCourse?.id
+        ? initialCourseLessonIdsRef.current.filter((id) => !savedIdSet.has(id))
+        : [];
 
       try {
         const courseRes = await fetchPostJson({
@@ -339,6 +370,9 @@ export const CreateCourseModalForm: FC<TProps> = ({
             ..._data,
             image_id: attachments?.attachments?.[0]?.id,
             lesson_ids: JSON.stringify(lessonIdsToSave),
+            ...(chosenCourse?.id
+              ? { removed_lesson_ids: removedLessonIds }
+              : {}),
             ...(folderId != null && !chosenCourse?.id
               ? { folder_id: folderId }
               : {}),
@@ -355,7 +389,7 @@ export const CreateCourseModalForm: FC<TProps> = ({
         setIsLoading(false);
       }
     },
-    [step, orderedLessons, images, uploadImages, chosenCourse?.id, folderId, onSuccess, workspace],
+    [step, orderedLessons, courseLessonsReady, images, uploadImages, chosenCourse?.id, folderId, onSuccess, workspace],
   );
 
   const title = watch("title");
@@ -592,7 +626,9 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     type="submit"
                     className="w-full"
                     size="lg"
-                    isLoading={isLoading}
+                    isLoading={
+                      isLoading || (!!chosenCourse?.id && !courseLessonsReady)
+                    }
                   >
                     {orderedLessons.length
                       ? <T k="modals.next" />
@@ -657,7 +693,9 @@ export const CreateCourseModalForm: FC<TProps> = ({
                     type="submit"
                     className="w-full"
                     size="lg"
-                    isLoading={isLoading}
+                    isLoading={
+                      isLoading || (!!chosenCourse?.id && !courseLessonsReady)
+                    }
                   >
                     {orderedLessons.length
                       ? <T k="modals.next" />

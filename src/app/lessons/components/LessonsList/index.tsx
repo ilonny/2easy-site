@@ -41,17 +41,16 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  rectSortingStrategy,
-} from "@dnd-kit/sortable";
+import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import {
   REORDER_NEAR_RATIO,
   SortableCatalogCard,
   nestFolderDropId,
 } from "./SortableCatalogCard";
-import { selectVisibleCatalogItems } from "./visibleCatalogItems";
+import {
+  applyWindowedReorder,
+  selectVisibleCatalogItems,
+} from "./visibleCatalogItems";
 
 const INITIAL_LESSON_BATCH = 24;
 const LESSON_RENDER_STEP = 24;
@@ -396,6 +395,9 @@ export const LessonsList: FC<TProps> = ({
   const [visibleLessonCount, setVisibleLessonCount] = useState(
     INITIAL_LESSON_BATCH,
   );
+  // Inside a course the window used to hide everything after the first page,
+  // and a drag then saved only that page as the whole course.
+  const showAllItems = !!isCourses || !!currentCourse;
 
   useEffect(() => {
     setVisibleLessonCount(Math.min(INITIAL_LESSON_BATCH, lessons.length));
@@ -403,15 +405,15 @@ export const LessonsList: FC<TProps> = ({
 
   const visibleLessons = useMemo(
     () =>
-      selectVisibleCatalogItems(lessons, visibleLessonCount, !!isCourses),
-    [lessons, visibleLessonCount, isCourses],
+      selectVisibleCatalogItems(lessons, visibleLessonCount, showAllItems),
+    [lessons, visibleLessonCount, showAllItems],
   );
   const hasMoreLessonsToRender =
-    !isCourses && visibleLessonCount < lessons.length;
+    !showAllItems && visibleLessonCount < lessons.length;
 
   const revealSentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (!hasMoreLessonsToRender || isCourses) return;
+    if (!hasMoreLessonsToRender || showAllItems) return;
     const el = revealSentinelRef.current;
     if (!el) return;
     const obs = new IntersectionObserver(
@@ -425,7 +427,7 @@ export const LessonsList: FC<TProps> = ({
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [hasMoreLessonsToRender, isCourses, lessons.length]);
+  }, [hasMoreLessonsToRender, showAllItems, lessons.length]);
 
   useEffect(() => {
     if (
@@ -658,7 +660,13 @@ export const LessonsList: FC<TProps> = ({
         const oldIndex = sortableIds.indexOf(activeKey);
         const newIndex = sortableIds.indexOf(currentReorderFolderId);
         if (oldIndex >= 0 && newIndex >= 0 && oldIndex !== newIndex) {
-          const reordered = arrayMove(visibleLessons, oldIndex, newIndex);
+          const reordered = applyWindowedReorder(
+            lessons,
+            visibleLessonCount,
+            showAllItems,
+            oldIndex,
+            newIndex,
+          );
           onReorderItems(
             reordered.map((lesson) => ({
               type: itemTypeOf(lesson as any),
@@ -680,7 +688,13 @@ export const LessonsList: FC<TProps> = ({
       const oldIndex = sortableIds.indexOf(activeKey);
       const newIndex = sortableIds.indexOf(overKey);
       if (oldIndex < 0 || newIndex < 0 || !onReorderItems) return;
-      const reordered = arrayMove(visibleLessons, oldIndex, newIndex);
+      const reordered = applyWindowedReorder(
+        lessons,
+        visibleLessonCount,
+        showAllItems,
+        oldIndex,
+        newIndex,
+      );
       onReorderItems(
         reordered.map((lesson) => ({
           type: itemTypeOf(lesson as any),
@@ -692,10 +706,12 @@ export const LessonsList: FC<TProps> = ({
       clearDropTarget,
       enableCatalogDnd,
       itemTypeOf,
+      lessons,
       onDropOnFolder,
       onReorderItems,
+      showAllItems,
       sortableIds,
-      visibleLessons,
+      visibleLessonCount,
     ],
   );
 

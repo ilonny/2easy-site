@@ -1045,8 +1045,13 @@
     "moreInteresting": "– there's lots of interesting stuff there"
   },
   "body": {
-    "shareOpinion": "Share your opinion",
-    "shareOpinionModal": "Share your opinion with us"
+    "pmTransferHint": "Psst... we'll move your materials from ProgressMe/Edvibe over here",
+    "pmTransferTitle": "Move your materials from ProgressMe and Edvibe",
+    "pmTransferLead": "You can do this in Lesson plans. Open Actions.",
+    "pmTransferLesson": "Separate lessons — Create a Lesson, then Import archive.",
+    "pmTransferCourse": "A whole textbook — Create course, then Import archive.",
+    "pmTransferHelp": "A detailed guide is available via the “?” button on the creation screen.",
+    "pmTransferOpen": "Open Lesson plans"
   },
   "videoCall": {
     "title": "Video call",

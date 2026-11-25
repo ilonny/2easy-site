@@ -1047,8 +1047,13 @@
     "moreInteresting": "– там много интересного"
   },
   "body": {
-    "shareOpinion": "Поделитесь мнением",
-    "shareOpinionModal": "Поделитесь вашим мнением"
+    "pmTransferHint": "Псс... перенесём ваши материалы с ProgressMe/Edvibe к нам",
+    "pmTransferTitle": "Перенесём материалы из ProgressMe и Edvibe",
+    "pmTransferLead": "Это можно сделать в разделе Lesson plans. Нажмите «Действия».",
+    "pmTransferLesson": "Отдельные уроки — «Создать урок», затем «Импортировать архив».",
+    "pmTransferCourse": "Целый учебник — «Создать курс», затем «Импортировать архив».",
+    "pmTransferHelp": "Подробная инструкция доступна по кнопке «?» на странице создания.",
+    "pmTransferOpen": "Открыть Lesson plans"
   },
   "videoCall": {
     "title": "Видеосвязь",

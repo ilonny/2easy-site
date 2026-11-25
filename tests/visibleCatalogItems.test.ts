@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { selectVisibleCatalogItems } from "../src/app/lessons/components/LessonsList/visibleCatalogItems.ts";
+import {
+  applyWindowedReorder,
+  selectVisibleCatalogItems,
+} from "../src/app/lessons/components/LessonsList/visibleCatalogItems.ts";
 
 const INITIAL_LESSON_BATCH = 24;
 
@@ -42,6 +45,27 @@ test("a search hit past the first page stays visible on the courses tab", () => 
   assert.deepEqual(
     visible.map((course) => course.title),
     [query],
+  );
+});
+
+test("reordering the first page keeps lessons past that page", () => {
+  const lessons = items(30);
+  const reordered = applyWindowedReorder(lessons, INITIAL_LESSON_BATCH, false, 0, 2);
+
+  assert.equal(reordered.length, 30);
+  assert.equal(reordered[0].id, 2);
+  assert.equal(reordered[1].id, 3);
+  assert.equal(reordered[2].id, 1);
+  assert.equal(reordered[24].id, 25);
+  assert.equal(reordered[29].id, 30);
+});
+
+test("a full list reorder does not invent a hidden tail", () => {
+  const lessons = items(5);
+  const reordered = applyWindowedReorder(lessons, 2, true, 0, 4);
+  assert.deepEqual(
+    reordered.map((lesson) => lesson.id),
+    [2, 3, 4, 5, 1],
   );
 });
 
