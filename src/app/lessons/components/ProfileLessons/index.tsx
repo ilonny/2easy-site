@@ -994,7 +994,7 @@ export const ProfileLessons = (props: TProps) => {
         />
       ) : null}
       {currentCourse && (
-        <>
+        <div className="flex flex-col items-center gap-2">
           <div className="flex flex-col items-center gap-2 px-1 text-center sm:flex-row sm:justify-center sm:gap-4 sm:text-left sm:items-baseline">
             {studentId ? (
               <Link
@@ -1019,10 +1019,32 @@ export const ProfileLessons = (props: TProps) => {
               {currentCourse.title}
             </h2>
           </div>
-          <div className="h-4" />
-          <p className="text-center">{currentCourse.description}</p>
-          <div className="h-[13px]" />
-        </>
+          {currentCourse.description ? (
+            <p className="m-0 text-center">{currentCourse.description}</p>
+          ) : null}
+          {showCourseSearch && (
+            <div className="w-full max-w-[525px] min-w-0 px-0">
+              <Input
+                value={filterSearchString}
+                onValueChange={setFilterSearchString}
+                placeholder={t("lessons.searchLessons")}
+                size="lg"
+                classNames={{
+                  inputWrapper:
+                    "min-w-0 rounded-[14px] bg-brand-gray shadow-none hover:bg-[#e6e6ea] group-data-[focus=true]:bg-brand-gray",
+                  input: "font-normal text-brand-black",
+                }}
+                startContent={
+                  <Image
+                    src={Loupe.src}
+                    alt="search"
+                    style={{ borderRadius: 0 }}
+                  />
+                }
+              />
+            </div>
+          )}
+        </div>
       )}
       {studentTabIndex !== "schedule" && isListLoading ? (
         <div className="w-full h-[500px] flex justify-center items-center ">
@@ -1107,31 +1129,6 @@ export const ProfileLessons = (props: TProps) => {
             (stayOnPage || useCatalogMode) &&
             !isListLoading)) && (
         <>
-          {showCourseSearch && (
-            <>
-              <div className="h-2"></div>
-              <div className="w-full max-w-[525px] m-auto min-w-0 px-0">
-                <Input
-                  value={filterSearchString}
-                  onValueChange={setFilterSearchString}
-                  placeholder={t("lessons.searchLessons")}
-                  size="lg"
-                  classNames={{
-                    inputWrapper:
-                      "min-w-0 rounded-[14px] bg-brand-gray shadow-none hover:bg-[#e6e6ea] group-data-[focus=true]:bg-brand-gray",
-                    input: "font-normal text-brand-black",
-                  }}
-                  startContent={
-                    <Image
-                      src={Loupe.src}
-                      alt="search"
-                      style={{ borderRadius: 0 }}
-                    />
-                  }
-                />
-              </div>
-            </>
-          )}
           {currentFolderId != null && (
             <div className="mb-2 flex items-center gap-3 px-1">
               <Button
