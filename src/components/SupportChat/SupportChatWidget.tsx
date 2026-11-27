@@ -24,7 +24,9 @@ import { getSupportUserId } from "./access";
 
 function shouldHideOnPath(pathname: string | null) {
   return (
-    !!pathname?.includes("/lessons/") || !!pathname?.includes("/grammar/")
+    !!pathname?.includes("/lessons/") ||
+    !!pathname?.includes("/grammar/") ||
+    !!pathname?.includes("/board/")
   );
 }
 

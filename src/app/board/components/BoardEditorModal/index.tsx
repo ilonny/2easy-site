@@ -8,7 +8,7 @@ import {
 import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
 import { BoardEditorChrome } from "@/app/board/components/BoardEditorChrome";
 import { BoardParticipantsList } from "@/app/board/components/BoardParticipantsList";
-import { LessonTimerFab } from "@/app/lessons/components/LessonTimer";
+import { BoardSessionTools } from "@/app/board/components/BoardSessionTools";
 import type { TUseLessonTimer } from "@/app/lessons/mediaSync/useLessonTimer";
 import { T } from "@/i18n/T";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
@@ -28,6 +28,10 @@ type TProps = {
   isHost?: boolean;
   /** Synced lesson countdown — shown over the board while a lesson is open. */
   lessonTimer?: TUseLessonTimer | null;
+  lessonId?: number;
+  studentId?: number;
+  lessonSessionId?: number;
+  isTeacher?: boolean;
 };
 
 export const BoardEditorModal: FC<TProps> = ({
@@ -37,6 +41,10 @@ export const BoardEditorModal: FC<TProps> = ({
   mode = "solo",
   isHost = false,
   lessonTimer = null,
+  lessonId = 0,
+  studentId,
+  lessonSessionId,
+  isTeacher = false,
 }) => {
   const boardId = board?.id;
   const [boardApi, setBoardApi] = useState<ExcalidrawImperativeAPI | null>(
@@ -117,13 +125,13 @@ export const BoardEditorModal: FC<TProps> = ({
             />
           ) : null}
           {lessonTimer ? (
-            <div className="pointer-events-auto absolute bottom-3 right-3 z-[100] sm:bottom-4 sm:right-4 pb-[env(safe-area-inset-bottom,0px)]">
-              <LessonTimerFab
-                timer={lessonTimer}
-                hideWhenIdle={!lessonTimer.isTeacher}
-                className="bg-white/95 shadow-lg ring-1 ring-black/5"
-              />
-            </div>
+            <BoardSessionTools
+              timer={lessonTimer}
+              lessonId={lessonId}
+              studentId={studentId}
+              lessonSessionId={lessonSessionId}
+              isTeacher={isTeacher}
+            />
           ) : null}
         </ModalBody>
       </ModalContent>

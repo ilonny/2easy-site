@@ -33,6 +33,7 @@ import {
   CHAT_ATTACHMENT_MAX_BYTES,
   CHAT_ATTACHMENT_MAX_COUNT,
 } from "./constants";
+import { useBoardChat } from "@/app/board/hooks/useBoardChat";
 import { useLessonChat } from "./hooks/useLessonChat";
 import type { TChatMessage, TChatPendingAttachment } from "./types";
 import { chatAttachmentKindFromMime } from "./utils/attachmentKind";
@@ -44,6 +45,9 @@ type TProps = {
   studentId?: number;
   lessonSessionId?: number;
   isTeacher?: boolean;
+  /** Board that is not tied to a lesson. Messages stay with that board. */
+  boardId?: number;
+  className?: string;
 };
 
 const ChatFabIcon = () => (
@@ -69,7 +73,10 @@ export const Chat: FC<TProps> = ({
   studentId,
   lessonSessionId,
   isTeacher = false,
+  boardId = 0,
+  className,
 }) => {
+  const boardChat = boardId > 0 && !lesson_id;
   const [isOpen, setIsOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [replyTo, setReplyTo] = useState<TChatMessage | null>(null);
@@ -113,13 +120,20 @@ export const Chat: FC<TProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- revoke only on unmount
   }, []);
 
-  const { messageList, sendMessage, editMessage, toggleReaction } =
-    useLessonChat({
-      lessonId: lesson_id,
-      studentId,
-      sessionId: lessonSessionId,
-      enabled: isOpen && !!(studentId || lessonSessionId || isTeacher),
-    });
+  const lessonChat = useLessonChat({
+    lessonId: lesson_id,
+    studentId,
+    sessionId: lessonSessionId,
+    enabled:
+      !boardChat && isOpen && !!(studentId || lessonSessionId || isTeacher),
+  });
+  const standaloneBoardChat = useBoardChat({
+    boardId,
+    enabled: boardChat && isOpen,
+  });
+  const { messageList, sendMessage, editMessage, toggleReaction } = boardChat
+    ? standaloneBoardChat
+    : lessonChat;
 
   const bumpInput = useCallback(() => setInputKey((k) => k + 1), []);
 
@@ -139,12 +153,12 @@ export const Chat: FC<TProps> = ({
   }, [bumpInput, clearPendingAttachments]);
 
   const handleOpen = useCallback(() => {
-    if (!isTeacher && !studentId && !lessonSessionId) {
+    if (!boardChat && !isTeacher && !studentId && !lessonSessionId) {
       toast(i18n.t("lessons.selectStudentForChat"), { type: "warning" });
       return;
     }
     setIsOpen(true);
-  }, [isTeacher, lessonSessionId, studentId]);
+  }, [boardChat, isTeacher, lessonSessionId, studentId]);
 
   const addFiles = useCallback((files: FileList | File[]) => {
     const list = Array.from(files || []);
@@ -314,6 +328,7 @@ export const Chat: FC<TProps> = ({
         ariaLabel={label}
         icon={<ChatFabIcon />}
         onClick={handleOpen}
+        className={className}
       />
     );
   }

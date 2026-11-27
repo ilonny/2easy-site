@@ -13,6 +13,7 @@ type TProps = {
   isLoading?: boolean;
   /** Hide from `md` up (e.g. participants — desktop uses the aside). */
   mobileOnly?: boolean;
+  className?: string;
 };
 
 /** Icon-only lesson tool control (dictionary / video / chat / board) on all viewports. */
@@ -22,6 +23,7 @@ export const LessonToolTrigger: FC<TProps> = ({
   onClick,
   isLoading,
   mobileOnly,
+  className,
 }) => {
   return (
     <ResponsiveTooltip content={ariaLabel} placement="left">
@@ -34,9 +36,11 @@ export const LessonToolTrigger: FC<TProps> = ({
         isLoading={isLoading}
         aria-label={ariaLabel}
         className={
-          mobileOnly
-            ? `${LESSON_FAB_BUTTON_CLASS} md:hidden`
-            : LESSON_FAB_BUTTON_CLASS
+          `${
+            mobileOnly
+              ? `${LESSON_FAB_BUTTON_CLASS} md:hidden`
+              : LESSON_FAB_BUTTON_CLASS
+          } ${className || ""}`
         }
       >
         {icon}

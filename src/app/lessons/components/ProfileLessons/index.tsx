@@ -1021,7 +1021,7 @@ export const ProfileLessons = (props: TProps) => {
           </div>
           <div className="h-4" />
           <p className="text-center">{currentCourse.description}</p>
-          <div className="h-10" />
+          <div className="h-[13px]" />
         </>
       )}
       {studentTabIndex !== "schedule" && isListLoading ? (
@@ -1109,7 +1109,7 @@ export const ProfileLessons = (props: TProps) => {
         <>
           {showCourseSearch && (
             <>
-              <div className="h-6"></div>
+              <div className="h-2"></div>
               <div className="w-full max-w-[525px] m-auto min-w-0 px-0">
                 <Input
                   value={filterSearchString}

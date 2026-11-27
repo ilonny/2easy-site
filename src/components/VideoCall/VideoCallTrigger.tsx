@@ -20,8 +20,13 @@ const VideoIcon = () => (
   </svg>
 );
 
+type TProps = {
+  /** Extra classes on the trigger (e.g. board overlay stacking). */
+  className?: string;
+};
+
 /** Lesson FAB control that opens the app-scoped video call shell. */
-export const VideoCallTrigger: FC = () => {
+export const VideoCallTrigger: FC<TProps> = ({ className }) => {
   const { isOpen, canOpen, open } = useVideoCall();
 
   if (!canOpen || isOpen) return null;
@@ -33,6 +38,7 @@ export const VideoCallTrigger: FC = () => {
       ariaLabel={label}
       icon={<VideoIcon />}
       onClick={open}
+      className={className}
     />
   );
 };

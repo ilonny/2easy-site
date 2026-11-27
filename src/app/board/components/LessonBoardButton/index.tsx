@@ -151,6 +151,10 @@ export const LessonBoardButton: FC<TProps> = ({
         mode="realtime"
         isHost={isTeacher}
         lessonTimer={lessonTimer}
+        lessonId={lessonId}
+        studentId={studentIdForBoard}
+        lessonSessionId={lessonSessionId}
+        isTeacher={isTeacher}
       />
     </>
   );

@@ -29,7 +29,7 @@ export function formatTimerMmSs(ms: number): string {
 }
 
 /** Distinct three-note “times up” chime (bright + short echo). */
-const playTimerBeep = () => {
+export const playTimerBeep = () => {
   try {
     const AudioCtx =
       window.AudioContext ||

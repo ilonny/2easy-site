@@ -5,6 +5,8 @@ import { BOARD_REALTIME_PING_MS } from "../constants";
 import { normalizeBoardSnapshot } from "../utils/boardSnapshot";
 import { stashAndStripSnapshot } from "../utils/boardFileStore";
 import { TBoardParticipant, TBoardSnapshot } from "../types";
+import type { TLessonTimerState } from "@/app/lessons/mediaSync/types";
+import type { TChatAttachment, TChatMessage } from "@/components/Chat/types";
 import {
   IBoardRealtimeAdapter,
   TBoardRealtimeCallbacks,
@@ -56,6 +58,15 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
   private pingTimer: ReturnType<typeof setInterval> | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private shouldReconnect = false;
+  private timerListeners = new Set<(timer: TLessonTimerState) => void>();
+  private pendingTimer: TLessonTimerState | null = null;
+  private chatListeners = new Set<
+    (
+      event:
+        | { type: "history"; messages: TChatMessage[] }
+        | { type: "message"; message: TChatMessage },
+    ) => void
+  >();
 
   async connect(boardId: number, callbacks: TBoardRealtimeCallbacks) {
     this.disconnect();
@@ -78,6 +89,9 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
       ws.onopen = () => {
         this.callbacks.onConnectionChange?.(true);
         this.startPing();
+        if (this.pendingTimer) {
+          this.sendRaw({ type: "timer", timer: this.pendingTimer });
+        }
         resolve();
       };
 
@@ -163,6 +177,14 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
             normalizeParticipants(message.participants),
           );
         }
+        this.emitTimerMessage(message);
+        this.emitChatHistory(message);
+        return;
+      case "chat":
+        this.emitChatMessage(message);
+        return;
+      case "timer":
+        this.emitTimerMessage(message);
         return;
       case "scene":
         this.callbacks.onScene?.({
@@ -252,6 +274,67 @@ export class MultiplayerBoardSyncAdapter implements IBoardRealtimeAdapter {
 
   requestJoin() {
     this.sendRaw({ type: "join" });
+  }
+
+  sendTimer(timer: TLessonTimerState) {
+    this.pendingTimer = timer;
+    this.sendRaw({ type: "timer", timer });
+  }
+
+  sendChat(payload: {
+    text: string;
+    attachments?: TChatAttachment[];
+    replyToId?: number | null;
+  }) {
+    this.sendRaw({
+      type: "chat",
+      text: payload.text,
+      attachments: payload.attachments || [],
+      reply_to_id: payload.replyToId || null,
+    });
+  }
+
+  subscribeChat(
+    listener: (
+      event:
+        | { type: "history"; messages: TChatMessage[] }
+        | { type: "message"; message: TChatMessage },
+    ) => void,
+  ) {
+    this.chatListeners.add(listener);
+    return () => {
+      this.chatListeners.delete(listener);
+    };
+  }
+
+  subscribeTimer(listener: (timer: TLessonTimerState) => void) {
+    this.timerListeners.add(listener);
+    return () => {
+      this.timerListeners.delete(listener);
+    };
+  }
+
+  private emitChatHistory(message: TWsMessage) {
+    const chat = (message as { chat?: TChatMessage[] }).chat;
+    if (!Array.isArray(chat)) return;
+    this.chatListeners.forEach((listener) =>
+      listener({ type: "history", messages: chat }),
+    );
+  }
+
+  private emitChatMessage(message: TWsMessage) {
+    const entry = (message as { message?: TChatMessage }).message;
+    if (!entry || typeof entry !== "object" || !entry.id) return;
+    this.chatListeners.forEach((listener) =>
+      listener({ type: "message", message: entry }),
+    );
+  }
+
+  private emitTimerMessage(message: TWsMessage) {
+    const timer = (message as { timer?: TLessonTimerState }).timer;
+    if (!timer || typeof timer !== "object") return;
+    if (typeof timer.status !== "string") return;
+    this.timerListeners.forEach((listener) => listener(timer));
   }
 
   isConnected() {

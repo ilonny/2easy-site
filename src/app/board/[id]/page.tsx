@@ -10,7 +10,9 @@ import { BoardCloseButton } from "@/app/board/components/BoardCloseButton";
 import { BoardEditorChrome } from "@/app/board/components/BoardEditorChrome";
 import { BoardEditModeBanner } from "@/app/board/components/BoardEditModeBanner";
 import { BoardParticipantsList } from "@/app/board/components/BoardParticipantsList";
+import { BoardSessionTools } from "@/app/board/components/BoardSessionTools";
 import { BoardStartLessonButton } from "@/app/board/components/BoardStartLessonButton";
+import { useBoardTimer } from "@/app/board/hooks/useBoardTimer";
 import { T } from "@/i18n/T";
 import { Button } from "@nextui-org/react";
 
@@ -76,6 +78,11 @@ export default function BoardRealtimePage() {
     });
   }, [boardId, isCatalogTeacherFlow, isLessonMode, leaveSession, router]);
 
+  const boardTimer = useBoardTimer({
+    enabled: boardId > 0 && authReady,
+    isTeacher,
+  });
+
   const title = useMemo(
     () => board?.title || <T k="boards.myBoards" />,
     [board?.title],
@@ -136,7 +143,7 @@ export default function BoardRealtimePage() {
         />
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="relative flex min-h-0 flex-1 flex-col">
         {boardId ? (
           <BoardEditorChrome
             boardId={boardId}
@@ -144,6 +151,14 @@ export default function BoardRealtimePage() {
             editor={editor}
             isEditorReady={isEditorReady}
             onApiChange={setBoardApi}
+          />
+        ) : null}
+        {authReady ? (
+          <BoardSessionTools
+            timer={boardTimer}
+            isTeacher={isTeacher}
+            lessonId={Number(board?.lesson_id || board?.anchor_lesson_id || 0)}
+            boardId={boardId}
           />
         ) : null}
       </div>
